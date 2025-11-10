@@ -52,31 +52,6 @@ export enum Permission {
 }
 
 /**
- * Page type enumeration
- */
-export enum PageType {
-  GALLERY_DOWNLOADER = 1,
-  SIMPLE_DOWNLOADER = 2,
-  HARD_DRIVE_IMPORT = 3,
-  PETITIONS = 5,
-  FILE_SEARCH = 6,
-  URL_DOWNLOADER = 7,
-  DUPLICATES = 8,
-  THREAD_WATCHER = 9,
-  PAGE_OF_PAGES = 10,
-}
-
-/**
- * Page state enumeration
- */
-export enum PageState {
-  READY = 0,
-  INITIALISING = 1,
-  SEARCHING_LOADING = 2,
-  SEARCH_CANCELLED = 3,
-}
-
-/**
  * Base response schema - all API responses include version info
  */
 export const BaseResponseSchema = z.object({
@@ -109,37 +84,6 @@ const SessionKeyResponseSchema = BaseResponseSchema.extend({
 
 export type SessionKeyResponse = z.infer<typeof SessionKeyResponseSchema>;
 
-/**
- * Page schema - recursive structure for nested pages
- */
-const PageSchema: z.ZodType<Page> = z.lazy(() =>
-  z.object({
-    name: z.string(),
-    page_key: z.string(),
-    page_state: z.enum(PageState),
-    page_type: z.enum(PageType),
-    is_media_page: z.boolean(),
-    selected: z.boolean(),
-    pages: z.array(PageSchema).optional(),
-  }),
-);
-
-export type Page = {
-  name: string;
-  page_key: string;
-  page_state: PageState;
-  page_type: PageType;
-  is_media_page: boolean;
-  selected: boolean;
-  pages?: Array<Page>;
-};
-
-const GetPagesResponseSchema = BaseResponseSchema.extend({
-  pages: PageSchema, // Singular page at to level
-});
-
-export type GetPagesResponse = z.infer<typeof GetPagesResponseSchema>;
-
 const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
   old_options: z
     .object({
@@ -151,26 +95,6 @@ const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
 export type GetClientOptionsResponse = z.infer<
   typeof GetClientOptionsResponseSchema
 >;
-
-const MediaSchema = z.object({
-  num_files: z.number(),
-  hash_ids: z.array(z.number()),
-});
-
-const PageInfoSchema = z.object({
-  name: z.string(),
-  page_key: z.string(),
-  page_state: z.enum(PageState),
-  page_type: z.enum(PageType),
-  is_media_page: z.boolean(),
-  media: MediaSchema,
-});
-
-const GetPageInfoResponseSchema = BaseResponseSchema.extend({
-  page_info: PageInfoSchema,
-});
-
-export type GetPageInfoResponse = z.infer<typeof GetPageInfoResponseSchema>;
 
 const SearchFilesResultsSchema = BaseResponseSchema.extend({
   file_ids: z.array(z.number()).optional(),
@@ -235,24 +159,6 @@ export async function requestNewPermissions(
 }
 
 /**
- * Get the page structure of the current UI session.
- * @param apiEndpoint The base URL of the Hydrus API.
- * @param apiAccessKey The access key for authentication.
- * @returns A promise that resolves to the pages structure.
- */
-export async function getPages(
-  apiEndpoint: string,
-  apiAccessKey: string,
-): Promise<GetPagesResponse> {
-  const response = await axios.get(`${apiEndpoint}/manage_pages/get_pages`, {
-    headers: {
-      [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
-    },
-  });
-  return GetPagesResponseSchema.parse(response.data);
-}
-
-/**
  * Get the current options from the client.
  * @param apiEndpoint The base URL of the Hydrus API.
  * @param apiAccessKey The access key for authentication.
@@ -271,85 +177,6 @@ export async function getClientOptions(
     },
   );
   return GetClientOptionsResponseSchema.parse(response.data);
-}
-
-/**
- * Get information about a specific page.
- * @param apiEndpoint The base URL of the Hydrus API.
- * @param apiAccessKey The access key for authentication.
- * @param pageKey The key of the page to get info for.
- * @param simple Whether to get simple info.
- * @returns A promise that resolves to the page info.
- */
-export async function getPageInfo(
-  apiEndpoint: string,
-  apiAccessKey: string,
-  pageKey: string,
-  simple = true,
-): Promise<GetPageInfoResponse> {
-  const response = await axios.get(
-    `${apiEndpoint}/manage_pages/get_page_info`,
-    {
-      headers: {
-        [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
-      },
-      params: {
-        page_key: pageKey,
-        simple,
-      },
-    },
-  );
-  return GetPageInfoResponseSchema.parse(response.data);
-}
-
-/**
- * Refresh a page in the main GUI.
- * @param apiEndpoint The base URL of the Hydrus API.
- * @param apiAccessKey The access key for authentication.
- * @param pageKey The key of the page to refresh.
- */
-export async function refreshPage(
-  apiEndpoint: string,
-  apiAccessKey: string,
-  pageKey: string,
-): Promise<void> {
-  await axios.post(
-    `${apiEndpoint}/manage_pages/refresh_page`,
-    {
-      page_key: pageKey,
-    },
-    {
-      headers: {
-        [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
-        "Content-Type": "application/json",
-      },
-    },
-  );
-}
-
-/**
- * 'Show' a page in the main GUI, making it the current page in view.
- * @param apiEndpoint The base URL of the Hydrus API.
- * @param apiAccessKey The access key for authentication.
- * @param pageKey The key of the page to focus.
- */
-export async function focusPage(
-  apiEndpoint: string,
-  apiAccessKey: string,
-  pageKey: string,
-): Promise<void> {
-  await axios.post(
-    `${apiEndpoint}/manage_pages/focus_page`,
-    {
-      page_key: pageKey,
-    },
-    {
-      headers: {
-        [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
-        "Content-Type": "application/json",
-      },
-    },
-  );
 }
 
 export async function getServices(
