@@ -205,6 +205,17 @@ export type GetFileMetadataResponse = z.infer<
   typeof GetFileMetadataResponseSchema
 >;
 
+const ServiceInfoSchema = z.object({
+  name: z.string(),
+  type: z.enum(ServiceType),
+});
+
+const GetServicesResponseSchema = BaseResponseSchema.extend({
+  services: z.record(z.string(), ServiceInfoSchema),
+});
+
+export type GetServicesResponse = z.infer<typeof GetServicesResponseSchema>;
+
 // ============================================================================
 // API Functions
 // ============================================================================
@@ -314,6 +325,18 @@ export async function getPageInfo(
     },
   );
   return GetPageInfoResponseSchema.parse(response.data);
+}
+
+export async function getServices(
+  apiEndpoint: string,
+  apiAccessKey: string,
+): Promise<GetServicesResponse> {
+  const response = await axios.get(`${apiEndpoint}/get_services`, {
+    headers: {
+      [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
+    },
+  });
+  return GetServicesResponseSchema.parse(response.data);
 }
 
 export enum HydrusFileSortType {

@@ -8,6 +8,7 @@ import {
   getClientOptions,
   getPageInfo,
   getPages,
+  getServices,
   requestNewPermissions,
   searchFiles,
   verifyAccessKey,
@@ -183,6 +184,23 @@ export const useGetClientOptionsQuery = () => {
     },
     enabled: !!apiEndpoint && !!apiAccessKey,
     staleTime: Infinity, // Options don't change often
+  });
+};
+
+export const useGetServicesQuery = () => {
+  const apiEndpoint = useApiEndpoint();
+  const apiAccessKey = useApiAccessKey();
+
+  return useQuery({
+    queryKey: ["getServices", apiEndpoint, simpleHash(apiAccessKey)],
+    queryFn: () => {
+      if (!apiEndpoint || !apiAccessKey) {
+        throw new Error("API endpoint and access key are required.");
+      }
+      return getServices(apiEndpoint, apiAccessKey);
+    },
+    enabled: !!apiEndpoint && !!apiAccessKey,
+    staleTime: Infinity, // Services don't change often
   });
 };
 
