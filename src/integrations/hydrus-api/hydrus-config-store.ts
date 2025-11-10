@@ -9,7 +9,10 @@ type AuthState = {
   api_endpoint: string;
   apiClient: HydrusApiClient | null;
   actions: {
-    setApiCredentials: (accessKey: string, endpoint: string) => void;
+    setApiCredentials: (
+      accessKey: string | null | undefined,
+      endpoint: string | null | undefined,
+    ) => void;
     reset: () => void;
   };
 };

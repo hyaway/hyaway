@@ -22,8 +22,8 @@ import {
 } from "./constants";
 
 export function Login() {
-  const { setApiCredentials } = useAuthActions();
   const queryClient = useQueryClient();
+  const { setApiCredentials } = useAuthActions();
   const hydrusApi = useHydrusApiClient();
 
   const persistentAccessQuery = useVerifyAccessQuery("persistent");
