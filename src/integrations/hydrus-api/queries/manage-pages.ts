@@ -4,17 +4,6 @@ import { useHydrusApiClient } from "../hydrus-config-store";
 import { PageState } from "../models";
 import type { Page } from "../models";
 
-// ============================================================================
-// Constants and Enums
-// ============================================================================
-
-/**
- * Page schema - recursive structure for nested pages
- */
-// ============================================================================
-// Query Hooks
-// ============================================================================
-
 /**
  * Iteratively flattens a page tree into an array of all pages
  */

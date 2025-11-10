@@ -44,7 +44,7 @@ export class HydrusApiClient {
     });
   }
 
-  // #region Access management
+  // #region Access
   public static async requestNewPermissions(
     apiEndpoint: string,
     name: string,
@@ -72,13 +72,13 @@ export class HydrusApiClient {
     const response = await this.axiosInstance.get("/get_services");
     return response.data;
   }
-  // #endregion Access management
+  // #endregion Access
 
-  // #region Importing and deleting files
+  // #region File actions
   // (No API functions currently needed)
-  // #endregion Importing and deleting files
+  // #endregion File actions
 
-  // #region Searching and fetching files
+  // #region Search
   public async searchFiles(
     options: SearchFilesOptions,
   ): Promise<SearchFilesResponse> {
@@ -110,9 +110,9 @@ export class HydrusApiClient {
     });
     return GetFileMetadataResponseSchema.parse(response.data);
   }
-  // #endregion Searching and fetching files
+  // #endregion Search
 
-  // #region Managing pages
+  // #region Pages
   public async getPages(): Promise<GetPagesResponse> {
     const response = await this.axiosInstance.get("/manage_pages/get_pages");
     return GetPagesResponseSchema.parse(response.data);
@@ -145,16 +145,16 @@ export class HydrusApiClient {
       page_key: pageKey,
     });
   }
-  // #endregion Managing pages
+  // #endregion Pages
 
-  // #region Managing the database
+  // #region Database
   public async getClientOptions(): Promise<GetClientOptionsResponse> {
     const response = await this.axiosInstance.get(
       "/manage_database/get_client_options",
     );
     return response.data;
   }
-  // #endregion Managing the database
+  // #endregion Database
 
   public toJSON() {
     return this.hash;

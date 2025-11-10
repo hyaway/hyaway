@@ -1,6 +1,5 @@
 import z from "zod";
 
-// #region Shared
 export const HYDRUS_API_HEADER_ACCESS_KEY = "Hydrus-Client-API-Access-Key";
 export const HYDRUS_API_HEADER_SESSION_KEY = "Hydrus-Client-API-Session-Key";
 
@@ -8,9 +7,8 @@ export const BaseResponseSchema = z.object({
   version: z.number().int().positive(),
   hydrus_version: z.number().int().positive(),
 });
-// #endregion Shared
 
-// #region Access management
+// #region Access
 export enum ServiceType {
   TAG_REPOSITORY = 0,
   FILE_REPOSITORY = 1,
@@ -86,13 +84,13 @@ export const GetServicesResponseSchema = BaseResponseSchema.extend({
 });
 
 export type GetServicesResponse = z.infer<typeof GetServicesResponseSchema>;
-// #endregion Access management
+// #endregion Access
 
-// #region Importing and deleting files
+// #region File actions
 // (No models currently needed)
-// #endregion Importing and deleting files
+// #endregion File actions
 
-// #region Searching and fetching files
+// #region Search
 export enum HydrusFileSortType {
   FileSize = 0,
   Duration = 1,
@@ -170,9 +168,9 @@ export const GetFileMetadataResponseSchema = BaseResponseSchema.extend({
 export type GetFileMetadataResponse = z.infer<
   typeof GetFileMetadataResponseSchema
 >;
-// #endregion Searching and fetching files
+// #endregion Search
 
-// #region Managing Pages
+// #region Pages
 export enum PageType {
   GALLERY_DOWNLOADER = 1,
   SIMPLE_DOWNLOADER = 2,
@@ -235,9 +233,9 @@ export const GetPageInfoResponseSchema = BaseResponseSchema.extend({
 
 export type GetPageInfoResponse = z.infer<typeof GetPageInfoResponseSchema>;
 
-// #endregion Managing Pages
+// #endregion Pages
 
-// #region Managing the database
+// #region Database
 export const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
   old_options: z
     .object({
@@ -249,4 +247,4 @@ export const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
 export type GetClientOptionsResponse = z.infer<
   typeof GetClientOptionsResponseSchema
 >;
-// #endregion Managing the database
+// #endregion Database
