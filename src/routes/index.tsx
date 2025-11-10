@@ -101,8 +101,15 @@ function Hero({
   secondaryCta: { label: string; to: string };
 } & NavigateProps) {
   return (
-    <Container className="flex flex-col gap-10 py-20 sm:py-28">
-      <div className="max-w-3xl space-y-6">
+    <div className="relative flex flex-col gap-10 p-6 py-20 sm:py-28">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <div className="from-primary/25 via-primary/5 absolute inset-0 bg-linear-to-br to-transparent opacity-60 dark:opacity-40" />
+        <div className="absolute top-1/2 left-1/2 size-240 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,var(--color-primary)/25%,transparent_70%)] opacity-30 blur-3xl" />
+      </div>
+      <div className="bg-background/85 ring-border/40 max-w-3xl space-y-6 rounded-lg p-6 shadow-lg ring-1 backdrop-blur-sm">
         <Heading level={1} className="text-4xl/10 font-bold sm:text-5xl/12">
           Remote gateway to your Hydrus Network gallery
         </Heading>
@@ -128,7 +135,7 @@ function Hero({
           </Button>
         </div>
       </div>
-    </Container>
+    </div>
   );
 }
 
