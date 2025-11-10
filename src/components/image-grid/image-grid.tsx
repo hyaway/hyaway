@@ -10,7 +10,7 @@ import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/g
 import { cn } from "@/lib/utils";
 
 export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
-  const itemsQuery = useInfiniteGetFilesMetadata(fileIds, true);
+  const itemsQuery = useInfiniteGetFilesMetadata(fileIds, false);
   const defaultDimensions = useThumbnailDimensions();
 
   if (fileIds.length === 0) {
