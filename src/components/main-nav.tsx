@@ -1,18 +1,17 @@
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { ThemeSwitcher } from "./theme-switcher";
-import type {NavbarProps} from "@/components/ui/navbar";
+import type { NavbarProps } from "@/components/ui/navbar";
 import {
   Navbar,
   NavbarGap,
   NavbarItem,
   NavbarItemLink,
   NavbarMobile,
-  
   NavbarProvider,
   NavbarSection,
   NavbarSpacer,
   NavbarStart,
-  NavbarTrigger
+  NavbarTrigger,
 } from "@/components/ui/navbar";
 import { Menu, MenuContent, MenuItem, MenuLink } from "@/components/ui/menu";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries";
@@ -28,6 +27,9 @@ export default function MainNavbar(props: NavbarProps) {
         <NavbarSection>
           <NavbarItemLink to={"/"}>Home</NavbarItemLink>
           <PagesNav />
+          <NavbarItemLink to="/recently-deleted">
+            Recently deleted
+          </NavbarItemLink>
           <NavbarItemLink to={"/settings"}>Settings</NavbarItemLink>
         </NavbarSection>
         <NavbarSpacer />
@@ -49,7 +51,7 @@ function PagesNav() {
   return (
     <Menu>
       <NavbarItem>
-        Pages
+        Client pages
         <ChevronDownIcon className="col-start-3" />
       </NavbarItem>
       <MenuContent className="min-w-(--trigger-width) sm:min-w-56">

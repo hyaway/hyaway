@@ -178,13 +178,12 @@ export const useRecentlyDeletedFilesQuery = () => {
       ([_key, service]) => service.type === ServiceType.TRASH,
     )?.[0];
   }, [servicesData]);
-
   const tags: HydrusTagSearch = [
     "system:limit=1000",
-    "system:archived time > 7 days ago",
+    "system:time imported < 3 days ago",
   ];
   const options: Omit<SearchFilesOptions, "tags"> = {
-    file_sort_type: HydrusFileSortType.ArchiveTimestamp,
+    file_sort_type: HydrusFileSortType.ImportTime,
     file_sort_asc: false,
   };
 
@@ -210,7 +209,7 @@ export const useRecentlyDeletedFilesQuery = () => {
       return searchFiles(apiEndpoint, apiAccessKey, {
         tags,
         ...options,
-        tag_service_key: trashServiceKey,
+        file_service_key: trashServiceKey,
       });
     },
     enabled:

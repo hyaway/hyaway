@@ -374,7 +374,7 @@ export type HydrusTagSearch = (string | string[])[];
 
 export interface SearchFilesOptions {
   tags: HydrusTagSearch;
-  file_domain?: string;
+  file_service_key?: string;
   tag_service_key?: string;
   include_current_tags?: boolean;
   include_pending_tags?: boolean;
