@@ -5,20 +5,15 @@ import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries";
 import { useGetMultipleFileMetadata } from "@/integrations/hydrus-api/get-files";
 
 export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
-  const results = useGetMultipleFileMetadata(fileIds);
-  return (
-    <>
-      {results.map((result, index) => {
-        if (result.isLoading) {
-          return <div key={index}>Loading...</div>;
-        }
-        if (result.isError) {
-          return <div key={index}>Error loading file {fileIds[index]}</div>;
-        }
-        return <div key={index}>File ID: {result.data?.file_id}</div>;
-      })}
-    </>
-  );
+  const result = useGetMultipleFileMetadata(fileIds);
+
+  if (result.isLoading) {
+    return <div>Loading...</div>;
+  }
+  if (result.isError) {
+    return <div>Error loading files</div>;
+  }
+  return <div>{JSON.stringify(result.data)}</div>;
   // return (
   //   <ImageGrid
   //     fileIds={results

@@ -6,23 +6,24 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useApiAccessKey, useApiEndpoint } from "./hydrus-config-store";
 import { BaseResponseSchema, HYDRUS_API_HEADER_ACCESS_KEY } from "./hydrus-api";
-import type { QueriesResults, UseQueryResult } from "@tanstack/react-query";
+import type { UseQueryResult } from "@tanstack/react-query";
 import { simpleHash } from "@/lib/utils";
 
 const FileMetadataBasicSchema = z.object({
-  file_id: z.number(),
-  hash: z.string(),
-  mime: z.string(),
-  width: z.number(),
-  height: z.number(),
   duration: z.number().nullable(),
-  file_size: z.number(),
-  import_time: z.number(),
-  last_viewed_time: z.number(),
+  ext: z.string(),
+  file_id: z.number(),
+  filetype_enum: z.number(),
+  filetype_forced: z.boolean(),
+  filetype_human: z.string(),
   has_audio: z.boolean(),
+  hash: z.string(),
+  height: z.number(),
+  mime: z.string(),
   num_frames: z.number().nullable(),
-  framerate: z.number().nullable(),
-  is_new: z.boolean(),
+  num_words: z.number().nullable(),
+  size: z.number(),
+  width: z.number(),
 });
 
 const FileMetadataSchema = FileMetadataBasicSchema.extend({
@@ -57,9 +58,9 @@ export async function getFileMetadata(
         [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
       },
       params: {
+        file_ids: JSON.stringify(file_ids),
         create_new_file_ids: false,
         detailed_url_information: false,
-        file_ids: JSON.stringify(file_ids),
         only_return_basic_information: false,
         include_blurhash: true,
         include_milliseconds: false,
@@ -68,7 +69,7 @@ export async function getFileMetadata(
       },
     },
   );
-  return response.data.metadata;
+  return GetFileMetadataResponseSchema.parse(response.data).metadata;
 }
 
 const getFileMetadataBatcher = memoize(
@@ -116,10 +117,10 @@ export const useGetMultipleFileMetadata = (file_ids: Array<number>) => {
   const apiAccessKey = useApiAccessKey();
 
   const combiner = useCallback(
-    (results: Array<UseQueryResult<GetFileMetadataResponse>>) => {
+    (results: Array<UseQueryResult<FileMetadata | null>>) => {
       return {
         data: results
-          .map((res) => res.data?.metadata[0])
+          .map((res) => res.data)
           .filter(Boolean)
           .map((meta) => ({
             file_id: meta!.file_id,
@@ -128,6 +129,7 @@ export const useGetMultipleFileMetadata = (file_ids: Array<number>) => {
           })),
         isLoading: results.some((res) => res.isLoading),
         isFetching: results.some((res) => res.isFetching),
+        isError: results.some((res) => res.isError),
       } as const;
     },
     [],
