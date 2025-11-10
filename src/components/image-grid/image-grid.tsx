@@ -1,5 +1,5 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import React, { useLayoutEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { Thumbnail } from "./thumbnail";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries";
 
@@ -35,12 +35,12 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
 
   const parentRef = React.useRef<HTMLDivElement>(null);
 
-  const [lanes, setLanes] = useState(4);
+  const [lanes, setLanes] = useState(0);
 
   const rowVirtualizer = useWindowVirtualizer({
     count: items.length,
     estimateSize: (i) => items[i].aspectRatio * dimensions.width,
-    overscan: 1,
+    overscan: 5,
     gap: 8,
     lanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
@@ -53,7 +53,6 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
-
       const newLanes = Math.max(
         1,
         Math.floor(entry.contentRect.width / (dimensions.width + 4)),
@@ -76,20 +75,23 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
           }}
           className="relative w-full"
         >
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => (
-            <div
-              key={virtualRow.index}
-              style={{
-                left: `${(virtualRow.lane * 100) / lanes}%`,
-                width: `${dimensions.width}px`,
-                height: `${items[virtualRow.index].aspectRatio * dimensions.width}px`,
-                transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
-              }}
-              className="absolute top-0"
-            >
-              <Thumbnail fileId={items[virtualRow.index].fileId} />
-            </div>
-          ))}
+          {!!lanes &&
+            rowVirtualizer.getVirtualItems().map((virtualRow) => (
+              <div
+                key={virtualRow.index}
+                style={{
+                  left: `${(virtualRow.lane * 100) / lanes}%`,
+                  width: `${dimensions.width}px`,
+                  height: `${items[virtualRow.index].aspectRatio * dimensions.width}px`,
+                  transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
+                  transition: "transform 150ms ease-out, left 150ms ease-out",
+                  willChange: "transform,left",
+                }}
+                className="absolute top-0"
+              >
+                <Thumbnail fileId={items[virtualRow.index].fileId} />
+              </div>
+            ))}
         </div>
       </div>
     </>
