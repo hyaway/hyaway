@@ -61,6 +61,10 @@ function PagesNav() {
               key={page.page_key}
               to={`/pages/$pageId`}
               params={{ pageId: page.page_key }}
+              activeProps={{
+                className:
+                  "font-bold rounded-s-none border-s-4 border-s-primary",
+              }}
             >
               {page.name}
             </MenuLink>
