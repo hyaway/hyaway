@@ -6,6 +6,7 @@ import {
 } from "../../integrations/hydrus-api/hydrus-config-store";
 import {
   getClientOptions,
+  getPageInfo,
   getPages,
   type Page,
   PageState,
@@ -93,17 +94,13 @@ const flattenPages = (root: Page): Page[] => {
       }
     }
   }
-  console.log(
-    "FLATTENED PAGES:",
-    result.map((p) => p.page_key),
-  );
   return result;
 };
 
 /**
  * Check if all pages in the tree are in a stable state (ready or cancelled)
  */
-const isStable = (page: Page): boolean => {
+const isStable = (page: { page_state: PageState }): boolean => {
   return (
     page.page_state === PageState.READY ||
     page.page_state === PageState.SEARCH_CANCELLED
@@ -138,10 +135,8 @@ export const useGetPagesQuery = () => {
 
       // If all pages are stable (ready or cancelled), stop refetching
       if (areAllPagesStable(query.state.data.pages)) {
-        console.log("All pages are stable, stopping refetch.");
         return false;
       }
-      console.log("Some pages are still unstable, refetching...");
 
       // Otherwise, refetch every 5 seconds
       return 5000;
@@ -154,8 +149,6 @@ export const useGetPagesQuery = () => {
  */
 export const useGetMediaPagesQuery = () => {
   const { data, ...rest } = useGetPagesQuery();
-
-  console.log("DATA", data);
 
   const mediaPages = useMemo(
     () =>
@@ -188,6 +181,43 @@ export const useGetClientOptionsQuery = () => {
     },
     enabled: !!apiEndpoint && !!apiAccessKey,
     staleTime: Infinity, // Options don't change often
+  });
+};
+
+export const useGetPageInfoQuery = (pageKey: string, simple = true) => {
+  const apiEndpoint = useApiEndpoint();
+  const apiAccessKey = useApiAccessKey();
+
+  return useQuery({
+    queryKey: [
+      "getPageInfo",
+      pageKey,
+      simple,
+      apiEndpoint,
+      simpleHash(apiAccessKey),
+    ],
+    queryFn: () => {
+      if (!apiEndpoint || !apiAccessKey) {
+        throw new Error("API endpoint and access key are required.");
+      }
+      return getPageInfo(apiEndpoint, apiAccessKey, pageKey, simple);
+    },
+    enabled: !!apiEndpoint && !!apiAccessKey && !!pageKey,
+    staleTime: Infinity, // We want this to be not change while performing the archive/delete actions
+    refetchInterval: (query) => {
+      // Stop refetching if there's no data or an error
+      if (!query.state.data || query.state.error) {
+        return false;
+      }
+
+      // If all pages are stable (ready or cancelled), stop refetching
+      if (isStable(query.state.data.page_info)) {
+        return false;
+      }
+
+      // Otherwise, refetch every 5 seconds
+      return 5000;
+    },
   });
 };
 

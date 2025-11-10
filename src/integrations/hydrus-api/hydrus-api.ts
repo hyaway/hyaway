@@ -152,6 +152,26 @@ export type GetClientOptionsResponse = z.infer<
   typeof GetClientOptionsResponseSchema
 >;
 
+const PageInfoSchema = z.object({
+  name: z.string(),
+  page_key: z.string(),
+  page_state: z.enum(PageState),
+  page_type: z.enum(PageType),
+  is_media_page: z.boolean(),
+});
+
+const MediaSchema = z.object({
+  num_files: z.number(),
+  hash_ids: z.array(z.number()),
+});
+
+const GetPageInfoResponseSchema = BaseResponseSchema.extend({
+  page_info: PageInfoSchema,
+  media: MediaSchema,
+});
+
+export type GetPageInfoResponse = z.infer<typeof GetPageInfoResponseSchema>;
+
 // ============================================================================
 // API Functions
 // ============================================================================
@@ -232,4 +252,33 @@ export async function getClientOptions(
     },
   );
   return GetClientOptionsResponseSchema.parse(response.data);
+}
+
+/**
+ * Get information about a specific page.
+ * @param apiEndpoint The base URL of the Hydrus API.
+ * @param apiAccessKey The access key for authentication.
+ * @param pageKey The key of the page to get info for.
+ * @param simple Whether to get simple info.
+ * @returns A promise that resolves to the page info.
+ */
+export async function getPageInfo(
+  apiEndpoint: string,
+  apiAccessKey: string,
+  pageKey: string,
+  simple = true,
+): Promise<GetPageInfoResponse> {
+  const response = await axios.get(
+    `${apiEndpoint}/manage_pages/get_page_info`,
+    {
+      headers: {
+        [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
+      },
+      params: {
+        page_key: pageKey,
+        simple,
+      },
+    },
+  );
+  return GetPageInfoResponseSchema.parse(response.data);
 }
