@@ -1,5 +1,5 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
-import { Settings } from "../components/settings/settings";
+import { Login } from "../components/settings/login";
 import { useHydrusApiClient } from "../integrations/hydrus-api/hydrus-config-store";
 import { useVerifyAccessQuery } from "../integrations/hydrus-api/queries/access";
 
@@ -20,7 +20,7 @@ function AuthLayout() {
   }
 
   if (!hasRequiredPermissions) {
-    return <Settings />;
+    return <Login />;
   }
 
   return (

@@ -19,7 +19,7 @@ import { Note } from "../ui/note";
 import { getFormDataWithSubmitter } from "./form-utils";
 import { ApiEndpointCard } from "./api-endpoint-card";
 
-export function Settings() {
+export function Login() {
   const { setApiCredentials } = useAuthActions();
   const queryClient = useQueryClient();
   const defaultEndpoint = useApiEndpoint();
@@ -69,15 +69,6 @@ export function Settings() {
       <FormPrimitive onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Heading level={2}>Hydrus API Settings</Heading>
         <ApiEndpointCard />
-
-        <TextInputField
-          label="API endpoint"
-          name="endpoint"
-          defaultValue={defaultEndpoint}
-          placeholder="http://localhost:45869"
-          isRequired
-          isDisabled={pending}
-        />
         <Button
           type="submit"
           className="self-start"

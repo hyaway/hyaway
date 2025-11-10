@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Settings } from "@/components/settings/settings";
+import { Login } from "@/components/settings/login";
 
 export const Route = createFileRoute("/settings/account")({
   component: SettingsAccountComponent,
@@ -8,7 +8,7 @@ export const Route = createFileRoute("/settings/account")({
 function SettingsAccountComponent() {
   return (
     <div className="p-4">
-      <Settings />
+      <Login />
     </div>
   );
 }
