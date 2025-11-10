@@ -5,6 +5,7 @@ import {
   useApiAccessKey,
   useApiEndpoint,
   useAuthActions,
+  useHydrusApiClient,
 } from "../integrations/hydrus-api/hydrus-config-store";
 import {
   useRequestNewPermissionsMutation,
@@ -22,11 +23,15 @@ export function Settings() {
   const defaultEndpoint = useApiEndpoint();
   const defaultAccessKey = useApiAccessKey();
   const requestNewPermissions = useRequestNewPermissionsMutation();
+  const hydrusApi = useHydrusApiClient();
 
-  const { hasRequiredPermissions, isError, error, isFetching } =
-    useVerifyAccessQuery();
+  const persistentAccessQuery = useVerifyAccessQuery("persistent");
+  const sessionAccessQuery = useVerifyAccessQuery("session");
 
-  const pending = requestNewPermissions.isPending || isFetching;
+  const pending =
+    requestNewPermissions.isPending ||
+    persistentAccessQuery.isFetching ||
+    sessionAccessQuery.isFetching;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,79 +82,112 @@ export function Settings() {
   };
 
   return (
-    <FormPrimitive
-      onSubmit={handleSubmit}
-      className="mx-auto flex max-w-md flex-col gap-4"
-    >
-      <Heading level={2}>Hydrus API Settings</Heading>
+    <div className="mx-auto flex max-w-md flex-col gap-4">
+      <FormPrimitive onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <Heading level={2}>Hydrus API Settings</Heading>
 
-      <TextInputField
-        label="API endpoint"
-        name="endpoint"
-        defaultValue={defaultEndpoint}
-        placeholder="http://localhost:45869"
-        isRequired
-        isDisabled={pending}
-      />
-      <Button
-        type="submit"
-        className="self-start"
-        isDisabled={pending}
-        name="action"
-        value="request_api_key"
-      >
-        {requestNewPermissions.isPending ? (
-          <ProgressCircle
-            isIndeterminate
-            aria-label="Requesting new API access key"
-          />
-        ) : null}
-        {requestNewPermissions.isPending
-          ? "Requesting new API access key"
-          : "Request new API access key"}
-      </Button>
-      {requestNewPermissions.isError && (
-        <Note intent="danger">
-          {requestNewPermissions.error instanceof Error
-            ? requestNewPermissions.error.message
-            : "An unknown error occurred while requesting new permissions."}
-          <br />
-          {requestNewPermissions.error instanceof AxiosError &&
-            requestNewPermissions.error.response?.data?.error && (
-              <span>{requestNewPermissions.error.response.data.error}</span>
-            )}
-        </Note>
+        <TextInputField
+          label="API endpoint"
+          name="endpoint"
+          defaultValue={defaultEndpoint}
+          placeholder="http://localhost:45869"
+          isRequired
+          isDisabled={pending}
+        />
+        <Button
+          type="submit"
+          className="self-start"
+          isDisabled={pending}
+          name="action"
+          value="request_api_key"
+        >
+          {requestNewPermissions.isPending ? (
+            <ProgressCircle
+              isIndeterminate
+              aria-label="Requesting new API access key"
+            />
+          ) : null}
+          {requestNewPermissions.isPending
+            ? "Requesting new API access key"
+            : "Request new API access key"}
+        </Button>
+        {requestNewPermissions.isError && (
+          <Note intent="danger">
+            {requestNewPermissions.error instanceof Error
+              ? requestNewPermissions.error.message
+              : "An unknown error occurred while requesting new permissions."}
+            <br />
+            {requestNewPermissions.error instanceof AxiosError &&
+              requestNewPermissions.error.response?.data?.error && (
+                <span>{requestNewPermissions.error.response.data.error}</span>
+              )}
+          </Note>
+        )}
+        {requestNewPermissions.isSuccess && (
+          <Note intent="success">New API access key obtained and saved.</Note>
+        )}
+        <SecretInputField
+          label="API access key"
+          name="accessKey"
+          defaultValue={defaultAccessKey}
+          key={defaultAccessKey}
+          isRequired
+          isDisabled={pending}
+        />
+        <Button
+          type="submit"
+          className="self-start"
+          isDisabled={pending}
+          name="action"
+          value="save"
+        >
+          {persistentAccessQuery.isFetching ? (
+            <ProgressCircle
+              isIndeterminate
+              aria-label="Checking API connection"
+            />
+          ) : null}
+          {persistentAccessQuery.isFetching
+            ? "Checking"
+            : "Check API connection"}
+        </Button>
+        {!persistentAccessQuery.isFetching &&
+          persistentAccessQuery.hasRequiredPermissions && (
+            <Note intent="success">Access key API connection successful</Note>
+          )}
+        {!persistentAccessQuery.isFetching && persistentAccessQuery.isError && (
+          <Note intent="danger">{persistentAccessQuery.error.message}</Note>
+        )}
+      </FormPrimitive>
+
+      {!sessionAccessQuery.isLoading && (
+        <Button
+          type="button"
+          className="self-start"
+          isDisabled={pending}
+          onClick={async () => {
+            await hydrusApi?.refreshSessionKey();
+            queryClient.invalidateQueries({
+              queryKey: ["verifyAccess", "session"],
+            });
+          }}
+        >
+          {sessionAccessQuery.isFetching ? (
+            <ProgressCircle
+              isIndeterminate
+              aria-label="Refreshing session key"
+            />
+          ) : null}
+          {sessionAccessQuery.isFetching ? "Refreshing" : "Refresh session key"}
+        </Button>
       )}
-      {requestNewPermissions.isSuccess && (
-        <Note intent="success">New API access key obtained and saved.</Note>
+      {!sessionAccessQuery.isFetching &&
+        sessionAccessQuery.hasRequiredPermissions && (
+          <Note intent="success">Session key API connection successful</Note>
+        )}
+      {!sessionAccessQuery.isFetching && sessionAccessQuery.isError && (
+        <Note intent="danger">{sessionAccessQuery.error.message}</Note>
       )}
-      <SecretInputField
-        label="API access key"
-        name="accessKey"
-        defaultValue={defaultAccessKey}
-        key={defaultAccessKey}
-        isRequired
-        isDisabled={pending}
-      />
-      <Button
-        type="submit"
-        className="self-start"
-        isDisabled={pending}
-        name="action"
-        value="save"
-      >
-        {isFetching ? (
-          <ProgressCircle
-            isIndeterminate
-            aria-label="Checking API connection"
-          />
-        ) : null}
-        {isFetching ? "Checking" : "Check API connection"}
-      </Button>
-      {!isFetching && hasRequiredPermissions && (
-        <Note intent="success">API connection successful</Note>
-      )}
-      {!isFetching && isError && <Note intent="danger">{error.message}</Note>}
-    </FormPrimitive>
+    </div>
   );
 }

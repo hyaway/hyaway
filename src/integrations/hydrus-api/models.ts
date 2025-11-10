@@ -48,6 +48,8 @@ export enum Permission {
   SEE_LOCAL_PATHS = 13,
 }
 
+export type AccessKeyType = "persistent" | "session";
+
 export const RequestNewPermissionsResponseSchema = BaseResponseSchema.extend({
   access_key: z.string(),
 });

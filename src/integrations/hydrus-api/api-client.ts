@@ -11,6 +11,7 @@ import {
   VerifyAccessKeyResponseSchema,
 } from "./models";
 import type {
+  AccessKeyType,
   GetClientOptionsResponse,
   GetFileMetadataResponse,
   GetPageInfoResponse,
@@ -149,11 +150,11 @@ export class HydrusApiClient {
   }
 
   public async verifyAccessKey(
-    keyType: "session" | "access" = "access",
+    keyType: AccessKeyType,
   ): Promise<VerifyAccessKeyResponse> {
     // We need to perform manual request to control which header is sent
     const headers: Record<string, string> = {};
-    if (keyType === "access") {
+    if (keyType === "persistent") {
       headers[HYDRUS_API_HEADER_ACCESS_KEY] = this.apiAccessKey;
     } else {
       // Ensure a session key exists, fetching if needed

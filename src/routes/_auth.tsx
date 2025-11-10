@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_auth")({
 });
 
 function AuthLayout() {
-  const { hasRequiredPermissions, isLoading } = useVerifyAccessQuery();
+  const { hasRequiredPermissions, isLoading } = useVerifyAccessQuery("session");
   const apiEndpoint = useApiEndpoint();
   const apiAccessKey = useApiAccessKey();
 

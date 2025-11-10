@@ -20,7 +20,8 @@ const authSlice: StateCreator<AuthState> = (set, _get, store) => ({
   apiClient: null,
   actions: {
     setApiCredentials: (accessKey: string, endpoint: string) => {
-      const apiClient = new HydrusApiClient(endpoint, accessKey);
+      const apiClient =
+        endpoint && accessKey ? new HydrusApiClient(endpoint, accessKey) : null;
       set({ api_access_key: accessKey, api_endpoint: endpoint, apiClient });
       getContext().queryClient.clear();
     },
