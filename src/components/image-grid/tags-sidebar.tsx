@@ -97,9 +97,9 @@ export function TagsSidebar({
                 transform: `translateY(${virtualRow.start}px)`,
               }}
               ref={rowVirtualizer.measureElement}
-              className="absolute top-0 left-0 flex w-full flex-row flex-wrap items-center gap-1"
+              className="absolute top-0 left-0 flex w-full flex-row flex-wrap items-center gap-1 font-mono uppercase"
             >
-              <Badge intent="primary" isCircle={false}>
+              <Badge intent="info" isCircle={false}>
                 {tag.displayTag}
               </Badge>
               <Text>:</Text>
