@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { useThumbnailFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
 
@@ -23,22 +24,28 @@ export function ThumbnailImage({ fileId, className }: ThumbnailProps) {
 }
 
 export interface ImageCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  fileId: number;
   virtualRow: { lane: number; index: number };
   lanes: number;
   totalItemsCount: number;
   innerClassName?: string;
+  item: FileMetadata;
+  width: number;
 }
 
 export function ImageGridCard({
-  fileId,
   virtualRow,
   lanes,
   totalItemsCount,
   className,
   innerClassName,
+  item,
+  width,
   ...props
 }: ImageCardProps) {
+  const rawScale =
+    Math.min(window.innerWidth, item.thumbnail_width ?? width) / width;
+  const scale = Math.min(4, Math.max(1.2, rawScale));
+
   const originClass = useMemo(() => {
     const isFirstLane = virtualRow.lane === 0;
     const isLastLane = virtualRow.lane === lanes - 1;
@@ -59,8 +66,9 @@ export function ImageGridCard({
 
   return (
     <div
-      {...props}
       className={cn(`group h-full w-full overflow-visible`, className)}
+      style={{ [`--thumbnail-hover-scale`]: `${scale}` }}
+      {...props}
     >
       <div
         className={cn(
@@ -68,7 +76,7 @@ export function ImageGridCard({
           originClass,
         )}
       >
-        <ThumbnailImage fileId={fileId} />
+        <ThumbnailImage fileId={item.file_id} />
       </div>
     </div>
   );

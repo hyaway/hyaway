@@ -149,10 +149,6 @@ export function PureImageGrid({
           {!!lanes &&
             rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const item = items[virtualRow.index];
-              const rawScale =
-                Math.min(window.innerWidth, item.thumbnail_width ?? width) /
-                width;
-              const scale = Math.min(4, Math.max(1.2, rawScale));
 
               return (
                 <div
@@ -162,15 +158,15 @@ export function PureImageGrid({
                     width: `${width}px`,
                     height: `${heights[virtualRow.index]}px`,
                     transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
-                    [`--thumbnail-hover-scale`]: `${scale}`,
                   }}
                   className="absolute top-0 z-0 overflow-visible transition-[left,transform,width,height] duration-350 ease-out will-change-[left,transform,width,height] hover:z-999"
                 >
                   <ImageGridCard
-                    fileId={item.file_id}
                     virtualRow={virtualRow}
                     lanes={lanes}
                     totalItemsCount={items.length}
+                    item={item}
+                    width={width}
                   />
                 </div>
               );
