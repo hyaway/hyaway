@@ -22,15 +22,18 @@ import type {
   VerifyAccessKeyResponse,
 } from "./models";
 import type { AxiosInstance } from "axios";
+import { simpleHash } from "@/lib/utils";
 
 export class HydrusApiClient {
   public readonly apiEndpoint: string;
   private readonly apiAccessKey: string;
+  private readonly hash: number;
   private readonly axiosInstance: AxiosInstance;
 
   constructor(apiEndpoint: string, apiAccessKey: string) {
     this.apiEndpoint = apiEndpoint;
     this.apiAccessKey = apiAccessKey;
+    this.hash = simpleHash(apiEndpoint + apiAccessKey);
     this.axiosInstance = axios.create({
       baseURL: apiEndpoint,
     });
@@ -152,4 +155,8 @@ export class HydrusApiClient {
     return response.data;
   }
   // #endregion Managing the database
+
+  public toJSON() {
+    return this.hash;
+  }
 }
