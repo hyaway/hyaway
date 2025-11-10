@@ -8,8 +8,11 @@
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true
   },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always" // Or "always"
+  },
   "tailwindCSS.experimental.classRegex": [
     ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
   ],
-  "cSpell.words": ["blurhash", "overscan", "partialize"]
+  "cSpell.words": ["blurhash", "BOORU", "IPFS", "overscan", "partialize"]
 }
