@@ -152,22 +152,22 @@ export type GetClientOptionsResponse = z.infer<
   typeof GetClientOptionsResponseSchema
 >;
 
+const MediaSchema = z.object({
+  num_files: z.number(),
+  hash_ids: z.array(z.number()),
+});
+
 const PageInfoSchema = z.object({
   name: z.string(),
   page_key: z.string(),
   page_state: z.enum(PageState),
   page_type: z.enum(PageType),
   is_media_page: z.boolean(),
-});
-
-const MediaSchema = z.object({
-  num_files: z.number(),
-  hash_ids: z.array(z.number()),
+  media: MediaSchema,
 });
 
 const GetPageInfoResponseSchema = BaseResponseSchema.extend({
   page_info: PageInfoSchema,
-  media: MediaSchema,
 });
 
 export type GetPageInfoResponse = z.infer<typeof GetPageInfoResponseSchema>;
@@ -176,7 +176,7 @@ export type GetPageInfoResponse = z.infer<typeof GetPageInfoResponseSchema>;
 // API Functions
 // ============================================================================
 
-const HYDRUS_API_HEADER_ACCESS_KEY = "Hydrus-Client-API-Access-Key";
+export const HYDRUS_API_HEADER_ACCESS_KEY = "Hydrus-Client-API-Access-Key";
 
 /**
  * Check if your access key is valid.
