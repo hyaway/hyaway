@@ -74,21 +74,19 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
         <div
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
-            width: "100%",
-            position: "relative",
           }}
+          className="relative w-full"
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => (
             <div
               key={virtualRow.index}
               style={{
-                position: "absolute",
-                top: 0,
                 left: `${(virtualRow.lane * 100) / lanes}%`,
                 width: `${dimensions.width}px`,
                 height: `${items[virtualRow.index].aspectRatio * dimensions.width}px`,
                 transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
               }}
+              className="absolute top-0"
             >
               <Thumbnail fileId={items[virtualRow.index].fileId} />
             </div>
