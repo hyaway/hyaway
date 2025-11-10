@@ -6,16 +6,16 @@ import {
   useApiEndpoint,
   useAuthActions,
   useHydrusApiClient,
-} from "../integrations/hydrus-api/hydrus-config-store";
+} from "../../integrations/hydrus-api/hydrus-config-store";
 import {
   useRequestNewPermissionsMutation,
   useVerifyAccessQuery,
-} from "../integrations/hydrus-api/queries/access";
-import { Button } from "./ui/button";
-import { Heading } from "./ui/heading";
-import { SecretInputField, TextInputField } from "./text-input-field";
-import { ProgressCircle } from "./ui/progress-circle";
-import { Note } from "./ui/note";
+} from "../../integrations/hydrus-api/queries/access";
+import { Button } from "../ui/button";
+import { Heading } from "../ui/heading";
+import { SecretInputField, TextInputField } from "../text-input-field";
+import { ProgressCircle } from "../ui/progress-circle";
+import { Note } from "../ui/note";
 
 export function Settings() {
   const { setApiCredentials } = useAuthActions();

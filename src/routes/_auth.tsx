@@ -1,5 +1,5 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
-import { Settings } from "../components/settings";
+import { Settings } from "../components/settings/settings";
 import { useHydrusApiClient } from "../integrations/hydrus-api/hydrus-config-store";
 import { useVerifyAccessQuery } from "../integrations/hydrus-api/queries/access";
 
