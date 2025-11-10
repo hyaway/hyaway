@@ -19,14 +19,10 @@ function getNextTheme(currentPreference: Theme): Theme {
   const systemTheme = getWindowSystemTheme();
 
   if (currentPreference === "system") {
-    return systemTheme === "light"
-      ? "dark"
-      : systemTheme === "dark"
-        ? "light"
-        : "dark";
+    return systemTheme === "light" ? "dark" : "light";
   }
 
-  if (systemTheme && currentPreference === systemTheme) {
+  if (currentPreference === systemTheme) {
     return "system";
   }
 
