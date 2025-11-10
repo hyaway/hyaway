@@ -3,11 +3,13 @@ import z from "zod";
 import memoize from "lodash.memoize";
 import * as batshit from "@yornaath/batshit";
 import { useQueries, useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { useApiAccessKey, useApiEndpoint } from "./hydrus-config-store";
 import { BaseResponseSchema, HYDRUS_API_HEADER_ACCESS_KEY } from "./hydrus-api";
+import type { QueriesResults, UseQueryResult } from "@tanstack/react-query";
 import { simpleHash } from "@/lib/utils";
 
-const FileMetadataSchema = z.object({
+const FileMetadataBasicSchema = z.object({
   file_id: z.number(),
   hash: z.string(),
   mime: z.string(),
@@ -21,6 +23,16 @@ const FileMetadataSchema = z.object({
   num_frames: z.number().nullable(),
   framerate: z.number().nullable(),
   is_new: z.boolean(),
+});
+
+const FileMetadataSchema = FileMetadataBasicSchema.extend({
+  blurhash: z.string(),
+  thumbnail_width: z.number(),
+  thumbnail_height: z.number(),
+  is_inbox: z.boolean(),
+  is_local: z.boolean(),
+  is_trashed: z.boolean(),
+  is_deleted: z.boolean(),
 });
 
 export type FileMetadata = z.infer<typeof FileMetadataSchema>;
@@ -103,6 +115,24 @@ export const useGetMultipleFileMetadata = (file_ids: Array<number>) => {
   const apiEndpoint = useApiEndpoint();
   const apiAccessKey = useApiAccessKey();
 
+  const combiner = useCallback(
+    (results: Array<UseQueryResult<GetFileMetadataResponse>>) => {
+      return {
+        data: results
+          .map((res) => res.data?.metadata[0])
+          .filter(Boolean)
+          .map((meta) => ({
+            file_id: meta!.file_id,
+            thumbnail_width: meta!.thumbnail_width,
+            thumbnail_height: meta!.thumbnail_height,
+          })),
+        isLoading: results.some((res) => res.isLoading),
+        isFetching: results.some((res) => res.isFetching),
+      } as const;
+    },
+    [],
+  );
+
   return useQueries({
     queries: file_ids.map((file_id) => ({
       queryKey: [
@@ -123,5 +153,6 @@ export const useGetMultipleFileMetadata = (file_ids: Array<number>) => {
       enabled: (!!apiEndpoint && !!apiAccessKey) || !!file_id,
       staleTime: Infinity, // Should not change without user action
     })),
+    combine: combiner,
   });
 };
