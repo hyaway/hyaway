@@ -47,9 +47,8 @@ export function ImageGridCard({
   width,
   ...props
 }: ImageCardProps) {
-  const rawScale =
-    Math.min(window.innerWidth, item.thumbnail_width ?? width) / width;
-  const scale = Math.min(4, Math.max(1.2, rawScale));
+  const scale =
+    Math.min(lanes * width, (item.thumbnail_width ?? width) * 1.1) / width;
 
   const originClass = useMemo(() => {
     const isFirstLane = virtualRow.lane === 0;
