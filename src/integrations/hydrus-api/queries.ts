@@ -1,35 +1,31 @@
 import { useMemo } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  useApiAccessKey,
-  useApiEndpoint,
-} from "../../integrations/hydrus-api/hydrus-config-store";
-import {
-  HydrusFileSortType,
-  Permission,
-  ServiceType,
-  getClientOptions,
-  getServices,
-  requestNewPermissions,
-  searchFiles,
-  verifyAccessKey,
-} from "./hydrus-api";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import { HydrusApiClient } from "./api-client";
+import { useHydrusApiClient } from "./hydrus-config-store";
+import { HydrusFileSortType, Permission, ServiceType } from "./hydrus-api";
 import type { HydrusTagSearch, SearchFilesOptions } from "./hydrus-api";
-import { simpleHash } from "@/lib/utils";
+
+export {
+  useFocusPageMutation,
+  useGetMediaPagesQuery,
+  useGetPageInfoQuery,
+  useGetPagesQuery,
+  useRefreshPageMutation,
+} from "./manage-pages";
+export { useGetFilesMetadata, useInfiniteGetFilesMetadata } from "./get-files";
 
 export const usePermissionsQuery = () => {
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
+  const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: ["verifyAccess", apiEndpoint, simpleHash(apiAccessKey)],
-    queryFn: () => {
-      if (!apiEndpoint || !apiAccessKey) {
-        throw new Error("API endpoint and access key are required.");
+    queryKey: ["verifyAccess", hydrusApi],
+    queryFn: async () => {
+      if (!hydrusApi) {
+        throw new Error("Hydrus API client is required.");
       }
-      return verifyAccessKey(apiEndpoint, apiAccessKey);
+      return hydrusApi.verifyAccessKey();
     },
-    enabled: !!apiEndpoint && !!apiAccessKey,
+    enabled: !!hydrusApi,
     select: (data) => {
       return {
         hasAllPermissions: data.permits_everything,
@@ -69,7 +65,7 @@ export const useRequestNewPermissionsMutation = () => {
       apiEndpoint: string;
       name: string;
     }) => {
-      return requestNewPermissions(apiEndpoint, name);
+      return HydrusApiClient.requestNewPermissions(apiEndpoint, name);
     },
   });
 };
@@ -85,28 +81,20 @@ export const useRecentlyArchivedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
+  const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: [
-      "searchFiles",
-      "recentlyArchived",
-      tags,
-      options,
-      apiEndpoint,
-      simpleHash(apiAccessKey),
-    ],
-    queryFn: () => {
-      if (!apiEndpoint || !apiAccessKey) {
-        throw new Error("API endpoint and access key are required.");
+    queryKey: ["searchFiles", "recentlyArchived", tags, options, hydrusApi],
+    queryFn: async () => {
+      if (!hydrusApi) {
+        throw new Error("Hydrus API client is required.");
       }
-      return searchFiles(apiEndpoint, apiAccessKey, {
+      return hydrusApi.searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!apiEndpoint && !!apiAccessKey && tags.length > 0,
+    enabled: !!hydrusApi && tags.length > 0,
   });
 };
 
@@ -128,8 +116,7 @@ export const useRecentlyDeletedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
+  const hydrusApi = useHydrusApiClient();
 
   return useQuery({
     queryKey: [
@@ -138,23 +125,19 @@ export const useRecentlyDeletedFilesQuery = () => {
       trashServiceKey,
       tags,
       options,
-      apiEndpoint,
-      simpleHash(apiAccessKey),
+      hydrusApi,
     ],
-    queryFn: () => {
-      if (!apiEndpoint || !apiAccessKey || !trashServiceKey) {
-        throw new Error(
-          "API endpoint, access key, and trash service are required.",
-        );
+    queryFn: async () => {
+      if (!hydrusApi || !trashServiceKey) {
+        throw new Error("API client and trash service are required.");
       }
-      return searchFiles(apiEndpoint, apiAccessKey, {
+      return hydrusApi.searchFiles({
         tags,
         ...options,
         file_service_key: trashServiceKey,
       });
     },
-    enabled:
-      !!apiEndpoint && !!apiAccessKey && tags.length > 0 && !!trashServiceKey,
+    enabled: !!hydrusApi && tags.length > 0 && !!trashServiceKey,
   });
 };
 
@@ -169,28 +152,20 @@ export const useRecentlyInboxedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
+  const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: [
-      "searchFiles",
-      "recentlyInboxed",
-      tags,
-      options,
-      apiEndpoint,
-      simpleHash(apiAccessKey),
-    ],
-    queryFn: () => {
-      if (!apiEndpoint || !apiAccessKey) {
-        throw new Error("API endpoint and access key are required.");
+    queryKey: ["searchFiles", "recentlyInboxed", tags, options, hydrusApi],
+    queryFn: async () => {
+      if (!hydrusApi) {
+        throw new Error("Hydrus API client is required.");
       }
-      return searchFiles(apiEndpoint, apiAccessKey, {
+      return hydrusApi.searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!apiEndpoint && !!apiAccessKey && tags.length > 0,
+    enabled: !!hydrusApi && tags.length > 0,
   });
 };
 
@@ -198,35 +173,33 @@ export const useRecentlyInboxedFilesQuery = () => {
  * Query hook for getting all options from Hydrus client
  */
 export const useGetClientOptionsQuery = () => {
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
+  const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: ["getClientOptions", apiEndpoint, simpleHash(apiAccessKey)],
-    queryFn: () => {
-      if (!apiEndpoint || !apiAccessKey) {
-        throw new Error("API endpoint and access key are required.");
+    queryKey: ["getClientOptions", hydrusApi],
+    queryFn: async () => {
+      if (!hydrusApi) {
+        throw new Error("Hydrus API client is required.");
       }
-      return getClientOptions(apiEndpoint, apiAccessKey);
+      return hydrusApi.getClientOptions();
     },
-    enabled: !!apiEndpoint && !!apiAccessKey,
+    enabled: !!hydrusApi,
     staleTime: Infinity, // Options don't change often
   });
 };
 
 export const useGetServicesQuery = () => {
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
+  const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: ["getServices", apiEndpoint, simpleHash(apiAccessKey)],
-    queryFn: () => {
-      if (!apiEndpoint || !apiAccessKey) {
-        throw new Error("API endpoint and access key are required.");
+    queryKey: ["getServices", hydrusApi],
+    queryFn: async () => {
+      if (!hydrusApi) {
+        throw new Error("Hydrus API client is required.");
       }
-      return getServices(apiEndpoint, apiAccessKey);
+      return hydrusApi.getServices();
     },
-    enabled: !!apiEndpoint && !!apiAccessKey,
+    enabled: !!hydrusApi,
     staleTime: Infinity, // Services don't change often
   });
 };
@@ -235,24 +208,57 @@ export const useSearchFilesQuery = (
   tags: HydrusTagSearch,
   options?: Omit<SearchFilesOptions, "tags">,
 ) => {
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
+  const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: [
-      "searchFiles",
-      tags,
-      options,
-      apiEndpoint,
-      simpleHash(apiAccessKey),
-    ],
-    queryFn: () => {
-      if (!apiEndpoint || !apiAccessKey) {
-        throw new Error("API endpoint and access key are required.");
+    queryKey: ["searchFiles", tags, options, hydrusApi],
+    queryFn: async () => {
+      if (!hydrusApi) {
+        throw new Error("Hydrus API client is required.");
       }
-      return searchFiles(apiEndpoint, apiAccessKey, { tags, ...options });
+      return hydrusApi.searchFiles({ tags, ...options });
     },
-    enabled: !!apiEndpoint && !!apiAccessKey && tags.length > 0,
+    enabled: !!hydrusApi && tags.length > 0,
+  });
+};
+
+export const useInfiniteSearchFilesQuery = (
+  tags: HydrusTagSearch,
+  options?: Omit<SearchFilesOptions, "tags">,
+) => {
+  const hydrusApi = useHydrusApiClient();
+  const BATCH_SIZE = 256;
+
+  return useInfiniteQuery({
+    queryKey: ["infiniteSearchFiles", tags, options, BATCH_SIZE, hydrusApi],
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!hydrusApi) {
+        throw new Error("Hydrus API client is required.");
+      }
+
+      const searchTags: HydrusTagSearch = [
+        ...tags,
+        `system:limit=${BATCH_SIZE}`,
+        `system:offset=${pageParam}`,
+      ];
+
+      const result = await hydrusApi.searchFiles({
+        ...options,
+        tags: searchTags,
+      });
+      return {
+        file_ids: result.file_ids ?? [],
+        offset: pageParam,
+      };
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.file_ids.length < BATCH_SIZE) {
+        return undefined; // No more pages
+      }
+      return lastPage.offset + BATCH_SIZE;
+    },
+    initialPageParam: 0,
+    enabled: !!hydrusApi && tags.length > 0,
   });
 };
 

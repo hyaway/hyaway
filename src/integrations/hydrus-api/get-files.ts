@@ -13,7 +13,7 @@ export const useGetFilesMetadata = (
       only_return_basic_information,
       hydrusApi,
     ],
-    queryFn: () => {
+    queryFn: async () => {
       if (!hydrusApi) {
         throw new Error("Hydrus API client is required.");
       }
