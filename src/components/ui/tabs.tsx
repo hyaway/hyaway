@@ -94,6 +94,7 @@ const Tab = ({ children, className, ref, ...props }: TabProps) => {
         "*:data-[slot=icon]:text-muted-fg selected:*:data-[slot=icon]:text-primary-subtle-fg *:data-[slot=icon]:mr-2 *:data-[slot=icon]:-ml-0.5 *:data-[slot=icon]:size-4 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:self-center",
         "selected:text-primary-subtle-fg text-muted-fg hover:bg-secondary selected:hover:bg-primary-subtle hover:text-fg selected:hover:text-primary-subtle-fg focus:ring-0",
         "disabled:opacity-50",
+        "focus-visible:ring-offset-bg focus:outline-0 focus-visible:ring-2 focus-visible:ring-offset-3 focus-visible:outline focus-visible:outline-offset-2",
         "href" in props ? "cursor-pointer" : "cursor-default",
         className,
       )}
