@@ -5,7 +5,7 @@ import { Heading } from "@/components/ui/heading";
 import { Loader } from "@/components/ui/loader";
 import { Note } from "@/components/ui/note";
 import { Separator } from "@/components/ui/separator";
-import { useRecentlyArchivedFilesQuery } from "@/integrations/hydrus-api/queries";
+import { useRecentlyArchivedFilesQuery } from "@/integrations/hydrus-api/queries/queries";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui/button";
 

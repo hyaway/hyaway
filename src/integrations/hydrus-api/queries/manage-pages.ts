@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useHydrusApiClient } from "./hydrus-config-store";
-import { PageState } from "./models";
-import type { Page } from "./models";
+import { useHydrusApiClient } from "../hydrus-config-store";
+import { PageState } from "../models";
+import type { Page } from "../models";
 
 // ============================================================================
 // Constants and Enums

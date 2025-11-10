@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useHydrusApiClient } from "./hydrus-config-store";
+import { useHydrusApiClient } from "../hydrus-config-store";
 
 export const useGetFilesMetadata = (
   file_ids: Array<number>,
