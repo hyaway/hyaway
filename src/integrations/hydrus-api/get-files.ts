@@ -36,7 +36,7 @@ export type GetFileMetadataResponse = z.infer<
 export async function getFileMetadata(
   apiEndpoint: string,
   apiAccessKey: string,
-  fileIds?: Array<string>,
+  file_ids: Array<number>,
 ): Promise<Array<FileMetadata>> {
   const response = await axios.get<{ metadata: Array<FileMetadata> }>(
     `${apiEndpoint}/get_files/file_metadata`,
@@ -45,7 +45,14 @@ export async function getFileMetadata(
         [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
       },
       params: {
-        file_ids: fileIds?.join(","),
+        create_new_file_ids: false,
+        detailed_url_information: false,
+        file_ids: JSON.stringify(file_ids),
+        only_return_basic_information: false,
+        include_blurhash: true,
+        include_milliseconds: false,
+        include_notes: false,
+        include_services_object: false,
       },
     },
   );
@@ -56,7 +63,7 @@ const getFileMetadataBatcher = memoize(
   (apiEndpoint: string, apiAccessKey: string) => {
     return batshit.create({
       name: "HydrusGetFileMetadataBatcher",
-      fetcher: async (file_ids: Array<string>) =>
+      fetcher: async (file_ids: Array<number>) =>
         await getFileMetadata(apiEndpoint, apiAccessKey, file_ids),
       scheduler: batshit.windowedFiniteBatchScheduler({
         windowMs: 50,
@@ -67,7 +74,7 @@ const getFileMetadataBatcher = memoize(
   },
 );
 
-export const useGetFileMetadata = (file_id: string) => {
+export const useGetFileMetadata = (file_id: number) => {
   const apiEndpoint = useApiEndpoint();
   const apiAccessKey = useApiAccessKey();
 
@@ -92,7 +99,7 @@ export const useGetFileMetadata = (file_id: string) => {
   });
 };
 
-export const useGetMultipleFileMetadata = (file_ids: string[]) => {
+export const useGetMultipleFileMetadata = (file_ids: Array<number>) => {
   const apiEndpoint = useApiEndpoint();
   const apiAccessKey = useApiAccessKey();
 

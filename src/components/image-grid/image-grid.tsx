@@ -1,9 +1,34 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import React, { useLayoutEffect, useMemo, useState } from "react";
 import { Thumbnail } from "./thumbnail";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries";
+import { useGetMultipleFileMetadata } from "@/integrations/hydrus-api/get-files";
 
-export function ImageGrid({ fileIds }: { fileIds: number[] }) {
+export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
+  const results = useGetMultipleFileMetadata(fileIds);
+  return (
+    <>
+      {results.map((result, index) => {
+        if (result.isLoading) {
+          return <div key={index}>Loading...</div>;
+        }
+        if (result.isError) {
+          return <div key={index}>Error loading file {fileIds[index]}</div>;
+        }
+        return <div key={index}>File ID: {result.data?.file_id}</div>;
+      })}
+    </>
+  );
+  // return (
+  //   <ImageGrid
+  //     fileIds={results
+  //       .filter(({ data }) => !!data)
+  //       .map(({ data }) => data!.file_id)}
+  //   />
+  // );
+}
+
+export function PureImageGrid({ fileIds }: { fileIds: Array<number> }) {
   const dimensions = useThumbnailDimensions();
 
   const items = useMemo(
