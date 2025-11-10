@@ -187,7 +187,7 @@ export function PureImageGrid({
       <TagsSidebar
         items={items}
         style={{
-          height: `${rowVirtualizer.getTotalSize()}px`,
+          height: `max(${rowVirtualizer.getTotalSize()}px, 30vh)`,
         }}
       />
     </div>
