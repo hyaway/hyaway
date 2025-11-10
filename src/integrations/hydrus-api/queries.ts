@@ -1,25 +1,20 @@
 import { useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   useApiAccessKey,
   useApiEndpoint,
 } from "../../integrations/hydrus-api/hydrus-config-store";
 import {
   HydrusFileSortType,
-  PageState,
   Permission,
   ServiceType,
-  focusPage,
   getClientOptions,
-  getPageInfo,
-  getPages,
   getServices,
-  refreshPage,
   requestNewPermissions,
   searchFiles,
   verifyAccessKey,
 } from "./hydrus-api";
-import type { HydrusTagSearch, Page, SearchFilesOptions } from "./hydrus-api";
+import type { HydrusTagSearch, SearchFilesOptions } from "./hydrus-api";
 import { simpleHash } from "@/lib/utils";
 
 export const usePermissionsQuery = () => {
@@ -77,96 +72,6 @@ export const useRequestNewPermissionsMutation = () => {
       return requestNewPermissions(apiEndpoint, name);
     },
   });
-};
-
-/**
- * Iteratively flattens a page tree into an array of all pages
- */
-const flattenPages = (root: Page): Array<Page> => {
-  const result: Array<Page> = [];
-  const stack: Array<Page> = [root];
-
-  while (stack.length) {
-    const current = stack.pop()!;
-    result.push(current);
-
-    if (current.pages && current.pages.length) {
-      // Push in reverse to preserve original recursive order
-      for (let i = current.pages.length - 1; i >= 0; i--) {
-        stack.push(current.pages[i]);
-      }
-    }
-  }
-  return result;
-};
-
-/**
- * Check if all pages in the tree are in a stable state (ready or cancelled)
- */
-const isStable = (page: { page_state: PageState }): boolean => {
-  return (
-    page.page_state === PageState.READY ||
-    page.page_state === PageState.SEARCH_CANCELLED
-  );
-};
-const areAllPagesStable = (page: Page): boolean => {
-  return flattenPages(page).every(isStable);
-};
-
-/**
- * Query hook for getting all pages from Hydrus
- */
-export const useGetPagesQuery = () => {
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
-
-  return useQuery({
-    queryKey: ["getPages", apiEndpoint, simpleHash(apiAccessKey)],
-    queryFn: () => {
-      if (!apiEndpoint || !apiAccessKey) {
-        throw new Error("API endpoint and access key are required.");
-      }
-      return getPages(apiEndpoint, apiAccessKey);
-    },
-    enabled: !!apiEndpoint && !!apiAccessKey,
-    staleTime: 5 * 60 * 1000, // Pages can change frequently, but don't need to refetch constantly
-    refetchInterval: (query) => {
-      // Stop refetching if there's no data or an error
-      if (!query.state.data || query.state.error) {
-        return false;
-      }
-
-      // If all pages are stable (ready or cancelled), stop refetching
-      if (areAllPagesStable(query.state.data.pages)) {
-        return false;
-      }
-
-      // Otherwise, refetch every 5 seconds
-      return 5000;
-    },
-  });
-};
-
-/**
- * Query hook for getting only media pages (pages that can hold files)
- */
-export const useGetMediaPagesQuery = () => {
-  const { data, ...rest } = useGetPagesQuery();
-
-  const mediaPages = useMemo(
-    () =>
-      data?.pages
-        ? flattenPages(data.pages)
-            .filter((page) => page.is_media_page)
-            .map((page) => ({ ...page, id: page.page_key }))
-        : [],
-    [data?.pages],
-  );
-
-  return {
-    ...rest,
-    data: mediaPages,
-  };
 };
 
 export const useRecentlyArchivedFilesQuery = () => {
@@ -287,82 +192,6 @@ export const useGetServicesQuery = () => {
     },
     enabled: !!apiEndpoint && !!apiAccessKey,
     staleTime: Infinity, // Services don't change often
-  });
-};
-
-export const useRefreshPageMutation = () => {
-  const queryClient = useQueryClient();
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
-
-  return useMutation({
-    mutationFn: (pageKey: string) => {
-      if (!apiEndpoint || !apiAccessKey || !pageKey) {
-        throw new Error("API endpoint, access key, and page key are required.");
-      }
-      return refreshPage(apiEndpoint, apiAccessKey, pageKey);
-    },
-    onSuccess: (_data, pageKey) => {
-      // Invalidate the specific getPageInfo for the refreshed page
-      queryClient.invalidateQueries({
-        queryKey: ["getPageInfo", pageKey],
-      });
-      // Invalidate getPages to refetch the page list, which might have updated states
-      queryClient.invalidateQueries({
-        queryKey: ["getPages"],
-      });
-    },
-  });
-};
-
-export const useFocusPageMutation = () => {
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
-
-  return useMutation({
-    mutationFn: (pageKey: string) => {
-      if (!apiEndpoint || !apiAccessKey || !pageKey) {
-        throw new Error("API endpoint, access key, and page key are required.");
-      }
-      return focusPage(apiEndpoint, apiAccessKey, pageKey);
-    },
-  });
-};
-
-export const useGetPageInfoQuery = (pageKey: string, simple = true) => {
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
-
-  return useQuery({
-    queryKey: [
-      "getPageInfo",
-      pageKey,
-      simple,
-      apiEndpoint,
-      simpleHash(apiAccessKey),
-    ],
-    queryFn: () => {
-      if (!apiEndpoint || !apiAccessKey) {
-        throw new Error("API endpoint and access key are required.");
-      }
-      return getPageInfo(apiEndpoint, apiAccessKey, pageKey, simple);
-    },
-    enabled: !!apiEndpoint && !!apiAccessKey && !!pageKey,
-    staleTime: Infinity, // We want this to be not change while performing the archive/delete actions
-    refetchInterval: (query) => {
-      // Stop refetching if there's no data or an error
-      if (!query.state.data || query.state.error) {
-        return false;
-      }
-
-      // If all pages are stable (ready or cancelled), stop refetching
-      if (isStable(query.state.data.page_info)) {
-        return false;
-      }
-
-      // Otherwise, refetch every 5 seconds
-      return 5000;
-    },
   });
 };
 
