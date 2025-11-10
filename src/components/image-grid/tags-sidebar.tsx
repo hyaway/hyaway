@@ -1,5 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useMemo } from "react";
+import { he } from "zod/v4/locales";
 import { Badge } from "../ui/badge";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagStatus } from "@/integrations/hydrus-api/models";
@@ -9,9 +10,11 @@ import { cn } from "@/lib/utils";
 export function TagsSidebar({
   items,
   className,
+  style,
 }: {
   items: Array<FileMetadata>;
   className?: string;
+  style?: React.CSSProperties;
 }) {
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
 
@@ -32,40 +35,48 @@ export function TagsSidebar({
 
   const rowVirtualizer = useVirtualizer({
     count: tags.length,
-    estimateSize: () => 20,
+    estimateSize: () => 40,
     overscan: 3,
     gap: 8,
     getScrollElement: () => parentRef.current,
   });
 
+  const rows = rowVirtualizer.getVirtualItems();
+
   return (
-    <div ref={parentRef} className={cn("h-full w-24 overflow-auto", className)}>
+    <div
+      ref={parentRef}
+      className={cn("w-72 overflow-auto", className)}
+      style={style}
+    >
       <div
         style={{
           height: `${rowVirtualizer.getTotalSize()}px`,
         }}
         className="relative w-full"
       >
-        {
-          !rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const tag = tags[virtualRow.index];
+        {rows.map((virtualRow) => {
+          const tag = tags[virtualRow.index];
 
-            return (
-              <div
-                key={virtualRow.index}
-                style={{
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-                className="absolute top-0 left-0 z-0 w-full overflow-visible transition-[left,transform,width,height] duration-350 ease-out will-change-[left,transform,width,height] hover:z-999"
-              >
-                <Badge intent="secondary" isCircle={true}>
-                  {tag}
-                </Badge>
-              </div>
-            );
-          })
-        }
+          return (
+            <div
+              key={virtualRow.index}
+              data-index={virtualRow.index}
+              style={{
+                transform: `translateY(${virtualRow.start}px)`,
+              }}
+              ref={rowVirtualizer.measureElement}
+              className="absolute top-0 left-0 flex w-full flex-row gap-1"
+            >
+              <Badge intent="primary" isCircle={false}>
+                {tag}
+              </Badge>
+              <Badge intent="secondary" isCircle={false}>
+                5
+              </Badge>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

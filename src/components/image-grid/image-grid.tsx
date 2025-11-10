@@ -5,6 +5,7 @@ import { Loader } from "../ui/loader";
 import { Note } from "../ui/note";
 import { Badge } from "../ui/badge";
 import { ImageGridCard } from "./image-grid-card";
+import { TagsSidebar } from "./tags-sidebar";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/get-files";
 import { cn } from "@/lib/utils";
@@ -138,8 +139,8 @@ export function PureImageGrid({
   }, [heights, width, lanes, rowVirtualizer]);
 
   return (
-    <>
-      <div ref={parentRef}>
+    <div className="flex w-full flex-row">
+      <div ref={parentRef} className="w-full">
         <div
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
@@ -183,6 +184,12 @@ export function PureImageGrid({
           {(lastItemIndex ?? 0) + 1}/{items.length} ({totalItems})
         </Badge>
       </div>
-    </>
+      <TagsSidebar
+        items={items}
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+        }}
+      />
+    </div>
   );
 }
