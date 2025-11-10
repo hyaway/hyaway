@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { HydrusApiClient } from "../api-client";
 import { useHydrusApiClient } from "../hydrus-config-store";
 import { Permission } from "../models";
-import type { AccessKeyType } from "../models";
+import type { AccessKeyType, VerifyAccessKeyResponse } from "../models";
 
 export const usePermissionsQuery = (keyType: AccessKeyType) => {
   const hydrusApi = useHydrusApiClient();
@@ -16,34 +16,58 @@ export const usePermissionsQuery = (keyType: AccessKeyType) => {
       return hydrusApi.verifyAccessKey(keyType);
     },
     enabled: !!hydrusApi,
-    select: (data) => {
-      return {
-        hasAllPermissions: data.permits_everything,
-        permissions: data.basic_permissions,
-      };
-    },
-    staleTime: Infinity,
+    // Persistent key rarely changes; keep effectively permanent.
+    // Session key lasts up to a day or until remote client restarts. Use a generous stale time & focus/refetch triggers
+    // instead of frequent polling. If the client restarts and a 419/403 occurs, interceptor + error state will surface it.
+    staleTime: keyType === "persistent" ? Infinity : 6 * 60 * 60 * 1000, // 6h; adjust upward if needed
+    refetchOnWindowFocus: keyType === "session", // pick up invalidation after tab inactivity
+    refetchOnReconnect: keyType === "session", // network reconnect may invalidate prior state
+    refetchInterval: false, // no periodic polling; rely on user activity & error-driven invalidation
   });
 };
+
+const requiredPermissions = [
+  Permission.IMPORT_AND_DELETE_FILES,
+  Permission.EDIT_FILE_TAGS,
+  Permission.SEARCH_FOR_AND_FETCH_FILES,
+  Permission.MANAGE_PAGES,
+] as const;
+
+function checkPermissions(permissionsData?: VerifyAccessKeyResponse) {
+  const hasRequiredPermissions =
+    !!permissionsData?.permits_everything ||
+    requiredPermissions.every((p) =>
+      permissionsData?.basic_permissions.includes(p),
+    );
+  return hasRequiredPermissions;
+}
 
 export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
   const { data: permissionsData, ...rest } = usePermissionsQuery(keyType);
 
-  const requiredPermissions = [
-    Permission.IMPORT_AND_DELETE_FILES,
-    Permission.EDIT_FILE_TAGS,
-    Permission.SEARCH_FOR_AND_FETCH_FILES,
-    Permission.MANAGE_PAGES,
-  ];
-
-  const hasRequiredPermissions =
-    permissionsData?.hasAllPermissions ||
-    requiredPermissions.every((p) => permissionsData?.permissions.includes(p));
-
   return {
     ...rest,
-    hasRequiredPermissions,
+    hasRequiredPermissions: checkPermissions(permissionsData),
   };
+};
+
+/**
+ * Imperative (mutation-based) variant of access verification.
+ * Useful for on-demand checks without subscribing a component to query re-renders.
+ * Returns mutation object whose data includes permission analysis.
+ */
+export const useVerifyAccessMutation = () => {
+  const hydrusApi = useHydrusApiClient();
+  return useMutation({
+    mutationFn: async (keyType: AccessKeyType) => {
+      if (!hydrusApi) throw new Error("Hydrus API client is required.");
+      const response = await hydrusApi.verifyAccessKey(keyType);
+      return {
+        raw: response,
+        hasRequiredPermissions: checkPermissions(response),
+      };
+    },
+  });
 };
 
 export const useRequestNewPermissionsMutation = () => {
