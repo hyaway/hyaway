@@ -1,6 +1,8 @@
 import { AxiosError } from "axios";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRequestNewPermissionsMutation } from "../../integrations/hydrus-api/queries/access";
+import {
+  useApiVersionQuery,
+  useRequestNewPermissionsMutation,
+} from "../../integrations/hydrus-api/queries/access";
 import { Button } from "../ui/button";
 import { Note } from "../ui/note";
 import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
@@ -12,15 +14,15 @@ import {
 export function RequestNewPermissionsField() {
   const apiEndpoint = useApiEndpoint();
   const { setApiCredentials } = useAuthActions();
-  const queryClient = useQueryClient();
   const { mutate, isPending, isSuccess, isError, error } =
     useRequestNewPermissionsMutation();
+  const apiVersionQuery = useApiVersionQuery(apiEndpoint);
 
   return (
     <div className="flex flex-col gap-4">
       <Button
         type="button"
-        isDisabled={isPending || !apiEndpoint}
+        isDisabled={isPending || !apiEndpoint || !apiVersionQuery.isSuccess}
         name={SETTINGS_ACTION}
         value={SETTINGS_REQUEST_API_KEY_ACTION}
         onPress={() => {
@@ -29,9 +31,6 @@ export function RequestNewPermissionsField() {
             {
               onSuccess: ({ access_key }) => {
                 setApiCredentials(access_key, apiEndpoint);
-                setTimeout(() => {
-                  queryClient.removeQueries({ queryKey: ["verifyAccess"] });
-                }, 5000);
               },
             },
           );

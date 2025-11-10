@@ -1,7 +1,10 @@
 import { AxiosError } from "axios";
 import { Form as FormPrimitive } from "react-aria-components";
 import { useQueryClient } from "@tanstack/react-query";
-import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/access";
+import {
+  useApiVersionQuery,
+  useVerifyAccessQuery,
+} from "../../integrations/hydrus-api/queries/access";
 import { Button } from "../ui/button";
 import { SecretInputField } from "../text-input-field";
 import { Note } from "../ui/note";
@@ -26,6 +29,8 @@ export function AccessKeyField() {
 
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useVerifyAccessQuery("persistent");
+
+  const apiVersionQuery = useApiVersionQuery(apiEndpoint);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,7 +61,7 @@ export function AccessKeyField() {
       />
       <Button
         type="submit"
-        isDisabled={isLoading || !apiEndpoint}
+        isDisabled={isLoading || !apiEndpoint || !apiVersionQuery.isSuccess}
         name={SETTINGS_ACTION}
         value={SETTINGS_SAVE_ACCESS_KEY_ACTION}
       >
@@ -85,6 +90,7 @@ export function AccessKeyField() {
           {error instanceof AxiosError && error.response?.data?.error && (
             <span>{error.response.data.error}</span>
           )}
+          <br />
           API Access key:{" "}
           <b>
             {apiAccessKey

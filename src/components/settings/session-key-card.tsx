@@ -29,6 +29,7 @@ export function SessionKeyCard() {
 
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useVerifyAccessQuery("session");
+  const persistentAccessQuery = useVerifyAccessQuery("persistent");
 
   return (
     <Card className="max-w-lg">
@@ -57,6 +58,9 @@ export function SessionKeyCard() {
               });
             });
           }}
+          isDisabled={
+            !apiEndpoint || !hydrusApi || !persistentAccessQuery.isSuccess
+          }
         >
           {isFetching ? "Refreshing" : "Refresh session key"}
         </Button>
