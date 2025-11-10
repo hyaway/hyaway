@@ -1,52 +1,65 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { AxiosError } from "axios";
-import React, { useLayoutEffect, useMemo, useState } from "react";
 import { Loader } from "../ui/loader";
 import { Note } from "../ui/note";
 import { Thumbnail } from "./thumbnail";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries";
-import { useGetFilesMetadata } from "@/integrations/hydrus-api/get-files";
+import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/get-files";
 
 export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
-  const { data, isLoading, isError, error } = useGetFilesMetadata(fileIds);
+  const itemsQuery = useInfiniteGetFilesMetadata(fileIds, true);
   const defaultDimensions = useThumbnailDimensions();
 
-  if (!defaultDimensions || isLoading) {
+  if (fileIds.length === 0) {
+    return <p>Page is empty.</p>;
+  }
+
+  if (!defaultDimensions || itemsQuery.isPending) {
     return <Loader />;
   }
 
-  if (isError) {
+  if (itemsQuery.isError) {
     return (
       <Note intent="danger">
-        {error instanceof Error
-          ? error.message
+        {itemsQuery.error instanceof Error
+          ? itemsQuery.error.message
           : "An unknown error occurred while fetching gallery"}
         <br />
-        {error instanceof AxiosError && error.response?.data?.error && (
-          <span>{error.response.data.error}</span>
-        )}
+        {itemsQuery.error instanceof AxiosError &&
+          itemsQuery.error.response?.data?.error && (
+            <span>{itemsQuery.error.response.data.error}</span>
+          )}
       </Note>
     );
   }
 
-  if (!data || data.length === 0) {
-    return <p>No images to display.</p>;
+  if (itemsQuery.data.pages[0].metadata.length === 0) {
+    return <p>No images loaded.</p>;
   }
 
-  return <PureImageGrid items={data} defaultDimensions={defaultDimensions} />;
+  return (
+    <PureImageGrid
+      itemsQuery={itemsQuery}
+      defaultDimensions={defaultDimensions}
+    />
+  );
 }
 
 export function PureImageGrid({
-  items,
+  itemsQuery,
   defaultDimensions,
 }: {
-  items: Array<{
-    file_id: number;
-    width: number;
-    height: number;
-  }>;
+  itemsQuery: ReturnType<typeof useInfiniteGetFilesMetadata>;
   defaultDimensions: { width: number; height: number };
 }) {
+  const { data, isFetchingNextPage, fetchNextPage, hasNextPage } = itemsQuery;
+
+  const items = useMemo(
+    () => (data ? data.pages.flatMap((d) => d.metadata) : []),
+    [data],
+  );
+
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const [desiredLanes, setLanes] = useState(0);
@@ -68,6 +81,28 @@ export function PureImageGrid({
     lanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
   });
+
+  useEffect(() => {
+    const [lastItemIndex] = [...rowVirtualizer.getVirtualIndexes()].reverse();
+
+    if (!lastItemIndex) {
+      return;
+    }
+
+    if (
+      lastItemIndex >= items.length - 1 &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
+      fetchNextPage();
+    }
+  }, [
+    hasNextPage,
+    fetchNextPage,
+    items.length,
+    isFetchingNextPage,
+    rowVirtualizer.getVirtualIndexes(),
+  ]);
 
   useLayoutEffect(() => {
     if (!parentRef.current) {

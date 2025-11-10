@@ -102,11 +102,11 @@ export const useGetFilesMetadata = (
 
 export const useInfiniteGetFilesMetadata = (
   file_ids: Array<number>,
-  only_return_basic_information = false,
+  only_return_basic_information = true,
 ) => {
   const apiEndpoint = useApiEndpoint();
   const apiAccessKey = useApiAccessKey();
-  const BATCH_SIZE = 100;
+  const BATCH_SIZE = 128;
 
   return useInfiniteQuery({
     queryKey: [
