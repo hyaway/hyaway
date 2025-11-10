@@ -16,8 +16,8 @@ import { Route as SettingsIndexRouteImport } from "./routes/settings.index";
 import { Route as SettingsUxRouteImport } from "./routes/settings.ux";
 import { Route as SettingsAccountRouteImport } from "./routes/settings.account";
 import { Route as AuthRecentlyDeletedRouteImport } from "./routes/_auth/recently-deleted";
+import { Route as AuthRecentlyArchivedRouteImport } from "./routes/_auth/recently-archived";
 import { Route as AuthPagesRouteImport } from "./routes/_auth/pages";
-import { Route as AuthHelloWorldRouteImport } from "./routes/_auth/hello-world";
 import { Route as AuthPagesPageIdRouteImport } from "./routes/_auth/pages.$pageId";
 
 const SettingsRoute = SettingsRouteImport.update({
@@ -54,14 +54,14 @@ const AuthRecentlyDeletedRoute = AuthRecentlyDeletedRouteImport.update({
   path: "/recently-deleted",
   getParentRoute: () => AuthRoute,
 } as any);
+const AuthRecentlyArchivedRoute = AuthRecentlyArchivedRouteImport.update({
+  id: "/recently-archived",
+  path: "/recently-archived",
+  getParentRoute: () => AuthRoute,
+} as any);
 const AuthPagesRoute = AuthPagesRouteImport.update({
   id: "/pages",
   path: "/pages",
-  getParentRoute: () => AuthRoute,
-} as any);
-const AuthHelloWorldRoute = AuthHelloWorldRouteImport.update({
-  id: "/hello-world",
-  path: "/hello-world",
   getParentRoute: () => AuthRoute,
 } as any);
 const AuthPagesPageIdRoute = AuthPagesPageIdRouteImport.update({
@@ -73,8 +73,8 @@ const AuthPagesPageIdRoute = AuthPagesPageIdRouteImport.update({
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/settings": typeof SettingsRouteWithChildren;
-  "/hello-world": typeof AuthHelloWorldRoute;
   "/pages": typeof AuthPagesRouteWithChildren;
+  "/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/settings/account": typeof SettingsAccountRoute;
   "/settings/ux": typeof SettingsUxRoute;
@@ -83,8 +83,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
-  "/hello-world": typeof AuthHelloWorldRoute;
   "/pages": typeof AuthPagesRouteWithChildren;
+  "/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/settings/account": typeof SettingsAccountRoute;
   "/settings/ux": typeof SettingsUxRoute;
@@ -96,8 +96,8 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/_auth": typeof AuthRouteWithChildren;
   "/settings": typeof SettingsRouteWithChildren;
-  "/_auth/hello-world": typeof AuthHelloWorldRoute;
   "/_auth/pages": typeof AuthPagesRouteWithChildren;
+  "/_auth/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/_auth/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/settings/account": typeof SettingsAccountRoute;
   "/settings/ux": typeof SettingsUxRoute;
@@ -109,8 +109,8 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/settings"
-    | "/hello-world"
     | "/pages"
+    | "/recently-archived"
     | "/recently-deleted"
     | "/settings/account"
     | "/settings/ux"
@@ -119,8 +119,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
-    | "/hello-world"
     | "/pages"
+    | "/recently-archived"
     | "/recently-deleted"
     | "/settings/account"
     | "/settings/ux"
@@ -131,8 +131,8 @@ export interface FileRouteTypes {
     | "/"
     | "/_auth"
     | "/settings"
-    | "/_auth/hello-world"
     | "/_auth/pages"
+    | "/_auth/recently-archived"
     | "/_auth/recently-deleted"
     | "/settings/account"
     | "/settings/ux"
@@ -197,18 +197,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthRecentlyDeletedRouteImport;
       parentRoute: typeof AuthRoute;
     };
+    "/_auth/recently-archived": {
+      id: "/_auth/recently-archived";
+      path: "/recently-archived";
+      fullPath: "/recently-archived";
+      preLoaderRoute: typeof AuthRecentlyArchivedRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
     "/_auth/pages": {
       id: "/_auth/pages";
       path: "/pages";
       fullPath: "/pages";
       preLoaderRoute: typeof AuthPagesRouteImport;
-      parentRoute: typeof AuthRoute;
-    };
-    "/_auth/hello-world": {
-      id: "/_auth/hello-world";
-      path: "/hello-world";
-      fullPath: "/hello-world";
-      preLoaderRoute: typeof AuthHelloWorldRouteImport;
       parentRoute: typeof AuthRoute;
     };
     "/_auth/pages/$pageId": {
@@ -234,14 +234,14 @@ const AuthPagesRouteWithChildren = AuthPagesRoute._addFileChildren(
 );
 
 interface AuthRouteChildren {
-  AuthHelloWorldRoute: typeof AuthHelloWorldRoute;
   AuthPagesRoute: typeof AuthPagesRouteWithChildren;
+  AuthRecentlyArchivedRoute: typeof AuthRecentlyArchivedRoute;
   AuthRecentlyDeletedRoute: typeof AuthRecentlyDeletedRoute;
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
-  AuthHelloWorldRoute: AuthHelloWorldRoute,
   AuthPagesRoute: AuthPagesRouteWithChildren,
+  AuthRecentlyArchivedRoute: AuthRecentlyArchivedRoute,
   AuthRecentlyDeletedRoute: AuthRecentlyDeletedRoute,
 };
 
