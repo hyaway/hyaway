@@ -10,5 +10,6 @@
   },
   "tailwindCSS.experimental.classRegex": [
     ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
-  ]
+  ],
+  "cSpell.words": ["partialize"]
 }
