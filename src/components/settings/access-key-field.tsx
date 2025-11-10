@@ -87,9 +87,16 @@ export function AccessKeyField() {
             ? error.message
             : "An unknown error occurred while checking endpoint."}
           <br />
-          {error instanceof AxiosError && error.response?.data?.error && (
-            <span>{error.response.data.error}</span>
-          )}
+          {error instanceof AxiosError ? (
+            <>
+              <span>{error.response?.data.error}</span>
+              <br />
+              <span>
+                {error.response?.status === 403 &&
+                  "If you just requested a token, complete the permissions flow in Hydrus client then check API connection"}
+              </span>
+            </>
+          ) : null}
           <br />
           API Access key:{" "}
           <b>

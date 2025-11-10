@@ -48,7 +48,7 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
             api_endpoint: nextApiEndpoint,
             apiClient: new HydrusApiClient(nextApiEndpoint, nextApiAccessKey),
           });
-          getContext().queryClient.clear();
+          getContext().queryClient.resetQueries();
         }
       } else {
         set({
@@ -56,7 +56,7 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
           api_endpoint: nextApiEndpoint,
           apiClient: null,
         });
-        getContext().queryClient.clear();
+        getContext().queryClient.resetQueries();
       }
     },
     reset: () => {
@@ -65,7 +65,7 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
         ...initialState,
         apiClient: null,
       });
-      getContext().queryClient.clear();
+      getContext().queryClient.resetQueries();
     },
   },
 });
