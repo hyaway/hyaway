@@ -48,7 +48,7 @@ export function Note({
       {IconComponent && indicator && (
         <div
           className={twJoin(
-            "mr-3 grid size-8 place-content-center rounded-full border-2",
+            "animate-in zoom-in mr-3 grid size-8 place-content-center rounded-full border-2",
             intent === "warning" && "border-warning-subtle-fg/40",
             intent === "success" && "border-success-subtle-fg/40",
             intent === "danger" && "border-danger-subtle-fg/40",
