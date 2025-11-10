@@ -1,9 +1,6 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { Settings } from "../components/settings";
-import {
-  useApiAccessKey,
-  useApiEndpoint,
-} from "../integrations/hydrus-api/hydrus-config-store";
+import { useHydrusApiClient } from "../integrations/hydrus-api/hydrus-config-store";
 import { useVerifyAccessQuery } from "../integrations/hydrus-api/queries/access";
 
 export const Route = createFileRoute("/_auth")({
@@ -12,12 +9,9 @@ export const Route = createFileRoute("/_auth")({
 
 function AuthLayout() {
   const { hasRequiredPermissions, isLoading } = useVerifyAccessQuery("session");
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
+  const hydrusApi = useHydrusApiClient();
 
-  const hasCredentials = !!(apiEndpoint && apiAccessKey);
-
-  if (isLoading && hasCredentials) {
+  if (isLoading && hydrusApi) {
     return (
       <div className="flex h-screen items-center justify-center">
         Loading...

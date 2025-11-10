@@ -100,6 +100,13 @@ export class HydrusApiClient {
             return Promise.reject(error);
           }
         }
+        if (status === 403) {
+          console.error(
+            "Hydrus API access forbidden: please check your access key permissions.",
+          );
+          this.sessionKey = undefined;
+          this.refreshSessionPromise = undefined;
+        }
         return Promise.reject(error);
       },
     );
