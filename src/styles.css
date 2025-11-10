@@ -16,11 +16,6 @@
   }
 }
 
-body {
-  @apply bg-white dark:bg-zinc-900;
-  color-scheme: dark light;
-}
-
 @theme inline {
   --font-sans:
     "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",

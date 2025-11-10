@@ -10,6 +10,7 @@ import {
   NavbarStart,
   NavbarTrigger,
 } from "@/components/ui/navbar";
+import { ThemeSwitcher } from "./theme-switcher";
 
 export default function MainNavbar(props: NavbarProps) {
   return (
@@ -24,9 +25,14 @@ export default function MainNavbar(props: NavbarProps) {
           <NavbarItemLink to={"/settings"}>Settings</NavbarItemLink>
         </NavbarSection>
         <NavbarSpacer />
+        <NavbarSection className="hidden md:flex">
+          <ThemeSwitcher />
+        </NavbarSection>
       </Navbar>
       <NavbarMobile>
         <NavbarTrigger />
+        <NavbarSpacer />
+        <ThemeSwitcher />
       </NavbarMobile>
     </NavbarProvider>
   );
