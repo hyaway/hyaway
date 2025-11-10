@@ -1,15 +1,10 @@
 import { Form as FormPrimitive } from "react-aria-components";
-import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  useApiAccessKey,
   useAuthActions,
   useHydrusApiClient,
 } from "../../integrations/hydrus-api/hydrus-config-store";
-import {
-  useRequestNewPermissionsMutation,
-  useVerifyAccessQuery,
-} from "../../integrations/hydrus-api/queries/access";
+import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/access";
 import { Button } from "../ui/button";
 import { Heading } from "../ui/heading";
 import { ProgressCircle } from "../ui/progress-circle";
@@ -17,20 +12,18 @@ import { Note } from "../ui/note";
 import { getFormDataWithSubmitter } from "./form-utils";
 import { ApiEndpointCard } from "./api-endpoint-card";
 import { AccessKeyField } from "./access-key-field";
+import { RequestNewPermissionsField } from "./request-new-permissions-field";
 
 export function Login() {
   const { setApiCredentials } = useAuthActions();
   const queryClient = useQueryClient();
-  const requestNewPermissions = useRequestNewPermissionsMutation();
   const hydrusApi = useHydrusApiClient();
 
   const persistentAccessQuery = useVerifyAccessQuery("persistent");
   const sessionAccessQuery = useVerifyAccessQuery("session");
 
   const pending =
-    requestNewPermissions.isPending ||
-    persistentAccessQuery.isFetching ||
-    sessionAccessQuery.isFetching;
+    persistentAccessQuery.isFetching || sessionAccessQuery.isFetching;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,15 +35,6 @@ export function Login() {
     if (action === "check_endpoint") {
       queryClient.resetQueries({ queryKey: ["apiVersion"] });
     } else if (action === "request_api_key" && typeof endpoint === "string") {
-      requestNewPermissions.mutate(
-        { apiEndpoint: endpoint, name: "hydrus-archive-helper" },
-        {
-          onSuccess: ({ access_key }) => {
-            setApiCredentials(access_key, endpoint);
-            queryClient.removeQueries({ queryKey: ["verifyAccess"] });
-          },
-        },
-      );
     } else if (
       action === "save" &&
       typeof endpoint === "string" &&
@@ -66,39 +50,7 @@ export function Login() {
       <FormPrimitive onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Heading level={2}>Hydrus API Settings</Heading>
         <ApiEndpointCard />
-        <Button
-          type="submit"
-          className="self-start"
-          isDisabled={pending}
-          name="action"
-          value="request_api_key"
-        >
-          {requestNewPermissions.isPending ? (
-            <ProgressCircle
-              isIndeterminate
-              aria-label="Requesting new API access key"
-            />
-          ) : null}
-          {requestNewPermissions.isPending
-            ? "Requesting new API access key"
-            : "Request new API access key"}
-        </Button>
-        {requestNewPermissions.isError && (
-          <Note intent="danger">
-            {requestNewPermissions.error instanceof Error
-              ? requestNewPermissions.error.message
-              : "An unknown error occurred while requesting new permissions."}
-            <br />
-            {requestNewPermissions.error instanceof AxiosError &&
-              requestNewPermissions.error.response?.data?.error && (
-                <span>{requestNewPermissions.error.response.data.error}</span>
-              )}
-          </Note>
-        )}
-        {requestNewPermissions.isSuccess && (
-          <Note intent="success">New API access key obtained and saved.</Note>
-        )}
-
+        <RequestNewPermissionsField />
         <AccessKeyField />
       </FormPrimitive>
 

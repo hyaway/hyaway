@@ -34,7 +34,9 @@ export function AccessKeyField() {
         <Skeleton className="h-28" />
       ) : isSuccess ? (
         data.hasRequiredPermissions ? (
-          <Note intent="success">Access key API connection successful</Note>
+          <Note intent="success">
+            {data.raw.name ?? "API"} access key connection successful
+          </Note>
         ) : (
           <Note intent="warning">
             Insufficient permissions for {data.raw.name ?? "API"} access key
