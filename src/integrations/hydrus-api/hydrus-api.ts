@@ -52,6 +52,31 @@ export enum Permission {
 }
 
 /**
+ * Page type enumeration
+ */
+export enum PageType {
+  GALLERY_DOWNLOADER = 1,
+  SIMPLE_DOWNLOADER = 2,
+  HARD_DRIVE_IMPORT = 3,
+  PETITIONS = 5,
+  FILE_SEARCH = 6,
+  URL_DOWNLOADER = 7,
+  DUPLICATES = 8,
+  THREAD_WATCHER = 9,
+  PAGE_OF_PAGES = 10,
+}
+
+/**
+ * Page state enumeration
+ */
+export enum PageState {
+  READY = 0,
+  INITIALISING = 1,
+  SEARCHING_LOADING = 2,
+  SEARCH_CANCELLED = 3,
+}
+
+/**
  * Base response schema - all API responses include version info
  */
 const BaseResponseSchema = z.object({
@@ -83,6 +108,37 @@ const SessionKeyResponseSchema = BaseResponseSchema.extend({
 });
 
 export type SessionKeyResponse = z.infer<typeof SessionKeyResponseSchema>;
+
+/**
+ * Page schema - recursive structure for nested pages
+ */
+const PageSchema: z.ZodType<Page> = z.lazy(() =>
+  z.object({
+    name: z.string(),
+    page_key: z.string(),
+    page_state: z.enum(PageState),
+    page_type: z.enum(PageType),
+    is_media_page: z.boolean(),
+    selected: z.boolean(),
+    pages: z.array(PageSchema).optional(),
+  }),
+);
+
+export type Page = {
+  name: string;
+  page_key: string;
+  page_state: PageState;
+  page_type: PageType;
+  is_media_page: boolean;
+  selected: boolean;
+  pages?: Page[];
+};
+
+const GetPagesResponseSchema = z.object({
+  pages: PageSchema,
+});
+
+export type GetPagesResponse = z.infer<typeof GetPagesResponseSchema>;
 
 // ============================================================================
 // API Functions
@@ -125,4 +181,22 @@ export async function requestNewPermissions(
     },
   });
   return RequestNewPermissionsResponseSchema.parse(response.data);
+}
+
+/**
+ * Get the page structure of the current UI session.
+ * @param apiEndpoint The base URL of the Hydrus API.
+ * @param apiAccessKey The access key for authentication.
+ * @returns A promise that resolves to the pages structure.
+ */
+export async function getPages(
+  apiEndpoint: string,
+  apiAccessKey: string,
+): Promise<GetPagesResponse> {
+  const response = await axios.get(`${apiEndpoint}/manage_pages/get_pages`, {
+    headers: {
+      [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
+    },
+  });
+  return GetPagesResponseSchema.parse(response.data);
 }
