@@ -32,15 +32,6 @@ importers:
       '@tanstack/react-virtual':
         specifier: ^3.13.12
         version: 3.13.12(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      '@yornaath/batshit':
-        specifier: ^0.11.1
-        version: 0.11.1
-      '@yornaath/batshit-devtools':
-        specifier: ^1.7.1
-        version: 1.7.1
-      '@yornaath/batshit-devtools-react':
-        specifier: ^0.8.1
-        version: 0.8.1(react@19.2.0)
       axios:
         specifier: ^1.13.1
         version: 1.13.1
@@ -2034,17 +2025,6 @@ packages:
   '@vitest/utils@4.0.5':
     resolution: {integrity: sha512-V5RndUgCB5/AfNvK9zxGCrRs99IrPYtMTIdUzJMMFs9nrmE5JXExIEfjVtUteyTRiLfCm+dCRMHf/Uu7Mm8/dg==}
 
-  '@yornaath/batshit-devtools-react@0.8.1':
-    resolution: {integrity: sha512-Qg1ZFFkZD/7kko6iPFLP01TpOhLXjjg6tJmPeEOv6m20FGa+MLHnmJFnbyXd0z0YNMzF8LJghwRIhfO++FjRwg==}
-    peerDependencies:
-      react: '*'
-
-  '@yornaath/batshit-devtools@1.7.1':
-    resolution: {integrity: sha512-AyttV1Njj5ug+XqEWY1smV45dTWMlWKtj1B8jcFYgBKUFyUlF/qEhD+iP1E5UaRYW6hQRYD9T2WNDwFTrOMWzQ==}
-
-  '@yornaath/batshit@0.11.1':
-    resolution: {integrity: sha512-LYsrHbsdGivKIr2IDcwaqrEYoW2W27a68GT4eW1jlM7nHO3KtH2qItqaOD57wiiOpYzxFRTVz7LUZMVMSfaekQ==}
-
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -2798,9 +2778,6 @@ packages:
   locate-path@6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
-
-  lodash-es@4.17.21:
-    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
 
   lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
@@ -6000,19 +5977,6 @@ snapshots:
       '@vitest/pretty-format': 4.0.5
       tinyrainbow: 3.0.3
 
-  '@yornaath/batshit-devtools-react@0.8.1(react@19.2.0)':
-    dependencies:
-      '@yornaath/batshit': 0.11.1
-      '@yornaath/batshit-devtools': 1.7.1
-      lodash-es: 4.17.21
-      react: 19.2.0
-
-  '@yornaath/batshit-devtools@1.7.1': {}
-
-  '@yornaath/batshit@0.11.1':
-    dependencies:
-      '@yornaath/batshit-devtools': 1.7.1
-
   acorn-jsx@5.3.2(acorn@8.15.0):
     dependencies:
       acorn: 8.15.0
@@ -6765,8 +6729,6 @@ snapshots:
   locate-path@6.0.0:
     dependencies:
       p-locate: 5.0.0
-
-  lodash-es@4.17.21: {}
 
   lodash.memoize@4.1.2: {}
 

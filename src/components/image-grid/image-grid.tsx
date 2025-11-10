@@ -3,9 +3,11 @@ import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { AxiosError } from "axios";
 import { Loader } from "../ui/loader";
 import { Note } from "../ui/note";
+import { Badge } from "../ui/badge";
 import { Thumbnail } from "./thumbnail";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/get-files";
+import { cn } from "@/lib/utils";
 
 export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
   const itemsQuery = useInfiniteGetFilesMetadata(fileIds, true);
@@ -41,6 +43,7 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
   return (
     <PureImageGrid
       itemsQuery={itemsQuery}
+      totalItems={fileIds.length}
       defaultDimensions={defaultDimensions}
     />
   );
@@ -48,9 +51,11 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
 
 export function PureImageGrid({
   itemsQuery,
+  totalItems,
   defaultDimensions,
 }: {
   itemsQuery: ReturnType<typeof useInfiniteGetFilesMetadata>;
+  totalItems: number;
   defaultDimensions: { width: number; height: number };
 }) {
   const { data, isFetchingNextPage, fetchNextPage, hasNextPage } = itemsQuery;
@@ -82,9 +87,9 @@ export function PureImageGrid({
     scrollMargin: parentRef.current?.offsetTop ?? 0,
   });
 
-  useEffect(() => {
-    const [lastItemIndex] = [...rowVirtualizer.getVirtualIndexes()].reverse();
+  const lastItemIndex = rowVirtualizer.getVirtualIndexes().at(-1);
 
+  useEffect(() => {
     if (!lastItemIndex) {
       return;
     }
@@ -101,7 +106,7 @@ export function PureImageGrid({
     fetchNextPage,
     items.length,
     isFetchingNextPage,
-    rowVirtualizer.getVirtualIndexes(),
+    lastItemIndex,
   ]);
 
   useLayoutEffect(() => {
@@ -157,6 +162,16 @@ export function PureImageGrid({
               </div>
             ))}
         </div>
+        <Badge
+          className={cn(
+            "fixed right-4 bottom-4 mt-4",
+            rowVirtualizer.isScrolling ? "opacity-100" : "opacity-50",
+          )}
+          intent="secondary"
+          isCircle={true}
+        >
+          {(lastItemIndex ?? 0) + 1}/{totalItems}
+        </Badge>
       </div>
     </>
   );
