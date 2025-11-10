@@ -7,7 +7,7 @@ import {
   useAuthActions,
 } from "../integrations/hydrus-api/hydrus-config-store";
 import {
-  useRequestNewPermissionsQuery,
+  useRequestNewPermissionsMutation,
   useVerifyAccessQuery,
 } from "../integrations/hydrus-api/queries";
 import { Button } from "./ui/button";
@@ -21,7 +21,7 @@ export function Settings() {
   const queryClient = useQueryClient();
   const defaultEndpoint = useApiEndpoint();
   const defaultAccessKey = useApiAccessKey();
-  const requestNewPermissions = useRequestNewPermissionsQuery();
+  const requestNewPermissions = useRequestNewPermissionsMutation();
 
   const { hasRequiredPermissions, isError, error, isFetching } =
     useVerifyAccessQuery();

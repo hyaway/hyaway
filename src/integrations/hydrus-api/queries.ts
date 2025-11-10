@@ -5,16 +5,15 @@ import {
   useApiEndpoint,
 } from "../../integrations/hydrus-api/hydrus-config-store";
 import {
-  
-  PageState,
-  Permission,
   getClientOptions,
   getPageInfo,
   getPages,
   requestNewPermissions,
-  verifyAccessKey
+  searchFiles,
+  verifyAccessKey,
 } from "./hydrus-api";
-import type {Page} from "./hydrus-api";
+import type { HydrusTagSearch, Page, SearchFilesOptions } from "./hydrus-api";
+import { PageState, Permission } from "./hydrus-api";
 
 // Simple hash for key (no crypto needed for cache key)
 const simpleHash = (str: string) =>
@@ -63,7 +62,7 @@ export const useVerifyAccessQuery = () => {
   };
 };
 
-export const useRequestNewPermissionsQuery = () => {
+export const useRequestNewPermissionsMutation = () => {
   return useMutation({
     mutationFn: async ({
       apiEndpoint,
@@ -221,6 +220,31 @@ export const useGetPageInfoQuery = (pageKey: string, simple = true) => {
       // Otherwise, refetch every 5 seconds
       return 5000;
     },
+  });
+};
+
+export const useSearchFilesQuery = (
+  tags: HydrusTagSearch,
+  options?: Omit<SearchFilesOptions, "tags">,
+) => {
+  const apiEndpoint = useApiEndpoint();
+  const apiAccessKey = useApiAccessKey();
+
+  return useQuery({
+    queryKey: [
+      "searchFiles",
+      tags,
+      options,
+      apiEndpoint,
+      simpleHash(apiAccessKey),
+    ],
+    queryFn: () => {
+      if (!apiEndpoint || !apiAccessKey) {
+        throw new Error("API endpoint and access key are required.");
+      }
+      return searchFiles(apiEndpoint, apiAccessKey, { tags, ...options });
+    },
+    enabled: !!apiEndpoint && !!apiAccessKey && tags.length > 0,
   });
 };
 

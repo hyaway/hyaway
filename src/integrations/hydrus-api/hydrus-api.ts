@@ -172,6 +172,39 @@ const GetPageInfoResponseSchema = BaseResponseSchema.extend({
 
 export type GetPageInfoResponse = z.infer<typeof GetPageInfoResponseSchema>;
 
+const SearchFilesResultsSchema = BaseResponseSchema.extend({
+  file_ids: z.array(z.number()).optional(),
+  hashes: z.array(z.string()).optional(),
+});
+
+export type SearchFilesResults = z.infer<typeof SearchFilesResultsSchema>;
+
+const FileMetadataSchema = z.object({
+  file_id: z.number(),
+  hash: z.string(),
+  mime: z.string(),
+  width: z.number(),
+  height: z.number(),
+  duration: z.number().nullable(),
+  file_size: z.number(),
+  import_time: z.number(),
+  last_viewed_time: z.number(),
+  has_audio: z.boolean(),
+  num_frames: z.number().nullable(),
+  framerate: z.number().nullable(),
+  is_new: z.boolean(),
+});
+
+export type FileMetadata = z.infer<typeof FileMetadataSchema>;
+
+const GetFileMetadataResponseSchema = BaseResponseSchema.extend({
+  metadata: z.array(FileMetadataSchema),
+});
+
+export type GetFileMetadataResponse = z.infer<
+  typeof GetFileMetadataResponseSchema
+>;
+
 // ============================================================================
 // API Functions
 // ============================================================================
@@ -281,4 +314,90 @@ export async function getPageInfo(
     },
   );
   return GetPageInfoResponseSchema.parse(response.data);
+}
+
+export enum HydrusFileSortType {
+  FileSize = 0,
+  Duration = 1,
+  ImportTime = 2,
+  FileType = 3,
+  Random = 4,
+  Width = 5,
+  Height = 6,
+  Ratio = 7,
+  NumberOfPixels = 8,
+  NumberOfTags = 9,
+  NumberOfMediaViews = 10,
+  TotalMediaViewtime = 11,
+  ApproximateBitrate = 12,
+  HasAudio = 13,
+  ModifiedTime = 14,
+  Framerate = 15,
+  NumberOfFrames = 16,
+  LastViewedTime = 18,
+  ArchiveTimestamp = 19,
+  HashHex = 20,
+  PixelHashHex = 21,
+  Blurhash = 22,
+  AverageColourLightness = 23,
+  AverageColourChromaticMagnitude = 24,
+  AverageColourGreenRedAxis = 25,
+  AverageColourBlueYellowAxis = 26,
+  AverageColourHue = 27,
+}
+
+export type HydrusTagSearch = (string | string[])[];
+
+export interface SearchFilesOptions {
+  tags: HydrusTagSearch;
+  file_domain?: string;
+  tag_service_key?: string;
+  include_current_tags?: boolean;
+  include_pending_tags?: boolean;
+  file_sort_type?: HydrusFileSortType;
+  file_sort_asc?: boolean;
+  return_file_ids?: boolean;
+  return_hashes?: boolean;
+}
+
+export async function searchFiles(
+  apiEndpoint: string,
+  apiAccessKey: string,
+  options: SearchFilesOptions,
+) {
+  const { tags, ...rest } = options;
+  const response = await axios.get<SearchFilesResults>(
+    `${apiEndpoint}/get_files/search_files`,
+    {
+      headers: {
+        [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
+      },
+      params: {
+        tags: JSON.stringify(tags),
+        ...rest,
+      },
+    },
+  );
+  return response.data;
+}
+
+export async function getFileMetadata(
+  apiEndpoint: string,
+  apiAccessKey: string,
+  fileIds?: number[],
+  hashes?: string[],
+): Promise<FileMetadata[]> {
+  const response = await axios.get<{ metadata: FileMetadata[] }>(
+    `${apiEndpoint}/get_files/file_metadata`,
+    {
+      headers: {
+        [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
+      },
+      params: {
+        file_ids: fileIds?.join(","),
+        hashes: hashes?.join(","),
+      },
+    },
+  );
+  return response.data.metadata;
 }
