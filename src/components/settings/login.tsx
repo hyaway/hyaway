@@ -11,9 +11,15 @@ import { ProgressCircle } from "../ui/progress-circle";
 import { Note } from "../ui/note";
 import { getFormDataWithSubmitter } from "./form-utils";
 import { ApiEndpointCard } from "./api-endpoint-card";
-import { AccessKeyField } from "./access-key-field";
-import { RequestNewPermissionsField } from "./request-new-permissions-field";
 import { AccessKeyCard } from "./access-key-card";
+import {
+  SETTINGS_ACCESS_KEY_FIELD_NAME,
+  SETTINGS_ACTION,
+  SETTINGS_CHECK_ENDPOINT_ACTION,
+  SETTINGS_ENDPOINT_FIELD_NAME,
+  SETTINGS_REQUEST_API_KEY_ACTION,
+  SETTINGS_SAVE_ACTION,
+} from "./constants";
 
 export function Login() {
   const { setApiCredentials } = useAuthActions();
@@ -29,15 +35,18 @@ export function Login() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = getFormDataWithSubmitter(e);
-    const endpoint = formData.get("endpoint");
-    const accessKey = formData.get("accessKey");
-    const action = formData.get("action");
+    const endpoint = formData.get(SETTINGS_ENDPOINT_FIELD_NAME);
+    const accessKey = formData.get(SETTINGS_ACCESS_KEY_FIELD_NAME);
+    const action = formData.get(SETTINGS_ACTION);
 
-    if (action === "check_endpoint") {
+    if (action === SETTINGS_CHECK_ENDPOINT_ACTION) {
       queryClient.resetQueries({ queryKey: ["apiVersion"] });
-    } else if (action === "request_api_key" && typeof endpoint === "string") {
     } else if (
-      action === "save" &&
+      action === SETTINGS_REQUEST_API_KEY_ACTION &&
+      typeof endpoint === "string"
+    ) {
+    } else if (
+      action === SETTINGS_SAVE_ACTION &&
       typeof endpoint === "string" &&
       typeof accessKey === "string"
     ) {
@@ -47,7 +56,7 @@ export function Login() {
   };
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-4">
+    <div className="mx-auto flex max-w-lg flex-col gap-4">
       <FormPrimitive onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Heading level={2}>Hydrus API Settings</Heading>
         <ApiEndpointCard />

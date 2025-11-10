@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { SecretInputField } from "../text-input-field";
 import { Note } from "../ui/note";
 import { Skeleton } from "../ui/skeleton";
+import { SETTINGS_ACCESS_KEY_FIELD_NAME } from "./constants";
 import {
   useApiAccessKey,
   useApiEndpoint,
@@ -19,7 +20,7 @@ export function AccessKeyField() {
     <div className="flex flex-col gap-4">
       <SecretInputField
         label="API access key"
-        name="accessKey"
+        name={SETTINGS_ACCESS_KEY_FIELD_NAME}
         defaultValue={apiAccessKey}
         isRequired
         isDisabled={isLoading}

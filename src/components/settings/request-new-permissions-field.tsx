@@ -2,9 +2,9 @@ import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRequestNewPermissionsMutation } from "../../integrations/hydrus-api/queries/access";
 import { Button } from "../ui/button";
-import { CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { Note } from "../ui/note";
+import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
 import {
   useApiEndpoint,
   useAuthActions,
@@ -22,8 +22,8 @@ export function RequestNewPermissionsField() {
       <Button
         type="button"
         isDisabled={isPending || !apiEndpoint}
-        name="action"
-        value="request_api_key"
+        name={SETTINGS_ACTION}
+        value={SETTINGS_REQUEST_API_KEY_ACTION}
         onPress={() => {
           mutate(
             { apiEndpoint: apiEndpoint, name: "hydrus-archive-helper" },

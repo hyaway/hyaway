@@ -11,6 +11,11 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
+import {
+  SETTINGS_ACTION,
+  SETTINGS_CHECK_ENDPOINT_ACTION,
+  SETTINGS_ENDPOINT_FIELD_NAME,
+} from "./constants";
 import { useApiEndpoint } from "@/integrations/hydrus-api/hydrus-config-store";
 
 export function ApiEndpointCard() {
@@ -27,7 +32,7 @@ export function ApiEndpointCard() {
       <CardContent className="flex flex-col gap-4">
         <TextInputField
           label="API endpoint"
-          name="apiEndpoint"
+          name={SETTINGS_ENDPOINT_FIELD_NAME}
           defaultValue={apiEndpoint}
           placeholder="http://localhost:45869"
           isRequired
@@ -35,8 +40,8 @@ export function ApiEndpointCard() {
         />
         <Button
           type="submit"
-          name="action"
-          value="check_endpoint"
+          name={SETTINGS_ACTION}
+          value={SETTINGS_CHECK_ENDPOINT_ACTION}
           isDisabled={isFetching}
         >
           {isFetching ? "Checking endpoint..." : "Check endpoint"}
