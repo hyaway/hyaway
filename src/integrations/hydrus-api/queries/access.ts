@@ -74,6 +74,11 @@ export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
   });
 };
 
+export const useIsAuthenticated = (): boolean => {
+  const { data } = useVerifyAccessQuery("session");
+  return !!data && data.hasRequiredPermissions;
+};
+
 /**
  * Imperative (mutation-based) variant of access verification.
  * Useful for on-demand checks without subscribing a component to query re-renders.

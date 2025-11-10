@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useHydrusApiClient } from "../hydrus-config-store";
 import { PageState } from "../models";
+import { useIsAuthenticated } from "./access";
 import type { Page } from "../models";
 
 /**
@@ -43,6 +44,7 @@ const areAllPagesStable = (page: Page): boolean => {
  */
 export const useGetPagesQuery = () => {
   const hydrusApi = useHydrusApiClient();
+  const enabled = useIsAuthenticated();
 
   return useQuery({
     queryKey: ["getPages", hydrusApi],
@@ -52,7 +54,7 @@ export const useGetPagesQuery = () => {
       }
       return hydrusApi.getPages();
     },
-    enabled: !!hydrusApi,
+    enabled: !!hydrusApi && enabled,
     staleTime: 5 * 60 * 1000, // Pages can change frequently, but don't need to refetch constantly
     refetchInterval: (query) => {
       // Stop refetching if there's no data or an error

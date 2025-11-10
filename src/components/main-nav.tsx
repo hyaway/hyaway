@@ -53,7 +53,7 @@ export default function MainNavbar(props: NavbarProps) {
 }
 
 function PagesNav() {
-  const { data, isLoading, isSuccess } = useGetMediaPagesQuery();
+  const { data, isPending, isSuccess } = useGetMediaPagesQuery();
   return (
     <Menu>
       <NavbarItem>
@@ -61,7 +61,7 @@ function PagesNav() {
         <ChevronDownIcon className="col-start-3" />
       </NavbarItem>
       <MenuContent className="min-w-(--trigger-width) sm:min-w-56">
-        {isLoading && <MenuItem>Loading...</MenuItem>}
+        {isPending && <MenuItem>Nothing here yet</MenuItem>}
         {isSuccess &&
           data.map((page) => (
             <MenuLink
