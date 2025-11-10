@@ -147,20 +147,29 @@ export function PureImageGrid({
           className="relative w-full"
         >
           {!!lanes &&
-            rowVirtualizer.getVirtualItems().map((virtualRow) => (
-              <div
-                key={virtualRow.index}
-                style={{
-                  left: `${(virtualRow.lane * 100) / lanes}%`,
-                  width: `${width}px`,
-                  height: `${heights[virtualRow.index]}px`,
-                  transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
-                }}
-                className="absolute top-0 transition-[left,transform,width,height] duration-350 ease-out will-change-[left,transform,width,height]"
-              >
-                <Thumbnail fileId={items[virtualRow.index].file_id} />
-              </div>
-            ))}
+            rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const item = items[virtualRow.index];
+              const rawScale =
+                Math.min(window.innerWidth, item.thumbnail_width ?? width) /
+                width;
+              const scale = Math.min(4, Math.max(1.1, rawScale));
+
+              return (
+                <div
+                  key={virtualRow.index}
+                  style={{
+                    left: `${(virtualRow.lane * 100) / lanes}%`,
+                    width: `${width}px`,
+                    height: `${heights[virtualRow.index]}px`,
+                    transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
+                    [`--thumbnail-hover-scale`]: `${scale}`,
+                  }}
+                  className="absolute top-0 z-0 overflow-visible transition-[left,transform,width,height] duration-350 ease-out will-change-[left,transform,width,height] hover:z-999"
+                >
+                  <Thumbnail fileId={item.file_id} className="origin-left" />
+                </div>
+              );
+            })}
         </div>
         <Badge
           className={cn(

@@ -10,14 +10,16 @@ export function Thumbnail({ fileId, className, ...props }: ThumbnailProps) {
   return (
     <div
       {...props}
-      className={cn(`h-full w-full overflow-hidden rounded border`, className)}
+      className={cn(`group h-full w-full overflow-visible`, className)}
     >
-      <img
-        src={url}
-        alt={`Thumbnail for file ID ${fileId}`}
-        className="transition-scale h-full w-full object-cover duration-350 ease-out hover:scale-105"
-        loading="lazy"
-      />
+      <div className="h-full w-full overflow-hidden rounded border object-cover transition-[width,height,transform] duration-350 ease-out group-hover:scale-(--thumbnail-hover-scale) hover:pointer-events-none">
+        <img
+          src={url}
+          alt={`Thumbnail for file ID ${fileId}`}
+          className="h-full w-full overflow-visible object-cover transition-[width,height,transform]"
+          loading="lazy"
+        />
+      </div>
     </div>
   );
 }

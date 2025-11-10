@@ -159,6 +159,8 @@ export const FileMetadataSchema = z.object({
   num_words: z.number().nullable(),
   size: z.number(),
   width: z.number(),
+  thumbnail_height: z.number().optional(),
+  thumbnail_width: z.number().optional(),
 });
 
 export type FileMetadata = z.infer<typeof FileMetadataSchema>;
