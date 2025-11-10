@@ -173,7 +173,7 @@ export const useRecentlyArchivedFilesQuery = () => {
   const tags: HydrusTagSearch = [
     "system:limit=1000",
     "system:archive",
-    "system:archived time < 70 days ago",
+    "system:archived time < 3 days ago",
   ];
   const options: Omit<SearchFilesOptions, "tags"> = {
     file_sort_type: HydrusFileSortType.ArchiveTimestamp,
