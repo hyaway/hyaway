@@ -154,6 +154,25 @@ export function PureImageGrid({
                 width;
               const scale = Math.min(4, Math.max(1.1, rawScale));
 
+              const isFirstLane = virtualRow.lane === 0;
+              const isLastLane = virtualRow.lane === lanes - 1;
+              const isTopRow = virtualRow.index < lanes;
+              const lastRowStart = items.length - 2 * lanes;
+              const isBottomRow = virtualRow.index >= lastRowStart;
+
+              let originClass = "origin-center";
+              if (isTopRow && isFirstLane) originClass = "origin-top-left";
+              else if (isTopRow && isLastLane) originClass = "origin-top-right";
+              else if (isBottomRow && isFirstLane)
+                originClass = "origin-bottom-left";
+              else if (isBottomRow && isLastLane)
+                originClass = "origin-bottom-right";
+              else if (isTopRow) originClass = "origin-top";
+              else if (isBottomRow) originClass = "origin-bottom";
+              else if (isFirstLane) originClass = "origin-left";
+              else if (isLastLane) originClass = "origin-right";
+              else originClass = "origin-center";
+
               return (
                 <div
                   key={virtualRow.index}
@@ -166,7 +185,10 @@ export function PureImageGrid({
                   }}
                   className="absolute top-0 z-0 overflow-visible transition-[left,transform,width,height] duration-350 ease-out will-change-[left,transform,width,height] hover:z-999"
                 >
-                  <Thumbnail fileId={item.file_id} className="origin-left" />
+                  <Thumbnail
+                    fileId={item.file_id}
+                    innerClassName={originClass}
+                  />
                 </div>
               );
             })}

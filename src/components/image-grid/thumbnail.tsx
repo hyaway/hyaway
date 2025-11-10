@@ -3,16 +3,27 @@ import { cn } from "@/lib/utils";
 
 export interface ThumbnailProps extends React.HTMLAttributes<HTMLDivElement> {
   fileId: number;
+  innerClassName?: string;
 }
 
-export function Thumbnail({ fileId, className, ...props }: ThumbnailProps) {
+export function Thumbnail({
+  fileId,
+  className,
+  innerClassName,
+  ...props
+}: ThumbnailProps) {
   const url = useThumbnailFileIdUrl(fileId);
   return (
     <div
       {...props}
       className={cn(`group h-full w-full overflow-visible`, className)}
     >
-      <div className="h-full w-full overflow-hidden rounded border object-cover transition-[width,height,transform] duration-350 ease-out group-hover:scale-(--thumbnail-hover-scale) hover:pointer-events-none">
+      <div
+        className={cn(
+          "h-full w-full overflow-hidden rounded border object-cover transition-[width,height,transform] duration-350 ease-out group-hover:scale-(--thumbnail-hover-scale) hover:pointer-events-none",
+          innerClassName,
+        )}
+      >
         <img
           src={url}
           alt={`Thumbnail for file ID ${fileId}`}
