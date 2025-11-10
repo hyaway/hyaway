@@ -3,17 +3,20 @@ import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/acce
 import { Button } from "../ui/button";
 import { SecretInputField } from "../text-input-field";
 import { Note } from "../ui/note";
-import { CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
-import { useApiAccessKey } from "@/integrations/hydrus-api/hydrus-config-store";
+import {
+  useApiAccessKey,
+  useApiEndpoint,
+} from "@/integrations/hydrus-api/hydrus-config-store";
 
 export function AccessKeyField() {
   const apiAccessKey = useApiAccessKey();
+  const apiEndpoint = useApiEndpoint();
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useVerifyAccessQuery("persistent");
 
   return (
-    <CardContent className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <SecretInputField
         label="API access key"
         name="accessKey"
@@ -21,13 +24,7 @@ export function AccessKeyField() {
         isRequired
         isDisabled={isLoading}
       />
-      <Button
-        type="submit"
-        className="self-start"
-        isDisabled={isLoading}
-        name="action"
-        value="save"
-      >
+      <Button type="submit" isDisabled={isLoading} name="action" value="save">
         {isFetching ? "Checking" : "Check API connection"}
       </Button>
       {isLoading ? (
@@ -35,11 +32,13 @@ export function AccessKeyField() {
       ) : isSuccess ? (
         data.hasRequiredPermissions ? (
           <Note intent="success">
-            {data.raw.name ?? "API"} access key connection successful
+            Connection to <b>{apiEndpoint}</b> with{" "}
+            <b>{data.raw.name ?? "API"}</b> access key successful
           </Note>
         ) : (
           <Note intent="warning">
-            Insufficient permissions for {data.raw.name ?? "API"} access key
+            Insufficient permissions for <b>{data.raw.name ?? "API"}</b> access
+            key on <b>{apiEndpoint}</b>
           </Note>
         )
       ) : isError ? (
@@ -53,6 +52,6 @@ export function AccessKeyField() {
           )}
         </Note>
       ) : null}
-    </CardContent>
+    </div>
   );
 }

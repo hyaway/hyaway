@@ -18,10 +18,9 @@ export function RequestNewPermissionsField() {
     useRequestNewPermissionsMutation();
 
   return (
-    <CardContent className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <Button
         type="button"
-        className="self-start"
         isDisabled={isPending || !apiEndpoint}
         name="action"
         value="request_api_key"
@@ -45,7 +44,7 @@ export function RequestNewPermissionsField() {
         <Skeleton className="h-28" />
       ) : isSuccess ? (
         <Note intent="success">
-          New API access key for {apiEndpoint} obtained and saved.
+          New API access key for <b>{apiEndpoint}</b> obtained and saved.
         </Note>
       ) : isError ? (
         <Note intent="danger">
@@ -58,6 +57,6 @@ export function RequestNewPermissionsField() {
           )}
         </Note>
       ) : null}
-    </CardContent>
+    </div>
   );
 }

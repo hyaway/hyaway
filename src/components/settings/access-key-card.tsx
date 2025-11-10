@@ -1,0 +1,31 @@
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Separator } from "../ui/separator";
+import { AccessKeyField } from "./access-key-field";
+import { RequestNewPermissionsField } from "./request-new-permissions-field";
+import { useApiEndpoint } from "@/integrations/hydrus-api/hydrus-config-store";
+
+export function AccessKeyCard() {
+  const apiEndpoint = useApiEndpoint();
+
+  return (
+    <Card className="max-w-lg">
+      <CardHeader>
+        <CardTitle>2. Get an access key</CardTitle>
+        <CardDescription>
+          Generate or enter an access key for your Hydrus client.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <RequestNewPermissionsField />
+        <Separator />
+        <AccessKeyField />
+      </CardContent>
+    </Card>
+  );
+}

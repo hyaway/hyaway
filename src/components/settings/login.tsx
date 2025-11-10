@@ -13,6 +13,7 @@ import { getFormDataWithSubmitter } from "./form-utils";
 import { ApiEndpointCard } from "./api-endpoint-card";
 import { AccessKeyField } from "./access-key-field";
 import { RequestNewPermissionsField } from "./request-new-permissions-field";
+import { AccessKeyCard } from "./access-key-card";
 
 export function Login() {
   const { setApiCredentials } = useAuthActions();
@@ -50,8 +51,7 @@ export function Login() {
       <FormPrimitive onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Heading level={2}>Hydrus API Settings</Heading>
         <ApiEndpointCard />
-        <RequestNewPermissionsField />
-        <AccessKeyField />
+        <AccessKeyCard />
       </FormPrimitive>
 
       {!sessionAccessQuery.isLoading && (
