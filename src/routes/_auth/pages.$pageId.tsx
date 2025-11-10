@@ -10,7 +10,7 @@ import {
   useFocusPageMutation,
   useGetPageInfoQuery,
   useRefreshPageMutation,
-} from "@/integrations/hydrus-api/queries";
+} from "@/integrations/hydrus-api/manage-pages";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 
 export const Route = createFileRoute("/_auth/pages/$pageId")({

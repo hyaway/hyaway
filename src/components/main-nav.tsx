@@ -14,7 +14,7 @@ import {
   NavbarTrigger,
 } from "@/components/ui/navbar";
 import { Menu, MenuContent, MenuItem, MenuLink } from "@/components/ui/menu";
-import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries";
+import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/manage-pages";
 
 export default function MainNavbar(props: NavbarProps) {
   return (
