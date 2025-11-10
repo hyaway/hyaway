@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { HydrusApiClient } from "./api-client";
 import { useHydrusApiClient } from "./hydrus-config-store";
-import { HydrusFileSortType, Permission, ServiceType } from "./hydrus-api";
-import type { HydrusTagSearch, SearchFilesOptions } from "./hydrus-api";
+import { HydrusFileSortType, Permission, ServiceType } from "./models";
+import type { HydrusTagSearch, SearchFilesOptions } from "./models";
 
 export {
   useFocusPageMutation,

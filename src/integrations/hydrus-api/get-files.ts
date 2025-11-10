@@ -56,12 +56,12 @@ export const useInfiniteGetFilesMetadata = (
       if (batchFileIds.length === 0) {
         return { metadata: [], nextCursor: undefined };
       }
-      const metadata = await hydrusApi.getFileMetadata(
+      const response = await hydrusApi.getFileMetadata(
         batchFileIds,
         only_return_basic_information,
       );
       return {
-        metadata,
+        metadata: response.metadata,
         nextCursor:
           pageParam + batchFileIds.length < file_ids.length
             ? pageParam + BATCH_SIZE

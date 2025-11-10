@@ -1,4 +1,4 @@
-import { HYDRUS_API_HEADER_ACCESS_KEY } from "@/integrations/hydrus-api/hydrus-api";
+import { HYDRUS_API_HEADER_ACCESS_KEY } from "@/integrations/hydrus-api/models";
 import {
   useApiAccessKey,
   useApiEndpoint,
