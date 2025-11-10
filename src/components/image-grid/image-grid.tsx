@@ -170,7 +170,7 @@ export function PureImageGrid({
           intent="secondary"
           isCircle={true}
         >
-          {(lastItemIndex ?? 0) + 1}/{totalItems}
+          {(lastItemIndex ?? 0) + 1}/{items.length} ({totalItems})
         </Badge>
       </div>
     </>

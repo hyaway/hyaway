@@ -42,7 +42,7 @@ function RouteComponent() {
       <Button
         onPress={() =>
           queryClient.invalidateQueries({
-            queryKey: ["searchFiles", "recentlyArchived"],
+            queryKey: ["searchFiles", "recentlyDeleted"],
           })
         }
       >
