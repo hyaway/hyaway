@@ -302,6 +302,31 @@ export async function getPageInfo(
   return GetPageInfoResponseSchema.parse(response.data);
 }
 
+/**
+ * Refresh a page in the main GUI.
+ * @param apiEndpoint The base URL of the Hydrus API.
+ * @param apiAccessKey The access key for authentication.
+ * @param pageKey The key of the page to refresh.
+ */
+export async function refreshPage(
+  apiEndpoint: string,
+  apiAccessKey: string,
+  pageKey: string,
+): Promise<void> {
+  await axios.post(
+    `${apiEndpoint}/manage_pages/refresh_page`,
+    {
+      page_key: pageKey,
+    },
+    {
+      headers: {
+        [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+}
+
 export async function getServices(
   apiEndpoint: string,
   apiAccessKey: string,

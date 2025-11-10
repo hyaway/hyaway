@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   useApiAccessKey,
   useApiEndpoint,
@@ -13,6 +13,7 @@ import {
   getPageInfo,
   getPages,
   getServices,
+  refreshPage,
   requestNewPermissions,
   searchFiles,
   verifyAccessKey,
@@ -36,7 +37,7 @@ export const usePermissionsQuery = () => {
     select: (data) => {
       return {
         hasAllPermissions: data.permits_everything,
-        permissions: data.basic_permissions ?? [],
+        permissions: data.basic_permissions,
       };
     },
     staleTime: Infinity,
@@ -285,6 +286,31 @@ export const useGetServicesQuery = () => {
     },
     enabled: !!apiEndpoint && !!apiAccessKey,
     staleTime: Infinity, // Services don't change often
+  });
+};
+
+export const useRefreshPageMutation = () => {
+  const queryClient = useQueryClient();
+  const apiEndpoint = useApiEndpoint();
+  const apiAccessKey = useApiAccessKey();
+
+  return useMutation({
+    mutationFn: (pageKey: string) => {
+      if (!apiEndpoint || !apiAccessKey || !pageKey) {
+        throw new Error("API endpoint, access key, and page key are required.");
+      }
+      return refreshPage(apiEndpoint, apiAccessKey, pageKey);
+    },
+    onSuccess: (_data, pageKey) => {
+      // Invalidate the specific getPageInfo for the refreshed page
+      queryClient.invalidateQueries({
+        queryKey: ["getPageInfo", pageKey],
+      });
+      // Invalidate getPages to refetch the page list, which might have updated states
+      queryClient.invalidateQueries({
+        queryKey: ["getPages"],
+      });
+    },
   });
 };
 
