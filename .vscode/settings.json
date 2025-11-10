@@ -14,5 +14,12 @@
   "tailwindCSS.experimental.classRegex": [
     ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
   ],
-  "cSpell.words": ["blurhash", "BOORU", "IPFS", "overscan", "partialize"]
+  "cSpell.words": [
+    "blurhash",
+    "BOORU",
+    "hyaway",
+    "IPFS",
+    "overscan",
+    "partialize"
+  ]
 }

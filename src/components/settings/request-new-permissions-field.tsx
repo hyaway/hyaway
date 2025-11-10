@@ -27,7 +27,7 @@ export function RequestNewPermissionsField() {
         value={SETTINGS_REQUEST_API_KEY_ACTION}
         onPress={() => {
           mutate(
-            { apiEndpoint: apiEndpoint, name: "hydrus-archive-helper" },
+            { apiEndpoint: apiEndpoint, name: "hyaway-app" },
             {
               onSuccess: ({ access_key }) => {
                 setApiCredentials(access_key, apiEndpoint);
