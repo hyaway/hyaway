@@ -5,6 +5,7 @@ import {
   useApiEndpoint,
 } from "../../integrations/hydrus-api/hydrus-config-store";
 import {
+  getClientOptions,
   getPages,
   type Page,
   PageState,
@@ -168,4 +169,52 @@ export const useGetMediaPagesQuery = () => {
     ...rest,
     data: mediaPages,
   };
+};
+
+/**
+ * Query hook for getting all options from Hydrus client
+ */
+export const useGetClientOptionsQuery = () => {
+  const apiEndpoint = useApiEndpoint();
+  const apiAccessKey = useApiAccessKey();
+
+  return useQuery({
+    queryKey: ["getClientOptions", apiEndpoint, simpleHash(apiAccessKey)],
+    queryFn: () => {
+      if (!apiEndpoint || !apiAccessKey) {
+        throw new Error("API endpoint and access key are required.");
+      }
+      return getClientOptions(apiEndpoint, apiAccessKey);
+    },
+    enabled: !!apiEndpoint && !!apiAccessKey,
+    staleTime: Infinity, // Options don't change often
+  });
+};
+
+export const useThumbnailDimensions = () => {
+  const { data } = useGetClientOptionsQuery();
+
+  return useMemo(() => {
+    if (
+      !data ||
+      !data.old_options?.thumbnail_dimensions ||
+      data.old_options.thumbnail_dimensions.length !== 2 ||
+      data.old_options.thumbnail_dimensions[0] <= 0 ||
+      data.old_options.thumbnail_dimensions[1] <= 0
+    ) {
+      return { width: 200, height: 200 };
+    }
+
+    const width = data.old_options.thumbnail_dimensions[0];
+    const height = data.old_options.thumbnail_dimensions[1];
+
+    if (width > 500) {
+      const scaleFactor = width / 500;
+      return {
+        width: Math.floor(width / scaleFactor),
+        height: Math.floor(height / scaleFactor),
+      };
+    }
+    return { width, height };
+  }, [data]);
 };

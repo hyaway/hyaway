@@ -140,6 +140,18 @@ const GetPagesResponseSchema = BaseResponseSchema.extend({
 
 export type GetPagesResponse = z.infer<typeof GetPagesResponseSchema>;
 
+const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
+  old_options: z
+    .object({
+      thumbnail_dimensions: z.array(z.number()).min(2).max(2).optional(),
+    })
+    .optional(),
+});
+
+export type GetClientOptionsResponse = z.infer<
+  typeof GetClientOptionsResponseSchema
+>;
+
 // ============================================================================
 // API Functions
 // ============================================================================
@@ -199,4 +211,25 @@ export async function getPages(
     },
   });
   return GetPagesResponseSchema.parse(response.data);
+}
+
+/**
+ * Get the current options from the client.
+ * @param apiEndpoint The base URL of the Hydrus API.
+ * @param apiAccessKey The access key for authentication.
+ * @returns A promise that resolves to the client options.
+ */
+export async function getClientOptions(
+  apiEndpoint: string,
+  apiAccessKey: string,
+): Promise<GetClientOptionsResponse> {
+  const response = await axios.get(
+    `${apiEndpoint}/manage_database/get_client_options`,
+    {
+      headers: {
+        [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
+      },
+    },
+  );
+  return GetClientOptionsResponseSchema.parse(response.data);
 }
