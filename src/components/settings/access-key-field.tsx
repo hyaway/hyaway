@@ -82,33 +82,42 @@ export function AccessKeyField() {
           </Note>
         )
       ) : isError ? (
-        <Note intent="danger">
-          {error instanceof Error
-            ? error.message
-            : "An unknown error occurred while checking endpoint."}
-          <br />
-          {error instanceof AxiosError ? (
-            <>
-              <span>{error.response?.data.error}</span>
-              <br />
-              <span>
-                {error.response?.status === 403 &&
-                  "If you just requested a token, complete the permissions flow in Hydrus client then check API connection"}
-              </span>
-            </>
+        <>
+          {error instanceof AxiosError && error.response?.status === 403 ? (
+            <Note intent="info">
+              If you just requested a token, complete the permissions flow in
+              Hydrus client then press <i>Check API connection</i> above to
+              check again.
+            </Note>
           ) : null}
-          <br />
-          API Access key:{" "}
-          <b>
-            {apiAccessKey
-              ? apiAccessKey.length <= 6
-                ? apiAccessKey
-                : `${apiAccessKey.slice(0, 2)}●●●●${apiAccessKey.slice(-4)}`
-              : ""}
-          </b>
-          <br />
-          API endpoint: <b>{apiEndpoint}</b>
-        </Note>
+          <Note intent="danger">
+            {error instanceof Error
+              ? error.message
+              : "An unknown error occurred while checking endpoint."}
+            <br />
+            {error instanceof AxiosError ? (
+              <>
+                <span>{error.response?.data.error}</span>
+                <br />
+                <span>
+                  {error.response?.status === 403 &&
+                    "If you just requested a token, complete the permissions flow in Hydrus client then check API connection"}
+                </span>
+              </>
+            ) : null}
+            <br />
+            API Access key:{" "}
+            <b>
+              {apiAccessKey
+                ? apiAccessKey.length <= 6
+                  ? apiAccessKey
+                  : `${apiAccessKey.slice(0, 2)}●●●●${apiAccessKey.slice(-4)}`
+                : ""}
+            </b>
+            <br />
+            API endpoint: <b>{apiEndpoint}</b>
+          </Note>{" "}
+        </>
       ) : null}
     </FormPrimitive>
   );

@@ -69,9 +69,7 @@ export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
     // Session key lasts up to a day or until remote client restarts. Use a generous stale time & focus/refetch triggers
     // instead of frequent polling. If the client restarts and a 419/403 occurs, interceptor + error state will surface it.
     staleTime: keyType === "persistent" ? Infinity : 6 * 60 * 60 * 1000, // 6h; adjust upward if needed
-    refetchOnWindowFocus: keyType === "session", // pick up invalidation after tab inactivity
-    refetchOnReconnect: keyType === "session", // network reconnect may invalidate prior state
-    refetchInterval: false, // no periodic polling; rely on user activity & error-driven invalidation
+    refetchInterval: false,
     retry: false,
   });
 };
