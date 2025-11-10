@@ -54,6 +54,11 @@ export const useAuthStore = create<AuthState>()(
   }),
 );
 
+export const useApiEndpoint = () => useAuthStore((state) => state.api_endpoint);
+
+export const useApiAccessKey = () =>
+  useAuthStore((state) => state.api_access_key);
+
 export const useHydrusApiClient = () =>
   useAuthStore((state) => state.apiClient);
 
