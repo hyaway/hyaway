@@ -8,6 +8,7 @@ const config = {
     "composeTailwindRenderProps",
     "twMerge",
     "cn",
+    "cx",
     "clsx",
   ],
 };

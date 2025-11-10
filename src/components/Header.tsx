@@ -57,10 +57,8 @@ export default function Header() {
             <span className="font-medium">Home</span>
           </Link>
 
-          {/* Demo Links Start */}
-
           <Link
-            to="/demo/tanstack-query"
+            to="/hello-world"
             onClick={() => setIsOpen(false)}
             className="mb-2 flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-gray-800"
             activeProps={{
@@ -69,24 +67,11 @@ export default function Header() {
             }}
           >
             <Network size={20} />
-            <span className="font-medium">TanStack Query</span>
+            <span className="font-medium">Hellow world</span>
           </Link>
 
           <Link
-            to="/demo/storybook"
-            onClick={() => setIsOpen(false)}
-            className="mb-2 flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-gray-800"
-            activeProps={{
-              className:
-                "flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-            }}
-          >
-            <BookOpen size={20} />
-            <span className="font-medium">Storybook</span>
-          </Link>
-
-          <Link
-            to="/demo/form/simple"
+            to="/settings/account"
             onClick={() => setIsOpen(false)}
             className="mb-2 flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-gray-800"
             activeProps={{
@@ -95,23 +80,8 @@ export default function Header() {
             }}
           >
             <ClipboardType size={20} />
-            <span className="font-medium">Simple Form</span>
+            <span className="font-medium">Account settings</span>
           </Link>
-
-          <Link
-            to="/demo/form/address"
-            onClick={() => setIsOpen(false)}
-            className="mb-2 flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-gray-800"
-            activeProps={{
-              className:
-                "flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-            }}
-          >
-            <ClipboardType size={20} />
-            <span className="font-medium">Address Form</span>
-          </Link>
-
-          {/* Demo Links End */}
         </nav>
       </aside>
     </>

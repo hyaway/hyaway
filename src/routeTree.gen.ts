@@ -9,94 +9,71 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
+import { Route as AuthRouteImport } from "./routes/_auth";
 import { Route as IndexRouteImport } from "./routes/index";
-import { Route as DemoTanstackQueryRouteImport } from "./routes/demo/tanstack-query";
-import { Route as DemoStorybookRouteImport } from "./routes/demo/storybook";
-import { Route as DemoFormSimpleRouteImport } from "./routes/demo/form.simple";
-import { Route as DemoFormAddressRouteImport } from "./routes/demo/form.address";
+import { Route as SettingsAccountRouteImport } from "./routes/settings.account";
+import { Route as AuthHelloWorldRouteImport } from "./routes/_auth/hello-world";
 
+const AuthRoute = AuthRouteImport.update({
+  id: "/_auth",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any);
-const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
-  id: "/demo/tanstack-query",
-  path: "/demo/tanstack-query",
+const SettingsAccountRoute = SettingsAccountRouteImport.update({
+  id: "/settings/account",
+  path: "/settings/account",
   getParentRoute: () => rootRouteImport,
 } as any);
-const DemoStorybookRoute = DemoStorybookRouteImport.update({
-  id: "/demo/storybook",
-  path: "/demo/storybook",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const DemoFormSimpleRoute = DemoFormSimpleRouteImport.update({
-  id: "/demo/form/simple",
-  path: "/demo/form/simple",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const DemoFormAddressRoute = DemoFormAddressRouteImport.update({
-  id: "/demo/form/address",
-  path: "/demo/form/address",
-  getParentRoute: () => rootRouteImport,
+const AuthHelloWorldRoute = AuthHelloWorldRouteImport.update({
+  id: "/hello-world",
+  path: "/hello-world",
+  getParentRoute: () => AuthRoute,
 } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
-  "/demo/storybook": typeof DemoStorybookRoute;
-  "/demo/tanstack-query": typeof DemoTanstackQueryRoute;
-  "/demo/form/address": typeof DemoFormAddressRoute;
-  "/demo/form/simple": typeof DemoFormSimpleRoute;
+  "/hello-world": typeof AuthHelloWorldRoute;
+  "/settings/account": typeof SettingsAccountRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
-  "/demo/storybook": typeof DemoStorybookRoute;
-  "/demo/tanstack-query": typeof DemoTanstackQueryRoute;
-  "/demo/form/address": typeof DemoFormAddressRoute;
-  "/demo/form/simple": typeof DemoFormSimpleRoute;
+  "/hello-world": typeof AuthHelloWorldRoute;
+  "/settings/account": typeof SettingsAccountRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
-  "/demo/storybook": typeof DemoStorybookRoute;
-  "/demo/tanstack-query": typeof DemoTanstackQueryRoute;
-  "/demo/form/address": typeof DemoFormAddressRoute;
-  "/demo/form/simple": typeof DemoFormSimpleRoute;
+  "/_auth": typeof AuthRouteWithChildren;
+  "/_auth/hello-world": typeof AuthHelloWorldRoute;
+  "/settings/account": typeof SettingsAccountRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths:
-    | "/"
-    | "/demo/storybook"
-    | "/demo/tanstack-query"
-    | "/demo/form/address"
-    | "/demo/form/simple";
+  fullPaths: "/" | "/hello-world" | "/settings/account";
   fileRoutesByTo: FileRoutesByTo;
-  to:
-    | "/"
-    | "/demo/storybook"
-    | "/demo/tanstack-query"
-    | "/demo/form/address"
-    | "/demo/form/simple";
-  id:
-    | "__root__"
-    | "/"
-    | "/demo/storybook"
-    | "/demo/tanstack-query"
-    | "/demo/form/address"
-    | "/demo/form/simple";
+  to: "/" | "/hello-world" | "/settings/account";
+  id: "__root__" | "/" | "/_auth" | "/_auth/hello-world" | "/settings/account";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
-  DemoStorybookRoute: typeof DemoStorybookRoute;
-  DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute;
-  DemoFormAddressRoute: typeof DemoFormAddressRoute;
-  DemoFormSimpleRoute: typeof DemoFormSimpleRoute;
+  AuthRoute: typeof AuthRouteWithChildren;
+  SettingsAccountRoute: typeof SettingsAccountRoute;
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/_auth": {
+      id: "/_auth";
+      path: "";
+      fullPath: "";
+      preLoaderRoute: typeof AuthRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/": {
       id: "/";
       path: "/";
@@ -104,43 +81,37 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/demo/tanstack-query": {
-      id: "/demo/tanstack-query";
-      path: "/demo/tanstack-query";
-      fullPath: "/demo/tanstack-query";
-      preLoaderRoute: typeof DemoTanstackQueryRouteImport;
+    "/settings/account": {
+      id: "/settings/account";
+      path: "/settings/account";
+      fullPath: "/settings/account";
+      preLoaderRoute: typeof SettingsAccountRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/demo/storybook": {
-      id: "/demo/storybook";
-      path: "/demo/storybook";
-      fullPath: "/demo/storybook";
-      preLoaderRoute: typeof DemoStorybookRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/demo/form/simple": {
-      id: "/demo/form/simple";
-      path: "/demo/form/simple";
-      fullPath: "/demo/form/simple";
-      preLoaderRoute: typeof DemoFormSimpleRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/demo/form/address": {
-      id: "/demo/form/address";
-      path: "/demo/form/address";
-      fullPath: "/demo/form/address";
-      preLoaderRoute: typeof DemoFormAddressRouteImport;
-      parentRoute: typeof rootRouteImport;
+    "/_auth/hello-world": {
+      id: "/_auth/hello-world";
+      path: "/hello-world";
+      fullPath: "/hello-world";
+      preLoaderRoute: typeof AuthHelloWorldRouteImport;
+      parentRoute: typeof AuthRoute;
     };
   }
 }
 
+interface AuthRouteChildren {
+  AuthHelloWorldRoute: typeof AuthHelloWorldRoute;
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthHelloWorldRoute: AuthHelloWorldRoute,
+};
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DemoStorybookRoute: DemoStorybookRoute,
-  DemoTanstackQueryRoute: DemoTanstackQueryRoute,
-  DemoFormAddressRoute: DemoFormAddressRoute,
-  DemoFormSimpleRoute: DemoFormSimpleRoute,
+  AuthRoute: AuthRouteWithChildren,
+  SettingsAccountRoute: SettingsAccountRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
