@@ -7,6 +7,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 
 import { RouterProvider } from "react-aria-components";
+import BatshitDevtools from "@yornaath/batshit-devtools-react";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 import type { QueryClient } from "@tanstack/react-query";
@@ -41,6 +42,7 @@ function RootComponent() {
           TanStackQueryDevtools,
         ]}
       />
+      <BatshitDevtools />
     </>
   );
 }

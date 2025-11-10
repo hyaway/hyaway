@@ -5,22 +5,18 @@ import {
   useApiEndpoint,
 } from "../../integrations/hydrus-api/hydrus-config-store";
 import {
+  HydrusFileSortType,
+  PageState,
+  Permission,
+  ServiceType,
   getClientOptions,
   getPageInfo,
   getPages,
   getServices,
-  HydrusFileSortType,
-  requestNewPermissions,
-  searchFiles,
-  ServiceType,
-  verifyAccessKey,
+  requestNewPermissions, searchFiles, verifyAccessKey 
 } from "./hydrus-api";
 import type { HydrusTagSearch, Page, SearchFilesOptions } from "./hydrus-api";
-import { PageState, Permission } from "./hydrus-api";
-
-// Simple hash for key (no crypto needed for cache key)
-const simpleHash = (str: string) =>
-  [...str].reduce((a, b) => a + b.charCodeAt(0), 0);
+import { simpleHash } from "@/lib/utils";
 
 export const usePermissionsQuery = () => {
   const apiEndpoint = useApiEndpoint();

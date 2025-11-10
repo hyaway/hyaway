@@ -79,7 +79,7 @@ export enum PageState {
 /**
  * Base response schema - all API responses include version info
  */
-const BaseResponseSchema = z.object({
+export const BaseResponseSchema = z.object({
   version: z.number().int().positive(),
   hydrus_version: z.number().int().positive(),
 });
@@ -178,32 +178,6 @@ const SearchFilesResultsSchema = BaseResponseSchema.extend({
 });
 
 export type SearchFilesResults = z.infer<typeof SearchFilesResultsSchema>;
-
-const FileMetadataSchema = z.object({
-  file_id: z.number(),
-  hash: z.string(),
-  mime: z.string(),
-  width: z.number(),
-  height: z.number(),
-  duration: z.number().nullable(),
-  file_size: z.number(),
-  import_time: z.number(),
-  last_viewed_time: z.number(),
-  has_audio: z.boolean(),
-  num_frames: z.number().nullable(),
-  framerate: z.number().nullable(),
-  is_new: z.boolean(),
-});
-
-export type FileMetadata = z.infer<typeof FileMetadataSchema>;
-
-const GetFileMetadataResponseSchema = BaseResponseSchema.extend({
-  metadata: z.array(FileMetadataSchema),
-});
-
-export type GetFileMetadataResponse = z.infer<
-  typeof GetFileMetadataResponseSchema
->;
 
 const ServiceInfoSchema = z.object({
   name: z.string(),
@@ -370,7 +344,7 @@ export enum HydrusFileSortType {
   AverageColourHue = 27,
 }
 
-export type HydrusTagSearch = (string | string[])[];
+export type HydrusTagSearch = Array<string | Array<string>>;
 
 export interface SearchFilesOptions {
   tags: HydrusTagSearch;
@@ -403,23 +377,4 @@ export async function searchFiles(
     },
   );
   return response.data;
-}
-
-export async function getFileMetadata(
-  apiEndpoint: string,
-  apiAccessKey: string,
-  fileIds?: number[],
-): Promise<FileMetadata[]> {
-  const response = await axios.get<{ metadata: FileMetadata[] }>(
-    `${apiEndpoint}/get_files/file_metadata`,
-    {
-      headers: {
-        [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
-      },
-      params: {
-        file_ids: fileIds?.join(","),
-      },
-    },
-  );
-  return response.data.metadata;
 }
