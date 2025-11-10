@@ -1,6 +1,9 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { Settings } from "../components/settings";
-import { useApiAccessKey, useApiEndpoint } from "../hooks/useAuth";
+import {
+  useApiAccessKey,
+  useApiEndpoint,
+} from "../integrations/hydrus-api/hydrus-config-store";
 import { useVerifyAccessQuery } from "../integrations/hydrus-api/queries";
 
 export const Route = createFileRoute("/_auth")({

@@ -3,8 +3,11 @@ import {
   useApiAccessKey,
   useApiEndpoint,
   useAuthActions,
-} from "../hooks/useAuth";
-import { useVerifyAccessQuery } from "../integrations/hydrus-api/queries";
+} from "../integrations/hydrus-api/hydrus-config-store";
+import {
+  useRequestNewPermissionsQuery,
+  useVerifyAccessQuery,
+} from "../integrations/hydrus-api/queries";
 import { Button } from "./ui/button";
 import { Heading } from "./ui/heading";
 import { SecretInputField, TextInputField } from "./text-input-field";
@@ -13,6 +16,7 @@ export function Settings() {
   const { setApiCredentials } = useAuthActions();
   const defaultEndpoint = useApiEndpoint();
   const defaultAccessKey = useApiAccessKey();
+  const requestNewPermissions = useRequestNewPermissionsQuery();
 
   const { hasRequiredPermissions, isError, error, isPending } =
     useVerifyAccessQuery();
@@ -21,8 +25,22 @@ export function Settings() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
-    const { endpoint, accessKey } = data;
-    if (typeof endpoint === "string" && typeof accessKey === "string") {
+
+    const { endpoint, accessKey, action } = data;
+    if (action === "request_api_key" && typeof endpoint === "string") {
+      requestNewPermissions.mutate(
+        { apiEndpoint: endpoint, name: "hydrus-archive-helper" },
+        {
+          onSuccess: ({ access_key }) => {
+            setApiCredentials(access_key, endpoint);
+          },
+        },
+      );
+    } else if (
+      action === "save" &&
+      typeof endpoint === "string" &&
+      typeof accessKey === "string"
+    ) {
       setApiCredentials(accessKey, endpoint);
     }
   };
@@ -35,21 +53,36 @@ export function Settings() {
       <Heading level={2}>Hydrus API Settings</Heading>
 
       <TextInputField
-        label="API Endpoint"
+        label="API endpoint"
         name="endpoint"
         defaultValue={defaultEndpoint}
         placeholder="http://localhost:45869"
         isRequired
         isDisabled={isPending}
       />
+      <Button
+        type="submit"
+        className="self-start"
+        isDisabled={isPending}
+        name="action"
+        value="request_api_key"
+      >
+        Request new API access key
+      </Button>
       <SecretInputField
-        label="API Access Key"
+        label="API access key"
         name="accessKey"
         defaultValue={defaultAccessKey}
         isRequired
         isDisabled={isPending}
       />
-      <Button type="submit" className="self-start" isDisabled={isPending}>
+      <Button
+        type="submit"
+        className="self-start"
+        isDisabled={isPending}
+        name="action"
+        value="save"
+      >
         {isPending ? "Verifying..." : "Save"}
       </Button>
       {hasRequiredPermissions && (

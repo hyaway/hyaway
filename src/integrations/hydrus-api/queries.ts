@@ -1,6 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { useApiAccessKey, useApiEndpoint } from "../../hooks/useAuth";
-import { Permission, verifyAccessKey } from "./hydrus-api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  useApiAccessKey,
+  useApiEndpoint,
+} from "../../integrations/hydrus-api/hydrus-config-store";
+import {
+  Permission,
+  requestNewPermissions,
+  verifyAccessKey,
+} from "./hydrus-api";
 
 export const usePermissionsQuery = () => {
   const apiEndpoint = useApiEndpoint();
@@ -42,4 +49,18 @@ export const useVerifyAccessQuery = () => {
     ...rest,
     hasRequiredPermissions,
   };
+};
+
+export const useRequestNewPermissionsQuery = () => {
+  return useMutation({
+    mutationFn: async ({
+      apiEndpoint,
+      name,
+    }: {
+      apiEndpoint: string;
+      name: string;
+    }) => {
+      return requestNewPermissions(apiEndpoint, name);
+    },
+  });
 };

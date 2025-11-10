@@ -32,41 +32,6 @@ export enum ServiceType {
 }
 
 /**
- * File import status enumeration
- */
-export enum FileStatus {
-  NOT_IN_DATABASE = 0,
-  SUCCESSFUL = 1,
-  ALREADY_IN_DATABASE = 2,
-  PREVIOUSLY_DELETED = 3,
-  FAILED = 4,
-  VETOED = 7,
-}
-
-/**
- * Tag action enumeration for tag operations
- */
-export enum TagAction {
-  ADD_TO_LOCAL = 0,
-  DELETE_FROM_LOCAL = 1,
-  PEND_TO_REPOSITORY = 2,
-  RESCIND_PEND_FROM_REPOSITORY = 3,
-  PETITION_FROM_REPOSITORY = 4,
-  RESCIND_PETITION_FROM_REPOSITORY = 5,
-}
-
-/**
- * URL type enumeration
- */
-export enum URLType {
-  POST_URL = 0,
-  FILE_URL = 2,
-  GALLERY_URL = 3,
-  WATCHABLE_URL = 4,
-  UNKNOWN_URL = 5,
-}
-
-/**
  * Permission enumeration
  */
 export enum Permission {
@@ -87,39 +52,6 @@ export enum Permission {
 }
 
 /**
- * Star shape enumeration for rating services
- */
-export enum StarShape {
-  CIRCLE = "circle",
-  SQUARE = "square",
-  FAT_STAR = "fat star",
-  PENTAGRAM_STAR = "pentagram star",
-  SIX_POINT_STAR = "six point star",
-  EIGHT_POINT_STAR = "eight point star",
-  X_SHAPE = "x shape",
-  SQUARE_CROSS = "square cross",
-  TRIANGLE_UP = "triangle up",
-  TRIANGLE_DOWN = "triangle down",
-  TRIANGLE_RIGHT = "triangle right",
-  TRIANGLE_LEFT = "triangle left",
-  DIAMOND = "diamond",
-  RHOMBUS_RIGHT = "rhombus right",
-  RHOMBUS_LEFT = "rhombus left",
-  HOURGLASS = "hourglass",
-  PENTAGON = "pentagon",
-  HEXAGON = "hexagon",
-  SMALL_HEXAGON = "small hexagon",
-  HEART = "heart",
-  TEARDROP = "teardrop",
-  CRESCENT_MOON = "crescent moon",
-  SVG = "svg",
-}
-
-// ============================================================================
-// Zod Schemas - Common Types
-// ============================================================================
-
-/**
  * Base response schema - all API responses include version info
  */
 const BaseResponseSchema = z.object({
@@ -136,6 +68,14 @@ const VerifyAccessKeyResponseSchema = BaseResponseSchema.extend({
 
 export type VerifyAccessKeyResponse = z.infer<
   typeof VerifyAccessKeyResponseSchema
+>;
+
+const RequestNewPermissionsResponseSchema = z.object({
+  access_key: z.string(),
+});
+
+export type RequestNewPermissionsResponse = z.infer<
+  typeof RequestNewPermissionsResponseSchema
 >;
 
 const SessionKeyResponseSchema = BaseResponseSchema.extend({
@@ -166,4 +106,23 @@ export async function verifyAccessKey(
     },
   });
   return VerifyAccessKeyResponseSchema.parse(response.data);
+}
+
+/**
+ * Request a new access key with specific permissions.
+ * @param apiEndpoint The base URL of the Hydrus API.
+ * @param name The name for the new key.
+ * @returns A promise that resolves to the new key response.
+ */
+export async function requestNewPermissions(
+  apiEndpoint: string,
+  name: string,
+): Promise<RequestNewPermissionsResponse> {
+  const response = await axios.get(`${apiEndpoint}/request_new_permissions`, {
+    params: {
+      name,
+      permits_everything: true,
+    },
+  });
+  return RequestNewPermissionsResponseSchema.parse(response.data);
 }
