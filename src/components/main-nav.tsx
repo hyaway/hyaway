@@ -33,6 +33,9 @@ export default function MainNavbar(props: NavbarProps) {
           <NavbarItemLink to="/recently-archived">
             Recently archived
           </NavbarItemLink>
+          <NavbarItemLink to="/recently-inboxed">
+            Recently inboxed
+          </NavbarItemLink>
           <NavbarItemLink to={"/settings"}>Settings</NavbarItemLink>
         </NavbarSection>
         <NavbarSpacer />

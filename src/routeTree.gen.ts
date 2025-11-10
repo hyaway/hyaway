@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from "./routes/index";
 import { Route as SettingsIndexRouteImport } from "./routes/settings.index";
 import { Route as SettingsUxRouteImport } from "./routes/settings.ux";
 import { Route as SettingsAccountRouteImport } from "./routes/settings.account";
+import { Route as AuthRecentlyInboxedRouteImport } from "./routes/_auth/recently-inboxed";
 import { Route as AuthRecentlyDeletedRouteImport } from "./routes/_auth/recently-deleted";
 import { Route as AuthRecentlyArchivedRouteImport } from "./routes/_auth/recently-archived";
 import { Route as AuthPagesRouteImport } from "./routes/_auth/pages";
@@ -49,6 +50,11 @@ const SettingsAccountRoute = SettingsAccountRouteImport.update({
   path: "/account",
   getParentRoute: () => SettingsRoute,
 } as any);
+const AuthRecentlyInboxedRoute = AuthRecentlyInboxedRouteImport.update({
+  id: "/recently-inboxed",
+  path: "/recently-inboxed",
+  getParentRoute: () => AuthRoute,
+} as any);
 const AuthRecentlyDeletedRoute = AuthRecentlyDeletedRouteImport.update({
   id: "/recently-deleted",
   path: "/recently-deleted",
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   "/pages": typeof AuthPagesRouteWithChildren;
   "/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/recently-deleted": typeof AuthRecentlyDeletedRoute;
+  "/recently-inboxed": typeof AuthRecentlyInboxedRoute;
   "/settings/account": typeof SettingsAccountRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   "/pages": typeof AuthPagesRouteWithChildren;
   "/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/recently-deleted": typeof AuthRecentlyDeletedRoute;
+  "/recently-inboxed": typeof AuthRecentlyInboxedRoute;
   "/settings/account": typeof SettingsAccountRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings": typeof SettingsIndexRoute;
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   "/_auth/pages": typeof AuthPagesRouteWithChildren;
   "/_auth/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/_auth/recently-deleted": typeof AuthRecentlyDeletedRoute;
+  "/_auth/recently-inboxed": typeof AuthRecentlyInboxedRoute;
   "/settings/account": typeof SettingsAccountRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
     | "/pages"
     | "/recently-archived"
     | "/recently-deleted"
+    | "/recently-inboxed"
     | "/settings/account"
     | "/settings/ux"
     | "/settings/"
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | "/pages"
     | "/recently-archived"
     | "/recently-deleted"
+    | "/recently-inboxed"
     | "/settings/account"
     | "/settings/ux"
     | "/settings"
@@ -134,6 +145,7 @@ export interface FileRouteTypes {
     | "/_auth/pages"
     | "/_auth/recently-archived"
     | "/_auth/recently-deleted"
+    | "/_auth/recently-inboxed"
     | "/settings/account"
     | "/settings/ux"
     | "/settings/"
@@ -190,6 +202,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SettingsAccountRouteImport;
       parentRoute: typeof SettingsRoute;
     };
+    "/_auth/recently-inboxed": {
+      id: "/_auth/recently-inboxed";
+      path: "/recently-inboxed";
+      fullPath: "/recently-inboxed";
+      preLoaderRoute: typeof AuthRecentlyInboxedRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
     "/_auth/recently-deleted": {
       id: "/_auth/recently-deleted";
       path: "/recently-deleted";
@@ -237,12 +256,14 @@ interface AuthRouteChildren {
   AuthPagesRoute: typeof AuthPagesRouteWithChildren;
   AuthRecentlyArchivedRoute: typeof AuthRecentlyArchivedRoute;
   AuthRecentlyDeletedRoute: typeof AuthRecentlyDeletedRoute;
+  AuthRecentlyInboxedRoute: typeof AuthRecentlyInboxedRoute;
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthPagesRoute: AuthPagesRouteWithChildren,
   AuthRecentlyArchivedRoute: AuthRecentlyArchivedRoute,
   AuthRecentlyDeletedRoute: AuthRecentlyDeletedRoute,
+  AuthRecentlyInboxedRoute: AuthRecentlyInboxedRoute,
 };
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);

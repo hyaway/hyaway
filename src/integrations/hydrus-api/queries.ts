@@ -158,6 +158,42 @@ export const useRecentlyDeletedFilesQuery = () => {
   });
 };
 
+export const useRecentlyInboxedFilesQuery = () => {
+  const tags: HydrusTagSearch = [
+    "system:limit=1000",
+    "system:inbox",
+    "system:time imported < 3 days ago",
+  ];
+  const options: Omit<SearchFilesOptions, "tags"> = {
+    file_sort_type: HydrusFileSortType.ImportTime,
+    file_sort_asc: false,
+  };
+
+  const apiEndpoint = useApiEndpoint();
+  const apiAccessKey = useApiAccessKey();
+
+  return useQuery({
+    queryKey: [
+      "searchFiles",
+      "recentlyInboxed",
+      tags,
+      options,
+      apiEndpoint,
+      simpleHash(apiAccessKey),
+    ],
+    queryFn: () => {
+      if (!apiEndpoint || !apiAccessKey) {
+        throw new Error("API endpoint and access key are required.");
+      }
+      return searchFiles(apiEndpoint, apiAccessKey, {
+        tags,
+        ...options,
+      });
+    },
+    enabled: !!apiEndpoint && !!apiAccessKey && tags.length > 0,
+  });
+};
+
 /**
  * Query hook for getting all options from Hydrus client
  */
