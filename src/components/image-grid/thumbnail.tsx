@@ -15,7 +15,7 @@ export function Thumbnail({ fileId, className, ...props }: ThumbnailProps) {
       <img
         src={url}
         alt={`Thumbnail for file ID ${fileId}`}
-        className="h-full w-full object-cover"
+        className="transition-scale h-full w-full object-cover duration-350 ease-out hover:scale-105"
         loading="lazy"
       />
     </div>
