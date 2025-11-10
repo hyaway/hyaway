@@ -9,6 +9,7 @@ import {
   PageState,
   Permission,
   ServiceType,
+  focusPage,
   getClientOptions,
   getPageInfo,
   getPages,
@@ -310,6 +311,20 @@ export const useRefreshPageMutation = () => {
       queryClient.invalidateQueries({
         queryKey: ["getPages"],
       });
+    },
+  });
+};
+
+export const useFocusPageMutation = () => {
+  const apiEndpoint = useApiEndpoint();
+  const apiAccessKey = useApiAccessKey();
+
+  return useMutation({
+    mutationFn: (pageKey: string) => {
+      if (!apiEndpoint || !apiAccessKey || !pageKey) {
+        throw new Error("API endpoint, access key, and page key are required.");
+      }
+      return focusPage(apiEndpoint, apiAccessKey, pageKey);
     },
   });
 };

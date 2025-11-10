@@ -327,6 +327,31 @@ export async function refreshPage(
   );
 }
 
+/**
+ * 'Show' a page in the main GUI, making it the current page in view.
+ * @param apiEndpoint The base URL of the Hydrus API.
+ * @param apiAccessKey The access key for authentication.
+ * @param pageKey The key of the page to focus.
+ */
+export async function focusPage(
+  apiEndpoint: string,
+  apiAccessKey: string,
+  pageKey: string,
+): Promise<void> {
+  await axios.post(
+    `${apiEndpoint}/manage_pages/focus_page`,
+    {
+      page_key: pageKey,
+    },
+    {
+      headers: {
+        [HYDRUS_API_HEADER_ACCESS_KEY]: apiAccessKey,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+}
+
 export async function getServices(
   apiEndpoint: string,
   apiAccessKey: string,

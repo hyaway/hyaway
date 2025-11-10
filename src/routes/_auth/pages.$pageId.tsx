@@ -7,6 +7,7 @@ import { Loader } from "@/components/ui/loader";
 import { Note } from "@/components/ui/note";
 import { Separator } from "@/components/ui/separator";
 import {
+  useFocusPageMutation,
   useGetPageInfoQuery,
   useRefreshPageMutation,
 } from "@/integrations/hydrus-api/queries";
@@ -20,6 +21,7 @@ function RouteComponent() {
   const { pageId } = Route.useParams();
   const { data, isLoading, isError, error } = useGetPageInfoQuery(pageId, true);
   const refreshPageMutation = useRefreshPageMutation();
+  const focusPageMutation = useFocusPageMutation();
   const queryClient = useQueryClient();
 
   if (isLoading) {
@@ -55,6 +57,7 @@ function RouteComponent() {
         <Button onPress={() => refreshPageMutation.mutate(pageId)}>
           Refresh remote
         </Button>
+        <Button onPress={() => focusPageMutation.mutate(pageId)}>Focus</Button>
       </div>
       <Separator className="my-2" />
       {data?.page_info.media ? (
