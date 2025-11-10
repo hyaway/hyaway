@@ -134,8 +134,8 @@ export type Page = {
   pages?: Page[];
 };
 
-const GetPagesResponseSchema = z.object({
-  pages: PageSchema,
+const GetPagesResponseSchema = BaseResponseSchema.extend({
+  pages: PageSchema, // Singular page at to level
 });
 
 export type GetPagesResponse = z.infer<typeof GetPagesResponseSchema>;
