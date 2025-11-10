@@ -34,8 +34,11 @@ export function SessionKeyCard() {
   return (
     <Card className="max-w-lg">
       <CardHeader>
-        <CardTitle>3. Get session key</CardTitle>
-        <CardDescription>Refresh session key if needed</CardDescription>
+        <CardTitle>3. Get a session key</CardTitle>
+        <CardDescription>
+          Session key should refresh automatically, but you can do so here if
+          needed.
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <SecretInputField
