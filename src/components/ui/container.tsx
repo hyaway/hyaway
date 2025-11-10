@@ -12,7 +12,7 @@ const Container = ({
 }: ContainerProps) => (
   <div
     className={twMerge(
-      "mx-auto w-full max-w-7xl [--container-padding:--spacing(4)] xl:max-w-(--breakpoint-xl) 2xl:max-w-(--breakpoint-2xl)",
+      "mx-auto w-full max-w-7xl py-(--container-padding) [--container-padding:--spacing(4)] xl:max-w-(--breakpoint-xl) 2xl:max-w-(--breakpoint-2xl)",
       constrained ? "sm:px-(--container-padding)" : "px-(--container-padding)",
       className,
     )}

@@ -1,39 +1,234 @@
-import { createFileRoute } from "@tanstack/react-router";
-import logo from "../logo.svg";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { Container } from "@/components/ui/container";
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from "@/components/ui/card";
+import { useHydrusApiClient } from "@/integrations/hydrus-api/hydrus-config-store";
 
 export const Route = createFileRoute("/")({
-  component: App,
+  component: LandingPage,
 });
 
-function App() {
+function LandingPage() {
+  const apiClient = useHydrusApiClient();
+  const router = useRouter();
+
+  const features: Array<{
+    title: string;
+    description: string;
+  }> = [
+    {
+      title: "Browse Anywhere",
+      description:
+        "Securely explore your Hydrus gallery from any device with a modern responsive UI.",
+    },
+    {
+      title: "Fast Tag Searching",
+      description:
+        "Query tags and relationships quickly using cached & batched Hydrus API calls.",
+    },
+    {
+      title: "Live Client Pages",
+      description:
+        "Peek into active client pages remotely and jump straight to what matters.",
+    },
+    {
+      title: "Inbox / Archive Views",
+      description:
+        "Jump to Recently Inboxed, Archived, or Deleted media in one click.",
+    },
+    {
+      title: "Adaptive Theming",
+      description:
+        "Switch between light & dark themes instantly; respects system preferences.",
+    },
+    {
+      title: "Local Keys Only",
+      description:
+        "Your access & session keys stay client-side (persisted with secure storage logic).",
+    },
+  ];
+
+  const primaryCta = apiClient
+    ? {
+        label: "Go to Inbox",
+        to: "/recently-inboxed" as const,
+        intent: "primary" as const,
+      }
+    : {
+        label: "Configure Access",
+        to: "/settings" as const,
+        intent: "primary" as const,
+      };
+
+  const secondaryCta = apiClient
+    ? { label: "Settings", to: "/settings" as const }
+    : { label: "See Features", to: "#features" as const };
+
   return (
-    <div className="text-center">
-      <header className="flex min-h-screen flex-col items-center justify-center bg-[#282c34] text-[calc(10px+2vmin)] text-white">
-        <img
-          src={logo}
-          className="pointer-events-none h-[40vmin] animate-[spin_20s_linear_infinite]"
-          alt="logo"
-        />
-        <p>
-          Edit <code>src/routes/index.tsx</code> and save to reload.
-        </p>
-        <a
-          className="text-[#61dafb] hover:underline"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <a
-          className="text-[#61dafb] hover:underline"
-          href="https://tanstack.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn TanStack
-        </a>
-      </header>
-    </div>
+    <>
+      <Hero
+        primaryCta={primaryCta}
+        secondaryCta={secondaryCta}
+        onNavigate={(to) => router.navigate({ to })}
+      />
+      <Features id="features" features={features} />
+      <QuickStart
+        hasClient={!!apiClient}
+        onNavigate={(to) => router.navigate({ to })}
+      />
+      <Footer />
+    </>
+  );
+}
+
+interface NavigateProps {
+  onNavigate: (to: string) => void;
+}
+
+function Hero({
+  primaryCta,
+  secondaryCta,
+  onNavigate,
+}: {
+  primaryCta: { label: string; to: string; intent: "primary" };
+  secondaryCta: { label: string; to: string };
+} & NavigateProps) {
+  return (
+    <Container className="flex flex-col gap-10 py-20 sm:py-28">
+      <div className="max-w-3xl space-y-6">
+        <Heading level={1} className="text-4xl/10 font-bold sm:text-5xl/12">
+          Remote gateway to your Hydrus Network gallery
+        </Heading>
+        <Text className="text-lg/8 sm:text-xl/9">
+          HyAway lets you securely manage, search, and explore your Hydrus
+          collection without being at your workstation. Optimized for speed,
+          clarity, and keyboard navigation.
+        </Text>
+        <div className="flex flex-wrap gap-4 pt-2">
+          <Button
+            intent={primaryCta.intent}
+            size="lg"
+            onPress={() => onNavigate(primaryCta.to)}
+          >
+            {primaryCta.label}
+          </Button>
+          <Button
+            intent="outline"
+            size="lg"
+            onPress={() => onNavigate(secondaryCta.to)}
+          >
+            {secondaryCta.label}
+          </Button>
+        </div>
+      </div>
+    </Container>
+  );
+}
+
+function Features({
+  features,
+  id,
+}: {
+  features: Array<{ title: string; description: string }>;
+  id?: string;
+}) {
+  return (
+    <Container
+      id={id}
+      className="flex flex-col gap-10 border-t pt-16 sm:pt-24"
+      constrained
+    >
+      <Heading level={2} className="text-3xl/10 font-semibold">
+        Why HyAway?
+      </Heading>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {features.map((f) => (
+          <Card key={f.title} className="h-full">
+            <CardHeader title={f.title} />
+            <CardContent>
+              <CardDescription>{f.description}</CardDescription>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </Container>
+  );
+}
+
+function QuickStart({
+  hasClient,
+  onNavigate,
+}: { hasClient: boolean } & NavigateProps) {
+  return (
+    <Container className="flex flex-col gap-8 pt-24" constrained>
+      <Heading level={2} className="text-3xl/9 font-semibold">
+        {hasClient ? "Next up" : "Get started in 3 steps"}
+      </Heading>
+      {hasClient ? (
+        <div className="flex flex-col gap-4">
+          <Text>
+            You already have an active API client. Dive straight into your
+            inbox, or fine-tune tag search & layout preferences.
+          </Text>
+          <div className="flex flex-wrap gap-4">
+            <Button size="md" onPress={() => onNavigate("/recently-inboxed")}>
+              Open Inbox
+            </Button>
+            <Button
+              intent="outline"
+              size="md"
+              onPress={() => onNavigate("/settings/ux")}
+            >
+              UX Settings
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <ol className="grid gap-6 sm:grid-cols-3">
+          <li className="flex flex-col gap-2">
+            <Heading level={3}>1. Generate Access Key</Heading>
+            <Text>
+              In Hydrus: Services → Manage Services → Client API → Generate a
+              new access key.
+            </Text>
+          </li>
+          <li className="flex flex-col gap-2">
+            <Heading level={3}>2. Enter Credentials</Heading>
+            <Text>
+              Paste the access key & endpoint in Settings. HyAway stores them
+              locally only.
+            </Text>
+          </li>
+          <li className="flex flex-col gap-2">
+            <Heading level={3}>3. Explore</Heading>
+            <Text>
+              Start browsing pages, search tags, and manage inbox/archived items
+              remotely.
+            </Text>
+          </li>
+        </ol>
+      )}
+    </Container>
+  );
+}
+
+function Footer() {
+  return (
+    <Container className="mt-32 border-t pt-10 text-center" constrained>
+      <Text className="text-sm/6">
+        Built with TanStack Router & Hydrus API. Privacy-first: keys never leave
+        your browser.
+      </Text>
+      <Text className="mt-2 text-xs/5 opacity-60">
+        © {new Date().getFullYear()} HyAway
+      </Text>
+    </Container>
   );
 }

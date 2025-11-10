@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import {
-  ArchiveBoxIcon,
   ExclamationCircleIcon,
   InboxIcon,
   TrashIcon,
