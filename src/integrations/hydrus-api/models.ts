@@ -143,6 +143,13 @@ export const SearchFilesResponseSchema = BaseResponseSchema.extend({
 
 export type SearchFilesResponse = z.infer<typeof SearchFilesResponseSchema>;
 
+export enum TagStatus {
+  CURRENT = "0",
+  PENDING = "1",
+  DELETED = "2",
+  PETITIONED = "3",
+}
+
 export const FileMetadataSchema = z.object({
   blurhash: z.string().optional(),
   duration: z.number().nullable(),
@@ -165,6 +172,17 @@ export const FileMetadataSchema = z.object({
   is_local: z.boolean().optional(),
   is_trashed: z.boolean().optional(),
   is_deleted: z.boolean().optional(),
+  tags: z
+    .record(
+      z.string(),
+      z.object({
+        display_tags: z.record(
+          z.enum(TagStatus),
+          z.array(z.string()).optional(),
+        ),
+      }),
+    )
+    .optional(),
 });
 
 export type FileMetadata = z.infer<typeof FileMetadataSchema>;
