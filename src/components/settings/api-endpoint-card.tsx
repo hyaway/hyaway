@@ -15,8 +15,8 @@ import {
 import { Skeleton } from "../ui/skeleton";
 import {
   SETTINGS_ACTION,
-  SETTINGS_CHECK_ENDPOINT_ACTION,
   SETTINGS_ENDPOINT_FIELD_NAME,
+  SETTINGS_SAVE_ENDPOINT_ACTION,
 } from "./constants";
 import { getFormDataWithSubmitter } from "./form-utils";
 import {
@@ -39,7 +39,7 @@ export function ApiEndpointCard() {
     const action = formData.get(SETTINGS_ACTION);
 
     if (
-      action === SETTINGS_CHECK_ENDPOINT_ACTION &&
+      action === SETTINGS_SAVE_ENDPOINT_ACTION &&
       (typeof endpoint === "string" || endpoint === null)
     ) {
       setApiCredentials(undefined, endpoint);
@@ -67,7 +67,7 @@ export function ApiEndpointCard() {
           <Button
             type="submit"
             name={SETTINGS_ACTION}
-            value={SETTINGS_CHECK_ENDPOINT_ACTION}
+            value={SETTINGS_SAVE_ENDPOINT_ACTION}
             isDisabled={isFetching}
           >
             {isFetching ? "Checking endpoint..." : "Check endpoint"}

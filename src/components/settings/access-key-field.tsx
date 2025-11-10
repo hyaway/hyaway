@@ -9,7 +9,7 @@ import { Skeleton } from "../ui/skeleton";
 import {
   SETTINGS_ACCESS_KEY_FIELD_NAME,
   SETTINGS_ACTION,
-  SETTINGS_SAVE_ACTION,
+  SETTINGS_SAVE_ACCESS_KEY_ACTION,
 } from "./constants";
 import { getFormDataWithSubmitter } from "./form-utils";
 import {
@@ -21,6 +21,7 @@ import {
 export function AccessKeyField() {
   const queryClient = useQueryClient();
   const { setApiCredentials } = useAuthActions();
+
   const apiAccessKey = useApiAccessKey();
   const apiEndpoint = useApiEndpoint();
 
@@ -34,7 +35,7 @@ export function AccessKeyField() {
     const action = formData.get(SETTINGS_ACTION);
 
     if (
-      action === SETTINGS_SAVE_ACTION &&
+      action === SETTINGS_SAVE_ACCESS_KEY_ACTION &&
       (typeof accessKey === "string" || accessKey === null)
     ) {
       setApiCredentials(accessKey, undefined);
@@ -53,7 +54,12 @@ export function AccessKeyField() {
         minLength={64}
         maxLength={64}
       />
-      <Button type="submit" isDisabled={isLoading} name="action" value="save">
+      <Button
+        type="submit"
+        isDisabled={isLoading}
+        name={SETTINGS_ACTION}
+        value={SETTINGS_SAVE_ACCESS_KEY_ACTION}
+      >
         {isFetching ? "Checking" : "Check API connection"}
       </Button>
       {isLoading ? (
