@@ -161,6 +161,10 @@ export const FileMetadataSchema = z.object({
   width: z.number(),
   thumbnail_height: z.number().optional(),
   thumbnail_width: z.number().optional(),
+  is_inbox: z.boolean().optional(),
+  is_local: z.boolean().optional(),
+  is_trashed: z.boolean().optional(),
+  is_deleted: z.boolean().optional(),
 });
 
 export type FileMetadata = z.infer<typeof FileMetadataSchema>;
