@@ -5,8 +5,8 @@ import type { StateCreator } from "zustand";
 import { getContext } from "@/integrations/tanstack-query/root-provider.tsx";
 
 type AuthState = {
-  api_access_key: string | null;
-  api_endpoint: string | null;
+  api_access_key: string;
+  api_endpoint: string;
   apiClient: HydrusApiClient | null;
   actions: {
     setApiCredentials: (accessKey: string, endpoint: string) => void;
@@ -15,11 +15,14 @@ type AuthState = {
 };
 
 const authSlice: StateCreator<AuthState> = (set, get, store) => ({
-  api_access_key: null,
-  api_endpoint: null,
+  api_access_key: "",
+  api_endpoint: "",
   apiClient: null,
   actions: {
-    setApiCredentials: (accessKey: string | null, endpoint: string | null) => {
+    setApiCredentials: (
+      accessKey: string | null | undefined,
+      endpoint: string | null | undefined,
+    ) => {
       const {
         api_access_key: previousApiAccessKey,
         api_endpoint: previousApiEndpoint,
@@ -38,8 +41,8 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
         nextApiClient = null;
       }
       set({
-        api_access_key: accessKey,
-        api_endpoint: endpoint,
+        api_access_key: accessKey ?? "",
+        api_endpoint: endpoint ?? "",
         apiClient: nextApiClient,
       });
       getContext().queryClient.clear();
