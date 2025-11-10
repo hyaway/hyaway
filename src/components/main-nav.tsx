@@ -1,19 +1,20 @@
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { ThemeSwitcher } from "./theme-switcher";
+import type {NavbarProps} from "@/components/ui/navbar";
 import {
   Navbar,
   NavbarGap,
   NavbarItem,
   NavbarItemLink,
   NavbarMobile,
-  type NavbarProps,
+  
   NavbarProvider,
   NavbarSection,
   NavbarSpacer,
   NavbarStart,
-  NavbarTrigger,
+  NavbarTrigger
 } from "@/components/ui/navbar";
-import { ThemeSwitcher } from "./theme-switcher";
 import { Menu, MenuContent, MenuItem, MenuLink } from "@/components/ui/menu";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries";
 
 export default function MainNavbar(props: NavbarProps) {

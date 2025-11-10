@@ -1,11 +1,11 @@
-import { twMerge } from "tailwind-merge"
+import { twMerge } from "tailwind-merge";
 
 export function Text({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
       data-slot="text"
       {...props}
-      className={twMerge("text-base/6 text-muted-fg sm:text-sm/6", className)}
+      className={twMerge("text-muted-fg text-base/6 sm:text-sm/6", className)}
     />
-  )
+  );
 }

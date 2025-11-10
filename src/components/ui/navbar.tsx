@@ -12,6 +12,7 @@ import {
 } from "react";
 import { Link } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
+import { createLink } from "@tanstack/react-router";
 import { Button } from "./button";
 import { Separator } from "./separator";
 import { Sheet, SheetBody, SheetContent } from "./sheet";
@@ -19,7 +20,6 @@ import type { ButtonProps } from "./button";
 import type { LinkProps } from "react-aria-components";
 import { cx } from "@/lib/primitive";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { createLink } from "@tanstack/react-router";
 
 interface NavbarContextProps {
   open: boolean;

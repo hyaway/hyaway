@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import { Outlet, createFileRoute, useLocation } from "@tanstack/react-router";
 import { TabLink, TabList, TabPanel, Tabs } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/settings")({

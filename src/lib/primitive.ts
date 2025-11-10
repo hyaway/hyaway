@@ -1,6 +1,6 @@
 import { composeRenderProps } from "react-aria-components";
-import {  twMerge } from "tailwind-merge";
-import type {ClassNameValue} from "tailwind-merge";
+import { twMerge } from "tailwind-merge";
+import type { ClassNameValue } from "tailwind-merge";
 
 /** @deprecated Use cx */
 export function composeTailwindRenderProps<T>(

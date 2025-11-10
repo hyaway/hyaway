@@ -14,6 +14,7 @@ import {
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
 import { tv } from "tailwind-variants";
+import { createLink } from "@tanstack/react-router";
 import {
   DropdownDescription,
   DropdownKeyboard,
@@ -33,7 +34,6 @@ import type {
   MenuTriggerProps as MenuTriggerPrimitiveProps,
 } from "react-aria-components";
 import { cx } from "@/lib/primitive";
-import { createLink } from "@tanstack/react-router";
 
 const Menu = (props: MenuTriggerPrimitiveProps) => (
   <MenuTriggerPrimitive {...props} />

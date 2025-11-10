@@ -131,7 +131,7 @@ export type Page = {
   page_type: PageType;
   is_media_page: boolean;
   selected: boolean;
-  pages?: Page[];
+  pages?: Array<Page>;
 };
 
 const GetPagesResponseSchema = BaseResponseSchema.extend({

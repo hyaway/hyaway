@@ -1,17 +1,18 @@
-import { Button } from "@/components/ui/button";
-import {
-  getWindowSystemTheme,
-  useActiveTheme,
-  useThemeActions,
-  useThemePreference,
-  type Theme,
-} from "@/lib/theme-store";
-import { cn } from "@/lib/utils";
 import {
   ComputerDesktopIcon,
   MoonIcon,
   SunIcon,
 } from "@heroicons/react/20/solid";
+import type {Theme} from "@/lib/theme-store";
+import { Button } from "@/components/ui/button";
+import {
+  
+  getWindowSystemTheme,
+  useActiveTheme,
+  useThemeActions,
+  useThemePreference
+} from "@/lib/theme-store";
+import { cn } from "@/lib/utils";
 
 interface Props {
   appearance?: "plain" | "outline";

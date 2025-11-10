@@ -5,15 +5,16 @@ import {
   useApiEndpoint,
 } from "../../integrations/hydrus-api/hydrus-config-store";
 import {
+  
+  PageState,
+  Permission,
   getClientOptions,
   getPageInfo,
   getPages,
-  type Page,
-  PageState,
-  Permission,
   requestNewPermissions,
-  verifyAccessKey,
+  verifyAccessKey
 } from "./hydrus-api";
+import type {Page} from "./hydrus-api";
 
 // Simple hash for key (no crypto needed for cache key)
 const simpleHash = (str: string) =>
@@ -79,9 +80,9 @@ export const useRequestNewPermissionsQuery = () => {
 /**
  * Iteratively flattens a page tree into an array of all pages
  */
-const flattenPages = (root: Page): Page[] => {
-  const result: Page[] = [];
-  const stack: Page[] = [root];
+const flattenPages = (root: Page): Array<Page> => {
+  const result: Array<Page> = [];
+  const stack: Array<Page> = [root];
 
   while (stack.length) {
     const current = stack.pop()!;
@@ -153,7 +154,9 @@ export const useGetMediaPagesQuery = () => {
   const mediaPages = useMemo(
     () =>
       data?.pages
-        ? flattenPages(data.pages).filter((page) => page.is_media_page)
+        ? flattenPages(data.pages)
+            .filter((page) => page.is_media_page)
+            .map((page) => ({ ...page, id: page.page_key }))
         : [],
     [data?.pages],
   );

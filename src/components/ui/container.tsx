@@ -1,10 +1,15 @@
-import { twMerge } from "tailwind-merge"
+import { twMerge } from "tailwind-merge";
 
 interface ContainerProps extends React.ComponentProps<"div"> {
-  constrained?: boolean
+  constrained?: boolean;
 }
 
-const Container = ({ className, constrained = false, ref, ...props }: ContainerProps) => (
+const Container = ({
+  className,
+  constrained = false,
+  ref,
+  ...props
+}: ContainerProps) => (
   <div
     className={twMerge(
       "mx-auto w-full max-w-7xl [--container-padding:--spacing(4)] xl:max-w-(--breakpoint-xl) 2xl:max-w-(--breakpoint-2xl)",
@@ -14,7 +19,7 @@ const Container = ({ className, constrained = false, ref, ...props }: ContainerP
     {...props}
     ref={ref}
   />
-)
+);
 
-export type { ContainerProps }
-export { Container }
+export type { ContainerProps };
+export { Container };

@@ -1,5 +1,5 @@
-import { ProgressBar } from "react-aria-components"
-import { twMerge } from "tailwind-merge"
+import { ProgressBar } from "react-aria-components";
+import { twMerge } from "tailwind-merge";
 
 const Ring = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -23,10 +23,14 @@ const Ring = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
       d="M4.636 11.91a7.273 7.273 0 0 1 7.273-7.274V1C5.885 1 1 5.885 1 11.91zm1.819 4.81a7.24 7.24 0 0 1-1.819-4.81H1c0 2.764 1.032 5.294 2.727 7.215z"
     />
   </svg>
-)
+);
 
 const Spin = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
-  <svg className={twMerge("size-4", className)} viewBox="0 0 2400 2400" {...props}>
+  <svg
+    className={twMerge("size-4", className)}
+    viewBox="0 0 2400 2400"
+    {...props}
+  >
     <g strokeWidth="200" strokeLinecap="round" fill="none">
       <line x1="1200" y1="600" x2="1200" y2="100" />
       <line opacity="0.5" x1="1200" y1="2300" x2="1200" y2="1800" />
@@ -53,27 +57,31 @@ const Spin = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
       />
     </g>
   </svg>
-)
+);
 
 const LOADERS = {
   ring: Ring,
   spin: Spin,
-}
+};
 
-const DEFAULT_SPINNER = "spin"
+const DEFAULT_SPINNER = "spin";
 
 export interface LoaderProps
-  extends Omit<React.ComponentPropsWithoutRef<"svg">, "display" | "opacity" | "intent"> {
-  variant?: keyof typeof LOADERS
-  percentage?: number
-  isIndeterminate?: boolean
-  formatOptions?: Intl.NumberFormatOptions
-  ref?: React.RefObject<SVGSVGElement>
+  extends Omit<
+    React.ComponentPropsWithoutRef<"svg">,
+    "display" | "opacity" | "intent"
+  > {
+  variant?: keyof typeof LOADERS;
+  percentage?: number;
+  isIndeterminate?: boolean;
+  formatOptions?: Intl.NumberFormatOptions;
+  ref?: React.RefObject<SVGSVGElement>;
 }
 
 export function Loader({ isIndeterminate = true, ref, ...props }: LoaderProps) {
-  const { className, variant = DEFAULT_SPINNER, ...spinnerProps } = props
-  const LoaderPrimitive = LOADERS[variant in LOADERS ? variant : DEFAULT_SPINNER]
+  const { className, variant = DEFAULT_SPINNER, ...spinnerProps } = props;
+  const LoaderPrimitive =
+    LOADERS[variant in LOADERS ? variant : DEFAULT_SPINNER];
 
   return (
     <ProgressBar
@@ -94,5 +102,5 @@ export function Loader({ isIndeterminate = true, ref, ...props }: LoaderProps) {
         {...spinnerProps}
       />
     </ProgressBar>
-  )
+  );
 }

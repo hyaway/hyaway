@@ -1,25 +1,25 @@
 "use client";
 
-import type {
-  TabListProps as TabListPrimitiveProps,
-  TabPanelProps as TabPanelPrimitiveProps,
-  TabProps as TabPrimitiveProps,
-  TabsProps as TabsPrimitiveProps,
-} from "react-aria-components";
 
 import {
-  composeRenderProps,
   SelectionIndicator,
   TabList as TabListPrimitive,
   TabPanel as TabPanelPrimitive,
   Tab as TabPrimitive,
   TabsContext,
   Tabs as TabsPrimitive,
+  composeRenderProps,
   useSlottedContext,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
-import { cx } from "@/lib/primitive";
 import { createLink } from "@tanstack/react-router";
+import type {
+  TabListProps as TabListPrimitiveProps,
+  TabPanelProps as TabPanelPrimitiveProps,
+  TabProps as TabPrimitiveProps,
+  TabsProps as TabsPrimitiveProps,
+} from "react-aria-components";
+import { cx } from "@/lib/primitive";
 
 interface TabsProps extends TabsPrimitiveProps {
   ref?: React.RefObject<HTMLDivElement>;

@@ -1,9 +1,8 @@
-import { Container } from "@/components/ui/container";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { AxiosError } from "axios";
 import { Loader } from "@/components/ui/loader";
 import { Note } from "@/components/ui/note";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { AxiosError } from "axios";
 
 export const Route = createFileRoute("/_auth/pages")({
   component: RouteComponent,

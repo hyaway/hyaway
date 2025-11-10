@@ -6,12 +6,12 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 
+import { RouterProvider } from "react-aria-components";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 import type { QueryClient } from "@tanstack/react-query";
 import MainNavbar from "@/components/main-nav";
 import { useApplyTheme } from "@/lib/theme-store";
-import { RouterProvider } from "react-aria-components";
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -19,7 +19,7 @@ interface MyRouterContext {
 
 function RootComponent() {
   useApplyTheme();
-  let router = useRouter();
+  const router = useRouter();
   return (
     <>
       <RouterProvider
