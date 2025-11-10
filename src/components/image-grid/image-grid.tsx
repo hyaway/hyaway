@@ -35,7 +35,8 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
 
   const parentRef = React.useRef<HTMLDivElement>(null);
 
-  const [lanes, setLanes] = useState(0);
+  const [desiredLanes, setLanes] = useState(0);
+  const lanes = items.length < desiredLanes ? items.length : desiredLanes;
 
   const rowVirtualizer = useWindowVirtualizer({
     count: items.length,
