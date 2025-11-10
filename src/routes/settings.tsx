@@ -10,20 +10,18 @@ function SettingsComponent() {
     select: (location) => location.pathname,
   });
   return (
-    <div className="p-4">
-      <Tabs aria-label="Navbar" selectedKey={pathname}>
-        <TabList>
-          <TabLink to="/settings/account" id="/settings/account">
-            Account
-          </TabLink>
-          <TabLink to="/settings/ux" id="/settings/ux">
-            UX
-          </TabLink>
-        </TabList>
-        <TabPanel id={pathname}>
-          <Outlet />
-        </TabPanel>
-      </Tabs>
-    </div>
+    <Tabs aria-label="Navbar" selectedKey={pathname}>
+      <TabList className="px-4">
+        <TabLink to="/settings/account" id="/settings/account">
+          Account
+        </TabLink>
+        <TabLink to="/settings/ux" id="/settings/ux">
+          UX
+        </TabLink>
+      </TabList>
+      <TabPanel id={pathname}>
+        <Outlet />
+      </TabPanel>
+    </Tabs>
   );
 }

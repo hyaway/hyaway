@@ -2,24 +2,29 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   InformationCircleIcon,
-} from "@heroicons/react/24/solid"
-import { twJoin, twMerge } from "tailwind-merge"
+} from "@heroicons/react/24/solid";
+import { twJoin, twMerge } from "tailwind-merge";
 
 export interface NoteProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
-  intent?: "default" | "info" | "warning" | "danger" | "success"
-  indicator?: boolean
+  intent?: "default" | "info" | "warning" | "danger" | "success";
+  indicator?: boolean;
 }
 
-export function Note({ indicator = true, intent = "default", className, ...props }: NoteProps) {
+export function Note({
+  indicator = true,
+  intent = "default",
+  className,
+  ...props
+}: NoteProps) {
   const iconMap: Record<string, React.ElementType | null> = {
     info: InformationCircleIcon,
     warning: ExclamationCircleIcon,
     danger: ExclamationCircleIcon,
     success: CheckCircleIcon,
     default: null,
-  }
+  };
 
-  const IconComponent = iconMap[intent] || null
+  const IconComponent = iconMap[intent] || null;
 
   return (
     <div
@@ -63,9 +68,9 @@ export function Note({ indicator = true, intent = "default", className, ...props
           </div>
         </div>
       )}
-      <div className="text-pretty text-base/6 group-has-data-[slot=icon]:col-start-2 sm:text-sm/6">
+      <div className="pt-1 text-base/6 text-pretty group-has-data-[slot=icon]:col-start-2 sm:text-sm/6">
         {props.children}
       </div>
     </div>
-  )
+  );
 }

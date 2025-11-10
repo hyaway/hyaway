@@ -30,7 +30,7 @@ function RouteComponent() {
   }
 
   return (
-    <Container>
+    <Container className="py-2">
       <Outlet />
     </Container>
   );
