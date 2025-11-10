@@ -11,7 +11,7 @@ type AuthState = {
   };
 };
 
-const authSlice: StateCreator<AuthState> = (set, get, store) => ({
+const authSlice: StateCreator<AuthState> = (set, _get, store) => ({
   api_access_key: "",
   api_endpoint: "",
   actions: {
