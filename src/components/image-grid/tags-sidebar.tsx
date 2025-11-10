@@ -2,7 +2,6 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useMemo } from "react";
 import { Text } from "../ui/text";
 import { Badge } from "../ui/badge";
-import { Separator } from "../ui/separator";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
@@ -45,9 +44,14 @@ export function TagsSidebar({
     );
 
     resultWithNs.sort((a, b) => {
-      const nsCompare = b.namespace.localeCompare(a.namespace);
-      if (nsCompare !== 0) return nsCompare;
       if (b.count !== a.count) return b.count - a.count;
+      const nsCompare =
+        a.namespace === "" && b.namespace !== ""
+          ? 1
+          : a.namespace !== "" && b.namespace === ""
+            ? -1
+            : a.namespace.localeCompare(b.namespace);
+      if (nsCompare !== 0) return nsCompare;
       return a.displayTag.localeCompare(b.displayTag);
     });
 
@@ -59,7 +63,7 @@ export function TagsSidebar({
   const rowVirtualizer = useVirtualizer({
     count: tags.length,
     estimateSize: () => 40,
-    overscan: 1,
+    overscan: 3,
     gap: 8,
     getScrollElement: () => parentRef.current,
   });
@@ -93,7 +97,7 @@ export function TagsSidebar({
                 transform: `translateY(${virtualRow.start}px)`,
               }}
               ref={rowVirtualizer.measureElement}
-              className="absolute top-0 left-0 flex w-full flex-row items-center gap-1"
+              className="absolute top-0 left-0 flex w-full flex-row flex-wrap items-center gap-1"
             >
               <Badge intent="primary" isCircle={false}>
                 {tag.displayTag}
