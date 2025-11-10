@@ -1,6 +1,6 @@
 import axios from "axios";
 import z from "zod";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useApiAccessKey, useApiEndpoint } from "./hydrus-config-store";
 import { BaseResponseSchema, HYDRUS_API_HEADER_ACCESS_KEY } from "./hydrus-api";
 import { simpleHash } from "@/lib/utils";
@@ -37,6 +37,7 @@ export async function getFileMetadata(
   apiEndpoint: string,
   apiAccessKey: string,
   file_ids: Array<number>,
+  only_return_basic_information = true,
 ): Promise<Array<FileMetadata>> {
   const response = await axios.get<{ metadata: Array<FileMetadata> }>(
     `${apiEndpoint}/get_files/file_metadata`,
@@ -48,7 +49,7 @@ export async function getFileMetadata(
         file_ids: JSON.stringify(file_ids),
         create_new_file_ids: false,
         detailed_url_information: false,
-        only_return_basic_information: true,
+        only_return_basic_information,
         include_blurhash: true,
         include_milliseconds: false,
         include_notes: false,
@@ -59,7 +60,10 @@ export async function getFileMetadata(
   return GetFileMetadataResponseSchema.parse(response.data).metadata;
 }
 
-export const useGetFilesMetadata = (file_ids: Array<number>) => {
+export const useGetFilesMetadata = (
+  file_ids: Array<number>,
+  only_return_basic_information = true,
+) => {
   const apiEndpoint = useApiEndpoint();
   const apiAccessKey = useApiAccessKey();
 
@@ -67,6 +71,7 @@ export const useGetFilesMetadata = (file_ids: Array<number>) => {
     queryKey: [
       "getFilesMetadata",
       file_ids,
+      only_return_basic_information,
       apiEndpoint,
       simpleHash(apiAccessKey),
     ],
@@ -77,7 +82,12 @@ export const useGetFilesMetadata = (file_ids: Array<number>) => {
       if (file_ids.length === 0) {
         throw new Error("File Ids are required.");
       }
-      return getFileMetadata(apiEndpoint, apiAccessKey, file_ids);
+      return getFileMetadata(
+        apiEndpoint,
+        apiAccessKey,
+        file_ids,
+        only_return_basic_information,
+      );
     },
     select: (data) =>
       data.map((meta) => ({
@@ -87,5 +97,51 @@ export const useGetFilesMetadata = (file_ids: Array<number>) => {
       })),
     enabled: !!apiEndpoint && !!apiAccessKey && file_ids.length > 0,
     staleTime: Infinity, // Should not change without user action
+  });
+};
+
+export const useInfiniteGetFilesMetadata = (
+  file_ids: Array<number>,
+  only_return_basic_information = false,
+) => {
+  const apiEndpoint = useApiEndpoint();
+  const apiAccessKey = useApiAccessKey();
+  const BATCH_SIZE = 100;
+
+  return useInfiniteQuery({
+    queryKey: [
+      "infiniteGetFilesMetadata",
+      file_ids,
+      only_return_basic_information,
+      BATCH_SIZE,
+      apiEndpoint,
+      simpleHash(apiAccessKey),
+    ],
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!apiEndpoint || !apiAccessKey) {
+        throw new Error("API endpoint and access key are required.");
+      }
+      const batchFileIds = file_ids.slice(pageParam, pageParam + BATCH_SIZE);
+      if (batchFileIds.length === 0) {
+        return { metadata: [], nextCursor: undefined };
+      }
+      const metadata = await getFileMetadata(
+        apiEndpoint,
+        apiAccessKey,
+        batchFileIds,
+        only_return_basic_information,
+      );
+      return {
+        metadata,
+        nextCursor:
+          pageParam + batchFileIds.length < file_ids.length
+            ? pageParam + BATCH_SIZE
+            : undefined,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    initialPageParam: 0,
+    enabled: !!apiEndpoint && !!apiAccessKey && file_ids.length > 0,
+    staleTime: Infinity,
   });
 };
