@@ -409,7 +409,6 @@ export async function getFileMetadata(
   apiEndpoint: string,
   apiAccessKey: string,
   fileIds?: number[],
-  hashes?: string[],
 ): Promise<FileMetadata[]> {
   const response = await axios.get<{ metadata: FileMetadata[] }>(
     `${apiEndpoint}/get_files/file_metadata`,
@@ -419,7 +418,6 @@ export async function getFileMetadata(
       },
       params: {
         file_ids: fileIds?.join(","),
-        hashes: hashes?.join(","),
       },
     },
   );
