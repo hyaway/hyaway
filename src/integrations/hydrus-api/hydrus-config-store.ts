@@ -97,4 +97,7 @@ export const useApiAccessKey = () =>
 export const useHydrusApiClient = () =>
   useAuthStore((state) => state.apiClient);
 
+export const useApiSessionKey = () =>
+  useAuthStore((state) => state.apiClient?.getSessionKey() ?? "");
+
 export const useAuthActions = () => useAuthStore((state) => state.actions);

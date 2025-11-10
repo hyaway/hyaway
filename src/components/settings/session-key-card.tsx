@@ -18,6 +18,7 @@ import {
 } from "./constants";
 import {
   useApiEndpoint,
+  useApiSessionKey,
   useHydrusApiClient,
 } from "@/integrations/hydrus-api/hydrus-config-store";
 
@@ -25,6 +26,7 @@ export function SessionKeyCard() {
   const queryClient = useQueryClient();
   const apiEndpoint = useApiEndpoint();
   const hydrusApi = useHydrusApiClient();
+  const sessionKey = useApiSessionKey();
 
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useVerifyAccessQuery("session");
@@ -38,14 +40,13 @@ export function SessionKeyCard() {
       <CardContent className="flex flex-col gap-4">
         <SecretInputField
           label="API session key"
-          value={hydrusApi?.getSessionKey() ?? ""}
+          value={sessionKey}
           isDisabled={true}
         />
         <Button
           type="button"
           name={SETTINGS_ACTION}
           value={SETTINGS_REQUEST_SESSION_KEY_ACTION}
-          isDisabled={isFetching}
           onPress={async () => {
             await hydrusApi?.refreshSessionKey();
             queryClient.invalidateQueries({
