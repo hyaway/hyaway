@@ -9,11 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
+import { Route as SettingsRouteImport } from "./routes/settings";
 import { Route as AuthRouteImport } from "./routes/_auth";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as SettingsIndexRouteImport } from "./routes/settings.index";
+import { Route as SettingsUxRouteImport } from "./routes/settings.ux";
+import { Route as SettingsAccountRouteImport } from "./routes/settings.account";
 import { Route as AuthHelloWorldRouteImport } from "./routes/_auth/hello-world";
-import { Route as AuthSettingsAccountRouteImport } from "./routes/_auth/settings.account";
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: "/settings",
+  path: "/settings",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const AuthRoute = AuthRouteImport.update({
   id: "/_auth",
   getParentRoute: () => rootRouteImport,
@@ -23,54 +31,89 @@ const IndexRoute = IndexRouteImport.update({
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any);
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: "/",
+  path: "/",
+  getParentRoute: () => SettingsRoute,
+} as any);
+const SettingsUxRoute = SettingsUxRouteImport.update({
+  id: "/ux",
+  path: "/ux",
+  getParentRoute: () => SettingsRoute,
+} as any);
+const SettingsAccountRoute = SettingsAccountRouteImport.update({
+  id: "/account",
+  path: "/account",
+  getParentRoute: () => SettingsRoute,
+} as any);
 const AuthHelloWorldRoute = AuthHelloWorldRouteImport.update({
   id: "/hello-world",
   path: "/hello-world",
   getParentRoute: () => AuthRoute,
 } as any);
-const AuthSettingsAccountRoute = AuthSettingsAccountRouteImport.update({
-  id: "/settings/account",
-  path: "/settings/account",
-  getParentRoute: () => AuthRoute,
-} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/settings": typeof SettingsRouteWithChildren;
   "/hello-world": typeof AuthHelloWorldRoute;
-  "/settings/account": typeof AuthSettingsAccountRoute;
+  "/settings/account": typeof SettingsAccountRoute;
+  "/settings/ux": typeof SettingsUxRoute;
+  "/settings/": typeof SettingsIndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/hello-world": typeof AuthHelloWorldRoute;
-  "/settings/account": typeof AuthSettingsAccountRoute;
+  "/settings/account": typeof SettingsAccountRoute;
+  "/settings/ux": typeof SettingsUxRoute;
+  "/settings": typeof SettingsIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/_auth": typeof AuthRouteWithChildren;
+  "/settings": typeof SettingsRouteWithChildren;
   "/_auth/hello-world": typeof AuthHelloWorldRoute;
-  "/_auth/settings/account": typeof AuthSettingsAccountRoute;
+  "/settings/account": typeof SettingsAccountRoute;
+  "/settings/ux": typeof SettingsUxRoute;
+  "/settings/": typeof SettingsIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/hello-world" | "/settings/account";
+  fullPaths:
+    | "/"
+    | "/settings"
+    | "/hello-world"
+    | "/settings/account"
+    | "/settings/ux"
+    | "/settings/";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/hello-world" | "/settings/account";
+  to: "/" | "/hello-world" | "/settings/account" | "/settings/ux" | "/settings";
   id:
     | "__root__"
     | "/"
     | "/_auth"
+    | "/settings"
     | "/_auth/hello-world"
-    | "/_auth/settings/account";
+    | "/settings/account"
+    | "/settings/ux"
+    | "/settings/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   AuthRoute: typeof AuthRouteWithChildren;
+  SettingsRoute: typeof SettingsRouteWithChildren;
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/settings": {
+      id: "/settings";
+      path: "/settings";
+      fullPath: "/settings";
+      preLoaderRoute: typeof SettingsRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/_auth": {
       id: "/_auth";
       path: "";
@@ -85,6 +128,27 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/settings/": {
+      id: "/settings/";
+      path: "/";
+      fullPath: "/settings/";
+      preLoaderRoute: typeof SettingsIndexRouteImport;
+      parentRoute: typeof SettingsRoute;
+    };
+    "/settings/ux": {
+      id: "/settings/ux";
+      path: "/ux";
+      fullPath: "/settings/ux";
+      preLoaderRoute: typeof SettingsUxRouteImport;
+      parentRoute: typeof SettingsRoute;
+    };
+    "/settings/account": {
+      id: "/settings/account";
+      path: "/account";
+      fullPath: "/settings/account";
+      preLoaderRoute: typeof SettingsAccountRouteImport;
+      parentRoute: typeof SettingsRoute;
+    };
     "/_auth/hello-world": {
       id: "/_auth/hello-world";
       path: "/hello-world";
@@ -92,31 +156,39 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthHelloWorldRouteImport;
       parentRoute: typeof AuthRoute;
     };
-    "/_auth/settings/account": {
-      id: "/_auth/settings/account";
-      path: "/settings/account";
-      fullPath: "/settings/account";
-      preLoaderRoute: typeof AuthSettingsAccountRouteImport;
-      parentRoute: typeof AuthRoute;
-    };
   }
 }
 
 interface AuthRouteChildren {
   AuthHelloWorldRoute: typeof AuthHelloWorldRoute;
-  AuthSettingsAccountRoute: typeof AuthSettingsAccountRoute;
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthHelloWorldRoute: AuthHelloWorldRoute,
-  AuthSettingsAccountRoute: AuthSettingsAccountRoute,
 };
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
 
+interface SettingsRouteChildren {
+  SettingsAccountRoute: typeof SettingsAccountRoute;
+  SettingsUxRoute: typeof SettingsUxRoute;
+  SettingsIndexRoute: typeof SettingsIndexRoute;
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsAccountRoute: SettingsAccountRoute,
+  SettingsUxRoute: SettingsUxRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
+};
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+);
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
+  SettingsRoute: SettingsRouteWithChildren,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

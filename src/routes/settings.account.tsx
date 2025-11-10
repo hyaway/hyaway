@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Settings } from "@/components/settings";
 
-export const Route = createFileRoute("/_auth/settings/account")({
+export const Route = createFileRoute("/settings/account")({
   component: SettingsAccountComponent,
 });
 
