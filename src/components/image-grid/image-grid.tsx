@@ -5,7 +5,7 @@ import { Loader } from "../ui/loader";
 import { Note } from "../ui/note";
 import { Badge } from "../ui/badge";
 import { Thumbnail } from "./thumbnail";
-import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/queries";
+import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/get-files";
 import { cn } from "@/lib/utils";
 

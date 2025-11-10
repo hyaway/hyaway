@@ -4,7 +4,7 @@ import {
   useApiAccessKey,
   useApiEndpoint,
 } from "../integrations/hydrus-api/hydrus-config-store";
-import { useVerifyAccessQuery } from "../integrations/hydrus-api/queries/queries";
+import { useVerifyAccessQuery } from "../integrations/hydrus-api/queries/access";
 
 export const Route = createFileRoute("/_auth")({
   component: AuthLayout,

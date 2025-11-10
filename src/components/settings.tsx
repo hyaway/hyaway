@@ -9,7 +9,7 @@ import {
 import {
   useRequestNewPermissionsMutation,
   useVerifyAccessQuery,
-} from "../integrations/hydrus-api/queries/queries";
+} from "../integrations/hydrus-api/queries/access";
 import { Button } from "./ui/button";
 import { Heading } from "./ui/heading";
 import { SecretInputField, TextInputField } from "./text-input-field";
