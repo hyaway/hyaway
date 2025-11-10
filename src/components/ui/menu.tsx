@@ -33,6 +33,7 @@ import type {
   MenuTriggerProps as MenuTriggerPrimitiveProps,
 } from "react-aria-components";
 import { cx } from "@/lib/primitive";
+import { createLink } from "@tanstack/react-router";
 
 const Menu = (props: MenuTriggerPrimitiveProps) => (
   <MenuTriggerPrimitive {...props} />
@@ -174,6 +175,8 @@ const MenuItem = ({ className, intent, children, ...props }: MenuItemProps) => {
     </MenuItemPrimitive>
   );
 };
+
+export const MenuLink = createLink(MenuItem);
 
 export interface MenuHeaderProps extends React.ComponentProps<typeof Header> {
   separator?: boolean;

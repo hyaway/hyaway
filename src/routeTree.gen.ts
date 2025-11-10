@@ -15,7 +15,9 @@ import { Route as IndexRouteImport } from "./routes/index";
 import { Route as SettingsIndexRouteImport } from "./routes/settings.index";
 import { Route as SettingsUxRouteImport } from "./routes/settings.ux";
 import { Route as SettingsAccountRouteImport } from "./routes/settings.account";
+import { Route as AuthPagesRouteImport } from "./routes/_auth/pages";
 import { Route as AuthHelloWorldRouteImport } from "./routes/_auth/hello-world";
+import { Route as AuthPagesPageIdRouteImport } from "./routes/_auth/pages.$pageId";
 
 const SettingsRoute = SettingsRouteImport.update({
   id: "/settings",
@@ -46,26 +48,40 @@ const SettingsAccountRoute = SettingsAccountRouteImport.update({
   path: "/account",
   getParentRoute: () => SettingsRoute,
 } as any);
+const AuthPagesRoute = AuthPagesRouteImport.update({
+  id: "/pages",
+  path: "/pages",
+  getParentRoute: () => AuthRoute,
+} as any);
 const AuthHelloWorldRoute = AuthHelloWorldRouteImport.update({
   id: "/hello-world",
   path: "/hello-world",
   getParentRoute: () => AuthRoute,
+} as any);
+const AuthPagesPageIdRoute = AuthPagesPageIdRouteImport.update({
+  id: "/$pageId",
+  path: "/$pageId",
+  getParentRoute: () => AuthPagesRoute,
 } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/settings": typeof SettingsRouteWithChildren;
   "/hello-world": typeof AuthHelloWorldRoute;
+  "/pages": typeof AuthPagesRouteWithChildren;
   "/settings/account": typeof SettingsAccountRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
+  "/pages/$pageId": typeof AuthPagesPageIdRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/hello-world": typeof AuthHelloWorldRoute;
+  "/pages": typeof AuthPagesRouteWithChildren;
   "/settings/account": typeof SettingsAccountRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings": typeof SettingsIndexRoute;
+  "/pages/$pageId": typeof AuthPagesPageIdRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -73,9 +89,11 @@ export interface FileRoutesById {
   "/_auth": typeof AuthRouteWithChildren;
   "/settings": typeof SettingsRouteWithChildren;
   "/_auth/hello-world": typeof AuthHelloWorldRoute;
+  "/_auth/pages": typeof AuthPagesRouteWithChildren;
   "/settings/account": typeof SettingsAccountRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
+  "/_auth/pages/$pageId": typeof AuthPagesPageIdRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -83,20 +101,31 @@ export interface FileRouteTypes {
     | "/"
     | "/settings"
     | "/hello-world"
+    | "/pages"
     | "/settings/account"
     | "/settings/ux"
-    | "/settings/";
+    | "/settings/"
+    | "/pages/$pageId";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/hello-world" | "/settings/account" | "/settings/ux" | "/settings";
+  to:
+    | "/"
+    | "/hello-world"
+    | "/pages"
+    | "/settings/account"
+    | "/settings/ux"
+    | "/settings"
+    | "/pages/$pageId";
   id:
     | "__root__"
     | "/"
     | "/_auth"
     | "/settings"
     | "/_auth/hello-world"
+    | "/_auth/pages"
     | "/settings/account"
     | "/settings/ux"
-    | "/settings/";
+    | "/settings/"
+    | "/_auth/pages/$pageId";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -149,6 +178,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SettingsAccountRouteImport;
       parentRoute: typeof SettingsRoute;
     };
+    "/_auth/pages": {
+      id: "/_auth/pages";
+      path: "/pages";
+      fullPath: "/pages";
+      preLoaderRoute: typeof AuthPagesRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
     "/_auth/hello-world": {
       id: "/_auth/hello-world";
       path: "/hello-world";
@@ -156,15 +192,36 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthHelloWorldRouteImport;
       parentRoute: typeof AuthRoute;
     };
+    "/_auth/pages/$pageId": {
+      id: "/_auth/pages/$pageId";
+      path: "/$pageId";
+      fullPath: "/pages/$pageId";
+      preLoaderRoute: typeof AuthPagesPageIdRouteImport;
+      parentRoute: typeof AuthPagesRoute;
+    };
   }
 }
 
+interface AuthPagesRouteChildren {
+  AuthPagesPageIdRoute: typeof AuthPagesPageIdRoute;
+}
+
+const AuthPagesRouteChildren: AuthPagesRouteChildren = {
+  AuthPagesPageIdRoute: AuthPagesPageIdRoute,
+};
+
+const AuthPagesRouteWithChildren = AuthPagesRoute._addFileChildren(
+  AuthPagesRouteChildren,
+);
+
 interface AuthRouteChildren {
   AuthHelloWorldRoute: typeof AuthHelloWorldRoute;
+  AuthPagesRoute: typeof AuthPagesRouteWithChildren;
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthHelloWorldRoute: AuthHelloWorldRoute,
+  AuthPagesRoute: AuthPagesRouteWithChildren,
 };
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
