@@ -152,7 +152,7 @@ export function PureImageGrid({
               const rawScale =
                 Math.min(window.innerWidth, item.thumbnail_width ?? width) /
                 width;
-              const scale = Math.min(4, Math.max(1.1, rawScale));
+              const scale = Math.min(4, Math.max(1.2, rawScale));
 
               const isFirstLane = virtualRow.lane === 0;
               const isLastLane = virtualRow.lane === lanes - 1;
