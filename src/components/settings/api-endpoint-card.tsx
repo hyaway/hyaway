@@ -43,7 +43,7 @@ export function ApiEndpointCard() {
       (typeof endpoint === "string" || endpoint === null)
     ) {
       setApiCredentials(undefined, endpoint);
-      queryClient.resetQueries({ queryKey: ["apiVersion"] });
+      queryClient.invalidateQueries({ queryKey: ["apiVersion"] });
     }
   };
   return (
@@ -76,7 +76,7 @@ export function ApiEndpointCard() {
             <Skeleton className="h-28" />
           ) : isSuccess ? (
             <Note intent="success">
-              Api endpoint: <b>{apiEndpoint}</b>
+              API endpoint: <b>{apiEndpoint}</b>
               <br />
               Hydrus version: <b>{data.hydrus_version}</b>
               <br />
@@ -91,6 +91,7 @@ export function ApiEndpointCard() {
               {error instanceof AxiosError && error.response?.data?.error && (
                 <span>{error.response.data.error}</span>
               )}
+              API endpoint: <b>{apiEndpoint}</b>
             </Note>
           ) : null}
         </CardContent>

@@ -1,29 +1,57 @@
 import { AxiosError } from "axios";
+import { Form as FormPrimitive } from "react-aria-components";
+import { useQueryClient } from "@tanstack/react-query";
 import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/access";
 import { Button } from "../ui/button";
 import { SecretInputField } from "../text-input-field";
 import { Note } from "../ui/note";
 import { Skeleton } from "../ui/skeleton";
-import { SETTINGS_ACCESS_KEY_FIELD_NAME } from "./constants";
+import {
+  SETTINGS_ACCESS_KEY_FIELD_NAME,
+  SETTINGS_ACTION,
+  SETTINGS_SAVE_ACTION,
+} from "./constants";
+import { getFormDataWithSubmitter } from "./form-utils";
 import {
   useApiAccessKey,
   useApiEndpoint,
+  useAuthActions,
 } from "@/integrations/hydrus-api/hydrus-config-store";
 
 export function AccessKeyField() {
+  const queryClient = useQueryClient();
+  const { setApiCredentials } = useAuthActions();
   const apiAccessKey = useApiAccessKey();
   const apiEndpoint = useApiEndpoint();
+
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useVerifyAccessQuery("persistent");
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = getFormDataWithSubmitter(e);
+    const accessKey = formData.get(SETTINGS_ACCESS_KEY_FIELD_NAME);
+    const action = formData.get(SETTINGS_ACTION);
+
+    if (
+      action === SETTINGS_SAVE_ACTION &&
+      (typeof accessKey === "string" || accessKey === null)
+    ) {
+      setApiCredentials(accessKey, undefined);
+      queryClient.invalidateQueries({ queryKey: ["verifyAccess"] });
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-4">
+    <FormPrimitive onSubmit={handleSubmit} className="flex flex-col gap-4">
       <SecretInputField
         label="API access key"
         name={SETTINGS_ACCESS_KEY_FIELD_NAME}
         defaultValue={apiAccessKey}
         isRequired
         isDisabled={isLoading}
+        minLength={64}
+        maxLength={64}
       />
       <Button type="submit" isDisabled={isLoading} name="action" value="save">
         {isFetching ? "Checking" : "Check API connection"}
@@ -51,8 +79,18 @@ export function AccessKeyField() {
           {error instanceof AxiosError && error.response?.data?.error && (
             <span>{error.response.data.error}</span>
           )}
+          API Access key:{" "}
+          <b>
+            {apiAccessKey
+              ? apiAccessKey.length <= 6
+                ? apiAccessKey
+                : `${apiAccessKey.slice(0, 2)}●●●●${apiAccessKey.slice(-4)}`
+              : ""}
+          </b>
+          <br />
+          API endpoint: <b>{apiEndpoint}</b>
         </Note>
       ) : null}
-    </div>
+    </FormPrimitive>
   );
 }
