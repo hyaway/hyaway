@@ -1,3 +1,5 @@
+"use client";
+
 import {
   FieldError as FieldErrorPrimitive,
   Label as LabelPrimitive,

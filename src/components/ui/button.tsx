@@ -1,12 +1,9 @@
 "use client";
 
-import {
-  Button as ButtonPrimitive
-  
-} from "react-aria-components";
-import {  tv } from "tailwind-variants";
-import type {VariantProps} from "tailwind-variants";
-import type {ButtonProps as ButtonPrimitiveProps} from "react-aria-components";
+import { Button as ButtonPrimitive } from "react-aria-components";
+import { tv } from "tailwind-variants";
+import type { VariantProps } from "tailwind-variants";
+import type { ButtonProps as ButtonPrimitiveProps } from "react-aria-components";
 import { cx } from "@/lib/primitive";
 
 export const buttonStyles = tv({

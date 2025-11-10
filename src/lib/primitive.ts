@@ -1,28 +1,35 @@
-import { composeRenderProps } from "react-aria-components"
-import { type ClassNameValue, twMerge } from "tailwind-merge"
+import { composeRenderProps } from "react-aria-components";
+import {  twMerge } from "tailwind-merge";
+import type {ClassNameValue} from "tailwind-merge";
 
 /** @deprecated Use cx */
 export function composeTailwindRenderProps<T>(
   className: string | ((v: T) => string) | undefined,
   tailwind: ClassNameValue,
 ): string | ((v: T) => string) {
-  return composeRenderProps(className, (className) => twMerge(tailwind, className))
+  return composeRenderProps(className, (className) =>
+    twMerge(tailwind, className),
+  );
 }
 
-type Render<T> = string | ((v: T) => string) | undefined
+type Render<T> = string | ((v: T) => string) | undefined;
 
-type CxArgs<T> = [...ClassNameValue[], Render<T>] | [[...ClassNameValue[], Render<T>]]
+type CxArgs<T> =
+  | [...Array<ClassNameValue>, Render<T>]
+  | [[...Array<ClassNameValue>, Render<T>]];
 
-export function cx<T = unknown>(...args: CxArgs<T>): string | ((v: T) => string) {
-  let resolvedArgs = args
+export function cx<T = unknown>(
+  ...args: CxArgs<T>
+): string | ((v: T) => string) {
+  let resolvedArgs = args;
   if (args.length === 1 && Array.isArray(args[0])) {
-    resolvedArgs = args[0] as [...ClassNameValue[], Render<T>]
+    resolvedArgs = args[0] as [...Array<ClassNameValue>, Render<T>];
   }
 
-  const className = resolvedArgs.pop() as Render<T>
-  const tailwinds = resolvedArgs as ClassNameValue[]
+  const className = resolvedArgs.pop() as Render<T>;
+  const tailwinds = resolvedArgs as Array<ClassNameValue>;
 
-  const fixed = twMerge(...tailwinds)
+  const fixed = twMerge(...tailwinds);
 
-  return composeRenderProps(className, (cn) => twMerge(fixed, cn))
+  return composeRenderProps(className, (cn) => twMerge(fixed, cn));
 }

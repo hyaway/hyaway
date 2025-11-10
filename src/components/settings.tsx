@@ -1,13 +1,13 @@
+import { Form as FormPrimitive } from "react-aria-components";
 import {
   useApiAccessKey,
   useApiEndpoint,
   useAuthActions,
 } from "../hooks/useAuth";
 import { useVerifyAccessQuery } from "../integrations/hydrus-api/queries";
-import { Button } from "./ui/Button";
-import { Form } from "./ui/Form";
-import { Heading } from "./ui/Heading";
-import { TextField } from "./ui/TextField";
+import { Button } from "./ui/button";
+import { Heading } from "./ui/heading";
+import { SecretInputField, TextInputField } from "./text-input-field";
 
 export function Settings() {
   const { setApiCredentials } = useAuthActions();
@@ -28,13 +28,13 @@ export function Settings() {
   };
 
   return (
-    <Form
+    <FormPrimitive
       onSubmit={handleSubmit}
       className="mx-auto flex max-w-md flex-col gap-4"
     >
       <Heading level={2}>Hydrus API Settings</Heading>
 
-      <TextField
+      <TextInputField
         label="API Endpoint"
         name="endpoint"
         defaultValue={defaultEndpoint}
@@ -42,7 +42,7 @@ export function Settings() {
         isRequired
         isDisabled={isPending}
       />
-      <TextField
+      <SecretInputField
         label="API Access Key"
         name="accessKey"
         defaultValue={defaultAccessKey}
@@ -56,6 +56,6 @@ export function Settings() {
         <p className="text-green-600">API connection successful</p>
       )}
       {isError && <p className="text-red-500">{error.message}</p>}
-    </Form>
+    </FormPrimitive>
   );
 }

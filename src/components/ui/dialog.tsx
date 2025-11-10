@@ -6,8 +6,8 @@ import {
   Dialog as PrimitiveDialog,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
-import { Button  } from "./button";
-import type {ButtonProps} from "./button";
+import { Button } from "./button";
+import type { ButtonProps } from "./button";
 import type { HeadingProps, TextProps } from "react-aria-components";
 import { cx } from "@/lib/primitive";
 

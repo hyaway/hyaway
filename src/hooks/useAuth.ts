@@ -1,6 +1,6 @@
-import {  create } from "zustand";
+import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type {StateCreator} from "zustand";
+import type { StateCreator } from "zustand";
 
 type AuthState = {
   api_access_key: string;

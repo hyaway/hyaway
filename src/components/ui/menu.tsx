@@ -13,7 +13,7 @@ import {
   composeRenderProps,
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
-import {  tv } from "tailwind-variants";
+import { tv } from "tailwind-variants";
 import {
   DropdownDescription,
   DropdownKeyboard,
@@ -22,9 +22,9 @@ import {
   dropdownItemStyles,
   dropdownSectionStyles,
 } from "./dropdown";
-import { PopoverContent  } from "./popover";
-import type {VariantProps} from "tailwind-variants";
-import type {PopoverContentProps} from "./popover";
+import { PopoverContent } from "./popover";
+import type { VariantProps } from "tailwind-variants";
+import type { PopoverContentProps } from "./popover";
 import type {
   ButtonProps,
   MenuItemProps as MenuItemPrimitiveProps,

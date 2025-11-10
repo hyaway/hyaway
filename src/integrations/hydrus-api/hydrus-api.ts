@@ -138,6 +138,12 @@ export type VerifyAccessKeyResponse = z.infer<
   typeof VerifyAccessKeyResponseSchema
 >;
 
+const SessionKeyResponseSchema = BaseResponseSchema.extend({
+  session_key: z.string().length(64),
+});
+
+export type SessionKeyResponse = z.infer<typeof SessionKeyResponseSchema>;
+
 // ============================================================================
 // API Functions
 // ============================================================================
