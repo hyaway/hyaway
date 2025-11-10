@@ -72,7 +72,12 @@ export const useGetFileMetadata = (file_id: string) => {
   const apiAccessKey = useApiAccessKey();
 
   return useQuery({
-    queryKey: ["getFileMetadata", apiEndpoint, simpleHash(apiAccessKey)],
+    queryKey: [
+      "getFileMetadata",
+      file_id,
+      apiEndpoint,
+      simpleHash(apiAccessKey),
+    ],
     queryFn: () => {
       if (!apiEndpoint || !apiAccessKey) {
         throw new Error("API endpoint and access key are required.");

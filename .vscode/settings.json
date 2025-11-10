@@ -11,5 +11,5 @@
   "tailwindCSS.experimental.classRegex": [
     ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
   ],
-  "cSpell.words": ["partialize"]
+  "cSpell.words": ["batshit", "overscan", "partialize", "yornaath"]
 }

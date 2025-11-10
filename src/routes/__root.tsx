@@ -24,7 +24,9 @@ function RootComponent() {
   return (
     <>
       <RouterProvider
-        navigate={(to, options) => router.navigate({ to, ...(options || {}) })}
+        navigate={(to, options: unknown) =>
+          router.navigate({ to, ...(options || {}) })
+        }
         useHref={(to) => router.buildLocation({ to }).href}
       >
         <MainNavbar />

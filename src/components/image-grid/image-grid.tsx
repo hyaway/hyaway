@@ -53,14 +53,13 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
-      if (entry) {
-        const newLanes = Math.max(
-          1,
-          Math.floor(entry.contentRect.width / (dimensions.width + 4)),
-        );
-        setLanes(newLanes);
-        rowVirtualizer.measure();
-      }
+
+      const newLanes = Math.max(
+        1,
+        Math.floor(entry.contentRect.width / (dimensions.width + 4)),
+      );
+      setLanes(newLanes);
+      rowVirtualizer.measure();
     });
 
     observer.observe(parentRef.current);

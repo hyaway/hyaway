@@ -13,7 +13,9 @@ import {
   getPageInfo,
   getPages,
   getServices,
-  requestNewPermissions, searchFiles, verifyAccessKey 
+  requestNewPermissions,
+  searchFiles,
+  verifyAccessKey,
 } from "./hydrus-api";
 import type { HydrusTagSearch, Page, SearchFilesOptions } from "./hydrus-api";
 import { simpleHash } from "@/lib/utils";
@@ -34,7 +36,7 @@ export const usePermissionsQuery = () => {
     select: (data) => {
       return {
         hasAllPermissions: data.permits_everything,
-        permissions: data.basic_permissions ?? [],
+        permissions: data.basic_permissions,
       };
     },
     staleTime: Infinity,
