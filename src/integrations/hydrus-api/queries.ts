@@ -7,17 +7,22 @@ import {
 import {
   getPages,
   type Page,
+  PageState,
   Permission,
   requestNewPermissions,
   verifyAccessKey,
 } from "./hydrus-api";
+
+// Simple hash for key (no crypto needed for cache key)
+const simpleHash = (str: string) =>
+  [...str].reduce((a, b) => a + b.charCodeAt(0), 0);
 
 export const usePermissionsQuery = () => {
   const apiEndpoint = useApiEndpoint();
   const apiAccessKey = useApiAccessKey();
 
   return useQuery({
-    queryKey: ["verifyAccess", apiEndpoint, apiAccessKey],
+    queryKey: ["verifyAccess", apiEndpoint, simpleHash(apiAccessKey)],
     queryFn: () => {
       if (!apiEndpoint || !apiAccessKey) {
         throw new Error("API endpoint and access key are required.");
@@ -70,30 +75,41 @@ export const useRequestNewPermissionsQuery = () => {
 };
 
 /**
- * Recursively flattens a page tree into an array of all pages
+ * Iteratively flattens a page tree into an array of all pages
  */
-const flattenPages = (page: Page): Page[] => {
-  const result: Page[] = [page];
-  if (page.pages) {
-    for (const childPage of page.pages) {
-      result.push(...flattenPages(childPage));
+const flattenPages = (root: Page): Page[] => {
+  const result: Page[] = [];
+  const stack: Page[] = [root];
+
+  while (stack.length) {
+    const current = stack.pop()!;
+    result.push(current);
+
+    if (current.pages && current.pages.length) {
+      // Push in reverse to preserve original recursive order
+      for (let i = current.pages.length - 1; i >= 0; i--) {
+        stack.push(current.pages[i]);
+      }
     }
   }
+  console.log(
+    "FLATTENED PAGES:",
+    result.map((p) => p.page_key),
+  );
   return result;
 };
 
 /**
  * Check if all pages in the tree are in a stable state (ready or cancelled)
  */
+const isStable = (page: Page): boolean => {
+  return (
+    page.page_state === PageState.READY ||
+    page.page_state === PageState.SEARCH_CANCELLED
+  );
+};
 const areAllPagesStable = (page: Page): boolean => {
-  const isStable =
-    page.page_state === 0 /* ready */ || page.page_state === 3; /* cancelled */
-
-  if (!page.pages) {
-    return isStable;
-  }
-
-  return isStable && flattenPages(page).every(areAllPagesStable);
+  return flattenPages(page).every(isStable);
 };
 
 /**
@@ -104,7 +120,7 @@ export const useGetPagesQuery = () => {
   const apiAccessKey = useApiAccessKey();
 
   return useQuery({
-    queryKey: ["getPages", apiEndpoint, apiAccessKey],
+    queryKey: ["getPages", apiEndpoint, simpleHash(apiAccessKey)],
     queryFn: () => {
       if (!apiEndpoint || !apiAccessKey) {
         throw new Error("API endpoint and access key are required.");
@@ -121,8 +137,10 @@ export const useGetPagesQuery = () => {
 
       // If all pages are stable (ready or cancelled), stop refetching
       if (areAllPagesStable(query.state.data.pages)) {
+        console.log("All pages are stable, stopping refetch.");
         return false;
       }
+      console.log("Some pages are still unstable, refetching...");
 
       // Otherwise, refetch every 5 seconds
       return 5000;
@@ -135,6 +153,8 @@ export const useGetPagesQuery = () => {
  */
 export const useGetMediaPagesQuery = () => {
   const { data, ...rest } = useGetPagesQuery();
+
+  console.log("DATA", data);
 
   const mediaPages = useMemo(
     () =>
