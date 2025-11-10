@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AxiosError } from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 import { Heading } from "@/components/ui/heading";
 import { Loader } from "@/components/ui/loader";
 import { Note } from "@/components/ui/note";
 import { Separator } from "@/components/ui/separator";
 import { useRecentlyDeletedFilesQuery } from "@/integrations/hydrus-api/queries";
 import { ImageGrid } from "@/components/image-grid/image-grid";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_auth/recently-deleted")({
   component: RouteComponent,
@@ -13,6 +15,7 @@ export const Route = createFileRoute("/_auth/recently-deleted")({
 
 function RouteComponent() {
   const { data, isLoading, isError, error } = useRecentlyDeletedFilesQuery();
+  const queryClient = useQueryClient();
 
   if (isLoading) {
     return <Loader />;
@@ -35,6 +38,16 @@ function RouteComponent() {
   return (
     <div>
       <Heading>Recently deleted</Heading>
+      <Separator className="my-2" />
+      <Button
+        onPress={() =>
+          queryClient.invalidateQueries({
+            queryKey: ["searchFiles", "recentlyArchived"],
+          })
+        }
+      >
+        Refetch
+      </Button>
       <Separator className="my-2" />
       {data?.file_ids && data.file_ids.length > 0 ? (
         <div>
