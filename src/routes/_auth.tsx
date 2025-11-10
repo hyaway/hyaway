@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_auth")({
 });
 
 function AuthLayout() {
-  const { hasRequiredPermissions, isLoading } = useVerifyAccessQuery("session");
+  const { data, isLoading } = useVerifyAccessQuery("session");
   const hydrusApi = useHydrusApiClient();
 
   if (isLoading && hydrusApi) {
@@ -19,7 +19,7 @@ function AuthLayout() {
     );
   }
 
-  if (!hasRequiredPermissions) {
+  if (!data?.hasRequiredPermissions) {
     return <Login />;
   }
 

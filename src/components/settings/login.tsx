@@ -3,7 +3,6 @@ import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useApiAccessKey,
-  useApiEndpoint,
   useAuthActions,
   useHydrusApiClient,
 } from "../../integrations/hydrus-api/hydrus-config-store";
@@ -13,17 +12,15 @@ import {
 } from "../../integrations/hydrus-api/queries/access";
 import { Button } from "../ui/button";
 import { Heading } from "../ui/heading";
-import { SecretInputField, TextInputField } from "../text-input-field";
 import { ProgressCircle } from "../ui/progress-circle";
 import { Note } from "../ui/note";
 import { getFormDataWithSubmitter } from "./form-utils";
 import { ApiEndpointCard } from "./api-endpoint-card";
+import { AccessKeyField } from "./access-key-field";
 
 export function Login() {
   const { setApiCredentials } = useAuthActions();
   const queryClient = useQueryClient();
-  const defaultEndpoint = useApiEndpoint();
-  const defaultAccessKey = useApiAccessKey();
   const requestNewPermissions = useRequestNewPermissionsMutation();
   const hydrusApi = useHydrusApiClient();
 
@@ -101,39 +98,8 @@ export function Login() {
         {requestNewPermissions.isSuccess && (
           <Note intent="success">New API access key obtained and saved.</Note>
         )}
-        <SecretInputField
-          label="API access key"
-          name="accessKey"
-          defaultValue={defaultAccessKey}
-          key={defaultAccessKey}
-          isRequired
-          isDisabled={pending}
-        />
-        <Button
-          type="submit"
-          className="self-start"
-          isDisabled={pending}
-          name="action"
-          value="save"
-        >
-          {persistentAccessQuery.isFetching ? (
-            <ProgressCircle
-              isIndeterminate
-              aria-label="Checking API connection"
-            />
-          ) : null}
-          {persistentAccessQuery.isFetching
-            ? "Checking"
-            : "Check API connection"}
-        </Button>
-        {!persistentAccessQuery.isFetching &&
-          persistentAccessQuery.isSuccess &&
-          persistentAccessQuery.hasRequiredPermissions && (
-            <Note intent="success">Access key API connection successful</Note>
-          )}
-        {!persistentAccessQuery.isFetching && persistentAccessQuery.isError && (
-          <Note intent="danger">{persistentAccessQuery.error.message}</Note>
-        )}
+
+        <AccessKeyField />
       </FormPrimitive>
 
       {!sessionAccessQuery.isLoading && (

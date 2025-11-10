@@ -28,28 +28,6 @@ export const useRequestNewPermissionsMutation = () => {
   });
 };
 
-export const usePermissionsQuery = (keyType: AccessKeyType) => {
-  const hydrusApi = useHydrusApiClient();
-
-  return useQuery({
-    queryKey: ["verifyAccess", keyType, hydrusApi],
-    queryFn: async () => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
-      return hydrusApi.verifyAccessKey(keyType);
-    },
-    enabled: !!hydrusApi,
-    // Persistent key rarely changes; keep effectively permanent.
-    // Session key lasts up to a day or until remote client restarts. Use a generous stale time & focus/refetch triggers
-    // instead of frequent polling. If the client restarts and a 419/403 occurs, interceptor + error state will surface it.
-    staleTime: keyType === "persistent" ? Infinity : 6 * 60 * 60 * 1000, // 6h; adjust upward if needed
-    refetchOnWindowFocus: keyType === "session", // pick up invalidation after tab inactivity
-    refetchOnReconnect: keyType === "session", // network reconnect may invalidate prior state
-    refetchInterval: false, // no periodic polling; rely on user activity & error-driven invalidation
-  });
-};
-
 const requiredPermissions = [
   Permission.IMPORT_AND_DELETE_FILES,
   Permission.EDIT_FILE_TAGS,
@@ -67,12 +45,32 @@ function checkPermissions(permissionsData?: VerifyAccessKeyResponse) {
 }
 
 export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
-  const { data: permissionsData, ...rest } = usePermissionsQuery(keyType);
+  const hydrusApi = useHydrusApiClient();
 
-  return {
-    ...rest,
-    hasRequiredPermissions: checkPermissions(permissionsData),
-  };
+  return useQuery({
+    queryKey: ["verifyAccess", keyType, hydrusApi],
+    queryFn: async () => {
+      if (!hydrusApi) {
+        throw new Error("Hydrus API client is required.");
+      }
+      return hydrusApi.verifyAccessKey(keyType);
+    },
+    // compute whether the API key has required permissions inside the query
+    select: (data: VerifyAccessKeyResponse) => {
+      return {
+        raw: data,
+        hasRequiredPermissions: checkPermissions(data),
+      };
+    },
+    enabled: !!hydrusApi,
+    // Persistent key rarely changes; keep effectively permanent.
+    // Session key lasts up to a day or until remote client restarts. Use a generous stale time & focus/refetch triggers
+    // instead of frequent polling. If the client restarts and a 419/403 occurs, interceptor + error state will surface it.
+    staleTime: keyType === "persistent" ? Infinity : 6 * 60 * 60 * 1000, // 6h; adjust upward if needed
+    refetchOnWindowFocus: keyType === "session", // pick up invalidation after tab inactivity
+    refetchOnReconnect: keyType === "session", // network reconnect may invalidate prior state
+    refetchInterval: false, // no periodic polling; rely on user activity & error-driven invalidation
+  });
 };
 
 /**

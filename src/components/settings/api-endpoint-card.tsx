@@ -15,7 +15,7 @@ import { useApiEndpoint } from "@/integrations/hydrus-api/hydrus-config-store";
 
 export function ApiEndpointCard() {
   const apiEndpoint = useApiEndpoint();
-  const { data, isFetching, isSuccess, isError, error } =
+  const { data, isLoading, isFetching, isSuccess, isError, error } =
     useApiVersionQuery(apiEndpoint);
 
   return (
@@ -41,7 +41,7 @@ export function ApiEndpointCard() {
         >
           {isFetching ? "Checking endpoint..." : "Check endpoint"}
         </Button>
-        {isFetching ? (
+        {isLoading ? (
           <Skeleton className="h-28" />
         ) : isSuccess ? (
           <Note intent="success">
