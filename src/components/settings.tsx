@@ -67,7 +67,7 @@ export function Settings() {
         {
           onSuccess: ({ access_key }) => {
             setApiCredentials(access_key, endpoint);
-            queryClient.invalidateQueries({ queryKey: ["verifyAccess"] });
+            queryClient.removeQueries({ queryKey: ["verifyAccess"] });
           },
         },
       );
@@ -77,7 +77,7 @@ export function Settings() {
       typeof accessKey === "string"
     ) {
       setApiCredentials(accessKey, endpoint);
-      queryClient.invalidateQueries({ queryKey: ["verifyAccess"] });
+      queryClient.removeQueries({ queryKey: ["verifyAccess"] });
     }
   };
 
@@ -152,6 +152,7 @@ export function Settings() {
             : "Check API connection"}
         </Button>
         {!persistentAccessQuery.isFetching &&
+          persistentAccessQuery.isSuccess &&
           persistentAccessQuery.hasRequiredPermissions && (
             <Note intent="success">Access key API connection successful</Note>
           )}
@@ -167,7 +168,7 @@ export function Settings() {
           isDisabled={pending}
           onClick={async () => {
             await hydrusApi?.refreshSessionKey();
-            queryClient.invalidateQueries({
+            queryClient.removeQueries({
               queryKey: ["verifyAccess", "session"],
             });
           }}
@@ -182,6 +183,7 @@ export function Settings() {
         </Button>
       )}
       {!sessionAccessQuery.isFetching &&
+        sessionAccessQuery.isSuccess &&
         sessionAccessQuery.hasRequiredPermissions && (
           <Note intent="success">Session key API connection successful</Note>
         )}
