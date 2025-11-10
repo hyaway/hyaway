@@ -28,24 +28,34 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
         api_endpoint: previousApiEndpoint,
         apiClient: previousApiClient,
       } = get();
-      let nextApiClient = previousApiClient;
-      if (accessKey && endpoint) {
+
+      const nextApiAccessKey =
+        accessKey === undefined ? previousApiAccessKey : (accessKey ?? "");
+      const nextApiEndpoint =
+        endpoint === undefined ? previousApiEndpoint : (endpoint ?? "");
+
+      let nextApiClient: HydrusApiClient | null = previousApiClient;
+
+      if (nextApiAccessKey && nextApiEndpoint) {
         if (
-          accessKey !== previousApiAccessKey ||
-          endpoint !== previousApiEndpoint ||
-          !previousApiClient
+          !previousApiClient ||
+          nextApiAccessKey !== previousApiAccessKey ||
+          nextApiEndpoint !== previousApiEndpoint
         ) {
-          nextApiClient = new HydrusApiClient(endpoint, accessKey);
+          nextApiClient = new HydrusApiClient(
+            nextApiEndpoint,
+            nextApiAccessKey,
+          );
         }
       } else {
         nextApiClient = null;
       }
+
       set({
-        api_access_key: accessKey ?? "",
-        api_endpoint: endpoint ?? "",
+        api_access_key: nextApiAccessKey,
+        api_endpoint: nextApiEndpoint,
         apiClient: nextApiClient,
       });
-      getContext().queryClient.clear();
     },
     reset: () => {
       const initialState = store.getInitialState();
