@@ -50,21 +50,20 @@ export function PureImageGrid({
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const [desiredLanes, setLanes] = useState(0);
-  const lanes = items.length < desiredLanes ? items.length : desiredLanes;
+  const lanes =
+    items.length < desiredLanes ? Math.max(items.length, 2) : desiredLanes;
+
+  const [width, setWidth] = useState(defaultDimensions.width);
 
   const heights = useMemo(
-    () =>
-      items.map(
-        (item) =>
-          Math.min(item.height / item.width, 3) * defaultDimensions.width,
-      ),
-    [items, defaultDimensions.width],
+    () => items.map((item) => Math.min(item.height / item.width, 3) * width),
+    [items, width],
   );
 
   const rowVirtualizer = useWindowVirtualizer({
     count: items.length,
     estimateSize: (i) => heights[i],
-    overscan: 5,
+    overscan: 3,
     gap: 8,
     lanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
@@ -78,17 +77,25 @@ export function PureImageGrid({
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       const newLanes = Math.max(
-        1,
+        2,
         Math.floor(entry.contentRect.width / (defaultDimensions.width + 4)),
       );
+      if (newLanes < 3) {
+        setWidth(entry.contentRect.width / newLanes - 4);
+      } else {
+        setWidth(defaultDimensions.width);
+      }
       setLanes(newLanes);
-      rowVirtualizer.measure();
     });
 
     observer.observe(parentRef.current);
 
     return () => observer.disconnect();
   }, [defaultDimensions.width, rowVirtualizer]);
+
+  useLayoutEffect(() => {
+    rowVirtualizer.measure();
+  }, [heights, width, lanes, rowVirtualizer]);
 
   return (
     <>
@@ -105,13 +112,11 @@ export function PureImageGrid({
                 key={virtualRow.index}
                 style={{
                   left: `${(virtualRow.lane * 100) / lanes}%`,
-                  width: `${defaultDimensions.width}px`,
+                  width: `${width}px`,
                   height: `${heights[virtualRow.index]}px`,
                   transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
-                  transition: "transform 150ms ease-out, left 150ms ease-out",
-                  willChange: "transform,left",
                 }}
-                className="absolute top-0"
+                className="absolute top-0 transition-[left,transform,width,height] duration-350 ease-out will-change-[left,transform,width,height]"
               >
                 <Thumbnail fileId={items[virtualRow.index].file_id} />
               </div>
