@@ -36,7 +36,7 @@ export const usePermissionsQuery = () => {
     select: (data) => {
       return {
         hasAllPermissions: data.permits_everything,
-        permissions: data.basic_permissions,
+        permissions: data.basic_permissions ?? [],
       };
     },
     staleTime: Infinity,

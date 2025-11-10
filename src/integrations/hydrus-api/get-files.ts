@@ -2,7 +2,7 @@ import axios from "axios";
 import z from "zod";
 import memoize from "lodash.memoize";
 import * as batshit from "@yornaath/batshit";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useApiAccessKey, useApiEndpoint } from "./hydrus-config-store";
 import { BaseResponseSchema, HYDRUS_API_HEADER_ACCESS_KEY } from "./hydrus-api";
 import { simpleHash } from "@/lib/utils";
@@ -89,5 +89,32 @@ export const useGetFileMetadata = (file_id: string) => {
     },
     enabled: (!!apiEndpoint && !!apiAccessKey) || !!file_id,
     staleTime: Infinity, // Should not change without user action
+  });
+};
+
+export const useGetMultipleFileMetadata = (file_ids: string[]) => {
+  const apiEndpoint = useApiEndpoint();
+  const apiAccessKey = useApiAccessKey();
+
+  return useQueries({
+    queries: file_ids.map((file_id) => ({
+      queryKey: [
+        "getFileMetadata",
+        file_id,
+        apiEndpoint,
+        simpleHash(apiAccessKey),
+      ],
+      queryFn: () => {
+        if (!apiEndpoint || !apiAccessKey) {
+          throw new Error("API endpoint and access key are required.");
+        }
+        if (!file_id) {
+          throw new Error("File Id is required.");
+        }
+        return getFileMetadataBatcher(apiEndpoint, apiAccessKey).fetch(file_id);
+      },
+      enabled: (!!apiEndpoint && !!apiAccessKey) || !!file_id,
+      staleTime: Infinity, // Should not change without user action
+    })),
   });
 };

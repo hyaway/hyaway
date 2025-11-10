@@ -4,10 +4,17 @@ import storybook from "eslint-plugin-storybook";
 import pluginQuery from "@tanstack/eslint-plugin-query";
 import { tanstackConfig } from "@tanstack/eslint-config";
 import { defineConfig, globalIgnores } from "eslint/config";
+import tseslint from "typescript-eslint";
 
-export default [
+export default tseslint.config(
   ...pluginQuery.configs["flat/recommended"],
   ...tanstackConfig,
   ...storybook.configs["flat/recommended"],
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      "@typescript-eslint/array-type": ["error", { default: "array" }],
+    },
+  },
   globalIgnores(["eslint.config.js", "prettier.config.js"]),
-];
+);

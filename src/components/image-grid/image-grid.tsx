@@ -3,7 +3,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { Thumbnail } from "./thumbnail";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries";
 
-export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
+export function ImageGrid({ fileIds }: { fileIds: number[] }) {
   const dimensions = useThumbnailDimensions();
 
   const items = useMemo(
