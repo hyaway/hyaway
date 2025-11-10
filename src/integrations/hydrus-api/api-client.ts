@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+  BaseResponseSchema,
   GetClientOptionsResponseSchema,
   GetFileMetadataResponseSchema,
   GetPageInfoResponseSchema,
@@ -109,6 +110,11 @@ export class HydrusApiClient {
   // #endregion Interceptors
 
   // #region Access
+  public static async getApiVersion(apiEndpoint: string) {
+    const response = await axios.get(`${apiEndpoint}/api_version`);
+    return BaseResponseSchema.parse(response.data);
+  }
+
   public static async requestNewPermissions(
     apiEndpoint: string,
     name: string,

@@ -4,6 +4,30 @@ import { useHydrusApiClient } from "../hydrus-config-store";
 import { Permission } from "../models";
 import type { AccessKeyType, VerifyAccessKeyResponse } from "../models";
 
+export const useApiVersionQuery = (apiEndpoint: string) => {
+  return useQuery({
+    queryKey: ["apiVersion", apiEndpoint],
+    queryFn: async () => {
+      return HydrusApiClient.getApiVersion(apiEndpoint);
+    },
+    enabled: !!apiEndpoint,
+  });
+};
+
+export const useRequestNewPermissionsMutation = () => {
+  return useMutation({
+    mutationFn: async ({
+      apiEndpoint,
+      name,
+    }: {
+      apiEndpoint: string;
+      name: string;
+    }) => {
+      return HydrusApiClient.requestNewPermissions(apiEndpoint, name);
+    },
+  });
+};
+
 export const usePermissionsQuery = (keyType: AccessKeyType) => {
   const hydrusApi = useHydrusApiClient();
 
@@ -66,20 +90,6 @@ export const useVerifyAccessMutation = () => {
         raw: response,
         hasRequiredPermissions: checkPermissions(response),
       };
-    },
-  });
-};
-
-export const useRequestNewPermissionsMutation = () => {
-  return useMutation({
-    mutationFn: async ({
-      apiEndpoint,
-      name,
-    }: {
-      apiEndpoint: string;
-      name: string;
-    }) => {
-      return HydrusApiClient.requestNewPermissions(apiEndpoint, name);
     },
   });
 };

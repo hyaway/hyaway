@@ -11,7 +11,7 @@ import { ProgressCircle } from "../ui/progress-circle";
 import { Note } from "../ui/note";
 import { getFormDataWithSubmitter } from "./form-utils";
 
-export function RequestNewToken() {
+export function RequestNewTokenStep() {
   const { setApiCredentials } = useAuthActions();
   const queryClient = useQueryClient();
   const defaultApiEndpoint = useApiEndpoint();

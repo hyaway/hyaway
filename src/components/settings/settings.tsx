@@ -17,6 +17,7 @@ import { SecretInputField, TextInputField } from "../text-input-field";
 import { ProgressCircle } from "../ui/progress-circle";
 import { Note } from "../ui/note";
 import { getFormDataWithSubmitter } from "./form-utils";
+import { ApiEndpointCard } from "./api-endpoint-card";
 
 export function Settings() {
   const { setApiCredentials } = useAuthActions();
@@ -37,7 +38,9 @@ export function Settings() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { endpoint, accessKey, action } = getFormDataWithSubmitter(e);
-    if (action === "request_api_key" && typeof endpoint === "string") {
+    if (action === "check_endpoint") {
+      queryClient.resetQueries({ queryKey: ["apiVersion"] });
+    } else if (action === "request_api_key" && typeof endpoint === "string") {
       requestNewPermissions.mutate(
         { apiEndpoint: endpoint, name: "hydrus-archive-helper" },
         {
@@ -61,6 +64,7 @@ export function Settings() {
     <div className="mx-auto flex max-w-md flex-col gap-4">
       <FormPrimitive onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Heading level={2}>Hydrus API Settings</Heading>
+        <ApiEndpointCard />
 
         <TextInputField
           label="API endpoint"
