@@ -4,7 +4,7 @@ import { AxiosError } from "axios";
 import { Loader } from "../ui/loader";
 import { Note } from "../ui/note";
 import { Badge } from "../ui/badge";
-import { Thumbnail } from "./thumbnail";
+import { ImageGridCard } from "./image-grid-card";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/get-files";
 import { cn } from "@/lib/utils";
@@ -154,25 +154,6 @@ export function PureImageGrid({
                 width;
               const scale = Math.min(4, Math.max(1.2, rawScale));
 
-              const isFirstLane = virtualRow.lane === 0;
-              const isLastLane = virtualRow.lane === lanes - 1;
-              const isTopRow = virtualRow.index < lanes;
-              const lastRowStart = items.length - 2 * lanes;
-              const isBottomRow = virtualRow.index >= lastRowStart;
-
-              let originClass = "origin-center";
-              if (isTopRow && isFirstLane) originClass = "origin-top-left";
-              else if (isTopRow && isLastLane) originClass = "origin-top-right";
-              else if (isBottomRow && isFirstLane)
-                originClass = "origin-bottom-left";
-              else if (isBottomRow && isLastLane)
-                originClass = "origin-bottom-right";
-              else if (isTopRow) originClass = "origin-top";
-              else if (isBottomRow) originClass = "origin-bottom";
-              else if (isFirstLane) originClass = "origin-left";
-              else if (isLastLane) originClass = "origin-right";
-              else originClass = "origin-center";
-
               return (
                 <div
                   key={virtualRow.index}
@@ -185,9 +166,11 @@ export function PureImageGrid({
                   }}
                   className="absolute top-0 z-0 overflow-visible transition-[left,transform,width,height] duration-350 ease-out will-change-[left,transform,width,height] hover:z-999"
                 >
-                  <Thumbnail
+                  <ImageGridCard
                     fileId={item.file_id}
-                    innerClassName={originClass}
+                    virtualRow={virtualRow}
+                    lanes={lanes}
+                    totalItemsCount={items.length}
                   />
                 </div>
               );
