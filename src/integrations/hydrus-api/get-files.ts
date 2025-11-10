@@ -1,15 +1,12 @@
 import axios from "axios";
 import z from "zod";
-import memoize from "lodash.memoize";
-import * as batshit from "@yornaath/batshit";
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useApiAccessKey, useApiEndpoint } from "./hydrus-config-store";
 import { BaseResponseSchema, HYDRUS_API_HEADER_ACCESS_KEY } from "./hydrus-api";
-import type { UseQueryResult } from "@tanstack/react-query";
 import { simpleHash } from "@/lib/utils";
 
-const FileMetadataBasicSchema = z.object({
+const FileMetadataSchema = z.object({
+  blurhash: z.string(),
   duration: z.number().nullable(),
   ext: z.string(),
   file_id: z.number(),
@@ -24,16 +21,6 @@ const FileMetadataBasicSchema = z.object({
   num_words: z.number().nullable(),
   size: z.number(),
   width: z.number(),
-});
-
-const FileMetadataSchema = FileMetadataBasicSchema.extend({
-  blurhash: z.string(),
-  thumbnail_width: z.number(),
-  thumbnail_height: z.number(),
-  is_inbox: z.boolean(),
-  is_local: z.boolean(),
-  is_trashed: z.boolean(),
-  is_deleted: z.boolean(),
 });
 
 export type FileMetadata = z.infer<typeof FileMetadataSchema>;
@@ -61,7 +48,7 @@ export async function getFileMetadata(
         file_ids: JSON.stringify(file_ids),
         create_new_file_ids: false,
         detailed_url_information: false,
-        only_return_basic_information: false,
+        only_return_basic_information: true,
         include_blurhash: true,
         include_milliseconds: false,
         include_notes: false,
@@ -72,29 +59,14 @@ export async function getFileMetadata(
   return GetFileMetadataResponseSchema.parse(response.data).metadata;
 }
 
-const getFileMetadataBatcher = memoize(
-  (apiEndpoint: string, apiAccessKey: string) => {
-    return batshit.create({
-      name: "HydrusGetFileMetadataBatcher",
-      fetcher: async (file_ids: Array<number>) =>
-        await getFileMetadata(apiEndpoint, apiAccessKey, file_ids),
-      scheduler: batshit.windowedFiniteBatchScheduler({
-        windowMs: 50,
-        maxBatchSize: 128,
-      }),
-      resolver: batshit.keyResolver("file_id"),
-    });
-  },
-);
-
-export const useGetFileMetadata = (file_id: number) => {
+export const useGetFilesMetadata = (file_ids: Array<number>) => {
   const apiEndpoint = useApiEndpoint();
   const apiAccessKey = useApiAccessKey();
 
   return useQuery({
     queryKey: [
-      "getFileMetadata",
-      file_id,
+      "getFilesMetadata",
+      file_ids,
       apiEndpoint,
       simpleHash(apiAccessKey),
     ],
@@ -102,59 +74,18 @@ export const useGetFileMetadata = (file_id: number) => {
       if (!apiEndpoint || !apiAccessKey) {
         throw new Error("API endpoint and access key are required.");
       }
-      if (!file_id) {
-        throw new Error("File Id is required.");
+      if (file_ids.length === 0) {
+        throw new Error("File Ids are required.");
       }
-      return getFileMetadataBatcher(apiEndpoint, apiAccessKey).fetch(file_id);
+      return getFileMetadata(apiEndpoint, apiAccessKey, file_ids);
     },
-    enabled: (!!apiEndpoint && !!apiAccessKey) || !!file_id,
+    select: (data) =>
+      data.map((meta) => ({
+        file_id: meta.file_id,
+        width: meta.width,
+        height: meta.height,
+      })),
+    enabled: !!apiEndpoint && !!apiAccessKey && file_ids.length > 0,
     staleTime: Infinity, // Should not change without user action
-  });
-};
-
-export const useGetMultipleFileMetadata = (file_ids: Array<number>) => {
-  const apiEndpoint = useApiEndpoint();
-  const apiAccessKey = useApiAccessKey();
-
-  const combiner = useCallback(
-    (results: Array<UseQueryResult<FileMetadata | null>>) => {
-      return {
-        data: results
-          .map((res) => res.data)
-          .filter(Boolean)
-          .map((meta) => ({
-            file_id: meta!.file_id,
-            thumbnail_width: meta!.thumbnail_width,
-            thumbnail_height: meta!.thumbnail_height,
-          })),
-        isLoading: results.some((res) => res.isLoading),
-        isFetching: results.some((res) => res.isFetching),
-        isError: results.some((res) => res.isError),
-      } as const;
-    },
-    [],
-  );
-
-  return useQueries({
-    queries: file_ids.map((file_id) => ({
-      queryKey: [
-        "getFileMetadata",
-        file_id,
-        apiEndpoint,
-        simpleHash(apiAccessKey),
-      ],
-      queryFn: () => {
-        if (!apiEndpoint || !apiAccessKey) {
-          throw new Error("API endpoint and access key are required.");
-        }
-        if (!file_id) {
-          throw new Error("File Id is required.");
-        }
-        return getFileMetadataBatcher(apiEndpoint, apiAccessKey).fetch(file_id);
-      },
-      enabled: (!!apiEndpoint && !!apiAccessKey) || !!file_id,
-      staleTime: Infinity, // Should not change without user action
-    })),
-    combine: combiner,
   });
 };

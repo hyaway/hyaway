@@ -351,7 +351,10 @@ export const useSearchFilesQuery = (
 };
 
 export const useThumbnailDimensions = () => {
-  const { data } = useGetClientOptionsQuery();
+  const { data, isFetched } = useGetClientOptionsQuery();
+  if (isFetched && !data) {
+    return undefined;
+  }
 
   return useMemo(() => {
     if (

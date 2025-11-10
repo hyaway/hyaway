@@ -1,66 +1,69 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { AxiosError } from "axios";
 import React, { useLayoutEffect, useMemo, useState } from "react";
+import { Loader } from "../ui/loader";
+import { Note } from "../ui/note";
 import { Thumbnail } from "./thumbnail";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries";
-import { useGetMultipleFileMetadata } from "@/integrations/hydrus-api/get-files";
+import { useGetFilesMetadata } from "@/integrations/hydrus-api/get-files";
 
 export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
-  const result = useGetMultipleFileMetadata(fileIds);
+  const { data, isLoading, isError, error } = useGetFilesMetadata(fileIds);
+  const defaultDimensions = useThumbnailDimensions();
 
-  if (result.isLoading) {
-    return <div>Loading...</div>;
+  if (!defaultDimensions || isLoading) {
+    return <Loader />;
   }
-  if (result.isError) {
-    return <div>Error loading files</div>;
+
+  if (isError) {
+    return (
+      <Note intent="danger">
+        {error instanceof Error
+          ? error.message
+          : "An unknown error occurred while fetching gallery"}
+        <br />
+        {error instanceof AxiosError && error.response?.data?.error && (
+          <span>{error.response.data.error}</span>
+        )}
+      </Note>
+    );
   }
-  return <div>{JSON.stringify(result.data)}</div>;
-  // return (
-  //   <ImageGrid
-  //     fileIds={results
-  //       .filter(({ data }) => !!data)
-  //       .map(({ data }) => data!.file_id)}
-  //   />
-  // );
+
+  if (!data || data.length === 0) {
+    return <p>No images to display.</p>;
+  }
+
+  return <PureImageGrid items={data} defaultDimensions={defaultDimensions} />;
 }
 
-export function PureImageGrid({ fileIds }: { fileIds: Array<number> }) {
-  const dimensions = useThumbnailDimensions();
-
-  const items = useMemo(
-    () =>
-      fileIds.map((fileId, index) => {
-        // Deterministic pseudo-random number in [0,1)
-        const seed = fileId ^ ((index + 1) * 0x45d9f3b);
-        let x = seed;
-        x = ((x >> 16) ^ x) * 0x45d9f3b;
-        x = ((x >> 16) ^ x) * 0x45d9f3b;
-        x = (x >> 16) ^ x;
-        const rand01 = (x >>> 0) / 0xffffffff;
-
-        const minRatio = 0.5;
-        const maxRatio = 1.4;
-        const aspectRatio = +(
-          minRatio +
-          rand01 * (maxRatio - minRatio)
-        ).toFixed(3);
-
-        return {
-          fileId,
-          id: fileId,
-          aspectRatio,
-        };
-      }),
-    [fileIds],
-  );
-
+export function PureImageGrid({
+  items,
+  defaultDimensions,
+}: {
+  items: Array<{
+    file_id: number;
+    width: number;
+    height: number;
+  }>;
+  defaultDimensions: { width: number; height: number };
+}) {
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const [desiredLanes, setLanes] = useState(0);
   const lanes = items.length < desiredLanes ? items.length : desiredLanes;
 
+  const heights = useMemo(
+    () =>
+      items.map(
+        (item) =>
+          Math.min(item.height / item.width, 3) * defaultDimensions.width,
+      ),
+    [items, defaultDimensions.width],
+  );
+
   const rowVirtualizer = useWindowVirtualizer({
     count: items.length,
-    estimateSize: (i) => items[i].aspectRatio * dimensions.width,
+    estimateSize: (i) => heights[i],
     overscan: 5,
     gap: 8,
     lanes,
@@ -76,7 +79,7 @@ export function PureImageGrid({ fileIds }: { fileIds: Array<number> }) {
       const entry = entries[0];
       const newLanes = Math.max(
         1,
-        Math.floor(entry.contentRect.width / (dimensions.width + 4)),
+        Math.floor(entry.contentRect.width / (defaultDimensions.width + 4)),
       );
       setLanes(newLanes);
       rowVirtualizer.measure();
@@ -85,7 +88,7 @@ export function PureImageGrid({ fileIds }: { fileIds: Array<number> }) {
     observer.observe(parentRef.current);
 
     return () => observer.disconnect();
-  }, [dimensions.width, rowVirtualizer]);
+  }, [defaultDimensions.width, rowVirtualizer]);
 
   return (
     <>
@@ -102,15 +105,15 @@ export function PureImageGrid({ fileIds }: { fileIds: Array<number> }) {
                 key={virtualRow.index}
                 style={{
                   left: `${(virtualRow.lane * 100) / lanes}%`,
-                  width: `${dimensions.width}px`,
-                  height: `${items[virtualRow.index].aspectRatio * dimensions.width}px`,
+                  width: `${defaultDimensions.width}px`,
+                  height: `${heights[virtualRow.index]}px`,
                   transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
                   transition: "transform 150ms ease-out, left 150ms ease-out",
                   willChange: "transform,left",
                 }}
                 className="absolute top-0"
               >
-                <Thumbnail fileId={items[virtualRow.index].fileId} />
+                <Thumbnail fileId={items[virtualRow.index].file_id} />
               </div>
             ))}
         </div>
