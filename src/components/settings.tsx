@@ -13,6 +13,8 @@ import { Heading } from "./ui/heading";
 import { SecretInputField, TextInputField } from "./text-input-field";
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import { ProgressCircle } from "./ui/progress-circle";
+import { Note } from "./ui/note";
 
 export function Settings() {
   const { setApiCredentials } = useAuthActions();
@@ -60,6 +62,7 @@ export function Settings() {
         {
           onSuccess: ({ access_key }) => {
             setApiCredentials(access_key, endpoint);
+            queryClient.invalidateQueries({ queryKey: ["verifyAccess"] });
           },
         },
       );
@@ -69,8 +72,8 @@ export function Settings() {
       typeof accessKey === "string"
     ) {
       setApiCredentials(accessKey, endpoint);
+      queryClient.invalidateQueries({ queryKey: ["verifyAccess"] });
     }
-    queryClient.invalidateQueries({ queryKey: ["verifyAccess"] });
   };
 
   return (
@@ -95,12 +98,18 @@ export function Settings() {
         name="action"
         value="request_api_key"
       >
+        {requestNewPermissions.isPending ? (
+          <ProgressCircle
+            isIndeterminate
+            aria-label="Requesting new API access key"
+          />
+        ) : null}
         {requestNewPermissions.isPending
-          ? "Requesting new API access key..."
+          ? "Requesting new API access key"
           : "Request new API access key"}
       </Button>
       {requestNewPermissions.isError && (
-        <p className="text-red-500">
+        <Note intent="danger">
           {requestNewPermissions.error instanceof Error
             ? requestNewPermissions.error.message
             : "An unknown error occurred while requesting new permissions."}
@@ -109,10 +118,10 @@ export function Settings() {
             requestNewPermissions.error.response?.data?.error && (
               <span>{requestNewPermissions.error.response.data.error}</span>
             )}
-        </p>
+        </Note>
       )}
       {requestNewPermissions.isSuccess && (
-        <p className="text-green-600">New API access key obtained and saved.</p>
+        <Note intent="success">New API access key obtained and saved.</Note>
       )}
       <SecretInputField
         label="API access key"
@@ -129,14 +138,18 @@ export function Settings() {
         name="action"
         value="save"
       >
-        {isFetching ? "Verifying..." : "Check"}
+        {isFetching ? (
+          <ProgressCircle
+            isIndeterminate
+            aria-label="Checking API connection"
+          />
+        ) : null}
+        {isFetching ? "Checking" : "Check API connection"}
       </Button>
       {!isFetching && hasRequiredPermissions && (
-        <p className="text-green-600">API connection successful</p>
+        <Note intent="success">API connection successful</Note>
       )}
-      {!isFetching && isError && (
-        <p className="text-red-500">{error.message}</p>
-      )}
+      {!isFetching && isError && <Note intent="danger">{error.message}</Note>}
     </FormPrimitive>
   );
 }

@@ -28,6 +28,7 @@ export const usePermissionsQuery = () => {
         permissions: data.basic_permissions ?? [],
       };
     },
+    staleTime: Infinity,
   });
 };
 
