@@ -3,14 +3,12 @@ import {
   MoonIcon,
   SunIcon,
 } from "@heroicons/react/20/solid";
-import type {Theme} from "@/lib/theme-store";
+import type { Theme } from "@/lib/theme-store";
 import { Button } from "@/components/ui/button";
 import {
-  
   getWindowSystemTheme,
-  useActiveTheme,
   useThemeActions,
-  useThemePreference
+  useThemePreference,
 } from "@/lib/theme-store";
 import { cn } from "@/lib/utils";
 

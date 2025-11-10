@@ -1,7 +1,7 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries";
 import React, { useLayoutEffect, useMemo, useState } from "react";
 import { Thumbnail } from "./thumbnail";
+import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries";
 
 export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
   const dimensions = useThumbnailDimensions();
