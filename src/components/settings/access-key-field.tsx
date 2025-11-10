@@ -5,7 +5,6 @@ import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/acce
 import { Button } from "../ui/button";
 import { SecretInputField } from "../text-input-field";
 import { Note } from "../ui/note";
-import { Skeleton } from "../ui/skeleton";
 import {
   SETTINGS_ACCESS_KEY_FIELD_NAME,
   SETTINGS_ACTION,
@@ -39,7 +38,7 @@ export function AccessKeyField() {
       (typeof accessKey === "string" || accessKey === null)
     ) {
       setApiCredentials(accessKey, undefined);
-      queryClient.invalidateQueries({ queryKey: ["verifyAccess"] });
+      queryClient.resetQueries({ queryKey: ["verifyAccess"] });
     }
   };
 
@@ -49,6 +48,7 @@ export function AccessKeyField() {
         label="API access key"
         name={SETTINGS_ACCESS_KEY_FIELD_NAME}
         defaultValue={apiAccessKey}
+        key={apiAccessKey}
         isRequired
         isDisabled={isLoading}
         minLength={64}
@@ -56,14 +56,14 @@ export function AccessKeyField() {
       />
       <Button
         type="submit"
-        isDisabled={isLoading}
+        isDisabled={isLoading || !apiEndpoint}
         name={SETTINGS_ACTION}
         value={SETTINGS_SAVE_ACCESS_KEY_ACTION}
       >
         {isFetching ? "Checking" : "Check API connection"}
       </Button>
       {isLoading ? (
-        <Skeleton className="h-28" />
+        <Note intent="info">Checking API access key...</Note>
       ) : isSuccess ? (
         data.hasRequiredPermissions ? (
           <Note intent="success">

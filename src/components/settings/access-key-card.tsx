@@ -13,7 +13,7 @@ export function AccessKeyCard() {
   return (
     <Card className="max-w-lg">
       <CardHeader>
-        <CardTitle>2. Get an access key</CardTitle>
+        <CardTitle>2. Set access key</CardTitle>
         <CardDescription>
           Generate or enter an access key for your Hydrus client.
         </CardDescription>

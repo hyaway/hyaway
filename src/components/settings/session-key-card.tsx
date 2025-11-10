@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Skeleton } from "../ui/skeleton";
 import {
   SETTINGS_ACTION,
   SETTINGS_REQUEST_SESSION_KEY_ACTION,
@@ -43,6 +42,7 @@ export function SessionKeyCard() {
       <CardContent className="flex flex-col gap-4">
         <SecretInputField
           label="API session key"
+          key={sessionKey}
           value={sessionKey}
           isDisabled={true}
         />
@@ -50,17 +50,20 @@ export function SessionKeyCard() {
           type="button"
           name={SETTINGS_ACTION}
           value={SETTINGS_REQUEST_SESSION_KEY_ACTION}
-          onPress={async () => {
-            await hydrusApi?.refreshSessionKey();
-            queryClient.invalidateQueries({
-              queryKey: ["verifyAccess", "session"],
+          onPress={() => {
+            hydrusApi?.refreshSessionKey().finally(() => {
+              queryClient.resetQueries({
+                queryKey: ["verifyAccess", "session"],
+              });
             });
           }}
         >
           {isFetching ? "Refreshing" : "Refresh session key"}
         </Button>
-        {isLoading ? (
-          <Skeleton className="h-28" />
+        {!sessionKey ? (
+          <Note intent="warning">No session key</Note>
+        ) : isLoading ? (
+          <Note intent="info">Checking session key...</Note>
         ) : isSuccess ? (
           data.hasRequiredPermissions ? (
             <Note intent="success">

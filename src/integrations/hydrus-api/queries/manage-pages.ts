@@ -144,6 +144,7 @@ export const useRefreshPageMutation = () => {
         queryKey: ["getPages"],
       });
     },
+    mutationKey: ["refreshRemotePage"],
   });
 };
 
@@ -157,5 +158,6 @@ export const useFocusPageMutation = () => {
       }
       return hydrusApi.focusPage(pageKey);
     },
+    mutationKey: ["focusRemotePage"],
   });
 };

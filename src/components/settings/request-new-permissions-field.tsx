@@ -2,7 +2,6 @@ import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRequestNewPermissionsMutation } from "../../integrations/hydrus-api/queries/access";
 import { Button } from "../ui/button";
-import { Skeleton } from "../ui/skeleton";
 import { Note } from "../ui/note";
 import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
 import {
@@ -30,7 +29,9 @@ export function RequestNewPermissionsField() {
             {
               onSuccess: ({ access_key }) => {
                 setApiCredentials(access_key, apiEndpoint);
-                queryClient.removeQueries({ queryKey: ["verifyAccess"] });
+                setTimeout(() => {
+                  queryClient.removeQueries({ queryKey: ["verifyAccess"] });
+                }, 5000);
               },
             },
           );
@@ -38,10 +39,12 @@ export function RequestNewPermissionsField() {
       >
         {isPending
           ? `Requesting new API access key for ${apiEndpoint}...`
-          : `Request new API access key for ${apiEndpoint}`}
+          : apiEndpoint
+            ? `Request new API access key for ${apiEndpoint}`
+            : "Request new API access key"}
       </Button>
-      {isPending ? (
-        <Skeleton className="h-28" />
+      {!apiEndpoint ? null : isPending ? (
+        <Note intent="info">Requesting new API access key...</Note>
       ) : isSuccess ? (
         <Note intent="success">
           New API access key for <b>{apiEndpoint}</b> obtained and saved.

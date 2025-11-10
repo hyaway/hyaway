@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Skeleton } from "../ui/skeleton";
 import {
   SETTINGS_ACTION,
   SETTINGS_ENDPOINT_FIELD_NAME,
@@ -43,7 +42,7 @@ export function ApiEndpointCard() {
       (typeof endpoint === "string" || endpoint === null)
     ) {
       setApiCredentials(undefined, endpoint);
-      queryClient.invalidateQueries({ queryKey: ["apiVersion"] });
+      queryClient.resetQueries({ queryKey: ["apiVersion"] });
     }
   };
   return (
@@ -59,6 +58,7 @@ export function ApiEndpointCard() {
           <TextInputField
             label="API endpoint"
             name={SETTINGS_ENDPOINT_FIELD_NAME}
+            key={apiEndpoint}
             defaultValue={apiEndpoint}
             placeholder="http://localhost:45869"
             isRequired
@@ -73,7 +73,7 @@ export function ApiEndpointCard() {
             {isFetching ? "Checking endpoint..." : "Check endpoint"}
           </Button>
           {isLoading ? (
-            <Skeleton className="h-28" />
+            <Note intent="info">Checking endpoint...</Note>
           ) : isSuccess ? (
             <Note intent="success">
               API endpoint: <b>{apiEndpoint}</b>
@@ -91,6 +91,7 @@ export function ApiEndpointCard() {
               {error instanceof AxiosError && error.response?.data?.error && (
                 <span>{error.response.data.error}</span>
               )}
+              <br />
               API endpoint: <b>{apiEndpoint}</b>
             </Note>
           ) : null}

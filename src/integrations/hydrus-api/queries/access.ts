@@ -26,6 +26,7 @@ export const useRequestNewPermissionsMutation = () => {
     }) => {
       return HydrusApiClient.requestNewPermissions(apiEndpoint, name);
     },
+    mutationKey: ["requestNewPermissions"],
   });
 };
 
@@ -91,5 +92,6 @@ export const useVerifyAccessMutation = () => {
         hasRequiredPermissions: checkPermissions(response),
       };
     },
+    mutationKey: ["verifyAccess"],
   });
 };
