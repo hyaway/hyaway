@@ -9,8 +9,10 @@ import {
   getPageInfo,
   getPages,
   getServices,
+  HydrusFileSortType,
   requestNewPermissions,
   searchFiles,
+  ServiceType,
   verifyAccessKey,
 } from "./hydrus-api";
 import type { HydrusTagSearch, Page, SearchFilesOptions } from "./hydrus-api";
@@ -165,6 +167,55 @@ export const useGetMediaPagesQuery = () => {
     ...rest,
     data: mediaPages,
   };
+};
+
+export const useRecentlyDeletedFilesQuery = () => {
+  const { data: servicesData } = useGetServicesQuery();
+
+  const trashServiceKey = useMemo(() => {
+    if (!servicesData) return undefined;
+    return Object.entries(servicesData.services).find(
+      ([_key, service]) => service.type === ServiceType.TRASH,
+    )?.[0];
+  }, [servicesData]);
+
+  const tags: HydrusTagSearch = [
+    "system:limit=1000",
+    "system:archived time > 7 days ago",
+  ];
+  const options: Omit<SearchFilesOptions, "tags"> = {
+    file_sort_type: HydrusFileSortType.ArchiveTimestamp,
+    file_sort_asc: false,
+  };
+
+  const apiEndpoint = useApiEndpoint();
+  const apiAccessKey = useApiAccessKey();
+
+  return useQuery({
+    queryKey: [
+      "searchFiles",
+      "recentlyDeleted",
+      trashServiceKey,
+      tags,
+      options,
+      apiEndpoint,
+      simpleHash(apiAccessKey),
+    ],
+    queryFn: () => {
+      if (!apiEndpoint || !apiAccessKey || !trashServiceKey) {
+        throw new Error(
+          "API endpoint, access key, and trash service are required.",
+        );
+      }
+      return searchFiles(apiEndpoint, apiAccessKey, {
+        tags,
+        ...options,
+        tag_service_key: trashServiceKey,
+      });
+    },
+    enabled:
+      !!apiEndpoint && !!apiAccessKey && tags.length > 0 && !!trashServiceKey,
+  });
 };
 
 /**

@@ -208,6 +208,7 @@ export type GetFileMetadataResponse = z.infer<
 const ServiceInfoSchema = z.object({
   name: z.string(),
   type: z.enum(ServiceType),
+  type_pretty: z.string(),
 });
 
 const GetServicesResponseSchema = BaseResponseSchema.extend({
