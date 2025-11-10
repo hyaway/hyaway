@@ -82,7 +82,7 @@ export function ImageGridCard({
       <div
         className={cn(
           "bg-background h-full w-full overflow-hidden rounded border object-cover",
-          "pointer-events-none transition-[width,height,transform] duration-350 ease-out group-hover:scale-(--thumbnail-hover-scale)",
+          "pointer-events-none transition-[scale] duration-100 ease-out group-hover:scale-(--thumbnail-hover-scale)",
           originClass,
         )}
       >
