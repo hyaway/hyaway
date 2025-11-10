@@ -1,8 +1,10 @@
 import axios from "axios";
 import {
+  GetClientOptionsResponseSchema,
   GetFileMetadataResponseSchema,
   GetPageInfoResponseSchema,
   GetPagesResponseSchema,
+  GetServicesResponseSchema,
   HYDRUS_API_HEADER_ACCESS_KEY,
   HYDRUS_API_HEADER_SESSION_KEY,
   RequestNewPermissionsResponseSchema,
@@ -30,7 +32,7 @@ export class HydrusApiClient {
   public readonly apiEndpoint: string;
   private readonly apiAccessKey: string;
   private readonly hash: number;
-  private readonly axiosInstance: AxiosInstance;
+  private readonly axiosSessionInstance: AxiosInstance;
   private sessionKey?: string; // Lazily acquired session key
   private refreshSessionPromise?: Promise<SessionKeyResponse>; // Single-flight promise for concurrent refreshes
 
@@ -38,44 +40,35 @@ export class HydrusApiClient {
     this.apiEndpoint = apiEndpoint;
     this.apiAccessKey = apiAccessKey;
     this.hash = simpleHash(apiEndpoint + apiAccessKey);
-    this.axiosInstance = axios.create({
+    this.axiosSessionInstance = axios.create({
       baseURL: apiEndpoint,
     });
 
-    // Interceptor that ensures a session key is present for all requests
-    this.axiosInstance.interceptors.request.use(async (config) => {
-      // Always send access key only for the session key creation endpoint
-      if (config.url && config.url.endsWith("/session_key")) {
-        config.headers[HYDRUS_API_HEADER_ACCESS_KEY] = this.apiAccessKey;
-        return config;
-      }
-
+    // #region Interceptors
+    // Interceptor that ensures a session key is present for all requests made via the instance
+    this.axiosSessionInstance.interceptors.request.use(async (config) => {
       // Acquire session key lazily
       if (!this.sessionKey) {
         try {
           await this.ensureSessionKey();
         } catch (err) {
-          // If session key acquisition fails, fall back to access key so caller still gets an auth attempt
-          config.headers[HYDRUS_API_HEADER_ACCESS_KEY] = this.apiAccessKey;
-          return config;
+          // Propagate error: we are not allowed to use the access key for ordinary endpoints
+          return Promise.reject(err);
         }
       }
 
       if (this.sessionKey) {
-        // Prefer session key header; remove access key header if set
+        // Set session key header; ensure no access key leaks
         if (HYDRUS_API_HEADER_ACCESS_KEY in config.headers) {
           delete config.headers[HYDRUS_API_HEADER_ACCESS_KEY];
         }
         config.headers[HYDRUS_API_HEADER_SESSION_KEY] = this.sessionKey;
-      } else {
-        // Fallback (should rarely happen)
-        config.headers[HYDRUS_API_HEADER_ACCESS_KEY] = this.apiAccessKey;
       }
       return config;
     });
 
     // Response interceptor to handle expired session (HTTP 419)
-    this.axiosInstance.interceptors.response.use(
+    this.axiosSessionInstance.interceptors.response.use(
       (response) => response,
       async (error) => {
         const status = error?.response?.status;
@@ -95,22 +88,16 @@ export class HydrusApiClient {
             }
             originalRequest.headers[HYDRUS_API_HEADER_SESSION_KEY] =
               this.sessionKey!;
-            return this.axiosInstance(originalRequest);
+            return this.axiosSessionInstance(originalRequest);
           } catch (refreshErr) {
             return Promise.reject(error);
           }
-        }
-        if (status === 403) {
-          console.error(
-            "Hydrus API access forbidden: please check your access key permissions.",
-          );
-          this.sessionKey = undefined;
-          this.refreshSessionPromise = undefined;
         }
         return Promise.reject(error);
       },
     );
   }
+  // #endregion Interceptors
 
   // #region Access
   public static async requestNewPermissions(
@@ -175,8 +162,8 @@ export class HydrusApiClient {
   }
 
   public async getServices(): Promise<GetServicesResponse> {
-    const response = await this.axiosInstance.get("/get_services");
-    return response.data;
+    const response = await this.axiosSessionInstance.get("/get_services");
+    return GetServicesResponseSchema.parse(response.data);
   }
   // #endregion Access
 
@@ -189,12 +176,15 @@ export class HydrusApiClient {
     options: SearchFilesOptions,
   ): Promise<SearchFilesResponse> {
     const { tags, ...rest } = options;
-    const response = await this.axiosInstance.get("/get_files/search_files", {
-      params: {
-        tags: JSON.stringify(tags),
-        ...rest,
+    const response = await this.axiosSessionInstance.get(
+      "/get_files/search_files",
+      {
+        params: {
+          tags: JSON.stringify(tags),
+          ...rest,
+        },
       },
-    });
+    );
     return SearchFilesResponseSchema.parse(response.data);
   }
 
@@ -202,25 +192,30 @@ export class HydrusApiClient {
     file_ids: Array<number>,
     only_return_basic_information = true,
   ): Promise<GetFileMetadataResponse> {
-    const response = await this.axiosInstance.get("/get_files/file_metadata", {
-      params: {
-        file_ids: JSON.stringify(file_ids),
-        create_new_file_ids: false,
-        detailed_url_information: false,
-        only_return_basic_information,
-        include_blurhash: false,
-        include_milliseconds: false,
-        include_notes: false,
-        include_services_object: false,
+    const response = await this.axiosSessionInstance.get(
+      "/get_files/file_metadata",
+      {
+        params: {
+          file_ids: JSON.stringify(file_ids),
+          create_new_file_ids: false,
+          detailed_url_information: false,
+          only_return_basic_information,
+          include_blurhash: false,
+          include_milliseconds: false,
+          include_notes: false,
+          include_services_object: false,
+        },
       },
-    });
+    );
     return GetFileMetadataResponseSchema.parse(response.data);
   }
   // #endregion Search
 
   // #region Pages
   public async getPages(): Promise<GetPagesResponse> {
-    const response = await this.axiosInstance.get("/manage_pages/get_pages");
+    const response = await this.axiosSessionInstance.get(
+      "/manage_pages/get_pages",
+    );
     return GetPagesResponseSchema.parse(response.data);
   }
 
@@ -228,7 +223,7 @@ export class HydrusApiClient {
     pageKey: string,
     simple = true,
   ): Promise<GetPageInfoResponse> {
-    const response = await this.axiosInstance.get(
+    const response = await this.axiosSessionInstance.get(
       "/manage_pages/get_page_info",
       {
         params: {
@@ -241,13 +236,13 @@ export class HydrusApiClient {
   }
 
   public async refreshPage(pageKey: string): Promise<void> {
-    await this.axiosInstance.post("/manage_pages/refresh_page", {
+    await this.axiosSessionInstance.post("/manage_pages/refresh_page", {
       page_key: pageKey,
     });
   }
 
   public async focusPage(pageKey: string): Promise<void> {
-    await this.axiosInstance.post("/manage_pages/focus_page", {
+    await this.axiosSessionInstance.post("/manage_pages/focus_page", {
       page_key: pageKey,
     });
   }
@@ -255,10 +250,10 @@ export class HydrusApiClient {
 
   // #region Database
   public async getClientOptions(): Promise<GetClientOptionsResponse> {
-    const response = await this.axiosInstance.get(
+    const response = await this.axiosSessionInstance.get(
       "/manage_database/get_client_options",
     );
-    return response.data;
+    return GetClientOptionsResponseSchema.parse(response.data);
   }
   // #endregion Database
 
