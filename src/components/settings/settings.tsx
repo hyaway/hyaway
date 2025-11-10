@@ -37,7 +37,11 @@ export function Settings() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const { endpoint, accessKey, action } = getFormDataWithSubmitter(e);
+    const formData = getFormDataWithSubmitter(e);
+    const endpoint = formData.get("endpoint");
+    const accessKey = formData.get("accessKey");
+    const action = formData.get("action");
+
     if (action === "check_endpoint") {
       queryClient.resetQueries({ queryKey: ["apiVersion"] });
     } else if (action === "request_api_key" && typeof endpoint === "string") {

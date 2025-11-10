@@ -5,8 +5,8 @@ import type { StateCreator } from "zustand";
 import { getContext } from "@/integrations/tanstack-query/root-provider.tsx";
 
 type AuthState = {
-  api_access_key: string;
-  api_endpoint: string;
+  api_access_key: string | null;
+  api_endpoint: string | null;
   apiClient: HydrusApiClient | null;
   actions: {
     setApiCredentials: (accessKey: string, endpoint: string) => void;
@@ -14,15 +14,34 @@ type AuthState = {
   };
 };
 
-const authSlice: StateCreator<AuthState> = (set, _get, store) => ({
-  api_access_key: "",
-  api_endpoint: "",
+const authSlice: StateCreator<AuthState> = (set, get, store) => ({
+  api_access_key: null,
+  api_endpoint: null,
   apiClient: null,
   actions: {
-    setApiCredentials: (accessKey: string, endpoint: string) => {
-      const apiClient =
-        endpoint && accessKey ? new HydrusApiClient(endpoint, accessKey) : null;
-      set({ api_access_key: accessKey, api_endpoint: endpoint, apiClient });
+    setApiCredentials: (accessKey: string | null, endpoint: string | null) => {
+      const {
+        api_access_key: previousApiAccessKey,
+        api_endpoint: previousApiEndpoint,
+        apiClient: previousApiClient,
+      } = get();
+      let nextApiClient = previousApiClient;
+      if (accessKey && endpoint) {
+        if (
+          accessKey !== previousApiAccessKey ||
+          endpoint !== previousApiEndpoint ||
+          !previousApiClient
+        ) {
+          nextApiClient = new HydrusApiClient(endpoint, accessKey);
+        }
+      } else {
+        nextApiClient = null;
+      }
+      set({
+        api_access_key: accessKey,
+        api_endpoint: endpoint,
+        apiClient: nextApiClient,
+      });
       getContext().queryClient.clear();
     },
     reset: () => {

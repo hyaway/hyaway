@@ -19,7 +19,9 @@ export function RequestNewTokenStep() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const { apiEndpoint, action } = getFormDataWithSubmitter(e);
+    const formData = getFormDataWithSubmitter(e);
+    const action = formData.get("action");
+    const apiEndpoint = formData.get("apiEndpoint");
     if (action === "request_api_key" && typeof apiEndpoint === "string") {
       requestNewPermissions.mutate(
         { apiEndpoint, name: "hydrus-archive-helper" },

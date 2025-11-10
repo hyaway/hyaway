@@ -24,5 +24,5 @@ export function getFormDataWithSubmitter(e: React.FormEvent<HTMLFormElement>) {
   } else {
     formData = new FormData(e.currentTarget);
   }
-  return Object.fromEntries(formData) as Record<string, FormDataEntryValue>;
+  return formData;
 }
