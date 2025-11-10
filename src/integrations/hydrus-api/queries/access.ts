@@ -11,6 +11,7 @@ export const useApiVersionQuery = (apiEndpoint: string) => {
       return HydrusApiClient.getApiVersion(apiEndpoint);
     },
     enabled: !!apiEndpoint,
+    retry: false,
   });
 };
 
@@ -70,6 +71,7 @@ export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
     refetchOnWindowFocus: keyType === "session", // pick up invalidation after tab inactivity
     refetchOnReconnect: keyType === "session", // network reconnect may invalidate prior state
     refetchInterval: false, // no periodic polling; rely on user activity & error-driven invalidation
+    retry: false,
   });
 };
 

@@ -39,13 +39,7 @@ export function Login() {
     const accessKey = formData.get(SETTINGS_ACCESS_KEY_FIELD_NAME);
     const action = formData.get(SETTINGS_ACTION);
 
-    if (action === SETTINGS_CHECK_ENDPOINT_ACTION) {
-      queryClient.resetQueries({ queryKey: ["apiVersion"] });
-    } else if (
-      action === SETTINGS_REQUEST_API_KEY_ACTION &&
-      typeof endpoint === "string"
-    ) {
-    } else if (
+    if (
       action === SETTINGS_SAVE_ACTION &&
       typeof endpoint === "string" &&
       typeof accessKey === "string"
@@ -57,9 +51,9 @@ export function Login() {
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-4">
+      <Heading level={2}>Hydrus API Settings</Heading>
+      <ApiEndpointCard />
       <FormPrimitive onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Heading level={2}>Hydrus API Settings</Heading>
-        <ApiEndpointCard />
         <AccessKeyCard />
       </FormPrimitive>
 
