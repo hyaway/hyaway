@@ -1,5 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useMemo } from "react";
+import { Heading } from "react-aria-components";
 import { Text } from "../ui/text";
 import { Badge } from "../ui/badge";
 import { Container } from "../ui/container";
@@ -129,6 +130,9 @@ export function TagsSidebar({
       className={cn("hidden w-72 ps-4 lg:block", className)}
       style={combinedStyle}
     >
+      <Heading level={3} className="mb-4 text-lg font-semibold">
+        Tags
+      </Heading>
       <ol
         style={{
           height: `${rowVirtualizer.getTotalSize()}px`,
