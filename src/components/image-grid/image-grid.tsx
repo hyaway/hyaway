@@ -141,7 +141,7 @@ export function PureImageGrid({
   return (
     <div className="flex w-full flex-row">
       <div ref={parentRef} className="w-full">
-        <div
+        <ul
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
           }}
@@ -152,7 +152,7 @@ export function PureImageGrid({
               const item = items[virtualRow.index];
 
               return (
-                <div
+                <li
                   key={virtualRow.index}
                   style={{
                     left: `${(virtualRow.lane * 100) / lanes}%`,
@@ -169,10 +169,10 @@ export function PureImageGrid({
                     item={item}
                     width={width}
                   />
-                </div>
+                </li>
               );
             })}
-        </div>
+        </ul>
         <Badge
           className={cn(
             "fixed right-4 bottom-4 mt-4",
@@ -184,12 +184,7 @@ export function PureImageGrid({
           {(lastItemIndex ?? 0) + 1}/{items.length} ({totalItems})
         </Badge>
       </div>
-      <TagsSidebar
-        items={items}
-        style={{
-          height: `max(${rowVirtualizer.getTotalSize()}px, 30vh)`,
-        }}
-      />
+      <TagsSidebar items={items} />
     </div>
   );
 }
