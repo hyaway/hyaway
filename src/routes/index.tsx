@@ -153,7 +153,8 @@ function Features({
       constrained
     >
       <Heading level={2} className="text-3xl/10 font-semibold">
-        Why HyAway?
+        Why <span className="text-orange-400">hy</span>
+        <span className="text-yellow-400">AWAY</span>?
       </Heading>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((f) => (
