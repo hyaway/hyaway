@@ -11,7 +11,7 @@ import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 import type { QueryClient } from "@tanstack/react-query";
 import MainNavbar from "@/components/main-nav";
-import { useApplyTheme } from "@/lib/theme-store";
+import { useApplyTheme, useSystemThemeListener } from "@/lib/theme-store";
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -19,6 +19,7 @@ interface MyRouterContext {
 
 function RootComponent() {
   useApplyTheme();
+  useSystemThemeListener();
   const router = useRouter();
   return (
     <>

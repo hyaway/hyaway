@@ -1,4 +1,4 @@
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -12,6 +12,7 @@ type ThemeState = {
   actions: {
     setActiveTheme: (theme: ActiveTheme) => void;
     setThemePreference: (theme: Theme) => void;
+    resetSystemTheme: () => void;
   };
 };
 
@@ -29,6 +30,13 @@ export const useThemeStore = create<ThemeState>()(
             set({ themePreference, activeTheme: themePreference });
           }
         },
+        resetSystemTheme: () =>
+          set((state) => {
+            if (state.themePreference === "system") {
+              return { activeTheme: getWindowSystemTheme() };
+            }
+            return {};
+          }),
       },
     }),
     {
@@ -60,6 +68,17 @@ function applyTheme(theme: ActiveTheme) {
   const root = window.document.documentElement;
   root.classList.remove("light", "dark");
   root.classList.add(theme);
+}
+
+export function useSystemThemeListener() {
+  const { resetSystemTheme } = useThemeActions();
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    mediaQuery.addEventListener("change", resetSystemTheme);
+    return () => {
+      mediaQuery.removeEventListener("change", resetSystemTheme);
+    };
+  }, [resetSystemTheme]);
 }
 
 export function useApplyTheme() {
