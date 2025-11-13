@@ -176,7 +176,7 @@ export function PureImageGrid({
       </div>
       <Badge
         className={cn(
-          "fixed right-4 bottom-4 mt-4",
+          "fixed right-4 bottom-4 z-10 mt-4",
           rowVirtualizer.isScrolling ? "opacity-100" : "opacity-50",
         )}
         intent="secondary"
