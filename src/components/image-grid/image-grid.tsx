@@ -173,17 +173,17 @@ export function PureImageGrid({
               );
             })}
         </ul>
-        <Badge
-          className={cn(
-            "fixed right-4 bottom-4 mt-4",
-            rowVirtualizer.isScrolling ? "opacity-100" : "opacity-50",
-          )}
-          intent="secondary"
-          isCircle={true}
-        >
-          {(lastItemIndex ?? 0) + 1}/{items.length} ({totalItems})
-        </Badge>
       </div>
+      <Badge
+        className={cn(
+          "fixed right-4 bottom-4 mt-4",
+          rowVirtualizer.isScrolling ? "opacity-100" : "opacity-50",
+        )}
+        intent="secondary"
+        isCircle={true}
+      >
+        {(lastItemIndex ?? 0) + 1}/{items.length} ({totalItems})
+      </Badge>
       <TagsSidebar items={items} />
     </div>
   );
