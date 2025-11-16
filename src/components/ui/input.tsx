@@ -1,5 +1,3 @@
-"use client";
-
 import { Group, Input as InputPrimitive } from "react-aria-components";
 import type {
   GroupProps,

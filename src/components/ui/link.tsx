@@ -1,3 +1,5 @@
+"use client";
+
 import { Link as LinkPrimitive } from "react-aria-components";
 import type { LinkProps as LinkPrimitiveProps } from "react-aria-components";
 import { cx } from "@/lib/primitive";

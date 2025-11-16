@@ -1,3 +1,5 @@
+"use client";
+
 import {
   DialogTrigger as DialogTriggerPrimitive,
   OverlayArrow,

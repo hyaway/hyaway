@@ -1,5 +1,3 @@
-"use client";
-
 import { CheckIcon } from "@heroicons/react/16/solid";
 import {
   Collection,

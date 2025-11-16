@@ -1,5 +1,3 @@
-"use client";
-
 import { CheckIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import {
   Button,
