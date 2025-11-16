@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { HydrusApiClient } from "../api-client";
-import { useHydrusApiClient } from "../hydrus-config-store";
+import { useApiEndpoint, useHydrusApiClient } from "../hydrus-config-store";
 import { Permission } from "../models";
 import type { AccessKeyType, VerifyAccessKeyResponse } from "../models";
 
@@ -48,6 +48,8 @@ function checkPermissions(permissionsData?: VerifyAccessKeyResponse) {
 
 export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
   const hydrusApi = useHydrusApiClient();
+  const apiEndpoint = useApiEndpoint();
+  const validEndpoint = useApiVersionQuery(apiEndpoint);
 
   return useQuery({
     queryKey: ["verifyAccess", keyType, hydrusApi],
@@ -64,7 +66,7 @@ export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
         hasRequiredPermissions: checkPermissions(data),
       };
     },
-    enabled: !!hydrusApi,
+    enabled: !!hydrusApi && validEndpoint.isSuccess,
     // Persistent key rarely changes; keep effectively permanent.
     // Session key lasts up to a day or until remote client restarts. Use a generous stale time & focus/refetch triggers
     // instead of frequent polling. If the client restarts and a 419/403 occurs, interceptor + error state will surface it.
