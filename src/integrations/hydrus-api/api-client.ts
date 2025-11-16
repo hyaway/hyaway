@@ -27,7 +27,7 @@ import type {
   VerifyAccessKeyResponse,
 } from "./models";
 import type { AxiosInstance } from "axios";
-import { simpleHash } from "@/lib/utils";
+import { simpleHash } from "@/lib/simple-hash";
 
 export class HydrusApiClient {
   public readonly apiEndpoint: string;
