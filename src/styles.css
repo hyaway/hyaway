@@ -1,8 +1,8 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@plugin "tailwindcss-react-aria-components";
 
 @custom-variant dark (&:is(.dark *));
-@plugin "tailwindcss-react-aria-components";
-@plugin "tailwindcss-animate";
 
 /* Scale up hit targets on high resolution mobile devices. */
 @media (min-resolution: 200dpi) {
