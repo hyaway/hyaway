@@ -14,6 +14,7 @@
   "tailwindCSS.experimental.classRegex": [
     ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
   ],
+  "tailwindCSS.experimental.configFile": "src/styles.css",
   "cSpell.words": [
     "blurhash",
     "BOORU",
