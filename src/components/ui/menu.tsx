@@ -61,8 +61,7 @@ const MenuTrigger = ({ className, ref, ...props }: MenuTriggerProps) => (
 );
 
 interface MenuContentProps<T>
-  extends MenuPrimitiveProps<T>,
-    Pick<PopoverContentProps, "placement"> {
+  extends MenuPrimitiveProps<T>, Pick<PopoverContentProps, "placement"> {
   className?: string;
   popover?: Pick<
     PopoverContentProps,
@@ -105,8 +104,7 @@ const MenuContent = <T extends object>({
 };
 
 interface MenuItemProps
-  extends MenuItemPrimitiveProps,
-    VariantProps<typeof dropdownItemStyles> {}
+  extends MenuItemPrimitiveProps, VariantProps<typeof dropdownItemStyles> {}
 
 const MenuItem = ({ className, intent, children, ...props }: MenuItemProps) => {
   const textValue =

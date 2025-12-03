@@ -66,9 +66,7 @@ const sizes = {
 };
 
 interface CommandMenuProps
-  extends AutocompleteProps,
-    MenuTriggerProps,
-    CommandMenuProviderProps {
+  extends AutocompleteProps, MenuTriggerProps, CommandMenuProviderProps {
   isDismissable?: boolean;
   "aria-label"?: string;
   shortcut?: string;
@@ -245,8 +243,9 @@ const CommandMenuItem = ({
   );
 };
 
-interface CommandMenuDescriptionProps
-  extends React.ComponentProps<typeof MenuDescription> {}
+interface CommandMenuDescriptionProps extends React.ComponentProps<
+  typeof MenuDescription
+> {}
 
 const CommandMenuDescription = ({
   className,

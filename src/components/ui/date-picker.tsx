@@ -23,8 +23,9 @@ import { InputGroup } from "@/components/ui/input";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { cx } from "@/lib/primitive";
 
-export interface DatePickerProps<T extends DateValue>
-  extends DatePickerPrimitiveProps<T> {
+export interface DatePickerProps<
+  T extends DateValue,
+> extends DatePickerPrimitiveProps<T> {
   popover?: Omit<PopoverProps, "children">;
 }
 

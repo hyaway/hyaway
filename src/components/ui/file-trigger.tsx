@@ -11,8 +11,7 @@ import type { FileTriggerProps as FileTriggerPrimitiveProps } from "react-aria-c
 import type { VariantProps } from "tailwind-variants";
 
 export interface FileTriggerProps
-  extends FileTriggerPrimitiveProps,
-    VariantProps<typeof buttonStyles> {
+  extends FileTriggerPrimitiveProps, VariantProps<typeof buttonStyles> {
   isDisabled?: boolean;
   isPending?: boolean;
   ref?: React.RefObject<HTMLInputElement>;

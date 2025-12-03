@@ -5,8 +5,10 @@ import { FieldError } from "@/components/ui/field";
 import { Tag, TagGroup, TagList } from "@/components/ui/tag-group";
 import { TextField } from "@/components/ui/text-field";
 
-interface TagInputProps
-  extends Pick<TextFieldProps, "children" | "aria-label" | "aria-labelledby"> {
+interface TagInputProps extends Pick<
+  TextFieldProps,
+  "children" | "aria-label" | "aria-labelledby"
+> {
   value?: Selection;
   onChange?: (next: Selection) => void;
   defaultValue?: Array<string>;

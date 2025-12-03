@@ -88,8 +88,7 @@ export const buttonStyles = tv({
 });
 
 export interface ButtonProps
-  extends ButtonPrimitiveProps,
-    VariantProps<typeof buttonStyles> {
+  extends ButtonPrimitiveProps, VariantProps<typeof buttonStyles> {
   ref?: React.Ref<HTMLButtonElement>;
 }
 

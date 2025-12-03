@@ -24,8 +24,10 @@ type ToggleSize =
   | "sq-md"
   | "sq-lg";
 
-interface ToggleGroupContextValue
-  extends Pick<ToggleButtonGroupProps, "selectionMode" | "orientation"> {
+interface ToggleGroupContextValue extends Pick<
+  ToggleButtonGroupProps,
+  "selectionMode" | "orientation"
+> {
   size?: ToggleSize;
 }
 

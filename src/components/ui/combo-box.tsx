@@ -25,8 +25,10 @@ import { fieldStyles } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cx } from "@/lib/primitive";
 
-interface ComboBoxProps<T extends object>
-  extends Omit<ComboboxPrimitiveProps<T>, "children"> {
+interface ComboBoxProps<T extends object> extends Omit<
+  ComboboxPrimitiveProps<T>,
+  "children"
+> {
   children: React.ReactNode;
 }
 
@@ -44,7 +46,8 @@ const ComboBox = <T extends object>({
 };
 
 interface ComboBoxListProps<T extends object>
-  extends Omit<ListBoxProps<T>, "layout" | "orientation">,
+  extends
+    Omit<ListBoxProps<T>, "layout" | "orientation">,
     Pick<PopoverProps, "placement"> {
   popover?: Omit<PopoverProps, "children">;
 }

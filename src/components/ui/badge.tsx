@@ -1,5 +1,5 @@
-import {  tv } from "tailwind-variants";
-import type {VariantProps} from "tailwind-variants";
+import { tv } from "tailwind-variants";
+import type { VariantProps } from "tailwind-variants";
 
 const badgeStyles = tv({
   base: [
@@ -37,7 +37,8 @@ const badgeStyles = tv({
 });
 
 interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeStyles> {
   className?: string;
   children: React.ReactNode;

@@ -1,17 +1,12 @@
 import {
-  
   createContext,
   use,
   useCallback,
   useId,
   useMemo,
-  useState
+  useState,
 } from "react";
-import {
-  ToggleButton,
-  ToggleButtonGroup
-  
-} from "react-aria-components";
+import { ToggleButton, ToggleButtonGroup } from "react-aria-components";
 import {
   CartesianGrid as CartesianGridPrimitive,
   Legend as LegendPrimitive,
@@ -21,8 +16,8 @@ import {
   YAxis as YAxisPrimitive,
 } from "recharts";
 import { twJoin, twMerge } from "tailwind-merge";
-import type {ReactElement} from "react";
-import type {ToggleButtonGroupProps} from "react-aria-components";
+import type { ReactElement } from "react";
+import type { ToggleButtonGroupProps } from "react-aria-components";
 import type {
   CartesianGridProps as CartesianGridPrimitiveProps,
   CartesianGridProps,
@@ -163,17 +158,17 @@ function getPayloadConfigFromPayload(
     ] as string;
   }
 
-  return configLabelKey in config
-    ? config[configLabelKey]
-    : config[key];
+  return configLabelKey in config ? config[configLabelKey] : config[key];
 }
 
 // #endregion
 
 // #region Base Chart Components
 
-interface BaseChartProps<TValue extends ValueType, TName extends NameType>
-  extends React.HTMLAttributes<HTMLDivElement> {
+interface BaseChartProps<
+  TValue extends ValueType,
+  TName extends NameType,
+> extends React.HTMLAttributes<HTMLDivElement> {
   config: ChartConfig;
   data: Array<Record<string, any>>;
   dataKey: string;

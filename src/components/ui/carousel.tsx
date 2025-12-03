@@ -4,9 +4,9 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import useEmblaCarousel from "embla-carousel-react";
 import { createContext, use, useCallback, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { Button  } from "./button";
-import type {ButtonProps} from "./button";
-import type {UseEmblaCarouselType} from "embla-carousel-react";
+import { Button } from "./button";
+import type { ButtonProps } from "./button";
+import type { UseEmblaCarouselType } from "embla-carousel-react";
 import { cx } from "@/lib/primitive";
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -43,8 +43,7 @@ interface CarouselRootProps {
 }
 
 interface CarouselProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    CarouselRootProps {
+  extends React.HTMLAttributes<HTMLDivElement>, CarouselRootProps {
   opts?: CarouselOptions;
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";

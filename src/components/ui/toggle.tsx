@@ -75,8 +75,7 @@ export const toggleStyles = tv({
 });
 
 export interface ToggleProps
-  extends ToggleButtonProps,
-    VariantProps<typeof toggleStyles> {
+  extends ToggleButtonProps, VariantProps<typeof toggleStyles> {
   ref?: React.Ref<HTMLButtonElement>;
 }
 export function Toggle({

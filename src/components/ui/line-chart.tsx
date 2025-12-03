@@ -21,8 +21,10 @@ import type {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-interface LineChartProps<TValue extends ValueType, TName extends NameType>
-  extends BaseChartProps<TValue, TName> {
+interface LineChartProps<
+  TValue extends ValueType,
+  TName extends NameType,
+> extends BaseChartProps<TValue, TName> {
   connectNulls?: boolean;
   lineProps?: LineProps;
   chartProps?: Omit<

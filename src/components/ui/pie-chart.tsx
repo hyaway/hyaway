@@ -30,18 +30,20 @@ const parseLabelInput = (
 ): string =>
   labelInput || valueFormatter(calculateDefaultLabel(data, valueKey));
 
-interface PieChartProps<TValue extends ValueType, TName extends NameType>
-  extends Omit<
-    BaseChartProps<TValue, TName>,
-    | "hideGridLines"
-    | "hideXAxis"
-    | "hideYAxis"
-    | "xAxisProps"
-    | "yAxisProps"
-    | "displayEdgeLabelsOnly"
-    | "legend"
-    | "legendProps"
-  > {
+interface PieChartProps<
+  TValue extends ValueType,
+  TName extends NameType,
+> extends Omit<
+  BaseChartProps<TValue, TName>,
+  | "hideGridLines"
+  | "hideXAxis"
+  | "hideYAxis"
+  | "xAxisProps"
+  | "yAxisProps"
+  | "displayEdgeLabelsOnly"
+  | "legend"
+  | "legendProps"
+> {
   variant?: "pie" | "donut";
   nameKey?: string;
 

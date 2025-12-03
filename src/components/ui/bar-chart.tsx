@@ -1,10 +1,9 @@
 "use client";
 
-import {  startTransition } from "react";
+import { startTransition } from "react";
 import { Bar, BarChart as BarChartPrimitive } from "recharts";
 import { twMerge } from "tailwind-merge";
 import {
-  
   CartesianGrid,
   Chart,
   ChartLegend,
@@ -16,17 +15,19 @@ import {
   YAxis,
   constructCategoryColors,
   getColorValue,
-  valueToPercent
+  valueToPercent,
 } from "./chart";
-import type {BaseChartProps} from "./chart";
-import type {ComponentProps} from "react";
+import type { BaseChartProps } from "./chart";
+import type { ComponentProps } from "react";
 import type {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-interface BarChartProps<TValue extends ValueType, TName extends NameType>
-  extends BaseChartProps<TValue, TName> {
+interface BarChartProps<
+  TValue extends ValueType,
+  TName extends NameType,
+> extends BaseChartProps<TValue, TName> {
   barCategoryGap?: number;
   barRadius?: number;
   barGap?: number;

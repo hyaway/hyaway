@@ -22,8 +22,10 @@ import type {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-interface AreaChartProps<TValue extends ValueType, TName extends NameType>
-  extends BaseChartProps<TValue, TName> {
+interface AreaChartProps<
+  TValue extends ValueType,
+  TName extends NameType,
+> extends BaseChartProps<TValue, TName> {
   chartProps?: Omit<
     ComponentProps<typeof AreaChartPrimitive>,
     "data" | "stackOffset"

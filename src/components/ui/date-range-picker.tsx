@@ -16,8 +16,9 @@ import { DateInput as PrimitiveDateInput } from "@/components/ui/date-field";
 import { InputGroup } from "@/components/ui/input";
 import { cx } from "@/lib/primitive";
 
-export interface DateRangePickerProps<T extends DateValue>
-  extends DateRangePickerPrimitiveProps<T> {
+export interface DateRangePickerProps<
+  T extends DateValue,
+> extends DateRangePickerPrimitiveProps<T> {
   visibleDuration?: DateDuration;
   pageBehavior?: "visible" | "single";
   popover?: Omit<PopoverProps, "children">;

@@ -30,8 +30,10 @@ const showMoreStyles = tv({
   },
 });
 
-interface ShowMoreProps
-  extends Omit<React.ComponentProps<typeof ToggleButton>, "className"> {
+interface ShowMoreProps extends Omit<
+  React.ComponentProps<typeof ToggleButton>,
+  "className"
+> {
   className?: string;
   orientation?: "horizontal" | "vertical";
   as?: "text" | "button";

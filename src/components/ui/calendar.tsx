@@ -1,11 +1,7 @@
 "use client";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
-import {
-  
-  getLocalTimeZone,
-  today
-} from "@internationalized/date";
+import { getLocalTimeZone, today } from "@internationalized/date";
 import { useDateFormatter } from "@react-aria/i18n";
 import { use } from "react";
 import {
@@ -29,15 +25,17 @@ import {
   SelectLabel,
   SelectTrigger,
 } from "./select";
-import type {CalendarDate} from "@internationalized/date";
+import type { CalendarDate } from "@internationalized/date";
 import type {
   CalendarProps as CalendarPrimitiveProps,
   CalendarState,
   DateValue,
 } from "react-aria-components";
 
-interface CalendarProps<T extends DateValue>
-  extends Omit<CalendarPrimitiveProps<T>, "visibleDuration"> {
+interface CalendarProps<T extends DateValue> extends Omit<
+  CalendarPrimitiveProps<T>,
+  "visibleDuration"
+> {
   className?: string;
 }
 
