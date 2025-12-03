@@ -6,9 +6,5 @@ export const Route = createFileRoute("/settings/account")({
 });
 
 function SettingsAccountComponent() {
-  return (
-    <div className="p-4">
-      <Login />
-    </div>
-  );
+  return <Login />;
 }
