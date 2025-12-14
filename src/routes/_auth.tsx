@@ -13,9 +13,5 @@ function AuthLayout() {
     return <Login />;
   }
 
-  return (
-    <div className="p-4">
-      <Outlet />
-    </div>
-  );
+  return <Outlet />;
 }
