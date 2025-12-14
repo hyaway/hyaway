@@ -21,7 +21,7 @@ const settingsItems = linkOptions([
 
 function SettingsComponent() {
   return (
-    <div className="mx-auto max-w-7xl pt-16 lg:flex lg:gap-x-16 lg:px-8">
+    <div className="mx-auto max-w-7xl lg:flex lg:gap-x-16 lg:px-8">
       <h1 className="sr-only">Settings</h1>
 
       <aside className="flex overflow-x-auto border-b border-gray-900/5 py-4 lg:block lg:w-64 lg:flex-none lg:border-0 lg:py-20 dark:border-white/10">
