@@ -9,8 +9,8 @@ export const Route = createFileRoute("/settings")({
 
 const settingsItems = linkOptions([
   {
-    name: "Account",
-    to: "/settings/account",
+    name: "Client API",
+    to: "/settings/client-api",
     icon: FingerPrintIcon,
   },
   { name: "UX", to: "/settings/ux", icon: BellIcon },

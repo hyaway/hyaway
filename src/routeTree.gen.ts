@@ -14,7 +14,7 @@ import { Route as AuthRouteImport } from "./routes/_auth";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as SettingsIndexRouteImport } from "./routes/settings.index";
 import { Route as SettingsUxRouteImport } from "./routes/settings.ux";
-import { Route as SettingsAccountRouteImport } from "./routes/settings.account";
+import { Route as SettingsClientApiRouteImport } from "./routes/settings.client-api";
 import { Route as AuthRecentlyInboxedRouteImport } from "./routes/_auth/recently-inboxed";
 import { Route as AuthRecentlyDeletedRouteImport } from "./routes/_auth/recently-deleted";
 import { Route as AuthRecentlyArchivedRouteImport } from "./routes/_auth/recently-archived";
@@ -45,9 +45,9 @@ const SettingsUxRoute = SettingsUxRouteImport.update({
   path: "/ux",
   getParentRoute: () => SettingsRoute,
 } as any);
-const SettingsAccountRoute = SettingsAccountRouteImport.update({
-  id: "/account",
-  path: "/account",
+const SettingsClientApiRoute = SettingsClientApiRouteImport.update({
+  id: "/client-api",
+  path: "/client-api",
   getParentRoute: () => SettingsRoute,
 } as any);
 const AuthRecentlyInboxedRoute = AuthRecentlyInboxedRouteImport.update({
@@ -83,7 +83,7 @@ export interface FileRoutesByFullPath {
   "/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/recently-inboxed": typeof AuthRecentlyInboxedRoute;
-  "/settings/account": typeof SettingsAccountRoute;
+  "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
   "/pages/$pageId": typeof AuthPagesPageIdRoute;
@@ -94,7 +94,7 @@ export interface FileRoutesByTo {
   "/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/recently-inboxed": typeof AuthRecentlyInboxedRoute;
-  "/settings/account": typeof SettingsAccountRoute;
+  "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings": typeof SettingsIndexRoute;
   "/pages/$pageId": typeof AuthPagesPageIdRoute;
@@ -108,7 +108,7 @@ export interface FileRoutesById {
   "/_auth/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/_auth/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/_auth/recently-inboxed": typeof AuthRecentlyInboxedRoute;
-  "/settings/account": typeof SettingsAccountRoute;
+  "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
   "/_auth/pages/$pageId": typeof AuthPagesPageIdRoute;
@@ -122,7 +122,7 @@ export interface FileRouteTypes {
     | "/recently-archived"
     | "/recently-deleted"
     | "/recently-inboxed"
-    | "/settings/account"
+    | "/settings/client-api"
     | "/settings/ux"
     | "/settings/"
     | "/pages/$pageId";
@@ -133,7 +133,7 @@ export interface FileRouteTypes {
     | "/recently-archived"
     | "/recently-deleted"
     | "/recently-inboxed"
-    | "/settings/account"
+    | "/settings/client-api"
     | "/settings/ux"
     | "/settings"
     | "/pages/$pageId";
@@ -146,7 +146,7 @@ export interface FileRouteTypes {
     | "/_auth/recently-archived"
     | "/_auth/recently-deleted"
     | "/_auth/recently-inboxed"
-    | "/settings/account"
+    | "/settings/client-api"
     | "/settings/ux"
     | "/settings/"
     | "/_auth/pages/$pageId";
@@ -195,11 +195,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SettingsUxRouteImport;
       parentRoute: typeof SettingsRoute;
     };
-    "/settings/account": {
-      id: "/settings/account";
-      path: "/account";
-      fullPath: "/settings/account";
-      preLoaderRoute: typeof SettingsAccountRouteImport;
+    "/settings/client-api": {
+      id: "/settings/client-api";
+      path: "/client-api";
+      fullPath: "/settings/client-api";
+      preLoaderRoute: typeof SettingsClientApiRouteImport;
       parentRoute: typeof SettingsRoute;
     };
     "/_auth/recently-inboxed": {
@@ -269,13 +269,13 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
 
 interface SettingsRouteChildren {
-  SettingsAccountRoute: typeof SettingsAccountRoute;
+  SettingsClientApiRoute: typeof SettingsClientApiRoute;
   SettingsUxRoute: typeof SettingsUxRoute;
   SettingsIndexRoute: typeof SettingsIndexRoute;
 }
 
 const SettingsRouteChildren: SettingsRouteChildren = {
-  SettingsAccountRoute: SettingsAccountRoute,
+  SettingsClientApiRoute: SettingsClientApiRoute,
   SettingsUxRoute: SettingsUxRoute,
   SettingsIndexRoute: SettingsIndexRoute,
 };
