@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Heading } from "../ui/heading";
-import { AuthLayout } from "../ui-primitives/auth-layout";
 import { ApiEndpointCard } from "./api-endpoint-card";
 import { AccessKeyCard } from "./access-key-card";
 import { SessionKeyCard } from "./session-key-card";
@@ -13,14 +12,12 @@ export function Login() {
     setSettingsKey((prev) => prev + 1);
   };
   return (
-    <AuthLayout key={settingsKey}>
-      <div className="flex flex-col gap-4">
-        <Heading level={2}>Hydrus API Settings</Heading>
-        <ApiEndpointCard />
-        <AccessKeyCard />
-        <SessionKeyCard />
-        <ResetCard resetKey={resetKey} />
-      </div>
-    </AuthLayout>
+    <div className="flex flex-col gap-4" key={settingsKey}>
+      <Heading level={2}>Hydrus API Settings</Heading>
+      <ApiEndpointCard />
+      <AccessKeyCard />
+      <SessionKeyCard />
+      <ResetCard resetKey={resetKey} />
+    </div>
   );
 }
