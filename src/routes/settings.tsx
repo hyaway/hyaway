@@ -1,5 +1,8 @@
 import { Outlet, createFileRoute, linkOptions } from "@tanstack/react-router";
-import { BellIcon, FingerPrintIcon } from "@heroicons/react/24/outline";
+import {
+  FingerPrintIcon,
+  RectangleGroupIcon,
+} from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { Link } from "@/components/ui-primitives/link";
 
@@ -13,7 +16,7 @@ const settingsItems = linkOptions([
     to: "/settings/client-api",
     icon: FingerPrintIcon,
   },
-  { name: "UX", to: "/settings/ux", icon: BellIcon },
+  { name: "UX", to: "/settings/ux", icon: RectangleGroupIcon },
 ]);
 
 function SettingsComponent() {
