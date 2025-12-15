@@ -2,7 +2,7 @@ import { AxiosError } from "axios";
 import { Form as FormPrimitive } from "react-aria-components";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApiVersionQuery } from "../../integrations/hydrus-api/queries/access";
-import { Button } from "../ui/button";
+import { Button } from "../ui-primitives/button";
 import { TextInputField } from "../text-input-field";
 import { Note } from "../ui/note";
 import {

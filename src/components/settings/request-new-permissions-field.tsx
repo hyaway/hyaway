@@ -3,7 +3,7 @@ import {
   useApiVersionQuery,
   useRequestNewPermissionsMutation,
 } from "../../integrations/hydrus-api/queries/access";
-import { Button } from "../ui/button";
+import { Button } from "../ui-primitives/button";
 import { Note } from "../ui/note";
 import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
 import {

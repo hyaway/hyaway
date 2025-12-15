@@ -7,7 +7,7 @@ import { Note } from "@/components/ui/note";
 import { Separator } from "@/components/ui/separator";
 import { useRecentlyInboxedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-primitives/button";
 
 export const Route = createFileRoute("/_auth/recently-inboxed")({
   component: RouteComponent,

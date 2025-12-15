@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Loader } from "@/components/ui/loader";
 import { Note } from "@/components/ui/note";

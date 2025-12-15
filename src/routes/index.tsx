@@ -2,7 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Container } from "@/components/ui/container";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Text } from "@/components/ui/text";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-primitives/button";
 import {
   Card,
   CardContent,

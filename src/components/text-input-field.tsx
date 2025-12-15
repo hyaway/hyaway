@@ -4,7 +4,7 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/20/solid";
 import { Description, FieldError, Label } from "./ui/field";
 import { Input, InputGroup } from "./ui/input";
 import { TextField } from "./ui/text-field";
-import { Button } from "./ui/button";
+import { Button } from "./ui-primitives/button";
 import type {
   TextFieldProps as AriaTextFieldProps,
   ValidationResult,

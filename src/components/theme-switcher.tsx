@@ -4,7 +4,7 @@ import {
   SunIcon,
 } from "@heroicons/react/20/solid";
 import type { Theme } from "@/lib/theme-store";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-primitives/button";
 import {
   getWindowSystemTheme,
   useThemeActions,

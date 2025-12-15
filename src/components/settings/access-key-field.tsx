@@ -5,7 +5,7 @@ import {
   useApiVersionQuery,
   useVerifyAccessQuery,
 } from "../../integrations/hydrus-api/queries/access";
-import { Button } from "../ui/button";
+import { Button } from "../ui-primitives/button";
 import { SecretInputField } from "../text-input-field";
 import { Note } from "../ui/note";
 import {
