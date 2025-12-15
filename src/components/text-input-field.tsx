@@ -20,6 +20,8 @@ export interface TextFieldProps extends AriaTextFieldProps {
   description?: string;
   errorMessage?: string | ((validation: ValidationResult) => string);
   placeholder?: string;
+  defaultValue?: string;
+  value?: string;
 }
 
 export function TextInputField({
@@ -27,12 +29,18 @@ export function TextInputField({
   description,
   errorMessage,
   placeholder,
+  defaultValue,
+  value,
   ...props
 }: TextFieldProps) {
   return (
     <Field {...props}>
       {label && <FieldLabel>{label}</FieldLabel>}
-      <Input placeholder={placeholder} />
+      <Input
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        value={value}
+      />
       {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError>{errorMessage}</FieldError>
     </Field>
@@ -44,6 +52,8 @@ export function SecretInputField({
   description,
   errorMessage,
   placeholder,
+  defaultValue,
+  value,
   ...props
 }: TextFieldProps) {
   const [isVisible, setIsVisible] = useState(false);
@@ -55,6 +65,8 @@ export function SecretInputField({
         <InputGroupInput
           placeholder={placeholder}
           type={isVisible ? "text" : "password"}
+          defaultValue={defaultValue}
+          value={value}
         />
         <Button
           variant={"secondary"}
