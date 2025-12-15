@@ -1,20 +1,20 @@
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/access";
-import { Button } from "../ui-primitives/button";
 import { SecretInputField } from "../text-input-field";
-import { Note } from "../ui-primitives/note";
+import {
+  SETTINGS_ACTION,
+  SETTINGS_REQUEST_SESSION_KEY_ACTION,
+} from "./constants";
+import { Button } from "@/components/ui-primitives/button";
+import { Note } from "@/components/ui-primitives/note";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui-primitives/card";
-import {
-  SETTINGS_ACTION,
-  SETTINGS_REQUEST_SESSION_KEY_ACTION,
-} from "./constants";
+} from "@/components/ui-primitives/card";
 import {
   useApiEndpoint,
   useApiSessionKey,

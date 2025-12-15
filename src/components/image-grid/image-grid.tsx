@@ -1,11 +1,11 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { AxiosError } from "axios";
-import { Spinner } from "../ui-primitives/spinner";
-import { Note } from "../ui-primitives/note";
-import { Badge } from "../ui-primitives/badge";
 import { ImageGridCard } from "./image-grid-card";
 import { TagsSidebar } from "./tags-sidebar";
+import { Spinner } from "@/components/ui-primitives/spinner";
+import { Note } from "@/components/ui-primitives/note";
+import { Badge } from "@/components/ui-primitives/badge";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/get-files";
 import { cn } from "@/lib/utils";

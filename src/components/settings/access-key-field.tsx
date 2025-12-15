@@ -5,15 +5,15 @@ import {
   useApiVersionQuery,
   useVerifyAccessQuery,
 } from "../../integrations/hydrus-api/queries/access";
-import { Button } from "../ui-primitives/button";
 import { SecretInputField } from "../text-input-field";
-import { Note } from "../ui-primitives/note";
 import {
   SETTINGS_ACCESS_KEY_FIELD_NAME,
   SETTINGS_ACTION,
   SETTINGS_SAVE_ACCESS_KEY_ACTION,
 } from "./constants";
 import { getFormDataWithSubmitter } from "./form-utils";
+import { Note } from "@/components/ui-primitives/note";
+import { Button } from "@/components/ui-primitives/button";
 import {
   useApiAccessKey,
   useApiEndpoint,

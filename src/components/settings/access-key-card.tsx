@@ -1,13 +1,13 @@
+import { AccessKeyField } from "./access-key-field";
+import { RequestNewPermissionsField } from "./request-new-permissions-field";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui-primitives/card";
-import { Separator } from "../ui-primitives/separator";
-import { AccessKeyField } from "./access-key-field";
-import { RequestNewPermissionsField } from "./request-new-permissions-field";
+} from "@/components/ui-primitives/card";
+import { Separator } from "@/components/ui-primitives/separator";
 
 export function AccessKeyCard() {
   return (

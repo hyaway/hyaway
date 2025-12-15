@@ -1,10 +1,8 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useMemo } from "react";
-import { Heading } from "react-aria-components";
-import { Text } from "../ui/text";
-import { Badge } from "../ui-primitives/badge";
-import { Container } from "../ui/container";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import { Badge } from "@/components/ui-primitives/badge";
+import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { cn } from "@/lib/utils";
@@ -125,7 +123,7 @@ export function TagsSidebar({
     return null;
   }
   return (
-    <Container
+    <div
       ref={parentRef}
       className={cn("hidden w-72 ps-4 lg:block", className)}
       style={combinedStyle}
@@ -169,6 +167,6 @@ export function TagsSidebar({
           );
         })}
       </ol>
-    </Container>
+    </div>
   );
 }

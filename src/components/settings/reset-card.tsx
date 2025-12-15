@@ -1,11 +1,11 @@
-import { Button } from "../ui-primitives/button";
+import { SETTINGS_ACTION, SETTINGS_RESET_CONFIG_ACTION } from "./constants";
+import { Button } from "@/components/ui-primitives/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../ui-primitives/card";
-import { SETTINGS_ACTION, SETTINGS_RESET_CONFIG_ACTION } from "./constants";
+} from "@/components/ui-primitives/card";
 import { useAuthActions } from "@/integrations/hydrus-api/hydrus-config-store";
 
 export function ResetCard({ resetKey }: { resetKey: () => void }) {

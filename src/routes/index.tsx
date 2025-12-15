@@ -1,7 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { Container } from "@/components/ui/container";
 import { Heading } from "@/components/ui-primitives/heading";
-import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Card,
@@ -113,11 +111,11 @@ function Hero({
         <Heading level={1} className="text-4xl/10 font-bold sm:text-5xl/12">
           Remote gateway to your Hydrus Network gallery
         </Heading>
-        <Text className="text-lg/8 sm:text-xl/9">
+        <p className="text-lg/8 sm:text-xl/9">
           HyAway lets you securely manage, search, and explore your Hydrus
           collection without being at your workstation. Optimized for speed,
           clarity, and keyboard navigation.
-        </Text>
+        </p>
         <div className="flex flex-wrap gap-4 pt-2">
           <Button
             intent={primaryCta.intent}
@@ -147,11 +145,7 @@ function Features({
   id?: string;
 }) {
   return (
-    <Container
-      id={id}
-      className="flex flex-col gap-10 border-t pt-16 sm:pt-24"
-      constrained
-    >
+    <div id={id} className="flex flex-col gap-10 border-t pt-16 sm:pt-24">
       <Heading level={2} className="text-3xl/10 font-semibold">
         Why <span className="text-orange-400">hy</span>
         <span className="text-yellow-400">AWAY</span>?
@@ -166,7 +160,7 @@ function Features({
           </Card>
         ))}
       </div>
-    </Container>
+    </div>
   );
 }
 

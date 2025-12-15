@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Heading } from "../ui-primitives/heading";
 import { ApiEndpointCard } from "./api-endpoint-card";
 import { AccessKeyCard } from "./access-key-card";
 import { SessionKeyCard } from "./session-key-card";
 import { ResetCard } from "./reset-card";
+import { Heading } from "@/components/ui-primitives/heading";
 
 export function Login() {
   const [settingsKey, setSettingsKey] = useState(0);

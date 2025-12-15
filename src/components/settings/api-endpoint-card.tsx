@@ -2,22 +2,22 @@ import { AxiosError } from "axios";
 import { Form as FormPrimitive } from "react-aria-components";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApiVersionQuery } from "../../integrations/hydrus-api/queries/access";
-import { Button } from "../ui-primitives/button";
 import { TextInputField } from "../text-input-field";
-import { Note } from "../ui-primitives/note";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui-primitives/card";
 import {
   SETTINGS_ACTION,
   SETTINGS_ENDPOINT_FIELD_NAME,
   SETTINGS_SAVE_ENDPOINT_ACTION,
 } from "./constants";
 import { getFormDataWithSubmitter } from "./form-utils";
+import { Button } from "@/components/ui-primitives/button";
+import { Note } from "@/components/ui-primitives/note";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui-primitives/card";
 import {
   useApiEndpoint,
   useAuthActions,
