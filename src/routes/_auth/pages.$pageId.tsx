@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
-import { Loader } from "@/components/ui/loader";
+import { Spinner } from "@/components/ui-primitives/spinner";
 import { Note } from "@/components/ui-primitives/note";
 import { Separator } from "@/components/ui-primitives/separator";
 import {
@@ -25,7 +25,7 @@ function RouteComponent() {
   const queryClient = useQueryClient();
 
   if (isLoading) {
-    return <Loader />;
+    return <Spinner />;
   }
 
   if (isError) {

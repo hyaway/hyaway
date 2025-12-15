@@ -1,7 +1,7 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { AxiosError } from "axios";
-import { Loader } from "../ui/loader";
+import { Spinner } from "../ui-primitives/spinner";
 import { Note } from "../ui-primitives/note";
 import { Badge } from "../ui-primitives/badge";
 import { ImageGridCard } from "./image-grid-card";
@@ -19,7 +19,7 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
   }
 
   if (!defaultDimensions || itemsQuery.isPending) {
-    return <Loader />;
+    return <Spinner />;
   }
 
   if (itemsQuery.isError) {
