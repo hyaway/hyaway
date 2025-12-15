@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/access";
 import { Button } from "../ui-primitives/button";
 import { SecretInputField } from "../text-input-field";
-import { Note } from "../ui/note";
+import { Note } from "../ui-primitives/note";
 import {
   Card,
   CardContent,

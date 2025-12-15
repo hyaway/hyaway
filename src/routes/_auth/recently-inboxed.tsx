@@ -3,7 +3,7 @@ import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Loader } from "@/components/ui/loader";
-import { Note } from "@/components/ui/note";
+import { Note } from "@/components/ui-primitives/note";
 import { Separator } from "@/components/ui-primitives/separator";
 import { useRecentlyInboxedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";

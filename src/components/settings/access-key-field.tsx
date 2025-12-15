@@ -7,7 +7,7 @@ import {
 } from "../../integrations/hydrus-api/queries/access";
 import { Button } from "../ui-primitives/button";
 import { SecretInputField } from "../text-input-field";
-import { Note } from "../ui/note";
+import { Note } from "../ui-primitives/note";
 import {
   SETTINGS_ACCESS_KEY_FIELD_NAME,
   SETTINGS_ACTION,

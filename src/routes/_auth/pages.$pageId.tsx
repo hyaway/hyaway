@@ -4,7 +4,7 @@ import { AxiosError } from "axios";
 import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Loader } from "@/components/ui/loader";
-import { Note } from "@/components/ui/note";
+import { Note } from "@/components/ui-primitives/note";
 import { Separator } from "@/components/ui-primitives/separator";
 import {
   useFocusPageMutation,
