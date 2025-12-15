@@ -6,7 +6,6 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 
-import { RouterProvider } from "react-aria-components";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 import type { QueryClient } from "@tanstack/react-query";
@@ -23,15 +22,8 @@ function RootComponent() {
   const router = useRouter();
   return (
     <>
-      <RouterProvider
-        navigate={(to, options: unknown) =>
-          router.navigate({ to, ...(options || {}) })
-        }
-        useHref={(to) => router.buildLocation({ to }).href}
-      >
-        <MainNavbar />
-        <Outlet />
-      </RouterProvider>
+      <MainNavbar />
+      <Outlet />
       <TanStackDevtools
         config={{
           position: "bottom-right",
