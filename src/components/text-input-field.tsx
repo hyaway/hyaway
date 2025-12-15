@@ -1,10 +1,15 @@
 "use client";
 import { useState } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/20/solid";
-import { Description, FieldError, Label } from "./ui/field";
-import { Input, InputGroup } from "./ui/input";
-import { TextField } from "./ui/text-field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "./ui-primitives/field";
+import { InputGroup, InputGroupInput } from "./ui-primitives/input-group";
 import { Button } from "./ui-primitives/button";
+import { Input } from "./ui-primitives/input";
 import type {
   TextFieldProps as AriaTextFieldProps,
   ValidationResult,
@@ -25,12 +30,12 @@ export function TextInputField({
   ...props
 }: TextFieldProps) {
   return (
-    <TextField {...props}>
-      {label && <Label>{label}</Label>}
+    <Field {...props}>
+      {label && <FieldLabel>{label}</FieldLabel>}
       <Input placeholder={placeholder} />
-      {description && <Description>{description}</Description>}
+      {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError>{errorMessage}</FieldError>
-    </TextField>
+    </Field>
   );
 }
 
@@ -44,10 +49,10 @@ export function SecretInputField({
   const [isVisible, setIsVisible] = useState(false);
   const toggleVisibility = () => setIsVisible((prevState) => !prevState);
   return (
-    <TextField {...props}>
-      {label && <Label>{label}</Label>}
+    <Field {...props}>
+      {label && <FieldLabel>{label}</FieldLabel>}
       <InputGroup className="[--input-gutter-end:--spacing(12)]">
-        <Input
+        <InputGroupInput
           placeholder={placeholder}
           type={isVisible ? "text" : "password"}
         />
@@ -55,13 +60,13 @@ export function SecretInputField({
           intent="secondary"
           aria-pressed={isVisible}
           onPress={toggleVisibility}
-          aria-label={isVisible ? "Hide API access key" : "Show API access key"}
+          aria-label={isVisible ? `Hide ${label}` : `Show ${label}`}
         >
           {isVisible ? <EyeSlashIcon /> : <EyeIcon />}
         </Button>
       </InputGroup>
-      {description && <Description>{description}</Description>}
+      {description && <FieldDescription>{description}</FieldDescription>}
       <FieldError>{errorMessage}</FieldError>
-    </TextField>
+    </Field>
   );
 }
