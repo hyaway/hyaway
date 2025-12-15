@@ -1,5 +1,10 @@
 import { Button } from "../ui-primitives/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../ui-primitives/card";
 import { SETTINGS_ACTION, SETTINGS_RESET_CONFIG_ACTION } from "./constants";
 import { useAuthActions } from "@/integrations/hydrus-api/hydrus-config-store";
 

@@ -3,7 +3,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { AxiosError } from "axios";
 import { Loader } from "../ui/loader";
 import { Note } from "../ui/note";
-import { Badge } from "../ui/badge";
+import { Badge } from "../ui-primitives/badge";
 import { ImageGridCard } from "./image-grid-card";
 import { TagsSidebar } from "./tags-sidebar";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";

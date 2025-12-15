@@ -8,7 +8,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-} from "@/components/ui/card";
+} from "@/components/ui-primitives/card";
 import { useHydrusApiClient } from "@/integrations/hydrus-api/hydrus-config-store";
 
 export const Route = createFileRoute("/")({

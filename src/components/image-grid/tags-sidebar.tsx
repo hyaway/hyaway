@@ -2,7 +2,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useMemo } from "react";
 import { Heading } from "react-aria-components";
 import { Text } from "../ui/text";
-import { Badge } from "../ui/badge";
+import { Badge } from "../ui-primitives/badge";
 import { Container } from "../ui/container";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagStatus } from "@/integrations/hydrus-api/models";

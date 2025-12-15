@@ -4,7 +4,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui/card";
+} from "../ui-primitives/card";
 import { Separator } from "../ui/separator";
 import { AccessKeyField } from "./access-key-field";
 import { RequestNewPermissionsField } from "./request-new-permissions-field";

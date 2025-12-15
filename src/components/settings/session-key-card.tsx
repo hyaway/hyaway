@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui/card";
+} from "../ui-primitives/card";
 import {
   SETTINGS_ACTION,
   SETTINGS_REQUEST_SESSION_KEY_ACTION,
