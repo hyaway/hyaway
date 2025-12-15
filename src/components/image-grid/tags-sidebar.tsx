@@ -150,19 +150,20 @@ export function TagsSidebar({
               ref={rowVirtualizer.measureElement}
               className="absolute top-0 left-0 flex w-full flex-row items-center gap-1 font-mono uppercase"
             >
-              <Text>{virtualRow.index + 1}.</Text>
+              <span
+                aria-hidden="true"
+                className="text-muted-foreground text-right tabular-nums"
+              >
+                {virtualRow.index + 1}.
+              </span>
               <Badge
-                intent="info"
-                isCircle={false}
+                variant={"outline"}
                 className="break-normal wrap-anywhere whitespace-normal"
               >
                 {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
                 {tagItem.tag}
               </Badge>
-
-              <Badge intent="secondary" isCircle={false}>
-                {tagItem.count}
-              </Badge>
+              <Badge variant={"outline"}>{tagItem.count}</Badge>
             </li>
           );
         })}
