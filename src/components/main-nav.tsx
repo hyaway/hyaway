@@ -1,59 +1,52 @@
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { Link } from "@tanstack/react-router";
 import { ThemeSwitcher } from "./theme-switcher";
 import { Heading } from "./ui-primitives/heading";
-import type { NavbarProps } from "@/components/ui/navbar";
 import {
-  Navbar,
-  NavbarGap,
-  NavbarItem,
-  NavbarItemLink,
-  NavbarMobile,
-  NavbarProvider,
-  NavbarSection,
-  NavbarSpacer,
-  NavbarStart,
-  NavbarTrigger,
-} from "@/components/ui/navbar";
-import { Menu, MenuContent, MenuItem, MenuLink } from "@/components/ui/menu";
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui-primitives/navigation-menu";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 
-export default function MainNavbar(props: NavbarProps) {
+export default function MainNavbar() {
   return (
-    <NavbarProvider>
-      <Navbar {...props}>
-        <NavbarStart>
-          <Logo />
-        </NavbarStart>
-        <NavbarGap />
-        <NavbarSection>
-          <NavbarItemLink to={"/"}>Home</NavbarItemLink>
-          <PagesNav />
-          <NavbarItemLink to="/recently-deleted">
-            Recently deleted
-          </NavbarItemLink>
-          <NavbarItemLink to="/recently-archived">
-            Recently archived
-          </NavbarItemLink>
-          <NavbarItemLink to="/recently-inboxed">
-            Recently inboxed
-          </NavbarItemLink>
-          <NavbarItemLink to={"/settings"}>Settings</NavbarItemLink>
-        </NavbarSection>
-        <NavbarSpacer />
-        <NavbarSection className="hidden md:flex">
-          <ThemeSwitcher />
-        </NavbarSection>
-      </Navbar>
-      <NavbarMobile>
-        <NavbarTrigger />
-        <Logo />
-        <NavbarSpacer />
-        <ThemeSwitcher />
-      </NavbarMobile>
-    </NavbarProvider>
+    <NavigationMenu>
+      <Logo />
+      <NavigationMenuList>
+        <NavigationMenuItem>
+          <NavigationMenuLink>
+            <Link to={"/"}>Home</Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <PagesNav />
+        <NavigationMenuItem>
+          <NavigationMenuLink>
+            <Link to="/recently-deleted">Recently deleted</Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink>
+            <Link to="/recently-archived">Recently archived</Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink>
+            <Link to="/recently-inboxed">Recently inboxed</Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink>
+            <Link to={"/settings"}>Settings</Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+      </NavigationMenuList>
+      <ThemeSwitcher />
+    </NavigationMenu>
   );
 }
-
 function Logo() {
   return (
     <Heading className="font-logo font-normal tracking-normal" level={1}>
@@ -65,30 +58,30 @@ function Logo() {
 function PagesNav() {
   const { data, isPending, isSuccess } = useGetMediaPagesQuery();
   return (
-    <Menu>
-      <NavbarItem>
-        Client pages
-        <ChevronDownIcon className="col-start-3" />
-      </NavbarItem>
-      <MenuContent className="min-w-(--trigger-width) sm:min-w-56">
-        {isPending && <MenuItem>Nothing here yet</MenuItem>}
+    <NavigationMenuItem>
+      <NavigationMenuTrigger>Client pages</NavigationMenuTrigger>
+      <NavigationMenuContent className="min-w-(--trigger-width) sm:min-w-56">
+        {isPending && (
+          <div className="text-sm leading-none font-medium">
+            Nothing here yet
+          </div>
+        )}
         {isSuccess &&
           data.map((page) => (
-            <MenuLink
-              id={page.page_key}
-              textValue={page.name}
-              key={page.page_key}
-              to={`/pages/$pageId`}
-              params={{ pageId: page.page_key }}
-              activeProps={{
-                className:
-                  "font-bold rounded-s-none border-s-4 border-s-primary",
-              }}
-            >
-              {page.name}
-            </MenuLink>
+            <NavigationMenuLink id={page.page_key} key={page.page_key}>
+              <Link
+                to={`/pages/$pageId`}
+                params={{ pageId: page.page_key }}
+                activeProps={{
+                  className:
+                    "font-bold rounded-s-none border-s-4 border-s-primary",
+                }}
+              >
+                {page.name}
+              </Link>
+            </NavigationMenuLink>
           ))}
-      </MenuContent>
-    </Menu>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
   );
 }
