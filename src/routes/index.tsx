@@ -169,16 +169,16 @@ function QuickStart({
   onNavigate,
 }: { hasClient: boolean } & NavigateProps) {
   return (
-    <Container className="flex flex-col gap-8 pt-24" constrained>
+    <div className="flex flex-col gap-8 pt-24" constrained>
       <Heading level={2} className="text-3xl/9 font-semibold">
         {hasClient ? "Next up" : "Get started in 3 steps"}
       </Heading>
       {hasClient ? (
         <div className="flex flex-col gap-4">
-          <Text>
+          <p>
             You already have an active API client. Dive straight into your
             inbox, or fine-tune tag search & layout preferences.
-          </Text>
+          </p>
           <div className="flex flex-wrap gap-4">
             <Button size="md" onPress={() => onNavigate("/recently-inboxed")}>
               Open Inbox
@@ -196,41 +196,41 @@ function QuickStart({
         <ol className="grid gap-6 sm:grid-cols-3">
           <li className="flex flex-col gap-2">
             <Heading level={3}>1. Generate Access Key</Heading>
-            <Text>
+            <p>
               In Hydrus: Services → Manage Services → Client API → Generate a
               new access key.
-            </Text>
+            </p>
           </li>
           <li className="flex flex-col gap-2">
             <Heading level={3}>2. Enter Credentials</Heading>
-            <Text>
+            <p>
               Paste the access key & endpoint in Settings. HyAway stores them
               locally only.
-            </Text>
+            </p>
           </li>
           <li className="flex flex-col gap-2">
             <Heading level={3}>3. Explore</Heading>
-            <Text>
+            <p>
               Start browsing pages, search tags, and manage inbox/archived items
               remotely.
-            </Text>
+            </p>
           </li>
         </ol>
       )}
-    </Container>
+    </div>
   );
 }
 
 function Footer() {
   return (
-    <Container className="mt-32 border-t pt-10 text-center" constrained>
-      <Text className="text-sm/6">
+    <div className="mt-32 border-t pt-10 text-center" constrained>
+      <p className="text-sm/6">
         Built with TanStack Router & Hydrus API. Privacy-first: keys never leave
         your browser.
-      </Text>
-      <Text className="mt-2 text-xs/5 opacity-60">
+      </p>
+      <p className="mt-2 text-xs/5 opacity-60">
         © {new Date().getFullYear()} HyAway
-      </Text>
-    </Container>
+      </p>
+    </div>
   );
 }
