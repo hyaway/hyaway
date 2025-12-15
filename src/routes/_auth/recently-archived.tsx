@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Loader } from "@/components/ui/loader";
 import { Note } from "@/components/ui/note";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/ui-primitives/separator";
 import { useRecentlyArchivedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui-primitives/button";
