@@ -57,9 +57,9 @@ export function SecretInputField({
           type={isVisible ? "text" : "password"}
         />
         <Button
-          intent="secondary"
+          variant={"secondary"}
           aria-pressed={isVisible}
-          onPress={toggleVisibility}
+          onClick={toggleVisibility}
           aria-label={isVisible ? `Hide ${label}` : `Show ${label}`}
         >
           {isVisible ? <EyeSlashIcon /> : <EyeIcon />}

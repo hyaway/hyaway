@@ -48,16 +48,16 @@ function RouteComponent() {
       <Separator className="my-2" />
       <div className="flex gap-2">
         <Button
-          onPress={() =>
+          onClick={() =>
             queryClient.invalidateQueries({ queryKey: ["getPageInfo", pageId] })
           }
         >
           Refetch
         </Button>
-        <Button onPress={() => refreshPageMutation.mutate(pageId)}>
+        <Button onClick={() => refreshPageMutation.mutate(pageId)}>
           Refresh remote
         </Button>
-        <Button onPress={() => focusPageMutation.mutate(pageId)}>Focus</Button>
+        <Button onClick={() => focusPageMutation.mutate(pageId)}>Focus</Button>
       </div>
       <Separator className="my-2" />
       {data?.page_info.media ? (

@@ -25,7 +25,7 @@ export function RequestNewPermissionsField() {
         isDisabled={isPending || !apiEndpoint || !apiVersionQuery.isSuccess}
         name={SETTINGS_ACTION}
         value={SETTINGS_REQUEST_API_KEY_ACTION}
-        onPress={() => {
+        onClick={() => {
           mutate(
             { apiEndpoint: apiEndpoint, name: "hyaway-app" },
             {

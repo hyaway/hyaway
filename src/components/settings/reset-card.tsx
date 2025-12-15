@@ -21,7 +21,7 @@ export function ResetCard({ resetKey }: { resetKey: () => void }) {
           type="button"
           name={SETTINGS_ACTION}
           value={SETTINGS_RESET_CONFIG_ACTION}
-          onPress={() => {
+          onClick={() => {
             reset();
             resetKey();
           }}

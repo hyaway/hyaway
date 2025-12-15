@@ -40,7 +40,7 @@ function RouteComponent() {
       <Heading>Recently inboxed</Heading>
       <Separator className="my-2" />
       <Button
-        onPress={() =>
+        onClick={() =>
           queryClient.invalidateQueries({
             queryKey: ["searchFiles", "recentlyInboxed"],
           })

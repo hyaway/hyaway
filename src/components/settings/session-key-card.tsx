@@ -51,7 +51,7 @@ export function SessionKeyCard() {
           type="button"
           name={SETTINGS_ACTION}
           value={SETTINGS_REQUEST_SESSION_KEY_ACTION}
-          onPress={() => {
+          onClick={() => {
             hydrusApi?.refreshSessionKey().finally(() => {
               queryClient.resetQueries({
                 queryKey: ["verifyAccess", "session"],

@@ -120,14 +120,14 @@ function Hero({
           <Button
             intent={primaryCta.intent}
             size="lg"
-            onPress={() => onNavigate(primaryCta.to)}
+            onClick={() => onNavigate(primaryCta.to)}
           >
             {primaryCta.label}
           </Button>
           <Button
             intent="outline"
             size="lg"
-            onPress={() => onNavigate(secondaryCta.to)}
+            onClick={() => onNavigate(secondaryCta.to)}
           >
             {secondaryCta.label}
           </Button>
@@ -180,13 +180,13 @@ function QuickStart({
             inbox, or fine-tune tag search & layout preferences.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Button size="md" onPress={() => onNavigate("/recently-inboxed")}>
+            <Button size="md" onClick={() => onNavigate("/recently-inboxed")}>
               Open Inbox
             </Button>
             <Button
               intent="outline"
               size="md"
-              onPress={() => onNavigate("/settings/ux")}
+              onClick={() => onNavigate("/settings/ux")}
             >
               UX Settings
             </Button>

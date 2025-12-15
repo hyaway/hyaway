@@ -37,7 +37,7 @@ export function ThemeSwitcher({ appearance = "plain" }: Props) {
       intent={appearance}
       size="sq-sm"
       aria-label="Switch theme"
-      onPress={() => setThemePreference(getNextTheme(themePreference))}
+      onClick={() => setThemePreference(getNextTheme(themePreference))}
     >
       <SunIcon
         className={cn(
