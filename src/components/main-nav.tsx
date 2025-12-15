@@ -78,6 +78,7 @@ function PagesNav() {
                 className:
                   "font-bold rounded-s-none border-s-4 border-s-primary",
               }}
+              closeOnClick={true}
             >
               {page.name}
             </RouterNavigationMenuLink>
