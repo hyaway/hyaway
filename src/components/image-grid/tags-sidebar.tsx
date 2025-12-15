@@ -135,7 +135,7 @@ export function TagsSidebar({
         style={{
           height: `${rowVirtualizer.getTotalSize()}px`,
         }}
-        className="relative flex"
+        className="relative"
       >
         {rows.map((virtualRow) => {
           const tagItem = tags[virtualRow.index];
@@ -148,22 +148,24 @@ export function TagsSidebar({
                 transform: `translateY(${virtualRow.start}px)`,
               }}
               ref={rowVirtualizer.measureElement}
-              className="absolute top-0 left-0 flex w-full flex-row items-center gap-1 font-mono uppercase"
+              className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-baseline gap-1 font-mono uppercase"
             >
               <span
                 aria-hidden="true"
-                className="text-muted-foreground text-right tabular-nums"
+                className="text-muted-foreground shrink-0 text-right tabular-nums"
               >
                 {virtualRow.index + 1}.
               </span>
               <Badge
                 variant={"outline"}
-                className="break-normal wrap-anywhere whitespace-normal"
+                className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
               >
                 {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
                 {tagItem.tag}
               </Badge>
-              <Badge variant={"outline"}>{tagItem.count}</Badge>
+              <Badge variant={"outline"} className="shrink-0">
+                {tagItem.count}
+              </Badge>
             </li>
           );
         })}
