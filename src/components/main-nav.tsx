@@ -1,6 +1,6 @@
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { ThemeSwitcher } from "./theme-switcher";
-import { Heading } from "./ui/heading";
+import { Heading } from "./ui-primitives/heading";
 import type { NavbarProps } from "@/components/ui/navbar";
 import {
   Navbar,
