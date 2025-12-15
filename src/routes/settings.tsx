@@ -1,10 +1,14 @@
-import { Outlet, createFileRoute, linkOptions } from "@tanstack/react-router";
+import {
+  Link,
+  Outlet,
+  createFileRoute,
+  linkOptions,
+} from "@tanstack/react-router";
 import {
   FingerPrintIcon,
   RectangleGroupIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { Link } from "@/components/ui-primitives/link";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsComponent,
