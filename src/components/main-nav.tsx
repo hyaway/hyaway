@@ -15,7 +15,7 @@ export default function MainNavbar() {
   return (
     <NavigationMenu className="max-w-full">
       <Logo />
-      <NavigationMenuList className="ms-4 flex-wrap justify-start">
+      <NavigationMenuList className="ms-4 flex-wrap justify-start gap-1">
         <NavigationMenuItem>
           <RouterNavigationMenuLink to={"/"}>Home</RouterNavigationMenuLink>
         </NavigationMenuItem>
@@ -41,7 +41,7 @@ export default function MainNavbar() {
           </RouterNavigationMenuLink>
         </NavigationMenuItem>
       </NavigationMenuList>
-      <ThemeSwitcher className={"ms-auto size-9 border-0"} />
+      <ThemeSwitcher className={"ms-auto border-0"} />
     </NavigationMenu>
   );
 }
