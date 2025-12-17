@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { ThemeSwitcher } from "./theme-switcher";
 import { Heading } from "./ui-primitives/heading";
 import {
@@ -14,9 +13,9 @@ import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-
 
 export default function MainNavbar() {
   return (
-    <NavigationMenu>
+    <NavigationMenu className="max-w-full">
       <Logo />
-      <NavigationMenuList>
+      <NavigationMenuList className="ms-4 flex-wrap justify-start">
         <NavigationMenuItem>
           <RouterNavigationMenuLink to={"/"}>Home</RouterNavigationMenuLink>
         </NavigationMenuItem>
@@ -42,7 +41,7 @@ export default function MainNavbar() {
           </RouterNavigationMenuLink>
         </NavigationMenuItem>
       </NavigationMenuList>
-      <ThemeSwitcher />
+      <ThemeSwitcher className={"ms-auto size-9 border-0"} />
     </NavigationMenu>
   );
 }

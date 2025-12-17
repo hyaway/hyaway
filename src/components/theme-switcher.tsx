@@ -4,6 +4,7 @@ import {
   SunIcon,
 } from "@heroicons/react/20/solid";
 import type { Theme } from "@/lib/theme-store";
+import type { ComponentProps } from "react";
 import { Button } from "@/components/ui-primitives/button";
 import {
   getWindowSystemTheme,
@@ -12,9 +13,6 @@ import {
 } from "@/lib/theme-store";
 import { cn } from "@/lib/utils";
 
-interface Props {
-  appearance?: "plain" | "outline";
-}
 function getNextTheme(currentPreference: Theme): Theme {
   const systemTheme = getWindowSystemTheme();
 
@@ -29,14 +27,15 @@ function getNextTheme(currentPreference: Theme): Theme {
   return currentPreference === "light" ? "dark" : "light";
 }
 
-export function ThemeSwitcher({ appearance = "plain" }: Props) {
+export function ThemeSwitcher(props: ComponentProps<typeof Button>) {
   const themePreference = useThemePreference();
   const { setThemePreference } = useThemeActions();
   return (
     <Button
-      intent={appearance}
-      size="sq-sm"
+      variant={"ghost"}
+      size={"icon-lg"}
       aria-label="Switch theme"
+      {...props}
       onClick={() => setThemePreference(getNextTheme(themePreference))}
     >
       <SunIcon
