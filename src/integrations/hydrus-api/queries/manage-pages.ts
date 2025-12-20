@@ -47,7 +47,7 @@ export const useGetPagesQuery = () => {
   const enabled = useIsAuthenticated();
 
   return useQuery({
-    queryKey: ["getPages", hydrusApi],
+    queryKey: ["getPages", hydrusApi, hydrusApi?.toJSON()],
     queryFn: async () => {
       if (!hydrusApi) {
         throw new Error("Hydrus API client is required.");
@@ -99,7 +99,7 @@ export const useGetPageInfoQuery = (pageKey: string, simple = true) => {
   const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: ["getPageInfo", pageKey, simple, hydrusApi],
+    queryKey: ["getPageInfo", pageKey, simple, hydrusApi, hydrusApi?.toJSON()],
     queryFn: async () => {
       if (!hydrusApi) {
         throw new Error("Hydrus API client is required.");
