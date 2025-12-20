@@ -1,10 +1,15 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { AxiosError } from "axios";
+import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
 import { ImageGridCard } from "./image-grid-card";
 import { TagsSidebar } from "./tags-sidebar";
 import { Spinner } from "@/components/ui-primitives/spinner";
-import { Note } from "@/components/ui-primitives/note";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui-primitives/alert";
 import { Badge } from "@/components/ui-primitives/badge";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/get-files";
@@ -24,16 +29,20 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
 
   if (itemsQuery.isError) {
     return (
-      <Note intent="danger">
-        {itemsQuery.error instanceof Error
-          ? itemsQuery.error.message
-          : "An unknown error occurred while fetching gallery"}
-        <br />
-        {itemsQuery.error instanceof AxiosError &&
-          itemsQuery.error.response?.data?.error && (
+      <Alert variant="destructive">
+        <ExclamationCircleIcon />
+        <AlertTitle>
+          {itemsQuery.error instanceof Error
+            ? itemsQuery.error.message
+            : "An unknown error occurred while fetching gallery"}
+        </AlertTitle>
+        <AlertDescription>
+          {itemsQuery.error instanceof AxiosError &&
+          itemsQuery.error.response?.data?.error ? (
             <span>{itemsQuery.error.response.data.error}</span>
-          )}
-      </Note>
+          ) : null}
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -179,8 +188,7 @@ export function PureImageGrid({
           "fixed right-4 bottom-4 z-10 mt-4",
           rowVirtualizer.isScrolling ? "opacity-100" : "opacity-50",
         )}
-        intent="secondary"
-        isCircle={true}
+        variant="secondary"
       >
         {(lastItemIndex ?? 0) + 1}/{items.length} ({totalItems})
       </Badge>

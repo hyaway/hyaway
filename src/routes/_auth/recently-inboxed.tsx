@@ -1,9 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui-primitives/alert";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Spinner } from "@/components/ui-primitives/spinner";
-import { Note } from "@/components/ui-primitives/note";
 import { Separator } from "@/components/ui-primitives/separator";
 import { useRecentlyInboxedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
@@ -23,15 +28,19 @@ function RouteComponent() {
 
   if (isError) {
     return (
-      <Note intent="danger">
-        {error instanceof Error
-          ? error.message
-          : "An unknown error occurred while fetching recently inboxed files."}
-        <br />
-        {error instanceof AxiosError && error.response?.data?.error && (
-          <span>{error.response.data.error}</span>
-        )}
-      </Note>
+      <Alert variant="destructive">
+        <ExclamationCircleIcon />
+        <AlertTitle>
+          {error instanceof Error
+            ? error.message
+            : "An unknown error occurred while fetching recently inboxed files."}
+        </AlertTitle>
+        <AlertDescription>
+          {error instanceof AxiosError && error.response?.data?.error ? (
+            <span>{error.response.data.error}</span>
+          ) : null}
+        </AlertDescription>
+      </Alert>
     );
   }
 

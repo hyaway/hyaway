@@ -1,10 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui-primitives/alert";
 import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Spinner } from "@/components/ui-primitives/spinner";
-import { Note } from "@/components/ui-primitives/note";
 import { Separator } from "@/components/ui-primitives/separator";
 import {
   useFocusPageMutation,
@@ -30,15 +35,19 @@ function RouteComponent() {
 
   if (isError) {
     return (
-      <Note intent="danger">
-        {error instanceof Error
-          ? error.message
-          : "An unknown error occurred while fetching pages."}
-        <br />
-        {error instanceof AxiosError && error.response?.data?.error && (
-          <span>{error.response.data.error}</span>
-        )}
-      </Note>
+      <Alert variant="destructive">
+        <ExclamationCircleIcon />
+        <AlertTitle>
+          {error instanceof Error
+            ? error.message
+            : "An unknown error occurred while fetching pages."}
+        </AlertTitle>
+        <AlertDescription>
+          {error instanceof AxiosError && error.response?.data?.error ? (
+            <span>{error.response.data.error}</span>
+          ) : null}
+        </AlertDescription>
+      </Alert>
     );
   }
 
