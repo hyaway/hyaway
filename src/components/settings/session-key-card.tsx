@@ -87,7 +87,7 @@ export function SessionKeyCard() {
           data.hasRequiredPermissions ? (
             <Alert>
               <CheckCircleIcon />
-              <AlertTitle>Connection successful</AlertTitle>
+              <AlertTitle>Session key is valid!</AlertTitle>
               <AlertDescription>
                 Connection to <b>{apiEndpoint}</b> with{" "}
                 <b>{data.raw.name ?? "API"}</b> session key successful

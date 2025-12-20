@@ -86,7 +86,7 @@ export function AccessKeyField() {
         data.hasRequiredPermissions ? (
           <Alert>
             <CheckCircleIcon />
-            <AlertTitle>Connection successful</AlertTitle>
+            <AlertTitle>API access key is valid!</AlertTitle>
             <AlertDescription>
               Connection to <b>{apiEndpoint}</b> with{" "}
               <b>{data.raw.name ?? "API"}</b> access key successful
