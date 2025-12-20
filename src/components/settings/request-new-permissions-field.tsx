@@ -1,11 +1,16 @@
 import { AxiosError } from "axios";
 import {
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+} from "@heroicons/react/16/solid";
+import {
   useApiVersionQuery,
   useRequestNewPermissionsMutation,
 } from "../../integrations/hydrus-api/queries/access";
+import { Alert, AlertDescription, AlertTitle } from "../ui-primitives/alert";
+import { Spinner } from "../ui-primitives/spinner";
 import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
 import { Button } from "@/components/ui-primitives/button";
-import { Note } from "@/components/ui-primitives/note";
 import {
   useApiEndpoint,
   useAuthActions,
@@ -43,21 +48,32 @@ export function RequestNewPermissionsField() {
             : "Request new API access key"}
       </Button>
       {!apiEndpoint ? null : isPending ? (
-        <Note intent="info">Requesting new API access key...</Note>
+        <Alert>
+          <Spinner />
+          <AlertTitle>Requesting new API access key...</AlertTitle>
+        </Alert>
       ) : isSuccess ? (
-        <Note intent="success">
-          New API access key for <b>{apiEndpoint}</b> obtained and saved.
-        </Note>
+        <Alert>
+          <CheckCircleIcon />
+          <AlertTitle>New API access key saved</AlertTitle>
+          <AlertDescription>
+            New API access key for <b>{apiEndpoint}</b> obtained and saved.
+          </AlertDescription>
+        </Alert>
       ) : isError ? (
-        <Note intent="danger">
-          {error instanceof Error
-            ? error.message
-            : "An unknown error occurred while requesting new permissions."}
-          <br />
-          {error instanceof AxiosError && error.response?.data?.error && (
-            <span>{error.response.data.error}</span>
-          )}
-        </Note>
+        <Alert variant="destructive">
+          <ExclamationCircleIcon />
+          <AlertTitle>
+            {error instanceof Error
+              ? error.message
+              : "An unknown error occurred while requesting new permissions."}
+          </AlertTitle>
+          <AlertDescription>
+            {error instanceof AxiosError && error.response?.data?.error ? (
+              <span>{error.response.data.error}</span>
+            ) : null}
+          </AlertDescription>
+        </Alert>
       ) : null}
     </div>
   );

@@ -1,14 +1,19 @@
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+} from "@heroicons/react/16/solid";
 import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/access";
+import { Alert, AlertDescription, AlertTitle } from "../ui-primitives/alert";
 import { Field, FieldLabel } from "../ui-primitives/field";
 import { SecretInput } from "../ui-primitives/input";
+import { Spinner } from "../ui-primitives/spinner";
 import {
   SETTINGS_ACTION,
   SETTINGS_REQUEST_SESSION_KEY_ACTION,
 } from "./constants";
 import { Button } from "@/components/ui-primitives/button";
-import { Note } from "@/components/ui-primitives/note";
 import {
   Card,
   CardContent,
@@ -69,33 +74,53 @@ export function SessionKeyCard() {
           {isFetching ? "Refreshing" : "Refresh session key"}
         </Button>
         {!sessionKey ? (
-          <Note intent="warning">No session key</Note>
+          <Alert>
+            <ExclamationCircleIcon />
+            <AlertTitle>No session key</AlertTitle>
+          </Alert>
         ) : isLoading ? (
-          <Note intent="info">Checking session key...</Note>
+          <Alert>
+            <Spinner />
+            <AlertTitle>Checking session key...</AlertTitle>
+          </Alert>
         ) : isSuccess ? (
           data.hasRequiredPermissions ? (
-            <Note intent="success">
-              Connection to <b>{apiEndpoint}</b> with{" "}
-              <b>{data.raw.name ?? "API"}</b> session key successful
-            </Note>
+            <Alert>
+              <CheckCircleIcon />
+              <AlertTitle>Connection successful</AlertTitle>
+              <AlertDescription>
+                Connection to <b>{apiEndpoint}</b> with{" "}
+                <b>{data.raw.name ?? "API"}</b> session key successful
+              </AlertDescription>
+            </Alert>
           ) : (
-            <Note intent="warning">
-              Insufficient permissions for <b>{data.raw.name ?? "API"}</b>{" "}
-              session key on <b>{apiEndpoint}</b>
-            </Note>
+            <Alert>
+              <ExclamationCircleIcon />
+              <AlertTitle>Insufficient permissions</AlertTitle>
+              <AlertDescription>
+                Insufficient permissions for <b>{data.raw.name ?? "API"}</b>{" "}
+                session key on <b>{apiEndpoint}</b>
+              </AlertDescription>
+            </Alert>
           )
         ) : isError ? (
-          <Note intent="danger">
-            {error instanceof Error
-              ? error.message
-              : "An unknown error occurred while checking endpoint."}
-            <br />
-            {error instanceof AxiosError && error.response?.data?.error && (
-              <span>{error.response.data.error}</span>
-            )}
-            <br />
-            API endpoint: <b>{apiEndpoint}</b>
-          </Note>
+          <Alert variant="destructive">
+            <ExclamationCircleIcon />
+            <AlertTitle>
+              {error instanceof Error
+                ? error.message
+                : "An unknown error occurred while checking endpoint."}
+            </AlertTitle>
+            <AlertDescription>
+              {error instanceof AxiosError && error.response?.data?.error ? (
+                <>
+                  <span>{error.response.data.error}</span>
+                  <br />
+                </>
+              ) : null}
+              API endpoint: <b>{apiEndpoint}</b>
+            </AlertDescription>
+          </Alert>
         ) : null}
       </CardContent>
     </Card>
