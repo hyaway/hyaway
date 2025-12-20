@@ -51,7 +51,6 @@ export function SessionKeyCard() {
           <FieldLabel>API session key</FieldLabel>
           <SecretInput
             aria-label="API session key"
-            key={sessionKey}
             value={sessionKey}
             disabled={true}
           />
@@ -71,7 +70,7 @@ export function SessionKeyCard() {
             !apiEndpoint || !hydrusApi || !persistentAccessQuery.isSuccess
           }
         >
-          {isFetching ? "Refreshing" : "Refresh session key"}
+          {isFetching ? "Refreshing..." : "Refresh session key"}
         </Button>
         {!sessionKey ? (
           <Alert>
