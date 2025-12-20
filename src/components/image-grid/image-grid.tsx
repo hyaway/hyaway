@@ -187,7 +187,7 @@ export function PureImageGrid({
         className={cn(
           "fixed right-4 bottom-4 z-10 mt-4 transition-opacity lg:right-72",
           rowVirtualizer.isScrolling
-            ? "opacity-100 delay-0 duration-100"
+            ? "opacity-90 delay-0 duration-100"
             : "opacity-50 delay-500 duration-1000",
         )}
         variant="secondary"
