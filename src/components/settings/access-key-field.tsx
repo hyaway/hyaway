@@ -7,6 +7,7 @@ import {
   InformationCircleIcon,
 } from "@heroicons/react/16/solid";
 import z from "zod";
+import { useEffect } from "react";
 import {
   useApiVersionQuery,
   useVerifyAccessQuery,
@@ -53,9 +54,12 @@ export function AccessKeyField() {
     },
   });
 
+  useEffect(() => {
+    form.reset();
+  }, [apiAccessKey]);
+
   return (
     <form
-      key={apiAccessKey}
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault();
@@ -111,6 +115,9 @@ export function AccessKeyField() {
         <Alert>
           <Spinner />
           <AlertTitle>Checking API access key...</AlertTitle>
+          <AlertDescription>
+            Calling <b>{apiEndpoint}</b> with provided access key
+          </AlertDescription>
         </Alert>
       ) : isSuccess ? (
         data.hasRequiredPermissions ? (

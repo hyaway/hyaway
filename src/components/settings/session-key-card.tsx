@@ -81,6 +81,9 @@ export function SessionKeyCard() {
           <Alert>
             <Spinner />
             <AlertTitle>Checking session key...</AlertTitle>
+            <AlertDescription>
+              Getting new session key from <b>{apiEndpoint}</b>
+            </AlertDescription>
           </Alert>
         ) : isSuccess ? (
           data.hasRequiredPermissions ? (

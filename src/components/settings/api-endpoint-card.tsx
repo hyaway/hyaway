@@ -6,6 +6,7 @@ import {
   ExclamationCircleIcon,
 } from "@heroicons/react/16/solid";
 import z from "zod";
+import { useEffect } from "react";
 import { useApiVersionQuery } from "../../integrations/hydrus-api/queries/access";
 import { Field, FieldError, FieldLabel } from "../ui-primitives/field";
 import { Input } from "../ui-primitives/input";
@@ -48,6 +49,11 @@ export function ApiEndpointCard() {
       queryClient.resetQueries({ queryKey: ["apiVersion"] });
     },
   });
+
+  useEffect(() => {
+    form.reset();
+  }, [apiEndpoint]);
+
   return (
     <form
       onSubmit={(e) => {
@@ -105,6 +111,9 @@ export function ApiEndpointCard() {
             <Alert>
               <Spinner />
               <AlertTitle>Checking endpoint...</AlertTitle>
+              <AlertDescription>
+                Calling <b>{apiEndpoint}</b>
+              </AlertDescription>
             </Alert>
           ) : isSuccess ? (
             <Alert>

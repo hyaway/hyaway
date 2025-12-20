@@ -27,6 +27,7 @@ export function RequestNewPermissionsField() {
     <div className="flex flex-col gap-4">
       <Button
         type="button"
+        size={apiEndpoint ? "lg" : "default"}
         disabled={isPending || !apiEndpoint || !apiVersionQuery.isSuccess}
         name={SETTINGS_ACTION}
         value={SETTINGS_REQUEST_API_KEY_ACTION}
@@ -41,11 +42,13 @@ export function RequestNewPermissionsField() {
           );
         }}
       >
-        {isPending
-          ? `Requesting new API access key for ${apiEndpoint}...`
-          : apiEndpoint
-            ? `Request new API access key for ${apiEndpoint}`
-            : "Request new API access key"}
+        <span className={"text-wrap"}>
+          {isPending
+            ? `Requesting new API access key for ${apiEndpoint}...`
+            : apiEndpoint
+              ? `Request new API access key for ${apiEndpoint}`
+              : "Request new API access key"}
+        </span>
       </Button>
       {!apiEndpoint ? null : isPending ? (
         <Alert>
