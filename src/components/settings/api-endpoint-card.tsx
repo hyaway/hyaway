@@ -1,21 +1,17 @@
 import { AxiosError } from "axios";
-import { Form as FormPrimitive } from "react-aria-components";
+import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/16/solid";
+import z from "zod";
 import { useApiVersionQuery } from "../../integrations/hydrus-api/queries/access";
-import { Field, FieldLabel } from "../ui-primitives/field";
+import { Field, FieldError, FieldLabel } from "../ui-primitives/field";
 import { Input } from "../ui-primitives/input";
 import { Alert, AlertDescription, AlertTitle } from "../ui-primitives/alert";
 import { Spinner } from "../ui-primitives/spinner";
-import {
-  SETTINGS_ACTION,
-  SETTINGS_ENDPOINT_FIELD_NAME,
-  SETTINGS_SAVE_ENDPOINT_ACTION,
-} from "./constants";
-import { getFormDataWithSubmitter } from "./form-utils";
+import { SETTINGS_ENDPOINT_FIELD_NAME } from "./constants";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Card,
@@ -29,6 +25,12 @@ import {
   useAuthActions,
 } from "@/integrations/hydrus-api/hydrus-config-store";
 
+const endpointSchema = z.url("Please enter a valid URL");
+
+const formSchema = z.object({
+  [SETTINGS_ENDPOINT_FIELD_NAME]: endpointSchema,
+});
+
 export function ApiEndpointCard() {
   const queryClient = useQueryClient();
   const apiEndpoint = useApiEndpoint();
@@ -37,22 +39,23 @@ export function ApiEndpointCard() {
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useApiVersionQuery(apiEndpoint);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = getFormDataWithSubmitter(e);
-    const endpoint = formData.get(SETTINGS_ENDPOINT_FIELD_NAME);
-    const action = formData.get(SETTINGS_ACTION);
-
-    if (
-      action === SETTINGS_SAVE_ENDPOINT_ACTION &&
-      (typeof endpoint === "string" || endpoint === null)
-    ) {
-      setApiCredentials(undefined, endpoint);
+  const form = useForm({
+    defaultValues: {
+      [SETTINGS_ENDPOINT_FIELD_NAME]: apiEndpoint,
+    } satisfies z.input<typeof formSchema>,
+    onSubmit: ({ value }) => {
+      setApiCredentials(undefined, value[SETTINGS_ENDPOINT_FIELD_NAME]);
       queryClient.resetQueries({ queryKey: ["apiVersion"] });
-    }
-  };
+    },
+  });
   return (
-    <FormPrimitive onSubmit={handleSubmit}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+    >
       <Card className="max-w-lg">
         <CardHeader>
           <CardTitle>1. Set API endpoint</CardTitle>
@@ -61,25 +64,40 @@ export function ApiEndpointCard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <Field>
-            <FieldLabel>API endpoint</FieldLabel>
-            <Input
-              name={SETTINGS_ENDPOINT_FIELD_NAME}
-              key={apiEndpoint}
-              defaultValue={apiEndpoint}
-              placeholder="http://localhost:45869"
-              required={true}
-              type="url"
-            />
-          </Field>
-          <Button
-            type="submit"
-            name={SETTINGS_ACTION}
-            value={SETTINGS_SAVE_ENDPOINT_ACTION}
-            disabled={isFetching}
+          <form.Field
+            name={SETTINGS_ENDPOINT_FIELD_NAME}
+            validators={{ onChange: endpointSchema, onBlur: endpointSchema }}
           >
-            {isFetching ? "Checking endpoint..." : "Check endpoint"}
-          </Button>
+            {(field) => (
+              <Field>
+                <FieldLabel>API endpoint</FieldLabel>
+                <Input
+                  name={field.name}
+                  id={field.name}
+                  value={field.state.value}
+                  placeholder="http://localhost:45869"
+                  required={true}
+                  type="url"
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                />
+                {!field.state.meta.isValid && field.state.meta.isTouched && (
+                  <FieldError errors={field.state.meta.errors} />
+                )}
+              </Field>
+            )}
+          </form.Field>
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+          >
+            {([canSubmit, isSubmitting]) => (
+              <Button type="submit" disabled={isFetching || !canSubmit}>
+                {isFetching || isSubmitting
+                  ? "Checking endpoint..."
+                  : "Check endpoint"}
+              </Button>
+            )}
+          </form.Subscribe>
           {isLoading ? (
             <Alert>
               <Spinner />
@@ -118,6 +136,6 @@ export function ApiEndpointCard() {
           ) : null}
         </CardContent>
       </Card>
-    </FormPrimitive>
+    </form>
   );
 }
