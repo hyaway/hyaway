@@ -117,18 +117,10 @@ function Hero({
           clarity, and keyboard navigation.
         </p>
         <div className="flex flex-wrap gap-4 pt-2">
-          <Button
-            intent={primaryCta.intent}
-            size="lg"
-            onClick={() => onNavigate(primaryCta.to)}
-          >
+          <Button size="lg" onClick={() => onNavigate(primaryCta.to)}>
             {primaryCta.label}
           </Button>
-          <Button
-            intent="outline"
-            size="lg"
-            onClick={() => onNavigate(secondaryCta.to)}
-          >
+          <Button size="lg" onClick={() => onNavigate(secondaryCta.to)}>
             {secondaryCta.label}
           </Button>
         </div>
@@ -169,7 +161,7 @@ function QuickStart({
   onNavigate,
 }: { hasClient: boolean } & NavigateProps) {
   return (
-    <div className="flex flex-col gap-8 pt-24" constrained>
+    <div className="flex flex-col gap-8 pt-24">
       <Heading level={2} className="text-3xl/9 font-semibold">
         {hasClient ? "Next up" : "Get started in 3 steps"}
       </Heading>
@@ -180,14 +172,10 @@ function QuickStart({
             inbox, or fine-tune tag search & layout preferences.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Button size="md" onClick={() => onNavigate("/recently-inboxed")}>
+            <Button onClick={() => onNavigate("/recently-inboxed")}>
               Open Inbox
             </Button>
-            <Button
-              intent="outline"
-              size="md"
-              onClick={() => onNavigate("/settings/ux")}
-            >
+            <Button onClick={() => onNavigate("/settings/ux")}>
               UX Settings
             </Button>
           </div>
@@ -223,7 +211,7 @@ function QuickStart({
 
 function Footer() {
   return (
-    <div className="mt-32 border-t pt-10 text-center" constrained>
+    <div className="mt-32 border-t pt-10 text-center">
       <p className="text-sm/6">
         Built with TanStack Router & Hydrus API. Privacy-first: keys never leave
         your browser.
