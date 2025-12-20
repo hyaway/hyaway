@@ -1,31 +1,35 @@
 import { AxiosError } from "axios";
-import { Form as FormPrimitive } from "react-aria-components";
+import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   InformationCircleIcon,
 } from "@heroicons/react/16/solid";
+import z from "zod";
 import {
   useApiVersionQuery,
   useVerifyAccessQuery,
 } from "../../integrations/hydrus-api/queries/access";
 import { SecretInput } from "../ui-primitives/input";
-import { Field, FieldLabel } from "../ui-primitives/field";
+import { Field, FieldError, FieldLabel } from "../ui-primitives/field";
 import { Alert, AlertDescription, AlertTitle } from "../ui-primitives/alert";
 import { Spinner } from "../ui-primitives/spinner";
-import {
-  SETTINGS_ACCESS_KEY_FIELD_NAME,
-  SETTINGS_ACTION,
-  SETTINGS_SAVE_ACCESS_KEY_ACTION,
-} from "./constants";
-import { getFormDataWithSubmitter } from "./form-utils";
+import { SETTINGS_ACCESS_KEY_FIELD_NAME } from "./constants";
 import { Button } from "@/components/ui-primitives/button";
 import {
   useApiAccessKey,
   useApiEndpoint,
   useAuthActions,
 } from "@/integrations/hydrus-api/hydrus-config-store";
+
+const accessKeySchema = z
+  .string()
+  .length(64, "API access key must be exactly 64 characters");
+
+const formSchema = z.object({
+  [SETTINGS_ACCESS_KEY_FIELD_NAME]: accessKeySchema,
+});
 
 export function AccessKeyField() {
   const queryClient = useQueryClient();
@@ -39,44 +43,70 @@ export function AccessKeyField() {
 
   const apiVersionQuery = useApiVersionQuery(apiEndpoint);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = getFormDataWithSubmitter(e);
-    const accessKey = formData.get(SETTINGS_ACCESS_KEY_FIELD_NAME);
-    const action = formData.get(SETTINGS_ACTION);
-
-    if (
-      action === SETTINGS_SAVE_ACCESS_KEY_ACTION &&
-      (typeof accessKey === "string" || accessKey === null)
-    ) {
-      setApiCredentials(accessKey, undefined);
+  const form = useForm({
+    defaultValues: {
+      [SETTINGS_ACCESS_KEY_FIELD_NAME]: apiAccessKey,
+    } satisfies z.input<typeof formSchema>,
+    onSubmit: ({ value }) => {
+      setApiCredentials(value[SETTINGS_ACCESS_KEY_FIELD_NAME], undefined);
       queryClient.resetQueries({ queryKey: ["verifyAccess"] });
-    }
-  };
+    },
+  });
 
   return (
-    <FormPrimitive onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <Field>
-        <FieldLabel>API access key</FieldLabel>
-        <SecretInput
-          aria-label="API access key"
-          name={SETTINGS_ACCESS_KEY_FIELD_NAME}
-          defaultValue={apiAccessKey}
-          key={apiAccessKey}
-          required={true}
-          disabled={isLoading}
-          minLength={64}
-          maxLength={64}
-        />
-      </Field>
-      <Button
-        type="submit"
-        disabled={isLoading || !apiEndpoint || !apiVersionQuery.isSuccess}
-        name={SETTINGS_ACTION}
-        value={SETTINGS_SAVE_ACCESS_KEY_ACTION}
+    <form
+      key={apiAccessKey}
+      className="flex flex-col gap-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+    >
+      <form.Field
+        name={SETTINGS_ACCESS_KEY_FIELD_NAME}
+        validators={{ onChange: accessKeySchema, onBlur: accessKeySchema }}
       >
-        {isFetching ? "Checking" : "Check API connection"}
-      </Button>
+        {(field) => (
+          <Field>
+            <FieldLabel>API access key</FieldLabel>
+            <SecretInput
+              aria-label="API access key"
+              name={field.name}
+              id={field.name}
+              value={field.state.value}
+              required={true}
+              disabled={isLoading}
+              minLength={64}
+              maxLength={64}
+              onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={field.handleBlur}
+            />
+            {!field.state.meta.isValid && field.state.meta.isTouched && (
+              <FieldError errors={field.state.meta.errors} />
+            )}
+          </Field>
+        )}
+      </form.Field>
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <Button
+            type="submit"
+            disabled={
+              isLoading ||
+              isFetching ||
+              !canSubmit ||
+              isSubmitting ||
+              !apiEndpoint ||
+              !apiVersionQuery.isSuccess
+            }
+          >
+            {isFetching || isSubmitting ? "Checking" : "Check API connection"}
+          </Button>
+        )}
+      </form.Subscribe>
       {isLoading ? (
         <Alert>
           <Spinner />
@@ -148,6 +178,6 @@ export function AccessKeyField() {
           </Alert>
         </>
       ) : null}
-    </FormPrimitive>
+    </form>
   );
 }

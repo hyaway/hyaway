@@ -91,7 +91,10 @@ export function ApiEndpointCard() {
             selector={(state) => [state.canSubmit, state.isSubmitting]}
           >
             {([canSubmit, isSubmitting]) => (
-              <Button type="submit" disabled={isFetching || !canSubmit}>
+              <Button
+                type="submit"
+                disabled={isFetching || !canSubmit || isSubmitting}
+              >
                 {isFetching || isSubmitting
                   ? "Checking endpoint..."
                   : "Check endpoint"}
