@@ -2,18 +2,24 @@ import { AxiosError } from "axios";
 import { Form as FormPrimitive } from "react-aria-components";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/16/solid";
+import {
   useApiVersionQuery,
   useVerifyAccessQuery,
 } from "../../integrations/hydrus-api/queries/access";
 import { SecretInput } from "../ui-primitives/input";
 import { Field, FieldLabel } from "../ui-primitives/field";
+import { Alert, AlertDescription, AlertTitle } from "../ui-primitives/alert";
+import { Spinner } from "../ui-primitives/spinner";
 import {
   SETTINGS_ACCESS_KEY_FIELD_NAME,
   SETTINGS_ACTION,
   SETTINGS_SAVE_ACCESS_KEY_ACTION,
 } from "./constants";
 import { getFormDataWithSubmitter } from "./form-utils";
-import { Note } from "@/components/ui-primitives/note";
 import { Button } from "@/components/ui-primitives/button";
 import {
   useApiAccessKey,
@@ -62,8 +68,6 @@ export function AccessKeyField() {
           minLength={64}
           maxLength={64}
         />
-        {/* {description && <FieldDescription>{description}</FieldDescription>}
-            <FieldError>{errorMessage}</FieldError> */}
       </Field>
       <Button
         type="submit"
@@ -74,55 +78,74 @@ export function AccessKeyField() {
         {isFetching ? "Checking" : "Check API connection"}
       </Button>
       {isLoading ? (
-        <Note intent="info">Checking API access key...</Note>
+        <Alert>
+          <Spinner />
+          <AlertTitle>Checking API access key...</AlertTitle>
+        </Alert>
       ) : isSuccess ? (
         data.hasRequiredPermissions ? (
-          <Note intent="success">
-            Connection to <b>{apiEndpoint}</b> with{" "}
-            <b>{data.raw.name ?? "API"}</b> access key successful
-          </Note>
+          <Alert>
+            <CheckCircleIcon />
+            <AlertTitle>Connection successful</AlertTitle>
+            <AlertDescription>
+              Connection to <b>{apiEndpoint}</b> with{" "}
+              <b>{data.raw.name ?? "API"}</b> access key successful
+            </AlertDescription>
+          </Alert>
         ) : (
-          <Note intent="warning">
-            Insufficient permissions for <b>{data.raw.name ?? "API"}</b> access
-            key on <b>{apiEndpoint}</b>
-          </Note>
+          <Alert>
+            <ExclamationCircleIcon />
+            <AlertTitle>Insufficient permissions</AlertTitle>
+            <AlertDescription>
+              Insufficient permissions for <b>{data.raw.name ?? "API"}</b>
+              access key on <b>{apiEndpoint}</b>
+            </AlertDescription>
+          </Alert>
         )
       ) : isError ? (
         <>
           {error instanceof AxiosError && error.response?.status === 403 ? (
-            <Note intent="info">
-              If you just requested a token, complete the permissions flow in
-              Hydrus client then press <i>Check API connection</i> above to
-              check again.
-            </Note>
+            <Alert>
+              <InformationCircleIcon />
+              <AlertTitle>Complete the Hydrus permissions flow</AlertTitle>
+              <AlertDescription>
+                If you just requested a token, complete the permissions flow in
+                Hydrus client then press <i>Check API connection</i> above to
+                check again.
+              </AlertDescription>
+            </Alert>
           ) : null}
-          <Note intent="danger">
-            {error instanceof Error
-              ? error.message
-              : "An unknown error occurred while checking endpoint."}
-            <br />
-            {error instanceof AxiosError ? (
-              <>
-                <span>{error.response?.data.error}</span>
-                <br />
-                <span>
-                  {error.response?.status === 403 &&
-                    "If you just requested a token, complete the permissions flow in Hydrus client then check API connection"}
-                </span>
-              </>
-            ) : null}
-            <br />
-            API Access key:{" "}
-            <b>
-              {apiAccessKey
-                ? apiAccessKey.length <= 6
-                  ? apiAccessKey
-                  : `${apiAccessKey.slice(0, 2)}●●●●${apiAccessKey.slice(-4)}`
-                : ""}
-            </b>
-            <br />
-            API endpoint: <b>{apiEndpoint}</b>
-          </Note>{" "}
+          <Alert variant="destructive">
+            <ExclamationCircleIcon />
+            <AlertTitle>
+              {error instanceof Error
+                ? error.message
+                : "An unknown error occurred while checking endpoint."}
+            </AlertTitle>
+            <AlertDescription>
+              {error instanceof AxiosError ? (
+                <>
+                  <span>{error.response?.data.error}</span>
+                  <br />
+                  <span>
+                    {error.response?.status === 403 &&
+                      "If you just requested a token, complete the permissions flow in Hydrus client then check API connection"}
+                  </span>
+                  <br />
+                </>
+              ) : null}
+              API Access key:{" "}
+              <b>
+                {apiAccessKey
+                  ? apiAccessKey.length <= 6
+                    ? apiAccessKey
+                    : `${apiAccessKey.slice(0, 2)}●●●●${apiAccessKey.slice(-4)}`
+                  : ""}
+              </b>
+              <br />
+              API endpoint: <b>{apiEndpoint}</b>
+            </AlertDescription>
+          </Alert>
         </>
       ) : null}
     </FormPrimitive>
