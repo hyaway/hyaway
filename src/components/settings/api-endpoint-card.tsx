@@ -1,14 +1,15 @@
 import { AxiosError } from "axios";
 import { Form as FormPrimitive } from "react-aria-components";
 import { useQueryClient } from "@tanstack/react-query";
-import { useApiVersionQuery } from "../../integrations/hydrus-api/queries/access";
 import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "../ui-primitives/field";
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+} from "@heroicons/react/16/solid";
+import { useApiVersionQuery } from "../../integrations/hydrus-api/queries/access";
+import { Field, FieldLabel } from "../ui-primitives/field";
 import { Input } from "../ui-primitives/input";
+import { Alert, AlertDescription, AlertTitle } from "../ui-primitives/alert";
+import { Spinner } from "../ui-primitives/spinner";
 import {
   SETTINGS_ACTION,
   SETTINGS_ENDPOINT_FIELD_NAME,
@@ -16,7 +17,6 @@ import {
 } from "./constants";
 import { getFormDataWithSubmitter } from "./form-utils";
 import { Button } from "@/components/ui-primitives/button";
-import { Note } from "@/components/ui-primitives/note";
 import {
   Card,
   CardContent,
@@ -71,8 +71,6 @@ export function ApiEndpointCard() {
               required={true}
               type="url"
             />
-            {/* {description && <FieldDescription>{description}</FieldDescription>}
-            <FieldError>{errorMessage}</FieldError> */}
           </Field>
           <Button
             type="submit"
@@ -83,27 +81,40 @@ export function ApiEndpointCard() {
             {isFetching ? "Checking endpoint..." : "Check endpoint"}
           </Button>
           {isLoading ? (
-            <Note intent="info">Checking endpoint...</Note>
+            <Alert>
+              <Spinner />
+              <AlertTitle>Checking endpoint...</AlertTitle>
+            </Alert>
           ) : isSuccess ? (
-            <Note intent="success">
-              API endpoint: <b>{apiEndpoint}</b>
-              <br />
-              Hydrus version: <b>{data.hydrus_version}</b>
-              <br />
-              API version: <b>{data.version}</b>
-            </Note>
+            <Alert>
+              <CheckCircleIcon />
+              <AlertTitle>Endpoint is valid!</AlertTitle>
+              <AlertDescription>
+                API endpoint: <b>{apiEndpoint}</b>
+                <br />
+                Hydrus version: <b>{data.hydrus_version}</b>
+                <br />
+                API version: <b>{data.version}</b>
+              </AlertDescription>
+            </Alert>
           ) : isError ? (
-            <Note intent="danger">
-              {error instanceof Error
-                ? error.message
-                : "An unknown error occurred while checking endpoint."}
-              <br />
-              {error instanceof AxiosError && error.response?.data?.error && (
-                <span>{error.response.data.error}</span>
-              )}
-              <br />
-              API endpoint: <b>{apiEndpoint}</b>
-            </Note>
+            <Alert variant="destructive">
+              <ExclamationCircleIcon />
+              <AlertTitle>
+                {error instanceof Error
+                  ? error.message
+                  : "An unknown error occurred while checking endpoint."}
+              </AlertTitle>
+              <AlertDescription>
+                {error instanceof AxiosError && error.response?.data?.error && (
+                  <>
+                    <span>{error.response.data.error}</span>
+                    <br />
+                  </>
+                )}
+                API endpoint: <b>{apiEndpoint}</b>
+              </AlertDescription>
+            </Alert>
           ) : null}
         </CardContent>
       </Card>
