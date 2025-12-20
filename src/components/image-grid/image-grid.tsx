@@ -91,7 +91,7 @@ export function PureImageGrid({
   const rowVirtualizer = useWindowVirtualizer({
     count: items.length,
     estimateSize: (i) => heights[i],
-    overscan: 3,
+    overscan: 8,
     gap: 8,
     lanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
