@@ -1,6 +1,13 @@
 import * as React from "react";
 import { Input as InputPrimitive } from "@base-ui/react/input";
-
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/20/solid";
+import { useState } from "react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "./input-group";
 import { cn } from "@/lib/utils";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
@@ -17,4 +24,27 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   );
 }
 
-export { Input };
+function SecretInput(props: React.ComponentProps<"input">) {
+  const [isVisible, setIsVisible] = useState(false);
+  const toggleVisibility = () => setIsVisible((prevState) => !prevState);
+  return (
+    <InputGroup>
+      <InputGroupInput {...props} type={isVisible ? "text" : "password"} />
+      <InputGroupAddon align="inline-end">
+        <InputGroupButton
+          aria-pressed={isVisible}
+          onClick={toggleVisibility}
+          aria-label={
+            isVisible
+              ? `Hide ${props["aria-label"] ?? "field"}`
+              : `Show ${props["aria-label"] ?? "field"}`
+          }
+        >
+          {isVisible ? <EyeSlashIcon /> : <EyeIcon />}
+        </InputGroupButton>
+      </InputGroupAddon>
+    </InputGroup>
+  );
+}
+
+export { Input, SecretInput };

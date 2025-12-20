@@ -1,7 +1,8 @@
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/access";
-import { SecretInputField } from "../text-input-field";
+import { Field, FieldLabel } from "../ui-primitives/field";
+import { SecretInput } from "../ui-primitives/input";
 import {
   SETTINGS_ACTION,
   SETTINGS_REQUEST_SESSION_KEY_ACTION,
@@ -41,12 +42,15 @@ export function SessionKeyCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <SecretInputField
-          label="API session key"
-          key={sessionKey}
-          value={sessionKey}
-          isDisabled={true}
-        />
+        <Field>
+          <FieldLabel>API session key</FieldLabel>
+          <SecretInput
+            aria-label="API session key"
+            key={sessionKey}
+            value={sessionKey}
+            disabled={true}
+          />
+        </Field>
         <Button
           type="button"
           name={SETTINGS_ACTION}
@@ -58,7 +62,7 @@ export function SessionKeyCard() {
               });
             });
           }}
-          isDisabled={
+          disabled={
             !apiEndpoint || !hydrusApi || !persistentAccessQuery.isSuccess
           }
         >

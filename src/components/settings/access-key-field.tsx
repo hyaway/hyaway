@@ -5,7 +5,8 @@ import {
   useApiVersionQuery,
   useVerifyAccessQuery,
 } from "../../integrations/hydrus-api/queries/access";
-import { SecretInputField } from "../text-input-field";
+import { SecretInput } from "../ui-primitives/input";
+import { Field, FieldLabel } from "../ui-primitives/field";
 import {
   SETTINGS_ACCESS_KEY_FIELD_NAME,
   SETTINGS_ACTION,
@@ -49,19 +50,24 @@ export function AccessKeyField() {
 
   return (
     <FormPrimitive onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <SecretInputField
-        label="API access key"
-        name={SETTINGS_ACCESS_KEY_FIELD_NAME}
-        defaultValue={apiAccessKey}
-        key={apiAccessKey}
-        isRequired
-        isDisabled={isLoading}
-        minLength={64}
-        maxLength={64}
-      />
+      <Field>
+        <FieldLabel>API access key</FieldLabel>
+        <SecretInput
+          aria-label="API access key"
+          name={SETTINGS_ACCESS_KEY_FIELD_NAME}
+          defaultValue={apiAccessKey}
+          key={apiAccessKey}
+          required={true}
+          disabled={isLoading}
+          minLength={64}
+          maxLength={64}
+        />
+        {/* {description && <FieldDescription>{description}</FieldDescription>}
+            <FieldError>{errorMessage}</FieldError> */}
+      </Field>
       <Button
         type="submit"
-        isDisabled={isLoading || !apiEndpoint || !apiVersionQuery.isSuccess}
+        disabled={isLoading || !apiEndpoint || !apiVersionQuery.isSuccess}
         name={SETTINGS_ACTION}
         value={SETTINGS_SAVE_ACCESS_KEY_ACTION}
       >

@@ -2,7 +2,13 @@ import { AxiosError } from "axios";
 import { Form as FormPrimitive } from "react-aria-components";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApiVersionQuery } from "../../integrations/hydrus-api/queries/access";
-import { TextInputField } from "../text-input-field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "../ui-primitives/field";
+import { Input } from "../ui-primitives/input";
 import {
   SETTINGS_ACTION,
   SETTINGS_ENDPOINT_FIELD_NAME,
@@ -55,20 +61,24 @@ export function ApiEndpointCard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <TextInputField
-            label="API endpoint"
-            name={SETTINGS_ENDPOINT_FIELD_NAME}
-            key={apiEndpoint}
-            defaultValue={apiEndpoint}
-            placeholder="http://localhost:45869"
-            isRequired
-            type="url"
-          />
+          <Field>
+            <FieldLabel>API endpoint</FieldLabel>
+            <Input
+              name={SETTINGS_ENDPOINT_FIELD_NAME}
+              key={apiEndpoint}
+              defaultValue={apiEndpoint}
+              placeholder="http://localhost:45869"
+              required={true}
+              type="url"
+            />
+            {/* {description && <FieldDescription>{description}</FieldDescription>}
+            <FieldError>{errorMessage}</FieldError> */}
+          </Field>
           <Button
             type="submit"
             name={SETTINGS_ACTION}
             value={SETTINGS_SAVE_ENDPOINT_ACTION}
-            isDisabled={isFetching}
+            disabled={isFetching}
           >
             {isFetching ? "Checking endpoint..." : "Check endpoint"}
           </Button>

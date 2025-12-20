@@ -22,7 +22,7 @@ export function RequestNewPermissionsField() {
     <div className="flex flex-col gap-4">
       <Button
         type="button"
-        isDisabled={isPending || !apiEndpoint || !apiVersionQuery.isSuccess}
+        disabled={isPending || !apiEndpoint || !apiVersionQuery.isSuccess}
         name={SETTINGS_ACTION}
         value={SETTINGS_REQUEST_API_KEY_ACTION}
         onClick={() => {
