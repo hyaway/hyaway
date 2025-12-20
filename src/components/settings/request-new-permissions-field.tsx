@@ -27,7 +27,7 @@ export function RequestNewPermissionsField() {
     <div className="flex flex-col gap-4">
       <Button
         type="button"
-        size={apiEndpoint ? "lg" : "default"}
+        size={apiEndpoint ? "xl" : "default"}
         disabled={isPending || !apiEndpoint || !apiVersionQuery.isSuccess}
         name={SETTINGS_ACTION}
         value={SETTINGS_REQUEST_API_KEY_ACTION}

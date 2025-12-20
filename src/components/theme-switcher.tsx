@@ -33,7 +33,7 @@ export function ThemeSwitcher(props: ComponentProps<typeof Button>) {
   return (
     <Button
       variant={"ghost"}
-      size={"icon-lg"}
+      size={"icon-xl"}
       aria-label="Switch theme"
       {...props}
       onClick={() => setThemePreference(getNextTheme(themePreference))}
