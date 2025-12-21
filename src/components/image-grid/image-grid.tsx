@@ -104,7 +104,7 @@ export function PureImageGrid({
   const getItemHeight = (item: FileMetadata) => {
     const cached = heightCache.get(item.file_id);
     if (cached !== undefined) return cached;
-    const height = Math.min(item.height / item.width, 30) * width;
+    const height = Math.min(item.height / item.width, 3) * width;
     heightCache.set(item.file_id, height);
     return height;
   };
