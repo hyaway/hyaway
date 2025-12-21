@@ -11,6 +11,7 @@ import { AxiosError } from "axios";
 import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
 import { ImageGridCard } from "./image-grid-card";
 import { TagsSidebar } from "./tags-sidebar";
+import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import {
   Alert,
@@ -100,11 +101,11 @@ export function PureImageGrid({
   // Cache heights - invalidates when width changes
   const heightCache = useMemo(() => new Map<number, number>(), [width]);
 
-  const getItemHeight = (itemWidth: number, itemHeight: number) => {
-    const cached = heightCache.get(itemHeight);
+  const getItemHeight = (item: FileMetadata) => {
+    const cached = heightCache.get(item.file_id);
     if (cached !== undefined) return cached;
-    const height = Math.min(itemHeight / itemWidth, 3) * width;
-    heightCache.set(itemHeight, height);
+    const height = Math.min(item.height / item.width, 30) * width;
+    heightCache.set(item.file_id, height);
     return height;
   };
 
@@ -112,7 +113,7 @@ export function PureImageGrid({
     count: deferredItems.length,
     estimateSize: (i) => {
       const item = deferredItems[i];
-      return getItemHeight(item.width, item.height);
+      return getItemHeight(item);
     },
     overscan: 4,
     gap: 8,
@@ -184,7 +185,7 @@ export function PureImageGrid({
           {!!lanes &&
             virtualItems.map((virtualRow) => {
               const item = deferredItems[virtualRow.index];
-              const itemHeight = getItemHeight(item.width, item.height);
+              const itemHeight = getItemHeight(item);
 
               return (
                 <li
