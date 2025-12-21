@@ -18,7 +18,11 @@ export default function MainNavbar() {
         <NavigationMenuItem>
           <RouterNavigationMenuLink to={"/"}>Home</RouterNavigationMenuLink>
         </NavigationMenuItem>
-        <PagesNav />
+        <NavigationMenuItem>
+          <RouterNavigationMenuLink to="/pages">
+            Client pages
+          </RouterNavigationMenuLink>
+        </NavigationMenuItem>
         <NavigationMenuItem>
           <RouterNavigationMenuLink to="/recently-deleted">
             Recently deleted
@@ -49,39 +53,5 @@ function Logo() {
     <Heading className="font-logo font-normal tracking-normal" level={1}>
       hyAway
     </Heading>
-  );
-}
-
-function PagesNav() {
-  const { data, isPending, isSuccess } = useGetMediaPagesQuery();
-  return (
-    <NavigationMenuItem>
-      <NavigationMenuTrigger>Client pages</NavigationMenuTrigger>
-      <NavigationMenuContent>
-        {isPending && (
-          <div className="text-sm leading-none font-medium">
-            Nothing here yet
-          </div>
-        )}
-        {isSuccess &&
-          data.map((page) => (
-            <RouterNavigationMenuLink
-              id={page.page_key}
-              key={page.page_key}
-              to={`/pages/$pageId`}
-              params={{ pageId: page.page_key }}
-              activeProps={{
-                active: true,
-                "data-active": true,
-                className:
-                  "font-bold rounded-s-none border-s-4 border-s-primary",
-              }}
-              closeOnClick={true}
-            >
-              {page.name}
-            </RouterNavigationMenuLink>
-          ))}
-      </NavigationMenuContent>
-    </NavigationMenuItem>
   );
 }
