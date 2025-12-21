@@ -97,14 +97,23 @@ export function PureImageGrid({
       ? Math.max(deferredItems.length, 2)
       : desiredLanes;
 
-  // Calculate height on-demand - only called for visible items
-  const getItemHeight = (itemWidth: number, itemHeight: number) =>
-    Math.min(itemHeight / itemWidth, 3) * width;
+  // Cache heights - invalidates when width changes
+  const heightCache = useMemo(() => new Map<number, number>(), [width]);
+
+  const getItemHeight = (itemWidth: number, itemHeight: number) => {
+    const cached = heightCache.get(itemHeight);
+    if (cached !== undefined) return cached;
+    const height = Math.min(itemHeight / itemWidth, 3) * width;
+    heightCache.set(itemHeight, height);
+    return height;
+  };
 
   const rowVirtualizer = useWindowVirtualizer({
     count: deferredItems.length,
-    estimateSize: (i) =>
-      getItemHeight(deferredItems[i].width, deferredItems[i].height),
+    estimateSize: (i) => {
+      const item = deferredItems[i];
+      return getItemHeight(item.width, item.height);
+    },
     overscan: 4,
     gap: 8,
     lanes,
