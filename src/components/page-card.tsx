@@ -84,13 +84,13 @@ export function PageCard({ pageKey, pageName, className }: PageCardProps) {
               }).map((_, i) => (
                 <div
                   key={`empty-${i}`}
-                  className="aspect-square rounded bg-transparent"
+                  className="aspect-square rounded border border-dashed bg-transparent"
                   aria-hidden="true"
                 />
               ))}
             </div>
           ) : (
-            <div className="text-muted-foreground flex aspect-square items-center justify-center text-sm">
+            <div className="text-muted-foreground flex aspect-square items-center justify-center rounded border border-dashed text-sm">
               No files
             </div>
           )}
