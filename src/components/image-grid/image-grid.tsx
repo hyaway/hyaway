@@ -159,7 +159,7 @@ export function PureImageGrid({
 
   return (
     <div className="flex w-full flex-row">
-      <div ref={parentRef} className="w-full">
+      <div ref={parentRef} className="@container w-full">
         <ul
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
@@ -174,15 +174,14 @@ export function PureImageGrid({
                 <li
                   key={virtualRow.index}
                   style={{
-                    left: `${(virtualRow.lane * 100) / lanes}%`,
                     width: `${width}px`,
                     height: `${heights[virtualRow.index]}px`,
-                    transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
+                    transform: `translate(${(virtualRow.lane * 100) / lanes}cqw, ${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
                   }}
                   className={cn(
-                    "absolute top-0 z-0 overflow-visible hover:z-999",
+                    "absolute top-0 left-0 z-0 overflow-visible hover:z-999",
                     !rowVirtualizer.isScrolling &&
-                      "transition-[left,transform,width,height] duration-350 ease-out",
+                      "transition-transform duration-350 ease-out",
                   )}
                 >
                   <ImageGridCard

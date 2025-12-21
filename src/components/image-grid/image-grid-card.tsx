@@ -19,10 +19,7 @@ export function ThumbnailImage({ fileId, className }: ThumbnailProps) {
     <img
       src={url}
       alt={`Thumbnail for file ID ${fileId}`}
-      className={cn(
-        "h-full w-full object-cover transition-[width,height,transform]",
-        className,
-      )}
+      className={cn("h-full w-full object-cover", className)}
       loading="lazy"
     />
   );
