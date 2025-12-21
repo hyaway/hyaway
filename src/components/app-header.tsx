@@ -16,13 +16,25 @@ import { SidebarTrigger } from "@/components/ui-primitives/sidebar";
 export function AppHeader() {
   const matches = useMatches();
 
-  // Filter routes that have getTitle in their context
-  const breadcrumbs = matches
-    .filter((match) => (match.context as MyRouterContext | undefined)?.getTitle)
-    .map(({ pathname, context }) => ({
-      title: (context as MyRouterContext).getTitle!(),
-      path: pathname,
-    }));
+  // Filter routes that define their own getTitle (not inherited from parent)
+  // by comparing the getTitle function reference to the previous match's
+  const breadcrumbs: Array<{ title: string; path: string }> = [];
+  let prevGetTitle: (() => string) | undefined;
+
+  for (const match of matches) {
+    const context = match.context as MyRouterContext | undefined;
+    const getTitle = context?.getTitle;
+
+    // Only add if this route defines its own getTitle (different from parent's)
+    if (getTitle && getTitle !== prevGetTitle) {
+      breadcrumbs.push({
+        title: getTitle(),
+        path: match.pathname,
+      });
+    }
+
+    prevGetTitle = getTitle;
+  }
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -35,7 +47,7 @@ export function AppHeader() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to="/" />}>hyAway</BreadcrumbLink>
             </BreadcrumbItem>
             {breadcrumbs.length > 0 && (
               <BreadcrumbSeparator className="hidden md:block" />
