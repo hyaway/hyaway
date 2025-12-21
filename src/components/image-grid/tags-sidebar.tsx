@@ -13,7 +13,6 @@ import { Badge } from "@/components/ui-primitives/badge";
 import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
-import { cn } from "@/lib/utils";
 import { RightSidebarPortal } from "@/components/right-sidebar-portal";
 
 interface TagItem {
@@ -70,45 +69,66 @@ function TagsSidebarInternal({ items }: { items: Array<FileMetadata> }) {
   const tags = useMemo((): Array<TagItem> => {
     if (!allTagsServiceId || deferredItems.length === 0) return [];
 
-    const counts = new Map<string, number>();
+    // Use object for faster string key lookup than Map
+    const counts: Record<string, number> = Object.create(null);
 
-    for (const item of deferredItems) {
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for (let i = 0; i < deferredItems.length; i++) {
       const displayTags =
-        item.tags?.[allTagsServiceId]?.display_tags[TagStatus.CURRENT];
+        deferredItems[i].tags?.[allTagsServiceId]?.display_tags[
+          TagStatus.CURRENT
+        ];
 
       if (!displayTags) continue;
 
-      for (const displayTag of displayTags) {
-        if (!displayTag) continue;
-        counts.set(displayTag, (counts.get(displayTag) ?? 0) + 1);
+      // eslint-disable-next-line @typescript-eslint/prefer-for-of
+      for (let j = 0; j < displayTags.length; j++) {
+        const displayTag = displayTags[j];
+        if (displayTag) {
+          counts[displayTag] = (counts[displayTag] || 0) + 1;
+        }
       }
     }
 
-    const resultWithNs = Array.from(counts.entries()).map(
-      ([displayTag, count]) => {
-        const idx = displayTag.indexOf(":");
-        if (idx === -1) {
-          return { tag: displayTag, count, namespace: "" };
-        }
-        const namespace = displayTag.slice(0, idx);
-        const tag = displayTag.slice(idx + 1);
-        return { tag, count, namespace };
-      },
-    );
+    // Get keys once and pre-allocate result array
+    const keys = Object.keys(counts);
+    const result: Array<TagItem> = new Array(keys.length);
 
-    resultWithNs.sort((a, b) => {
+    for (let i = 0; i < keys.length; i++) {
+      const displayTag = keys[i];
+      const count = counts[displayTag];
+      const idx = displayTag.indexOf(":");
+
+      if (idx === -1) {
+        result[i] = { tag: displayTag, count, namespace: "" };
+      } else {
+        result[i] = {
+          tag: displayTag.slice(idx + 1),
+          count,
+          namespace: displayTag.slice(0, idx),
+        };
+      }
+    }
+
+    // Sort in place
+    result.sort((a, b) => {
+      // Count comparison (descending)
       if (b.count !== a.count) return b.count - a.count;
-      const nsCompare =
-        a.namespace === "" && b.namespace !== ""
-          ? 1
-          : a.namespace !== "" && b.namespace === ""
-            ? -1
-            : a.namespace.localeCompare(b.namespace);
-      if (nsCompare !== 0) return nsCompare;
+
+      // Namespace comparison: empty namespaces go last
+      const aHasNamespace = a.namespace !== "";
+      const bHasNamespace = b.namespace !== "";
+      if (aHasNamespace !== bHasNamespace) return aHasNamespace ? -1 : 1;
+      if (aHasNamespace) {
+        const nsCompare = a.namespace.localeCompare(b.namespace);
+        if (nsCompare !== 0) return nsCompare;
+      }
+
+      // Tag comparison (localeCompare for non-ASCII support)
       return a.tag.localeCompare(b.tag);
     });
 
-    return resultWithNs;
+    return result;
   }, [deferredItems, allTagsServiceId]);
 
   const parentRef = React.useRef<HTMLDivElement>(null);
