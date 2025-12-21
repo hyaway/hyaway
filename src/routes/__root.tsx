@@ -7,6 +7,11 @@ import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import MainNavbar from "@/components/main-nav";
 import { useApplyTheme, useSystemThemeListener } from "@/lib/theme-store";
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui-primitives/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -16,9 +21,12 @@ function RootComponent() {
   useApplyTheme();
   useSystemThemeListener();
   return (
-    <>
-      <MainNavbar />
-      <Outlet />
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <MainNavbar />
+        <Outlet />
+      </SidebarInset>
       <TanStackDevtools
         config={{
           position: "bottom-right",
@@ -31,7 +39,7 @@ function RootComponent() {
           TanStackQueryDevtools,
         ]}
       />
-    </>
+    </SidebarProvider>
   );
 }
 

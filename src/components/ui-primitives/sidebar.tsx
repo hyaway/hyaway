@@ -7,6 +7,7 @@ import { cva } from "class-variance-authority";
 
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SidebarLeftIcon } from "@hugeicons/core-free-icons";
+import { createLink } from "@tanstack/react-router";
 import type { VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui-primitives/button";
@@ -554,6 +555,8 @@ function SidebarMenuButton({
   );
 }
 
+const SidebarMenuLinkButton = createLink(SidebarMenuButton);
+
 function SidebarMenuAction({
   className,
   render,
@@ -699,6 +702,8 @@ function SidebarMenuSubButton({
   });
 }
 
+const SidebarMenuSubLinkButton = createLink(SidebarMenuSubButton);
+
 export {
   Sidebar,
   SidebarContent,
@@ -714,10 +719,12 @@ export {
   SidebarMenuAction,
   SidebarMenuBadge,
   SidebarMenuButton,
+  SidebarMenuLinkButton,
   SidebarMenuItem,
   SidebarMenuSkeleton,
   SidebarMenuSub,
   SidebarMenuSubButton,
+  SidebarMenuSubLinkButton,
   SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,

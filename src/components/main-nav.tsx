@@ -1,5 +1,6 @@
 import { ThemeSwitcher } from "./theme-switcher";
 import { Heading } from "./ui-primitives/heading";
+import { SidebarTrigger } from "./ui-primitives/sidebar";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -10,6 +11,7 @@ import {
 export default function MainNavbar() {
   return (
     <NavigationMenu className="max-w-full">
+      <SidebarTrigger className="-ml-1" />
       <Heading className="font-logo font-normal tracking-normal" level={1}>
         hyAway
       </Heading>
