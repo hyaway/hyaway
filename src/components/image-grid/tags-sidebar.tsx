@@ -1,5 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, { memo, useMemo } from "react";
+import React, { memo, useDeferredValue, useMemo } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,6 +16,48 @@ import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/s
 import { cn } from "@/lib/utils";
 import { RightSidebarPortal } from "@/components/right-sidebar-portal";
 
+interface TagItem {
+  tag: string;
+  count: number;
+  namespace: string;
+}
+
+// Memoized row component to prevent re-renders
+const TagRow = memo(function TagRow({
+  tagItem,
+  index,
+  style,
+}: {
+  tagItem: TagItem;
+  index: number;
+  style: React.CSSProperties;
+}) {
+  return (
+    <li
+      data-index={index}
+      style={style}
+      className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-baseline gap-1 font-mono uppercase"
+    >
+      <span
+        aria-hidden="true"
+        className="text-muted-foreground shrink-0 text-right tabular-nums"
+      >
+        {index + 1}.
+      </span>
+      <Badge
+        variant="outline"
+        className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal select-all"
+      >
+        {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
+        {tagItem.tag}
+      </Badge>
+      <Badge variant="outline" className="shrink-0 select-all">
+        {tagItem.count}
+      </Badge>
+    </li>
+  );
+});
+
 function TagsSidebarInternal({
   items,
   className,
@@ -27,16 +69,15 @@ function TagsSidebarInternal({
 }) {
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
 
-  const tags = useMemo((): Array<{
-    tag: string;
-    count: number;
-    namespace: string;
-  }> => {
-    if (!allTagsServiceId || items.length === 0) return [];
+  // Defer heavy computation so UI stays responsive
+  const deferredItems = useDeferredValue(items);
+
+  const tags = useMemo((): Array<TagItem> => {
+    if (!allTagsServiceId || deferredItems.length === 0) return [];
 
     const counts = new Map<string, number>();
 
-    for (const item of items) {
+    for (const item of deferredItems) {
       const displayTags =
         item.tags?.[allTagsServiceId]?.display_tags[TagStatus.CURRENT];
 
@@ -73,23 +114,21 @@ function TagsSidebarInternal({
     });
 
     return resultWithNs;
-  }, [items, allTagsServiceId]);
+  }, [deferredItems, allTagsServiceId]);
 
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
     count: tags.length,
-    estimateSize: () => 40,
-    overscan: 1,
+    estimateSize: () => 32, // Fixed height - no dynamic measurement
+    overscan: 5,
     gap: 8,
     getScrollElement: () => parentRef.current,
   });
 
-  const rows = rowVirtualizer.getVirtualItems();
+  // Cache virtual items
+  const virtualItems = rowVirtualizer.getVirtualItems();
 
-  const combinedStyle: React.CSSProperties = {
-    ...style,
-  };
   if (tags.length === 0) {
     return null;
   }
@@ -105,12 +144,12 @@ function TagsSidebarInternal({
             Tags
           </Heading>
         </SidebarHeader>
-        <SidebarContent className="p-2">
-          <ScrollArea className={"h-full"}>
+        <SidebarContent className="p-1">
+          <ScrollArea className="h-full pe-2">
             <SidebarGroup
               ref={parentRef}
               className={cn(className)}
-              style={combinedStyle}
+              style={style}
             >
               <ol
                 style={{
@@ -118,48 +157,23 @@ function TagsSidebarInternal({
                 }}
                 className="relative"
               >
-                {rows.map((virtualRow) => {
-                  const tagItem = tags[virtualRow.index];
-
-                  return (
-                    <li
-                      key={virtualRow.index}
-                      data-index={virtualRow.index}
-                      style={{
-                        transform: `translateY(${virtualRow.start}px)`,
-                      }}
-                      ref={rowVirtualizer.measureElement}
-                      className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-baseline gap-1 font-mono uppercase"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="text-muted-foreground shrink-0 text-right tabular-nums"
-                      >
-                        {virtualRow.index + 1}.
-                      </span>
-                      <Badge
-                        variant={"outline"}
-                        className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal select-all"
-                      >
-                        {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
-                        {tagItem.tag}
-                      </Badge>
-                      <Badge
-                        variant={"outline"}
-                        className="shrink-0 select-all"
-                      >
-                        {tagItem.count}
-                      </Badge>
-                    </li>
-                  );
-                })}
+                {virtualItems.map((virtualRow) => (
+                  <TagRow
+                    key={virtualRow.index}
+                    tagItem={tags[virtualRow.index]}
+                    index={virtualRow.index}
+                    style={{
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  />
+                ))}
               </ol>
             </SidebarGroup>
           </ScrollArea>
         </SidebarContent>
         <SidebarFooter>
           <span className="text-muted-foreground text-sm">
-            {tags.length} unique tags for {items.length} loaded files
+            {tags.length} unique tags for {deferredItems.length} loaded files
           </span>
         </SidebarFooter>
       </Sidebar>
