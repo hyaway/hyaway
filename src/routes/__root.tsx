@@ -16,6 +16,7 @@ import {
   RightSidebarProvider,
   RightSidebarSlot,
 } from "@/components/right-sidebar-portal";
+import { HeaderPortalProvider } from "@/components/header-portal";
 
 export interface MyRouterContext {
   queryClient: QueryClient;
@@ -26,28 +27,30 @@ function RootComponent() {
   useApplyTheme();
   useSystemThemeListener();
   return (
-    <RightSidebarProvider>
-      <SidebarProvider>
-        <AppSidebar />
+    <SidebarProvider>
+      <AppSidebar />
+      <RightSidebarProvider>
         <SidebarInset>
-          <AppHeader />
-          <Outlet />
+          <HeaderPortalProvider>
+            <AppHeader />
+            <Outlet />
+          </HeaderPortalProvider>
         </SidebarInset>
         <RightSidebarSlot className="hidden xl:block" />
-        <TanStackDevtools
-          config={{
-            position: "bottom-right",
-          }}
-          plugins={[
-            {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-            TanStackQueryDevtools,
-          ]}
-        />
-      </SidebarProvider>
-    </RightSidebarProvider>
+      </RightSidebarProvider>
+      <TanStackDevtools
+        config={{
+          position: "bottom-right",
+        }}
+        plugins={[
+          {
+            name: "Tanstack Router",
+            render: <TanStackRouterDevtoolsPanel />,
+          },
+          TanStackQueryDevtools,
+        ]}
+      />
+    </SidebarProvider>
   );
 }
 

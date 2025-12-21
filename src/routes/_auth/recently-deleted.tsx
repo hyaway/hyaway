@@ -9,10 +9,11 @@ import {
 } from "@/components/ui-primitives/alert";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Spinner } from "@/components/ui-primitives/spinner";
-import { Separator } from "@/components/ui-primitives/separator";
+import { HeaderPortal } from "@/components/header-portal";
 import { useRecentlyDeletedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui-primitives/button";
+import { Separator } from "@/components/ui-primitives/separator";
 
 export const Route = createFileRoute("/_auth/recently-deleted")({
   component: RouteComponent,
@@ -49,8 +50,9 @@ function RouteComponent() {
 
   return (
     <div>
-      <Heading>Recently deleted</Heading>
-      <Separator className="my-2" />
+      <HeaderPortal>
+        <Heading>Recently deleted</Heading>
+      </HeaderPortal>
       <Button
         onClick={() =>
           queryClient.invalidateQueries({

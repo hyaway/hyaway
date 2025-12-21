@@ -10,13 +10,14 @@ import {
 import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Spinner } from "@/components/ui-primitives/spinner";
-import { Separator } from "@/components/ui-primitives/separator";
+import { HeaderPortal } from "@/components/header-portal";
 import {
   useFocusPageMutation,
   useGetPageInfoQuery,
   useRefreshPageMutation,
 } from "@/integrations/hydrus-api/queries/manage-pages";
 import { ImageGrid } from "@/components/image-grid/image-grid";
+import { Separator } from "@/components/ui-primitives/separator";
 
 export const Route = createFileRoute("/_auth/pages/$pageId")({
   component: RouteComponent,
@@ -56,8 +57,9 @@ function RouteComponent() {
 
   return (
     <div>
-      <Heading>Page: {data?.page_info.name}</Heading>
-      <Separator className="my-2" />
+      <HeaderPortal>
+        <Heading>Page: {data?.page_info.name}</Heading>
+      </HeaderPortal>
       <div className="flex gap-2">
         <Button
           onClick={() =>
