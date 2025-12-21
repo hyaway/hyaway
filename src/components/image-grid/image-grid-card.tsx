@@ -84,19 +84,21 @@ export const ImageGridCard = memo(function ImageGridCard({
         )}
       >
         <ThumbnailImage fileId={item.file_id} />
-        <div
-          className={cn(
-            "bg-secondary absolute top-1 right-1 flex flex-col gap-2 rounded p-1 opacity-60",
-            "pointer-events-none group-hover:top-0.5 group-hover:right-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
-            "transition-opacity duration-350 ease-out",
-          )}
-        >
-          {item.is_inbox && <InboxIcon className="h-4 w-4" />}
-          {item.is_trashed && <TrashIcon className="h-4 w-4" />}
-          {item.is_deleted && !item.is_trashed && (
-            <ExclamationCircleIcon className="h-4 w-4" />
-          )}
-        </div>
+        {(item.is_inbox || item.is_trashed || item.is_deleted) && (
+          <div
+            className={cn(
+              "bg-secondary absolute top-1 right-1 flex flex-col gap-2 rounded p-1 opacity-60",
+              "pointer-events-none group-hover:top-0.5 group-hover:right-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
+              "transition-opacity duration-350 ease-out",
+            )}
+          >
+            {item.is_inbox && <InboxIcon className="h-4 w-4" />}
+            {item.is_trashed && <TrashIcon className="h-4 w-4" />}
+            {item.is_deleted && !item.is_trashed && (
+              <ExclamationCircleIcon className="h-4 w-4" />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

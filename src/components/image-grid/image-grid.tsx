@@ -105,12 +105,12 @@ export function PureImageGrid({
     scrollMargin: parentRef.current?.offsetTop ?? 0,
   });
 
-  const lastItemIndex = rowVirtualizer.getVirtualIndexes().at(-1);
+  // Cache virtual items to avoid calling getVirtualItems() multiple times
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const lastItemIndex = virtualItems.at(-1)?.index;
 
   useEffect(() => {
-    if (!lastItemIndex) {
-      return;
-    }
+    if (!lastItemIndex) return;
 
     if (
       lastItemIndex >= items.length - 1 &&
@@ -153,7 +153,7 @@ export function PureImageGrid({
     return () => observer.disconnect();
   }, [defaultDimensions.width, rowVirtualizer]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     rowVirtualizer.measure();
   }, [heights, width, lanes, rowVirtualizer]);
 
@@ -167,7 +167,7 @@ export function PureImageGrid({
           className="relative w-full"
         >
           {!!lanes &&
-            rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            virtualItems.map((virtualRow) => {
               const item = items[virtualRow.index];
 
               return (
