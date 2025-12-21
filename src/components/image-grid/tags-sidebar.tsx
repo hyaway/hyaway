@@ -1,11 +1,13 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useMemo } from "react";
+import { Sidebar } from "../ui-primitives/sidebar";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { Badge } from "@/components/ui-primitives/badge";
 import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { cn } from "@/lib/utils";
+import { RightSidebarPortal } from "@/components/right-sidebar-portal";
 
 export function TagsSidebar({
   items,
@@ -78,98 +80,69 @@ export function TagsSidebar({
 
   const rows = rowVirtualizer.getVirtualItems();
 
-  const [visibleHeight, setVisibleHeight] = React.useState<number | undefined>(
-    undefined,
-  );
-
-  React.useLayoutEffect(() => {
-    const update = () => {
-      const parentEl = parentRef.current?.parentElement;
-      if (!parentEl) {
-        setVisibleHeight(undefined);
-        return;
-      }
-      const rect = parentEl.getBoundingClientRect();
-      const top = Math.max(rect.top, 0);
-      const bottom = Math.min(rect.bottom, window.innerHeight);
-      const height = Math.max(0, bottom - top);
-      setVisibleHeight(height || undefined);
-    };
-
-    update();
-
-    const ro = new ResizeObserver(update);
-    if (parentRef.current?.parentElement) {
-      ro.observe(parentRef.current.parentElement);
-    }
-    window.addEventListener("resize", update, { passive: true });
-    window.addEventListener("scroll", update, { passive: true });
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update);
-    };
-  }, []);
-
   const combinedStyle: React.CSSProperties = {
     ...style,
-    position: "sticky",
-    top: 0,
-    height: visibleHeight ? `${visibleHeight}px` : undefined,
     overflow: "auto",
   };
   if (tags.length === 0) {
     return null;
   }
   return (
-    <div
-      ref={parentRef}
-      className={cn("hidden w-72 ps-4 lg:block", className)}
-      style={combinedStyle}
-    >
-      <Heading level={3} className="mb-4 text-lg font-semibold">
-        Tags
-      </Heading>
-      <ol
-        style={{
-          height: `${rowVirtualizer.getTotalSize()}px`,
-        }}
-        className="relative"
+    <RightSidebarPortal>
+      <Sidebar
+        side="right"
+        collapsible="none"
+        className="sticky top-0 hidden h-svh border-l lg:flex"
       >
-        {rows.map((virtualRow) => {
-          const tagItem = tags[virtualRow.index];
+        <div
+          ref={parentRef}
+          className={cn("hidden w-72 ps-4 lg:block", className)}
+          style={combinedStyle}
+        >
+          <Heading level={3} className="mb-4 text-lg font-semibold">
+            Tags
+          </Heading>
+          <ol
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+            }}
+            className="relative"
+          >
+            {rows.map((virtualRow) => {
+              const tagItem = tags[virtualRow.index];
 
-          return (
-            <li
-              key={virtualRow.index}
-              data-index={virtualRow.index}
-              style={{
-                transform: `translateY(${virtualRow.start}px)`,
-              }}
-              ref={rowVirtualizer.measureElement}
-              className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-baseline gap-1 font-mono uppercase"
-            >
-              <span
-                aria-hidden="true"
-                className="text-muted-foreground shrink-0 text-right tabular-nums"
-              >
-                {virtualRow.index + 1}.
-              </span>
-              <Badge
-                variant={"outline"}
-                className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
-              >
-                {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
-                {tagItem.tag}
-              </Badge>
-              <Badge variant={"outline"} className="shrink-0">
-                {tagItem.count}
-              </Badge>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
+              return (
+                <li
+                  key={virtualRow.index}
+                  data-index={virtualRow.index}
+                  style={{
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                  ref={rowVirtualizer.measureElement}
+                  className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-baseline gap-1 font-mono uppercase"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="text-muted-foreground shrink-0 text-right tabular-nums"
+                  >
+                    {virtualRow.index + 1}.
+                  </span>
+                  <Badge
+                    variant={"outline"}
+                    className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
+                  >
+                    {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
+                    {tagItem.tag}
+                  </Badge>
+                  <Badge variant={"outline"} className="shrink-0">
+                    {tagItem.count}
+                  </Badge>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </Sidebar>
+    </RightSidebarPortal>
   );
 }

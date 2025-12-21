@@ -12,6 +12,10 @@ import {
   SidebarProvider,
 } from "@/components/ui-primitives/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import {
+  RightSidebarProvider,
+  RightSidebarSlot,
+} from "@/components/right-sidebar-portal";
 
 export interface MyRouterContext {
   queryClient: QueryClient;
@@ -22,25 +26,28 @@ function RootComponent() {
   useApplyTheme();
   useSystemThemeListener();
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <AppHeader />
-        <Outlet />
-      </SidebarInset>
-      <TanStackDevtools
-        config={{
-          position: "bottom-right",
-        }}
-        plugins={[
-          {
-            name: "Tanstack Router",
-            render: <TanStackRouterDevtoolsPanel />,
-          },
-          TanStackQueryDevtools,
-        ]}
-      />
-    </SidebarProvider>
+    <RightSidebarProvider>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <AppHeader />
+          <Outlet />
+        </SidebarInset>
+        <RightSidebarSlot className="hidden lg:block" />
+        <TanStackDevtools
+          config={{
+            position: "bottom-right",
+          }}
+          plugins={[
+            {
+              name: "Tanstack Router",
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+            TanStackQueryDevtools,
+          ]}
+        />
+      </SidebarProvider>
+    </RightSidebarProvider>
   );
 }
 
