@@ -12,6 +12,9 @@ import clsx from "clsx";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsComponent,
+  beforeLoad: () => ({
+    getTitle: () => "Settings",
+  }),
 });
 
 const settingsItems = linkOptions([

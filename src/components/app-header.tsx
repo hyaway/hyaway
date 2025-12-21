@@ -1,5 +1,7 @@
 import { Link, useMatches } from "@tanstack/react-router";
 import { Fragment } from "react";
+
+import type { MyRouterContext } from "@/routes/__root";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,35 +13,16 @@ import {
 import { Separator } from "@/components/ui-primitives/separator";
 import { SidebarTrigger } from "@/components/ui-primitives/sidebar";
 
-interface BreadcrumbMeta {
-  title?: string;
-}
-
 export function AppHeader() {
   const matches = useMatches();
 
-  // Filter out root and layout routes, keep only routes with meaningful paths
+  // Filter routes that have getTitle in their context
   const breadcrumbs = matches
-    .filter((match) => {
-      // Skip root route and routes without a proper path segment
-      const path = match.pathname;
-      return path !== "/" && path !== "";
-    })
-    .map((match) => {
-      const meta = match.staticData as BreadcrumbMeta | undefined;
-      // Generate a title from the path if not provided in meta
-      const pathSegment = match.pathname.split("/").filter(Boolean).pop() ?? "";
-      const title =
-        meta?.title ??
-        pathSegment
-          .replace(/[-_]/g, " ")
-          .replace(/\b\w/g, (c) => c.toUpperCase());
-
-      return {
-        title,
-        path: match.pathname,
-      };
-    });
+    .filter((match) => (match.context as MyRouterContext | undefined)?.getTitle)
+    .map(({ pathname, context }) => ({
+      title: (context as MyRouterContext).getTitle!(),
+      path: pathname,
+    }));
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

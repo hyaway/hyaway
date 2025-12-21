@@ -16,6 +16,9 @@ import { Button } from "@/components/ui-primitives/button";
 
 export const Route = createFileRoute("/_auth/recently-archived")({
   component: RouteComponent,
+  beforeLoad: () => ({
+    getTitle: () => "Recently archived",
+  }),
 });
 
 function RouteComponent() {

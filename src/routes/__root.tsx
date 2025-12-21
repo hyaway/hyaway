@@ -13,8 +13,9 @@ import {
 } from "@/components/ui-primitives/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 
-interface MyRouterContext {
+export interface MyRouterContext {
   queryClient: QueryClient;
+  getTitle?: () => string;
 }
 
 function RootComponent() {

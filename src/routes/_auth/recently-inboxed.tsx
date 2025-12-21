@@ -16,6 +16,9 @@ import { Button } from "@/components/ui-primitives/button";
 
 export const Route = createFileRoute("/_auth/recently-inboxed")({
   component: RouteComponent,
+  beforeLoad: () => ({
+    getTitle: () => "Recently inboxed",
+  }),
 });
 
 function RouteComponent() {
