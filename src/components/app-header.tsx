@@ -1,5 +1,5 @@
 import { Link, useMatches } from "@tanstack/react-router";
-import { Fragment } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import type { MyRouterContext } from "@/routes/__root";
 import { HeaderPortalSlot } from "@/components/header-portal";
@@ -13,9 +13,65 @@ import {
 } from "@/components/ui-primitives/breadcrumb";
 import { Separator } from "@/components/ui-primitives/separator";
 import { SidebarTrigger } from "@/components/ui-primitives/sidebar";
+import { cn } from "@/lib/utils";
+
+function useScrollDirection(threshold = 10) {
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+
+  useEffect(() => {
+    // Initialize with current scroll position
+    lastScrollY.current = window.scrollY;
+
+    const updateScrollDir = () => {
+      const scrollY = window.scrollY;
+
+      // Ignore if only horizontal scroll occurred
+      if (scrollY === lastScrollY.current) {
+        ticking.current = false;
+        return;
+      }
+
+      // Always show header when at the top
+      if (scrollY < threshold) {
+        setIsVisible(true);
+        lastScrollY.current = scrollY;
+        ticking.current = false;
+        return;
+      }
+
+      const diff = scrollY - lastScrollY.current;
+
+      // Only update if scroll difference exceeds threshold (reduces jitter)
+      if (Math.abs(diff) >= threshold) {
+        setIsVisible(diff < 0); // Scrolling up = visible
+        lastScrollY.current = scrollY;
+      }
+
+      ticking.current = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(updateScrollDir);
+        ticking.current = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [threshold]);
+
+  return isVisible;
+}
 
 export function AppHeader() {
   const matches = useMatches();
+  const isVisible = useScrollDirection(50);
 
   // Filter routes that define their own getTitle (not inherited from parent)
   // by comparing the getTitle function reference to the previous match's
@@ -38,7 +94,14 @@ export function AppHeader() {
   }
 
   return (
-    <header className="flex shrink-0 flex-col transition-[width,height] ease-linear">
+    <header
+      className={cn(
+        "bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-60 flex shrink-0 flex-col backdrop-blur-sm transition-all duration-300 ease-in-out",
+        isVisible
+          ? "translate-y-0 opacity-100"
+          : "pointer-events-none -translate-y-full opacity-0",
+      )}
+    >
       <div className="flex h-16 items-center gap-2 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
@@ -82,6 +145,11 @@ export function AppHeader() {
         </div>
       </div>
       <HeaderPortalSlot className="px-4 py-2" />
+      {/* Prevent accidental hover interactions for zoom */}
+      <div
+        aria-hidden="true"
+        className="absolute top-full left-0 h-10 w-full"
+      />
     </header>
   );
 }

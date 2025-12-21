@@ -175,11 +175,7 @@ function TagsSidebarInternal({ items }: { items: Array<FileMetadata> }) {
                 {virtualItems.map((virtualRow) => (
                   <TagRow
                     key={virtualRow.index}
-                    ref={
-                      virtualRow.size > 24
-                        ? rowVirtualizer.measureElement
-                        : undefined
-                    }
+                    ref={rowVirtualizer.measureElement}
                     tagItem={tags[virtualRow.index]}
                     index={virtualRow.index}
                     style={{

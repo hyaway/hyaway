@@ -196,7 +196,7 @@ export function PureImageGrid({
                     containIntrinsicSize: `${width}px ${itemHeight}px`,
                   }}
                   className={cn(
-                    "absolute top-0 left-0 z-0 overflow-visible [content-visibility:auto] hover:z-999 hover:[content-visibility:visible]",
+                    "absolute top-0 left-0 z-0 overflow-visible [content-visibility:auto] hover:z-50 hover:[content-visibility:visible]",
                     !rowVirtualizer.isScrolling &&
                       "transition-transform duration-350 ease-out",
                   )}
