@@ -20,10 +20,10 @@ function PagesIndex() {
       <Separator className="my-4" />
       {isPending ? (
         <div
-          className="grid gap-4 @xs:grid-cols-[repeat(auto-fill,9rem)] @md:grid-cols-[repeat(auto-fill,12rem)]"
+          className="grid gap-4 @xs:grid-cols-2 @lg:grid-cols-3 @2xl:grid-cols-[repeat(auto-fill,12rem)]"
           aria-label="Loading pages"
         >
-          {Array.from({ length: 3 }).map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <PageCardSkeleton key={`page-skeleton-${i}`} />
           ))}
         </div>
@@ -36,7 +36,7 @@ function PagesIndex() {
           No media pages found. Open some file search pages in Hydrus Client.
         </div>
       ) : (
-        <div className="grid gap-4 @xs:grid-cols-[repeat(auto-fill,9rem)] @md:grid-cols-[repeat(auto-fill,12rem)]">
+        <div className="grid gap-4 @xs:grid-cols-2 @lg:grid-cols-3 @2xl:grid-cols-[repeat(auto-fill,12rem)]">
           {pages.map((page) => (
             <PageCard
               key={page.page_key}
