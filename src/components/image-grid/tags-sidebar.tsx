@@ -105,7 +105,7 @@ function TagsSidebarInternal({
             Tags
           </Heading>
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="p-2">
           <ScrollArea className={"h-full"}>
             <SidebarGroup
               ref={parentRef}
@@ -139,12 +139,15 @@ function TagsSidebarInternal({
                       </span>
                       <Badge
                         variant={"outline"}
-                        className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
+                        className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal select-all"
                       >
                         {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
                         {tagItem.tag}
                       </Badge>
-                      <Badge variant={"outline"} className="shrink-0">
+                      <Badge
+                        variant={"outline"}
+                        className="shrink-0 select-all"
+                      >
                         {tagItem.count}
                       </Badge>
                     </li>
