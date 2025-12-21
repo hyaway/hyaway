@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import {
   ExclamationCircleIcon,
   InboxIcon,
@@ -37,7 +37,7 @@ export interface ImageCardProps extends React.HTMLAttributes<HTMLDivElement> {
   width: number;
 }
 
-export function ImageGridCard({
+export const ImageGridCard = memo(function ImageGridCard({
   virtualRow,
   lanes,
   totalItemsCount,
@@ -103,4 +103,4 @@ export function ImageGridCard({
       </div>
     </div>
   );
-}
+});

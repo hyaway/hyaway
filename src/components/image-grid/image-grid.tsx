@@ -1,5 +1,11 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import React, {
+  startTransition,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 import { AxiosError } from "axios";
 import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
 import { ImageGridCard } from "./image-grid-card";
@@ -77,11 +83,13 @@ export function PureImageGrid({
 
   const parentRef = React.useRef<HTMLDivElement>(null);
 
-  const [desiredLanes, setLanes] = useState(0);
+  const [gridState, setGridState] = useState({
+    width: defaultDimensions.width,
+    desiredLanes: 0,
+  });
+  const { width, desiredLanes } = gridState;
   const lanes =
     items.length < desiredLanes ? Math.max(items.length, 2) : desiredLanes;
-
-  const [width, setWidth] = useState(defaultDimensions.width);
 
   const heights = useMemo(
     () => items.map((item) => Math.min(item.height / item.width, 3) * width),
@@ -91,7 +99,7 @@ export function PureImageGrid({
   const rowVirtualizer = useWindowVirtualizer({
     count: items.length,
     estimateSize: (i) => heights[i],
-    overscan: 8,
+    overscan: 4,
     gap: 8,
     lanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
@@ -130,12 +138,14 @@ export function PureImageGrid({
         2,
         Math.floor(entry.contentRect.width / (defaultDimensions.width + 4)),
       );
-      if (newLanes < 3) {
-        setWidth(entry.contentRect.width / newLanes - 4);
-      } else {
-        setWidth(defaultDimensions.width);
-      }
-      setLanes(newLanes);
+      const newWidth =
+        newLanes < 3
+          ? entry.contentRect.width / newLanes - 4
+          : defaultDimensions.width;
+
+      startTransition(() => {
+        setGridState({ width: newWidth, desiredLanes: newLanes });
+      });
     });
 
     observer.observe(parentRef.current);
@@ -169,7 +179,11 @@ export function PureImageGrid({
                     height: `${heights[virtualRow.index]}px`,
                     transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
                   }}
-                  className="absolute top-0 z-0 overflow-visible transition-[left,transform,width,height] duration-350 ease-out will-change-[left,transform,width,height] hover:z-999"
+                  className={cn(
+                    "absolute top-0 z-0 overflow-visible hover:z-999",
+                    !rowVirtualizer.isScrolling &&
+                      "transition-[left,transform,width,height] duration-350 ease-out",
+                  )}
                 >
                   <ImageGridCard
                     virtualRow={virtualRow}
