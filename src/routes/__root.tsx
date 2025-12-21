@@ -5,7 +5,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 import type { QueryClient } from "@tanstack/react-query";
-import MainNavbar from "@/components/main-nav";
+import { AppHeader } from "@/components/app-header";
 import { useApplyTheme, useSystemThemeListener } from "@/lib/theme-store";
 import {
   SidebarInset,
@@ -24,7 +24,7 @@ function RootComponent() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <MainNavbar />
+        <AppHeader />
         <Outlet />
       </SidebarInset>
       <TanStackDevtools
