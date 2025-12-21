@@ -52,17 +52,19 @@ function RouteComponent() {
     <div>
       <HeaderPortal>
         <Heading>Recently inboxed</Heading>
+        <Separator className="my-2" />
+        <Button
+          onClick={() =>
+            queryClient.invalidateQueries({
+              queryKey: ["searchFiles", "recentlyInboxed"],
+            })
+          }
+        >
+          Refetch
+        </Button>
+        <Separator className="my-2" />
       </HeaderPortal>
-      <Button
-        onClick={() =>
-          queryClient.invalidateQueries({
-            queryKey: ["searchFiles", "recentlyInboxed"],
-          })
-        }
-      >
-        Refetch
-      </Button>
-      <Separator className="my-2" />
+
       {data?.file_ids && data.file_ids.length > 0 ? (
         <div>
           <p>Number of files: {data.file_ids.length}</p>
