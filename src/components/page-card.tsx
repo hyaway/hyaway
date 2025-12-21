@@ -35,15 +35,10 @@ export function PageCard({ pageKey, pageName, className }: PageCardProps) {
     <Link
       to="/pages/$pageId"
       params={{ pageId: pageKey }}
-      className="block transition-transform hover:scale-[1.02] focus-visible:scale-[1.02] focus-visible:outline-none"
+      className="hover:ring-primary focus-visible:ring-primary block h-full transition-transform hover:scale-[1.02] hover:ring-2 focus-visible:scale-[1.02] focus-visible:ring-3 focus-visible:outline-none"
       aria-label={`View page "${pageName}" with ${totalFiles} ${totalFiles === 1 ? "file" : "files"}`}
     >
-      <Card
-        className={cn(
-          "hover:ring-primary/50 h-full transition-shadow hover:ring-2",
-          className,
-        )}
-      >
+      <Card className={cn("h-full", className)}>
         <CardContent>
           {isLoading ? (
             <div
