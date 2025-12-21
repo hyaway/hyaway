@@ -15,12 +15,12 @@ function PagesIndex() {
   const { data: pages, isPending, isError } = useGetMediaPagesQuery();
 
   return (
-    <div>
+    <div className="@container">
       <Heading level={2}>Client Pages</Heading>
       <Separator className="my-4" />
       {isPending ? (
         <div
-          className="grid grid-cols-[repeat(auto-fill,12rem)] gap-4"
+          className="grid gap-4 @xs:grid-cols-[repeat(auto-fill,9rem)] @md:grid-cols-[repeat(auto-fill,12rem)]"
           aria-label="Loading pages"
         >
           {Array.from({ length: 3 }).map((_, i) => (
@@ -36,7 +36,7 @@ function PagesIndex() {
           No media pages found. Open some file search pages in Hydrus Client.
         </div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,12rem)] gap-4">
+        <div className="grid gap-4 @xs:grid-cols-[repeat(auto-fill,9rem)] @md:grid-cols-[repeat(auto-fill,12rem)]">
           {pages.map((page) => (
             <PageCard
               key={page.page_key}
