@@ -3,8 +3,11 @@ import React, { memo, useMemo } from "react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
   SidebarHeader,
 } from "../ui-primitives/sidebar";
+import { ScrollArea } from "../ui-primitives/scroll-area";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { Badge } from "@/components/ui-primitives/badge";
 import { Heading } from "@/components/ui-primitives/heading";
@@ -103,52 +106,59 @@ function TagsSidebarInternal({
           </Heading>
         </SidebarHeader>
         <SidebarContent>
-          <div
-            ref={parentRef}
-            className={cn("hidden w-72 ps-4 lg:block", className)}
-            style={combinedStyle}
-          >
-            <ol
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-              }}
-              className="relative"
+          <ScrollArea className={"h-full"}>
+            <SidebarGroup
+              ref={parentRef}
+              className={cn(className)}
+              style={combinedStyle}
             >
-              {rows.map((virtualRow) => {
-                const tagItem = tags[virtualRow.index];
+              <ol
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                }}
+                className="relative"
+              >
+                {rows.map((virtualRow) => {
+                  const tagItem = tags[virtualRow.index];
 
-                return (
-                  <li
-                    key={virtualRow.index}
-                    data-index={virtualRow.index}
-                    style={{
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                    ref={rowVirtualizer.measureElement}
-                    className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-baseline gap-1 font-mono uppercase"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="text-muted-foreground shrink-0 text-right tabular-nums"
+                  return (
+                    <li
+                      key={virtualRow.index}
+                      data-index={virtualRow.index}
+                      style={{
+                        transform: `translateY(${virtualRow.start}px)`,
+                      }}
+                      ref={rowVirtualizer.measureElement}
+                      className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-baseline gap-1 font-mono uppercase"
                     >
-                      {virtualRow.index + 1}.
-                    </span>
-                    <Badge
-                      variant={"outline"}
-                      className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
-                    >
-                      {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
-                      {tagItem.tag}
-                    </Badge>
-                    <Badge variant={"outline"} className="shrink-0">
-                      {tagItem.count}
-                    </Badge>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
+                      <span
+                        aria-hidden="true"
+                        className="text-muted-foreground shrink-0 text-right tabular-nums"
+                      >
+                        {virtualRow.index + 1}.
+                      </span>
+                      <Badge
+                        variant={"outline"}
+                        className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
+                      >
+                        {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
+                        {tagItem.tag}
+                      </Badge>
+                      <Badge variant={"outline"} className="shrink-0">
+                        {tagItem.count}
+                      </Badge>
+                    </li>
+                  );
+                })}
+              </ol>
+            </SidebarGroup>
+          </ScrollArea>
         </SidebarContent>
+        <SidebarFooter>
+          <span className="text-muted-foreground text-sm">
+            {tags.length} unique tags for {items.length} loaded files
+          </span>
+        </SidebarFooter>
       </Sidebar>
     </RightSidebarPortal>
   );

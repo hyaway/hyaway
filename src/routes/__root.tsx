@@ -33,7 +33,7 @@ function RootComponent() {
           <AppHeader />
           <Outlet />
         </SidebarInset>
-        <RightSidebarSlot className="hidden lg:block" />
+        <RightSidebarSlot className="hidden xl:block" />
         <TanStackDevtools
           config={{
             position: "bottom-right",
