@@ -32,7 +32,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuLinkButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
               to="/"
             >
               <TouchTarget>
@@ -40,7 +40,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                   <span className="size-4">hA</span>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <Heading className="truncate font-medium" level={1}>
+                  <Heading className="truncate font-medium" level={2}>
                     hyAway
                   </Heading>
                 </div>
@@ -53,7 +53,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton to="/pages">
+              <SidebarMenuLinkButton to="/pages" className="cursor-pointer">
                 <TouchTarget>
                   <Squares2X2Icon className="size-8" />
                   <span>Pages</span>
@@ -61,7 +61,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton to="/recently-inboxed">
+              <SidebarMenuLinkButton
+                to="/recently-inboxed"
+                className="cursor-pointer"
+              >
                 <TouchTarget>
                   <InboxIcon />
                   <span>Recently inboxed</span>
@@ -69,7 +72,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton to="/recently-archived">
+              <SidebarMenuLinkButton
+                to="/recently-archived"
+                className="cursor-pointer"
+              >
                 <TouchTarget>
                   <ArchiveBoxIcon />
                   <span>Recently archived</span>
@@ -77,7 +83,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton to="/recently-deleted">
+              <SidebarMenuLinkButton
+                to="/recently-deleted"
+                className="cursor-pointer"
+              >
                 <TouchTarget>
                   <TrashIcon />
                   <span>Recently deleted</span>
@@ -91,7 +100,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarThemeSwitcher />
           <SidebarMenuItem>
-            <SidebarMenuLinkButton to="/settings">
+            <SidebarMenuLinkButton to="/settings" className="cursor-pointer">
               <TouchTarget>
                 <Cog6ToothIcon />
                 <span>Settings</span>
