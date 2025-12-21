@@ -1,5 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, { memo, useDeferredValue, useMemo } from "react";
+import React, { forwardRef, memo, useDeferredValue, useMemo } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,50 +23,45 @@ interface TagItem {
 }
 
 // Memoized row component to prevent re-renders
-const TagRow = memo(function TagRow({
-  tagItem,
-  index,
-  style,
-}: {
-  tagItem: TagItem;
-  index: number;
-  style: React.CSSProperties;
-}) {
-  return (
-    <li
-      data-index={index}
-      style={style}
-      className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-baseline gap-1 font-mono uppercase"
-    >
-      <span
-        aria-hidden="true"
-        className="text-muted-foreground shrink-0 text-right tabular-nums"
+const TagRow = memo(
+  forwardRef<
+    HTMLLIElement,
+    {
+      tagItem: TagItem;
+      index: number;
+      style: React.CSSProperties;
+    }
+  >(function TagRow({ tagItem, index, style }, ref) {
+    console.log("Rendering tag row:", index);
+    return (
+      <li
+        ref={ref}
+        data-index={index}
+        style={style}
+        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-baseline gap-1 font-mono uppercase"
       >
-        {index + 1}.
-      </span>
-      <Badge
-        variant="outline"
-        className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal select-all"
-      >
-        {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
-        {tagItem.tag}
-      </Badge>
-      <Badge variant="outline" className="shrink-0 select-all">
-        {tagItem.count}
-      </Badge>
-    </li>
-  );
-});
+        <span
+          aria-hidden="true"
+          className="text-muted-foreground shrink-0 text-right tabular-nums"
+        >
+          {index + 1}.
+        </span>
+        <Badge
+          variant="outline"
+          className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal select-all"
+        >
+          {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
+          {tagItem.tag}
+        </Badge>
+        <Badge variant="outline" className="shrink-0 select-all">
+          {tagItem.count}
+        </Badge>
+      </li>
+    );
+  }),
+);
 
-function TagsSidebarInternal({
-  items,
-  className,
-  style,
-}: {
-  items: Array<FileMetadata>;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
+function TagsSidebarInternal({ items }: { items: Array<FileMetadata> }) {
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
 
   // Defer heavy computation so UI stays responsive
@@ -120,7 +115,11 @@ function TagsSidebarInternal({
 
   const rowVirtualizer = useVirtualizer({
     count: tags.length,
-    estimateSize: () => 32, // Fixed height - no dynamic measurement
+    estimateSize: (i) => {
+      const tag = tags[i];
+      const length = tag.namespace.length + tag.tag.length;
+      return length > 18 ? 40 : 24;
+    },
     overscan: 5,
     gap: 8,
     getScrollElement: () => parentRef.current,
@@ -145,12 +144,8 @@ function TagsSidebarInternal({
           </Heading>
         </SidebarHeader>
         <SidebarContent className="p-1">
-          <ScrollArea className="h-full pe-2">
-            <SidebarGroup
-              ref={parentRef}
-              className={cn(className)}
-              style={style}
-            >
+          <ScrollArea className="h-full pe-2" ref={parentRef}>
+            <SidebarGroup>
               <ol
                 style={{
                   height: `${rowVirtualizer.getTotalSize()}px`,
@@ -160,6 +155,11 @@ function TagsSidebarInternal({
                 {virtualItems.map((virtualRow) => (
                   <TagRow
                     key={virtualRow.index}
+                    ref={
+                      virtualRow.size > 24
+                        ? rowVirtualizer.measureElement
+                        : undefined
+                    }
                     tagItem={tags[virtualRow.index]}
                     index={virtualRow.index}
                     style={{
