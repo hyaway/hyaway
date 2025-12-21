@@ -2,7 +2,13 @@
 
 import * as React from "react";
 
-import { Cog6ToothIcon } from "@heroicons/react/16/solid";
+import {
+  ArchiveBoxIcon,
+  Cog6ToothIcon,
+  InboxIcon,
+  Squares2X2Icon,
+  TrashIcon,
+} from "@heroicons/react/16/solid";
 import { Heading } from "./ui-primitives/heading";
 import { SidebarThemeSwitcher } from "./theme-switcher";
 import { TouchTarget } from "./ui-primitives/touch-target";
@@ -10,6 +16,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
@@ -40,7 +47,36 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>blah</SidebarContent>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuLinkButton to="/pages">
+                <Squares2X2Icon className="size-8" />
+                <span>Pages</span>
+              </SidebarMenuLinkButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuLinkButton to="/recently-inboxed">
+                <InboxIcon />
+                <span>Recently inboxed</span>
+              </SidebarMenuLinkButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuLinkButton to="/recently-archived">
+                <ArchiveBoxIcon />
+                <span>Recently archived</span>
+              </SidebarMenuLinkButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuLinkButton to="/recently-deleted">
+                <TrashIcon />
+                <span>Recently deleted</span>
+              </SidebarMenuLinkButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
           <SidebarThemeSwitcher />

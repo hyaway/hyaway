@@ -8,6 +8,7 @@ import { cva } from "class-variance-authority";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SidebarLeftIcon } from "@hugeicons/core-free-icons";
 import { createLink } from "@tanstack/react-router";
+import type { LinkComponent } from "@tanstack/react-router";
 import type { VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui-primitives/button";
@@ -555,7 +556,21 @@ function SidebarMenuButton({
   );
 }
 
-const SidebarMenuLinkButton = createLink(SidebarMenuButton);
+const CreatedSidebarMenuLinkButton = createLink(SidebarMenuButton);
+
+const SidebarMenuLinkButton: LinkComponent<typeof SidebarMenuButton> = (
+  props,
+) => {
+  return (
+    <CreatedSidebarMenuLinkButton
+      activeProps={{
+        active: true,
+        "data-active": true,
+      }}
+      {...props}
+    />
+  );
+};
 
 function SidebarMenuAction({
   className,
@@ -702,7 +717,21 @@ function SidebarMenuSubButton({
   });
 }
 
-const SidebarMenuSubLinkButton = createLink(SidebarMenuSubButton);
+const CreatedSidebarMenuSubLinkButton = createLink(SidebarMenuSubButton);
+
+const SidebarMenuSubLinkButton: LinkComponent<typeof SidebarMenuSubButton> = (
+  props,
+) => {
+  return (
+    <CreatedSidebarMenuSubLinkButton
+      activeProps={{
+        active: true,
+        "data-active": true,
+      }}
+      {...props}
+    />
+  );
+};
 
 export {
   Sidebar,
