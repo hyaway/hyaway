@@ -31,7 +31,6 @@ const TagRow = memo(
       style: React.CSSProperties;
     }
   >(function TagRow({ tagItem, index, style }, ref) {
-    console.log("Rendering tag row:", index);
     return (
       <li
         ref={ref}

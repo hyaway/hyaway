@@ -35,14 +35,16 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               to="/"
             >
-              <div className="border-sidebar-primary flex aspect-square size-8 items-center justify-center rounded-lg border">
-                <span className="size-4">hA</span>
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <Heading className="truncate font-medium" level={1}>
-                  hyAway
-                </Heading>
-              </div>
+              <TouchTarget>
+                <div className="border-sidebar-primary flex aspect-square size-8 items-center justify-center rounded-lg border">
+                  <span className="size-4">hA</span>
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <Heading className="truncate font-medium" level={1}>
+                    hyAway
+                  </Heading>
+                </div>
+              </TouchTarget>
             </SidebarMenuLinkButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -52,26 +54,34 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuLinkButton to="/pages">
-                <Squares2X2Icon className="size-8" />
-                <span>Pages</span>
+                <TouchTarget>
+                  <Squares2X2Icon className="size-8" />
+                  <span>Pages</span>
+                </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuLinkButton to="/recently-inboxed">
-                <InboxIcon />
-                <span>Recently inboxed</span>
+                <TouchTarget>
+                  <InboxIcon />
+                  <span>Recently inboxed</span>
+                </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuLinkButton to="/recently-archived">
-                <ArchiveBoxIcon />
-                <span>Recently archived</span>
+                <TouchTarget>
+                  <ArchiveBoxIcon />
+                  <span>Recently archived</span>
+                </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuLinkButton to="/recently-deleted">
-                <TrashIcon />
-                <span>Recently deleted</span>
+                <TouchTarget>
+                  <TrashIcon />
+                  <span>Recently deleted</span>
+                </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
           </SidebarMenu>

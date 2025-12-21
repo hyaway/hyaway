@@ -1,6 +1,7 @@
 import { Link, useMatches } from "@tanstack/react-router";
 import { Fragment, useEffect, useRef, useState } from "react";
 
+import { TouchTarget } from "./ui-primitives/touch-target";
 import type { MyRouterContext } from "@/routes/__root";
 import { HeaderPortalSlot } from "@/components/header-portal";
 import {
@@ -102,49 +103,49 @@ export function AppHeader() {
           : "pointer-events-none -translate-y-full opacity-0",
       )}
     >
-      <div className="flex h-16 items-center gap-2 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-        <div className="flex items-center gap-2 px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink render={<Link to="/" />}>hyAway</BreadcrumbLink>
-              </BreadcrumbItem>
-              {breadcrumbs.length > 0 && (
-                <BreadcrumbSeparator className="hidden md:block" />
-              )}
-              {breadcrumbs.map((crumb, index) => {
-                const isLast = index === breadcrumbs.length - 1;
+      <div className="flex h-12 shrink-0 items-center gap-2 px-4">
+        <SidebarTrigger className="-ml-1" />
+        <Separator
+          orientation="vertical"
+          className="my-auto mr-2 data-[orientation=vertical]:h-4"
+        />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink render={<Link to="/" />}>
+                <TouchTarget>hyAway</TouchTarget>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            {breadcrumbs.length > 0 && (
+              <BreadcrumbSeparator className="hidden md:block" />
+            )}
+            {breadcrumbs.map((crumb, index) => {
+              const isLast = index === breadcrumbs.length - 1;
 
-                return (
-                  <Fragment key={crumb.path}>
-                    <BreadcrumbItem>
-                      {isLast ? (
-                        <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
-                      ) : (
-                        <BreadcrumbLink
-                          render={<Link to={crumb.path} />}
-                          className="hidden md:block"
-                        >
-                          {crumb.title}
-                        </BreadcrumbLink>
-                      )}
-                    </BreadcrumbItem>
-                    {!isLast && (
-                      <BreadcrumbSeparator className="hidden md:block" />
+              return (
+                <Fragment key={crumb.path}>
+                  <BreadcrumbItem>
+                    {isLast ? (
+                      <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink
+                        render={<Link to={crumb.path} />}
+                        className="hidden md:block"
+                      >
+                        <TouchTarget>{crumb.title}</TouchTarget>
+                      </BreadcrumbLink>
                     )}
-                  </Fragment>
-                );
-              })}
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
+                  </BreadcrumbItem>
+                  {!isLast && (
+                    <BreadcrumbSeparator className="hidden md:block" />
+                  )}
+                </Fragment>
+              );
+            })}
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
-      <HeaderPortalSlot className="px-4 py-2" />
+      <HeaderPortalSlot className="px-4" />
       {/* Prevent accidental hover interactions for zoom */}
       <div
         aria-hidden="true"
