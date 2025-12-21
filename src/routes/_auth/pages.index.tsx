@@ -16,7 +16,7 @@ function PagesIndex() {
 
   return (
     <div className="@container">
-      <Heading level={2}>Client Pages</Heading>
+      <Heading level={2}>Pages</Heading>
       <Separator className="my-4" />
       {isPending ? (
         <div
