@@ -138,7 +138,7 @@ function TagsSidebarInternal({ items }: { items: Array<FileMetadata> }) {
     estimateSize: (i) => {
       const tag = tags[i];
       const length = tag.namespace.length + tag.tag.length;
-      return length > 18 ? 40 : 24;
+      return length > 14 ? 40 : 24;
     },
     overscan: 5,
     gap: 8,
