@@ -21,7 +21,7 @@ import { ImageGrid } from "@/components/image-grid/image-grid";
 export const Route = createFileRoute("/_auth/pages/$pageId")({
   component: RouteComponent,
   beforeLoad: ({ params }) => ({
-    getTitle: () => `Page ${params.pageId.slice(0, 8)}...`,
+    getTitle: () => `${params.pageId.slice(0, 8)}...`,
   }),
 });
 
