@@ -1,6 +1,7 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, {
   startTransition,
+  useDeferredValue,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -81,6 +82,9 @@ export function PureImageGrid({
     [data],
   );
 
+  // Defer items so old grid stays visible while new items load
+  const deferredItems = useDeferredValue(items);
+
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const [gridState, setGridState] = useState({
@@ -89,16 +93,18 @@ export function PureImageGrid({
   });
   const { width, desiredLanes } = gridState;
   const lanes =
-    items.length < desiredLanes ? Math.max(items.length, 2) : desiredLanes;
+    deferredItems.length < desiredLanes
+      ? Math.max(deferredItems.length, 2)
+      : desiredLanes;
 
-  const heights = useMemo(
-    () => items.map((item) => Math.min(item.height / item.width, 3) * width),
-    [items, width],
-  );
+  // Calculate height on-demand - only called for visible items
+  const getItemHeight = (itemWidth: number, itemHeight: number) =>
+    Math.min(itemHeight / itemWidth, 3) * width;
 
   const rowVirtualizer = useWindowVirtualizer({
-    count: items.length,
-    estimateSize: (i) => heights[i],
+    count: deferredItems.length,
+    estimateSize: (i) =>
+      getItemHeight(deferredItems[i].width, deferredItems[i].height),
     overscan: 4,
     gap: 8,
     lanes,
@@ -110,10 +116,10 @@ export function PureImageGrid({
   const lastItemIndex = virtualItems.at(-1)?.index;
 
   useEffect(() => {
-    if (!lastItemIndex) return;
+    if (lastItemIndex === undefined) return;
 
     if (
-      lastItemIndex >= items.length - 1 &&
+      lastItemIndex >= deferredItems.length - 1 &&
       hasNextPage &&
       !isFetchingNextPage
     ) {
@@ -122,7 +128,7 @@ export function PureImageGrid({
   }, [
     hasNextPage,
     fetchNextPage,
-    items.length,
+    deferredItems.length,
     isFetchingNextPage,
     lastItemIndex,
   ]);
@@ -155,7 +161,7 @@ export function PureImageGrid({
 
   useEffect(() => {
     rowVirtualizer.measure();
-  }, [heights, width, lanes, rowVirtualizer]);
+  }, [deferredItems, width, lanes, rowVirtualizer]);
 
   return (
     <div className="flex w-full flex-row">
@@ -168,18 +174,20 @@ export function PureImageGrid({
         >
           {!!lanes &&
             virtualItems.map((virtualRow) => {
-              const item = items[virtualRow.index];
+              const item = deferredItems[virtualRow.index];
+              const itemHeight = getItemHeight(item.width, item.height);
 
               return (
                 <li
                   key={virtualRow.index}
                   style={{
                     width: `${width}px`,
-                    height: `${heights[virtualRow.index]}px`,
+                    height: `${itemHeight}px`,
                     transform: `translate(${(virtualRow.lane * 100) / lanes}cqw, ${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
+                    containIntrinsicSize: `${width}px ${itemHeight}px`,
                   }}
                   className={cn(
-                    "absolute top-0 left-0 z-0 overflow-visible hover:z-999",
+                    "absolute top-0 left-0 z-0 overflow-visible [content-visibility:auto] hover:z-999 hover:[content-visibility:visible]",
                     !rowVirtualizer.isScrolling &&
                       "transition-transform duration-350 ease-out",
                   )}
@@ -187,7 +195,7 @@ export function PureImageGrid({
                   <ImageGridCard
                     virtualRow={virtualRow}
                     lanes={lanes}
-                    totalItemsCount={items.length}
+                    totalItemsCount={deferredItems.length}
                     item={item}
                     width={width}
                   />
@@ -205,9 +213,9 @@ export function PureImageGrid({
         )}
         variant="secondary"
       >
-        {(lastItemIndex ?? 0) + 1}/{items.length} ({totalItems})
+        {(lastItemIndex ?? 0) + 1}/{deferredItems.length} ({totalItems})
       </Badge>
-      <TagsSidebar items={items} />
+      <TagsSidebar items={deferredItems} />
     </div>
   );
 }
