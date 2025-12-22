@@ -161,7 +161,12 @@ function FileViewer({
           className={`max-w-full cursor-pointer rounded border object-contain transition-[max-height] duration-300 ${
             isExpanded ? "max-h-full" : "max-h-[70vh]"
           }`}
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => {
+            if (isExpanded) {
+              window.scrollTo({ top: 0, behavior: "auto" });
+            }
+            setIsExpanded(!isExpanded);
+          }}
         />
       </div>
     );
