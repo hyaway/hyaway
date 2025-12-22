@@ -11,7 +11,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/16/solid";
 import { NoSymbolIcon as NoSymbolIconLarge } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   Alert,
@@ -19,12 +19,15 @@ import {
   AlertTitle,
 } from "@/components/ui-primitives/alert";
 import { Badge } from "@/components/ui-primitives/badge";
-import { Heading } from "@/components/ui-primitives/heading";
+import { Heading, Subheading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
-import { TagsSidebar } from "@/components/image-grid/tags-sidebar";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/get-files";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
+import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
+import { TagStatus } from "@/integrations/hydrus-api/models";
+import { TagBadgeFromString } from "@/components/tag-badge";
+import { compareTagStrings } from "@/lib/tag-utils";
 
 export const Route = createFileRoute("/_auth/file/$fileId")({
   component: RouteComponent,
@@ -125,9 +128,9 @@ function RouteComponent() {
             <FileInfoTable data={data} />
           </div>
         </div>
+        <Separator className="my-2" />
+        <InlineTagsList data={data} />
       </div>
-
-      <TagsSidebar items={[data]} />
     </div>
   );
 }
@@ -398,4 +401,40 @@ function MimeIcon({ mime, className }: { mime: string; className?: string }) {
     return <SpeakerWaveIcon className={className} />;
   }
   return <DocumentIcon className={className} />;
+}
+
+function InlineTagsList({
+  data,
+}: {
+  data: NonNullable<ReturnType<typeof useGetSingleFileMetadata>["data"]>;
+}) {
+  const allTagsServiceId = useAllKnownTagsServiceQuery().data;
+
+  const tags = useMemo(() => {
+    if (!allTagsServiceId) return [];
+
+    const displayTags =
+      data.tags?.[allTagsServiceId]?.display_tags[TagStatus.CURRENT];
+
+    if (!displayTags) return [];
+
+    return [...displayTags].sort(compareTagStrings);
+  }, [data, allTagsServiceId]);
+
+  if (tags.length === 0) {
+    return (
+      <p className="text-muted-foreground text-sm">No tags for this file.</p>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <Heading level={3}>Tags ({tags.length})</Heading>
+      <div className="flex flex-wrap gap-2">
+        {tags.map((tag) => (
+          <TagBadgeFromString key={tag} displayTag={tag} />
+        ))}
+      </div>
+    </div>
+  );
 }

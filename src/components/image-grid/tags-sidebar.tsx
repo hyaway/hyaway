@@ -14,6 +14,8 @@ import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { RightSidebarPortal } from "@/components/right-sidebar-portal";
+import { TagBadge } from "@/components/tag-badge";
+import { compareTags, parseTag } from "@/lib/tag-utils";
 
 interface TagItem {
   tag: string;
@@ -45,13 +47,11 @@ const TagRow = memo(
         >
           {index + 1}.
         </span>
-        <Badge
-          variant="outline"
-          className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal select-all"
-        >
-          {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
-          {tagItem.tag}
-        </Badge>
+        <TagBadge
+          tag={tagItem.tag}
+          namespace={tagItem.namespace}
+          className="h-auto shrink items-start justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
+        />
         {showCount && (
           <Badge variant="outline" className="shrink-0 select-all">
             {tagItem.count}
@@ -103,17 +103,8 @@ export const TagsSidebar = memo(function TagsSidebar({
     for (let i = 0; i < keys.length; i++) {
       const displayTag = keys[i];
       const count = counts[displayTag];
-      const idx = displayTag.indexOf(":");
-
-      if (idx === -1) {
-        result[i] = { tag: displayTag, count, namespace: "" };
-      } else {
-        result[i] = {
-          tag: displayTag.slice(idx + 1),
-          count,
-          namespace: displayTag.slice(0, idx),
-        };
-      }
+      const { namespace, tag } = parseTag(displayTag);
+      result[i] = { tag, count, namespace };
     }
 
     // Sort in place
@@ -121,17 +112,8 @@ export const TagsSidebar = memo(function TagsSidebar({
       // Count comparison (descending)
       if (b.count !== a.count) return b.count - a.count;
 
-      // Namespace comparison: empty namespaces go last
-      const aHasNamespace = a.namespace !== "";
-      const bHasNamespace = b.namespace !== "";
-      if (aHasNamespace !== bHasNamespace) return aHasNamespace ? -1 : 1;
-      if (aHasNamespace) {
-        const nsCompare = a.namespace.localeCompare(b.namespace);
-        if (nsCompare !== 0) return nsCompare;
-      }
-
-      // Tag comparison (localeCompare for non-ASCII support)
-      return a.tag.localeCompare(b.tag);
+      // Then by namespace and tag
+      return compareTags(a, b);
     });
 
     return result;
