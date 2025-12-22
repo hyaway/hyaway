@@ -1,6 +1,25 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useHydrusApiClient } from "../hydrus-config-store";
 
+export const useGetSingleFileMetadata = (fileId: number) => {
+  const hydrusApi = useHydrusApiClient();
+  return useQuery({
+    queryKey: ["getSingleFileMetadata", fileId, hydrusApi],
+    queryFn: async () => {
+      if (!hydrusApi) {
+        throw new Error("Hydrus API client is required.");
+      }
+      const response = await hydrusApi.getFileMetadata([fileId], false);
+      if (response.metadata.length === 0) {
+        throw new Error("File not found.");
+      }
+      return response.metadata[0];
+    },
+    enabled: !!hydrusApi && !!fileId,
+    staleTime: Infinity,
+  });
+};
+
 export const useGetFilesMetadata = (
   file_ids: Array<number>,
   only_return_basic_information = true,
