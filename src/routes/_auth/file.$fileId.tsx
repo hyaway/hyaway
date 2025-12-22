@@ -118,9 +118,12 @@ function RouteComponent() {
         </div>
         <Separator className="my-2" />
 
-        <div className="space-y-4">
+        <div className="@container space-y-4">
           <Heading level={3}>File metadata</Heading>
-          <FileMetadataTable data={data} />
+          <div className="grid gap-4 @lg:grid-cols-2">
+            <ContentDetailsTable data={data} />
+            <FileInfoTable data={data} />
+          </div>
         </div>
       </div>
 
@@ -228,7 +231,45 @@ function FilePageHeader({ fileId }: { fileId: number }) {
   );
 }
 
-function FileMetadataTable({
+function MetadataList({
+  rows,
+}: {
+  rows: Array<{ label: string; value: React.ReactNode }>;
+}) {
+  return (
+    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+      {rows.map((row) => (
+        <div key={row.label} className="contents">
+          <dt className="text-muted-foreground font-medium select-all">
+            {row.label}
+          </dt>
+          <dd className="select-all">{row.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function FileInfoTable({
+  data,
+}: {
+  data: NonNullable<ReturnType<typeof useGetSingleFileMetadata>["data"]>;
+}) {
+  const rows: Array<{ label: string; value: React.ReactNode }> = [
+    { label: "File ID", value: data.file_id },
+    {
+      label: "Hash",
+      value: <code className="text-xs break-all">{data.hash}</code>,
+    },
+    { label: "MIME Type", value: data.mime },
+    { label: "File Type", value: data.filetype_human },
+    { label: "Extension", value: data.ext },
+  ];
+
+  return <MetadataList rows={rows} />;
+}
+
+function ContentDetailsTable({
   data,
 }: {
   data: NonNullable<ReturnType<typeof useGetSingleFileMetadata>["data"]>;
@@ -277,16 +318,8 @@ function FileMetadataTable({
   };
 
   const rows: Array<{ label: string; value: React.ReactNode }> = [
-    { label: "File ID", value: data.file_id },
-    {
-      label: "Hash",
-      value: <code className="text-xs break-all">{data.hash}</code>,
-    },
     { label: "Dimensions", value: `${data.width} × ${data.height}` },
     { label: "Size", value: formatBytes(data.size) },
-    { label: "MIME Type", value: data.mime },
-    { label: "File Type", value: data.filetype_human },
-    { label: "Extension", value: data.ext },
   ];
 
   if (data.duration !== null) {
@@ -314,18 +347,7 @@ function FileMetadataTable({
 
   rows.push({ label: "Has Audio", value: data.has_audio ? "Yes" : "No" });
 
-  return (
-    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-      {rows.map((row) => (
-        <div key={row.label} className="contents">
-          <dt className="text-muted-foreground font-medium select-all">
-            {row.label}
-          </dt>
-          <dd className="select-all">{row.value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
+  return <MetadataList rows={rows} />;
 }
 
 function FileDetailSkeleton({ fileId }: { fileId: number }) {
