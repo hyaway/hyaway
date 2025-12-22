@@ -12,6 +12,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/16/solid";
 import { NoSymbolIcon as NoSymbolIconLarge } from "@heroicons/react/24/solid";
+import { useState } from "react";
 
 import {
   Alert,
@@ -23,7 +24,6 @@ import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
-import { HeaderPortal } from "@/components/header-portal";
 import { TagsSidebar } from "@/components/image-grid/tags-sidebar";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/get-files";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
@@ -48,9 +48,7 @@ function RouteComponent() {
   if (isError) {
     return (
       <>
-        <HeaderPortal>
-          <FilePageHeader fileId={fileIdNum} />
-        </HeaderPortal>
+        <FilePageHeader fileId={fileIdNum} />
         <Alert variant="destructive">
           <ExclamationCircleIcon />
           <AlertTitle>
@@ -71,9 +69,7 @@ function RouteComponent() {
   if (!data) {
     return (
       <>
-        <HeaderPortal>
-          <FilePageHeader fileId={fileIdNum} />
-        </HeaderPortal>
+        <FilePageHeader fileId={fileIdNum} />
         <Alert variant="destructive">
           <ExclamationCircleIcon />
           <AlertTitle>File not found</AlertTitle>
@@ -85,38 +81,34 @@ function RouteComponent() {
   return (
     <div className="flex w-full flex-row">
       <div className="flex min-w-0 flex-1 flex-col">
-        <HeaderPortal>
-          <FilePageHeader fileId={fileIdNum} />
-          <Separator className="my-2" />
-          <div className="flex flex-wrap items-center gap-2">
-            {data.is_inbox && (
-              <Badge variant="secondary">
-                <InboxIcon className="mr-1 size-3" />
-                Inbox
-              </Badge>
-            )}
-            {data.is_trashed && (
-              <Badge variant="destructive">
-                <TrashIcon className="mr-1 size-3" />
-                Trashed
-              </Badge>
-            )}
-            {data.is_deleted && !data.is_trashed && (
-              <Badge variant="destructive">
-                <NoSymbolIcon className="mr-1 size-3" />
-                Deleted
-              </Badge>
-            )}
-            <Badge variant="outline">{data.filetype_human}</Badge>
-            <Badge variant="outline">{data.mime}</Badge>
-          </div>
-          <Separator className="my-2" />
-        </HeaderPortal>
-
+        <FilePageHeader fileId={fileIdNum} />
+        <Separator className="my-2" />
+        <div className="flex flex-wrap items-center gap-2">
+          {data.is_inbox && (
+            <Badge variant="secondary">
+              <InboxIcon className="mr-1 size-3" />
+              Inbox
+            </Badge>
+          )}
+          {data.is_trashed && (
+            <Badge variant="destructive">
+              <TrashIcon className="mr-1 size-3" />
+              Trashed
+            </Badge>
+          )}
+          {data.is_deleted && !data.is_trashed && (
+            <Badge variant="destructive">
+              <NoSymbolIcon className="mr-1 size-3" />
+              Permanently deleted
+            </Badge>
+          )}
+          <Badge variant="outline">{data.mime}</Badge>
+        </div>
+        <Separator className="my-2" />
         <FileViewer
           fileId={fileIdNum}
           mime={data.mime}
-          isDeleted={data.is_deleted}
+          isDeleted={data.is_deleted && !data.is_trashed}
         />
 
         <div className="mt-4 space-y-4">
@@ -157,13 +149,18 @@ function FileViewer({
   const isVideo = mime.startsWith("video/");
   const isAudio = mime.startsWith("audio/");
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (isImage) {
     return (
       <div className="flex justify-center">
         <img
           src={fileUrl}
           alt={`File ${fileId}`}
-          className="max-h-[70vh] max-w-full rounded border object-contain"
+          className={`max-w-full cursor-pointer rounded border object-contain transition-[max-height] duration-300 ${
+            isExpanded ? "max-h-full" : "max-h-[70vh]"
+          }`}
+          onClick={() => setIsExpanded(!isExpanded)}
         />
       </div>
     );
@@ -287,8 +284,10 @@ function FileMetadataTable({
     <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
       {rows.map((row) => (
         <div key={row.label} className="contents">
-          <dt className="text-muted-foreground font-medium">{row.label}</dt>
-          <dd>{row.value}</dd>
+          <dt className="text-muted-foreground font-medium select-all">
+            {row.label}
+          </dt>
+          <dd className="select-all">{row.value}</dd>
         </div>
       ))}
     </dl>
@@ -299,15 +298,13 @@ function FileDetailSkeleton({ fileId }: { fileId: number }) {
   return (
     <div className="flex w-full flex-row">
       <div className="flex min-w-0 flex-1 flex-col">
-        <HeaderPortal>
-          <FilePageHeader fileId={fileId} />
-          <Separator className="my-2" />
-          <div className="flex flex-wrap items-center gap-2">
-            <Skeleton className="h-5 w-16 rounded-full" />
-            <Skeleton className="h-5 w-24 rounded-full" />
-          </div>
-          <Separator className="my-2" />
-        </HeaderPortal>
+        <FilePageHeader fileId={fileId} />
+        <Separator className="my-2" />
+        <div className="flex flex-wrap items-center gap-2">
+          <Skeleton className="h-5 w-16 rounded-full" />
+          <Skeleton className="h-5 w-24 rounded-full" />
+        </div>
+        <Separator className="my-2" />
 
         {/* File viewer skeleton */}
         <div className="flex justify-center">

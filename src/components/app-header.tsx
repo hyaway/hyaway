@@ -176,10 +176,7 @@ export function AppHeader() {
       </div>
       <HeaderPortalSlot className="px-4" />
       {/* Prevent accidental hover interactions for zoom */}
-      <div
-        aria-hidden="true"
-        className="absolute top-full left-0 h-10 w-full"
-      />
+      <div aria-hidden="true" className="absolute top-full left-0 h-2 w-full" />
     </header>
   );
 }

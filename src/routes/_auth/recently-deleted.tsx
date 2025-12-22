@@ -9,7 +9,6 @@ import {
 } from "@/components/ui-primitives/alert";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Spinner } from "@/components/ui-primitives/spinner";
-import { HeaderPortal } from "@/components/header-portal";
 import { useRecentlyDeletedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui-primitives/button";
@@ -50,20 +49,18 @@ function RouteComponent() {
 
   return (
     <div>
-      <HeaderPortal>
-        <Heading>Recently deleted</Heading>
-        <Separator className="my-2" />
-        <Button
-          onClick={() =>
-            queryClient.invalidateQueries({
-              queryKey: ["searchFiles", "recentlyDeleted"],
-            })
-          }
-        >
-          Refetch
-        </Button>
-        <Separator className="my-2" />
-      </HeaderPortal>
+      <Heading>Recently deleted</Heading>
+      <Separator className="my-2" />
+      <Button
+        onClick={() =>
+          queryClient.invalidateQueries({
+            queryKey: ["searchFiles", "recentlyDeleted"],
+          })
+        }
+      >
+        Refetch
+      </Button>
+      <Separator className="my-2" />
 
       {data?.file_ids && data.file_ids.length > 0 ? (
         <div>

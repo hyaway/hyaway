@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Spinner } from "@/components/ui-primitives/spinner";
-import { HeaderPortal } from "@/components/header-portal";
 import {
   useFocusPageMutation,
   useGetPageInfoQuery,
@@ -57,28 +56,24 @@ function RouteComponent() {
 
   return (
     <div>
-      <HeaderPortal>
-        <Heading>Page: {data?.page_info.name}</Heading>
-        <Separator className="my-2" />
-        <div className="flex gap-2">
-          <Button
-            onClick={() =>
-              queryClient.invalidateQueries({
-                queryKey: ["getPageInfo", pageId],
-              })
-            }
-          >
-            Refetch
-          </Button>
-          <Button onClick={() => refreshPageMutation.mutate(pageId)}>
-            Refresh remote
-          </Button>
-          <Button onClick={() => focusPageMutation.mutate(pageId)}>
-            Focus
-          </Button>
-        </div>
-        <Separator className="my-2" />
-      </HeaderPortal>
+      <Heading>Page: {data?.page_info.name}</Heading>
+      <Separator className="my-2" />
+      <div className="flex gap-2">
+        <Button
+          onClick={() =>
+            queryClient.invalidateQueries({
+              queryKey: ["getPageInfo", pageId],
+            })
+          }
+        >
+          Refetch
+        </Button>
+        <Button onClick={() => refreshPageMutation.mutate(pageId)}>
+          Refresh remote
+        </Button>
+        <Button onClick={() => focusPageMutation.mutate(pageId)}>Focus</Button>
+      </div>
+      <Separator className="my-2" />
 
       {data?.page_info.media ? (
         <div>
