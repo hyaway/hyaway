@@ -8,8 +8,11 @@ import {
   ArrowLeftIcon,
   ExclamationCircleIcon,
   InboxIcon,
+  NoSymbolIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
+import { NoSymbolIcon as NoSymbolIconLarge } from "@heroicons/react/24/solid";
+
 import {
   Alert,
   AlertDescription,
@@ -100,7 +103,7 @@ function RouteComponent() {
             )}
             {data.is_deleted && !data.is_trashed && (
               <Badge variant="destructive">
-                <ExclamationCircleIcon className="mr-1 size-3" />
+                <NoSymbolIcon className="mr-1 size-3" />
                 Deleted
               </Badge>
             )}
@@ -110,7 +113,11 @@ function RouteComponent() {
           <Separator className="my-2" />
         </HeaderPortal>
 
-        <FileViewer fileId={fileIdNum} mime={data.mime} />
+        <FileViewer
+          fileId={fileIdNum}
+          mime={data.mime}
+          isDeleted={data.is_deleted}
+        />
 
         <div className="mt-4 space-y-4">
           <Heading level={3}>File metadata</Heading>
@@ -123,8 +130,27 @@ function RouteComponent() {
   );
 }
 
-function FileViewer({ fileId, mime }: { fileId: number; mime: string }) {
+function FileViewer({
+  fileId,
+  mime,
+  isDeleted,
+}: {
+  fileId: number;
+  mime: string;
+  isDeleted?: boolean;
+}) {
   const fileUrl = useFullFileIdUrl(fileId);
+
+  if (isDeleted) {
+    return (
+      <div className="flex flex-col items-center gap-4 rounded border p-8">
+        <NoSymbolIconLarge className="text-muted-foreground size-12" />
+        <p className="text-muted-foreground">
+          This file has been deleted and is no longer available.
+        </p>
+      </div>
+    );
+  }
 
   // Determine file type from MIME
   const isImage = mime.startsWith("image/");
