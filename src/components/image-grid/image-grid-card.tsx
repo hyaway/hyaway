@@ -4,6 +4,7 @@ import {
   InboxIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
+import { Link } from "@tanstack/react-router";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { useThumbnailFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
@@ -68,38 +69,43 @@ export const ImageGridCard = memo(function ImageGridCard({
   }, [virtualRow.lane, virtualRow.index, lanes, totalItemsCount]);
 
   return (
-    <div
-      className={cn(`group relative h-full w-full overflow-visible`, className)}
-      style={{
-        [`--thumbnail-hover-scale`]: `${scale}`,
-        [`--thumbnail-hover-reverse-scale`]: `${1 / scale}`,
-      }}
-      {...props}
-    >
+    <Link to="/file/$fileId" params={{ fileId: String(item.file_id) }}>
       <div
         className={cn(
-          "bg-background h-full w-full overflow-hidden rounded border object-cover",
-          "pointer-events-none transition-[scale] duration-100 ease-out group-hover:scale-(--thumbnail-hover-scale)",
-          originClass,
+          `group relative h-full w-full overflow-visible`,
+          className,
         )}
+        style={{
+          [`--thumbnail-hover-scale`]: `${scale}`,
+          [`--thumbnail-hover-reverse-scale`]: `${1 / scale}`,
+        }}
+        {...props}
       >
-        <ThumbnailImage fileId={item.file_id} />
-        {(item.is_inbox || item.is_trashed || item.is_deleted) && (
-          <div
-            className={cn(
-              "bg-secondary absolute top-1 right-1 flex flex-col gap-2 rounded p-1 opacity-60",
-              "pointer-events-none group-hover:top-0.5 group-hover:right-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
-              "transition-opacity duration-350 ease-out",
-            )}
-          >
-            {item.is_inbox && <InboxIcon className="h-4 w-4" />}
-            {item.is_trashed && <TrashIcon className="h-4 w-4" />}
-            {item.is_deleted && !item.is_trashed && (
-              <ExclamationCircleIcon className="h-4 w-4" />
-            )}
-          </div>
-        )}
+        <div
+          className={cn(
+            "bg-background h-full w-full overflow-hidden rounded border object-cover",
+            "pointer-events-none transition-[scale] duration-100 ease-out group-hover:scale-(--thumbnail-hover-scale)",
+            originClass,
+          )}
+        >
+          <ThumbnailImage fileId={item.file_id} />
+          {(item.is_inbox || item.is_trashed || item.is_deleted) && (
+            <div
+              className={cn(
+                "bg-secondary absolute top-1 right-1 flex flex-col gap-2 rounded p-1 opacity-60",
+                "pointer-events-none group-hover:top-0.5 group-hover:right-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
+                "transition-opacity duration-350 ease-out",
+              )}
+            >
+              {item.is_inbox && <InboxIcon className="h-4 w-4" />}
+              {item.is_trashed && <TrashIcon className="h-4 w-4" />}
+              {item.is_deleted && !item.is_trashed && (
+                <ExclamationCircleIcon className="h-4 w-4" />
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Link>
   );
 });

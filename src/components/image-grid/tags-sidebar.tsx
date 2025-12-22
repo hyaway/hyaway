@@ -29,8 +29,9 @@ const TagRow = memo(
       tagItem: TagItem;
       index: number;
       style: React.CSSProperties;
+      showCount: boolean;
     }
-  >(function TagRow({ tagItem, index, style }, ref) {
+  >(function TagRow({ tagItem, index, style, showCount }, ref) {
     return (
       <li
         ref={ref}
@@ -51,15 +52,21 @@ const TagRow = memo(
           {tagItem.namespace ? `${tagItem.namespace}: ` : ""}
           {tagItem.tag}
         </Badge>
-        <Badge variant="outline" className="shrink-0 select-all">
-          {tagItem.count}
-        </Badge>
+        {showCount && (
+          <Badge variant="outline" className="shrink-0 select-all">
+            {tagItem.count}
+          </Badge>
+        )}
       </li>
     );
   }),
 );
 
-function TagsSidebarInternal({ items }: { items: Array<FileMetadata> }) {
+export const TagsSidebar = memo(function TagsSidebar({
+  items,
+}: {
+  items: Array<FileMetadata>;
+}) {
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
 
   // Defer heavy computation so UI stays responsive
@@ -177,6 +184,7 @@ function TagsSidebarInternal({ items }: { items: Array<FileMetadata> }) {
                     ref={rowVirtualizer.measureElement}
                     tagItem={tags[virtualRow.index]}
                     index={virtualRow.index}
+                    showCount={deferredItems.length > 1}
                     style={{
                       transform: `translateY(${virtualRow.start}px)`,
                     }}
@@ -188,12 +196,12 @@ function TagsSidebarInternal({ items }: { items: Array<FileMetadata> }) {
         </SidebarContent>
         <SidebarFooter>
           <span className="text-muted-foreground text-sm">
-            {tags.length} unique tags for {deferredItems.length} loaded files
+            {deferredItems.length === 1
+              ? `${tags.length} tags`
+              : `${tags.length} unique tags for ${deferredItems.length} loaded files`}
           </span>
         </SidebarFooter>
       </Sidebar>
     </RightSidebarPortal>
   );
-}
-
-export const TagsSidebar = memo(TagsSidebarInternal);
+});
