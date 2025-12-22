@@ -39,7 +39,7 @@ const TagRow = memo(
         ref={ref}
         data-index={index}
         style={style}
-        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-baseline gap-1 font-mono uppercase"
+        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-center gap-1 font-mono"
       >
         <span
           aria-hidden="true"

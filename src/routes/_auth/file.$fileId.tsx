@@ -262,7 +262,7 @@ function FileInfoTable({
     { label: "File ID", value: data.file_id },
     {
       label: "Hash",
-      value: <code className="text-xs break-all">{data.hash}</code>,
+      value: <code className="font-mono break-all">{data.hash}</code>,
     },
     { label: "MIME Type", value: data.mime },
     { label: "File Type", value: data.filetype_human },
