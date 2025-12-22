@@ -21,6 +21,7 @@ import { Route as AuthRecentlyArchivedRouteImport } from "./routes/_auth/recentl
 import { Route as AuthPagesRouteImport } from "./routes/_auth/pages";
 import { Route as AuthPagesIndexRouteImport } from "./routes/_auth/pages.index";
 import { Route as AuthPagesPageIdRouteImport } from "./routes/_auth/pages.$pageId";
+import { Route as AuthFileFileIdRouteImport } from "./routes/_auth/file.$fileId";
 
 const SettingsRoute = SettingsRouteImport.update({
   id: "/settings",
@@ -81,6 +82,11 @@ const AuthPagesPageIdRoute = AuthPagesPageIdRouteImport.update({
   path: "/$pageId",
   getParentRoute: () => AuthPagesRoute,
 } as any);
+const AuthFileFileIdRoute = AuthFileFileIdRouteImport.update({
+  id: "/file/$fileId",
+  path: "/file/$fileId",
+  getParentRoute: () => AuthRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
+  "/file/$fileId": typeof AuthFileFileIdRoute;
   "/pages/$pageId": typeof AuthPagesPageIdRoute;
   "/pages/": typeof AuthPagesIndexRoute;
 }
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings": typeof SettingsIndexRoute;
+  "/file/$fileId": typeof AuthFileFileIdRoute;
   "/pages/$pageId": typeof AuthPagesPageIdRoute;
   "/pages": typeof AuthPagesIndexRoute;
 }
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
+  "/_auth/file/$fileId": typeof AuthFileFileIdRoute;
   "/_auth/pages/$pageId": typeof AuthPagesPageIdRoute;
   "/_auth/pages/": typeof AuthPagesIndexRoute;
 }
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | "/settings/client-api"
     | "/settings/ux"
     | "/settings/"
+    | "/file/$fileId"
     | "/pages/$pageId"
     | "/pages/";
   fileRoutesByTo: FileRoutesByTo;
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | "/settings/client-api"
     | "/settings/ux"
     | "/settings"
+    | "/file/$fileId"
     | "/pages/$pageId"
     | "/pages";
   id:
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | "/settings/client-api"
     | "/settings/ux"
     | "/settings/"
+    | "/_auth/file/$fileId"
     | "/_auth/pages/$pageId"
     | "/_auth/pages/";
   fileRoutesById: FileRoutesById;
@@ -254,6 +266,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthPagesPageIdRouteImport;
       parentRoute: typeof AuthPagesRoute;
     };
+    "/_auth/file/$fileId": {
+      id: "/_auth/file/$fileId";
+      path: "/file/$fileId";
+      fullPath: "/file/$fileId";
+      preLoaderRoute: typeof AuthFileFileIdRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
   }
 }
 
@@ -276,6 +295,7 @@ interface AuthRouteChildren {
   AuthRecentlyArchivedRoute: typeof AuthRecentlyArchivedRoute;
   AuthRecentlyDeletedRoute: typeof AuthRecentlyDeletedRoute;
   AuthRecentlyInboxedRoute: typeof AuthRecentlyInboxedRoute;
+  AuthFileFileIdRoute: typeof AuthFileFileIdRoute;
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -283,6 +303,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthRecentlyArchivedRoute: AuthRecentlyArchivedRoute,
   AuthRecentlyDeletedRoute: AuthRecentlyDeletedRoute,
   AuthRecentlyInboxedRoute: AuthRecentlyInboxedRoute,
+  AuthFileFileIdRoute: AuthFileFileIdRoute,
 };
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
