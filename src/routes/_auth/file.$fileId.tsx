@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AxiosError } from "axios";
 import {
+  ArrowDownTrayIcon,
+  ArrowTopRightOnSquareIcon,
   DocumentIcon,
   ExclamationCircleIcon,
   FilmIcon,
@@ -19,11 +21,15 @@ import {
   AlertTitle,
 } from "@/components/ui-primitives/alert";
 import { Badge } from "@/components/ui-primitives/badge";
-import { Heading, Subheading } from "@/components/ui-primitives/heading";
+import { Button } from "@/components/ui-primitives/button";
+import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/get-files";
-import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
+import {
+  useDownloadFileIdUrl,
+  useFullFileIdUrl,
+} from "@/hooks/use-url-with-api-key";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { TagBadgeFromString } from "@/components/tag-badge";
@@ -120,6 +126,9 @@ function RouteComponent() {
             </Badge>
           )}
         </div>
+        <Separator className="my-2" />
+
+        <FileActionButtons fileId={fileIdNum} />
         <Separator className="my-2" />
 
         <div className="@container space-y-4">
@@ -439,6 +448,32 @@ function InlineTagsList({
           <TagBadgeFromString key={tag} displayTag={tag} />
         ))}
       </div>
+    </div>
+  );
+}
+
+function FileActionButtons({ fileId }: { fileId: number }) {
+  const fileUrl = useFullFileIdUrl(fileId);
+  const downloadUrl = useDownloadFileIdUrl(fileId);
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        render={<a href={downloadUrl} download />}
+      >
+        <ArrowDownTrayIcon className="mr-1 size-4" />
+        Download
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        render={<a href={fileUrl} target="_blank" rel="noopener noreferrer" />}
+      >
+        <ArrowTopRightOnSquareIcon className="mr-1 size-4" />
+        Open in new tab
+      </Button>
     </div>
   );
 }

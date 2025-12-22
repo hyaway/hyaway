@@ -20,3 +20,9 @@ export const useFullFileIdUrl = (fileId: number) => {
   const sessionKey = useApiSessionKey();
   return `${apiEndpoint}/get_files/file?file_id=${fileId}&${HYDRUS_API_HEADER_SESSION_KEY}=${sessionKey}`;
 };
+
+export const useDownloadFileIdUrl = (fileId: number) => {
+  const apiEndpoint = useApiEndpoint();
+  const sessionKey = useApiSessionKey();
+  return `${apiEndpoint}/get_files/file?file_id=${fileId}&download=true&${HYDRUS_API_HEADER_SESSION_KEY}=${sessionKey}`;
+};
