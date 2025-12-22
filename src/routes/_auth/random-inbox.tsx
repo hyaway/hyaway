@@ -1,7 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
+import {
+  DiceFaces01Icon,
+  DiceFaces02Icon,
+  DiceFaces03Icon,
+  DiceFaces04Icon,
+  DiceFaces05Icon,
+  DiceFaces06Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Alert,
   AlertDescription,
@@ -14,6 +25,15 @@ import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui-primitives/button";
 import { Separator } from "@/components/ui-primitives/separator";
 
+const DICE_ICONS = [
+  DiceFaces01Icon,
+  DiceFaces02Icon,
+  DiceFaces03Icon,
+  DiceFaces04Icon,
+  DiceFaces05Icon,
+  DiceFaces06Icon,
+];
+
 export const Route = createFileRoute("/_auth/random-inbox")({
   component: RouteComponent,
   beforeLoad: () => ({
@@ -24,26 +44,78 @@ export const Route = createFileRoute("/_auth/random-inbox")({
 function RouteComponent() {
   const { data, isLoading, isError, error } = useRandomInboxFilesQuery();
   const queryClient = useQueryClient();
+  const [diceIndex, setDiceIndex] = useState(2);
+  const [showDice, setShowDice] = useState(true);
+
+  // Show dice when loading finishes
+  useEffect(() => {
+    if (!isLoading) {
+      setShowDice(true);
+    }
+  }, [isLoading]);
+
+  const handleShuffle = () => {
+    setShowDice(false); // Trigger exit animation
+    setDiceIndex(Math.floor(Math.random() * 6));
+    queryClient.resetQueries({
+      queryKey: ["searchFiles", "randomInbox"],
+    });
+  };
+
+  const shuffleButton = (
+    <Button onClick={handleShuffle} disabled={isLoading || isError}>
+      <span className="mr-1 size-4">
+        <AnimatePresence>
+          {showDice && (
+            <motion.span
+              key={diceIndex}
+              initial={{ rotate: -180, scale: 0 }}
+              animate={{ rotate: 0, scale: 1, transition: { duration: 0.15 } }}
+              exit={{ rotate: 1800, scale: 0, transition: { duration: 5 } }}
+              className="absolute block"
+            >
+              <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-4" />
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </span>
+      Shuffle
+    </Button>
+  );
 
   if (isLoading) {
-    return <Spinner />;
+    return (
+      <div>
+        <Heading level={1}>Random inbox</Heading>
+        <Separator className="my-2" />
+        {shuffleButton}
+        <Separator className="my-2" />
+        <Spinner />
+      </div>
+    );
   }
 
   if (isError) {
     return (
-      <Alert variant="destructive">
-        <ExclamationCircleIcon />
-        <AlertTitle>
-          {error instanceof Error
-            ? error.message
-            : "An unknown error occurred while fetching random inbox files."}
-        </AlertTitle>
-        <AlertDescription>
-          {error instanceof AxiosError && error.response?.data?.error ? (
-            <span>{error.response.data.error}</span>
-          ) : null}
-        </AlertDescription>
-      </Alert>
+      <div>
+        <Heading level={1}>Random inbox</Heading>
+        <Separator className="my-2" />
+        {shuffleButton}
+        <Separator className="my-2" />
+        <Alert variant="destructive">
+          <ExclamationCircleIcon />
+          <AlertTitle>
+            {error instanceof Error
+              ? error.message
+              : "An unknown error occurred while fetching random inbox files."}
+          </AlertTitle>
+          <AlertDescription>
+            {error instanceof AxiosError && error.response?.data?.error ? (
+              <span>{error.response.data.error}</span>
+            ) : null}
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
@@ -51,15 +123,7 @@ function RouteComponent() {
     <div>
       <Heading level={1}>Random inbox</Heading>
       <Separator className="my-2" />
-      <Button
-        onClick={() =>
-          queryClient.invalidateQueries({
-            queryKey: ["searchFiles", "randomInbox"],
-          })
-        }
-      >
-        Shuffle
-      </Button>
+      {shuffleButton}
       <Separator className="my-2" />
 
       {data?.file_ids && data.file_ids.length > 0 ? (
