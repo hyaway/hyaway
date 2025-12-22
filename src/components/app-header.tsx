@@ -16,17 +16,41 @@ import { Separator } from "@/components/ui-primitives/separator";
 import { SidebarTrigger } from "@/components/ui-primitives/sidebar";
 import { cn } from "@/lib/utils";
 
+// Custom event for scroll restoration
+export const SCROLL_RESTORATION_EVENT = "app:scroll-restoration";
+
+export function dispatchScrollRestoration() {
+  window.dispatchEvent(new CustomEvent(SCROLL_RESTORATION_EVENT));
+}
+
 function useScrollDirection(threshold = 10) {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
+  const skipNextScroll = useRef(false);
 
   useEffect(() => {
     // Initialize with current scroll position
     lastScrollY.current = window.scrollY;
 
+    const handleScrollRestoration = () => {
+      // Skip the next scroll event and keep header visible
+      skipNextScroll.current = true;
+      setIsVisible(true);
+      // Update lastScrollY to prevent hiding on next scroll
+      lastScrollY.current = window.scrollY;
+    };
+
     const updateScrollDir = () => {
       const scrollY = window.scrollY;
+
+      // Skip if scroll restoration just happened
+      if (skipNextScroll.current) {
+        skipNextScroll.current = false;
+        lastScrollY.current = scrollY;
+        ticking.current = false;
+        return;
+      }
 
       // Ignore if only horizontal scroll occurred
       if (scrollY === lastScrollY.current) {
@@ -61,9 +85,14 @@ function useScrollDirection(threshold = 10) {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener(SCROLL_RESTORATION_EVENT, handleScrollRestoration);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener(
+        SCROLL_RESTORATION_EVENT,
+        handleScrollRestoration,
+      );
     };
   }, [threshold]);
 

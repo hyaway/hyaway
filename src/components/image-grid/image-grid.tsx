@@ -1,4 +1,5 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { useElementScrollRestoration } from "@tanstack/react-router";
 import React, {
   startTransition,
   useDeferredValue,
@@ -12,6 +13,7 @@ import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
 import { ImageGridCard } from "./image-grid-card";
 import { TagsSidebar } from "./tags-sidebar";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import { dispatchScrollRestoration } from "@/components/app-header";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import {
   Alert,
@@ -109,6 +111,12 @@ export function PureImageGrid({
     return height;
   };
 
+  const scrollEntry = useElementScrollRestoration({
+    getElement: () => window,
+  });
+
+  const [scrollRestored, setScrollRestored] = useState(false);
+
   const rowVirtualizer = useWindowVirtualizer({
     count: deferredItems.length,
     estimateSize: (i) => {
@@ -120,6 +128,23 @@ export function PureImageGrid({
     lanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
   });
+
+  const totalSize = rowVirtualizer.getTotalSize();
+
+  useLayoutEffect(() => {
+    if (scrollRestored || !scrollEntry?.scrollY || scrollEntry.scrollY <= 0) {
+      return;
+    }
+
+    // Wait until virtualizer has calculated enough height to scroll to
+    if (totalSize < scrollEntry.scrollY) {
+      return;
+    }
+
+    dispatchScrollRestoration();
+    window.scrollTo(0, scrollEntry.scrollY);
+    setScrollRestored(true);
+  }, [scrollEntry?.scrollY, scrollRestored, totalSize]);
 
   // Cache virtual items to avoid calling getVirtualItems() multiple times
   const virtualItems = rowVirtualizer.getVirtualItems();
