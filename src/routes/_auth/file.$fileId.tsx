@@ -81,6 +81,12 @@ function RouteComponent() {
   return (
     <div className="flex w-full flex-row">
       <div className="flex min-w-0 flex-1 flex-col">
+        <FileViewer
+          fileId={fileIdNum}
+          mime={data.mime}
+          isDeleted={data.is_deleted && !data.is_trashed}
+        />
+
         <FilePageHeader fileId={fileIdNum} />
         <Separator className="my-2" />
         <div className="flex flex-wrap items-center gap-2">
@@ -105,13 +111,8 @@ function RouteComponent() {
           <Badge variant="outline">{data.mime}</Badge>
         </div>
         <Separator className="my-2" />
-        <FileViewer
-          fileId={fileIdNum}
-          mime={data.mime}
-          isDeleted={data.is_deleted && !data.is_trashed}
-        />
 
-        <div className="mt-4 space-y-4">
+        <div className="space-y-4">
           <Heading level={3}>File metadata</Heading>
           <FileMetadataTable data={data} />
         </div>
@@ -209,23 +210,10 @@ function FileViewer({
 }
 
 function FilePageHeader({ fileId }: { fileId: number }) {
-  const router = useRouter();
-  const canGoBack = useCanGoBack();
-
   return (
-    <div className="flex items-center gap-2">
-      {canGoBack && (
-        <Button
-          onClick={() => router.history.back()}
-          variant="ghost"
-          size="icon"
-          aria-label="Go back"
-        >
-          <ArrowLeftIcon className="size-4" />
-        </Button>
-      )}
-      <Heading>File: {fileId}</Heading>
-    </div>
+    <Heading level={1} className="hidden">
+      File: {fileId}
+    </Heading>
   );
 }
 
@@ -298,6 +286,11 @@ function FileDetailSkeleton({ fileId }: { fileId: number }) {
   return (
     <div className="flex w-full flex-row">
       <div className="flex min-w-0 flex-1 flex-col">
+        {/* File viewer skeleton */}
+        <div className="flex justify-center">
+          <Skeleton className="aspect-video w-full max-w-2xl rounded" />
+        </div>
+
         <FilePageHeader fileId={fileId} />
         <Separator className="my-2" />
         <div className="flex flex-wrap items-center gap-2">
@@ -306,13 +299,8 @@ function FileDetailSkeleton({ fileId }: { fileId: number }) {
         </div>
         <Separator className="my-2" />
 
-        {/* File viewer skeleton */}
-        <div className="flex justify-center">
-          <Skeleton className="aspect-video w-full max-w-2xl rounded" />
-        </div>
-
         {/* Metadata skeleton */}
-        <div className="mt-4 space-y-4">
+        <div className="space-y-4">
           <Skeleton className="h-6 w-36" />
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
             {Array.from({ length: 7 }).map((_, i) => (

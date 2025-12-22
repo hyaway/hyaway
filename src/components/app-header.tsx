@@ -1,7 +1,15 @@
-import { Link, useMatches } from "@tanstack/react-router";
+import {
+  Link,
+  useCanGoBack,
+  useMatchRoute,
+  useMatches,
+  useRouter,
+} from "@tanstack/react-router";
 import { Fragment, useEffect, useRef, useState } from "react";
 
+import { ArrowLeftIcon } from "@heroicons/react/16/solid";
 import { TouchTarget } from "./ui-primitives/touch-target";
+import { Button } from "./ui-primitives/button";
 import type { MyRouterContext } from "@/routes/__root";
 import { HeaderPortalSlot } from "@/components/header-portal";
 import {
@@ -122,7 +130,9 @@ export function AppHeader() {
 
     prevGetTitle = getTitle;
   }
-
+  const router = useRouter();
+  const canGoBack = useCanGoBack();
+  const matchRoute = useMatchRoute();
   return (
     <header
       className={cn(
@@ -134,6 +144,17 @@ export function AppHeader() {
     >
       <div className="flex h-12 shrink-0 items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
+
+        {matchRoute({ to: "/file/$fileId" }) && canGoBack && (
+          <Button
+            onClick={() => router.history.back()}
+            variant="ghost"
+            size="icon"
+            aria-label="Go back"
+          >
+            <ArrowLeftIcon className="size-4" />
+          </Button>
+        )}
         <Separator
           orientation="vertical"
           className="my-auto mr-2 data-[orientation=vertical]:h-4"
