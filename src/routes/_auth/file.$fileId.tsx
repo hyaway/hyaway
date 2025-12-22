@@ -1,14 +1,13 @@
-import {
-  createFileRoute,
-  useCanGoBack,
-  useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AxiosError } from "axios";
 import {
-  ArrowLeftIcon,
+  DocumentIcon,
   ExclamationCircleIcon,
+  FilmIcon,
   InboxIcon,
   NoSymbolIcon,
+  PhotoIcon,
+  SpeakerWaveIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
 import { NoSymbolIcon as NoSymbolIconLarge } from "@heroicons/react/24/solid";
@@ -20,7 +19,6 @@ import {
   AlertTitle,
 } from "@/components/ui-primitives/alert";
 import { Badge } from "@/components/ui-primitives/badge";
-import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
@@ -108,7 +106,15 @@ function RouteComponent() {
               Permanently deleted
             </Badge>
           )}
-          <Badge variant="outline">{data.mime}</Badge>
+          <Badge variant="outline">
+            <MimeIcon mime={data.mime} className="mr-1 size-3" />
+            {data.mime}
+          </Badge>
+          {data.has_audio && (
+            <Badge variant="outline">
+              <SpeakerWaveIcon className="mr-1 size-3" /> Has audio
+            </Badge>
+          )}
         </div>
         <Separator className="my-2" />
 
@@ -322,4 +328,17 @@ function FileDetailSkeleton({ fileId }: { fileId: number }) {
       <div className="hidden w-64 lg:block" />
     </div>
   );
+}
+
+function MimeIcon({ mime, className }: { mime: string; className?: string }) {
+  if (mime.startsWith("image/")) {
+    return <PhotoIcon className={className} />;
+  }
+  if (mime.startsWith("video/")) {
+    return <FilmIcon className={className} />;
+  }
+  if (mime.startsWith("audio/")) {
+    return <SpeakerWaveIcon className={className} />;
+  }
+  return <DocumentIcon className={className} />;
 }
