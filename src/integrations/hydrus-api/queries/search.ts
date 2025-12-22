@@ -118,6 +118,36 @@ export const useRecentlyInboxedFilesQuery = () => {
   });
 };
 
+export const useRandomInboxFilesQuery = () => {
+  const tags: HydrusTagSearch = ["system:limit=100", "system:inbox"];
+  const options: Omit<SearchFilesOptions, "tags"> = {
+    file_sort_type: HydrusFileSortType.Random,
+  };
+
+  const hydrusApi = useHydrusApiClient();
+
+  return useQuery({
+    queryKey: [
+      "searchFiles",
+      "randomInbox",
+      tags,
+      options,
+      hydrusApi,
+      hydrusApi?.toJSON(),
+    ],
+    queryFn: async () => {
+      if (!hydrusApi) {
+        throw new Error("Hydrus API client is required.");
+      }
+      return hydrusApi.searchFiles({
+        tags,
+        ...options,
+      });
+    },
+    enabled: !!hydrusApi && tags.length > 0,
+  });
+};
+
 export const useSearchFilesQuery = (
   tags: HydrusTagSearch,
   options?: Omit<SearchFilesOptions, "tags">,

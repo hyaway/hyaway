@@ -18,6 +18,7 @@ import { Route as SettingsClientApiRouteImport } from "./routes/settings.client-
 import { Route as AuthRecentlyInboxedRouteImport } from "./routes/_auth/recently-inboxed";
 import { Route as AuthRecentlyDeletedRouteImport } from "./routes/_auth/recently-deleted";
 import { Route as AuthRecentlyArchivedRouteImport } from "./routes/_auth/recently-archived";
+import { Route as AuthRandomInboxRouteImport } from "./routes/_auth/random-inbox";
 import { Route as AuthPagesRouteImport } from "./routes/_auth/pages";
 import { Route as AuthPagesIndexRouteImport } from "./routes/_auth/pages.index";
 import { Route as AuthPagesPageIdRouteImport } from "./routes/_auth/pages.$pageId";
@@ -67,6 +68,11 @@ const AuthRecentlyArchivedRoute = AuthRecentlyArchivedRouteImport.update({
   path: "/recently-archived",
   getParentRoute: () => AuthRoute,
 } as any);
+const AuthRandomInboxRoute = AuthRandomInboxRouteImport.update({
+  id: "/random-inbox",
+  path: "/random-inbox",
+  getParentRoute: () => AuthRoute,
+} as any);
 const AuthPagesRoute = AuthPagesRouteImport.update({
   id: "/pages",
   path: "/pages",
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/settings": typeof SettingsRouteWithChildren;
   "/pages": typeof AuthPagesRouteWithChildren;
+  "/random-inbox": typeof AuthRandomInboxRoute;
   "/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/recently-inboxed": typeof AuthRecentlyInboxedRoute;
@@ -104,6 +111,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/random-inbox": typeof AuthRandomInboxRoute;
   "/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/recently-inboxed": typeof AuthRecentlyInboxedRoute;
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   "/_auth": typeof AuthRouteWithChildren;
   "/settings": typeof SettingsRouteWithChildren;
   "/_auth/pages": typeof AuthPagesRouteWithChildren;
+  "/_auth/random-inbox": typeof AuthRandomInboxRoute;
   "/_auth/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/_auth/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/_auth/recently-inboxed": typeof AuthRecentlyInboxedRoute;
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | "/"
     | "/settings"
     | "/pages"
+    | "/random-inbox"
     | "/recently-archived"
     | "/recently-deleted"
     | "/recently-inboxed"
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
+    | "/random-inbox"
     | "/recently-archived"
     | "/recently-deleted"
     | "/recently-inboxed"
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | "/_auth"
     | "/settings"
     | "/_auth/pages"
+    | "/_auth/random-inbox"
     | "/_auth/recently-archived"
     | "/_auth/recently-deleted"
     | "/_auth/recently-inboxed"
@@ -245,6 +257,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthRecentlyArchivedRouteImport;
       parentRoute: typeof AuthRoute;
     };
+    "/_auth/random-inbox": {
+      id: "/_auth/random-inbox";
+      path: "/random-inbox";
+      fullPath: "/random-inbox";
+      preLoaderRoute: typeof AuthRandomInboxRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
     "/_auth/pages": {
       id: "/_auth/pages";
       path: "/pages";
@@ -292,6 +311,7 @@ const AuthPagesRouteWithChildren = AuthPagesRoute._addFileChildren(
 
 interface AuthRouteChildren {
   AuthPagesRoute: typeof AuthPagesRouteWithChildren;
+  AuthRandomInboxRoute: typeof AuthRandomInboxRoute;
   AuthRecentlyArchivedRoute: typeof AuthRecentlyArchivedRoute;
   AuthRecentlyDeletedRoute: typeof AuthRecentlyDeletedRoute;
   AuthRecentlyInboxedRoute: typeof AuthRecentlyInboxedRoute;
@@ -300,6 +320,7 @@ interface AuthRouteChildren {
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthPagesRoute: AuthPagesRouteWithChildren,
+  AuthRandomInboxRoute: AuthRandomInboxRoute,
   AuthRecentlyArchivedRoute: AuthRecentlyArchivedRoute,
   AuthRecentlyDeletedRoute: AuthRecentlyDeletedRoute,
   AuthRecentlyInboxedRoute: AuthRecentlyInboxedRoute,
