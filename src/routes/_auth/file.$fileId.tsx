@@ -243,13 +243,37 @@ function FileMetadataTable({
 
   const formatDuration = (ms: number | null) => {
     if (ms === null) return null;
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const parts: Array<string> = [];
     if (hours > 0) {
-      return `${hours}:${String(minutes % 60).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+      parts.push(
+        new Intl.NumberFormat(undefined, {
+          style: "unit",
+          unit: "hour",
+        }).format(hours),
+      );
     }
-    return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
+    if (minutes > 0) {
+      parts.push(
+        new Intl.NumberFormat(undefined, {
+          style: "unit",
+          unit: "minute",
+        }).format(minutes),
+      );
+    }
+    if (seconds > 0 || parts.length === 0) {
+      parts.push(
+        new Intl.NumberFormat(undefined, {
+          style: "unit",
+          unit: "second",
+        }).format(seconds),
+      );
+    }
+    return parts.join(" ");
   };
 
   const rows: Array<{ label: string; value: React.ReactNode }> = [
@@ -258,11 +282,11 @@ function FileMetadataTable({
       label: "Hash",
       value: <code className="text-xs break-all">{data.hash}</code>,
     },
-    { label: "File Type", value: data.filetype_human },
-    { label: "MIME Type", value: data.mime },
-    { label: "Extension", value: data.ext },
-    { label: "Size", value: formatBytes(data.size) },
     { label: "Dimensions", value: `${data.width} × ${data.height}` },
+    { label: "Size", value: formatBytes(data.size) },
+    { label: "MIME Type", value: data.mime },
+    { label: "File Type", value: data.filetype_human },
+    { label: "Extension", value: data.ext },
   ];
 
   if (data.duration !== null) {
@@ -270,7 +294,18 @@ function FileMetadataTable({
   }
 
   if (data.num_frames !== null) {
-    rows.push({ label: "Frames", value: data.num_frames });
+    rows.push({
+      label: "Frames",
+      value: new Intl.NumberFormat().format(data.num_frames),
+    });
+
+    if (data.duration !== null && data.duration > 0) {
+      const fps = data.num_frames / (data.duration / 1000);
+      rows.push({
+        label: "Framerate",
+        value: `${new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(fps)} fps`,
+      });
+    }
   }
 
   if (data.num_words !== null) {
