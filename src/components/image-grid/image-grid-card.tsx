@@ -1,7 +1,9 @@
 import { memo, useMemo } from "react";
 import {
   ExclamationCircleIcon,
+  FilmIcon,
   InboxIcon,
+  SpeakerWaveIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
 import { Link } from "@tanstack/react-router";
@@ -102,6 +104,20 @@ export const ImageGridCard = memo(function ImageGridCard({
               {item.is_deleted && !item.is_trashed && (
                 <ExclamationCircleIcon className="h-4 w-4" />
               )}
+            </div>
+          )}
+          {(item.mime.startsWith("video/") || item.has_audio) && (
+            <div
+              className={cn(
+                "bg-secondary absolute top-1 left-1 flex flex-row gap-1 rounded p-1 opacity-60",
+                "pointer-events-none group-hover:top-0.5 group-hover:left-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
+                "transition-opacity duration-350 ease-out",
+              )}
+            >
+              {item.mime.startsWith("video/") && (
+                <FilmIcon className="h-4 w-4" />
+              )}
+              {item.has_audio && <SpeakerWaveIcon className="h-4 w-4" />}
             </div>
           )}
         </div>
