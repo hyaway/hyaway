@@ -70,8 +70,16 @@ function RouteComponent() {
             <motion.span
               key={diceIndex}
               initial={{ rotate: -180, scale: 0 }}
-              animate={{ rotate: 0, scale: 1, transition: { duration: 0.15 } }}
-              exit={{ rotate: 1800, scale: 0, transition: { duration: 5 } }}
+              animate={{
+                rotate: 0,
+                scale: 1,
+                transition: { duration: 0.15, ease: "easeOut" },
+              }}
+              exit={{
+                rotate: 2700,
+                scale: 0,
+                transition: { duration: 5, ease: "easeOut" },
+              }}
               className="absolute block"
             >
               <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-4" />
