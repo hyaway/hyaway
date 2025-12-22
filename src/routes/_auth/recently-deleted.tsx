@@ -49,7 +49,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <Heading>Recently deleted</Heading>
+      <Heading level={1}>Recently deleted</Heading>
       <Separator className="my-2" />
       <Button
         onClick={() =>

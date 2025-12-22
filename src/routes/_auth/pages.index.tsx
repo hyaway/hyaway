@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Separator } from "@base-ui/react/separator";
 import { PageCard, PageCardSkeleton } from "@/components/page-card";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { Heading } from "@/components/ui-primitives/heading";
@@ -15,7 +16,8 @@ function PagesIndex() {
 
   return (
     <div className="@container">
-      <Heading level={2}>Pages</Heading>
+      <Heading level={1}>Pages</Heading>
+      <Separator className="my-2" />
 
       {isPending ? (
         <div

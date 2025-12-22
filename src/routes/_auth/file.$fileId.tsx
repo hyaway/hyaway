@@ -28,6 +28,7 @@ import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/s
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { TagBadgeFromString } from "@/components/tag-badge";
 import { compareTagStrings } from "@/lib/tag-utils";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_auth/file/$fileId")({
   component: RouteComponent,
@@ -122,7 +123,7 @@ function RouteComponent() {
         <Separator className="my-2" />
 
         <div className="@container space-y-4">
-          <Heading level={3}>File metadata</Heading>
+          <Heading level={2}>File metadata</Heading>
           <div className="grid gap-4 @lg:grid-cols-2">
             <ContentDetailsTable data={data} />
             <FileInfoTable data={data} />
@@ -170,9 +171,12 @@ function FileViewer({
         <img
           src={fileUrl}
           alt={`File ${fileId}`}
-          className={`max-w-full cursor-pointer rounded border object-contain transition-[max-height] duration-300 ${
-            isExpanded ? "max-h-full" : "max-h-[70vh]"
-          }`}
+          className={cn(
+            `max-w-full cursor-pointer rounded border object-contain transition-[max-height] duration-300`,
+            isExpanded
+              ? "max-h-full cursor-zoom-out"
+              : "max-h-[70vh] cursor-zoom-in",
+          )}
           onClick={() => {
             if (isExpanded) {
               window.scrollTo({ top: 0, behavior: "auto" });
@@ -429,7 +433,7 @@ function InlineTagsList({
 
   return (
     <div className="space-y-4">
-      <Heading level={3}>Tags ({tags.length})</Heading>
+      <Heading level={2}>Tags ({tags.length})</Heading>
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => (
           <TagBadgeFromString key={tag} displayTag={tag} />

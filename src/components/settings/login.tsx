@@ -13,7 +13,7 @@ export function Login() {
   };
   return (
     <div className="flex flex-col gap-4" key={settingsKey}>
-      <Heading level={2}>Hydrus API Settings</Heading>
+      <Heading level={1}>Hydrus API Settings</Heading>
       <ApiEndpointCard />
       <AccessKeyCard />
       <SessionKeyCard />

@@ -56,7 +56,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <Heading>Page: {data?.page_info.name}</Heading>
+      <Heading level={1}>Page: {data?.page_info.name}</Heading>
       <Separator className="my-2" />
       <div className="flex gap-2">
         <Button
