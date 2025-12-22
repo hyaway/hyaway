@@ -1,19 +1,10 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { useElementScrollRestoration } from "@tanstack/react-router";
-import React, {
-  startTransition,
-  useDeferredValue,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useDeferredValue, useEffect, useMemo } from "react";
 import { AxiosError } from "axios";
 import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
 import { ImageGridCard } from "./image-grid-card";
 import { TagsSidebar } from "./tags-sidebar";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import { dispatchScrollRestoration } from "@/components/app-header";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import {
   Alert,
@@ -23,6 +14,8 @@ import {
 import { Badge } from "@/components/ui-primitives/badge";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/get-files";
+import { useResponsiveGrid } from "@/hooks/use-responsive-grid";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { cn } from "@/lib/utils";
 
 export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
@@ -89,16 +82,11 @@ export function PureImageGrid({
   const deferredItems = useDeferredValue(items);
 
   const parentRef = React.useRef<HTMLDivElement>(null);
-
-  const [gridState, setGridState] = useState({
-    width: defaultDimensions.width,
-    desiredLanes: 0,
-  });
-  const { width, desiredLanes } = gridState;
-  const lanes =
-    deferredItems.length < desiredLanes
-      ? Math.max(deferredItems.length, 2)
-      : desiredLanes;
+  const { width, lanes } = useResponsiveGrid(
+    parentRef,
+    defaultDimensions.width,
+    deferredItems.length,
+  );
 
   // Cache heights - invalidates when width changes
   const heightCache = useMemo(() => new Map<number, number>(), [width]);
@@ -110,12 +98,6 @@ export function PureImageGrid({
     heightCache.set(item.file_id, height);
     return height;
   };
-
-  const scrollEntry = useElementScrollRestoration({
-    getElement: () => window,
-  });
-
-  const [scrollRestored, setScrollRestored] = useState(false);
 
   const rowVirtualizer = useWindowVirtualizer({
     count: deferredItems.length,
@@ -130,26 +112,13 @@ export function PureImageGrid({
   });
 
   const totalSize = rowVirtualizer.getTotalSize();
-
-  useLayoutEffect(() => {
-    if (scrollRestored || !scrollEntry?.scrollY || scrollEntry.scrollY <= 0) {
-      return;
-    }
-
-    // Wait until virtualizer has calculated enough height to scroll to
-    if (totalSize < scrollEntry.scrollY) {
-      return;
-    }
-
-    dispatchScrollRestoration();
-    window.scrollTo(0, scrollEntry.scrollY);
-    setScrollRestored(true);
-  }, [scrollEntry?.scrollY, scrollRestored, totalSize]);
+  useScrollRestoration(totalSize);
 
   // Cache virtual items to avoid calling getVirtualItems() multiple times
   const virtualItems = rowVirtualizer.getVirtualItems();
   const lastItemIndex = virtualItems.at(-1)?.index;
 
+  // Infinite scroll - fetch next page when near the end
   useEffect(() => {
     if (lastItemIndex === undefined) return;
 
@@ -168,32 +137,7 @@ export function PureImageGrid({
     lastItemIndex,
   ]);
 
-  useLayoutEffect(() => {
-    if (!parentRef.current) {
-      return;
-    }
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      const newLanes = Math.max(
-        2,
-        Math.floor(entry.contentRect.width / (defaultDimensions.width + 4)),
-      );
-      const newWidth =
-        newLanes < 3
-          ? entry.contentRect.width / newLanes - 4
-          : defaultDimensions.width;
-
-      startTransition(() => {
-        setGridState({ width: newWidth, desiredLanes: newLanes });
-      });
-    });
-
-    observer.observe(parentRef.current);
-
-    return () => observer.disconnect();
-  }, [defaultDimensions.width, rowVirtualizer]);
-
+  // Re-measure when items or dimensions change
   useEffect(() => {
     rowVirtualizer.measure();
   }, [deferredItems, width, lanes, rowVirtualizer]);
