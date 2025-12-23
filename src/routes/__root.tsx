@@ -2,9 +2,9 @@ import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 
-import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
-
 import type { QueryClient } from "@tanstack/react-query";
+import TanStackQueryDevtools from "@/integrations/tanstack-query/devtools";
+
 import { AppHeader } from "@/components/app-shell/app-header";
 import { useApplyTheme, useSystemThemeListener } from "@/lib/theme-store";
 import {

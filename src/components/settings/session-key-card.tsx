@@ -4,11 +4,11 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/16/solid";
-import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/access";
 import {
   SETTINGS_ACTION,
   SETTINGS_REQUEST_SESSION_KEY_ACTION,
 } from "./constants";
+import { useVerifyAccessQuery } from "@/integrations/hydrus-api/queries/access";
 import {
   Alert,
   AlertDescription,

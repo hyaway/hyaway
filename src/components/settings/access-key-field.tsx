@@ -8,11 +8,11 @@ import {
 } from "@heroicons/react/16/solid";
 import z from "zod";
 import { useEffect } from "react";
+import { SETTINGS_ACCESS_KEY_FIELD_NAME } from "./constants";
 import {
   useApiVersionQuery,
   useVerifyAccessQuery,
-} from "../../integrations/hydrus-api/queries/access";
-import { SETTINGS_ACCESS_KEY_FIELD_NAME } from "./constants";
+} from "@/integrations/hydrus-api/queries/access";
 import { SecretInput } from "@/components/ui-primitives/input";
 import {
   Field,

@@ -3,11 +3,11 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/16/solid";
+import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
 import {
   useApiVersionQuery,
   useRequestNewPermissionsMutation,
-} from "../../integrations/hydrus-api/queries/access";
-import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
+} from "@/integrations/hydrus-api/queries/access";
 import {
   Alert,
   AlertDescription,

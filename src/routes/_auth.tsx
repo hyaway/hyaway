@@ -1,5 +1,5 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
-import { useIsAuthenticated } from "../integrations/hydrus-api/queries/access";
+import { useIsAuthenticated } from "@/integrations/hydrus-api/queries/access";
 import { LinkButton } from "@/components/ui-primitives/button";
 
 export const Route = createFileRoute("/_auth")({

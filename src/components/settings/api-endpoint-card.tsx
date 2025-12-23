@@ -7,8 +7,8 @@ import {
 } from "@heroicons/react/16/solid";
 import z from "zod";
 import { useEffect } from "react";
-import { useApiVersionQuery } from "../../integrations/hydrus-api/queries/access";
 import { SETTINGS_ENDPOINT_FIELD_NAME } from "./constants";
+import { useApiVersionQuery } from "@/integrations/hydrus-api/queries/access";
 import {
   Field,
   FieldError,
