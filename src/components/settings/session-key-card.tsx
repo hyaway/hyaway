@@ -5,14 +5,18 @@ import {
   ExclamationCircleIcon,
 } from "@heroicons/react/16/solid";
 import { useVerifyAccessQuery } from "../../integrations/hydrus-api/queries/access";
-import { Alert, AlertDescription, AlertTitle } from "../ui-primitives/alert";
-import { Field, FieldLabel } from "../ui-primitives/field";
-import { SecretInput } from "../ui-primitives/input";
-import { Spinner } from "../ui-primitives/spinner";
 import {
   SETTINGS_ACTION,
   SETTINGS_REQUEST_SESSION_KEY_ACTION,
 } from "./constants";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui-primitives/alert";
+import { Field, FieldLabel } from "@/components/ui-primitives/field";
+import { SecretInput } from "@/components/ui-primitives/input";
+import { Spinner } from "@/components/ui-primitives/spinner";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Card,

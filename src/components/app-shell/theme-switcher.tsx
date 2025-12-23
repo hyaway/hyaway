@@ -3,9 +3,9 @@ import {
   MoonIcon,
   SunIcon,
 } from "@heroicons/react/20/solid";
-import { TouchTarget } from "../ui-primitives/touch-target";
 import type { Theme } from "@/lib/theme-store";
 import type { ComponentProps } from "react";
+import { TouchTarget } from "@/components/ui-primitives/touch-target";
 import { Button } from "@/components/ui-primitives/button";
 import {
   SidebarMenuButton,

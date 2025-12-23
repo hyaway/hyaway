@@ -11,7 +11,7 @@ import { ArrowLeftIcon } from "@heroicons/react/16/solid";
 import type { MyRouterContext } from "@/routes/__root";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";
 import { Button } from "@/components/ui-primitives/button";
-import { HeaderPortalSlot } from "@/components/app-shell/header-portal";
+import { HeaderPortalSlot } from "@/components/header-portal";
 import {
   Breadcrumb,
   BreadcrumbItem,

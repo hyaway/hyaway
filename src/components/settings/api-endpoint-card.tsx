@@ -8,11 +8,19 @@ import {
 import z from "zod";
 import { useEffect } from "react";
 import { useApiVersionQuery } from "../../integrations/hydrus-api/queries/access";
-import { Field, FieldError, FieldLabel } from "../ui-primitives/field";
-import { Input } from "../ui-primitives/input";
-import { Alert, AlertDescription, AlertTitle } from "../ui-primitives/alert";
-import { Spinner } from "../ui-primitives/spinner";
 import { SETTINGS_ENDPOINT_FIELD_NAME } from "./constants";
+import {
+  Field,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui-primitives/field";
+import { Input } from "@/components/ui-primitives/input";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui-primitives/alert";
+import { Spinner } from "@/components/ui-primitives/spinner";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Card,

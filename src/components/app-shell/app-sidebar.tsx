@@ -11,9 +11,9 @@ import {
 } from "@heroicons/react/16/solid";
 import { DiceIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Heading } from "../ui-primitives/heading";
-import { TouchTarget } from "../ui-primitives/touch-target";
 import { SidebarThemeSwitcher } from "./theme-switcher";
+import { Heading } from "@/components/ui-primitives/heading";
+import { TouchTarget } from "@/components/ui-primitives/touch-target";
 import {
   Sidebar,
   SidebarContent,

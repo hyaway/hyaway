@@ -6,7 +6,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarHeader,
-} from "../ui-primitives/sidebar";
+} from "@/components/ui-primitives/sidebar";
 import { RightSidebarPortal } from "@/components/app-shell/right-sidebar-portal";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Skeleton } from "@/components/ui-primitives/skeleton";

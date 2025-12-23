@@ -6,6 +6,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import {
   Sidebar,
   SidebarContent,
@@ -13,9 +14,8 @@ import {
   SidebarGroup,
   SidebarHeader,
   SidebarInput,
-} from "../ui-primitives/sidebar";
-import { ScrollArea } from "../ui-primitives/scroll-area";
-import type { FileMetadata } from "@/integrations/hydrus-api/models";
+} from "@/components/ui-primitives/sidebar";
+import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";

@@ -7,9 +7,13 @@ import {
   useApiVersionQuery,
   useRequestNewPermissionsMutation,
 } from "../../integrations/hydrus-api/queries/access";
-import { Alert, AlertDescription, AlertTitle } from "../ui-primitives/alert";
-import { Spinner } from "../ui-primitives/spinner";
 import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui-primitives/alert";
+import { Spinner } from "@/components/ui-primitives/spinner";
 import { Button } from "@/components/ui-primitives/button";
 import {
   useApiEndpoint,

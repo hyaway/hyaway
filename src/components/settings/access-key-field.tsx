@@ -12,11 +12,19 @@ import {
   useApiVersionQuery,
   useVerifyAccessQuery,
 } from "../../integrations/hydrus-api/queries/access";
-import { SecretInput } from "../ui-primitives/input";
-import { Field, FieldError, FieldLabel } from "../ui-primitives/field";
-import { Alert, AlertDescription, AlertTitle } from "../ui-primitives/alert";
-import { Spinner } from "../ui-primitives/spinner";
 import { SETTINGS_ACCESS_KEY_FIELD_NAME } from "./constants";
+import { SecretInput } from "@/components/ui-primitives/input";
+import {
+  Field,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui-primitives/field";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui-primitives/alert";
+import { Spinner } from "@/components/ui-primitives/spinner";
 import { Button } from "@/components/ui-primitives/button";
 import {
   useApiAccessKey,
