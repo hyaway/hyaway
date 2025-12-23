@@ -172,7 +172,6 @@ export const TagsSidebar = memo(function TagsSidebar({
             placeholder="Filter tags..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 text-sm"
           />
         </SidebarHeader>
         <SidebarContent>

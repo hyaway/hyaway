@@ -46,7 +46,7 @@ function TagBadgeCount({
     <Badge
       variant="outline"
       size="xs"
-      className={cn("ms-1 -me-1 shrink-0 select-all", className)}
+      className={cn("ms-1 -me-0.5 shrink-0 px-1.5 select-all", className)}
       {...props}
     >
       {children}
