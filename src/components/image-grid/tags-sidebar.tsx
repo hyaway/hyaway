@@ -1,5 +1,11 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, { forwardRef, memo, useDeferredValue, useMemo } from "react";
+import React, {
+  forwardRef,
+  memo,
+  useDeferredValue,
+  useMemo,
+  useState,
+} from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +21,7 @@ import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { RightSidebarPortal } from "@/components/right-sidebar-portal";
 import { TagBadge } from "@/components/tag-badge";
+import { Input } from "@/components/ui-primitives/input";
 import { compareTags, parseTag } from "@/lib/tag-utils";
 
 interface TagItem {
@@ -69,9 +76,11 @@ export const TagsSidebar = memo(function TagsSidebar({
   items: Array<FileMetadata>;
 }) {
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
+  const [search, setSearch] = useState("");
 
   // Defer heavy computation so UI stays responsive
   const deferredItems = useDeferredValue(items);
+  const deferredSearch = useDeferredValue(search);
 
   const tags = useMemo((): Array<TagItem> => {
     if (!allTagsServiceId || deferredItems.length === 0) return [];
@@ -120,12 +129,23 @@ export const TagsSidebar = memo(function TagsSidebar({
     return result;
   }, [deferredItems, allTagsServiceId]);
 
+  // Filter tags based on search
+  const filteredTags = useMemo(() => {
+    if (!deferredSearch.trim()) return tags;
+    const searchLower = deferredSearch.toLowerCase();
+    return tags.filter(
+      (item) =>
+        item.tag.toLowerCase().includes(searchLower) ||
+        item.namespace.toLowerCase().includes(searchLower),
+    );
+  }, [tags, deferredSearch]);
+
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
-    count: tags.length,
+    count: filteredTags.length,
     estimateSize: (i) => {
-      const tag = tags[i];
+      const tag = filteredTags[i];
       const length = tag.namespace.length + tag.tag.length;
       return length > 14 ? 40 : 24;
     },
@@ -145,14 +165,21 @@ export const TagsSidebar = memo(function TagsSidebar({
       <Sidebar
         side="right"
         collapsible="none"
-        className="sticky top-0 h-svh border-l"
+        className="sticky top-0 h-svh border-l p-1"
       >
-        <SidebarHeader>
+        <SidebarHeader className="gap-4">
           <Heading level={3} className="text-lg font-semibold">
             Tags
           </Heading>
+          <Input
+            type="search"
+            placeholder="Filter tags..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-8 text-sm"
+          />
         </SidebarHeader>
-        <SidebarContent className="p-1">
+        <SidebarContent>
           <ScrollArea className="h-full pe-2" ref={parentRef}>
             <SidebarGroup>
               <ol
@@ -165,7 +192,7 @@ export const TagsSidebar = memo(function TagsSidebar({
                   <TagRow
                     key={virtualRow.index}
                     ref={rowVirtualizer.measureElement}
-                    tagItem={tags[virtualRow.index]}
+                    tagItem={filteredTags[virtualRow.index]}
                     index={virtualRow.index}
                     showCount={deferredItems.length > 1}
                     style={{
@@ -179,9 +206,11 @@ export const TagsSidebar = memo(function TagsSidebar({
         </SidebarContent>
         <SidebarFooter>
           <span className="text-muted-foreground text-sm">
-            {deferredItems.length === 1
-              ? `${tags.length} tags`
-              : `${tags.length} unique tags for ${deferredItems.length} loaded files`}
+            {deferredSearch.trim()
+              ? `${filteredTags.length} of ${tags.length} tags`
+              : deferredItems.length === 1
+                ? `${tags.length} tags`
+                : `${tags.length} unique tags for ${deferredItems.length} loaded files`}
           </span>
         </SidebarFooter>
       </Sidebar>
