@@ -1,6 +1,6 @@
 import type { badgeVariants } from "@/components/ui-primitives/badge";
 import type { VariantProps } from "class-variance-authority";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { Badge } from "@/components/ui-primitives/badge";
 import { parseTag } from "@/lib/tag-utils";
@@ -15,20 +15,46 @@ type BadgeProps = ComponentProps<typeof Badge> &
 export function TagBadge({
   tag,
   namespace,
-  className,
   variant = "outline",
+  children,
   ...props
 }: {
   tag: string;
   namespace?: string;
+  children?: ReactNode;
 } & BadgeProps) {
   return (
-    <Badge variant={variant} className={cn("select-all", className)} {...props}>
-      {namespace ? `${namespace}: ` : ""}
-      {tag}
+    <Badge variant={variant} {...props}>
+      <span className="select-all">
+        {namespace ? `${namespace}: ` : ""}
+        {tag}
+      </span>
+      {children}
     </Badge>
   );
 }
+
+/**
+ * A count component to display inside TagBadge.
+ */
+function TagBadgeCount({
+  children,
+  className,
+  ...props
+}: ComponentProps<typeof Badge>) {
+  return (
+    <Badge
+      variant="outline"
+      size="xs"
+      className={cn("ms-1 -me-1 shrink-0 select-all", className)}
+      {...props}
+    >
+      {children}
+    </Badge>
+  );
+}
+
+TagBadge.Count = TagBadgeCount;
 
 /**
  * A badge component for displaying a raw tag string (will be parsed).

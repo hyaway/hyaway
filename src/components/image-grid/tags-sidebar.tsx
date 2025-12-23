@@ -12,16 +12,15 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarHeader,
+  SidebarInput,
 } from "../ui-primitives/sidebar";
 import { ScrollArea } from "../ui-primitives/scroll-area";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import { Badge } from "@/components/ui-primitives/badge";
 import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { RightSidebarPortal } from "@/components/right-sidebar-portal";
 import { TagBadge } from "@/components/tag-badge";
-import { Input } from "@/components/ui-primitives/input";
 import { compareTags, parseTag } from "@/lib/tag-utils";
 
 interface TagItem {
@@ -58,13 +57,10 @@ const TagRow = memo(
           tag={tagItem.tag}
           namespace={tagItem.namespace}
           size="xs"
-          className="h-auto min-h-6 shrink items-center justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
-        />
-        {showCount && (
-          <Badge variant="outline" className="shrink-0 select-all" size="xs">
-            {tagItem.count}
-          </Badge>
-        )}
+          className="h-auto min-h-8 shrink items-center justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
+        >
+          {showCount && <TagBadge.Count>{tagItem.count}</TagBadge.Count>}
+        </TagBadge>
       </li>
     );
   }),
@@ -171,7 +167,7 @@ export const TagsSidebar = memo(function TagsSidebar({
           <Heading level={3} className="text-lg font-semibold">
             Tags
           </Heading>
-          <Input
+          <SidebarInput
             type="search"
             placeholder="Filter tags..."
             value={search}
