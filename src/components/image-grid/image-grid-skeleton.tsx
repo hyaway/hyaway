@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { TagsSidebarSkeleton } from "./tags-sidebar-skeleton";
+import { TagsSidebarSkeleton } from "@/components/tag/tags-sidebar-skeleton";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 
 /**

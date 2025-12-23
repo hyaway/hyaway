@@ -3,7 +3,7 @@ import React, { useDeferredValue, useEffect, useMemo } from "react";
 import { AxiosError } from "axios";
 import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
 import { ImageGridCard } from "./image-grid-card";
-import { TagsSidebar } from "./tags-sidebar";
+import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import {

@@ -20,7 +20,7 @@ import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { RightSidebarPortal } from "@/components/app-shell/right-sidebar-portal";
-import { TagBadge } from "@/components/tag-badge";
+import { TagBadge } from "@/components/tag/tag-badge";
 import { compareTags, parseTag } from "@/lib/tag-utils";
 
 interface TagItem {

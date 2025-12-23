@@ -33,7 +33,7 @@ import {
 } from "@/hooks/use-url-with-api-key";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagStatus } from "@/integrations/hydrus-api/models";
-import { TagBadgeFromString } from "@/components/tag-badge";
+import { TagBadgeFromString } from "@/components/tag/tag-badge";
 import { compareTagStrings } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 
