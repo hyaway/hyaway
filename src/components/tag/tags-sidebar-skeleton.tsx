@@ -40,19 +40,21 @@ export function TagsSidebarSkeleton({ tagCount = 20 }: { tagCount?: number }) {
         </SidebarHeader>
         <SidebarContent className="p-1 pe-3">
           <SidebarGroup className="gap-2">
+            <Skeleton className="mb-2 h-8 w-full" />
             {widths.map((width, i) => (
               <div key={i} className="flex items-center gap-1">
-                <Skeleton className="h-6 w-5 shrink-0" />
+                <Skeleton className="h-8 w-8 shrink-0" />
                 <Skeleton
-                  className="h-6 rounded-4xl"
+                  className="h-8 rounded-4xl"
                   style={{ width: `${width}%` }}
                 />
-                <Skeleton className="h-6 w-8 shrink-0" />
               </div>
             ))}
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter></SidebarFooter>
+        <SidebarFooter>
+          <Skeleton className="h-16 w-full" />
+        </SidebarFooter>
       </Sidebar>
     </RightSidebarPortal>
   );
