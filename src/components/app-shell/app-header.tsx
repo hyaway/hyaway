@@ -8,10 +8,10 @@ import {
 import { Fragment, useEffect, useRef, useState } from "react";
 
 import { ArrowLeftIcon } from "@heroicons/react/16/solid";
-import { TouchTarget } from "./ui-primitives/touch-target";
-import { Button } from "./ui-primitives/button";
+import { TouchTarget } from "../ui-primitives/touch-target";
+import { Button } from "../ui-primitives/button";
 import type { MyRouterContext } from "@/routes/__root";
-import { HeaderPortalSlot } from "@/components/header-portal";
+import { HeaderPortalSlot } from "@/components/app-shell/header-portal";
 import {
   Breadcrumb,
   BreadcrumbItem,

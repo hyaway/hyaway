@@ -19,7 +19,7 @@ import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
-import { RightSidebarPortal } from "@/components/right-sidebar-portal";
+import { RightSidebarPortal } from "@/components/app-shell/right-sidebar-portal";
 import { TagBadge } from "@/components/tag-badge";
 import { compareTags, parseTag } from "@/lib/tag-utils";
 

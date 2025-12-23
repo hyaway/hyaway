@@ -5,18 +5,18 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 import type { QueryClient } from "@tanstack/react-query";
-import { AppHeader } from "@/components/app-header";
+import { AppHeader } from "@/components/app-shell/app-header";
 import { useApplyTheme, useSystemThemeListener } from "@/lib/theme-store";
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui-primitives/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/app-shell/app-sidebar";
 import {
   RightSidebarProvider,
   RightSidebarSlot,
-} from "@/components/right-sidebar-portal";
-import { HeaderPortalProvider } from "@/components/header-portal";
+} from "@/components/app-shell/right-sidebar-portal";
+import { HeaderPortalProvider } from "@/components/app-shell/header-portal";
 
 export interface MyRouterContext {
   queryClient: QueryClient;

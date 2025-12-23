@@ -3,7 +3,7 @@ import {
   MoonIcon,
   SunIcon,
 } from "@heroicons/react/20/solid";
-import { TouchTarget } from "./ui-primitives/touch-target";
+import { TouchTarget } from "../ui-primitives/touch-target";
 import type { Theme } from "@/lib/theme-store";
 import type { ComponentProps } from "react";
 import { Button } from "@/components/ui-primitives/button";
