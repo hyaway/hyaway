@@ -9,14 +9,15 @@ import {
 } from "@/components/ui-primitives/alert";
 import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
-import { Spinner } from "@/components/ui-primitives/spinner";
 import {
   useFocusPageMutation,
   useGetPageInfoQuery,
   useRefreshPageMutation,
 } from "@/integrations/hydrus-api/queries/manage-pages";
 import { ImageGrid } from "@/components/image-grid/image-grid";
+import { ImageGridSkeleton } from "@/components/image-grid/image-grid-skeleton";
 import { Separator } from "@/components/ui-primitives/separator";
+import { Skeleton } from "@/components/ui-primitives/skeleton";
 
 export const Route = createFileRoute("/_auth/pages/$pageId")({
   component: RouteComponent,
@@ -33,24 +34,40 @@ function RouteComponent() {
   const queryClient = useQueryClient();
 
   if (isLoading) {
-    return <Spinner />;
+    return (
+      <div>
+        <Heading level={1}>Page: {pageId.slice(0, 8)}...</Heading>
+        <Separator className="my-2" />
+        <div className="flex gap-2">
+          <Skeleton className="h-9 w-20 rounded-4xl" />
+          <Skeleton className="h-9 w-32 rounded-4xl" />
+          <Skeleton className="h-9 w-16 rounded-4xl" />
+        </div>
+        <Separator className="my-2" />
+        <ImageGridSkeleton />
+      </div>
+    );
   }
 
   if (isError) {
     return (
-      <Alert variant="destructive">
-        <ExclamationCircleIcon />
-        <AlertTitle>
-          {error instanceof Error
-            ? error.message
-            : "An unknown error occurred while fetching pages."}
-        </AlertTitle>
-        <AlertDescription>
-          {error instanceof AxiosError && error.response?.data?.error ? (
-            <span>{error.response.data.error}</span>
-          ) : null}
-        </AlertDescription>
-      </Alert>
+      <div>
+        <Heading level={1}>Page: {pageId.slice(0, 8)}...</Heading>
+        <Separator className="my-2" />
+        <Alert variant="destructive">
+          <ExclamationCircleIcon />
+          <AlertTitle>
+            {error instanceof Error
+              ? error.message
+              : "An unknown error occurred while fetching pages."}
+          </AlertTitle>
+          <AlertDescription>
+            {error instanceof AxiosError && error.response?.data?.error ? (
+              <span>{error.response.data.error}</span>
+            ) : null}
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
