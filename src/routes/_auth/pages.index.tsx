@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Separator } from "@base-ui/react/separator";
 import { PageCard, PageCardSkeleton } from "@/components/page-card";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { Heading } from "@/components/ui-primitives/heading";
+import { Separator } from "@/components/ui-primitives/separator";
 
 export const Route = createFileRoute("/_auth/pages/")({
   component: PagesIndex,
@@ -17,6 +17,7 @@ function PagesIndex() {
   return (
     <div className="@container">
       <Heading level={1}>Pages</Heading>
+
       <Separator className="my-2" />
 
       {isPending ? (
@@ -24,7 +25,7 @@ function PagesIndex() {
           className="grid gap-4 @xs:grid-cols-2 @lg:grid-cols-3 @2xl:grid-cols-[repeat(auto-fill,12rem)]"
           aria-label="Loading pages"
         >
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 3 }).map((_, i) => (
             <PageCardSkeleton key={`page-skeleton-${i}`} />
           ))}
         </div>

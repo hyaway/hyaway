@@ -111,9 +111,6 @@ export function PageCard({ pageKey, pageName, className }: PageCardProps) {
 export function PageCardSkeleton({ className }: { className?: string }) {
   return (
     <Card className={cn("h-full", className)}>
-      <CardHeader>
-        <Skeleton className="h-5 w-3/4" />
-      </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -121,6 +118,9 @@ export function PageCardSkeleton({ className }: { className?: string }) {
           ))}
         </div>
       </CardContent>
+      <CardFooter>
+        <Skeleton className="h-5 w-3/4" />
+      </CardFooter>
     </Card>
   );
 }
