@@ -377,28 +377,59 @@ function FileDetailSkeleton({ fileId }: { fileId: number }) {
 
         <FilePageHeader fileId={fileId} />
         <Separator className="my-2" />
+
+        {/* Badges skeleton */}
         <div className="flex flex-wrap items-center gap-2">
-          <Skeleton className="h-5 w-16 rounded-full" />
-          <Skeleton className="h-5 w-24 rounded-full" />
+          <Skeleton className="h-6 w-16 rounded-4xl" />
+          <Skeleton className="h-6 w-24 rounded-4xl" />
+        </div>
+        <Separator className="my-2" />
+
+        {/* Action buttons skeleton */}
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-8 w-28 rounded-4xl" />
+          <Skeleton className="h-8 w-36 rounded-4xl" />
         </div>
         <Separator className="my-2" />
 
         {/* Metadata skeleton */}
+        <div className="@container space-y-4">
+          <Heading level={2}>File metadata</Heading>
+          <div className="grid gap-4 @lg:grid-cols-2">
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <Skeleton className="h-6 w-24 shrink-0" />
+                  <Skeleton className="h-6 w-full" />
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <Skeleton className="h-6 w-24 shrink-0" />
+                  <Skeleton className="h-6 w-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <Separator className="my-2" />
+
+        {/* Tags skeleton */}
         <div className="space-y-4">
-          <Skeleton className="h-6 w-36" />
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <div key={i} className="contents">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-32" />
-              </div>
+          <Heading level={2}>Tags</Heading>
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                className="h-6 rounded-4xl"
+                style={{ width: `${60 + ((i * 17) % 60)}px` }}
+              />
             ))}
-          </dl>
+          </div>
         </div>
       </div>
-
-      {/* Tags sidebar skeleton space */}
-      <div className="hidden w-64 lg:block" />
     </div>
   );
 }
