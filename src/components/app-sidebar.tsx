@@ -19,6 +19,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
@@ -53,6 +54,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuLinkButton to="/pages" className="cursor-pointer">
@@ -62,17 +64,11 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuLinkButton
-                to="/random-inbox"
-                className="cursor-pointer"
-              >
-                <TouchTarget>
-                  <HugeiconsIcon icon={DiceIcon} className="size-4" />
-                  <span>Random inbox</span>
-                </TouchTarget>
-              </SidebarMenuLinkButton>
-            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Recent files</SidebarGroupLabel>
+          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuLinkButton
                 to="/recently-inboxed"
@@ -103,6 +99,22 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 <TouchTarget>
                   <TrashIcon />
                   <span>Recently deleted</span>
+                </TouchTarget>
+              </SidebarMenuLinkButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Other</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuLinkButton
+                to="/random-inbox"
+                className="cursor-pointer"
+              >
+                <TouchTarget>
+                  <HugeiconsIcon icon={DiceIcon} className="size-4" />
+                  <span>Random inbox</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
