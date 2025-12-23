@@ -440,17 +440,11 @@ function FileActionButtons({ fileId }: { fileId: number }) {
 
   return (
     <div className="flex flex-wrap gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        render={<a href={downloadUrl} download />}
-      >
+      <Button render={<a href={downloadUrl} download />}>
         <ArrowDownTrayIcon className="mr-1 size-4" />
         Download
       </Button>
       <Button
-        variant="outline"
-        size="sm"
         render={<a href={fileUrl} target="_blank" rel="noopener noreferrer" />}
       >
         <ArrowTopRightOnSquareIcon className="mr-1 size-4" />
