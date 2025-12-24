@@ -15,7 +15,7 @@ import { NoSymbolIcon as NoSymbolIconLarge } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
-import { PageError } from "@/components/page-error";
+import { PageError } from "@/components/page/page-error";
 import { Badge } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";

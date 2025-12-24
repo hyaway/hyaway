@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { PageError } from "@/components/page-error";
-import { PageHeading } from "@/components/page-heading";
-import { PageLoading } from "@/components/page-loading";
+import { PageError } from "@/components/page/page-error";
+import { PageHeading } from "@/components/page/page-heading";
+import { PageLoading } from "@/components/page/page-loading";
 import { Button } from "@/components/ui-primitives/button";
 import {
   useFocusPageMutation,

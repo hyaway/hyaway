@@ -1,10 +1,10 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useDeferredValue, useEffect, useMemo } from "react";
 import { ImageGridCard } from "./image-grid-card";
-import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { Spinner } from "@/components/ui-primitives/spinner";
-import { PageError } from "@/components/page-error";
+import { PageError } from "@/components/page/page-error";
 import { Badge } from "@/components/ui-primitives/badge";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/get-files";

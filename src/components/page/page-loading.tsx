@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { ImageGridSkeleton } from "@/components/image-grid/image-grid-skeleton";
-import { PageHeading } from "@/components/page-heading";
+import { PageHeading } from "@/components/page/page-heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 

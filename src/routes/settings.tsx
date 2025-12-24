@@ -9,7 +9,7 @@ import {
   NavigationMenuList,
   RouterNavigationMenuLink,
 } from "@/components/ui-primitives/navigation-menu";
-import { PageHeading } from "@/components/page-heading";
+import { PageHeading } from "@/components/page/page-heading";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsComponent,

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageCard, PageCardSkeleton } from "@/components/page-card";
-import { PageError } from "@/components/page-error";
-import { PageHeading } from "@/components/page-heading";
+import { PageError } from "@/components/page/page-error";
+import { PageHeading } from "@/components/page/page-heading";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 
 export const Route = createFileRoute("/_auth/pages/")({

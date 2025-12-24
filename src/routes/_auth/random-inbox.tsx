@@ -11,9 +11,9 @@ import {
   DiceFaces06Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PageError } from "@/components/page-error";
-import { PageHeading } from "@/components/page-heading";
-import { PageLoading } from "@/components/page-loading";
+import { PageError } from "@/components/page/page-error";
+import { PageHeading } from "@/components/page/page-heading";
+import { PageLoading } from "@/components/page/page-loading";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui-primitives/button";
