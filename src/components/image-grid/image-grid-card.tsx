@@ -94,7 +94,7 @@ export const ImageGridCard = memo(function ImageGridCard({
           {(item.is_inbox || item.is_trashed || item.is_deleted) && (
             <div
               className={cn(
-                "bg-secondary absolute top-1 right-1 flex flex-col gap-2 rounded p-1 opacity-60",
+                "bg-secondary text-secondary-foreground absolute top-1 right-1 flex flex-col gap-1 rounded p-1 opacity-60",
                 "pointer-events-none group-hover:top-0.5 group-hover:right-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
                 "transition-opacity duration-350 ease-out",
               )}
@@ -109,7 +109,7 @@ export const ImageGridCard = memo(function ImageGridCard({
           {(item.mime.startsWith("video/") || item.has_audio) && (
             <div
               className={cn(
-                "bg-secondary absolute top-1 left-1 flex flex-row gap-1 rounded p-1 opacity-60",
+                "bg-secondary text-secondary-foreground absolute top-1 left-1 flex flex-col gap-1 rounded p-1 opacity-60",
                 "pointer-events-none group-hover:top-0.5 group-hover:left-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
                 "transition-opacity duration-350 ease-out",
               )}
