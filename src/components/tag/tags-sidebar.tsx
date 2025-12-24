@@ -7,6 +7,8 @@ import React, {
   useState,
 } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import type { TagsSortMode } from "@/lib/ux-settings-store";
+import { useTagsSortMode, useUxSettingsActions } from "@/lib/ux-settings-store";
 import {
   Sidebar,
   SidebarContent,
@@ -27,8 +29,6 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 
-type SortMode = "count" | "namespace";
-
 interface TagItem {
   tag: string;
   count: number;
@@ -42,7 +42,8 @@ export const TagsSidebar = memo(function TagsSidebar({
 }) {
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
   const [search, setSearch] = useState("");
-  const [sortMode, setSortMode] = useState<SortMode>("count");
+  const sortMode = useTagsSortMode();
+  const { setTagsSortMode } = useUxSettingsActions();
 
   // Defer heavy computation so UI stays responsive
   const deferredItems = useDeferredValue(items);
@@ -163,8 +164,8 @@ export const TagsSidebar = memo(function TagsSidebar({
           <ToggleGroup
             value={[sortMode]}
             onValueChange={(value) => {
-              const newValue = value[0] as SortMode | undefined;
-              if (newValue) setSortMode(newValue);
+              const newValue = value[0] as TagsSortMode | undefined;
+              if (newValue) setTagsSortMode(newValue);
             }}
             variant="outline"
             size="sm"
