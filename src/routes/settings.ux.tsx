@@ -113,7 +113,7 @@ function ImageGalleryCard() {
                 const lanes = Array.isArray(value) ? value[0] : value;
                 setGridMaxLanes(lanes);
               }}
-              min={2}
+              min={3}
               max={MAX_GRID_LANES}
               step={1}
             />
@@ -161,7 +161,7 @@ function PagesCard() {
               const columns = Array.isArray(value) ? value[0] : value;
               setPagesMaxColumns(columns);
             }}
-            min={2}
+            min={3}
             max={MAX_PAGES_COLUMNS}
             step={1}
           />

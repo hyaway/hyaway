@@ -37,7 +37,9 @@ export function useResponsiveGrid(
       const newLanes = Math.min(calculatedLanes, maxLanes);
       const shouldExpand = expandImages || calculatedLanes < 3;
       const newWidth = shouldExpand
-        ? entry.contentRect.width / newLanes - 4
+        ? calculatedLanes > maxLanes
+          ? entry.contentRect.width / newLanes - 16
+          : entry.contentRect.width / newLanes - 4
         : defaultWidth;
 
       startTransition(() => {

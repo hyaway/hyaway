@@ -11,6 +11,7 @@ import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/g
 import { useResponsiveGrid } from "@/hooks/use-responsive-grid";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { cn } from "@/lib/utils";
+import { useGridExpandImages, useGridMaxLanes } from "@/lib/ux-settings-store";
 
 export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
   const itemsQuery = useInfiniteGetFilesMetadata(fileIds, false);
@@ -126,8 +127,13 @@ export function PureImageGrid({
     rowVirtualizer.measure();
   }, [deferredItems, width, lanes, rowVirtualizer]);
 
+  const maxLanes = useGridMaxLanes();
+  const expandImages = useGridExpandImages();
+
+  const maxWidth = !expandImages ? maxLanes * (width + 4) : undefined;
+
   return (
-    <div className="flex w-full flex-row">
+    <div className="flex w-full flex-row" style={{ maxWidth }}>
       <div ref={parentRef} className="@container w-full">
         <ul
           style={{
