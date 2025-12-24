@@ -22,6 +22,12 @@ import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/s
 import { RightSidebarPortal } from "@/components/app-shell/right-sidebar-portal";
 import { TagBadge } from "@/components/tag/tag-badge";
 import { compareTags, parseTag } from "@/lib/tag-utils";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui-primitives/toggle-group";
+
+type SortMode = "count" | "namespace";
 
 interface TagItem {
   tag: string;
@@ -75,10 +81,12 @@ export const TagsSidebar = memo(function TagsSidebar({
 }) {
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
   const [search, setSearch] = useState("");
+  const [sortMode, setSortMode] = useState<SortMode>("count");
 
   // Defer heavy computation so UI stays responsive
   const deferredItems = useDeferredValue(items);
   const deferredSearch = useDeferredValue(search);
+  const deferredSortMode = useDeferredValue(sortMode);
 
   const tags = useMemo((): Array<TagItem> => {
     if (!allTagsServiceId || deferredItems.length === 0) return [];
@@ -115,17 +123,33 @@ export const TagsSidebar = memo(function TagsSidebar({
       result[i] = { tag, count, namespace };
     }
 
-    // Sort in place
-    result.sort((a, b) => {
-      // Count comparison (descending)
-      if (b.count !== a.count) return b.count - a.count;
+    // Sort based on mode
+    if (deferredSortMode === "namespace") {
+      // Group by namespace first, then by count within each namespace
+      result.sort((a, b) => {
+        // Namespace comparison
+        const nsCompare = compareTags(a, b);
+        if (a.namespace !== b.namespace) return nsCompare;
 
-      // Then by namespace and tag
-      return compareTags(a, b);
-    });
+        // Within same namespace, sort by count descending
+        if (b.count !== a.count) return b.count - a.count;
+
+        // Then by tag name
+        return a.tag.localeCompare(b.tag);
+      });
+    } else {
+      // Sort by count (default)
+      result.sort((a, b) => {
+        // Count comparison (descending)
+        if (b.count !== a.count) return b.count - a.count;
+
+        // Then by namespace and tag
+        return compareTags(a, b);
+      });
+    }
 
     return result;
-  }, [deferredItems, allTagsServiceId]);
+  }, [deferredItems, allTagsServiceId, deferredSortMode]);
 
   // Filter tags based on search
   const filteredTags = useMemo(() => {
@@ -175,6 +199,23 @@ export const TagsSidebar = memo(function TagsSidebar({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <ToggleGroup
+            value={[sortMode]}
+            onValueChange={(value) => {
+              const newValue = value[0] as SortMode | undefined;
+              if (newValue) setSortMode(newValue);
+            }}
+            variant="outline"
+            size="sm"
+            className="w-full"
+          >
+            <ToggleGroupItem value="count" className="flex-1">
+              By count
+            </ToggleGroupItem>
+            <ToggleGroupItem value="namespace" className="flex-1">
+              By namespace
+            </ToggleGroupItem>
+          </ToggleGroup>
         </SidebarHeader>
         <SidebarContent>
           <ScrollArea className="h-full pe-2" ref={parentRef}>
