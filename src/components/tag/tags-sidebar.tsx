@@ -35,45 +35,6 @@ interface TagItem {
   namespace: string;
 }
 
-// Memoized row component to prevent re-renders
-const TagRow = memo(
-  forwardRef<
-    HTMLLIElement,
-    {
-      tagItem: TagItem;
-      index: number;
-      style: React.CSSProperties;
-      showCount: boolean;
-    }
-  >(function TagRow({ tagItem, index, style, showCount }, ref) {
-    return (
-      <li
-        ref={ref}
-        data-index={index}
-        style={style}
-        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-center justify-start font-mono text-xs"
-      >
-        <span
-          aria-hidden="true"
-          className="text-muted-foreground shrink-0 text-right tabular-nums"
-        >
-          {index + 1}.
-        </span>
-        <TagBadge
-          tag={tagItem.tag}
-          namespace={tagItem.namespace}
-          size="sm"
-          className="h-auto min-h-6 shrink items-center justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
-        >
-          {showCount && (
-            <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
-          )}
-        </TagBadge>
-      </li>
-    );
-  }),
-);
-
 export const TagsSidebar = memo(function TagsSidebar({
   items,
 }: {
@@ -255,3 +216,42 @@ export const TagsSidebar = memo(function TagsSidebar({
     </RightSidebarPortal>
   );
 });
+
+// Memoized row component to prevent re-renders
+const TagRow = memo(
+  forwardRef<
+    HTMLLIElement,
+    {
+      tagItem: TagItem;
+      index: number;
+      style: React.CSSProperties;
+      showCount: boolean;
+    }
+  >(function TagRow({ tagItem, index, style, showCount }, ref) {
+    return (
+      <li
+        ref={ref}
+        data-index={index}
+        style={style}
+        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-center justify-start font-mono text-xs"
+      >
+        <span
+          aria-hidden="true"
+          className="text-muted-foreground shrink-0 text-right tabular-nums"
+        >
+          {index + 1}.
+        </span>
+        <TagBadge
+          tag={tagItem.tag}
+          namespace={tagItem.namespace}
+          size="sm"
+          className="h-auto min-h-6 shrink items-center justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
+        >
+          {showCount && (
+            <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
+          )}
+        </TagBadge>
+      </li>
+    );
+  }),
+);
