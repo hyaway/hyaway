@@ -34,7 +34,9 @@ function RouteComponent() {
 
   return (
     <div>
-      <PageHeading title="Recently archived" />
+      <PageHeading
+        title={`Recently archived (${data?.file_ids?.length ?? 0} files)`}
+      />
       <Button
         onClick={() =>
           queryClient.invalidateQueries({
@@ -47,12 +49,9 @@ function RouteComponent() {
       <Separator className="my-2" />
 
       {data?.file_ids && data.file_ids.length > 0 ? (
-        <div>
-          <p>Number of files: {data.file_ids.length}</p>
-          <ImageGrid fileIds={data.file_ids} />
-        </div>
+        <ImageGrid fileIds={data.file_ids} />
       ) : (
-        <p>No recently deleted files found.</p>
+        <p>No recently archived files found.</p>
       )}
     </div>
   );

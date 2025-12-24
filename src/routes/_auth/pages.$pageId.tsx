@@ -46,7 +46,9 @@ function RouteComponent() {
 
   return (
     <div>
-      <PageHeading title={`Page: ${data?.page_info.name}`} />
+      <PageHeading
+        title={`Page: ${data?.page_info.name} (${data?.page_info.media.num_files ?? 0} files)`}
+      />
       <div className="flex gap-2">
         <Button
           onClick={() =>
@@ -65,10 +67,7 @@ function RouteComponent() {
       <Separator className="my-2" />
 
       {data?.page_info.media ? (
-        <div>
-          <p>Number of files: {data.page_info.media.num_files}</p>
-          <ImageGrid fileIds={data.page_info.media.hash_ids} />
-        </div>
+        <ImageGrid fileIds={data.page_info.media.hash_ids} />
       ) : (
         <p>This page has no media.</p>
       )}

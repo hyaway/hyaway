@@ -14,9 +14,11 @@ export const Route = createFileRoute("/_auth/pages/")({
 function PagesIndex() {
   const { data: pages, isPending, isError, error } = useGetMediaPagesQuery();
 
+  const title = isPending ? "Pages" : `Pages (${pages.length} pages)`;
+
   return (
     <div className="@container">
-      <PageHeading title="Pages" />
+      <PageHeading title={title} />
 
       {isPending ? (
         <div
