@@ -131,6 +131,8 @@ export function AppHeader() {
   const router = useRouter();
   const canGoBack = useCanGoBack();
   const matchRoute = useMatchRoute();
+  const isFilePage = matchRoute({ to: "/file/$fileId" }) && canGoBack;
+
   return (
     <header
       className={cn(
@@ -154,7 +156,7 @@ export function AppHeader() {
                 <TouchTarget>hyAway</TouchTarget>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            {matchRoute({ to: "/file/$fileId" }) && canGoBack && (
+            {isFilePage && (
               <>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
@@ -168,7 +170,9 @@ export function AppHeader() {
               </>
             )}
             {breadcrumbs.length > 0 && (
-              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbSeparator
+                className={cn({ "hidden md:block": !isFilePage })}
+              />
             )}
             {breadcrumbs.map((crumb, index) => {
               const isLast = index === breadcrumbs.length - 1;
