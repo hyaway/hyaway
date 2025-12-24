@@ -266,6 +266,9 @@ export const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
   old_options: z
     .object({
       thumbnail_dimensions: z.array(z.number()).min(2).max(2).optional(),
+      namespace_colours: z
+        .record(z.string(), z.array(z.number()).min(3).max(3))
+        .optional(),
     })
     .optional(),
 });

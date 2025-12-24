@@ -1,30 +1,47 @@
 import type { badgeVariants } from "@/components/ui-primitives/badge";
 import type { VariantProps } from "class-variance-authority";
-import type { ComponentProps, ReactNode } from "react";
+import type { CSSProperties, ComponentProps, ReactNode } from "react";
 
 import { Badge } from "@/components/ui-primitives/badge";
 import { parseTag } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
+import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
 
 type BadgeProps = ComponentProps<typeof Badge> &
   VariantProps<typeof badgeVariants>;
 
 /**
  * A badge component for displaying a tag with optional namespace.
+ * Automatically applies color from Hydrus client options based on namespace.
  */
 export function TagBadge({
   tag,
   namespace,
   variant = "outline",
   children,
+  className,
+  style,
   ...props
 }: {
   tag: string;
   namespace?: string;
   children?: ReactNode;
 } & BadgeProps) {
+  const namespaceColors = useNamespaceColors();
+  // Use empty string key for un-namespaced tags
+  const color = namespaceColors[namespace ?? ""];
+
+  const combinedStyle: CSSProperties | undefined = color
+    ? { "--tag-color": color, ...style }
+    : style;
+
   return (
-    <Badge variant={variant} {...props}>
+    <Badge
+      variant={variant}
+      className={cn(color && "text-(--tag-color)", className)}
+      style={combinedStyle}
+      {...props}
+    >
       <span className="select-all">
         {namespace ? `${namespace}: ` : ""}
         {tag}
