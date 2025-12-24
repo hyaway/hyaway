@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AxiosError } from "axios";
 import {
   ArrowDownTrayIcon,
   ArrowTopRightOnSquareIcon,
@@ -15,11 +14,8 @@ import {
 import { NoSymbolIcon as NoSymbolIconLarge } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui-primitives/alert";
+import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
+import { PageError } from "@/components/page-error";
 import { Badge } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
@@ -57,19 +53,10 @@ function RouteComponent() {
     return (
       <>
         <FilePageHeader fileId={fileIdNum} />
-        <Alert variant="destructive">
-          <ExclamationCircleIcon />
-          <AlertTitle>
-            {error instanceof Error
-              ? error.message
-              : "An unknown error occurred while fetching file."}
-          </AlertTitle>
-          <AlertDescription>
-            {error instanceof AxiosError && error.response?.data?.error ? (
-              <span>{error.response.data.error}</span>
-            ) : null}
-          </AlertDescription>
-        </Alert>
+        <PageError
+          error={error}
+          fallbackMessage="An unknown error occurred while fetching file."
+        />
       </>
     );
   }

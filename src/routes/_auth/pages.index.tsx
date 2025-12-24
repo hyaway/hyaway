@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageCard, PageCardSkeleton } from "@/components/page-card";
+import { PageError } from "@/components/page-error";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/_auth/pages/")({
  * Pages index component - shows grid of page cards
  */
 function PagesIndex() {
-  const { data: pages, isPending, isError } = useGetMediaPagesQuery();
+  const { data: pages, isPending, isError, error } = useGetMediaPagesQuery();
 
   return (
     <div className="@container">
@@ -30,9 +31,7 @@ function PagesIndex() {
           ))}
         </div>
       ) : isError ? (
-        <div className="text-muted-foreground py-12 text-center">
-          Failed to load pages
-        </div>
+        <PageError error={error} fallbackMessage="Failed to load pages" />
       ) : pages.length === 0 ? (
         <div className="text-muted-foreground py-12 text-center">
           No media pages found. Open some file search pages in Hydrus Client.

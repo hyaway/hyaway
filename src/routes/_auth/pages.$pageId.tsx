@@ -1,12 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
-import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui-primitives/alert";
+import { PageError } from "@/components/page-error";
 import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
 import {
@@ -54,19 +48,10 @@ function RouteComponent() {
       <div>
         <Heading level={1}>Page: {pageId.slice(0, 8)}...</Heading>
         <Separator className="my-2" />
-        <Alert variant="destructive">
-          <ExclamationCircleIcon />
-          <AlertTitle>
-            {error instanceof Error
-              ? error.message
-              : "An unknown error occurred while fetching pages."}
-          </AlertTitle>
-          <AlertDescription>
-            {error instanceof AxiosError && error.response?.data?.error ? (
-              <span>{error.response.data.error}</span>
-            ) : null}
-          </AlertDescription>
-        </Alert>
+        <PageError
+          error={error}
+          fallbackMessage="An unknown error occurred while fetching pages."
+        />
       </div>
     );
   }

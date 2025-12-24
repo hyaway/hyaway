@@ -1,12 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
-import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui-primitives/alert";
+import { PageError } from "@/components/page-error";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import { useRecentlyArchivedFilesQuery } from "@/integrations/hydrus-api/queries/search";
@@ -31,19 +25,10 @@ function RouteComponent() {
 
   if (isError) {
     return (
-      <Alert variant="destructive">
-        <ExclamationCircleIcon />
-        <AlertTitle>
-          {error instanceof Error
-            ? error.message
-            : "An unknown error occurred while fetching recently archived files."}
-        </AlertTitle>
-        <AlertDescription>
-          {error instanceof AxiosError && error.response?.data?.error ? (
-            <span>{error.response.data.error}</span>
-          ) : null}
-        </AlertDescription>
-      </Alert>
+      <PageError
+        error={error}
+        fallbackMessage="An unknown error occurred while fetching recently archived files."
+      />
     );
   }
 

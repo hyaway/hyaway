@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
 import {
   DiceFaces01Icon,
   DiceFaces02Icon,
@@ -13,11 +11,7 @@ import {
   DiceFaces06Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui-primitives/alert";
+import { PageError } from "@/components/page-error";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
@@ -110,19 +104,10 @@ function RouteComponent() {
         <Separator className="my-2" />
         {shuffleButton}
         <Separator className="my-2" />
-        <Alert variant="destructive">
-          <ExclamationCircleIcon />
-          <AlertTitle>
-            {error instanceof Error
-              ? error.message
-              : "An unknown error occurred while fetching random inbox files."}
-          </AlertTitle>
-          <AlertDescription>
-            {error instanceof AxiosError && error.response?.data?.error ? (
-              <span>{error.response.data.error}</span>
-            ) : null}
-          </AlertDescription>
-        </Alert>
+        <PageError
+          error={error}
+          fallbackMessage="An unknown error occurred while fetching random inbox files."
+        />
       </div>
     );
   }

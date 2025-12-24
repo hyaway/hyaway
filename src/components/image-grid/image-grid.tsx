@@ -1,16 +1,10 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useDeferredValue, useEffect, useMemo } from "react";
-import { AxiosError } from "axios";
-import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
 import { ImageGridCard } from "./image-grid-card";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { Spinner } from "@/components/ui-primitives/spinner";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui-primitives/alert";
+import { PageError } from "@/components/page-error";
 import { Badge } from "@/components/ui-primitives/badge";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/get-files";
@@ -32,20 +26,10 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
 
   if (itemsQuery.isError) {
     return (
-      <Alert variant="destructive">
-        <ExclamationCircleIcon />
-        <AlertTitle>
-          {itemsQuery.error instanceof Error
-            ? itemsQuery.error.message
-            : "An unknown error occurred while fetching gallery"}
-        </AlertTitle>
-        <AlertDescription>
-          {itemsQuery.error instanceof AxiosError &&
-          itemsQuery.error.response?.data?.error ? (
-            <span>{itemsQuery.error.response.data.error}</span>
-          ) : null}
-        </AlertDescription>
-      </Alert>
+      <PageError
+        error={itemsQuery.error}
+        fallbackMessage="An unknown error occurred while fetching gallery"
+      />
     );
   }
 
