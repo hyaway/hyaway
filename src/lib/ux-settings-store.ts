@@ -3,9 +3,9 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 export const MAX_GRID_LANES = 30;
 export const MAX_PAGES_COLUMNS = 30;
-export const MAX_RECENT_FILES_LIMIT = 2000;
+export const MAX_RECENT_FILES_LIMIT = 10000;
 export const MAX_RECENT_FILES_DAYS = 30;
-export const MAX_RANDOM_INBOX_LIMIT = 500;
+export const MAX_RANDOM_INBOX_LIMIT = 10000;
 
 export type TagsSortMode = "count" | "namespace";
 

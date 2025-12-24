@@ -47,9 +47,9 @@ export function RandomInboxSettingsPopover() {
             id="random-inbox-limit-popover-slider"
             label="Limit returned files to"
             value={randomInboxLimit}
-            min={10}
+            min={100}
             max={MAX_RANDOM_INBOX_LIMIT}
-            step={10}
+            step={100}
             onValueChange={setRandomInboxLimit}
             commitOnRelease
           />
