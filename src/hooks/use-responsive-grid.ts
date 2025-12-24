@@ -23,11 +23,6 @@ export function useResponsiveGrid(
     desiredLanes: 0,
   });
 
-  const { width, desiredLanes } = gridState;
-  const clampedLanes = Math.min(desiredLanes, maxLanes);
-  const lanes =
-    itemCount < clampedLanes ? Math.max(itemCount, 2) : clampedLanes;
-
   useLayoutEffect(() => {
     if (!containerRef.current) {
       return;
@@ -54,6 +49,11 @@ export function useResponsiveGrid(
 
     return () => observer.disconnect();
   }, [defaultWidth, containerRef, maxLanes, expandImages]);
+
+  const { width, desiredLanes } = gridState;
+  const clampedLanes = Math.min(desiredLanes, maxLanes);
+  const lanes =
+    itemCount < clampedLanes ? Math.max(itemCount, 2) : clampedLanes;
 
   return { width, lanes };
 }
