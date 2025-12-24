@@ -12,6 +12,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PageError } from "@/components/page/page-error";
+import { EmptyState } from "@/components/page/empty-state";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
@@ -99,13 +100,15 @@ function RouteComponent() {
 
   return (
     <div>
-      <PageHeading title={`Random inbox (${data?.file_ids?.length ?? 0} files)`} />
+      <PageHeading
+        title={`Random inbox (${data?.file_ids?.length ?? 0} files)`}
+      />
       {shuffleButton}
       <Separator className="my-2" />
       {data?.file_ids && data.file_ids.length > 0 ? (
         <ImageGrid fileIds={data.file_ids} />
       ) : (
-        <p>No inbox files found.</p>
+        <EmptyState message="No inbox files found." />
       )}
     </div>
   );

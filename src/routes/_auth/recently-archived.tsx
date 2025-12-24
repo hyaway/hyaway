@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { EmptyState } from "@/components/page/empty-state";
 import { PageError } from "@/components/page/page-error";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
@@ -51,7 +52,7 @@ function RouteComponent() {
       {data?.file_ids && data.file_ids.length > 0 ? (
         <ImageGrid fileIds={data.file_ids} />
       ) : (
-        <p>No recently archived files found.</p>
+        <EmptyState message="No recently archived files found." />
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageCard, PageCardSkeleton } from "@/components/page-card";
+import { EmptyState } from "@/components/page/empty-state";
 import { PageError } from "@/components/page/page-error";
 import { PageHeading } from "@/components/page/page-heading";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
@@ -32,9 +33,7 @@ function PagesIndex() {
       ) : isError ? (
         <PageError error={error} fallbackMessage="Failed to load pages" />
       ) : pages.length === 0 ? (
-        <div className="text-muted-foreground py-12 text-center">
-          No media pages found. Open some file search pages in Hydrus Client.
-        </div>
+        <EmptyState message="No media pages found. Open some file search pages in Hydrus Client." />
       ) : (
         <div className="grid gap-4 @xs:grid-cols-2 @lg:grid-cols-3 @2xl:grid-cols-[repeat(auto-fill,12rem)]">
           {pages.map((page) => (
