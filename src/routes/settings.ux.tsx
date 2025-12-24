@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Infinity01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { TagsSortMode } from "@/lib/ux-settings-store";
 import type { Theme } from "@/lib/theme-store";
 import { Heading } from "@/components/ui-primitives/heading";
@@ -14,7 +16,14 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { Label } from "@/components/ui-primitives/label";
-import { useTagsSortMode, useUxSettingsActions } from "@/lib/ux-settings-store";
+import { Slider } from "@/components/ui-primitives/slider";
+import { Switch } from "@/components/ui-primitives/switch";
+import {
+  useGridExpandImages,
+  useGridMaxLanes,
+  useTagsSortMode,
+  useUxSettingsActions,
+} from "@/lib/ux-settings-store";
 import { useThemeActions, useThemePreference } from "@/lib/theme-store";
 
 export const Route = createFileRoute("/settings/ux")({
@@ -31,6 +40,7 @@ function SettingsUXComponent() {
         UX Settings
       </Heading>
       <ThemeCard />
+      <ImageGalleryCard />
       <TagsSortCard />
     </div>
   );
@@ -66,6 +76,66 @@ function ThemeCard() {
             <ToggleGroupItem value="dark">Dark</ToggleGroupItem>
             <ToggleGroupItem value="system">System</ToggleGroupItem>
           </ToggleGroup>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+const MAX_LANES_SLIDER_VALUE = 20;
+
+function ImageGalleryCard() {
+  const gridMaxLanes = useGridMaxLanes();
+  const gridExpandImages = useGridExpandImages();
+  const { setGridMaxLanes, setGridExpandImages } = useUxSettingsActions();
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Image gallery</CardTitle>
+        <CardDescription>
+          Configure how images are displayed in the gallery grid.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="max-lanes-slider">Maximum lanes</Label>
+              <span className="text-muted-foreground text-base tabular-nums">
+                {gridMaxLanes >= MAX_LANES_SLIDER_VALUE ? (
+                  <HugeiconsIcon icon={Infinity01Icon} />
+                ) : (
+                  gridMaxLanes
+                )}
+              </span>
+            </div>
+            <Slider
+              id="max-lanes-slider"
+              value={[Math.min(gridMaxLanes, MAX_LANES_SLIDER_VALUE)]}
+              onValueChange={(value) => {
+                const lanes = Array.isArray(value) ? value[0] : value;
+                setGridMaxLanes(
+                  lanes === MAX_LANES_SLIDER_VALUE
+                    ? Number.MAX_SAFE_INTEGER
+                    : lanes,
+                );
+              }}
+              min={2}
+              max={MAX_LANES_SLIDER_VALUE}
+              step={1}
+            />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <Label htmlFor="expand-images-switch">
+              Expand images to fill space
+            </Label>
+            <Switch
+              id="expand-images-switch"
+              checked={gridExpandImages}
+              onCheckedChange={setGridExpandImages}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -1,4 +1,5 @@
 import { startTransition, useLayoutEffect, useState } from "react";
+import { useGridExpandImages, useGridMaxLanes } from "@/lib/ux-settings-store";
 
 interface GridState {
   width: number;
@@ -14,14 +15,18 @@ export function useResponsiveGrid(
   defaultWidth: number,
   itemCount: number,
 ): GridState {
+  const maxLanes = useGridMaxLanes();
+  const expandImages = useGridExpandImages();
+
   const [gridState, setGridState] = useState({
     width: defaultWidth,
     desiredLanes: 0,
   });
 
   const { width, desiredLanes } = gridState;
+  const clampedLanes = Math.min(desiredLanes, maxLanes);
   const lanes =
-    itemCount < desiredLanes ? Math.max(itemCount, 2) : desiredLanes;
+    itemCount < clampedLanes ? Math.max(itemCount, 2) : clampedLanes;
 
   useLayoutEffect(() => {
     if (!containerRef.current) {
@@ -30,22 +35,25 @@ export function useResponsiveGrid(
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
-      const newLanes = Math.max(
+      const calculatedLanes = Math.max(
         2,
         Math.floor(entry.contentRect.width / (defaultWidth + 4)),
       );
-      const newWidth =
-        newLanes < 3 ? entry.contentRect.width / newLanes - 4 : defaultWidth;
+      const newLanes = Math.min(calculatedLanes, maxLanes);
+      const shouldExpand = expandImages || calculatedLanes < 3;
+      const newWidth = shouldExpand
+        ? entry.contentRect.width / newLanes - 4
+        : defaultWidth;
 
       startTransition(() => {
-        setGridState({ width: newWidth, desiredLanes: newLanes });
+        setGridState({ width: newWidth, desiredLanes: calculatedLanes });
       });
     });
 
     observer.observe(containerRef.current);
 
     return () => observer.disconnect();
-  }, [defaultWidth, containerRef]);
+  }, [defaultWidth, containerRef, maxLanes, expandImages]);
 
   return { width, lanes };
 }
