@@ -68,6 +68,7 @@ export const useRecentlyDeletedFilesQuery = () => {
       tags,
       options,
       hydrusApi,
+      hydrusApi?.toJSON(),
     ],
     queryFn: async () => {
       if (!hydrusApi || !trashServiceKey) {
