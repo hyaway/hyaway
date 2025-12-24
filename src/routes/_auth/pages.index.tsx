@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { PageCard, PageCardSkeleton } from "@/components/page-card";
 import { EmptyState } from "@/components/page/empty-state";
 import { PageError } from "@/components/page/page-error";
 import { PageHeading } from "@/components/page/page-heading";
+import { RefetchButton } from "@/components/refetch-button";
 import { PagesSettingsPopover } from "@/components/settings/pages-settings-popover";
+import { Separator } from "@/components/ui-primitives/separator";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { usePagesMaxColumns } from "@/lib/ux-settings-store";
 import { cn } from "@/lib/utils";
@@ -16,7 +19,14 @@ export const Route = createFileRoute("/_auth/pages/")({
  * Pages index component - shows grid of page cards
  */
 function PagesIndex() {
-  const { data: pages, isPending, isError, error } = useGetMediaPagesQuery();
+  const {
+    data: pages,
+    isPending,
+    isFetching,
+    isError,
+    error,
+  } = useGetMediaPagesQuery();
+  const queryClient = useQueryClient();
   const pagesMaxColumns = usePagesMaxColumns();
 
   const title = isPending ? "Pages" : `Pages (${pages.length} pages)`;
@@ -38,9 +48,20 @@ function PagesIndex() {
   return (
     <div className="@container">
       <PageHeading title={title} />
-      <div className="mb-4 flex justify-end">
-        <PagesSettingsPopover />
+      <div className="flex items-center gap-2">
+        <RefetchButton
+          isFetching={isFetching}
+          onRefetch={() =>
+            queryClient.invalidateQueries({
+              queryKey: ["getPages"],
+            })
+          }
+        />
+        <div className="ml-auto">
+          <PagesSettingsPopover />
+        </div>
       </div>
+      <Separator className="my-2" />
 
       {isPending ? (
         <div
