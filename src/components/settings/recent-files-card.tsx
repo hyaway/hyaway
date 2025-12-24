@@ -35,7 +35,7 @@ export function RecentFilesCard() {
         <SettingsGroup>
           <SliderField
             id="recent-files-limit-slider"
-            label="Maximum files"
+            label="Limit returned files to"
             value={recentFilesLimit}
             min={100}
             max={MAX_RECENT_FILES_LIMIT}

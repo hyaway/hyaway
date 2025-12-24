@@ -15,6 +15,7 @@ import { PageError } from "@/components/page/page-error";
 import { EmptyState } from "@/components/page/empty-state";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
+import { RandomInboxSettingsPopover } from "@/components/settings/random-inbox-settings-popover";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui-primitives/button";
@@ -78,7 +79,12 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <PageLoading title="Random inbox">
-        {shuffleButton}
+        <div className="flex items-center gap-2">
+          {shuffleButton}
+          <div className="ml-auto">
+            <RandomInboxSettingsPopover />
+          </div>
+        </div>
         <Separator className="my-2" />
       </PageLoading>
     );
@@ -88,7 +94,12 @@ function RouteComponent() {
     return (
       <div>
         <PageHeading title="Random inbox" />
-        {shuffleButton}
+        <div className="flex items-center gap-2">
+          {shuffleButton}
+          <div className="ml-auto">
+            <RandomInboxSettingsPopover />
+          </div>
+        </div>
         <Separator className="my-2" />
         <PageError
           error={error}
@@ -103,7 +114,12 @@ function RouteComponent() {
       <PageHeading
         title={`Random inbox (${data?.file_ids?.length ?? 0} files)`}
       />
-      {shuffleButton}
+      <div className="flex items-center gap-2">
+        {shuffleButton}
+        <div className="ml-auto">
+          <RandomInboxSettingsPopover />
+        </div>
+      </div>
       <Separator className="my-2" />
       {data?.file_ids && data.file_ids.length > 0 ? (
         <ImageGrid fileIds={data.file_ids} />

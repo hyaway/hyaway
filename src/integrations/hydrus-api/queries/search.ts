@@ -5,6 +5,7 @@ import { HydrusFileSortType, ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
 import type { HydrusTagSearch, SearchFilesOptions } from "../models";
 import {
+  useRandomInboxLimit,
   useRecentFilesDays,
   useRecentFilesLimit,
 } from "@/lib/ux-settings-store";
@@ -132,7 +133,11 @@ export const useRecentlyInboxedFilesQuery = () => {
 };
 
 export const useRandomInboxFilesQuery = () => {
-  const tags: HydrusTagSearch = ["system:limit=100", "system:inbox"];
+  const randomInboxLimit = useRandomInboxLimit();
+  const tags: HydrusTagSearch = [
+    `system:limit=${randomInboxLimit}`,
+    "system:inbox",
+  ];
   const options: Omit<SearchFilesOptions, "tags"> = {
     file_sort_type: HydrusFileSortType.Random,
   };

@@ -15,17 +15,14 @@ import {
 } from "@/components/settings/setting-fields";
 import { ImageGallerySettingsContent } from "@/components/settings/image-gallery-settings-popover";
 import {
-  MAX_RECENT_FILES_DAYS,
-  MAX_RECENT_FILES_LIMIT,
-  useRecentFilesDays,
-  useRecentFilesLimit,
+  MAX_RANDOM_INBOX_LIMIT,
+  useRandomInboxLimit,
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
-export function RecentFilesSettingsPopover() {
-  const recentFilesLimit = useRecentFilesLimit();
-  const recentFilesDays = useRecentFilesDays();
-  const { setRecentFilesLimit, setRecentFilesDays } = useUxSettingsActions();
+export function RandomInboxSettingsPopover() {
+  const randomInboxLimit = useRandomInboxLimit();
+  const { setRandomInboxLimit } = useUxSettingsActions();
 
   return (
     <Popover>
@@ -43,27 +40,17 @@ export function RecentFilesSettingsPopover() {
         <Separator className="my-4" />
 
         <PopoverHeader>
-          <PopoverTitle>Recency settings</PopoverTitle>
+          <PopoverTitle>Random inbox settings</PopoverTitle>
         </PopoverHeader>
         <SettingsGroup>
           <SliderField
-            id="recent-files-limit-popover-slider"
+            id="random-inbox-limit-popover-slider"
             label="Limit returned files to"
-            value={recentFilesLimit}
-            min={100}
-            max={MAX_RECENT_FILES_LIMIT}
-            step={100}
-            onValueChange={setRecentFilesLimit}
-            commitOnRelease
-          />
-          <SliderField
-            id="recent-files-days-popover-slider"
-            label="Days to consider recent"
-            value={recentFilesDays}
-            min={1}
-            max={MAX_RECENT_FILES_DAYS}
-            step={1}
-            onValueChange={setRecentFilesDays}
+            value={randomInboxLimit}
+            min={10}
+            max={MAX_RANDOM_INBOX_LIMIT}
+            step={10}
+            onValueChange={setRandomInboxLimit}
             commitOnRelease
           />
         </SettingsGroup>

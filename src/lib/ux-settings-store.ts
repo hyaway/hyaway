@@ -5,6 +5,7 @@ export const MAX_GRID_LANES = 30;
 export const MAX_PAGES_COLUMNS = 30;
 export const MAX_RECENT_FILES_LIMIT = 2000;
 export const MAX_RECENT_FILES_DAYS = 30;
+export const MAX_RANDOM_INBOX_LIMIT = 500;
 
 export type TagsSortMode = "count" | "namespace";
 
@@ -15,6 +16,7 @@ type UxSettingsState = {
   pagesMaxColumns: number;
   recentFilesLimit: number;
   recentFilesDays: number;
+  randomInboxLimit: number;
   actions: {
     setTagsSortMode: (mode: TagsSortMode) => void;
     setGridMaxLanes: (lanes: number) => void;
@@ -22,6 +24,7 @@ type UxSettingsState = {
     setPagesMaxColumns: (columns: number) => void;
     setRecentFilesLimit: (limit: number) => void;
     setRecentFilesDays: (days: number) => void;
+    setRandomInboxLimit: (limit: number) => void;
   };
 };
 
@@ -32,8 +35,9 @@ export const useUxSettingsStore = create<UxSettingsState>()(
       gridMaxLanes: MAX_GRID_LANES,
       gridExpandImages: true,
       pagesMaxColumns: MAX_PAGES_COLUMNS,
-      recentFilesLimit: 1000,
+      recentFilesLimit: 100,
       recentFilesDays: 3,
+      randomInboxLimit: 100,
       actions: {
         setTagsSortMode: (tagsSortMode: TagsSortMode) => set({ tagsSortMode }),
         setGridMaxLanes: (gridMaxLanes: number) => set({ gridMaxLanes }),
@@ -45,6 +49,8 @@ export const useUxSettingsStore = create<UxSettingsState>()(
           set({ recentFilesLimit }),
         setRecentFilesDays: (recentFilesDays: number) =>
           set({ recentFilesDays }),
+        setRandomInboxLimit: (randomInboxLimit: number) =>
+          set({ randomInboxLimit }),
       },
     }),
     {
@@ -72,6 +78,9 @@ export const useRecentFilesLimit = () =>
 
 export const useRecentFilesDays = () =>
   useUxSettingsStore((state) => state.recentFilesDays);
+
+export const useRandomInboxLimit = () =>
+  useUxSettingsStore((state) => state.randomInboxLimit);
 
 export const useUxSettingsActions = () =>
   useUxSettingsStore((state) => state.actions);
