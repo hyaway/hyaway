@@ -45,7 +45,7 @@ const TagRow = memo(
         ref={ref}
         data-index={index}
         style={style}
-        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-center gap-1 font-mono text-sm"
+        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-center justify-start font-mono text-xs"
       >
         <span
           aria-hidden="true"
@@ -56,10 +56,12 @@ const TagRow = memo(
         <TagBadge
           tag={tagItem.tag}
           namespace={tagItem.namespace}
-          size="xs"
-          className="h-auto min-h-8 shrink items-center justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
+          size="sm"
+          className="h-auto min-h-6 shrink items-center justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
         >
-          {showCount && <TagBadge.Count>{tagItem.count}</TagBadge.Count>}
+          {showCount && (
+            <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
+          )}
         </TagBadge>
       </li>
     );

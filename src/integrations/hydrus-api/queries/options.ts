@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useHydrusApiClient } from "../hydrus-config-store";
+import { useActiveTheme } from "@/lib/theme-store";
+import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
 
 export const useGetClientOptionsQuery = () => {
   const hydrusApi = useHydrusApiClient();
@@ -53,9 +55,11 @@ export const useThumbnailDimensions = () => {
  * Hook to get namespace colors from client options.
  * Returns a record mapping namespace to RGB color string.
  * Empty string key ("") applies to un-namespaced tags.
+ * Colors are automatically adjusted for accessible contrast based on the current theme.
  */
 export const useNamespaceColors = (): Record<string, string> => {
   const { data } = useGetClientOptionsQuery();
+  const theme = useActiveTheme();
 
   return useMemo(() => {
     const namespaceColours = data?.old_options?.namespace_colours;
@@ -63,10 +67,11 @@ export const useNamespaceColors = (): Record<string, string> => {
 
     const result: Record<string, string> = {};
     for (const [namespace, rgb] of Object.entries(namespaceColours)) {
-      result[namespace] = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+      const adjustedRgb = adjustColorForTheme([rgb[0], rgb[1], rgb[2]], theme);
+      result[namespace] = rgbToString(adjustedRgb);
     }
     return result;
-  }, [data]);
+  }, [data, theme]);
 };
 
 /**

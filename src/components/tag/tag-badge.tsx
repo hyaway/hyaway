@@ -17,7 +17,7 @@ type BadgeProps = ComponentProps<typeof Badge> &
 export function TagBadge({
   tag,
   namespace,
-  variant = "outline",
+  variant = "ghost",
   children,
   className,
   style,
@@ -38,7 +38,7 @@ export function TagBadge({
   return (
     <Badge
       variant={variant}
-      className={cn(color && "text-(--tag-color)", className)}
+      className={cn(color && "text-(--tag-color)!", className)}
       style={combinedStyle}
       {...props}
     >
