@@ -29,10 +29,9 @@ const settingsItems = linkOptions([
 ]);
 
 function SettingsComponent() {
-  const { getTitle } = Route.useRouteContext();
   return (
     <div>
-      <Heading level={1}>{getTitle()}</Heading>
+      <Heading level={1}>Settings</Heading>
       <Separator className="my-2" />
 
       <NavigationMenu className="mb-8">
