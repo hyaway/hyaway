@@ -25,7 +25,7 @@ export function ImageGridSkeleton({ itemCount = 12 }: { itemCount?: number }) {
         {heights.map((height, i) => (
           <Skeleton
             key={i}
-            className="mb-2 w-full break-inside-avoid rounded-lg"
+            className="mb-2 w-full break-inside-avoid"
             style={{ height: `${height}px` }}
           />
         ))}
