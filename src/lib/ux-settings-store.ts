@@ -20,7 +20,7 @@ export const useUxSettingsStore = create<UxSettingsState>()(
   persist(
     (set) => ({
       tagsSortMode: "count",
-      gridMaxLanes: 8,
+      gridMaxLanes: 30,
       gridExpandImages: true,
       pagesMaxColumns: 30,
       actions: {
