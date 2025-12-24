@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+export const MAX_GRID_LANES = 30;
+export const MAX_PAGES_COLUMNS = 30;
+
 export type TagsSortMode = "count" | "namespace";
 
 type UxSettingsState = {
@@ -20,9 +23,9 @@ export const useUxSettingsStore = create<UxSettingsState>()(
   persist(
     (set) => ({
       tagsSortMode: "count",
-      gridMaxLanes: 30,
+      gridMaxLanes: MAX_GRID_LANES,
       gridExpandImages: true,
-      pagesMaxColumns: 30,
+      pagesMaxColumns: MAX_PAGES_COLUMNS,
       actions: {
         setTagsSortMode: (tagsSortMode: TagsSortMode) => set({ tagsSortMode }),
         setGridMaxLanes: (gridMaxLanes: number) => set({ gridMaxLanes }),

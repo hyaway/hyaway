@@ -17,6 +17,8 @@ import { Label } from "@/components/ui-primitives/label";
 import { Slider } from "@/components/ui-primitives/slider";
 import { Switch } from "@/components/ui-primitives/switch";
 import {
+  MAX_GRID_LANES,
+  MAX_PAGES_COLUMNS,
   useGridExpandImages,
   useGridMaxLanes,
   usePagesMaxColumns,
@@ -82,9 +84,6 @@ function ThemeCard() {
   );
 }
 
-const MAX_LANES_SLIDER_VALUE = 30;
-const MAX_PAGES_COLUMNS_SLIDER_VALUE = 30;
-
 function ImageGalleryCard() {
   const gridMaxLanes = useGridMaxLanes();
   const gridExpandImages = useGridExpandImages();
@@ -109,13 +108,13 @@ function ImageGalleryCard() {
             </div>
             <Slider
               id="max-lanes-slider"
-              value={[Math.min(gridMaxLanes, MAX_LANES_SLIDER_VALUE)]}
+              value={[Math.min(gridMaxLanes, MAX_GRID_LANES)]}
               onValueChange={(value) => {
                 const lanes = Array.isArray(value) ? value[0] : value;
                 setGridMaxLanes(lanes);
               }}
               min={2}
-              max={MAX_LANES_SLIDER_VALUE}
+              max={MAX_GRID_LANES}
               step={1}
             />
           </div>
@@ -157,13 +156,13 @@ function PagesCard() {
           </div>
           <Slider
             id="pages-columns-slider"
-            value={[Math.min(pagesMaxColumns, MAX_PAGES_COLUMNS_SLIDER_VALUE)]}
+            value={[Math.min(pagesMaxColumns, MAX_PAGES_COLUMNS)]}
             onValueChange={(value) => {
               const columns = Array.isArray(value) ? value[0] : value;
               setPagesMaxColumns(columns);
             }}
             min={2}
-            max={MAX_PAGES_COLUMNS_SLIDER_VALUE}
+            max={MAX_PAGES_COLUMNS}
             step={1}
           />
         </div>
