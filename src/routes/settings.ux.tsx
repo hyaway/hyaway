@@ -1,6 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Infinity01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import type { TagsSortMode } from "@/lib/ux-settings-store";
 import type { Theme } from "@/lib/theme-store";
 import { Heading } from "@/components/ui-primitives/heading";
@@ -21,6 +19,7 @@ import { Switch } from "@/components/ui-primitives/switch";
 import {
   useGridExpandImages,
   useGridMaxLanes,
+  usePagesMaxColumns,
   useTagsSortMode,
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
@@ -35,12 +34,13 @@ export const Route = createFileRoute("/settings/ux")({
 
 function SettingsUXComponent() {
   return (
-    <div className="flex max-w-xl flex-col gap-4 lg:mx-auto">
+    <div className="flex max-w-xl flex-col gap-4">
       <Heading level={2} className="sr-only">
         UX Settings
       </Heading>
       <ThemeCard />
       <ImageGalleryCard />
+      <PagesCard />
       <TagsSortCard />
     </div>
   );
@@ -82,7 +82,8 @@ function ThemeCard() {
   );
 }
 
-const MAX_LANES_SLIDER_VALUE = 20;
+const MAX_LANES_SLIDER_VALUE = 30;
+const MAX_PAGES_COLUMNS_SLIDER_VALUE = 30;
 
 function ImageGalleryCard() {
   const gridMaxLanes = useGridMaxLanes();
@@ -103,11 +104,7 @@ function ImageGalleryCard() {
             <div className="flex items-center justify-between">
               <Label htmlFor="max-lanes-slider">Maximum lanes</Label>
               <span className="text-muted-foreground text-base tabular-nums">
-                {gridMaxLanes >= MAX_LANES_SLIDER_VALUE ? (
-                  <HugeiconsIcon icon={Infinity01Icon} />
-                ) : (
-                  gridMaxLanes
-                )}
+                {gridMaxLanes}
               </span>
             </div>
             <Slider
@@ -115,11 +112,7 @@ function ImageGalleryCard() {
               value={[Math.min(gridMaxLanes, MAX_LANES_SLIDER_VALUE)]}
               onValueChange={(value) => {
                 const lanes = Array.isArray(value) ? value[0] : value;
-                setGridMaxLanes(
-                  lanes === MAX_LANES_SLIDER_VALUE
-                    ? Number.MAX_SAFE_INTEGER
-                    : lanes,
-                );
+                setGridMaxLanes(lanes);
               }}
               min={2}
               max={MAX_LANES_SLIDER_VALUE}
@@ -136,6 +129,43 @@ function ImageGalleryCard() {
               onCheckedChange={setGridExpandImages}
             />
           </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PagesCard() {
+  const pagesMaxColumns = usePagesMaxColumns();
+  const { setPagesMaxColumns } = useUxSettingsActions();
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Pages</CardTitle>
+        <CardDescription>
+          Configure how page cards are displayed.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="pages-columns-slider">Maximum columns</Label>
+            <span className="text-muted-foreground text-base tabular-nums">
+              {pagesMaxColumns}
+            </span>
+          </div>
+          <Slider
+            id="pages-columns-slider"
+            value={[Math.min(pagesMaxColumns, MAX_PAGES_COLUMNS_SLIDER_VALUE)]}
+            onValueChange={(value) => {
+              const columns = Array.isArray(value) ? value[0] : value;
+              setPagesMaxColumns(columns);
+            }}
+            min={2}
+            max={MAX_PAGES_COLUMNS_SLIDER_VALUE}
+            step={1}
+          />
         </div>
       </CardContent>
     </Card>

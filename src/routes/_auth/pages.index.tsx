@@ -4,6 +4,8 @@ import { EmptyState } from "@/components/page/empty-state";
 import { PageError } from "@/components/page/page-error";
 import { PageHeading } from "@/components/page/page-heading";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
+import { usePagesMaxColumns } from "@/lib/ux-settings-store";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_auth/pages/")({
   component: PagesIndex,
@@ -14,8 +16,23 @@ export const Route = createFileRoute("/_auth/pages/")({
  */
 function PagesIndex() {
   const { data: pages, isPending, isError, error } = useGetMediaPagesQuery();
+  const pagesMaxColumns = usePagesMaxColumns();
 
   const title = isPending ? "Pages" : `Pages (${pages.length} pages)`;
+
+  // Use auto-fit with a clever minmax formula:
+  // - max(12rem, 100%/N) ensures columns are at least 12rem OR 100%/maxColumns wide
+  // - This effectively caps the number of columns at maxColumns on wide screens
+  // - For large N (e.g. 30), 100%/N becomes small, so we just get the 12rem minimum
+  // - On smaller screens, container queries override with fixed column counts
+  // - calc(50% - 0.5rem) accounts for the gap-4 (1rem gap / 2 columns)
+  const gridStyle = {
+    "--pages-max-columns": pagesMaxColumns,
+  } as React.CSSProperties;
+
+  const gridClassName = cn(
+    "grid grid-cols-1 gap-4 @xs:grid-cols-2 @lg:grid-cols-[repeat(auto-fill,minmax(12rem,min(calc(50%-0.5rem),calc(100%/var(--pages-max-columns)-1rem))))]",
+  );
 
   return (
     <div className="@container">
@@ -23,7 +40,8 @@ function PagesIndex() {
 
       {isPending ? (
         <div
-          className="grid gap-4 @xs:grid-cols-2 @lg:grid-cols-3 @2xl:grid-cols-[repeat(auto-fill,12rem)]"
+          className={gridClassName}
+          style={gridStyle}
           aria-label="Loading pages"
         >
           {Array.from({ length: 3 }).map((_, i) => (
@@ -35,7 +53,7 @@ function PagesIndex() {
       ) : pages.length === 0 ? (
         <EmptyState message="No media pages found. Open some file search pages in Hydrus Client." />
       ) : (
-        <div className="grid gap-4 @xs:grid-cols-2 @lg:grid-cols-3 @2xl:grid-cols-[repeat(auto-fill,12rem)]">
+        <div className={gridClassName} style={gridStyle}>
           {pages.map((page) => (
             <PageCard
               key={page.page_key}

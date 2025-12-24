@@ -12,7 +12,7 @@ export function Login() {
     setSettingsKey((prev) => prev + 1);
   };
   return (
-    <div className="flex max-w-xl flex-col gap-4 lg:mx-auto" key={settingsKey}>
+    <div className="flex max-w-xl flex-col gap-4" key={settingsKey}>
       <Heading level={2} className="sr-only">
         Client API
       </Heading>

@@ -7,10 +7,12 @@ type UxSettingsState = {
   tagsSortMode: TagsSortMode;
   gridMaxLanes: number;
   gridExpandImages: boolean;
+  pagesMaxColumns: number;
   actions: {
     setTagsSortMode: (mode: TagsSortMode) => void;
     setGridMaxLanes: (lanes: number) => void;
     setGridExpandImages: (expand: boolean) => void;
+    setPagesMaxColumns: (columns: number) => void;
   };
 };
 
@@ -20,11 +22,14 @@ export const useUxSettingsStore = create<UxSettingsState>()(
       tagsSortMode: "count",
       gridMaxLanes: 8,
       gridExpandImages: true,
+      pagesMaxColumns: 30,
       actions: {
         setTagsSortMode: (tagsSortMode: TagsSortMode) => set({ tagsSortMode }),
         setGridMaxLanes: (gridMaxLanes: number) => set({ gridMaxLanes }),
         setGridExpandImages: (gridExpandImages: boolean) =>
           set({ gridExpandImages }),
+        setPagesMaxColumns: (pagesMaxColumns: number) =>
+          set({ pagesMaxColumns }),
       },
     }),
     {
@@ -43,6 +48,9 @@ export const useGridMaxLanes = () =>
 
 export const useGridExpandImages = () =>
   useUxSettingsStore((state) => state.gridExpandImages);
+
+export const usePagesMaxColumns = () =>
+  useUxSettingsStore((state) => state.pagesMaxColumns);
 
 export const useUxSettingsActions = () =>
   useUxSettingsStore((state) => state.actions);
