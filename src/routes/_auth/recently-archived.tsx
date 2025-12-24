@@ -4,9 +4,9 @@ import { EmptyState } from "@/components/page/empty-state";
 import { PageError } from "@/components/page/page-error";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
+import { RefetchButton } from "@/components/refetch-button";
 import { useRecentlyArchivedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
-import { Button } from "@/components/ui-primitives/button";
 import { Separator } from "@/components/ui-primitives/separator";
 
 export const Route = createFileRoute("/_auth/recently-archived")({
@@ -17,7 +17,8 @@ export const Route = createFileRoute("/_auth/recently-archived")({
 });
 
 function RouteComponent() {
-  const { data, isLoading, isError, error } = useRecentlyArchivedFilesQuery();
+  const { data, isLoading, isFetching, isError, error } =
+    useRecentlyArchivedFilesQuery();
   const queryClient = useQueryClient();
 
   if (isLoading) {
@@ -38,15 +39,14 @@ function RouteComponent() {
       <PageHeading
         title={`Recently archived (${data?.file_ids?.length ?? 0} files)`}
       />
-      <Button
-        onClick={() =>
+      <RefetchButton
+        isFetching={isFetching}
+        onRefetch={() =>
           queryClient.invalidateQueries({
             queryKey: ["searchFiles", "recentlyArchived"],
           })
         }
-      >
-        Refetch
-      </Button>
+      />
       <Separator className="my-2" />
 
       {data?.file_ids && data.file_ids.length > 0 ? (

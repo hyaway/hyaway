@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { PageError } from "@/components/page/page-error";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
+import { RefetchButton } from "@/components/refetch-button";
 import { Button } from "@/components/ui-primitives/button";
 import {
   useFocusPageMutation,
@@ -21,7 +22,10 @@ export const Route = createFileRoute("/_auth/pages/$pageId")({
 
 function RouteComponent() {
   const { pageId } = Route.useParams();
-  const { data, isLoading, isError, error } = useGetPageInfoQuery(pageId, true);
+  const { data, isLoading, isFetching, isError, error } = useGetPageInfoQuery(
+    pageId,
+    true,
+  );
   const refreshPageMutation = useRefreshPageMutation();
   const focusPageMutation = useFocusPageMutation();
   const queryClient = useQueryClient();
@@ -50,15 +54,14 @@ function RouteComponent() {
         title={`Page: ${data?.page_info.name} (${data?.page_info.media.num_files ?? 0} files)`}
       />
       <div className="flex gap-2">
-        <Button
-          onClick={() =>
+        <RefetchButton
+          isFetching={isFetching}
+          onRefetch={() =>
             queryClient.invalidateQueries({
               queryKey: ["getPageInfo", pageId],
             })
           }
-        >
-          Refetch
-        </Button>
+        />
         <Button onClick={() => refreshPageMutation.mutate(pageId)}>
           Refresh remote
         </Button>
