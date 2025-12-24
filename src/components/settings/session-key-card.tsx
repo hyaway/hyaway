@@ -42,7 +42,7 @@ export function SessionKeyCard() {
   const persistentAccessQuery = useVerifyAccessQuery("persistent");
 
   return (
-    <Card className="max-w-lg">
+    <Card>
       <CardHeader>
         <CardTitle>3. Get a session key</CardTitle>
         <CardDescription>

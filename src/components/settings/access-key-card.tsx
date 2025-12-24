@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui-primitives/separator";
 
 export function AccessKeyCard() {
   return (
-    <Card className="max-w-lg">
+    <Card>
       <CardHeader>
         <CardTitle>2. Set access key</CardTitle>
         <CardDescription>

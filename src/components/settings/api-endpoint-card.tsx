@@ -70,7 +70,7 @@ export function ApiEndpointCard() {
         form.handleSubmit();
       }}
     >
-      <Card className="max-w-lg">
+      <Card>
         <CardHeader>
           <CardTitle>1. Set API endpoint</CardTitle>
           <CardDescription>

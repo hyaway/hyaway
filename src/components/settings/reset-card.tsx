@@ -12,7 +12,7 @@ export function ResetCard({ resetKey }: { resetKey: () => void }) {
   const { reset } = useAuthActions();
 
   return (
-    <Card className="max-w-lg">
+    <Card>
       <CardHeader>
         <CardTitle>(Optional) Reset all Hydrus API settings</CardTitle>
       </CardHeader>

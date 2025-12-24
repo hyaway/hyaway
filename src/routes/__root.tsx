@@ -33,7 +33,9 @@ function RootComponent() {
         <SidebarInset>
           <HeaderPortalProvider>
             <AppHeader />
-            <Outlet />
+            <main className="px-4 py-8 sm:px-6">
+              <Outlet />
+            </main>
           </HeaderPortalProvider>
         </SidebarInset>
         <RightSidebarSlot className="hidden xl:block" />

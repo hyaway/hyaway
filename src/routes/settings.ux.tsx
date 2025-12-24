@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/settings/ux")({
   component: SettingsUXComponent,
+  beforeLoad: () => ({
+    getTitle: () => "UX settings",
+  }),
 });
 
 function SettingsUXComponent() {

@@ -13,9 +13,5 @@ function AuthPageLayout() {
     return <LinkButton to="/settings/client-api">Login</LinkButton>;
   }
 
-  return (
-    <main className="p-4 sm:px-6">
-      <Outlet />
-    </main>
-  );
+  return <Outlet />;
 }
