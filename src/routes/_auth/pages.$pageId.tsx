@@ -1,17 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageError } from "@/components/page-error";
+import { PageHeading } from "@/components/page-heading";
+import { PageLoading } from "@/components/page-loading";
 import { Button } from "@/components/ui-primitives/button";
-import { Heading } from "@/components/ui-primitives/heading";
 import {
   useFocusPageMutation,
   useGetPageInfoQuery,
   useRefreshPageMutation,
 } from "@/integrations/hydrus-api/queries/manage-pages";
 import { ImageGrid } from "@/components/image-grid/image-grid";
-import { ImageGridSkeleton } from "@/components/image-grid/image-grid-skeleton";
 import { Separator } from "@/components/ui-primitives/separator";
-import { Skeleton } from "@/components/ui-primitives/skeleton";
 
 export const Route = createFileRoute("/_auth/pages/$pageId")({
   component: RouteComponent,
@@ -29,25 +28,14 @@ function RouteComponent() {
 
   if (isLoading) {
     return (
-      <div>
-        <Heading level={1}>Page: {pageId.slice(0, 8)}...</Heading>
-        <Separator className="my-2" />
-        <div className="flex gap-2">
-          <Skeleton className="h-9 w-20 rounded-4xl" />
-          <Skeleton className="h-9 w-32 rounded-4xl" />
-          <Skeleton className="h-9 w-16 rounded-4xl" />
-        </div>
-        <Separator className="my-2" />
-        <ImageGridSkeleton />
-      </div>
+      <PageLoading title={`Page: ${pageId.slice(0, 8)}...`} buttonCount={3} />
     );
   }
 
   if (isError) {
     return (
       <div>
-        <Heading level={1}>Page: {pageId.slice(0, 8)}...</Heading>
-        <Separator className="my-2" />
+        <PageHeading title={`Page: ${pageId.slice(0, 8)}...`} />
         <PageError
           error={error}
           fallbackMessage="An unknown error occurred while fetching pages."
@@ -58,8 +46,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <Heading level={1}>Page: {data?.page_info.name}</Heading>
-      <Separator className="my-2" />
+      <PageHeading title={`Page: ${data?.page_info.name}`} />
       <div className="flex gap-2">
         <Button
           onClick={() =>

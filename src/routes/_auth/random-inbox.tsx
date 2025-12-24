@@ -12,8 +12,8 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PageError } from "@/components/page-error";
-import { Heading } from "@/components/ui-primitives/heading";
-import { Spinner } from "@/components/ui-primitives/spinner";
+import { PageHeading } from "@/components/page-heading";
+import { PageLoading } from "@/components/page-loading";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui-primitives/button";
@@ -87,21 +87,17 @@ function RouteComponent() {
 
   if (isLoading) {
     return (
-      <div>
-        <Heading level={1}>Random inbox</Heading>
-        <Separator className="my-2" />
+      <PageLoading title="Random inbox">
         {shuffleButton}
         <Separator className="my-2" />
-        <Spinner />
-      </div>
+      </PageLoading>
     );
   }
 
   if (isError) {
     return (
       <div>
-        <Heading level={1}>Random inbox</Heading>
-        <Separator className="my-2" />
+        <PageHeading title="Random inbox" />
         {shuffleButton}
         <Separator className="my-2" />
         <PageError
@@ -114,11 +110,9 @@ function RouteComponent() {
 
   return (
     <div>
-      <Heading level={1}>Random inbox</Heading>
-      <Separator className="my-2" />
+      <PageHeading title="Random inbox" />
       {shuffleButton}
       <Separator className="my-2" />
-
       {data?.file_ids && data.file_ids.length > 0 ? (
         <div>
           <p>Number of files: {data.file_ids.length}</p>

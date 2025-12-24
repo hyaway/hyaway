@@ -9,8 +9,7 @@ import {
   NavigationMenuList,
   RouterNavigationMenuLink,
 } from "@/components/ui-primitives/navigation-menu";
-import { Heading } from "@/components/ui-primitives/heading";
-import { Separator } from "@/components/ui-primitives/separator";
+import { PageHeading } from "@/components/page-heading";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsComponent,
@@ -31,9 +30,7 @@ const settingsItems = linkOptions([
 function SettingsComponent() {
   return (
     <div>
-      <Heading level={1}>Settings</Heading>
-      <Separator className="my-2" />
-
+      <PageHeading title="Settings" />
       <NavigationMenu className="mb-8">
         <NavigationMenuList>
           {settingsItems.map((item) => (

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageError } from "@/components/page-error";
-import { Heading } from "@/components/ui-primitives/heading";
-import { Spinner } from "@/components/ui-primitives/spinner";
+import { PageHeading } from "@/components/page-heading";
+import { PageLoading } from "@/components/page-loading";
 import { useRecentlyDeletedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui-primitives/button";
@@ -20,7 +20,7 @@ function RouteComponent() {
   const queryClient = useQueryClient();
 
   if (isLoading) {
-    return <Spinner />;
+    return <PageLoading title="Recently deleted" buttonCount={1} />;
   }
 
   if (isError) {
@@ -34,8 +34,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <Heading level={1}>Recently deleted</Heading>
-      <Separator className="my-2" />
+      <PageHeading title="Recently deleted" />
       <Button
         onClick={() =>
           queryClient.invalidateQueries({
