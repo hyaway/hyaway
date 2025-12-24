@@ -3,6 +3,7 @@ import { PageCard, PageCardSkeleton } from "@/components/page-card";
 import { EmptyState } from "@/components/page/empty-state";
 import { PageError } from "@/components/page/page-error";
 import { PageHeading } from "@/components/page/page-heading";
+import { PagesSettingsPopover } from "@/components/settings/pages-settings-popover";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { usePagesMaxColumns } from "@/lib/ux-settings-store";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,9 @@ function PagesIndex() {
   return (
     <div className="@container">
       <PageHeading title={title} />
+      <div className="mb-4 flex justify-end">
+        <PagesSettingsPopover />
+      </div>
 
       {isPending ? (
         <div

@@ -4,6 +4,7 @@ import { PageError } from "@/components/page/page-error";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
 import { RefetchButton } from "@/components/refetch-button";
+import { ImageGallerySettingsPopover } from "@/components/settings/image-gallery-settings-popover";
 import { Button } from "@/components/ui-primitives/button";
 import {
   useFocusPageMutation,
@@ -66,6 +67,9 @@ function RouteComponent() {
           Refresh remote
         </Button>
         <Button onClick={() => focusPageMutation.mutate(pageId)}>Focus</Button>
+        <div className="ml-auto">
+          <ImageGallerySettingsPopover />
+        </div>
       </div>
       <Separator className="my-2" />
 
