@@ -4,12 +4,19 @@ import { useHydrusApiClient } from "../hydrus-config-store";
 import { HydrusFileSortType, ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
 import type { HydrusTagSearch, SearchFilesOptions } from "../models";
+import {
+  useRecentFilesDays,
+  useRecentFilesLimit,
+} from "@/lib/ux-settings-store";
 
 export const useRecentlyArchivedFilesQuery = () => {
+  const recentFilesLimit = useRecentFilesLimit();
+  const recentFilesDays = useRecentFilesDays();
+
   const tags: HydrusTagSearch = [
-    "system:limit=1000",
+    `system:limit=${recentFilesLimit}`,
     "system:archive",
-    "system:archived time < 3 days ago",
+    `system:archived time < ${recentFilesDays} days ago`,
   ];
   const options: Omit<SearchFilesOptions, "tags"> = {
     file_sort_type: HydrusFileSortType.ArchiveTimestamp,
@@ -42,6 +49,8 @@ export const useRecentlyArchivedFilesQuery = () => {
 
 export const useRecentlyDeletedFilesQuery = () => {
   const { data: servicesData } = useGetServicesQuery();
+  const recentFilesLimit = useRecentFilesLimit();
+  const recentFilesDays = useRecentFilesDays();
 
   const trashServiceKey = useMemo(() => {
     if (!servicesData) return undefined;
@@ -50,8 +59,8 @@ export const useRecentlyDeletedFilesQuery = () => {
     )?.[0];
   }, [servicesData]);
   const tags: HydrusTagSearch = [
-    "system:limit=1000",
-    "system:time imported < 3 days ago",
+    `system:limit=${recentFilesLimit}`,
+    `system:time imported < ${recentFilesDays} days ago`,
   ];
   const options: Omit<SearchFilesOptions, "tags"> = {
     file_sort_type: HydrusFileSortType.ImportTime,
@@ -85,10 +94,13 @@ export const useRecentlyDeletedFilesQuery = () => {
 };
 
 export const useRecentlyInboxedFilesQuery = () => {
+  const recentFilesLimit = useRecentFilesLimit();
+  const recentFilesDays = useRecentFilesDays();
+
   const tags: HydrusTagSearch = [
-    "system:limit=1000",
+    `system:limit=${recentFilesLimit}`,
     "system:inbox",
-    "system:time imported < 3 days ago",
+    `system:time imported < ${recentFilesDays} days ago`,
   ];
   const options: Omit<SearchFilesOptions, "tags"> = {
     file_sort_type: HydrusFileSortType.ImportTime,
