@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   DiceFaces01Icon,
