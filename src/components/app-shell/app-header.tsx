@@ -7,10 +7,8 @@ import {
 } from "@tanstack/react-router";
 import { Fragment, useEffect, useRef, useState } from "react";
 
-import { ArrowLeftIcon } from "@heroicons/react/16/solid";
 import type { MyRouterContext } from "@/routes/__root";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";
-import { Button } from "@/components/ui-primitives/button";
 import { HeaderPortalSlot } from "@/components/app-shell/header-portal";
 import {
   Breadcrumb,
@@ -145,16 +143,6 @@ export function AppHeader() {
       <div className="flex h-12 shrink-0 items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
 
-        {matchRoute({ to: "/file/$fileId" }) && canGoBack && (
-          <Button
-            onClick={() => router.history.back()}
-            variant="ghost"
-            size="icon"
-            aria-label="Go back"
-          >
-            <ArrowLeftIcon className="size-4" />
-          </Button>
-        )}
         <Separator
           orientation="vertical"
           className="my-auto mr-2 data-[orientation=vertical]:h-4"
@@ -166,6 +154,19 @@ export function AppHeader() {
                 <TouchTarget>hyAway</TouchTarget>
               </BreadcrumbLink>
             </BreadcrumbItem>
+            {matchRoute({ to: "/file/$fileId" }) && canGoBack && (
+              <>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    onClick={() => router.history.back()}
+                    className="cursor-pointer"
+                  >
+                    <TouchTarget>Gallery</TouchTarget>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+              </>
+            )}
             {breadcrumbs.length > 0 && (
               <BreadcrumbSeparator className="hidden md:block" />
             )}
