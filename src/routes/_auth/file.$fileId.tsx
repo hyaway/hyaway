@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  ArchiveBoxIcon,
   ArrowDownTrayIcon,
   ArrowTopRightOnSquareIcon,
   DocumentIcon,
@@ -85,10 +86,15 @@ function RouteComponent() {
         <FilePageHeader fileId={fileIdNum} />
         <Separator className="my-2" />
         <div className="flex flex-wrap items-center gap-2">
-          {data.is_inbox && (
+          {data.is_inbox ? (
             <Badge variant="secondary">
               <InboxIcon className="mr-1 size-3" />
               Inbox
+            </Badge>
+          ) : (
+            <Badge variant="secondary">
+              <ArchiveBoxIcon className="mr-1 size-3" />
+              Archived
             </Badge>
           )}
           {data.is_trashed && (
