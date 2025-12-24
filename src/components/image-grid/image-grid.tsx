@@ -1,9 +1,9 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useDeferredValue, useEffect, useMemo } from "react";
 import { ImageGridCard } from "./image-grid-card";
+import { ImageGridSkeleton } from "./image-grid-skeleton";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
-import { Spinner } from "@/components/ui-primitives/spinner";
 import { PageError } from "@/components/page/page-error";
 import { Badge } from "@/components/ui-primitives/badge";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
@@ -21,7 +21,7 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
   }
 
   if (!defaultDimensions || itemsQuery.isPending) {
-    return <Spinner />;
+    return <ImageGridSkeleton />;
   }
 
   if (itemsQuery.isError) {

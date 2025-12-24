@@ -18,6 +18,7 @@ import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/sear
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui-primitives/button";
 import { Separator } from "@/components/ui-primitives/separator";
+import { Spinner } from "@/components/ui-primitives/spinner";
 
 const DICE_ICONS = [
   DiceFaces01Icon,
@@ -39,17 +40,8 @@ function RouteComponent() {
   const { data, isLoading, isError, error } = useRandomInboxFilesQuery();
   const queryClient = useQueryClient();
   const [diceIndex, setDiceIndex] = useState(2);
-  const [showDice, setShowDice] = useState(true);
-
-  // Show dice when loading finishes
-  useEffect(() => {
-    if (!isLoading) {
-      setShowDice(true);
-    }
-  }, [isLoading]);
 
   const handleShuffle = () => {
-    setShowDice(false); // Trigger exit animation
     setDiceIndex(Math.floor(Math.random() * 6));
     queryClient.resetQueries({
       queryKey: ["searchFiles", "randomInbox"],
@@ -57,10 +49,12 @@ function RouteComponent() {
   };
 
   const shuffleButton = (
-    <Button onClick={handleShuffle} disabled={isLoading || isError}>
+    <Button onClick={handleShuffle} disabled={isLoading || isError} key="a">
       <span className="mr-1 size-4">
         <AnimatePresence>
-          {showDice && (
+          {isLoading ? (
+            <Spinner />
+          ) : (
             <motion.span
               key={diceIndex}
               initial={{ rotate: -180, scale: 0 }}
@@ -68,11 +62,6 @@ function RouteComponent() {
                 rotate: 0,
                 scale: 1,
                 transition: { duration: 0.15, ease: "easeOut" },
-              }}
-              exit={{
-                rotate: 2700,
-                scale: 0,
-                transition: { duration: 5, ease: "easeOut" },
               }}
               className="absolute block"
             >
