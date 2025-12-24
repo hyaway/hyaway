@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Heading } from "@/components/ui-primitives/heading";
-import { ThemeCard } from "@/components/settings/theme-card";
 import { ImageGalleryCard } from "@/components/settings/image-gallery-card";
 import { PagesCard } from "@/components/settings/pages-card";
+import { RecentFilesCard } from "@/components/settings/recent-files-card";
 import { TagsSortCard } from "@/components/settings/tags-sort-card";
+import { ThemeCard } from "@/components/settings/theme-card";
 
 export const Route = createFileRoute("/settings/ux")({
   component: SettingsUXComponent,
@@ -20,8 +21,9 @@ function SettingsUXComponent() {
       </Heading>
       <ThemeCard />
       <ImageGalleryCard />
-      <PagesCard />
       <TagsSortCard />
+      <PagesCard />
+      <RecentFilesCard />
     </div>
   );
 }

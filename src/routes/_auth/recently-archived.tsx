@@ -5,6 +5,7 @@ import { PageError } from "@/components/page/page-error";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
 import { RefetchButton } from "@/components/refetch-button";
+import { RecentFilesSettingsPopover } from "@/components/settings/recent-files-settings-popover";
 import { useRecentlyArchivedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Separator } from "@/components/ui-primitives/separator";
@@ -39,14 +40,19 @@ function RouteComponent() {
       <PageHeading
         title={`Recently archived (${data?.file_ids?.length ?? 0} files)`}
       />
-      <RefetchButton
-        isFetching={isFetching}
-        onRefetch={() =>
-          queryClient.invalidateQueries({
-            queryKey: ["searchFiles", "recentlyArchived"],
-          })
-        }
-      />
+      <div className="flex items-center gap-2">
+        <RefetchButton
+          isFetching={isFetching}
+          onRefetch={() =>
+            queryClient.invalidateQueries({
+              queryKey: ["searchFiles", "recentlyArchived"],
+            })
+          }
+        />
+        <div className="ml-auto">
+          <RecentFilesSettingsPopover />
+        </div>
+      </div>
       <Separator className="my-2" />
 
       {data?.file_ids && data.file_ids.length > 0 ? (
