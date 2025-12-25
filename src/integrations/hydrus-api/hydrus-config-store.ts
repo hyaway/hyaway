@@ -59,6 +59,10 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
         nextApiAccessKey !== previousApiAccessKey ||
         nextApiEndpoint !== previousApiEndpoint;
 
+      // Also need to compute hash if missing (e.g., after rehydration from localStorage)
+      const needsHashComputation =
+        !get().accessKeyHash && nextApiAccessKey && nextApiEndpoint;
+
       if (credentialsChanged) {
         // Compute new access key hash
         const newAccessKeyHash = computeHash(nextApiEndpoint, nextApiAccessKey);
@@ -72,6 +76,10 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
           sessionKeyHash: 0,
         });
         getContext().queryClient.resetQueries();
+      } else if (needsHashComputation) {
+        // Rehydration case: compute hash without resetting queries
+        const newAccessKeyHash = computeHash(nextApiEndpoint, nextApiAccessKey);
+        set({ accessKeyHash: newAccessKeyHash });
       }
     },
     setSessionKey: (sessionKey: string | undefined) => {

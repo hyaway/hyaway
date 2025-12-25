@@ -116,8 +116,12 @@ export const useVerifySessionAccessQuery = () => {
 };
 
 export const useIsAuthenticated = (): boolean => {
-  const { data } = useVerifySessionAccessQuery();
-  return !!data && data.hasRequiredPermissions;
+  const { data: persistentData } = useVerifyPersistentAccessQuery();
+  const { data: sessionData } = useVerifySessionAccessQuery();
+  return (
+    !!persistentData?.hasRequiredPermissions &&
+    !!sessionData?.hasRequiredPermissions
+  );
 };
 
 /**
