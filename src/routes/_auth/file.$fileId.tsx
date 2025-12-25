@@ -7,15 +7,13 @@ import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/get-files";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
-import {
-  ContentDetailsTable,
-  FileActionButtons,
-  FileDetailSkeleton,
-  FileInfoTable,
-  FilePageHeader,
-  FileStatusBadges,
-  FileViewer,
-} from "@/components/file-detail";
+import { ContentDetailsTable } from "@/components/file-detail/content-details-table";
+import { FileActionButtons } from "@/components/file-detail/file-action-buttons";
+import { FileDetailSkeleton } from "@/components/file-detail/file-detail-skeleton";
+import { FileInfoTable } from "@/components/file-detail/file-info-table";
+import { FilePageHeader } from "@/components/file-detail/file-page-header";
+import { FileStatusBadges } from "@/components/file-detail/file-status-badges";
+import { FileViewer } from "@/components/file-detail/file-viewer";
 
 export const Route = createFileRoute("/_auth/file/$fileId")({
   component: RouteComponent,
