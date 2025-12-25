@@ -8,6 +8,7 @@ import {
 } from "@vidstack/react/player/layouts/default";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
+import { useActiveTheme } from "@/lib/theme-store";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
@@ -22,6 +23,7 @@ export function FileViewer({
   isDeleted?: boolean;
 }) {
   const fileUrl = useFullFileIdUrl(fileId);
+  const activeTheme = useActiveTheme();
 
   if (isDeleted) {
     return (
@@ -78,7 +80,10 @@ export function FileViewer({
               className: "h-full!",
             }}
           />
-          <DefaultVideoLayout icons={defaultLayoutIcons} />
+          <DefaultVideoLayout
+            icons={defaultLayoutIcons}
+            colorScheme={activeTheme}
+          />
         </MediaPlayer>
       </div>
     );
@@ -89,7 +94,10 @@ export function FileViewer({
       <div className="flex max-h-[70svh] flex-row justify-center pb-4 sm:px-4">
         <MediaPlayer title={`File ${fileId}`} src={fileUrl} playsInline>
           <MediaProvider />
-          <DefaultAudioLayout icons={defaultLayoutIcons} />
+          <DefaultAudioLayout
+            icons={defaultLayoutIcons}
+            colorScheme={activeTheme}
+          />
         </MediaPlayer>
       </div>
     );
