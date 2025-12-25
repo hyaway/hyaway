@@ -10,6 +10,7 @@ import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
+import "@vidstack/react/player/styles/default/layouts/audio.css";
 
 export function FileViewer({
   fileId,

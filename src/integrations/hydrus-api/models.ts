@@ -151,7 +151,7 @@ export enum TagStatus {
 }
 
 export const FileMetadataSchema = z.object({
-  blurhash: z.string().optional(),
+  blurhash: z.string().nullish(),
   duration: z.number().nullable(),
   ext: z.string(),
   file_id: z.number(),
@@ -160,12 +160,12 @@ export const FileMetadataSchema = z.object({
   filetype_human: z.string(),
   has_audio: z.boolean(),
   hash: z.string(),
-  height: z.number(),
+  height: z.number().nullable(),
   mime: z.string(),
   num_frames: z.number().nullable(),
   num_words: z.number().nullable(),
   size: z.number(),
-  width: z.number(),
+  width: z.number().nullable(),
   thumbnail_height: z.number().optional(),
   thumbnail_width: z.number().optional(),
   is_inbox: z.boolean().optional(),
