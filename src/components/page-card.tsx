@@ -3,7 +3,6 @@ import {
   Card,
   CardContent,
   CardFooter,
-  CardHeader,
   CardTitle,
 } from "@/components/ui-primitives/card";
 import { ThumbnailImage } from "@/components/image-grid/image-grid-card";
