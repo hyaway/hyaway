@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { NoSymbolIcon as NoSymbolIconLarge } from "@heroicons/react/24/solid";
-import { MediaPlayer, MediaProvider } from "@vidstack/react";
+import {
+  MediaPlayer,
+  MediaProvider,
+  ToggleButton,
+  Tooltip,
+} from "@vidstack/react";
 import {
   DefaultVideoLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
-
+import { TheatreModeExitIcon, TheatreModeIcon } from "@vidstack/react/icons";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
-
+import "@vidstack/react/player/styles/base.css";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 
@@ -72,28 +77,40 @@ export function FileViewer({
   if (isVideo) {
     return (
       <div className="relative flex justify-center pb-4 md:px-8">
-        <div
-          className={cn(
-            "absolute inset-0",
-            isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
-          )}
-          onClick={() => {
-            if (isExpanded) {
-              window.scrollTo({ top: 0, behavior: "auto" });
-            }
-            setIsExpanded(!isExpanded);
-          }}
-        />
         <MediaPlayer
           title={`File ${fileId}`}
           src={fileUrl}
           className={cn(
-            isExpanded ? "max-w-full" : "max-w-2xl",
+            isExpanded ? "max-w-full" : "max-w-3xl",
             "max-h-screen",
           )}
         >
           <MediaProvider />
-          <DefaultVideoLayout icons={defaultLayoutIcons} />
+          <DefaultVideoLayout
+            icons={defaultLayoutIcons}
+            slots={{
+              beforeFullscreenButton: (
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <ToggleButton
+                      className="vds-button group"
+                      aria-label="Theatre Mode"
+                      onClick={() => setIsExpanded(!isExpanded)}
+                    >
+                      <TheatreModeIcon className="vds-icon hidden group-data-pressed:block" />
+                      <TheatreModeExitIcon className="vds-icon group-data-pressed:hidden" />
+                    </ToggleButton>
+                  </Tooltip.Trigger>
+                  <Tooltip.Content
+                    className="vds-tooltip-content"
+                    placement="top start"
+                  >
+                    {isExpanded ? "Exit Theatre Mode" : "Enter Theatre Mode"}
+                  </Tooltip.Content>
+                </Tooltip.Root>
+              ),
+            }}
+          />
         </MediaPlayer>
       </div>
     );
