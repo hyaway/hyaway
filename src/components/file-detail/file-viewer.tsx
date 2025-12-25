@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { NoSymbolIcon as NoSymbolIconLarge } from "@heroicons/react/24/solid";
+import {
+  FaceFrownIcon,
+  NoSymbolIcon as NoSymbolIconLarge,
+} from "@heroicons/react/24/solid";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import {
   DefaultAudioLayout,
@@ -106,6 +109,7 @@ export function FileViewer({
   // Fallback for other types - try to embed or show download link
   return (
     <div className="flex flex-col items-center gap-4 rounded border p-8">
+      <FaceFrownIcon className="text-muted-foreground size-12" />
       <p className="text-muted-foreground">
         This file type ({mime}) is not currently viewable inline.
       </p>
