@@ -107,7 +107,7 @@ export function FileViewer({
   return (
     <div className="flex flex-col items-center gap-4 rounded border p-8">
       <p className="text-muted-foreground">
-        This file type ({mime}) may not be viewable in the browser.
+        This file type ({mime}) is not currently viewable inline.
       </p>
       <a
         href={fileUrl}
