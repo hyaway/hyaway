@@ -15,6 +15,11 @@ import {
 import { NoSymbolIcon as NoSymbolIconLarge } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
+import { MediaPlayer, MediaProvider } from "@vidstack/react";
+import {
+  DefaultVideoLayout,
+  defaultLayoutIcons,
+} from "@vidstack/react/player/layouts/default";
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
 import { PageError } from "@/components/page/page-error";
 import { Badge } from "@/components/ui-primitives/badge";
@@ -32,6 +37,8 @@ import {
   InlineTagsListSkeleton,
 } from "@/components/tag/inline-tags-list";
 import { cn } from "@/lib/utils";
+import "@vidstack/react/player/styles/default/theme.css";
+import "@vidstack/react/player/styles/default/layouts/video.css";
 
 export const Route = createFileRoute("/_auth/file/$fileId")({
   component: RouteComponent,
@@ -76,7 +83,7 @@ function RouteComponent() {
 
   return (
     <div className="flex w-full flex-row">
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
         <FileViewer
           fileId={fileIdNum}
           mime={data.mime}
@@ -169,7 +176,18 @@ function FileViewer({
 
   if (isImage) {
     return (
-      <div className="flex justify-center">
+      <div
+        className={cn(
+          "flex justify-center",
+          isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
+        )}
+        onClick={() => {
+          if (isExpanded) {
+            window.scrollTo({ top: 0, behavior: "auto" });
+          }
+          setIsExpanded(!isExpanded);
+        }}
+      >
         <img
           src={fileUrl}
           alt={`File ${fileId}`}
@@ -179,12 +197,6 @@ function FileViewer({
               ? "max-h-full cursor-zoom-out"
               : "max-h-[70vh] cursor-zoom-in",
           )}
-          onClick={() => {
-            if (isExpanded) {
-              window.scrollTo({ top: 0, behavior: "auto" });
-            }
-            setIsExpanded(!isExpanded);
-          }}
         />
       </div>
     );
@@ -192,14 +204,30 @@ function FileViewer({
 
   if (isVideo) {
     return (
-      <div className="flex justify-center">
-        <video
+      <div className="relative flex justify-center pb-4 md:px-8">
+        <div
+          className={cn(
+            "absolute inset-0",
+            isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
+          )}
+          onClick={() => {
+            if (isExpanded) {
+              window.scrollTo({ top: 0, behavior: "auto" });
+            }
+            setIsExpanded(!isExpanded);
+          }}
+        />
+        <MediaPlayer
+          title={`File ${fileId}`}
           src={fileUrl}
-          controls
-          className="max-h-[70vh] max-w-full rounded border"
+          className={cn(
+            isExpanded ? "max-w-full" : "max-w-2xl",
+            "max-h-screen",
+          )}
         >
-          Your browser does not support the video element.
-        </video>
+          <MediaProvider />
+          <DefaultVideoLayout icons={defaultLayoutIcons} />
+        </MediaPlayer>
       </div>
     );
   }
