@@ -66,7 +66,9 @@ function RouteComponent() {
         <Button onClick={() => refreshPageMutation.mutate(pageId)}>
           Refresh remote
         </Button>
-        <Button onClick={() => focusPageMutation.mutate(pageId)}>Focus</Button>
+        <Button onClick={() => focusPageMutation.mutate(pageId)}>
+          Focus remote
+        </Button>
         <div className="ml-auto">
           <ImageGallerySettingsPopover />
         </div>
