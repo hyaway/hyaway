@@ -58,7 +58,7 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
           className="h-8 w-48 text-sm"
         />
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap">
         {tags.map((tag) => {
           const isVisible = !filteredTagsSet || filteredTagsSet.has(tag);
           return (
