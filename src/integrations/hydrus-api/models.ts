@@ -160,12 +160,18 @@ export const FileMetadataSchema = z.object({
   filetype_human: z.string(),
   has_audio: z.boolean(),
   hash: z.string(),
-  height: z.number().nullable(),
+  height: z
+    .number()
+    .nullable()
+    .transform((val) => val ?? 200),
   mime: z.string(),
   num_frames: z.number().nullable(),
   num_words: z.number().nullable(),
   size: z.number(),
-  width: z.number().nullable(),
+  width: z
+    .number()
+    .nullable()
+    .transform((val) => val ?? 200),
   thumbnail_height: z.number().optional(),
   thumbnail_width: z.number().optional(),
   is_inbox: z.boolean().optional(),
