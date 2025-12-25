@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useHydrusApiClient } from "../hydrus-config-store";
+import { searchFiles } from "../api-client";
+import { useSessionKeyHash } from "../hydrus-config-store";
 import { HydrusFileSortType, ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
 import type { HydrusTagSearch, SearchFilesOptions } from "../models";
@@ -24,20 +25,23 @@ export const useRecentlyArchivedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
 
   return useQuery({
-    queryKey: ["searchFiles", "recentlyArchived", tags, options, hydrusApi],
+    queryKey: [
+      "searchFiles",
+      "recentlyArchived",
+      tags,
+      options,
+      sessionKeyHash,
+    ],
     queryFn: async () => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
-      return hydrusApi.searchFiles({
+      return searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!hydrusApi && tags.length > 0,
+    enabled: !!sessionKeyHash && tags.length > 0,
   });
 };
 
@@ -61,7 +65,7 @@ export const useRecentlyDeletedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
 
   return useQuery({
     queryKey: [
@@ -70,19 +74,19 @@ export const useRecentlyDeletedFilesQuery = () => {
       trashServiceKey,
       tags,
       options,
-      hydrusApi,
+      sessionKeyHash,
     ],
     queryFn: async () => {
-      if (!hydrusApi || !trashServiceKey) {
-        throw new Error("API client and trash service are required.");
+      if (!trashServiceKey) {
+        throw new Error("Trash service is required.");
       }
-      return hydrusApi.searchFiles({
+      return searchFiles({
         tags,
         ...options,
         file_service_key: trashServiceKey,
       });
     },
-    enabled: !!hydrusApi && tags.length > 0 && !!trashServiceKey,
+    enabled: !!sessionKeyHash && tags.length > 0 && !!trashServiceKey,
   });
 };
 
@@ -100,20 +104,17 @@ export const useRecentlyInboxedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
 
   return useQuery({
-    queryKey: ["searchFiles", "recentlyInboxed", tags, options, hydrusApi],
+    queryKey: ["searchFiles", "recentlyInboxed", tags, options, sessionKeyHash],
     queryFn: async () => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
-      return hydrusApi.searchFiles({
+      return searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!hydrusApi && tags.length > 0,
+    enabled: !!sessionKeyHash && tags.length > 0,
   });
 };
 
@@ -127,20 +128,17 @@ export const useRandomInboxFilesQuery = () => {
     file_sort_type: HydrusFileSortType.Random,
   };
 
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
 
   return useQuery({
-    queryKey: ["searchFiles", "randomInbox", tags, options, hydrusApi],
+    queryKey: ["searchFiles", "randomInbox", tags, options, sessionKeyHash],
     queryFn: async () => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
-      return hydrusApi.searchFiles({
+      return searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!hydrusApi && tags.length > 0,
+    enabled: !!sessionKeyHash && tags.length > 0,
   });
 };
 
@@ -148,17 +146,14 @@ export const useSearchFilesQuery = (
   tags: HydrusTagSearch,
   options?: Omit<SearchFilesOptions, "tags">,
 ) => {
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
 
   return useQuery({
-    queryKey: ["searchFiles", tags, options, hydrusApi],
+    queryKey: ["searchFiles", tags, options, sessionKeyHash],
     queryFn: async () => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
-      return hydrusApi.searchFiles({ tags, ...options });
+      return searchFiles({ tags, ...options });
     },
-    enabled: !!hydrusApi && tags.length > 0,
+    enabled: !!sessionKeyHash && tags.length > 0,
   });
 };
 
@@ -166,23 +161,25 @@ export const useInfiniteSearchFilesQuery = (
   tags: HydrusTagSearch,
   options?: Omit<SearchFilesOptions, "tags">,
 ) => {
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
   const BATCH_SIZE = 256;
 
   return useInfiniteQuery({
-    queryKey: ["infiniteSearchFiles", tags, options, BATCH_SIZE, hydrusApi],
+    queryKey: [
+      "infiniteSearchFiles",
+      tags,
+      options,
+      BATCH_SIZE,
+      sessionKeyHash,
+    ],
     queryFn: async ({ pageParam = 0 }) => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
-
       const searchTags: HydrusTagSearch = [
         ...tags,
         `system:limit=${BATCH_SIZE}`,
         `system:offset=${pageParam}`,
       ];
 
-      const result = await hydrusApi.searchFiles({
+      const result = await searchFiles({
         ...options,
         tags: searchTags,
       });
@@ -198,6 +195,6 @@ export const useInfiniteSearchFilesQuery = (
       return lastPage.offset + BATCH_SIZE;
     },
     initialPageParam: 0,
-    enabled: !!hydrusApi && tags.length > 0,
+    enabled: !!sessionKeyHash && tags.length > 0,
   });
 };

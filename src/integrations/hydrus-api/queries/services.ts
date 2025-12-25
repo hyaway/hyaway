@@ -1,19 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { useHydrusApiClient } from "../hydrus-config-store";
+import { getServices } from "../api-client";
+import { useSessionKeyHash } from "../hydrus-config-store";
 import { ServiceType } from "../models";
 
 export const useGetServicesQuery = () => {
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
 
   return useQuery({
-    queryKey: ["getServices", hydrusApi],
+    queryKey: ["getServices", sessionKeyHash],
     queryFn: async () => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
-      return hydrusApi.getServices();
+      return getServices();
     },
-    enabled: !!hydrusApi,
+    enabled: !!sessionKeyHash,
     staleTime: Infinity, // Services don't change often
   });
 };

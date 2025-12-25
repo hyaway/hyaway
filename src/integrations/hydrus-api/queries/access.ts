@@ -1,6 +1,15 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { HydrusApiClient } from "../api-client";
-import { useApiEndpoint, useHydrusApiClient } from "../hydrus-config-store";
+import {
+  getApiVersion,
+  requestNewPermissions,
+  verifyAccessKey,
+} from "../api-client";
+import {
+  useAccessKeyHash,
+  useApiEndpoint,
+  useIsApiConfigured,
+  useSessionKeyHash,
+} from "../hydrus-config-store";
 import { Permission } from "../models";
 import type { AccessKeyType, VerifyAccessKeyResponse } from "../models";
 
@@ -8,7 +17,7 @@ export const useApiVersionQuery = (apiEndpoint: string) => {
   return useQuery({
     queryKey: ["apiVersion", apiEndpoint],
     queryFn: async () => {
-      return HydrusApiClient.getApiVersion(apiEndpoint);
+      return getApiVersion(apiEndpoint);
     },
     enabled: !!apiEndpoint,
     retry: false,
@@ -24,7 +33,7 @@ export const useRequestNewPermissionsMutation = () => {
       apiEndpoint: string;
       name: string;
     }) => {
-      return HydrusApiClient.requestNewPermissions(apiEndpoint, name);
+      return requestNewPermissions(apiEndpoint, name);
     },
     mutationKey: ["requestNewPermissions"],
   });
@@ -47,17 +56,19 @@ function checkPermissions(permissionsData?: VerifyAccessKeyResponse) {
 }
 
 export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
-  const hydrusApi = useHydrusApiClient();
+  const accessKeyHash = useAccessKeyHash();
+  const sessionKeyHash = useSessionKeyHash();
   const apiEndpoint = useApiEndpoint();
+  const isConfigured = useIsApiConfigured();
   const validEndpoint = useApiVersionQuery(apiEndpoint);
 
+  // Use accessKeyHash for persistent key, sessionKeyHash for session key
+  const hashKey = keyType === "persistent" ? accessKeyHash : sessionKeyHash;
+
   return useQuery({
-    queryKey: ["verifyAccess", keyType, hydrusApi],
+    queryKey: ["verifyAccess", keyType, hashKey],
     queryFn: async () => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
-      return hydrusApi.verifyAccessKey(keyType);
+      return verifyAccessKey(keyType);
     },
     // compute whether the API key has required permissions inside the query
     select: (data: VerifyAccessKeyResponse) => {
@@ -66,7 +77,7 @@ export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
         hasRequiredPermissions: checkPermissions(data),
       };
     },
-    enabled: !!hydrusApi && validEndpoint.isSuccess,
+    enabled: isConfigured && validEndpoint.isSuccess,
     // Persistent key rarely changes; keep effectively permanent.
     // Session key lasts up to a day or until remote client restarts. Use a generous stale time & focus/refetch triggers
     // instead of frequent polling. If the client restarts and a 419/403 occurs, interceptor + error state will surface it.
@@ -87,11 +98,11 @@ export const useIsAuthenticated = (): boolean => {
  * Returns mutation object whose data includes permission analysis.
  */
 export const useVerifyAccessMutation = () => {
-  const hydrusApi = useHydrusApiClient();
+  const isConfigured = useIsApiConfigured();
   return useMutation({
     mutationFn: async (keyType: AccessKeyType) => {
-      if (!hydrusApi) throw new Error("Hydrus API client is required.");
-      const response = await hydrusApi.verifyAccessKey(keyType);
+      if (!isConfigured) throw new Error("Hydrus API is not configured.");
+      const response = await verifyAccessKey(keyType);
       return {
         raw: response,
         hasRequiredPermissions: checkPermissions(response),

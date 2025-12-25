@@ -7,14 +7,14 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui-primitives/card";
-import { useHydrusApiClient } from "@/integrations/hydrus-api/hydrus-config-store";
+import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
 function LandingPage() {
-  const apiClient = useHydrusApiClient();
+  const isConfigured = useIsApiConfigured();
   const router = useRouter();
 
   const features: Array<{
@@ -53,7 +53,7 @@ function LandingPage() {
     },
   ];
 
-  const primaryCta = apiClient
+  const primaryCta = isConfigured
     ? {
         label: "Go to Inbox",
         to: "/recently-inboxed" as const,
@@ -65,7 +65,7 @@ function LandingPage() {
         intent: "primary" as const,
       };
 
-  const secondaryCta = apiClient
+  const secondaryCta = isConfigured
     ? { label: "Settings", to: "/settings" as const }
     : { label: "See Features", to: "#features" as const };
 
@@ -78,7 +78,7 @@ function LandingPage() {
       />
       <Features id="features" features={features} />
       <QuickStart
-        hasClient={!!apiClient}
+        hasClient={isConfigured}
         onNavigate={(to) => router.navigate({ to })}
       />
       <Footer />

@@ -1,14 +1,21 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { HydrusApiClient } from "./api-client";
 import type { StateCreator } from "zustand";
 import { getContext } from "@/integrations/tanstack-query/root-provider.tsx";
+import { simpleHash } from "@/lib/simple-hash";
 
 type AuthState = {
   api_access_key: string;
   api_endpoint: string;
   sessionKey: string;
-  apiClient: HydrusApiClient | null;
+  /**
+   * Hash of endpoint + access key, used as query key prefix for cache invalidation
+   */
+  accessKeyHash: number;
+  /**
+   * Hash of endpoint + session key, used as query key prefix for cache invalidation
+   */
+  sessionKeyHash: number;
   actions: {
     setApiCredentials: (
       accessKey: string | null | undefined,
@@ -19,11 +26,20 @@ type AuthState = {
   };
 };
 
+/**
+ * Compute hash for endpoint + key combination
+ */
+const computeHash = (endpoint: string, key: string): number => {
+  if (!endpoint || !key) return 0;
+  return simpleHash(`${endpoint}:${key}`);
+};
+
 const authSlice: StateCreator<AuthState> = (set, get, store) => ({
   api_access_key: "",
   api_endpoint: "",
   sessionKey: "",
-  apiClient: null,
+  accessKeyHash: 0,
+  sessionKeyHash: 0,
   actions: {
     setApiCredentials: (
       accessKey: string | null | undefined,
@@ -32,7 +48,6 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
       const {
         api_access_key: previousApiAccessKey,
         api_endpoint: previousApiEndpoint,
-        apiClient: previousApiClient,
       } = get();
 
       const nextApiAccessKey =
@@ -40,43 +55,38 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
       const nextApiEndpoint =
         endpoint === undefined ? previousApiEndpoint : (endpoint ?? "");
 
-      if (nextApiAccessKey && nextApiEndpoint) {
-        if (
-          !previousApiClient ||
-          nextApiAccessKey !== previousApiAccessKey ||
-          nextApiEndpoint !== previousApiEndpoint
-        ) {
-          // Clear session key when credentials change
-          set({
-            api_access_key: nextApiAccessKey,
-            api_endpoint: nextApiEndpoint,
-            sessionKey: "",
-            apiClient: new HydrusApiClient(
-              nextApiEndpoint,
-              nextApiAccessKey,
-              (sk) => get().actions.setSessionKey(sk),
-            ),
-          });
-          getContext().queryClient.resetQueries();
-        }
-      } else {
+      const credentialsChanged =
+        nextApiAccessKey !== previousApiAccessKey ||
+        nextApiEndpoint !== previousApiEndpoint;
+
+      if (credentialsChanged) {
+        // Compute new access key hash
+        const newAccessKeyHash = computeHash(nextApiEndpoint, nextApiAccessKey);
+
+        // Clear session key when credentials change
         set({
           api_access_key: nextApiAccessKey,
           api_endpoint: nextApiEndpoint,
           sessionKey: "",
-          apiClient: null,
+          accessKeyHash: newAccessKeyHash,
+          sessionKeyHash: 0,
         });
         getContext().queryClient.resetQueries();
       }
     },
     setSessionKey: (sessionKey: string | undefined) => {
-      set({ sessionKey: sessionKey ?? "" });
+      const { api_endpoint } = get();
+      const newSessionKey = sessionKey ?? "";
+      const newSessionKeyHash = computeHash(api_endpoint, newSessionKey);
+      set({
+        sessionKey: newSessionKey,
+        sessionKeyHash: newSessionKeyHash,
+      });
     },
     reset: () => {
       const initialState = store.getInitialState();
       set({
         ...initialState,
-        apiClient: null,
       });
       getContext().queryClient.resetQueries();
     },
@@ -107,9 +117,24 @@ export const useApiEndpoint = () => useAuthStore((state) => state.api_endpoint);
 export const useApiAccessKey = () =>
   useAuthStore((state) => state.api_access_key);
 
-export const useHydrusApiClient = () =>
-  useAuthStore((state) => state.apiClient);
-
 export const useApiSessionKey = () => useAuthStore((state) => state.sessionKey);
+
+/**
+ * Hash of endpoint + access key. Use in query keys to enable/invalidate queries when credentials change.
+ */
+export const useAccessKeyHash = () =>
+  useAuthStore((state) => state.accessKeyHash);
+
+/**
+ * Hash of endpoint + session key. Use in query keys to enable/invalidate queries when session changes.
+ */
+export const useSessionKeyHash = () =>
+  useAuthStore((state) => state.sessionKeyHash);
+
+/**
+ * Returns true if the API is configured (has both endpoint and access key)
+ */
+export const useIsApiConfigured = () =>
+  useAuthStore((state) => !!(state.api_endpoint && state.api_access_key));
 
 export const useAuthActions = () => useAuthStore((state) => state.actions);

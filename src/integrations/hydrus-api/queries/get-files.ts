@@ -1,21 +1,20 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useHydrusApiClient } from "../hydrus-config-store";
+import { getFileMetadata } from "../api-client";
+import { useSessionKeyHash } from "../hydrus-config-store";
 
 export const useGetSingleFileMetadata = (fileId: number) => {
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
+
   return useQuery({
-    queryKey: ["getSingleFileMetadata", fileId, hydrusApi],
+    queryKey: ["getSingleFileMetadata", fileId, sessionKeyHash],
     queryFn: async () => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
-      const response = await hydrusApi.getFileMetadata([fileId], false);
+      const response = await getFileMetadata([fileId], false);
       if (response.metadata.length === 0) {
         throw new Error("File not found.");
       }
       return response.metadata[0];
     },
-    enabled: !!hydrusApi && !!fileId,
+    enabled: !!sessionKeyHash && !!fileId,
     staleTime: Infinity,
   });
 };
@@ -24,22 +23,20 @@ export const useGetFilesMetadata = (
   file_ids: Array<number>,
   only_return_basic_information = true,
 ) => {
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
+
   return useQuery({
     queryKey: [
       "getFilesMetadata",
       file_ids,
       only_return_basic_information,
-      hydrusApi,
+      sessionKeyHash,
     ],
     queryFn: async () => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
       if (file_ids.length === 0) {
         throw new Error("File Ids are required.");
       }
-      return hydrusApi.getFileMetadata(file_ids, only_return_basic_information);
+      return getFileMetadata(file_ids, only_return_basic_information);
     },
     select: (data) =>
       data.metadata.map((meta) => ({
@@ -47,7 +44,7 @@ export const useGetFilesMetadata = (
         width: meta.width,
         height: meta.height,
       })),
-    enabled: !!hydrusApi && file_ids.length > 0,
+    enabled: !!sessionKeyHash && file_ids.length > 0,
     staleTime: Infinity, // Should not change without user action
   });
 };
@@ -56,7 +53,7 @@ export const useInfiniteGetFilesMetadata = (
   file_ids: Array<number>,
   only_return_basic_information = true,
 ) => {
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
   const BATCH_SIZE = 128;
 
   return useInfiniteQuery({
@@ -65,17 +62,14 @@ export const useInfiniteGetFilesMetadata = (
       file_ids,
       only_return_basic_information,
       BATCH_SIZE,
-      hydrusApi,
+      sessionKeyHash,
     ],
     queryFn: async ({ pageParam = 0 }) => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
       const batchFileIds = file_ids.slice(pageParam, pageParam + BATCH_SIZE);
       if (batchFileIds.length === 0) {
         return { metadata: [], nextCursor: undefined };
       }
-      const response = await hydrusApi.getFileMetadata(
+      const response = await getFileMetadata(
         batchFileIds,
         only_return_basic_information,
       );
@@ -89,7 +83,7 @@ export const useInfiniteGetFilesMetadata = (
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: 0,
-    enabled: !!hydrusApi && file_ids.length > 0,
+    enabled: !!sessionKeyHash && file_ids.length > 0,
     staleTime: Infinity,
   });
 };

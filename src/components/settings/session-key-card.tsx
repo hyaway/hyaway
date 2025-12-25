@@ -27,12 +27,13 @@ import {
 import {
   useApiEndpoint,
   useApiSessionKey,
-  useHydrusApiClient,
+  useIsApiConfigured,
 } from "@/integrations/hydrus-api/hydrus-config-store";
+import { refreshSessionKey } from "@/integrations/hydrus-api/api-client";
 
 export function SessionKeyCard() {
   const apiEndpoint = useApiEndpoint();
-  const hydrusApi = useHydrusApiClient();
+  const isConfigured = useIsApiConfigured();
   const sessionKey = useApiSessionKey();
 
   const { data, isLoading, isFetching, isSuccess, isError, error } =
@@ -62,11 +63,11 @@ export function SessionKeyCard() {
           name={SETTINGS_ACTION}
           value={SETTINGS_REQUEST_SESSION_KEY_ACTION}
           onClick={() => {
-            hydrusApi?.refreshSessionKey();
+            refreshSessionKey();
           }}
           disabled={
             !apiEndpoint ||
-            !hydrusApi ||
+            !isConfigured ||
             isFetching ||
             !persistentAccessQuery.isSuccess
           }

@@ -1,21 +1,19 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useHydrusApiClient } from "../hydrus-config-store";
+import { getClientOptions } from "../api-client";
+import { useSessionKeyHash } from "../hydrus-config-store";
 import { useActiveTheme } from "@/lib/theme-store";
 import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
 
 export const useGetClientOptionsQuery = () => {
-  const hydrusApi = useHydrusApiClient();
+  const sessionKeyHash = useSessionKeyHash();
 
   return useQuery({
-    queryKey: ["getClientOptions", hydrusApi],
+    queryKey: ["getClientOptions", sessionKeyHash],
     queryFn: async () => {
-      if (!hydrusApi) {
-        throw new Error("Hydrus API client is required.");
-      }
-      return hydrusApi.getClientOptions();
+      return getClientOptions();
     },
-    enabled: !!hydrusApi,
+    enabled: !!sessionKeyHash,
     staleTime: Infinity, // Options don't change often
   });
 };
