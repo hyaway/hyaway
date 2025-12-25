@@ -57,32 +57,30 @@ function RouteComponent() {
   }
 
   return (
-    <div className="flex w-full flex-row">
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <FileViewer
-          fileId={fileIdNum}
-          mime={data.mime}
-          isDeleted={data.is_deleted && !data.is_trashed}
-        />
+    <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <FileViewer
+        fileId={fileIdNum}
+        mime={data.mime}
+        isDeleted={data.is_deleted && !data.is_trashed}
+      />
 
-        <FilePageHeader fileId={fileIdNum} />
-        <Separator className="my-2" />
-        <FileStatusBadges data={data} />
-        <Separator className="my-2" />
+      <FilePageHeader fileId={fileIdNum} />
+      <Separator className="my-2" />
+      <FileStatusBadges data={data} />
+      <Separator className="my-2" />
 
-        <FileActionButtons fileId={fileIdNum} />
-        <Separator className="my-2" />
+      <FileActionButtons fileId={fileIdNum} />
+      <Separator className="my-2" />
 
-        <div className="@container space-y-4">
-          <Heading level={2}>File metadata</Heading>
-          <div className="grid gap-4 @lg:grid-cols-2">
-            <ContentDetailsTable data={data} />
-            <FileInfoTable data={data} />
-          </div>
+      <div className="@container space-y-4">
+        <Heading level={2}>File metadata</Heading>
+        <div className="grid gap-4 @lg:grid-cols-2">
+          <ContentDetailsTable data={data} />
+          <FileInfoTable data={data} />
         </div>
-        <Separator className="my-2" />
-        <InlineTagsList data={data} />
       </div>
+      <Separator className="my-2" />
+      <InlineTagsList data={data} />
     </div>
   );
 }

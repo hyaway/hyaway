@@ -62,9 +62,6 @@ importers:
       lodash.memoize:
         specifier: ^4.1.2
         version: 4.1.2
-      media-icons:
-        specifier: ^1.1.5
-        version: 1.1.5
       motion:
         specifier: ^12.23.26
         version: 12.23.26(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -2736,10 +2733,6 @@ packages:
 
   media-captions@1.0.4:
     resolution: {integrity: sha512-cyDNmuZvvO4H27rcBq2Eudxo9IZRDCOX/I7VEyqbxsEiD2Ei7UYUhG/Sc5fvMZjmathgz3fEK7iAKqvpY+Ux1w==}
-    engines: {node: '>=16'}
-
-  media-icons@1.1.5:
-    resolution: {integrity: sha512-zu3CjKRs63ybLLWPomRRgTDyYiSrk2bRRgw97ZmN3FGXuo9qUUhBSfYwnjmvSdLG2JOJfAwzDz99bPATSY81DQ==}
     engines: {node: '>=16'}
 
   media-typer@1.1.0:
@@ -6400,8 +6393,6 @@ snapshots:
   mdn-data@2.12.2: {}
 
   media-captions@1.0.4: {}
-
-  media-icons@1.1.5: {}
 
   media-typer@1.1.0: {}
 
