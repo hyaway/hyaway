@@ -151,14 +151,8 @@ export function AppHeader() {
         />
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink render={<Link to="/" />}>
-                <TouchTarget>hyAway</TouchTarget>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
             {isFilePage && (
               <>
-                <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
                   <BreadcrumbLink
                     onClick={() => router.history.back()}
@@ -167,12 +161,8 @@ export function AppHeader() {
                     <TouchTarget>Gallery</TouchTarget>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
+                {breadcrumbs.length > 0 && <BreadcrumbSeparator />}
               </>
-            )}
-            {breadcrumbs.length > 0 && (
-              <BreadcrumbSeparator
-                className={cn({ "hidden md:block": !isFilePage })}
-              />
             )}
             {breadcrumbs.map((crumb, index) => {
               const isLast = index === breadcrumbs.length - 1;
