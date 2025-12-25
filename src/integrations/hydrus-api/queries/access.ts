@@ -55,40 +55,64 @@ function checkPermissions(permissionsData?: VerifyAccessKeyResponse) {
   return hasRequiredPermissions;
 }
 
-export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
+/**
+ * Verify persistent access key validity.
+ * Uses accessKeyHash for cache invalidation when credentials change.
+ */
+export const useVerifyPersistentAccessQuery = () => {
   const accessKeyHash = useAccessKeyHash();
+  const apiEndpoint = useApiEndpoint();
+  const isConfigured = useIsApiConfigured();
+  const validEndpoint = useApiVersionQuery(apiEndpoint);
+
+  return useQuery({
+    queryKey: ["verifyAccess", "persistent", accessKeyHash],
+    queryFn: async () => {
+      return verifyAccessKey("persistent");
+    },
+    select: (data: VerifyAccessKeyResponse) => ({
+      raw: data,
+      hasRequiredPermissions: checkPermissions(data),
+    }),
+    enabled: !!accessKeyHash && isConfigured && validEndpoint.isSuccess,
+    // Persistent key rarely changes; keep effectively permanent
+    staleTime: Infinity,
+    refetchInterval: false,
+    retry: false,
+  });
+};
+
+/**
+ * Verify session key validity.
+ * Uses sessionKeyHash for cache invalidation when session changes.
+ */
+export const useVerifySessionAccessQuery = () => {
   const sessionKeyHash = useSessionKeyHash();
   const apiEndpoint = useApiEndpoint();
   const isConfigured = useIsApiConfigured();
   const validEndpoint = useApiVersionQuery(apiEndpoint);
 
-  // Use accessKeyHash for persistent key, sessionKeyHash for session key
-  const hashKey = keyType === "persistent" ? accessKeyHash : sessionKeyHash;
-
   return useQuery({
-    queryKey: ["verifyAccess", keyType, hashKey],
+    queryKey: ["verifyAccess", "session", sessionKeyHash],
     queryFn: async () => {
-      return verifyAccessKey(keyType);
+      return verifyAccessKey("session");
     },
-    // compute whether the API key has required permissions inside the query
-    select: (data: VerifyAccessKeyResponse) => {
-      return {
-        raw: data,
-        hasRequiredPermissions: checkPermissions(data),
-      };
-    },
-    enabled: isConfigured && validEndpoint.isSuccess,
-    // Persistent key rarely changes; keep effectively permanent.
-    // Session key lasts up to a day or until remote client restarts. Use a generous stale time & focus/refetch triggers
-    // instead of frequent polling. If the client restarts and a 419/403 occurs, interceptor + error state will surface it.
-    staleTime: keyType === "persistent" ? Infinity : 6 * 60 * 60 * 1000, // 6h; adjust upward if needed
+    select: (data: VerifyAccessKeyResponse) => ({
+      raw: data,
+      hasRequiredPermissions: checkPermissions(data),
+    }),
+    enabled: !!sessionKeyHash && isConfigured && validEndpoint.isSuccess,
+    // Session key lasts up to a day or until remote client restarts.
+    // Use a generous stale time & focus/refetch triggers instead of frequent polling.
+    // If the client restarts and a 419/403 occurs, interceptor + error state will surface it.
+    staleTime: 6 * 60 * 60 * 1000, // 6h
     refetchInterval: false,
     retry: false,
   });
 };
 
 export const useIsAuthenticated = (): boolean => {
-  const { data } = useVerifyAccessQuery("session");
+  const { data } = useVerifySessionAccessQuery();
   return !!data && data.hasRequiredPermissions;
 };
 

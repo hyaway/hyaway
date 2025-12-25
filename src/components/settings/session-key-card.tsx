@@ -7,7 +7,10 @@ import {
   SETTINGS_ACTION,
   SETTINGS_REQUEST_SESSION_KEY_ACTION,
 } from "./constants";
-import { useVerifyAccessQuery } from "@/integrations/hydrus-api/queries/access";
+import {
+  useVerifyPersistentAccessQuery,
+  useVerifySessionAccessQuery,
+} from "@/integrations/hydrus-api/queries/access";
 import {
   Alert,
   AlertDescription,
@@ -37,8 +40,8 @@ export function SessionKeyCard() {
   const sessionKey = useApiSessionKey();
 
   const { data, isLoading, isFetching, isSuccess, isError, error } =
-    useVerifyAccessQuery("session");
-  const persistentAccessQuery = useVerifyAccessQuery("persistent");
+    useVerifySessionAccessQuery();
+  const persistentAccessQuery = useVerifyPersistentAccessQuery();
 
   return (
     <Card>

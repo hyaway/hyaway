@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import { SETTINGS_ACCESS_KEY_FIELD_NAME } from "./constants";
 import {
   useApiVersionQuery,
-  useVerifyAccessQuery,
+  useVerifyPersistentAccessQuery,
 } from "@/integrations/hydrus-api/queries/access";
 import { SecretInput } from "@/components/ui-primitives/input";
 import {
@@ -48,7 +48,7 @@ export function AccessKeyField() {
   const apiEndpoint = useApiEndpoint();
 
   const { data, isLoading, isFetching, isSuccess, isError, error } =
-    useVerifyAccessQuery("persistent");
+    useVerifyPersistentAccessQuery();
 
   const apiVersionQuery = useApiVersionQuery(apiEndpoint);
 
