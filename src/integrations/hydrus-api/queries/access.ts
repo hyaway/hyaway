@@ -52,7 +52,7 @@ export const useVerifyAccessQuery = (keyType: AccessKeyType) => {
   const validEndpoint = useApiVersionQuery(apiEndpoint);
 
   return useQuery({
-    queryKey: ["verifyAccess", keyType, hydrusApi, hydrusApi?.toJSON()],
+    queryKey: ["verifyAccess", keyType, hydrusApi],
     queryFn: async () => {
       if (!hydrusApi) {
         throw new Error("Hydrus API client is required.");

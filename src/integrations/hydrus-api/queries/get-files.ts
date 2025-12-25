@@ -31,7 +31,6 @@ export const useGetFilesMetadata = (
       file_ids,
       only_return_basic_information,
       hydrusApi,
-      hydrusApi?.toJSON(),
     ],
     queryFn: async () => {
       if (!hydrusApi) {
@@ -67,7 +66,6 @@ export const useInfiniteGetFilesMetadata = (
       only_return_basic_information,
       BATCH_SIZE,
       hydrusApi,
-      hydrusApi?.toJSON(),
     ],
     queryFn: async ({ pageParam = 0 }) => {
       if (!hydrusApi) {

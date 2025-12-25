@@ -6,7 +6,7 @@ export const useGetServicesQuery = () => {
   const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: ["getServices", hydrusApi, hydrusApi?.toJSON()],
+    queryKey: ["getServices", hydrusApi],
     queryFn: async () => {
       if (!hydrusApi) {
         throw new Error("Hydrus API client is required.");

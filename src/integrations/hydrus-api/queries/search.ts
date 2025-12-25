@@ -27,14 +27,7 @@ export const useRecentlyArchivedFilesQuery = () => {
   const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: [
-      "searchFiles",
-      "recentlyArchived",
-      tags,
-      options,
-      hydrusApi,
-      hydrusApi?.toJSON(),
-    ],
+    queryKey: ["searchFiles", "recentlyArchived", tags, options, hydrusApi],
     queryFn: async () => {
       if (!hydrusApi) {
         throw new Error("Hydrus API client is required.");
@@ -78,7 +71,6 @@ export const useRecentlyDeletedFilesQuery = () => {
       tags,
       options,
       hydrusApi,
-      hydrusApi?.toJSON(),
     ],
     queryFn: async () => {
       if (!hydrusApi || !trashServiceKey) {
@@ -111,14 +103,7 @@ export const useRecentlyInboxedFilesQuery = () => {
   const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: [
-      "searchFiles",
-      "recentlyInboxed",
-      tags,
-      options,
-      hydrusApi,
-      hydrusApi?.toJSON(),
-    ],
+    queryKey: ["searchFiles", "recentlyInboxed", tags, options, hydrusApi],
     queryFn: async () => {
       if (!hydrusApi) {
         throw new Error("Hydrus API client is required.");
@@ -145,14 +130,7 @@ export const useRandomInboxFilesQuery = () => {
   const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: [
-      "searchFiles",
-      "randomInbox",
-      tags,
-      options,
-      hydrusApi,
-      hydrusApi?.toJSON(),
-    ],
+    queryKey: ["searchFiles", "randomInbox", tags, options, hydrusApi],
     queryFn: async () => {
       if (!hydrusApi) {
         throw new Error("Hydrus API client is required.");
@@ -173,7 +151,7 @@ export const useSearchFilesQuery = (
   const hydrusApi = useHydrusApiClient();
 
   return useQuery({
-    queryKey: ["searchFiles", tags, options, hydrusApi, hydrusApi?.toJSON()],
+    queryKey: ["searchFiles", tags, options, hydrusApi],
     queryFn: async () => {
       if (!hydrusApi) {
         throw new Error("Hydrus API client is required.");
@@ -192,14 +170,7 @@ export const useInfiniteSearchFilesQuery = (
   const BATCH_SIZE = 256;
 
   return useInfiniteQuery({
-    queryKey: [
-      "infiniteSearchFiles",
-      tags,
-      options,
-      BATCH_SIZE,
-      hydrusApi,
-      hydrusApi?.toJSON(),
-    ],
+    queryKey: ["infiniteSearchFiles", tags, options, BATCH_SIZE, hydrusApi],
     queryFn: async ({ pageParam = 0 }) => {
       if (!hydrusApi) {
         throw new Error("Hydrus API client is required.");
