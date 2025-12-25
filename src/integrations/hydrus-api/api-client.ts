@@ -55,11 +55,7 @@ export class HydrusApiClient {
     this.axiosSessionInstance.interceptors.request.use(async (config) => {
       // Acquire session key lazily (will return cached key if available)
       const sessionKey = await this.ensureSessionKey();
-      config.headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
-      // Ensure no access key is sent alongside session key
-      if (HYDRUS_API_HEADER_ACCESS_KEY in config.headers) {
-        delete config.headers[HYDRUS_API_HEADER_ACCESS_KEY];
-      }
+      this.applySessionKey(config, sessionKey);
       return config;
     });
 
@@ -69,26 +65,22 @@ export class HydrusApiClient {
       async (error) => {
         const status = error?.response?.status;
         const originalRequest = error.config;
+
+        // Session expired - refresh and retry once
         if (status === 419 && originalRequest && !originalRequest.__retried) {
           originalRequest.__retried = true;
-          // Mark current session key invalid, but retain any in-flight refresh promise (single-flight).
-          this.updateSessionKey(undefined);
           try {
-            const newSessionKey = await this.ensureSessionKey();
-            // Replace headers: remove access key if present, set new session key
-            originalRequest.headers[HYDRUS_API_HEADER_SESSION_KEY] =
-              newSessionKey;
-            if (
-              originalRequest.headers &&
-              HYDRUS_API_HEADER_ACCESS_KEY in originalRequest.headers
-            ) {
-              delete originalRequest.headers[HYDRUS_API_HEADER_ACCESS_KEY];
-            }
+            // Force refresh - we know the current session is invalid
+            const { session_key } = await this.refreshSessionKey();
+            this.applySessionKey(originalRequest, session_key);
             return this.axiosSessionInstance(originalRequest);
-          } catch (refreshErr) {
+          } catch {
+            // Refresh failed - reject with original 419 error
             return Promise.reject(error);
           }
         }
+
+        // Forbidden - clear state entirely (bad access key or permissions)
         if (status === 403) {
           console.error(
             "Hydrus API access forbidden: please check your access key permissions.",
@@ -96,9 +88,23 @@ export class HydrusApiClient {
           this.updateSessionKey(undefined);
           this.refreshSessionPromise = undefined;
         }
+
         return Promise.reject(error);
       },
     );
+  }
+
+  /**
+   * Apply session key to request config, removing any access key header.
+   */
+  private applySessionKey(
+    config: { headers: Record<string, string> },
+    sessionKey: string,
+  ) {
+    config.headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
+    if (HYDRUS_API_HEADER_ACCESS_KEY in config.headers) {
+      delete config.headers[HYDRUS_API_HEADER_ACCESS_KEY];
+    }
   }
   // #endregion Interceptors
 
