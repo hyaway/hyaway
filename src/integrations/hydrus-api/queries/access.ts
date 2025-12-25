@@ -85,6 +85,7 @@ export const useVerifyPersistentAccessQuery = () => {
 /**
  * Verify session key validity.
  * Uses sessionKeyHash for cache invalidation when session changes.
+ * Will automatically acquire a session key if one doesn't exist.
  */
 export const useVerifySessionAccessQuery = () => {
   const sessionKeyHash = useSessionKeyHash();
@@ -95,13 +96,16 @@ export const useVerifySessionAccessQuery = () => {
   return useQuery({
     queryKey: ["verifyAccess", "session", sessionKeyHash],
     queryFn: async () => {
+      // verifyAccessKey("session") calls ensureSessionKey() internally,
+      // which will fetch a session key if one doesn't exist
       return verifyAccessKey("session");
     },
     select: (data: VerifyAccessKeyResponse) => ({
       raw: data,
       hasRequiredPermissions: checkPermissions(data),
     }),
-    enabled: !!sessionKeyHash && isConfigured && validEndpoint.isSuccess,
+    // Don't require sessionKeyHash - the query will acquire one if missing
+    enabled: isConfigured && validEndpoint.isSuccess,
     // Session key lasts up to a day or until remote client restarts.
     // Use a generous stale time & focus/refetch triggers instead of frequent polling.
     // If the client restarts and a 419/403 occurs, interceptor + error state will surface it.
