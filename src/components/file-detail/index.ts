@@ -3,6 +3,7 @@ export { FileActionButtons } from "./file-action-buttons";
 export { FileDetailSkeleton } from "./file-detail-skeleton";
 export { FileInfoTable } from "./file-info-table";
 export { FilePageHeader } from "./file-page-header";
+export { FileStatusBadges } from "./file-status-badges";
 export { FileViewer } from "./file-viewer";
 export { MetadataList } from "./metadata-list";
 export { MimeIcon } from "./mime-icon";

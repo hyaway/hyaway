@@ -1,16 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  ArchiveBoxIcon,
-  ExclamationCircleIcon,
-  InboxIcon,
-  NoSymbolIcon,
-  SpeakerWaveIcon,
-  TrashIcon,
-} from "@heroicons/react/16/solid";
+import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
 
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
 import { PageError } from "@/components/page/page-error";
-import { Badge } from "@/components/ui-primitives/badge";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/get-files";
@@ -21,8 +13,8 @@ import {
   FileDetailSkeleton,
   FileInfoTable,
   FilePageHeader,
+  FileStatusBadges,
   FileViewer,
-  MimeIcon,
 } from "@/components/file-detail";
 
 export const Route = createFileRoute("/_auth/file/$fileId")({
@@ -77,40 +69,7 @@ function RouteComponent() {
 
         <FilePageHeader fileId={fileIdNum} />
         <Separator className="my-2" />
-        <div className="flex flex-wrap items-center gap-2">
-          {data.is_inbox ? (
-            <Badge variant="secondary">
-              <InboxIcon className="mr-1 size-3" />
-              Inbox
-            </Badge>
-          ) : (
-            <Badge variant="secondary">
-              <ArchiveBoxIcon className="mr-1 size-3" />
-              Archived
-            </Badge>
-          )}
-          {data.is_trashed && (
-            <Badge variant="destructive">
-              <TrashIcon className="mr-1 size-3" />
-              Trashed
-            </Badge>
-          )}
-          {data.is_deleted && !data.is_trashed && (
-            <Badge variant="destructive">
-              <NoSymbolIcon className="mr-1 size-3" />
-              Permanently deleted
-            </Badge>
-          )}
-          <Badge variant="outline">
-            <MimeIcon mime={data.mime} className="mr-1 size-3" />
-            {data.mime}
-          </Badge>
-          {data.has_audio && (
-            <Badge variant="outline">
-              <SpeakerWaveIcon className="mr-1 size-3" /> Has audio
-            </Badge>
-          )}
-        </div>
+        <FileStatusBadges data={data} />
         <Separator className="my-2" />
 
         <FileActionButtons fileId={fileIdNum} />

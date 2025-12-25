@@ -32,6 +32,7 @@
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
     "lodash.memoize": "^4.1.2",
+    "media-icons": "^1.1.5",
     "motion": "^12.23.26",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
