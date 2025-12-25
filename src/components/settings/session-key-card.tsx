@@ -32,7 +32,6 @@ import {
 } from "@/integrations/hydrus-api/hydrus-config-store";
 
 export function SessionKeyCard() {
-  const queryClient = useQueryClient();
   const apiEndpoint = useApiEndpoint();
   const hydrusApi = useHydrusApiClient();
   const sessionKey = useApiSessionKey();
@@ -64,14 +63,13 @@ export function SessionKeyCard() {
           name={SETTINGS_ACTION}
           value={SETTINGS_REQUEST_SESSION_KEY_ACTION}
           onClick={() => {
-            hydrusApi?.refreshSessionKey().finally(() => {
-              queryClient.resetQueries({
-                queryKey: ["verifyAccess", "session"],
-              });
-            });
+            hydrusApi?.refreshSessionKey();
           }}
           disabled={
-            !apiEndpoint || !hydrusApi || !persistentAccessQuery.isSuccess
+            !apiEndpoint ||
+            !hydrusApi ||
+            isFetching ||
+            !persistentAccessQuery.isSuccess
           }
         >
           {isFetching ? "Refreshing..." : "Refresh session key"}

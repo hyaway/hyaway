@@ -27,22 +27,25 @@ import type {
   VerifyAccessKeyResponse,
 } from "./models";
 import type { AxiosInstance } from "axios";
-import { simpleHash } from "@/lib/simple-hash";
+
+export type SessionKeyCallback = (sessionKey: string | undefined) => void;
 
 export class HydrusApiClient {
   public readonly apiEndpoint: string;
   private readonly apiAccessKey: string;
-  // Hash that uniquely (and opaquely) represents this client instance. Recomputed when session key changes.
-  private hash: number;
   private readonly axiosSessionInstance: AxiosInstance;
-  private sessionKey?: string; // Lazily acquired session key
-  private refreshSessionPromise?: Promise<SessionKeyResponse>; // Single-flight promise for concurrent refreshes
+  private sessionKey?: string;
+  private refreshSessionPromise?: Promise<SessionKeyResponse>;
+  private readonly onSessionKeyChange?: SessionKeyCallback;
 
-  constructor(apiEndpoint: string, apiAccessKey: string) {
+  constructor(
+    apiEndpoint: string,
+    apiAccessKey: string,
+    onSessionKeyChange?: SessionKeyCallback,
+  ) {
     this.apiEndpoint = apiEndpoint;
     this.apiAccessKey = apiAccessKey;
-    // Initial hash excludes session key (not yet acquired)
-    this.hash = simpleHash(apiEndpoint + apiAccessKey);
+    this.onSessionKeyChange = onSessionKeyChange;
     this.axiosSessionInstance = axios.create({
       baseURL: apiEndpoint,
     });
@@ -50,22 +53,12 @@ export class HydrusApiClient {
     // #region Interceptors
     // Interceptor that ensures a session key is present for all requests made via the instance
     this.axiosSessionInstance.interceptors.request.use(async (config) => {
-      // Acquire session key lazily
-      if (!this.sessionKey) {
-        try {
-          await this.ensureSessionKey();
-        } catch (err) {
-          // Propagate error: we are not allowed to use the access key for ordinary endpoints
-          return Promise.reject(err);
-        }
-      }
-
-      if (this.sessionKey) {
-        // Set session key header; ensure no access key leaks
-        if (HYDRUS_API_HEADER_ACCESS_KEY in config.headers) {
-          delete config.headers[HYDRUS_API_HEADER_ACCESS_KEY];
-        }
-        config.headers[HYDRUS_API_HEADER_SESSION_KEY] = this.sessionKey;
+      // Acquire session key lazily (will return cached key if available)
+      const sessionKey = await this.ensureSessionKey();
+      config.headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
+      // Ensure no access key is sent alongside session key
+      if (HYDRUS_API_HEADER_ACCESS_KEY in config.headers) {
+        delete config.headers[HYDRUS_API_HEADER_ACCESS_KEY];
       }
       return config;
     });
@@ -79,18 +72,18 @@ export class HydrusApiClient {
         if (status === 419 && originalRequest && !originalRequest.__retried) {
           originalRequest.__retried = true;
           // Mark current session key invalid, but retain any in-flight refresh promise (single-flight).
-          this.setSessionKey(undefined);
+          this.updateSessionKey(undefined);
           try {
-            await this.ensureSessionKey();
+            const newSessionKey = await this.ensureSessionKey();
             // Replace headers: remove access key if present, set new session key
+            originalRequest.headers[HYDRUS_API_HEADER_SESSION_KEY] =
+              newSessionKey;
             if (
               originalRequest.headers &&
               HYDRUS_API_HEADER_ACCESS_KEY in originalRequest.headers
             ) {
               delete originalRequest.headers[HYDRUS_API_HEADER_ACCESS_KEY];
             }
-            originalRequest.headers[HYDRUS_API_HEADER_SESSION_KEY] =
-              this.sessionKey!;
             return this.axiosSessionInstance(originalRequest);
           } catch (refreshErr) {
             return Promise.reject(error);
@@ -100,7 +93,7 @@ export class HydrusApiClient {
           console.error(
             "Hydrus API access forbidden: please check your access key permissions.",
           );
-          this.setSessionKey(undefined);
+          this.updateSessionKey(undefined);
           this.refreshSessionPromise = undefined;
         }
         return Promise.reject(error);
@@ -129,33 +122,13 @@ export class HydrusApiClient {
   }
 
   public async refreshSessionKey(): Promise<SessionKeyResponse> {
-    // Single-flight: if a refresh is already in progress, reuse it
-    if (this.refreshSessionPromise) return this.refreshSessionPromise;
-    // Intentionally clear cached key so callers relying on ensureSessionKey won't serve stale
-    this.setSessionKey(undefined);
-    this.refreshSessionPromise = axios
-      .get(`${this.apiEndpoint}/session_key`, {
-        headers: { [HYDRUS_API_HEADER_ACCESS_KEY]: this.apiAccessKey },
-      })
-      .then((response) => {
-        const parsed = SessionKeyResponseSchema.parse(response.data);
-        this.setSessionKey(parsed.session_key);
-        return parsed;
-      })
-      .finally(() => {
-        // Clear promise reference so subsequent refreshes can start new cycle
-        this.refreshSessionPromise = undefined;
-      });
+    // Clear cached key to force a fresh fetch
+    this.updateSessionKey(undefined);
+    // Reuse in-flight request if one exists, otherwise start a new one
+    if (!this.refreshSessionPromise) {
+      this.refreshSessionPromise = this.fetchSessionKey();
+    }
     return this.refreshSessionPromise;
-  }
-
-  /**
-   * Returns the currently cached session key without triggering any network request.
-   * If no session key has been acquired yet, returns undefined. Use `refreshSessionKey()`
-   * to force retrieval or allow the request interceptor to fetch it lazily.
-   */
-  public getSessionKey(): string | undefined {
-    return this.sessionKey;
   }
 
   public async verifyAccessKey(
@@ -167,8 +140,8 @@ export class HydrusApiClient {
       headers[HYDRUS_API_HEADER_ACCESS_KEY] = this.apiAccessKey;
     } else {
       // Ensure a session key exists, fetching if needed
-      await this.ensureSessionKey();
-      headers[HYDRUS_API_HEADER_SESSION_KEY] = this.sessionKey!;
+      const sessionKey = await this.ensureSessionKey();
+      headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
     }
     const response = await axios.get(`${this.apiEndpoint}/verify_access_key`, {
       headers,
@@ -272,25 +245,43 @@ export class HydrusApiClient {
   }
   // #endregion Database
 
-  public toJSON() {
-    return this.hash;
-  }
-
   // #region Internal helpers
   /**
-   * Internal setter that updates the session key and recomputes the hash. Use whenever the session key changes.
+   * Updates the session key and notifies the callback. Use whenever the session key changes.
    */
-  private setSessionKey(newKey?: string) {
+  private updateSessionKey(newKey?: string) {
     this.sessionKey = newKey;
-    this.hash = simpleHash(this.apiEndpoint + this.apiAccessKey + newKey);
+    this.onSessionKeyChange?.(newKey);
   }
   /**
-   * Ensures a session key is available (lazy initialization). Uses a raw axios call to avoid interceptor recursion.
+   * Ensures a session key is available (lazy initialization).
+   * Returns immediately if a valid session key exists, otherwise fetches one.
+   * Uses single-flight pattern to prevent redundant network requests.
    */
   private async ensureSessionKey(): Promise<string> {
     if (this.sessionKey) return this.sessionKey;
-    const response = await this.refreshSessionKey();
+    // Reuse in-flight refresh if one exists, otherwise start a new one
+    if (!this.refreshSessionPromise) {
+      this.refreshSessionPromise = this.fetchSessionKey();
+    }
+    const response = await this.refreshSessionPromise;
     return response.session_key;
+  }
+
+  /**
+   * Fetches a new session key from the API. Internal method - use refreshSessionKey() or ensureSessionKey().
+   */
+  private async fetchSessionKey(): Promise<SessionKeyResponse> {
+    try {
+      const response = await axios.get(`${this.apiEndpoint}/session_key`, {
+        headers: { [HYDRUS_API_HEADER_ACCESS_KEY]: this.apiAccessKey },
+      });
+      const parsed = SessionKeyResponseSchema.parse(response.data);
+      this.updateSessionKey(parsed.session_key);
+      return parsed;
+    } finally {
+      this.refreshSessionPromise = undefined;
+    }
   }
   // #endregion Internal helpers
 }

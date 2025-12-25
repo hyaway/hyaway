@@ -7,12 +7,14 @@ import { getContext } from "@/integrations/tanstack-query/root-provider.tsx";
 type AuthState = {
   api_access_key: string;
   api_endpoint: string;
+  sessionKey: string;
   apiClient: HydrusApiClient | null;
   actions: {
     setApiCredentials: (
       accessKey: string | null | undefined,
       endpoint: string | null | undefined,
     ) => void;
+    setSessionKey: (sessionKey: string | undefined) => void;
     reset: () => void;
   };
 };
@@ -20,6 +22,7 @@ type AuthState = {
 const authSlice: StateCreator<AuthState> = (set, get, store) => ({
   api_access_key: "",
   api_endpoint: "",
+  sessionKey: "",
   apiClient: null,
   actions: {
     setApiCredentials: (
@@ -43,10 +46,16 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
           nextApiAccessKey !== previousApiAccessKey ||
           nextApiEndpoint !== previousApiEndpoint
         ) {
+          // Clear session key when credentials change
           set({
             api_access_key: nextApiAccessKey,
             api_endpoint: nextApiEndpoint,
-            apiClient: new HydrusApiClient(nextApiEndpoint, nextApiAccessKey),
+            sessionKey: "",
+            apiClient: new HydrusApiClient(
+              nextApiEndpoint,
+              nextApiAccessKey,
+              (sk) => get().actions.setSessionKey(sk),
+            ),
           });
           getContext().queryClient.resetQueries();
         }
@@ -54,10 +63,14 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
         set({
           api_access_key: nextApiAccessKey,
           api_endpoint: nextApiEndpoint,
+          sessionKey: "",
           apiClient: null,
         });
         getContext().queryClient.resetQueries();
       }
+    },
+    setSessionKey: (sessionKey: string | undefined) => {
+      set({ sessionKey: sessionKey ?? "" });
     },
     reset: () => {
       const initialState = store.getInitialState();
@@ -97,7 +110,6 @@ export const useApiAccessKey = () =>
 export const useHydrusApiClient = () =>
   useAuthStore((state) => state.apiClient);
 
-export const useApiSessionKey = () =>
-  useAuthStore((state) => state.apiClient?.getSessionKey() ?? "");
+export const useApiSessionKey = () => useAuthStore((state) => state.sessionKey);
 
 export const useAuthActions = () => useAuthStore((state) => state.actions);
