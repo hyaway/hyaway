@@ -564,7 +564,7 @@ const SidebarMenuLinkButton: LinkComponent<typeof SidebarMenuButton> = (
   return (
     <CreatedSidebarMenuLinkButton
       activeProps={{
-        active: true,
+        isActive: true,
         "data-active": true,
       }}
       {...props}
@@ -725,7 +725,7 @@ const SidebarMenuSubLinkButton: LinkComponent<typeof SidebarMenuSubButton> = (
   return (
     <CreatedSidebarMenuSubLinkButton
       activeProps={{
-        active: true,
+        isActive: true,
         "data-active": true,
       }}
       {...props}
