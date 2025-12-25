@@ -141,9 +141,6 @@ export const TagsSidebar = memo(function TagsSidebar({
   // Cache virtual items
   const virtualItems = rowVirtualizer.getVirtualItems();
 
-  if (tags.length === 0) {
-    return null;
-  }
   return (
     <RightSidebarPortal>
       <Sidebar
