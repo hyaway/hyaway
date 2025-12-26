@@ -4,7 +4,6 @@ import type { FileMetadata } from "@/integrations/hydrus-api/models";
 
 import { FileStateBadge } from "@/components/file-detail/file-state-badge";
 import { Button } from "@/components/ui-primitives/button";
-import { useSidebar } from "@/components/ui-primitives/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +19,6 @@ interface FloatingActionBarProps {
 }
 
 export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
-  const { state, isMobile } = useSidebar();
   const actionGroups = useFileActions(data, { includeExternal: true });
   const allActions = actionGroups.flatMap((g) => g.actions);
 
@@ -60,11 +58,8 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
       className={cn(
         "bg-background/80 fixed right-0 bottom-0 z-40 border-t backdrop-blur-sm",
         "flex items-center justify-between px-4 py-2",
-        isMobile
-          ? "left-0"
-          : state === "collapsed"
-            ? "left-(--sidebar-width-icon)"
-            : "left-(--sidebar-width)",
+        "transition-[left] duration-200 ease-linear",
+        "left-0 md:left-(--sidebar-width) md:group-data-[state=collapsed]/sidebar-wrapper:left-(--sidebar-width-icon)",
         className,
       )}
     >
