@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
 import { useFileActions } from "@/hooks/use-file-actions";
+import { cn } from "@/lib/utils";
 
 interface FloatingActionBarProps {
   data: FileMetadata;
@@ -54,39 +55,39 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
     : allActions.filter((a) => !usedActionIds.has(a.id));
 
   return (
-    <FloatingBar className={className}>
+    <FloatingBar className={cn("gap-1", className)}>
       {/* Left: Trash/Restore */}
       <div className="flex min-w-0 flex-1 justify-start">
         {leftAction && (
           <Button
-            variant="ghost"
+            variant={"ghost"}
             onClick={leftAction.onClick}
-            className={
-              leftAction.variant === "destructive"
-                ? "text-destructive hover:text-destructive"
-                : undefined
-            }
+            size="xl"
+            className={"flex-col items-center gap-1"}
           >
-            <leftAction.icon className="size-4" />
+            <leftAction.icon className="size-8 sm:size-6" />
             <span className="hidden sm:inline">{leftAction.label}</span>
           </Button>
         )}
       </div>
-
       {/* Center: Status + More */}
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 items-center gap-1">
         <FileStateBadge data={data} />
 
         {overflowActions.length > 0 && (
           <>
-            <div className="bg-border h-6 w-px" />
             <DropdownMenu>
               <DropdownMenuTrigger
-                render={<Button variant="ghost" />}
+                render={
+                  <Button
+                    variant="ghost"
+                    size="xl"
+                    className="flex-col items-center gap-2"
+                  />
+                }
                 nativeButton={false}
               >
-                <EllipsisHorizontalIcon className="size-4" />
-                <span className="hidden sm:inline">More</span>
+                <EllipsisHorizontalIcon className="size-8" />
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="center">
                 {overflowActions.map((action) => (
@@ -107,7 +108,7 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
                       ) : undefined
                     }
                   >
-                    <action.icon className="size-4" />
+                    <action.icon />
                     {action.label}
                   </DropdownMenuItem>
                 ))}
@@ -116,12 +117,18 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
           </>
         )}
       </div>
+      <div className="bg-border h-6 w-px" />
 
       {/* Right: Archive/Unarchive */}
       <div className="flex min-w-0 flex-1 justify-end">
         {rightAction && (
-          <Button variant="ghost" onClick={rightAction.onClick}>
-            <rightAction.icon className="size-4" />
+          <Button
+            variant="ghost"
+            size="xl"
+            onClick={rightAction.onClick}
+            className="flex-col items-center gap-1"
+          >
+            <rightAction.icon className="size-8 sm:size-6" />
             <span className="hidden sm:inline">{rightAction.label}</span>
           </Button>
         )}
