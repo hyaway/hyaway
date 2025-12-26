@@ -9,6 +9,7 @@ import {
   DefaultVideoLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
+import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
 import { useActiveTheme } from "@/lib/theme-store";
@@ -17,17 +18,11 @@ import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
 
-export function FileViewer({
-  fileId,
-  mime,
-  isDeleted,
-}: {
-  fileId: number;
-  mime: string;
-  isDeleted?: boolean;
-}) {
-  const fileUrl = useFullFileIdUrl(fileId);
+export function FileViewer({ data }: { data: FileMetadata }) {
+  const fileUrl = useFullFileIdUrl(data.file_id);
   const activeTheme = useActiveTheme();
+
+  const isDeleted = data.is_deleted && !data.is_trashed;
 
   if (isDeleted) {
     return (
@@ -41,9 +36,9 @@ export function FileViewer({
   }
 
   // Determine file type from MIME
-  const isImage = mime.startsWith("image/");
-  const isVideo = mime.startsWith("video/");
-  const isAudio = mime.startsWith("audio/");
+  const isImage = data.mime.startsWith("image/");
+  const isVideo = data.mime.startsWith("video/");
+  const isAudio = data.mime.startsWith("audio/");
 
   const startExpanded = useFileViewerStartExpanded();
   const [isExpanded, setIsExpanded] = useState(startExpanded);
@@ -53,7 +48,8 @@ export function FileViewer({
       <div className="flex justify-center pb-4">
         <img
           src={fileUrl}
-          alt={`File ${fileId}`}
+          alt={`File ${data.file_id}`}
+          loading="eager"
           className={cn(
             `max-w-full cursor-pointer object-contain transition-[max-height] duration-300`,
             isExpanded
@@ -74,7 +70,7 @@ export function FileViewer({
   if (isVideo) {
     return (
       <div className="flex max-h-[70svh] flex-row justify-center pb-4 sm:px-4">
-        <MediaPlayer title={`File ${fileId}`} src={fileUrl} playsInline>
+        <MediaPlayer title={`File ${data.file_id}`} src={fileUrl} playsInline>
           <MediaProvider
             mediaProps={{
               className: "h-full!",
@@ -92,7 +88,7 @@ export function FileViewer({
   if (isAudio) {
     return (
       <div className="flex max-h-[70svh] flex-row justify-center pb-4 sm:px-4">
-        <MediaPlayer title={`File ${fileId}`} src={fileUrl} playsInline>
+        <MediaPlayer title={`File ${data.file_id}`} src={fileUrl} playsInline>
           <MediaProvider />
           <DefaultAudioLayout
             icons={defaultLayoutIcons}
@@ -108,7 +104,7 @@ export function FileViewer({
     <div className="flex flex-col items-center gap-4 rounded border p-8">
       <FaceFrownIcon className="text-muted-foreground size-12" />
       <p className="text-muted-foreground">
-        This file type ({mime}) is not currently viewable inline.
+        This file type ({data.mime}) is not currently viewable inline.
       </p>
       <a
         href={fileUrl}

@@ -58,11 +58,7 @@ function RouteComponent() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-2">
-      <FileViewer
-        fileId={fileIdNum}
-        mime={data.mime}
-        isDeleted={data.is_deleted && !data.is_trashed}
-      />
+      <FileViewer data={data} />
 
       <FilePageHeader fileId={fileIdNum} />
       <Separator className="my-2" />
