@@ -1,5 +1,6 @@
 /**
  * Color utilities for contrast adjustment and accessibility.
+ * Uses APCA (Advanced Perceptual Contrast Algorithm) for contrast calculations.
  */
 
 type RGB = [number, number, number];
@@ -10,11 +11,22 @@ type RGB = [number, number, number];
 const LIGHT_BG: RGB = [255, 255, 255];
 const DARK_BG: RGB = [10, 10, 10];
 
-// Badge background opacity (10% of tag color over base background)
+// Badge background opacity (20% of tag color over base background)
 const BADGE_BG_OPACITY = 0.2;
 
-// WCAG AA minimum contrast ratio for normal text
-const MIN_CONTRAST_RATIO = 4.5;
+// APCA minimum contrast (Lc) for body text
+// Lc 60 is recommended for body text, 45 for large/bold text
+const MIN_APCA_CONTRAST = 60;
+
+// APCA constants
+const APCA_NORM_BG = 0.56;
+const APCA_NORM_TXT = 0.57;
+const APCA_REV_BG = 0.65;
+const APCA_REV_TXT = 0.62;
+const APCA_SCALE = 1.14;
+const APCA_CLAMP = 0.1;
+const APCA_LO_OFFSET = 0.027;
+const APCA_LO_CLIP = 0.1;
 
 /**
  * Blend a foreground color with a background at a given opacity.
@@ -29,32 +41,62 @@ function blendColors(fg: RGB, bg: RGB, alpha: number): RGB {
 }
 
 /**
- * Convert sRGB value (0-255) to linear RGB.
+ * Convert sRGB value (0-255) to APCA Y (luminance).
+ * Uses piecewise sRGB transfer function with APCA coefficients.
  */
-function srgbToLinear(value: number): number {
-  const v = value / 255;
-  return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+function srgbToY(rgb: RGB): number {
+  // Linearize with piecewise sRGB transfer
+  const coeffs = [0.2126729, 0.7151522, 0.072175];
+
+  let Y = 0;
+  for (let i = 0; i < 3; i++) {
+    const c = rgb[i] / 255;
+    // Piecewise linearization
+    const lin = c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    Y += lin * coeffs[i];
+  }
+
+  // Soft clamp for very dark colors
+  return Y > 0.022 ? Y : Y + Math.pow(0.022 - Y, 1.414);
 }
 
 /**
- * Calculate relative luminance of an RGB color.
- * https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
+ * Calculate APCA contrast (Lc) between text and background.
+ * Returns a signed value: positive means dark text on light bg,
+ * negative means light text on dark bg.
+ * Target: |Lc| >= 60 for body text, >= 45 for large text.
  */
-function getRelativeLuminance(rgb: RGB): number {
-  const [r, g, b] = rgb.map(srgbToLinear);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
+function getApcaContrast(textRgb: RGB, bgRgb: RGB): number {
+  const Ytxt = srgbToY(textRgb);
+  const Ybg = srgbToY(bgRgb);
 
-/**
- * Calculate contrast ratio between two colors.
- * https://www.w3.org/TR/WCAG21/#dfn-contrast-ratio
- */
-function getContrastRatio(fg: RGB, bg: RGB): number {
-  const l1 = getRelativeLuminance(fg);
-  const l2 = getRelativeLuminance(bg);
-  const lighter = Math.max(l1, l2);
-  const darker = Math.min(l1, l2);
-  return (lighter + 0.05) / (darker + 0.05);
+  // Determine polarity and calculate contrast
+  let Lc: number;
+
+  if (Ybg > Ytxt) {
+    // Dark text on light background (normal polarity)
+    const SAPC =
+      (Math.pow(Ybg, APCA_NORM_BG) - Math.pow(Ytxt, APCA_NORM_TXT)) *
+      APCA_SCALE;
+    Lc =
+      SAPC < APCA_CLAMP
+        ? 0
+        : SAPC < APCA_LO_CLIP
+          ? SAPC - SAPC * APCA_LO_OFFSET
+          : SAPC - APCA_LO_OFFSET;
+  } else {
+    // Light text on dark background (reverse polarity)
+    const SAPC =
+      (Math.pow(Ybg, APCA_REV_BG) - Math.pow(Ytxt, APCA_REV_TXT)) * APCA_SCALE;
+    Lc =
+      SAPC > -APCA_CLAMP
+        ? 0
+        : SAPC > -APCA_LO_CLIP
+          ? SAPC - SAPC * APCA_LO_OFFSET
+          : SAPC + APCA_LO_OFFSET;
+  }
+
+  return Lc * 100;
 }
 
 /**
@@ -132,9 +174,10 @@ function oklchToRgb(L: number, C: number, H: number): RGB {
 }
 
 /**
- * Adjust a color's lightness to meet contrast requirements against a background.
+ * Adjust a color's lightness to meet APCA contrast requirements.
  * Preserves hue and chroma while adjusting lightness using OKLCH color space.
  * Accounts for the badge background being 20% of the text color over the base background.
+ * Adjusts chroma to compensate for lightness changes - boosts for light theme, reduces for dark.
  */
 function adjustColorForContrast(color: RGB, baseBackground: RGB): RGB {
   // Calculate effective background: base background with 20% of the color overlaid
@@ -143,15 +186,15 @@ function adjustColorForContrast(color: RGB, baseBackground: RGB): RGB {
     baseBackground,
     BADGE_BG_OPACITY,
   );
-  const contrast = getContrastRatio(color, effectiveBackground);
+  const contrast = Math.abs(getApcaContrast(color, effectiveBackground));
 
-  if (contrast >= MIN_CONTRAST_RATIO) {
+  if (contrast >= MIN_APCA_CONTRAST) {
     return color;
   }
 
   const [L, C, H] = rgbToOklch(color);
-  const bgLuminance = getRelativeLuminance(baseBackground);
-  const isDarkBg = bgLuminance < 0.5;
+  const bgY = srgbToY(baseBackground);
+  const isDarkBg = bgY < 0.2; // APCA uses different threshold than WCAG
 
   // Binary search for the right lightness
   let minL = isDarkBg ? L : 0;
@@ -167,9 +210,9 @@ function adjustColorForContrast(color: RGB, baseBackground: RGB): RGB {
       baseBackground,
       BADGE_BG_OPACITY,
     );
-    const testContrast = getContrastRatio(testColor, testEffectiveBg);
+    const testContrast = Math.abs(getApcaContrast(testColor, testEffectiveBg));
 
-    if (testContrast >= MIN_CONTRAST_RATIO) {
+    if (testContrast >= MIN_APCA_CONTRAST) {
       if (isDarkBg) {
         maxL = midL; // Try to find a darker valid color (closer to original)
       } else {
@@ -185,12 +228,27 @@ function adjustColorForContrast(color: RGB, baseBackground: RGB): RGB {
   }
 
   const finalL = isDarkBg ? minL : maxL;
-  return oklchToRgb(finalL, C, H);
+
+  // Adjust chroma based on lightness change
+  const lightnessShift = Math.abs(finalL - L);
+  let adjustedC = C;
+
+  if (isDarkBg) {
+    // Dark theme: reduce chroma slightly when going lighter to avoid oversaturation
+    adjustedC = C * Math.max(0.7, 1 - lightnessShift * 0.3);
+  } else {
+    // Light theme: boost chroma when going darker to maintain vibrancy
+    // Also apply a base boost since darker colors appear less saturated
+    adjustedC = C * Math.min(1.5, 1 + lightnessShift * 0.8);
+  }
+
+  return oklchToRgb(finalL, adjustedC, H);
 }
 
 /**
  * Adjust an RGB color for accessible contrast based on theme.
  * Returns an RGB tuple adjusted for the background in the given theme.
+ * Uses APCA contrast algorithm for better perceptual accuracy.
  */
 export function adjustColorForTheme(rgb: RGB, theme: "light" | "dark"): RGB {
   const background = theme === "dark" ? DARK_BG : LIGHT_BG;
