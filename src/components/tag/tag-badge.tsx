@@ -64,9 +64,12 @@ function TagBadgeCount({
 }: ComponentProps<typeof Badge>) {
   return (
     <Badge
-      variant="outline"
+      variant="overlay"
       size="xs"
-      className={cn("ms-1 -me-0.5 shrink-0 px-1.5 select-all", className)}
+      className={cn(
+        "ms-1 -me-0.5 shrink-0 border border-(--badge-overlay)/30 px-1.5 select-all",
+        className,
+      )}
       {...props}
     >
       {children}
