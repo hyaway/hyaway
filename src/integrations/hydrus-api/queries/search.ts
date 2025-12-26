@@ -139,6 +139,7 @@ export const useRandomInboxFilesQuery = () => {
       });
     },
     enabled: !!sessionKeyHash && tags.length > 0,
+    staleTime: Infinity,
   });
 };
 
