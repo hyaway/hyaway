@@ -147,28 +147,17 @@ export function PureImageGrid({
               const itemHeight = getItemHeight(item);
 
               return (
-                <li
+                <ImageGridCard
                   key={virtualRow.index}
-                  style={{
-                    width: `${width}px`,
-                    height: `${itemHeight}px`,
-                    transform: `translate(${(virtualRow.lane * 100) / lanes}cqw, ${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
-                    containIntrinsicSize: `${width}px ${itemHeight}px`,
-                  }}
-                  className={cn(
-                    "absolute top-0 left-0 z-0 overflow-visible [content-visibility:auto] hover:z-30 hover:[content-visibility:visible]",
-                    !rowVirtualizer.isScrolling &&
-                      "transition-transform duration-350 ease-out",
-                  )}
-                >
-                  <ImageGridCard
-                    virtualRow={virtualRow}
-                    lanes={lanes}
-                    totalItemsCount={deferredItems.length}
-                    item={item}
-                    width={width}
-                  />
-                </li>
+                  virtualRow={virtualRow}
+                  lanes={lanes}
+                  totalItemsCount={deferredItems.length}
+                  item={item}
+                  width={width}
+                  height={itemHeight}
+                  scrollMargin={rowVirtualizer.options.scrollMargin}
+                  isScrolling={rowVirtualizer.isScrolling}
+                />
               );
             })}
         </ul>
