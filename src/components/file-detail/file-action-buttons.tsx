@@ -15,19 +15,23 @@ export function FileActionButtons({ fileId }: { fileId: number }) {
   const downloadUrl = useDownloadFileIdUrl(fileId);
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button render={<a href={downloadUrl} download />} nativeButton={false}>
-        <ArrowDownTrayIcon className="mr-1 size-4" />
-        Download
-      </Button>
-      <Button
-        render={<a href={fileUrl} target="_blank" rel="noopener noreferrer" />}
-        nativeButton={false}
-      >
-        <ArrowTopRightOnSquareIcon className="mr-1 size-4" />
-        Open in new tab
-      </Button>
-      <FileViewerSettingsPopover className="ms-auto" />
+    <div className="flex flex-row justify-between gap-2">
+      <div className="flex flex-wrap gap-2">
+        <Button render={<a href={downloadUrl} download />} nativeButton={false}>
+          <ArrowDownTrayIcon className="mr-1 size-4" />
+          Download
+        </Button>
+        <Button
+          render={
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer" />
+          }
+          nativeButton={false}
+        >
+          <ArrowTopRightOnSquareIcon className="mr-1 size-4" />
+          Open in new tab
+        </Button>
+      </div>
+      <FileViewerSettingsPopover />
     </div>
   );
 }

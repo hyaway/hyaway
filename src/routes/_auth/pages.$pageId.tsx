@@ -54,24 +54,25 @@ function RouteComponent() {
       <PageHeading
         title={`Page: ${data?.page_info.name} (${data?.page_info.media.num_files ?? 0} files)`}
       />
-      <div className="flex gap-2">
-        <RefetchButton
-          isFetching={isFetching}
-          onRefetch={() =>
-            queryClient.invalidateQueries({
-              queryKey: ["getPageInfo", pageId],
-            })
-          }
-        />
-        <Button onClick={() => refreshPageMutation.mutate(pageId)}>
-          Refresh remote
-        </Button>
-        <Button onClick={() => focusPageMutation.mutate(pageId)}>
-          Focus remote
-        </Button>
-        <div className="ml-auto">
-          <ImageGallerySettingsPopover />
+      <div className="flex flex-row justify-between gap-2">
+        <div className="flex flex-wrap gap-2">
+          <RefetchButton
+            isFetching={isFetching}
+            onRefetch={() =>
+              queryClient.invalidateQueries({
+                queryKey: ["getPageInfo", pageId],
+              })
+            }
+          />
+          <Button onClick={() => refreshPageMutation.mutate(pageId)}>
+            Refresh remote
+          </Button>
+          <Button onClick={() => focusPageMutation.mutate(pageId)}>
+            Focus remote
+          </Button>
         </div>
+
+        <ImageGallerySettingsPopover />
       </div>
       <Separator className="my-2" />
 
