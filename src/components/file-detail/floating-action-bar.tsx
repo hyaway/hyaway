@@ -72,7 +72,7 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
       </div>
       {/* Center: Status + More */}
       <div className="flex shrink-0 items-center gap-1">
-        <FileStateBadge data={data} />
+        <FileStateBadge data={data} size="lg" />
 
         {overflowActions.length > 0 && (
           <>
@@ -81,13 +81,13 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
                 render={
                   <Button
                     variant="ghost"
-                    size="xl"
-                    className="flex-col items-center gap-2"
+                    size="icon-lg"
+                    className="flex-col items-center gap-2 border-none"
                   />
                 }
                 nativeButton={false}
               >
-                <EllipsisHorizontalIcon className="size-8" />
+                <EllipsisHorizontalIcon className="size-6" />
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="center">
                 {overflowActions.map((action) => (
@@ -117,8 +117,6 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
           </>
         )}
       </div>
-      <div className="bg-border h-6 w-px" />
-
       {/* Right: Archive/Unarchive */}
       <div className="flex min-w-0 flex-1 justify-end">
         {rightAction && (

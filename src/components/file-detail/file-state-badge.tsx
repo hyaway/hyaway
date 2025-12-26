@@ -5,6 +5,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/16/solid";
 
+import type { ComponentProps } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 
 import { Badge } from "@/components/ui-primitives/badge";
@@ -14,11 +15,15 @@ type FileStateData = Pick<
   "is_inbox" | "is_trashed" | "is_deleted"
 >;
 
-export function FileStateBadge({ data }: { data: FileStateData }) {
+type FileStateBadgeProps = Omit<ComponentProps<typeof Badge>, "variant"> & {
+  data: FileStateData;
+};
+
+export function FileStateBadge({ data, ...badgeProps }: FileStateBadgeProps) {
   // Permanently deleted (is_deleted but not in trash)
   if (data.is_deleted && !data.is_trashed) {
     return (
-      <Badge variant="destructive">
+      <Badge variant="destructive" {...badgeProps}>
         <NoSymbolIcon className="mr-1 size-3" />
         Permanently deleted
       </Badge>
@@ -27,7 +32,7 @@ export function FileStateBadge({ data }: { data: FileStateData }) {
 
   if (data.is_trashed) {
     return (
-      <Badge variant="destructive">
+      <Badge variant="destructive" {...badgeProps}>
         <TrashIcon className="mr-1 size-3" />
         Trashed
       </Badge>
@@ -36,7 +41,7 @@ export function FileStateBadge({ data }: { data: FileStateData }) {
 
   if (data.is_inbox) {
     return (
-      <Badge variant="secondary">
+      <Badge variant="secondary" {...badgeProps}>
         <InboxIcon className="mr-1 size-3" />
         Inbox
       </Badge>
@@ -44,7 +49,7 @@ export function FileStateBadge({ data }: { data: FileStateData }) {
   }
 
   return (
-    <Badge variant="secondary">
+    <Badge variant="secondary" {...badgeProps}>
       <ArchiveBoxIcon className="mr-1 size-3" />
       Archived
     </Badge>
