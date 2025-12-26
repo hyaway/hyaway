@@ -308,4 +308,53 @@ export async function getClientOptions(): Promise<GetClientOptionsResponse> {
   const response = await apiClient.get("/manage_database/get_client_options");
   return GetClientOptionsResponseSchema.parse(response.data);
 }
+
+// #region File Management
+
+export type FileIdentifiers =
+  | { file_ids: Array<number> }
+  | { hashes: Array<string> }
+  | { hash: string }
+  | { file_id: number };
+
+export type DeleteFilesOptions = FileIdentifiers & {
+  file_service_key?: string;
+  reason?: string;
+};
+
+export type UndeleteFilesOptions = FileIdentifiers & {
+  file_service_key?: string;
+};
+
+/**
+ * Send files to the trash
+ */
+export async function deleteFiles(options: DeleteFilesOptions): Promise<void> {
+  await apiClient.post("/add_files/delete_files", options);
+}
+
+/**
+ * Restore files from the trash
+ */
+export async function undeleteFiles(
+  options: UndeleteFilesOptions,
+): Promise<void> {
+  await apiClient.post("/add_files/undelete_files", options);
+}
+
+/**
+ * Archive files (remove from inbox)
+ */
+export async function archiveFiles(options: FileIdentifiers): Promise<void> {
+  await apiClient.post("/add_files/archive_files", options);
+}
+
+/**
+ * Unarchive files (put back in inbox)
+ */
+export async function unarchiveFiles(options: FileIdentifiers): Promise<void> {
+  await apiClient.post("/add_files/unarchive_files", options);
+}
+
+// #endregion File Management
 // #endregion API Functions
