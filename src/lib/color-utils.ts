@@ -4,10 +4,11 @@
 
 type RGB = [number, number, number];
 
-// Background colors for high contrast badge variant
-// Pure white for light theme, pure black for dark theme
+// Background colors matching --background CSS variable
+// Light: oklch(1 0 0) = rgb(255, 255, 255)
+// Dark: oklch(0.145 0 0) = rgb(10, 10, 10)
 const LIGHT_BG: RGB = [255, 255, 255];
-const DARK_BG: RGB = [0, 0, 0];
+const DARK_BG: RGB = [10, 10, 10];
 
 // Badge background opacity (10% of tag color over base background)
 const BADGE_BG_OPACITY = 0.2;
