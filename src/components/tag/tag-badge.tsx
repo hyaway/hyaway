@@ -42,16 +42,16 @@ export function TagBadge({
   return (
     <Badge
       variant={"overlay"}
-      className={className}
+      className={cn("select-auto", className)}
       style={combinedStyle}
       {...props}
     >
-      <div className="select-all">
+      <span className="select-all">
         <TouchTarget>
           {namespace ? `${namespace}: ` : ""}
           {tag}
         </TouchTarget>
-      </div>
+      </span>
       {children}
     </Badge>
   );
