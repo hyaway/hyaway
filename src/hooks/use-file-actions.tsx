@@ -1,4 +1,5 @@
 import {
+  ArchiveBoxArrowDownIcon,
   ArchiveBoxIcon,
   ArrowDownTrayIcon,
   ArrowTopRightOnSquareIcon,
@@ -122,7 +123,7 @@ export function useFileActions(
     managementActions.push({
       id: "archive",
       label: "Archive",
-      icon: ArchiveBoxIcon,
+      icon: ArchiveBoxArrowDownIcon,
       onClick: () => archiveFilesMutation.mutate({ file_id: data.file_id }),
     });
   } else {
@@ -144,7 +145,7 @@ export function useFileActions(
   } else {
     managementActions.push({
       id: "delete",
-      label: "Delete",
+      label: "Trash",
       icon: TrashIcon,
       onClick: () => deleteFilesMutation.mutate({ file_id: data.file_id }),
       variant: "destructive",

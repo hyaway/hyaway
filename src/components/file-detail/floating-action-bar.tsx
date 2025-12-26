@@ -3,6 +3,7 @@ import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 
 import { FileStateBadge } from "@/components/file-detail/file-state-badge";
+import { FloatingBar } from "@/components/app-shell/floating-bar";
 import { Button } from "@/components/ui-primitives/button";
 import {
   DropdownMenu,
@@ -11,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
 import { useFileActions } from "@/hooks/use-file-actions";
-import { cn } from "@/lib/utils";
 
 interface FloatingActionBarProps {
   data: FileMetadata;
@@ -54,21 +54,12 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
     : allActions.filter((a) => !usedActionIds.has(a.id));
 
   return (
-    <div
-      className={cn(
-        "bg-background/80 fixed right-0 bottom-0 z-40 border-t backdrop-blur-sm",
-        "flex items-center justify-between px-4 py-2",
-        "transition-[left] duration-200 ease-linear",
-        "left-0 md:left-(--sidebar-width) md:group-data-[state=collapsed]/sidebar-wrapper:left-(--sidebar-width-icon)",
-        className,
-      )}
-    >
+    <FloatingBar className={className}>
       {/* Left: Trash/Restore */}
       <div className="flex min-w-0 flex-1 justify-start">
         {leftAction && (
           <Button
             variant="ghost"
-            size="sm"
             onClick={leftAction.onClick}
             className={
               leftAction.variant === "destructive"
@@ -91,7 +82,7 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
             <div className="bg-border h-6 w-px" />
             <DropdownMenu>
               <DropdownMenuTrigger
-                render={<Button variant="ghost" size="sm" />}
+                render={<Button variant="ghost" />}
                 nativeButton={false}
               >
                 <EllipsisHorizontalIcon className="size-4" />
@@ -129,12 +120,12 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
       {/* Right: Archive/Unarchive */}
       <div className="flex min-w-0 flex-1 justify-end">
         {rightAction && (
-          <Button variant="ghost" size="sm" onClick={rightAction.onClick}>
+          <Button variant="ghost" onClick={rightAction.onClick}>
             <rightAction.icon className="size-4" />
             <span className="hidden sm:inline">{rightAction.label}</span>
           </Button>
         )}
       </div>
-    </div>
+    </FloatingBar>
   );
 }
