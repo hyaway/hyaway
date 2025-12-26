@@ -18,6 +18,7 @@ import type {
   FileIdentifiers,
   UndeleteFilesOptions,
 } from "../api-client";
+import type { FileMetadata } from "../models";
 
 export const useGetSingleFileMetadata = (fileId: number) => {
   const authKeyHash = useAuthKeyHash();
@@ -108,50 +109,84 @@ export const useInfiniteGetFilesMetadata = (
 // #region File Management Mutations
 
 /**
- * Helper to extract file IDs from FileIdentifiers for cache invalidation
+ * Helper to extract file IDs from FileIdentifiers for cache updates
  */
 const getFileIdsFromIdentifiers = (
   identifiers: FileIdentifiers,
 ): Array<number> | undefined => {
   if ("file_ids" in identifiers) return identifiers.file_ids;
   if ("file_id" in identifiers) return [identifiers.file_id];
-  return undefined; // Can't invalidate by hash easily
+  return undefined; // Can't update by hash easily
 };
 
 /**
- * Helper to invalidate all file-related queries for given file IDs
+ * Helper to update file metadata flags in all relevant caches
  */
-const invalidateFileQueries = (
+const updateFileMetadataFlags = (
   queryClient: ReturnType<typeof useQueryClient>,
   fileIds: Array<number> | undefined,
+  updater: (metadata: FileMetadata) => FileMetadata,
 ) => {
-  if (fileIds) {
-    const fileIdSet = new Set(fileIds);
+  if (!fileIds) return;
 
-    // Invalidate single file metadata queries
-    for (const fileId of fileIds) {
-      queryClient.invalidateQueries({
-        queryKey: ["getSingleFileMetadata", fileId],
-      });
-    }
+  const fileIdSet = new Set(fileIds);
 
-    // Invalidate batch metadata queries that contain any of the affected file IDs
+  // Invalidate single file metadata queries for fresh data
+  for (const fileId of fileIds) {
     queryClient.invalidateQueries({
+      queryKey: ["getSingleFileMetadata", fileId],
+    });
+  }
+
+  // Update batch metadata queries that contain any of the affected file IDs
+  queryClient.setQueriesData<{ metadata: Array<FileMetadata> }>(
+    {
       predicate: (query) => {
         const key = query.queryKey;
-        if (
-          key[0] !== "getFilesMetadata" &&
-          key[0] !== "infiniteGetFilesMetadata"
-        ) {
-          return false;
-        }
-        // key[1] is the file_ids array
+        if (key[0] !== "getFilesMetadata") return false;
         const queryFileIds = key[1] as Array<number> | undefined;
         if (!queryFileIds) return false;
         return queryFileIds.some((id) => fileIdSet.has(id));
       },
-    });
-  }
+    },
+    (oldData) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        metadata: oldData.metadata.map((meta) =>
+          fileIdSet.has(meta.file_id) ? updater(meta) : meta,
+        ),
+      };
+    },
+  );
+
+  // Update infinite query caches
+  queryClient.setQueriesData<{
+    pages: Array<{ metadata: Array<FileMetadata>; nextCursor?: number }>;
+    pageParams: Array<number>;
+  }>(
+    {
+      predicate: (query) => {
+        const key = query.queryKey;
+        if (key[0] !== "infiniteGetFilesMetadata") return false;
+        const queryFileIds = key[1] as Array<number> | undefined;
+        if (!queryFileIds) return false;
+        return queryFileIds.some((id) => fileIdSet.has(id));
+      },
+    },
+    (oldData) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        pages: oldData.pages.map((page) => ({
+          ...page,
+          metadata: page.metadata.map((meta) =>
+            fileIdSet.has(meta.file_id) ? updater(meta) : meta,
+          ),
+        })),
+      };
+    },
+  );
 };
 
 /**
@@ -164,7 +199,14 @@ export const useDeleteFilesMutation = () => {
     mutationFn: (options: DeleteFilesOptions) => deleteFiles(options),
     onSuccess: (_data, variables) => {
       const fileIds = getFileIdsFromIdentifiers(variables);
-      invalidateFileQueries(queryClient, fileIds);
+      updateFileMetadataFlags(queryClient, fileIds, (meta) => ({
+        ...meta,
+        is_trashed: true,
+        is_deleted: true,
+      }));
+      queryClient.invalidateQueries({
+        queryKey: ["searchFiles", "recentlyDeleted"],
+      });
     },
     mutationKey: ["deleteFiles"],
   });
@@ -180,7 +222,14 @@ export const useUndeleteFilesMutation = () => {
     mutationFn: (options: UndeleteFilesOptions) => undeleteFiles(options),
     onSuccess: (_data, variables) => {
       const fileIds = getFileIdsFromIdentifiers(variables);
-      invalidateFileQueries(queryClient, fileIds);
+      updateFileMetadataFlags(queryClient, fileIds, (meta) => ({
+        ...meta,
+        is_trashed: false,
+        is_deleted: false,
+      }));
+      queryClient.invalidateQueries({
+        queryKey: ["searchFiles", "recentlyDeleted"],
+      });
     },
     mutationKey: ["undeleteFiles"],
   });
@@ -196,7 +245,16 @@ export const useArchiveFilesMutation = () => {
     mutationFn: (options: FileIdentifiers) => archiveFiles(options),
     onSuccess: (_data, variables) => {
       const fileIds = getFileIdsFromIdentifiers(variables);
-      invalidateFileQueries(queryClient, fileIds);
+      updateFileMetadataFlags(queryClient, fileIds, (meta) => ({
+        ...meta,
+        is_inbox: false,
+      }));
+      queryClient.invalidateQueries({
+        queryKey: ["searchFiles", "recentlyArchived"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["searchFiles", "recentlyInboxed"],
+      });
     },
     mutationKey: ["archiveFiles"],
   });
@@ -212,7 +270,16 @@ export const useUnarchiveFilesMutation = () => {
     mutationFn: (options: FileIdentifiers) => unarchiveFiles(options),
     onSuccess: (_data, variables) => {
       const fileIds = getFileIdsFromIdentifiers(variables);
-      invalidateFileQueries(queryClient, fileIds);
+      updateFileMetadataFlags(queryClient, fileIds, (meta) => ({
+        ...meta,
+        is_inbox: true,
+      }));
+      queryClient.invalidateQueries({
+        queryKey: ["searchFiles", "recentlyArchived"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["searchFiles", "recentlyInboxed"],
+      });
     },
     mutationKey: ["unarchiveFiles"],
   });
