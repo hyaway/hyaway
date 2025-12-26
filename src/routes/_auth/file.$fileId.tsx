@@ -65,7 +65,7 @@ function RouteComponent() {
       <FileStatusBadges data={data} />
       <Separator className="my-2" />
 
-      <FileActionButtons fileId={fileIdNum} />
+      <FileActionButtons data={data} />
       <Separator className="my-2" />
 
       <div className="@container space-y-4">

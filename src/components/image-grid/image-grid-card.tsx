@@ -1,12 +1,7 @@
 import { memo, useMemo, useState } from "react";
 import {
-  ArchiveBoxArrowDownIcon,
-  ArchiveBoxIcon,
-  ArrowUturnLeftIcon,
-  ArrowUturnUpIcon,
   ExclamationCircleIcon,
   FilmIcon,
-  InboxArrowDownIcon,
   InboxIcon,
   SpeakerWaveIcon,
   TrashIcon,
@@ -19,15 +14,11 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui-primitives/context-menu";
+import { useFileActions } from "@/hooks/use-file-actions";
 import { useThumbnailFileIdUrl } from "@/hooks/use-url-with-api-key";
-import {
-  useArchiveFilesMutation,
-  useDeleteFilesMutation,
-  useUnarchiveFilesMutation,
-  useUndeleteFilesMutation,
-} from "@/integrations/hydrus-api/queries/manage-files";
 import { cn } from "@/lib/utils";
 
 // --- Main Card Component ---
@@ -108,11 +99,7 @@ export const ImageGridCard = memo(function ImageGridCard({
             />
           </Link>
         </ContextMenuTrigger>
-        <ImageCardContextMenu
-          fileId={item.file_id}
-          isInbox={item.is_inbox}
-          isTrashed={item.is_trashed}
-        />
+        <ImageCardContextMenu item={item} />
       </ContextMenu>
     </li>
   );
@@ -179,54 +166,37 @@ const ImageCardContent = memo(function ImageCardContent({
 // --- Context Menu Actions ---
 
 interface ImageCardContextMenuProps {
-  fileId: number;
-  isInbox?: boolean;
-  isTrashed?: boolean;
+  item: Pick<
+    FileMetadata,
+    "file_id" | "is_inbox" | "is_trashed" | "ext" | "filetype_human"
+  >;
 }
 
 const ImageCardContextMenu = memo(function ImageCardContextMenu({
-  fileId,
-  isInbox = false,
-  isTrashed = false,
+  item,
 }: ImageCardContextMenuProps) {
-  const deleteFilesMutation = useDeleteFilesMutation();
-  const undeleteFilesMutation = useUndeleteFilesMutation();
-  const archiveFilesMutation = useArchiveFilesMutation();
-  const unarchiveFilesMutation = useUnarchiveFilesMutation();
+  const actionGroups = useFileActions(item, {
+    includeOpen: true,
+    includeExternal: true,
+  });
 
   return (
     <ContextMenuContent>
-      {isInbox ? (
-        <ContextMenuItem
-          onClick={() => archiveFilesMutation.mutate({ file_id: fileId })}
-        >
-          <ArchiveBoxArrowDownIcon className="h-4 w-4" />
-          Archive
-        </ContextMenuItem>
-      ) : (
-        <ContextMenuItem
-          onClick={() => unarchiveFilesMutation.mutate({ file_id: fileId })}
-        >
-          <InboxArrowDownIcon className="h-4 w-4" />
-          Return to inbox
-        </ContextMenuItem>
-      )}
-      {isTrashed ? (
-        <ContextMenuItem
-          onClick={() => undeleteFilesMutation.mutate({ file_id: fileId })}
-        >
-          <ArrowUturnLeftIcon className="h-4 w-4" />
-          Restore from trash
-        </ContextMenuItem>
-      ) : (
-        <ContextMenuItem
-          variant="destructive"
-          onClick={() => deleteFilesMutation.mutate({ file_id: fileId })}
-        >
-          <TrashIcon className="h-4 w-4" />
-          Send to trash
-        </ContextMenuItem>
-      )}
+      {actionGroups.map((group, groupIndex) => (
+        <div key={group.id}>
+          {groupIndex > 0 && <ContextMenuSeparator />}
+          {group.actions.map((action) => (
+            <ContextMenuItem
+              key={action.id}
+              onClick={action.onClick}
+              variant={action.variant}
+            >
+              <action.icon className="size-4" />
+              {action.label}
+            </ContextMenuItem>
+          ))}
+        </div>
+      ))}
     </ContextMenuContent>
   );
 });
