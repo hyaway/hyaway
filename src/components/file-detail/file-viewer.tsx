@@ -48,18 +48,7 @@ export function FileViewer({
 
   if (isImage) {
     return (
-      <div
-        className={cn(
-          "flex justify-center",
-          isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
-        )}
-        onClick={() => {
-          if (isExpanded) {
-            window.scrollTo({ top: 0, behavior: "auto" });
-          }
-          setIsExpanded(!isExpanded);
-        }}
-      >
+      <div className={cn("flex justify-center")}>
         <img
           src={fileUrl}
           alt={`File ${fileId}`}
@@ -69,6 +58,12 @@ export function FileViewer({
               ? "max-h-full cursor-zoom-out"
               : "max-h-[70vh] cursor-zoom-in",
           )}
+          onClick={() => {
+            if (isExpanded) {
+              window.scrollTo({ top: 0, behavior: "auto" });
+            }
+            setIsExpanded(!isExpanded);
+          }}
         />
       </div>
     );
