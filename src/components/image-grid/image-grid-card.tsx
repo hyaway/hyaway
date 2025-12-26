@@ -82,7 +82,8 @@ export const ImageGridCard = memo(function ImageGridCard({
         [`--thumbnail-hover-reverse-scale`]: `${1 / scale}`,
       }}
       className={cn(
-        "group absolute top-0 left-0 z-0 h-full w-full overflow-visible [content-visibility:auto] hover:z-30 hover:[content-visibility:visible]",
+        "group bg-secondary absolute top-0 left-0 z-0 flex h-full w-full justify-center overflow-visible [content-visibility:auto] hover:z-30 hover:[content-visibility:visible]",
+        width < height ? "flex-col" : "flex-row",
         !isScrolling && "transition-transform duration-350 ease-out",
         menuOpen && "z-30 [content-visibility:visible]",
         className,
