@@ -58,71 +58,86 @@ function getContrastRatio(fg: RGB, bg: RGB): number {
 }
 
 /**
- * Convert RGB to HSL.
+ * Convert RGB to linear RGB.
  */
-function rgbToHsl(rgb: RGB): [number, number, number] {
-  const r = rgb[0] / 255;
-  const g = rgb[1] / 255;
-  const b = rgb[2] / 255;
-
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-
-  if (max === min) {
-    return [0, 0, l];
-  }
-
-  const d = max - min;
-  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-  let h = 0;
-  if (max === r) {
-    h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-  } else if (max === g) {
-    h = ((b - r) / d + 2) / 6;
-  } else {
-    h = ((r - g) / d + 4) / 6;
-  }
-
-  return [h, s, l];
+function rgbToLinear(rgb: RGB): [number, number, number] {
+  return rgb.map((v) => {
+    const c = v / 255;
+    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  }) as [number, number, number];
 }
 
 /**
- * Convert HSL to RGB.
+ * Convert linear RGB to RGB.
  */
-function hslToRgb(h: number, s: number, l: number): RGB {
-  if (s === 0) {
-    const val = Math.round(l * 255);
-    return [val, val, val];
-  }
+function linearToRgb(linear: [number, number, number]): RGB {
+  return linear.map((c) => {
+    const v = c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+    return Math.round(Math.max(0, Math.min(1, v)) * 255);
+  }) as RGB;
+}
 
-  const hue2rgb = (p: number, q: number, t: number) => {
-    if (t < 0) t += 1;
-    if (t > 1) t -= 1;
-    if (t < 1 / 6) return p + (q - p) * 6 * t;
-    if (t < 1 / 2) return q;
-    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-    return p;
-  };
+/**
+ * Convert RGB to OKLCH.
+ */
+function rgbToOklch(rgb: RGB): [number, number, number] {
+  const [r, g, b] = rgbToLinear(rgb);
 
-  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-  const p = 2 * l - q;
+  // Linear RGB to LMS
+  const l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
+  const m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
+  const s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
 
-  return [
-    Math.round(hue2rgb(p, q, h + 1 / 3) * 255),
-    Math.round(hue2rgb(p, q, h) * 255),
-    Math.round(hue2rgb(p, q, h - 1 / 3) * 255),
-  ];
+  // LMS to Lab (cube root)
+  const l_ = Math.cbrt(l);
+  const m_ = Math.cbrt(m);
+  const s_ = Math.cbrt(s);
+
+  // Lab
+  const L = 0.2104542553 * l_ + 0.793617785 * m_ - 0.0040720468 * s_;
+  const a = 1.9779984951 * l_ - 2.428592205 * m_ + 0.4505937099 * s_;
+  const bVal = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.808675766 * s_;
+
+  // Lab to LCH
+  const C = Math.sqrt(a * a + bVal * bVal);
+  const H = Math.atan2(bVal, a) * (180 / Math.PI);
+
+  return [L, C, H < 0 ? H + 360 : H];
+}
+
+/**
+ * Convert OKLCH to RGB.
+ */
+function oklchToRgb(L: number, C: number, H: number): RGB {
+  // LCH to Lab
+  const hRad = (H * Math.PI) / 180;
+  const a = C * Math.cos(hRad);
+  const b = C * Math.sin(hRad);
+
+  // Lab to LMS (cube)
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = L - 0.0894841775 * a - 1.291485548 * b;
+
+  const l = l_ * l_ * l_;
+  const m = m_ * m_ * m_;
+  const s = s_ * s_ * s_;
+
+  // LMS to linear RGB
+  const r = +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+  const g = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+  const bl = -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s;
+
+  return linearToRgb([r, g, bl]);
 }
 
 /**
  * Adjust a color's lightness to meet contrast requirements against a background.
- * Preserves hue and saturation while adjusting lightness.
- * Accounts for the badge background being 5% of the text color over the base background.
+ * Preserves hue and chroma while adjusting lightness using OKLCH color space.
+ * Accounts for the badge background being 20% of the text color over the base background.
  */
 function adjustColorForContrast(color: RGB, baseBackground: RGB): RGB {
-  // Calculate effective background: base background with 5% of the color overlaid
+  // Calculate effective background: base background with 20% of the color overlaid
   const effectiveBackground = blendColors(
     color,
     baseBackground,
@@ -134,18 +149,18 @@ function adjustColorForContrast(color: RGB, baseBackground: RGB): RGB {
     return color;
   }
 
-  const [h, s, l] = rgbToHsl(color);
+  const [L, C, H] = rgbToOklch(color);
   const bgLuminance = getRelativeLuminance(baseBackground);
   const isDarkBg = bgLuminance < 0.5;
 
   // Binary search for the right lightness
-  let minL = isDarkBg ? l : 0;
-  let maxL = isDarkBg ? 1 : l;
+  let minL = isDarkBg ? L : 0;
+  let maxL = isDarkBg ? 1 : L;
 
   // If on dark bg, we need to go lighter; if on light bg, we need to go darker
   for (let i = 0; i < 20; i++) {
     const midL = (minL + maxL) / 2;
-    const testColor = hslToRgb(h, s, midL);
+    const testColor = oklchToRgb(midL, C, H);
     // Recalculate effective background for this test color
     const testEffectiveBg = blendColors(
       testColor,
@@ -170,7 +185,7 @@ function adjustColorForContrast(color: RGB, baseBackground: RGB): RGB {
   }
 
   const finalL = isDarkBg ? minL : maxL;
-  return hslToRgb(h, s, finalL);
+  return oklchToRgb(finalL, C, H);
 }
 
 /**
