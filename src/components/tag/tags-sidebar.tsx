@@ -134,7 +134,7 @@ export const TagsSidebar = memo(function TagsSidebar({
       return length > 14 ? 40 : 24;
     },
     overscan: 5,
-    gap: 8,
+    gap: 4,
     getScrollElement: () => parentRef.current,
   });
 
@@ -231,7 +231,7 @@ const TagRow = memo(
         ref={ref}
         data-index={index}
         style={style}
-        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-center justify-start font-mono text-xs"
+        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-center justify-start gap-1 font-mono text-xs"
       >
         <span
           aria-hidden="true"
@@ -243,7 +243,7 @@ const TagRow = memo(
           tag={tagItem.tag}
           namespace={tagItem.namespace}
           size="sm"
-          className="h-auto min-h-6 shrink items-center justify-start overflow-visible text-left break-normal wrap-anywhere whitespace-normal"
+          className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-0.5 text-left break-normal wrap-anywhere whitespace-normal"
         >
           {showCount && (
             <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>

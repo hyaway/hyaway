@@ -4,14 +4,28 @@
 
 type RGB = [number, number, number];
 
-// Background colors for contrast calculation (ignoring badge transparency)
-// Light: oklch(0.985 0 0) sidebar background ≈ rgb(250, 250, 250)
-// Dark: oklch(0.205 0 0) sidebar background ≈ rgb(47, 47, 47)
-const LIGHT_BG: RGB = [250, 250, 250];
-const DARK_BG: RGB = [47, 47, 47];
+// Background colors for high contrast badge variant
+// Pure white for light theme, pure black for dark theme
+const LIGHT_BG: RGB = [255, 255, 255];
+const DARK_BG: RGB = [0, 0, 0];
+
+// Badge background opacity (10% of tag color over base background)
+const BADGE_BG_OPACITY = 0.2;
 
 // WCAG AA minimum contrast ratio for normal text
 const MIN_CONTRAST_RATIO = 4.5;
+
+/**
+ * Blend a foreground color with a background at a given opacity.
+ * Simulates placing the foreground color at the given alpha over the background.
+ */
+function blendColors(fg: RGB, bg: RGB, alpha: number): RGB {
+  return [
+    Math.round(fg[0] * alpha + bg[0] * (1 - alpha)),
+    Math.round(fg[1] * alpha + bg[1] * (1 - alpha)),
+    Math.round(fg[2] * alpha + bg[2] * (1 - alpha)),
+  ];
+}
 
 /**
  * Convert sRGB value (0-255) to linear RGB.
@@ -104,16 +118,23 @@ function hslToRgb(h: number, s: number, l: number): RGB {
 /**
  * Adjust a color's lightness to meet contrast requirements against a background.
  * Preserves hue and saturation while adjusting lightness.
+ * Accounts for the badge background being 5% of the text color over the base background.
  */
-function adjustColorForContrast(color: RGB, background: RGB): RGB {
-  const contrast = getContrastRatio(color, background);
+function adjustColorForContrast(color: RGB, baseBackground: RGB): RGB {
+  // Calculate effective background: base background with 5% of the color overlaid
+  const effectiveBackground = blendColors(
+    color,
+    baseBackground,
+    BADGE_BG_OPACITY,
+  );
+  const contrast = getContrastRatio(color, effectiveBackground);
 
   if (contrast >= MIN_CONTRAST_RATIO) {
     return color;
   }
 
   const [h, s, l] = rgbToHsl(color);
-  const bgLuminance = getRelativeLuminance(background);
+  const bgLuminance = getRelativeLuminance(baseBackground);
   const isDarkBg = bgLuminance < 0.5;
 
   // Binary search for the right lightness
@@ -124,7 +145,13 @@ function adjustColorForContrast(color: RGB, background: RGB): RGB {
   for (let i = 0; i < 20; i++) {
     const midL = (minL + maxL) / 2;
     const testColor = hslToRgb(h, s, midL);
-    const testContrast = getContrastRatio(testColor, background);
+    // Recalculate effective background for this test color
+    const testEffectiveBg = blendColors(
+      testColor,
+      baseBackground,
+      BADGE_BG_OPACITY,
+    );
+    const testContrast = getContrastRatio(testColor, testEffectiveBg);
 
     if (testContrast >= MIN_CONTRAST_RATIO) {
       if (isDarkBg) {

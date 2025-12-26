@@ -19,6 +19,8 @@ const badgeVariants = cva(
           "border-border text-foreground [a]:hover:bg-secondary [a]:hover:text-secondary-foreground bg-input/30",
         ghost:
           "hover:bg-secondary hover:text-secondary-foreground dark:hover:bg-muted/50",
+        overlay:
+          "relative bg-white dark:bg-black text-(--badge-overlay) before:absolute before:inset-0 before:bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] before:transition-colors hover:before:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

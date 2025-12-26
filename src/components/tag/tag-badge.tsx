@@ -17,7 +17,7 @@ type BadgeProps = ComponentProps<typeof Badge> &
 export function TagBadge({
   tag,
   namespace,
-  variant = "ghost",
+  variant,
   children,
   className,
   style,
@@ -28,17 +28,20 @@ export function TagBadge({
   children?: ReactNode;
 } & BadgeProps) {
   const namespaceColors = useNamespaceColors();
-  // Use empty string key for un-namespaced tags
-  const color = namespaceColors[namespace ?? ""];
+  const color =
+    namespaceColors[namespace ?? ""] ||
+    namespaceColors["null"] ||
+    "var(--foreground)";
 
-  const combinedStyle: CSSProperties | undefined = color
-    ? { "--tag-color": color, ...style }
-    : style;
+  const combinedStyle: CSSProperties = {
+    "--badge-overlay": color,
+    ...style,
+  };
 
   return (
     <Badge
-      variant={variant}
-      className={cn(color && "text-(--tag-color)!", className)}
+      variant={"overlay"}
+      className={className}
       style={combinedStyle}
       {...props}
     >
