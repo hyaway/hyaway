@@ -12,6 +12,7 @@ import {
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
 import { useActiveTheme } from "@/lib/theme-store";
+import { useFileViewerStartExpanded } from "@/lib/ux-settings-store";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
@@ -44,11 +45,12 @@ export function FileViewer({
   const isVideo = mime.startsWith("video/");
   const isAudio = mime.startsWith("audio/");
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const startExpanded = useFileViewerStartExpanded();
+  const [isExpanded, setIsExpanded] = useState(startExpanded);
 
   if (isImage) {
     return (
-      <div className={cn("flex justify-center pb-4")}>
+      <div className="flex justify-center pb-4">
         <img
           src={fileUrl}
           alt={`File ${fileId}`}

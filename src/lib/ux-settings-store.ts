@@ -17,6 +17,7 @@ type UxSettingsState = {
   recentFilesLimit: number;
   recentFilesDays: number;
   randomInboxLimit: number;
+  fileViewerStartExpanded: boolean;
   actions: {
     setTagsSortMode: (mode: TagsSortMode) => void;
     setGridMaxLanes: (lanes: number) => void;
@@ -25,6 +26,7 @@ type UxSettingsState = {
     setRecentFilesLimit: (limit: number) => void;
     setRecentFilesDays: (days: number) => void;
     setRandomInboxLimit: (limit: number) => void;
+    setFileViewerStartExpanded: (expanded: boolean) => void;
   };
 };
 
@@ -38,6 +40,7 @@ export const useUxSettingsStore = create<UxSettingsState>()(
       recentFilesLimit: 100,
       recentFilesDays: 3,
       randomInboxLimit: 100,
+      fileViewerStartExpanded: false,
       actions: {
         setTagsSortMode: (tagsSortMode: TagsSortMode) => set({ tagsSortMode }),
         setGridMaxLanes: (gridMaxLanes: number) => set({ gridMaxLanes }),
@@ -51,6 +54,8 @@ export const useUxSettingsStore = create<UxSettingsState>()(
           set({ recentFilesDays }),
         setRandomInboxLimit: (randomInboxLimit: number) =>
           set({ randomInboxLimit }),
+        setFileViewerStartExpanded: (fileViewerStartExpanded: boolean) =>
+          set({ fileViewerStartExpanded }),
       },
     }),
     {
@@ -81,6 +86,9 @@ export const useRecentFilesDays = () =>
 
 export const useRandomInboxLimit = () =>
   useUxSettingsStore((state) => state.randomInboxLimit);
+
+export const useFileViewerStartExpanded = () =>
+  useUxSettingsStore((state) => state.fileViewerStartExpanded);
 
 export const useUxSettingsActions = () =>
   useUxSettingsStore((state) => state.actions);

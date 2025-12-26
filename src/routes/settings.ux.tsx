@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Heading } from "@/components/ui-primitives/heading";
+import { FileViewerCard } from "@/components/settings/file-viewer-card";
 import { ImageGalleryCard } from "@/components/settings/image-gallery-card";
 import { PagesCard } from "@/components/settings/pages-card";
 import { RandomInboxCard } from "@/components/settings/random-inbox-card";
@@ -21,6 +22,7 @@ function SettingsUXComponent() {
         UX Settings
       </Heading>
       <ThemeCard />
+      <FileViewerCard />
       <ImageGalleryCard />
       <TagsSortCard />
       <PagesCard />

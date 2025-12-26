@@ -8,6 +8,7 @@ import {
   useDownloadFileIdUrl,
   useFullFileIdUrl,
 } from "@/hooks/use-url-with-api-key";
+import { FileViewerSettingsPopover } from "@/components/settings/file-viewer-settings-popover";
 
 export function FileActionButtons({ fileId }: { fileId: number }) {
   const fileUrl = useFullFileIdUrl(fileId);
@@ -26,6 +27,7 @@ export function FileActionButtons({ fileId }: { fileId: number }) {
         <ArrowTopRightOnSquareIcon className="mr-1 size-4" />
         Open in new tab
       </Button>
+      <FileViewerSettingsPopover className="ms-auto" />
     </div>
   );
 }
