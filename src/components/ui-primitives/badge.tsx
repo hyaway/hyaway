@@ -20,7 +20,7 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-secondary hover:text-secondary-foreground dark:hover:bg-muted/50",
         overlay:
-          "relative bg-background text-(--badge-overlay) before:absolute before:inset-0 before:bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] before:transition-colors hover:before:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
+          "relative border-none bg-background text-(--badge-overlay) before:absolute before:inset-0 before:bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] before:transition-colors hover:before:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
