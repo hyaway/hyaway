@@ -8,12 +8,13 @@ import { Separator } from "@/components/ui-primitives/separator";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
 import { ContentDetailsTable } from "@/components/file-detail/content-details-table";
-import { FileActionButtons } from "@/components/file-detail/file-action-buttons";
 import { FileDetailSkeleton } from "@/components/file-detail/file-detail-skeleton";
 import { FileInfoTable } from "@/components/file-detail/file-info-table";
 import { FilePageHeader } from "@/components/file-detail/file-page-header";
 import { FileStatusBadges } from "@/components/file-detail/file-status-badges";
 import { FileViewer } from "@/components/file-detail/file-viewer";
+import { FloatingActionBar } from "@/components/file-detail/floating-action-bar";
+import { FileViewerSettingsPopover } from "@/components/settings/file-viewer-settings-popover";
 
 export const Route = createFileRoute("/_auth/file/$fileId")({
   component: RouteComponent,
@@ -57,16 +58,16 @@ function RouteComponent() {
   }
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2">
+    <div className="flex min-w-0 flex-1 flex-col gap-2 pb-18">
       <FileViewer data={data} />
 
       <FilePageHeader fileId={fileIdNum} />
-      <Separator className="my-2" />
-      <FileStatusBadges data={data} />
-      <Separator className="my-2" />
-
-      <FileActionButtons data={data} />
-      <Separator className="my-2" />
+      <Separator />
+      <div className="flex items-center justify-between gap-2">
+        <FileStatusBadges data={data} />
+        <FileViewerSettingsPopover />
+      </div>
+      <Separator />
 
       <div className="@container space-y-4">
         <Heading level={2}>File metadata</Heading>
@@ -75,8 +76,10 @@ function RouteComponent() {
           <FileInfoTable data={data} />
         </div>
       </div>
-      <Separator className="my-2" />
+      <Separator />
       <InlineTagsList data={data} />
+
+      <FloatingActionBar data={data} />
     </div>
   );
 }

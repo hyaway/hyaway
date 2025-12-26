@@ -128,7 +128,7 @@ export function useFileActions(
   } else {
     managementActions.push({
       id: "unarchive",
-      label: "Return to inbox",
+      label: "Re-inbox",
       icon: InboxArrowDownIcon,
       onClick: () => unarchiveFilesMutation.mutate({ file_id: data.file_id }),
     });
@@ -137,14 +137,14 @@ export function useFileActions(
   if (data.is_trashed) {
     managementActions.push({
       id: "undelete",
-      label: "Restore from trash",
+      label: "Undelete",
       icon: ArrowUturnUpIcon,
       onClick: () => undeleteFilesMutation.mutate({ file_id: data.file_id }),
     });
   } else {
     managementActions.push({
       id: "delete",
-      label: "Send to trash",
+      label: "Delete",
       icon: TrashIcon,
       onClick: () => deleteFilesMutation.mutate({ file_id: data.file_id }),
       variant: "destructive",
