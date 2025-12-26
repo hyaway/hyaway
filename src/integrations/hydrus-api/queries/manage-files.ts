@@ -131,11 +131,17 @@ const updateFileMetadataFlags = (
 
   const fileIdSet = new Set(fileIds);
 
-  // Invalidate single file metadata queries for fresh data
+  // Update single file metadata queries directly for immediate UI update
   for (const fileId of fileIds) {
-    queryClient.invalidateQueries({
-      queryKey: ["getSingleFileMetadata", fileId],
-    });
+    queryClient.setQueriesData<FileMetadata>(
+      {
+        predicate: (query) => {
+          const key = query.queryKey;
+          return key[0] === "getSingleFileMetadata" && key[1] === fileId;
+        },
+      },
+      (oldData) => (oldData ? updater(oldData) : oldData),
+    );
   }
 
   // Update batch metadata queries that contain any of the affected file IDs

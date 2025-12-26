@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
+import { Spinner } from "@/components/ui-primitives/spinner";
 import { useFileActions } from "@/hooks/use-file-actions";
 import { cn } from "@/lib/utils";
 
@@ -63,8 +64,12 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
             variant={"ghost"}
             onClick={leftAction.onClick}
             size="xl"
-            className={"flex-col items-center gap-1"}
+            className={"relative flex-col items-center gap-1"}
+            disabled={leftAction.isPending}
           >
+            {leftAction.isPending && (
+              <Spinner className="absolute right-1 size-4" />
+            )}
             <leftAction.icon className="size-8 sm:size-6" />
             <span className="hidden sm:inline">{leftAction.label}</span>
           </Button>
@@ -124,8 +129,12 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
             variant="ghost"
             size="xl"
             onClick={rightAction.onClick}
-            className="flex-col items-center gap-1"
+            className="relative flex-col items-center gap-1"
+            disabled={rightAction.isPending}
           >
+            {rightAction.isPending && (
+              <Spinner className="absolute right-1 size-4" />
+            )}
             <rightAction.icon className="size-8 sm:size-6" />
             <span className="hidden sm:inline">{rightAction.label}</span>
           </Button>

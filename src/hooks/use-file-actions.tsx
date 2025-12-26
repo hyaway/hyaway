@@ -1,11 +1,9 @@
 import {
   ArchiveBoxArrowDownIcon,
-  ArchiveBoxIcon,
   ArrowDownTrayIcon,
   ArrowTopRightOnSquareIcon,
   ArrowUturnUpIcon,
   DocumentTextIcon,
-  EyeIcon,
   InboxArrowDownIcon,
   TrashIcon,
 } from "@heroicons/react/16/solid";
@@ -34,6 +32,7 @@ export interface FileAction {
   href?: string;
   download?: boolean;
   external?: boolean;
+  isPending?: boolean;
 }
 
 export interface FileActionsGroup {
@@ -125,6 +124,7 @@ export function useFileActions(
       label: "Archive",
       icon: ArchiveBoxArrowDownIcon,
       onClick: () => archiveFilesMutation.mutate({ file_id: data.file_id }),
+      isPending: archiveFilesMutation.isPending,
     });
   } else {
     managementActions.push({
@@ -132,6 +132,7 @@ export function useFileActions(
       label: "Re-inbox",
       icon: InboxArrowDownIcon,
       onClick: () => unarchiveFilesMutation.mutate({ file_id: data.file_id }),
+      isPending: unarchiveFilesMutation.isPending,
     });
   }
 
@@ -141,6 +142,7 @@ export function useFileActions(
       label: "Undelete",
       icon: ArrowUturnUpIcon,
       onClick: () => undeleteFilesMutation.mutate({ file_id: data.file_id }),
+      isPending: undeleteFilesMutation.isPending,
     });
   } else {
     managementActions.push({
@@ -149,6 +151,7 @@ export function useFileActions(
       icon: TrashIcon,
       onClick: () => deleteFilesMutation.mutate({ file_id: data.file_id }),
       variant: "destructive",
+      isPending: deleteFilesMutation.isPending,
     });
   }
 
