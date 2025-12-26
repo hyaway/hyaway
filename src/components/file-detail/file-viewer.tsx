@@ -48,12 +48,12 @@ export function FileViewer({
 
   if (isImage) {
     return (
-      <div className={cn("flex justify-center")}>
+      <div className={cn("flex justify-center pb-4")}>
         <img
           src={fileUrl}
           alt={`File ${fileId}`}
           className={cn(
-            `max-w-full cursor-pointer rounded border object-contain transition-[max-height] duration-300`,
+            `max-w-full cursor-pointer object-contain shadow-sm transition-[max-height] duration-300 dark:border dark:shadow-none`,
             isExpanded
               ? "max-h-full cursor-zoom-out"
               : "max-h-[70vh] cursor-zoom-in",

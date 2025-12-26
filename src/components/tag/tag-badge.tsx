@@ -1,3 +1,4 @@
+import { TouchTarget } from "../ui-primitives/touch-target";
 import type { badgeVariants } from "@/components/ui-primitives/badge";
 import type { VariantProps } from "class-variance-authority";
 import type { CSSProperties, ComponentProps, ReactNode } from "react";
@@ -45,10 +46,12 @@ export function TagBadge({
       style={combinedStyle}
       {...props}
     >
-      <span className="select-all">
-        {namespace ? `${namespace}: ` : ""}
-        {tag}
-      </span>
+      <div className="select-all">
+        <TouchTarget>
+          {namespace ? `${namespace}: ` : ""}
+          {tag}
+        </TouchTarget>
+      </div>
       {children}
     </Badge>
   );

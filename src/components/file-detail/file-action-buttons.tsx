@@ -15,12 +15,13 @@ export function FileActionButtons({ fileId }: { fileId: number }) {
 
   return (
     <div className="flex flex-wrap gap-2">
-      <Button render={<a href={downloadUrl} download />}>
+      <Button render={<a href={downloadUrl} download />} nativeButton={false}>
         <ArrowDownTrayIcon className="mr-1 size-4" />
         Download
       </Button>
       <Button
         render={<a href={fileUrl} target="_blank" rel="noopener noreferrer" />}
+        nativeButton={false}
       >
         <ArrowTopRightOnSquareIcon className="mr-1 size-4" />
         Open in new tab
