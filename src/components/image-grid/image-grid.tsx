@@ -7,7 +7,7 @@ import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { PageError } from "@/components/page/page-error";
 import { Badge } from "@/components/ui-primitives/badge";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
-import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/get-files";
+import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useResponsiveGrid } from "@/hooks/use-responsive-grid";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { cn } from "@/lib/utils";

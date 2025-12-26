@@ -1,5 +1,5 @@
 import { MetadataList } from "./metadata-list";
-import type { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/get-files";
+import type { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 
 export function FileInfoTable({
   data,

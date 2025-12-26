@@ -27,7 +27,7 @@ import {
   useDeleteFilesMutation,
   useUnarchiveFilesMutation,
   useUndeleteFilesMutation,
-} from "@/integrations/hydrus-api/queries/get-files";
+} from "@/integrations/hydrus-api/queries/manage-files";
 import { cn } from "@/lib/utils";
 
 // --- Main Card Component ---

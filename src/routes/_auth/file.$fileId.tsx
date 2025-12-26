@@ -5,7 +5,7 @@ import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
 import { PageError } from "@/components/page/page-error";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
-import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/get-files";
+import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
 import { ContentDetailsTable } from "@/components/file-detail/content-details-table";
 import { FileActionButtons } from "@/components/file-detail/file-action-buttons";
