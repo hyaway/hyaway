@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { searchFiles } from "../api-client";
-import { useSessionKeyHash } from "../hydrus-config-store";
+import { useAuthKeyHash } from "../hydrus-config-store";
 import { HydrusFileSortType, ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
 import type { HydrusTagSearch, SearchFilesOptions } from "../models";
@@ -25,23 +25,17 @@ export const useRecentlyArchivedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const sessionKeyHash = useSessionKeyHash();
+  const authKeyHash = useAuthKeyHash();
 
   return useQuery({
-    queryKey: [
-      "searchFiles",
-      "recentlyArchived",
-      tags,
-      options,
-      sessionKeyHash,
-    ],
+    queryKey: ["searchFiles", "recentlyArchived", tags, options, authKeyHash],
     queryFn: async () => {
       return searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!sessionKeyHash && tags.length > 0,
+    enabled: !!authKeyHash && tags.length > 0,
   });
 };
 
@@ -65,7 +59,7 @@ export const useRecentlyDeletedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const sessionKeyHash = useSessionKeyHash();
+  const authKeyHash = useAuthKeyHash();
 
   return useQuery({
     queryKey: [
@@ -74,7 +68,7 @@ export const useRecentlyDeletedFilesQuery = () => {
       trashServiceKey,
       tags,
       options,
-      sessionKeyHash,
+      authKeyHash,
     ],
     queryFn: async () => {
       if (!trashServiceKey) {
@@ -86,7 +80,7 @@ export const useRecentlyDeletedFilesQuery = () => {
         file_service_key: trashServiceKey,
       });
     },
-    enabled: !!sessionKeyHash && tags.length > 0 && !!trashServiceKey,
+    enabled: !!authKeyHash && tags.length > 0 && !!trashServiceKey,
   });
 };
 
@@ -104,17 +98,17 @@ export const useRecentlyInboxedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const sessionKeyHash = useSessionKeyHash();
+  const authKeyHash = useAuthKeyHash();
 
   return useQuery({
-    queryKey: ["searchFiles", "recentlyInboxed", tags, options, sessionKeyHash],
+    queryKey: ["searchFiles", "recentlyInboxed", tags, options, authKeyHash],
     queryFn: async () => {
       return searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!sessionKeyHash && tags.length > 0,
+    enabled: !!authKeyHash && tags.length > 0,
   });
 };
 
@@ -128,17 +122,17 @@ export const useRandomInboxFilesQuery = () => {
     file_sort_type: HydrusFileSortType.Random,
   };
 
-  const sessionKeyHash = useSessionKeyHash();
+  const authKeyHash = useAuthKeyHash();
 
   return useQuery({
-    queryKey: ["searchFiles", "randomInbox", tags, options, sessionKeyHash],
+    queryKey: ["searchFiles", "randomInbox", tags, options, authKeyHash],
     queryFn: async () => {
       return searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!sessionKeyHash && tags.length > 0,
+    enabled: !!authKeyHash && tags.length > 0,
     staleTime: Infinity,
   });
 };
@@ -147,14 +141,14 @@ export const useSearchFilesQuery = (
   tags: HydrusTagSearch,
   options?: Omit<SearchFilesOptions, "tags">,
 ) => {
-  const sessionKeyHash = useSessionKeyHash();
+  const authKeyHash = useAuthKeyHash();
 
   return useQuery({
-    queryKey: ["searchFiles", tags, options, sessionKeyHash],
+    queryKey: ["searchFiles", tags, options, authKeyHash],
     queryFn: async () => {
       return searchFiles({ tags, ...options });
     },
-    enabled: !!sessionKeyHash && tags.length > 0,
+    enabled: !!authKeyHash && tags.length > 0,
   });
 };
 
@@ -162,17 +156,11 @@ export const useInfiniteSearchFilesQuery = (
   tags: HydrusTagSearch,
   options?: Omit<SearchFilesOptions, "tags">,
 ) => {
-  const sessionKeyHash = useSessionKeyHash();
+  const authKeyHash = useAuthKeyHash();
   const BATCH_SIZE = 256;
 
   return useInfiniteQuery({
-    queryKey: [
-      "infiniteSearchFiles",
-      tags,
-      options,
-      BATCH_SIZE,
-      sessionKeyHash,
-    ],
+    queryKey: ["infiniteSearchFiles", tags, options, BATCH_SIZE, authKeyHash],
     queryFn: async ({ pageParam = 0 }) => {
       const searchTags: HydrusTagSearch = [
         ...tags,
@@ -196,6 +184,6 @@ export const useInfiniteSearchFilesQuery = (
       return lastPage.offset + BATCH_SIZE;
     },
     initialPageParam: 0,
-    enabled: !!sessionKeyHash && tags.length > 0,
+    enabled: !!authKeyHash && tags.length > 0,
   });
 };

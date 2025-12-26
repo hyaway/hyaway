@@ -1,12 +1,12 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getFileMetadata } from "../api-client";
-import { useSessionKeyHash } from "../hydrus-config-store";
+import { useAuthKeyHash } from "../hydrus-config-store";
 
 export const useGetSingleFileMetadata = (fileId: number) => {
-  const sessionKeyHash = useSessionKeyHash();
+  const authKeyHash = useAuthKeyHash();
 
   return useQuery({
-    queryKey: ["getSingleFileMetadata", fileId, sessionKeyHash],
+    queryKey: ["getSingleFileMetadata", fileId, authKeyHash],
     queryFn: async () => {
       const response = await getFileMetadata([fileId], false);
       if (response.metadata.length === 0) {
@@ -14,7 +14,7 @@ export const useGetSingleFileMetadata = (fileId: number) => {
       }
       return response.metadata[0];
     },
-    enabled: !!sessionKeyHash && !!fileId,
+    enabled: !!authKeyHash && !!fileId,
     staleTime: Infinity,
   });
 };
@@ -23,14 +23,14 @@ export const useGetFilesMetadata = (
   file_ids: Array<number>,
   only_return_basic_information = true,
 ) => {
-  const sessionKeyHash = useSessionKeyHash();
+  const authKeyHash = useAuthKeyHash();
 
   return useQuery({
     queryKey: [
       "getFilesMetadata",
       file_ids,
       only_return_basic_information,
-      sessionKeyHash,
+      authKeyHash,
     ],
     queryFn: async () => {
       if (file_ids.length === 0) {
@@ -44,7 +44,7 @@ export const useGetFilesMetadata = (
         width: meta.width,
         height: meta.height,
       })),
-    enabled: !!sessionKeyHash && file_ids.length > 0,
+    enabled: !!authKeyHash && file_ids.length > 0,
     staleTime: Infinity, // Should not change without user action
   });
 };
@@ -53,7 +53,7 @@ export const useInfiniteGetFilesMetadata = (
   file_ids: Array<number>,
   only_return_basic_information = true,
 ) => {
-  const sessionKeyHash = useSessionKeyHash();
+  const authKeyHash = useAuthKeyHash();
   const BATCH_SIZE = 128;
 
   return useInfiniteQuery({
@@ -62,7 +62,7 @@ export const useInfiniteGetFilesMetadata = (
       file_ids,
       only_return_basic_information,
       BATCH_SIZE,
-      sessionKeyHash,
+      authKeyHash,
     ],
     queryFn: async ({ pageParam = 0 }) => {
       const batchFileIds = file_ids.slice(pageParam, pageParam + BATCH_SIZE);
@@ -83,7 +83,7 @@ export const useInfiniteGetFilesMetadata = (
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: 0,
-    enabled: !!sessionKeyHash && file_ids.length > 0,
+    enabled: !!authKeyHash && file_ids.length > 0,
     staleTime: Infinity,
   });
 };

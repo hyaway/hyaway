@@ -30,14 +30,19 @@ import {
 import {
   useApiEndpoint,
   useApiSessionKey,
+  useAuthActions,
   useIsApiConfigured,
+  useUseSessionKey,
 } from "@/integrations/hydrus-api/hydrus-config-store";
 import { refreshSessionKey } from "@/integrations/hydrus-api/api-client";
+import { Switch } from "@/components/ui-primitives/switch";
 
 export function SessionKeyCard() {
   const apiEndpoint = useApiEndpoint();
   const isConfigured = useIsApiConfigured();
   const sessionKey = useApiSessionKey();
+  const useSessionKey = useUseSessionKey();
+  const { setUseSessionKey } = useAuthActions();
 
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useVerifySessionAccessQuery();
@@ -53,6 +58,30 @@ export function SessionKeyCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        <Field>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-0.5">
+              <FieldLabel htmlFor="use-session-key-switch">
+                Use session key for API requests
+              </FieldLabel>
+              <p className="text-muted-foreground text-sm">
+                When enabled, uses session key instead of access key for all API
+                requests. Session keys expire and refresh automatically.
+              </p>
+              <p className="text-muted-foreground text-sm">
+                Session keys are more secure as they auto-expire, reducing risk
+                of accessing your client if intercepted. Disable for longer
+                browser caching of images and thumbnails that persists between
+                Hydrus client restarts.
+              </p>
+            </div>
+            <Switch
+              id="use-session-key-switch"
+              checked={useSessionKey}
+              onCheckedChange={setUseSessionKey}
+            />
+          </div>
+        </Field>
         <Field>
           <FieldLabel>API session key</FieldLabel>
           <SecretInput
