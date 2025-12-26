@@ -108,6 +108,7 @@ export const useAuthStore = create<AuthState>()(
     partialize: (state) => ({
       api_access_key: state.api_access_key,
       api_endpoint: state.api_endpoint,
+      sessionKey: state.sessionKey,
     }),
     onRehydrateStorage: () => (state) => {
       if (state) {
@@ -115,6 +116,10 @@ export const useAuthStore = create<AuthState>()(
           state.api_access_key,
           state.api_endpoint,
         );
+        // Recompute session key hash after rehydration
+        if (state.sessionKey) {
+          state.actions.setSessionKey(state.sessionKey);
+        }
       }
     },
   }),
