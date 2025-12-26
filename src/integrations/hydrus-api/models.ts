@@ -158,7 +158,7 @@ export const FileMetadataSchema = z.object({
   filetype_enum: z.number(),
   filetype_forced: z.boolean(),
   filetype_human: z.string(),
-  has_audio: z.boolean(),
+  has_audio: z.boolean().nullable(),
   hash: z.string(),
   height: z
     .number()
@@ -167,7 +167,7 @@ export const FileMetadataSchema = z.object({
   mime: z.string(),
   num_frames: z.number().nullable(),
   num_words: z.number().nullable(),
-  size: z.number(),
+  size: z.number().nullable(),
   width: z
     .number()
     .nullable()
