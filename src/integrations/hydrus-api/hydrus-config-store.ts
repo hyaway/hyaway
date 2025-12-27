@@ -6,7 +6,6 @@ import {
 } from "./models";
 import type { StateCreator } from "zustand";
 import { getContext } from "@/integrations/tanstack-query/root-provider.tsx";
-import { simpleHash } from "@/lib/simple-hash";
 
 type AuthState = {
   api_access_key: string;
@@ -16,14 +15,6 @@ type AuthState = {
    * Whether to use session key instead of access key for API requests
    */
   authWithSessionKey: boolean;
-  /**
-   * Hash of endpoint + access key, used as query key prefix for cache invalidation
-   */
-  accessKeyHash: number;
-  /**
-   * Hash of endpoint + session key, used as query key prefix for cache invalidation
-   */
-  sessionKeyHash: number;
   actions: {
     setApiCredentials: (
       accessKey: string | null | undefined,
@@ -35,21 +26,11 @@ type AuthState = {
   };
 };
 
-/**
- * Compute hash for endpoint + key combination
- */
-const computeHash = (endpoint: string, key: string): number => {
-  if (!endpoint || !key) return 0;
-  return simpleHash(`${endpoint}:${key}`);
-};
-
 const authSlice: StateCreator<AuthState> = (set, get, store) => ({
   api_access_key: "",
   api_endpoint: "",
   sessionKey: "",
   authWithSessionKey: true,
-  accessKeyHash: 0,
-  sessionKeyHash: 0,
   actions: {
     setApiCredentials: (
       accessKey: string | null | undefined,
@@ -69,47 +50,39 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
         nextApiAccessKey !== previousApiAccessKey ||
         nextApiEndpoint !== previousApiEndpoint;
 
-      // Also need to compute hash if missing (e.g., after rehydration from localStorage)
-      const needsHashComputation =
-        !get().accessKeyHash && nextApiAccessKey && nextApiEndpoint;
-
       if (credentialsChanged) {
-        // Compute new access key hash
-        const newAccessKeyHash = computeHash(nextApiEndpoint, nextApiAccessKey);
-
         // Clear session key when credentials change
         set({
           api_access_key: nextApiAccessKey,
           api_endpoint: nextApiEndpoint,
           sessionKey: "",
-          accessKeyHash: newAccessKeyHash,
-          sessionKeyHash: 0,
         });
-        getContext().queryClient.resetQueries();
-      } else if (needsHashComputation) {
-        // Rehydration case: compute hash without resetting queries
-        const newAccessKeyHash = computeHash(nextApiEndpoint, nextApiAccessKey);
-        set({ accessKeyHash: newAccessKeyHash });
+        getContext().queryClient.invalidateQueries();
       }
     },
     setSessionKey: (sessionKey: string | undefined) => {
-      const { api_endpoint } = get();
+      const { sessionKey: previousSessionKey } = get();
       const newSessionKey = sessionKey ?? "";
-      const newSessionKeyHash = computeHash(api_endpoint, newSessionKey);
-      set({
-        sessionKey: newSessionKey,
-        sessionKeyHash: newSessionKeyHash,
-      });
+
+      if (newSessionKey !== previousSessionKey) {
+        set({ sessionKey: newSessionKey });
+        getContext().queryClient.invalidateQueries();
+      }
     },
     setAuthWithSessionKey: (authWithSessionKey: boolean) => {
-      set({ authWithSessionKey });
+      const { authWithSessionKey: previousValue } = get();
+
+      if (authWithSessionKey !== previousValue) {
+        set({ authWithSessionKey });
+        getContext().queryClient.invalidateQueries();
+      }
     },
     reset: () => {
       const initialState = store.getInitialState();
       set({
         ...initialState,
       });
-      getContext().queryClient.resetQueries();
+      getContext().queryClient.invalidateQueries();
     },
   },
 });
@@ -124,17 +97,8 @@ export const useAuthStore = create<AuthState>()(
       sessionKey: state.sessionKey,
       authWithSessionKey: state.authWithSessionKey,
     }),
-    onRehydrateStorage: () => (state) => {
-      if (state) {
-        state.actions.setApiCredentials(
-          state.api_access_key,
-          state.api_endpoint,
-        );
-        // Recompute session key hash after rehydration
-        if (state.sessionKey) {
-          state.actions.setSessionKey(state.sessionKey);
-        }
-      }
+    onRehydrateStorage: () => () => {
+      getContext().queryClient.invalidateQueries();
     },
   }),
 );
@@ -145,18 +109,6 @@ export const useApiAccessKey = () =>
   useAuthStore((state) => state.api_access_key);
 
 export const useApiSessionKey = () => useAuthStore((state) => state.sessionKey);
-
-/**
- * Hash of endpoint + access key. Use in query keys to enable/invalidate queries when credentials change.
- */
-export const useAccessKeyHash = () =>
-  useAuthStore((state) => state.accessKeyHash);
-
-/**
- * Hash of endpoint + session key. Use in query keys to enable/invalidate queries when session changes.
- */
-export const useSessionKeyHash = () =>
-  useAuthStore((state) => state.sessionKeyHash);
 
 /**
  * Returns true if the API is configured (has both endpoint and access key)
@@ -171,15 +123,6 @@ export const useAuthActions = () => useAuthStore((state) => state.actions);
  */
 export const useAuthWithSessionKey = () =>
   useAuthStore((state) => state.authWithSessionKey);
-
-/**
- * Returns the appropriate auth key hash based on the authWithSessionKey setting.
- * Use in query keys to enable/invalidate queries when auth changes.
- */
-export const useAuthKeyHash = () =>
-  useAuthStore((state) =>
-    state.authWithSessionKey ? state.sessionKeyHash : state.accessKeyHash,
-  );
 
 /**
  * Returns the appropriate auth key (session or access) based on the authWithSessionKey setting.
