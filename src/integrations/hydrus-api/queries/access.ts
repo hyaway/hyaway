@@ -13,11 +13,12 @@ import {
 import { Permission } from "../models";
 import type { AccessKeyType, VerifyAccessKeyResponse } from "../models";
 
-export const useApiVersionQuery = () => {
-  const apiEndpoint = useApiEndpoint();
+export const useApiVersionQuery = (apiEndpoint: string) => {
   return useQuery({
-    queryKey: ["apiVersion"],
-    queryFn: getApiVersion,
+    queryKey: ["apiVersion", apiEndpoint],
+    queryFn: async () => {
+      return getApiVersion(apiEndpoint);
+    },
     enabled: !!apiEndpoint,
     retry: false,
   });
@@ -25,8 +26,14 @@ export const useApiVersionQuery = () => {
 
 export const useRequestNewPermissionsMutation = () => {
   return useMutation({
-    mutationFn: async ({ name }: { name: string }) => {
-      return requestNewPermissions(name);
+    mutationFn: async ({
+      apiEndpoint,
+      name,
+    }: {
+      apiEndpoint: string;
+      name: string;
+    }) => {
+      return requestNewPermissions(apiEndpoint, name);
     },
     mutationKey: ["requestNewPermissions"],
   });
@@ -54,8 +61,9 @@ function checkPermissions(permissionsData?: VerifyAccessKeyResponse) {
  */
 export const useVerifyPersistentAccessQuery = () => {
   const accessKeyHash = useAccessKeyHash();
+  const apiEndpoint = useApiEndpoint();
   const isConfigured = useIsApiConfigured();
-  const validEndpoint = useApiVersionQuery();
+  const validEndpoint = useApiVersionQuery(apiEndpoint);
 
   return useQuery({
     queryKey: ["verifyAccess", "persistent", accessKeyHash],
@@ -81,8 +89,9 @@ export const useVerifyPersistentAccessQuery = () => {
  */
 export const useVerifySessionAccessQuery = () => {
   const sessionKeyHash = useSessionKeyHash();
+  const apiEndpoint = useApiEndpoint();
   const isConfigured = useIsApiConfigured();
-  const validEndpoint = useApiVersionQuery();
+  const validEndpoint = useApiVersionQuery(apiEndpoint);
 
   return useQuery({
     queryKey: ["verifyAccess", "session", sessionKeyHash],

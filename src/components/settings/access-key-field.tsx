@@ -50,7 +50,7 @@ export function AccessKeyField() {
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useVerifyPersistentAccessQuery();
 
-  const apiVersionQuery = useApiVersionQuery();
+  const apiVersionQuery = useApiVersionQuery(apiEndpoint);
 
   const form = useForm({
     defaultValues: {

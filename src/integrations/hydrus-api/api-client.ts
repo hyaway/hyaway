@@ -6,14 +6,18 @@ import {
   GetPageInfoResponseSchema,
   GetPagesResponseSchema,
   GetServicesResponseSchema,
-  HYDRUS_API_HEADER_ACCESS_KEY,
-  HYDRUS_API_HEADER_SESSION_KEY,
   RequestNewPermissionsResponseSchema,
   SearchFilesResponseSchema,
-  SessionKeyResponseSchema,
   VerifyAccessKeyResponseSchema,
 } from "./models";
-import { useAuthStore } from "./hydrus-config-store";
+
+import { baseClient } from "./clients/base-client";
+import { accessKeyClient } from "./clients/access-key-client";
+import {
+  refreshSessionKey,
+  sessionKeyClient,
+} from "./clients/session-key-client";
+
 import type {
   AccessKeyType,
   GetClientOptionsResponse,
@@ -24,145 +28,10 @@ import type {
   RequestNewPermissionsResponse,
   SearchFilesOptions,
   SearchFilesResponse,
-  SessionKeyResponse,
   VerifyAccessKeyResponse,
 } from "./models";
 
-// #region Session Management
-/**
- * In-flight session refresh promise (single-flight pattern)
- */
-let refreshSessionPromise: Promise<SessionKeyResponse> | undefined;
-
-/**
- * Fetches a new session key from the API.
- */
-async function fetchSessionKey(): Promise<SessionKeyResponse> {
-  const { api_endpoint, api_access_key, actions } = useAuthStore.getState();
-
-  try {
-    const response = await axios.get(`${api_endpoint}/session_key`, {
-      headers: { [HYDRUS_API_HEADER_ACCESS_KEY]: api_access_key },
-    });
-    const parsed = SessionKeyResponseSchema.parse(response.data);
-    actions.setSessionKey(parsed.session_key);
-    return parsed;
-  } finally {
-    refreshSessionPromise = undefined;
-  }
-}
-
-/**
- * Ensures a session key is available (lazy initialization).
- * Returns immediately if a valid session key exists, otherwise fetches one.
- * Uses single-flight pattern to prevent redundant network requests.
- */
-async function ensureSessionKey(): Promise<string> {
-  const { sessionKey } = useAuthStore.getState();
-  if (sessionKey) return sessionKey;
-
-  // Reuse in-flight request if one exists, otherwise start a new one
-  if (!refreshSessionPromise) {
-    refreshSessionPromise = fetchSessionKey();
-  }
-  const response = await refreshSessionPromise;
-  return response.session_key;
-}
-
-/**
- * Force refresh the session key, clearing any cached value.
- */
-export async function refreshSessionKey(): Promise<SessionKeyResponse> {
-  const { actions } = useAuthStore.getState();
-  actions.setSessionKey(undefined);
-
-  if (!refreshSessionPromise) {
-    refreshSessionPromise = fetchSessionKey();
-  }
-  return refreshSessionPromise;
-}
-// #endregion Session Management
-
-// #region Axios Instance
-/**
- * Configured axios instance that reads from Zustand store.
- * Automatically injects the appropriate auth key via interceptors.
- */
-const apiClient = axios.create();
-
-// Request interceptor: inject auth key (session or access based on setting)
-apiClient.interceptors.request.use(async (config) => {
-  const { api_endpoint, api_access_key, authWithSessionKey } =
-    useAuthStore.getState();
-
-  if (!api_endpoint) {
-    throw new Error("Hydrus API endpoint is not configured.");
-  }
-
-  // Set base URL from store
-  config.baseURL = api_endpoint;
-
-  if (authWithSessionKey) {
-    // Acquire session key lazily (will return cached key if available)
-    const sessionKey = await ensureSessionKey();
-    config.headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
-
-    // Remove access key header if present (session key takes precedence)
-    if (HYDRUS_API_HEADER_ACCESS_KEY in config.headers) {
-      delete config.headers[HYDRUS_API_HEADER_ACCESS_KEY];
-    }
-  } else {
-    // Use access key directly
-    config.headers[HYDRUS_API_HEADER_ACCESS_KEY] = api_access_key;
-
-    // Remove session key header if present
-    if (HYDRUS_API_HEADER_SESSION_KEY in config.headers) {
-      delete config.headers[HYDRUS_API_HEADER_SESSION_KEY];
-    }
-  }
-
-  return config;
-});
-
-// Response interceptor: handle session expiry and auth errors
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const status = error?.response?.status;
-    const originalRequest = error.config;
-    const { authWithSessionKey } = useAuthStore.getState();
-
-    // Session expired (HTTP 419) - refresh and retry once (only when using session key)
-    if (
-      authWithSessionKey &&
-      status === 419 &&
-      originalRequest &&
-      !originalRequest.__retried
-    ) {
-      originalRequest.__retried = true;
-      try {
-        const { session_key } = await refreshSessionKey();
-        originalRequest.headers[HYDRUS_API_HEADER_SESSION_KEY] = session_key;
-        return apiClient(originalRequest);
-      } catch {
-        return Promise.reject(error);
-      }
-    }
-
-    // Forbidden (HTTP 403) - clear session state (only when using session key)
-    if (authWithSessionKey && status === 403) {
-      console.error(
-        "Hydrus API access forbidden: please check your access key permissions.",
-      );
-      const { actions } = useAuthStore.getState();
-      actions.setSessionKey(undefined);
-      refreshSessionPromise = undefined;
-    }
-
-    return Promise.reject(error);
-  },
-);
-// #endregion Axios Instance
+export { refreshSessionKey };
 
 // #region Static API Functions (no auth required)
 /**
@@ -197,19 +66,8 @@ export async function requestNewPermissions(
 export async function verifyAccessKey(
   keyType: AccessKeyType,
 ): Promise<VerifyAccessKeyResponse> {
-  const { api_endpoint, api_access_key } = useAuthStore.getState();
-  const headers: Record<string, string> = {};
-
-  if (keyType === "persistent") {
-    headers[HYDRUS_API_HEADER_ACCESS_KEY] = api_access_key;
-  } else {
-    const sessionKey = await ensureSessionKey();
-    headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
-  }
-
-  const response = await axios.get(`${api_endpoint}/verify_access_key`, {
-    headers,
-  });
+  const client = keyType === "persistent" ? accessKeyClient : sessionKeyClient;
+  const response = await client.get("/verify_access_key");
   return VerifyAccessKeyResponseSchema.parse(response.data);
 }
 
@@ -217,7 +75,7 @@ export async function verifyAccessKey(
  * Get all services configured in Hydrus
  */
 export async function getServices(): Promise<GetServicesResponse> {
-  const response = await apiClient.get("/get_services");
+  const response = await sessionKeyClient.get("/get_services");
   return GetServicesResponseSchema.parse(response.data);
 }
 
@@ -228,7 +86,7 @@ export async function searchFiles(
   options: SearchFilesOptions,
 ): Promise<SearchFilesResponse> {
   const { tags, ...rest } = options;
-  const response = await apiClient.get("/get_files/search_files", {
+  const response = await sessionKeyClient.get("/get_files/search_files", {
     params: {
       tags: JSON.stringify(tags),
       ...rest,
@@ -244,7 +102,7 @@ export async function getFileMetadata(
   file_ids: Array<number>,
   only_return_basic_information = true,
 ): Promise<GetFileMetadataResponse> {
-  const response = await apiClient.get("/get_files/file_metadata", {
+  const response = await sessionKeyClient.get("/get_files/file_metadata", {
     params: {
       file_ids: JSON.stringify(file_ids),
       create_new_file_ids: false,
@@ -263,7 +121,7 @@ export async function getFileMetadata(
  * Get all pages from the Hydrus client
  */
 export async function getPages(): Promise<GetPagesResponse> {
-  const response = await apiClient.get("/manage_pages/get_pages");
+  const response = await sessionKeyClient.get("/manage_pages/get_pages");
   return GetPagesResponseSchema.parse(response.data);
 }
 
@@ -274,7 +132,7 @@ export async function getPageInfo(
   pageKey: string,
   simple = true,
 ): Promise<GetPageInfoResponse> {
-  const response = await apiClient.get("/manage_pages/get_page_info", {
+  const response = await sessionKeyClient.get("/manage_pages/get_page_info", {
     params: {
       page_key: pageKey,
       simple,
@@ -287,7 +145,7 @@ export async function getPageInfo(
  * Refresh a page in the Hydrus client
  */
 export async function refreshPage(pageKey: string): Promise<void> {
-  await apiClient.post("/manage_pages/refresh_page", {
+  await sessionKeyClient.post("/manage_pages/refresh_page", {
     page_key: pageKey,
   });
 }
@@ -296,7 +154,7 @@ export async function refreshPage(pageKey: string): Promise<void> {
  * Focus a page in the Hydrus client
  */
 export async function focusPage(pageKey: string): Promise<void> {
-  await apiClient.post("/manage_pages/focus_page", {
+  await sessionKeyClient.post("/manage_pages/focus_page", {
     page_key: pageKey,
   });
 }
@@ -305,7 +163,9 @@ export async function focusPage(pageKey: string): Promise<void> {
  * Get client options from Hydrus
  */
 export async function getClientOptions(): Promise<GetClientOptionsResponse> {
-  const response = await apiClient.get("/manage_database/get_client_options");
+  const response = await sessionKeyClient.get(
+    "/manage_database/get_client_options",
+  );
   return GetClientOptionsResponseSchema.parse(response.data);
 }
 
@@ -330,7 +190,7 @@ export type UndeleteFilesOptions = FileIdentifiers & {
  * Send files to the trash
  */
 export async function deleteFiles(options: DeleteFilesOptions): Promise<void> {
-  await apiClient.post("/add_files/delete_files", options);
+  await sessionKeyClient.post("/add_files/delete_files", options);
 }
 
 /**
@@ -339,21 +199,21 @@ export async function deleteFiles(options: DeleteFilesOptions): Promise<void> {
 export async function undeleteFiles(
   options: UndeleteFilesOptions,
 ): Promise<void> {
-  await apiClient.post("/add_files/undelete_files", options);
+  await sessionKeyClient.post("/add_files/undelete_files", options);
 }
 
 /**
  * Archive files (remove from inbox)
  */
 export async function archiveFiles(options: FileIdentifiers): Promise<void> {
-  await apiClient.post("/add_files/archive_files", options);
+  await sessionKeyClient.post("/add_files/archive_files", options);
 }
 
 /**
  * Unarchive files (put back in inbox)
  */
 export async function unarchiveFiles(options: FileIdentifiers): Promise<void> {
-  await apiClient.post("/add_files/unarchive_files", options);
+  await sessionKeyClient.post("/add_files/unarchive_files", options);
 }
 
 // #endregion File Management
