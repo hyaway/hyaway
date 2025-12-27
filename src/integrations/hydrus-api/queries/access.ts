@@ -55,9 +55,8 @@ function checkPermissions(permissionsData?: VerifyAccessKeyResponse) {
  * Verify persistent access key validity.
  */
 export const useVerifyPersistentAccessQuery = () => {
-  const apiEndpoint = useApiEndpoint();
   const isConfigured = useIsApiConfigured();
-  const validEndpoint = useApiVersionQuery(apiEndpoint);
+  const validEndpoint = useApiVersionQuery();
 
   return useQuery({
     queryKey: ["verifyAccess", "persistent"],
@@ -81,9 +80,8 @@ export const useVerifyPersistentAccessQuery = () => {
  * Will automatically acquire a session key if one doesn't exist.
  */
 export const useVerifySessionAccessQuery = () => {
-  const apiEndpoint = useApiEndpoint();
   const isConfigured = useIsApiConfigured();
-  const validEndpoint = useApiVersionQuery(apiEndpoint);
+  const validEndpoint = useApiVersionQuery();
 
   return useQuery({
     queryKey: ["verifyAccess", "session"],
