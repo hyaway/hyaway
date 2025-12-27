@@ -92,7 +92,7 @@ const apiClient = axios.create();
 
 // Request interceptor: inject auth key (session or access based on setting)
 apiClient.interceptors.request.use(async (config) => {
-  const { api_endpoint, api_access_key, useSessionKey } =
+  const { api_endpoint, api_access_key, authWithSessionKey } =
     useAuthStore.getState();
 
   if (!api_endpoint) {
@@ -102,7 +102,7 @@ apiClient.interceptors.request.use(async (config) => {
   // Set base URL from store
   config.baseURL = api_endpoint;
 
-  if (useSessionKey) {
+  if (authWithSessionKey) {
     // Acquire session key lazily (will return cached key if available)
     const sessionKey = await ensureSessionKey();
     config.headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
@@ -130,11 +130,11 @@ apiClient.interceptors.response.use(
   async (error) => {
     const status = error?.response?.status;
     const originalRequest = error.config;
-    const { useSessionKey } = useAuthStore.getState();
+    const { authWithSessionKey } = useAuthStore.getState();
 
     // Session expired (HTTP 419) - refresh and retry once (only when using session key)
     if (
-      useSessionKey &&
+      authWithSessionKey &&
       status === 419 &&
       originalRequest &&
       !originalRequest.__retried
@@ -150,7 +150,7 @@ apiClient.interceptors.response.use(
     }
 
     // Forbidden (HTTP 403) - clear session state (only when using session key)
-    if (useSessionKey && status === 403) {
+    if (authWithSessionKey && status === 403) {
       console.error(
         "Hydrus API access forbidden: please check your access key permissions.",
       );

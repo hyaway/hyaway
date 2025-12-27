@@ -15,7 +15,7 @@ type AuthState = {
   /**
    * Whether to use session key instead of access key for API requests
    */
-  useSessionKey: boolean;
+  authWithSessionKey: boolean;
   /**
    * Hash of endpoint + access key, used as query key prefix for cache invalidation
    */
@@ -30,7 +30,7 @@ type AuthState = {
       endpoint: string | null | undefined,
     ) => void;
     setSessionKey: (sessionKey: string | undefined) => void;
-    setUseSessionKey: (useSessionKey: boolean) => void;
+    setAuthWithSessionKey: (authWithSessionKey: boolean) => void;
     reset: () => void;
   };
 };
@@ -47,7 +47,7 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
   api_access_key: "",
   api_endpoint: "",
   sessionKey: "",
-  useSessionKey: true,
+  authWithSessionKey: true,
   accessKeyHash: 0,
   sessionKeyHash: 0,
   actions: {
@@ -101,8 +101,8 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
         sessionKeyHash: newSessionKeyHash,
       });
     },
-    setUseSessionKey: (useSessionKey: boolean) => {
-      set({ useSessionKey });
+    setAuthWithSessionKey: (authWithSessionKey: boolean) => {
+      set({ authWithSessionKey });
     },
     reset: () => {
       const initialState = store.getInitialState();
@@ -122,7 +122,7 @@ export const useAuthStore = create<AuthState>()(
       api_access_key: state.api_access_key,
       api_endpoint: state.api_endpoint,
       sessionKey: state.sessionKey,
-      useSessionKey: state.useSessionKey,
+      authWithSessionKey: state.authWithSessionKey,
     }),
     onRehydrateStorage: () => (state) => {
       if (state) {
@@ -169,33 +169,33 @@ export const useAuthActions = () => useAuthStore((state) => state.actions);
 /**
  * Whether to use session key instead of access key for API requests
  */
-export const useUseSessionKey = () =>
-  useAuthStore((state) => state.useSessionKey);
+export const useAuthWithSessionKey = () =>
+  useAuthStore((state) => state.authWithSessionKey);
 
 /**
- * Returns the appropriate auth key hash based on the useSessionKey setting.
+ * Returns the appropriate auth key hash based on the authWithSessionKey setting.
  * Use in query keys to enable/invalidate queries when auth changes.
  */
 export const useAuthKeyHash = () =>
   useAuthStore((state) =>
-    state.useSessionKey ? state.sessionKeyHash : state.accessKeyHash,
+    state.authWithSessionKey ? state.sessionKeyHash : state.accessKeyHash,
   );
 
 /**
- * Returns the appropriate auth key (session or access) based on the useSessionKey setting.
+ * Returns the appropriate auth key (session or access) based on the authWithSessionKey setting.
  * Use for constructing URLs that need authentication.
  */
 export const useAuthKey = () =>
   useAuthStore((state) =>
-    state.useSessionKey ? state.sessionKey : state.api_access_key,
+    state.authWithSessionKey ? state.sessionKey : state.api_access_key,
   );
 
 /**
- * Returns the appropriate auth header name based on the useSessionKey setting.
+ * Returns the appropriate auth header name based on the authWithSessionKey setting.
  */
 export const useAuthHeaderName = () =>
   useAuthStore((state) =>
-    state.useSessionKey
+    state.authWithSessionKey
       ? HYDRUS_API_HEADER_SESSION_KEY
       : HYDRUS_API_HEADER_ACCESS_KEY,
   );

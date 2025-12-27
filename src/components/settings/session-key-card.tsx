@@ -31,8 +31,8 @@ import {
   useApiEndpoint,
   useApiSessionKey,
   useAuthActions,
+  useAuthWithSessionKey,
   useIsApiConfigured,
-  useUseSessionKey,
 } from "@/integrations/hydrus-api/hydrus-config-store";
 import { refreshSessionKey } from "@/integrations/hydrus-api/api-client";
 import { Switch } from "@/components/ui-primitives/switch";
@@ -41,8 +41,8 @@ export function SessionKeyCard() {
   const apiEndpoint = useApiEndpoint();
   const isConfigured = useIsApiConfigured();
   const sessionKey = useApiSessionKey();
-  const useSessionKey = useUseSessionKey();
-  const { setUseSessionKey } = useAuthActions();
+  const authWithSessionKey = useAuthWithSessionKey();
+  const { setAuthWithSessionKey } = useAuthActions();
 
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useVerifySessionAccessQuery();
@@ -77,8 +77,8 @@ export function SessionKeyCard() {
             </div>
             <Switch
               id="use-session-key-switch"
-              checked={useSessionKey}
-              onCheckedChange={setUseSessionKey}
+              checked={authWithSessionKey}
+              onCheckedChange={setAuthWithSessionKey}
             />
           </div>
         </Field>
