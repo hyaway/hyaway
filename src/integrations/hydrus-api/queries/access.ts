@@ -4,12 +4,7 @@ import {
   requestNewPermissions,
   verifyAccessKey,
 } from "../api-client";
-import {
-  useAccessKeyHash,
-  useApiEndpoint,
-  useIsApiConfigured,
-  useSessionKeyHash,
-} from "../hydrus-config-store";
+import { useApiEndpoint, useIsApiConfigured } from "../hydrus-config-store";
 import { Permission } from "../models";
 import type { AccessKeyType, VerifyAccessKeyResponse } from "../models";
 
@@ -57,16 +52,14 @@ function checkPermissions(permissionsData?: VerifyAccessKeyResponse) {
 
 /**
  * Verify persistent access key validity.
- * Uses accessKeyHash for cache invalidation when credentials change.
  */
 export const useVerifyPersistentAccessQuery = () => {
-  const accessKeyHash = useAccessKeyHash();
   const apiEndpoint = useApiEndpoint();
   const isConfigured = useIsApiConfigured();
   const validEndpoint = useApiVersionQuery(apiEndpoint);
 
   return useQuery({
-    queryKey: ["verifyAccess", "persistent", accessKeyHash],
+    queryKey: ["verifyAccess", "persistent"],
     queryFn: async () => {
       return verifyAccessKey("persistent");
     },
@@ -74,7 +67,7 @@ export const useVerifyPersistentAccessQuery = () => {
       raw: data,
       hasRequiredPermissions: checkPermissions(data),
     }),
-    enabled: !!accessKeyHash && isConfigured && validEndpoint.isSuccess,
+    enabled: isConfigured && validEndpoint.isSuccess,
     // Persistent key rarely changes; keep effectively permanent
     staleTime: Infinity,
     refetchInterval: false,
@@ -84,17 +77,15 @@ export const useVerifyPersistentAccessQuery = () => {
 
 /**
  * Verify session key validity.
- * Uses sessionKeyHash for cache invalidation when session changes.
  * Will automatically acquire a session key if one doesn't exist.
  */
 export const useVerifySessionAccessQuery = () => {
-  const sessionKeyHash = useSessionKeyHash();
   const apiEndpoint = useApiEndpoint();
   const isConfigured = useIsApiConfigured();
   const validEndpoint = useApiVersionQuery(apiEndpoint);
 
   return useQuery({
-    queryKey: ["verifyAccess", "session", sessionKeyHash],
+    queryKey: ["verifyAccess", "session"],
     queryFn: async () => {
       // verifyAccessKey("session") calls ensureSessionKey() internally,
       // which will fetch a session key if one doesn't exist
@@ -104,7 +95,6 @@ export const useVerifySessionAccessQuery = () => {
       raw: data,
       hasRequiredPermissions: checkPermissions(data),
     }),
-    // Don't require sessionKeyHash - the query will acquire one if missing
     enabled: isConfigured && validEndpoint.isSuccess,
     // Session key lasts up to a day or until remote client restarts.
     // Use a generous stale time & focus/refetch triggers instead of frequent polling.
