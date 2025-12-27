@@ -66,7 +66,6 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
 
       if (newSessionKey !== previousSessionKey) {
         set({ sessionKey: newSessionKey });
-        getContext().queryClient.resetQueries();
       }
     },
     setAuthWithSessionKey: (authWithSessionKey: boolean) => {
@@ -74,7 +73,6 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
 
       if (authWithSessionKey !== previousValue) {
         set({ authWithSessionKey });
-        getContext().queryClient.resetQueries();
       }
     },
     reset: () => {
@@ -82,7 +80,7 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
       set({
         ...initialState,
       });
-      getContext().queryClient.resetQueries();
+      getContext().queryClient.removeQueries();
     },
   },
 });
@@ -98,7 +96,7 @@ export const useAuthStore = create<AuthState>()(
       authWithSessionKey: state.authWithSessionKey,
     }),
     onRehydrateStorage: () => () => {
-      getContext().queryClient.resetQueries();
+      getContext().queryClient.invalidateQueries();
     },
   }),
 );

@@ -1,6 +1,5 @@
 import { AxiosError } from "axios";
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -41,12 +40,11 @@ const formSchema = z.object({
 });
 
 export function ApiEndpointCard() {
-  const queryClient = useQueryClient();
   const apiEndpoint = useApiEndpoint();
   const { setApiCredentials } = useAuthActions();
 
   const { data, isLoading, isFetching, isSuccess, isError, error } =
-    useApiVersionQuery(apiEndpoint);
+    useApiVersionQuery();
 
   const form = useForm({
     defaultValues: {
@@ -54,7 +52,6 @@ export function ApiEndpointCard() {
     } satisfies z.input<typeof formSchema>,
     onSubmit: ({ value }) => {
       setApiCredentials(undefined, value[SETTINGS_ENDPOINT_FIELD_NAME]);
-      queryClient.resetQueries({ queryKey: ["apiVersion"] });
     },
   });
 

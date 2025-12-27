@@ -1,6 +1,5 @@
 import { AxiosError } from "axios";
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -41,7 +40,6 @@ const formSchema = z.object({
 });
 
 export function AccessKeyField() {
-  const queryClient = useQueryClient();
   const { setApiCredentials } = useAuthActions();
 
   const apiAccessKey = useApiAccessKey();
@@ -50,7 +48,7 @@ export function AccessKeyField() {
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useVerifyPersistentAccessQuery();
 
-  const apiVersionQuery = useApiVersionQuery(apiEndpoint);
+  const apiVersionQuery = useApiVersionQuery();
 
   const form = useForm({
     defaultValues: {
@@ -58,7 +56,6 @@ export function AccessKeyField() {
     } satisfies z.input<typeof formSchema>,
     onSubmit: ({ value }) => {
       setApiCredentials(value[SETTINGS_ACCESS_KEY_FIELD_NAME], undefined);
-      queryClient.resetQueries({ queryKey: ["verifyAccess"] });
     },
   });
 
