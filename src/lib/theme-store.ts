@@ -9,10 +9,12 @@ export type Theme = "dark" | "light" | "system";
 type ThemeState = {
   activeTheme: ActiveTheme;
   themePreference: Theme;
+  _hasHydrated: boolean;
   actions: {
     setActiveTheme: (theme: ActiveTheme) => void;
     setThemePreference: (theme: Theme) => void;
     resetSystemTheme: () => void;
+    setHasHydrated: (state: boolean) => void;
   };
 };
 
@@ -21,6 +23,7 @@ export const useThemeStore = create<ThemeState>()(
     (set) => ({
       activeTheme: getWindowSystemTheme(),
       themePreference: "system",
+      _hasHydrated: false,
       actions: {
         setActiveTheme: (activeTheme: ActiveTheme) => set({ activeTheme }),
         setThemePreference: (themePreference: Theme) => {
@@ -37,12 +40,16 @@ export const useThemeStore = create<ThemeState>()(
             }
             return {};
           }),
+        setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
       },
     }),
     {
       name: "theme-storage", // localStorage key
       storage: createJSONStorage(() => localStorage),
-      partialize: ({ actions, ...rest }) => rest,
+      partialize: ({ actions, _hasHydrated, ...rest }) => rest,
+      onRehydrateStorage: () => (state) => {
+        state?.actions.setHasHydrated(true);
+      },
     },
   ),
 );
@@ -63,6 +70,8 @@ export const useActiveTheme = () => useThemeStore((state) => state.activeTheme);
 export const useThemePreference = () =>
   useThemeStore((state) => state.themePreference);
 export const useThemeActions = () => useThemeStore((state) => state.actions);
+export const useThemeHydrated = () =>
+  useThemeStore((state) => state._hasHydrated);
 
 function applyTheme(theme: ActiveTheme) {
   const root = window.document.documentElement;
