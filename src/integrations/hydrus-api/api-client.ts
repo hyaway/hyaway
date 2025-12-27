@@ -37,8 +37,8 @@ export { refreshSessionKey };
 /**
  * Get API version from a Hydrus endpoint (no auth required)
  */
-export async function getApiVersion(apiEndpoint: string) {
-  const response = await axios.get(`${apiEndpoint}/api_version`);
+export async function getApiVersion() {
+  const response = await baseClient.get(`/api_version`);
   return BaseResponseSchema.parse(response.data);
 }
 
@@ -46,10 +46,9 @@ export async function getApiVersion(apiEndpoint: string) {
  * Request new permissions from a Hydrus endpoint (no auth required)
  */
 export async function requestNewPermissions(
-  apiEndpoint: string,
   name: string,
 ): Promise<RequestNewPermissionsResponse> {
-  const response = await axios.get(`${apiEndpoint}/request_new_permissions`, {
+  const response = await baseClient.get(`/request_new_permissions`, {
     params: {
       name,
       permits_everything: true,

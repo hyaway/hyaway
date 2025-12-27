@@ -8,11 +8,12 @@ import { useApiEndpoint, useIsApiConfigured } from "../hydrus-config-store";
 import { Permission } from "../models";
 import type { AccessKeyType, VerifyAccessKeyResponse } from "../models";
 
-export const useApiVersionQuery = (apiEndpoint: string) => {
+export const useApiVersionQuery = () => {
+  const apiEndpoint = useApiEndpoint();
   return useQuery({
-    queryKey: ["apiVersion", apiEndpoint],
+    queryKey: ["apiVersion"],
     queryFn: async () => {
-      return getApiVersion(apiEndpoint);
+      return getApiVersion();
     },
     enabled: !!apiEndpoint,
     retry: false,

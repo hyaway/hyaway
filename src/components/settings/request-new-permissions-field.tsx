@@ -25,7 +25,7 @@ export function RequestNewPermissionsField() {
   const { setApiCredentials } = useAuthActions();
   const { mutate, isPending, isSuccess, isError, error } =
     useRequestNewPermissionsMutation();
-  const apiVersionQuery = useApiVersionQuery(apiEndpoint);
+  const apiVersionQuery = useApiVersionQuery();
 
   return (
     <div className="flex flex-col gap-4">
