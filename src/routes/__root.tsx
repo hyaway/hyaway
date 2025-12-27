@@ -6,7 +6,11 @@ import type { QueryClient } from "@tanstack/react-query";
 import TanStackQueryDevtools from "@/integrations/tanstack-query/devtools";
 
 import { AppHeader } from "@/components/app-shell/app-header";
-import { useApplyTheme, useSystemThemeListener } from "@/lib/theme-store";
+import {
+  useApplyTheme,
+  useSystemThemeListener,
+  useThemeHydrated,
+} from "@/lib/theme-store";
 import {
   SidebarInset,
   SidebarProvider,
@@ -24,8 +28,15 @@ export interface MyRouterContext {
 }
 
 function RootComponent() {
+  const hasHydrated = useThemeHydrated();
   useApplyTheme();
   useSystemThemeListener();
+
+  // Block render until theme is hydrated to prevent flash
+  if (!hasHydrated) {
+    return null;
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
