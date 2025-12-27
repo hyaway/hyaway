@@ -1,17 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { getServices } from "../api-client";
-import { useAuthKeyHash } from "../hydrus-config-store";
+import { useIsApiConfigured } from "../hydrus-config-store";
 import { ServiceType } from "../models";
 
 export const useGetServicesQuery = () => {
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useQuery({
-    queryKey: ["getServices", authKeyHash],
+    queryKey: ["getServices"],
     queryFn: async () => {
       return getServices();
     },
-    enabled: !!authKeyHash,
+    enabled: isConfigured,
     staleTime: Infinity, // Services don't change often
   });
 };

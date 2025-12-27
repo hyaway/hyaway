@@ -1,19 +1,19 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getClientOptions } from "../api-client";
-import { useAuthKeyHash } from "../hydrus-config-store";
+import { useIsApiConfigured } from "../hydrus-config-store";
 import { useActiveTheme } from "@/lib/theme-store";
 import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
 
 export const useGetClientOptionsQuery = () => {
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useQuery({
-    queryKey: ["getClientOptions", authKeyHash],
+    queryKey: ["getClientOptions"],
     queryFn: async () => {
       return getClientOptions();
     },
-    enabled: !!authKeyHash,
+    enabled: isConfigured,
     staleTime: Infinity, // Options don't change often
   });
 };

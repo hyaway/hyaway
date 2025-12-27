@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { searchFiles } from "../api-client";
-import { useAuthKeyHash } from "../hydrus-config-store";
+import { useIsApiConfigured } from "../hydrus-config-store";
 import { HydrusFileSortType, ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
 import type { HydrusTagSearch, SearchFilesOptions } from "../models";
@@ -25,17 +25,17 @@ export const useRecentlyArchivedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useQuery({
-    queryKey: ["searchFiles", "recentlyArchived", tags, options, authKeyHash],
+    queryKey: ["searchFiles", "recentlyArchived", tags, options],
     queryFn: async () => {
       return searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!authKeyHash && tags.length > 0,
+    enabled: isConfigured && tags.length > 0,
   });
 };
 
@@ -59,7 +59,7 @@ export const useRecentlyDeletedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useQuery({
     queryKey: [
@@ -68,7 +68,6 @@ export const useRecentlyDeletedFilesQuery = () => {
       trashServiceKey,
       tags,
       options,
-      authKeyHash,
     ],
     queryFn: async () => {
       if (!trashServiceKey) {
@@ -80,7 +79,7 @@ export const useRecentlyDeletedFilesQuery = () => {
         file_service_key: trashServiceKey,
       });
     },
-    enabled: !!authKeyHash && tags.length > 0 && !!trashServiceKey,
+    enabled: isConfigured && tags.length > 0 && !!trashServiceKey,
   });
 };
 
@@ -98,17 +97,17 @@ export const useRecentlyInboxedFilesQuery = () => {
     file_sort_asc: false,
   };
 
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useQuery({
-    queryKey: ["searchFiles", "recentlyInboxed", tags, options, authKeyHash],
+    queryKey: ["searchFiles", "recentlyInboxed", tags, options],
     queryFn: async () => {
       return searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!authKeyHash && tags.length > 0,
+    enabled: isConfigured && tags.length > 0,
   });
 };
 
@@ -122,17 +121,17 @@ export const useRandomInboxFilesQuery = () => {
     file_sort_type: HydrusFileSortType.Random,
   };
 
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useQuery({
-    queryKey: ["searchFiles", "randomInbox", tags, options, authKeyHash],
+    queryKey: ["searchFiles", "randomInbox", tags, options],
     queryFn: async () => {
       return searchFiles({
         tags,
         ...options,
       });
     },
-    enabled: !!authKeyHash && tags.length > 0,
+    enabled: isConfigured && tags.length > 0,
     staleTime: Infinity,
   });
 };
@@ -141,14 +140,14 @@ export const useSearchFilesQuery = (
   tags: HydrusTagSearch,
   options?: Omit<SearchFilesOptions, "tags">,
 ) => {
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useQuery({
-    queryKey: ["searchFiles", tags, options, authKeyHash],
+    queryKey: ["searchFiles", tags, options],
     queryFn: async () => {
       return searchFiles({ tags, ...options });
     },
-    enabled: !!authKeyHash && tags.length > 0,
+    enabled: isConfigured && tags.length > 0,
   });
 };
 
@@ -156,11 +155,11 @@ export const useInfiniteSearchFilesQuery = (
   tags: HydrusTagSearch,
   options?: Omit<SearchFilesOptions, "tags">,
 ) => {
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
   const BATCH_SIZE = 256;
 
   return useInfiniteQuery({
-    queryKey: ["infiniteSearchFiles", tags, options, BATCH_SIZE, authKeyHash],
+    queryKey: ["infiniteSearchFiles", tags, options, BATCH_SIZE],
     queryFn: async ({ pageParam = 0 }) => {
       const searchTags: HydrusTagSearch = [
         ...tags,
@@ -184,6 +183,6 @@ export const useInfiniteSearchFilesQuery = (
       return lastPage.offset + BATCH_SIZE;
     },
     initialPageParam: 0,
-    enabled: !!authKeyHash && tags.length > 0,
+    enabled: isConfigured && tags.length > 0,
   });
 };

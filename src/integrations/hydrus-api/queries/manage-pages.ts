@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { focusPage, getPageInfo, getPages, refreshPage } from "../api-client";
-import { useAuthKeyHash } from "../hydrus-config-store";
+import { useIsApiConfigured } from "../hydrus-config-store";
 import { PageState } from "../models";
 import { useIsAuthenticated } from "./access";
 import type { Page } from "../models";
@@ -44,15 +44,13 @@ const areAllPagesStable = (page: Page): boolean => {
  * Query hook for getting all pages from Hydrus
  */
 export const useGetPagesQuery = () => {
-  const authKeyHash = useAuthKeyHash();
-  const enabled = useIsAuthenticated();
-
+  const isConfigured = useIsApiConfigured();
   return useQuery({
-    queryKey: ["getPages", authKeyHash],
+    queryKey: ["getPages"],
     queryFn: async () => {
       return getPages();
     },
-    enabled: !!authKeyHash && enabled,
+    enabled: isConfigured,
     staleTime: 5 * 60 * 1000, // Pages can change frequently, but don't need to refetch constantly
     refetchInterval: (query) => {
       // Stop refetching if there's no data or an error
@@ -94,14 +92,14 @@ export const useGetMediaPagesQuery = () => {
 };
 
 export const useGetPageInfoQuery = (pageKey: string, simple = true) => {
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useQuery({
-    queryKey: ["getPageInfo", pageKey, simple, authKeyHash],
+    queryKey: ["getPageInfo", pageKey, simple],
     queryFn: async () => {
       return getPageInfo(pageKey, simple);
     },
-    enabled: !!authKeyHash && !!pageKey,
+    enabled: isConfigured && !!pageKey,
     staleTime: Infinity, // We want this to be not change while performing the archive/delete actions
     refetchInterval: (query) => {
       // Stop refetching if there's no data or an error
@@ -122,11 +120,11 @@ export const useGetPageInfoQuery = (pageKey: string, simple = true) => {
 
 export const useRefreshPageMutation = () => {
   const queryClient = useQueryClient();
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useMutation({
     mutationFn: async (pageKey: string) => {
-      if (!authKeyHash) {
+      if (!isConfigured) {
         throw new Error("Hydrus API session not established.");
       }
       return refreshPage(pageKey);
@@ -146,11 +144,11 @@ export const useRefreshPageMutation = () => {
 };
 
 export const useFocusPageMutation = () => {
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useMutation({
     mutationFn: async (pageKey: string) => {
-      if (!authKeyHash) {
+      if (!isConfigured) {
         throw new Error("Hydrus API session not established.");
       }
       return focusPage(pageKey);

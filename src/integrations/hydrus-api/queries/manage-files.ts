@@ -11,7 +11,7 @@ import {
   unarchiveFiles,
   undeleteFiles,
 } from "../api-client";
-import { useAuthKeyHash } from "../hydrus-config-store";
+import { useIsApiConfigured } from "../hydrus-config-store";
 
 import type {
   DeleteFilesOptions,
@@ -21,10 +21,10 @@ import type {
 import type { FileMetadata } from "../models";
 
 export const useGetSingleFileMetadata = (fileId: number) => {
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useQuery({
-    queryKey: ["getSingleFileMetadata", fileId, authKeyHash],
+    queryKey: ["getSingleFileMetadata", fileId],
     queryFn: async () => {
       const response = await getFileMetadata([fileId], false);
       if (response.metadata.length === 0) {
@@ -32,7 +32,7 @@ export const useGetSingleFileMetadata = (fileId: number) => {
       }
       return response.metadata[0];
     },
-    enabled: !!authKeyHash && !!fileId,
+    enabled: isConfigured && !!fileId,
     staleTime: Infinity,
   });
 };
@@ -41,15 +41,10 @@ export const useGetFilesMetadata = (
   file_ids: Array<number>,
   only_return_basic_information = true,
 ) => {
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
 
   return useQuery({
-    queryKey: [
-      "getFilesMetadata",
-      file_ids,
-      only_return_basic_information,
-      authKeyHash,
-    ],
+    queryKey: ["getFilesMetadata", file_ids, only_return_basic_information],
     queryFn: async () => {
       if (file_ids.length === 0) {
         throw new Error("File Ids are required.");
@@ -62,7 +57,7 @@ export const useGetFilesMetadata = (
         width: meta.width,
         height: meta.height,
       })),
-    enabled: !!authKeyHash && file_ids.length > 0,
+    enabled: isConfigured && file_ids.length > 0,
     staleTime: Infinity, // Should not change without user action
   });
 };
@@ -71,7 +66,7 @@ export const useInfiniteGetFilesMetadata = (
   file_ids: Array<number>,
   only_return_basic_information = true,
 ) => {
-  const authKeyHash = useAuthKeyHash();
+  const isConfigured = useIsApiConfigured();
   const BATCH_SIZE = 128;
 
   return useInfiniteQuery({
@@ -80,7 +75,6 @@ export const useInfiniteGetFilesMetadata = (
       file_ids,
       only_return_basic_information,
       BATCH_SIZE,
-      authKeyHash,
     ],
     queryFn: async ({ pageParam = 0 }) => {
       const batchFileIds = file_ids.slice(pageParam, pageParam + BATCH_SIZE);
@@ -101,7 +95,7 @@ export const useInfiniteGetFilesMetadata = (
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: 0,
-    enabled: !!authKeyHash && file_ids.length > 0,
+    enabled: isConfigured && file_ids.length > 0,
     staleTime: Infinity,
   });
 };
