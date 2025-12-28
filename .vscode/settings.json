@@ -24,6 +24,7 @@
     "IPFS",
     "nums",
     "overscan",
-    "partialize"
+    "partialize",
+    "Retryable"
   ]
 }
