@@ -18,7 +18,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui-primitives/context-menu";
 import { useFileActions } from "@/hooks/use-file-actions";
-import { useThumbnailWithRefresh } from "@/hooks/use-url-with-api-key";
+import { useThumbnailWithRetry } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
 
 // --- Main Card Component ---
@@ -210,7 +210,7 @@ export interface ThumbnailProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function ThumbnailImage({ fileId, className }: ThumbnailProps) {
-  const { url, onError } = useThumbnailWithRefresh(fileId);
+  const { url, onError } = useThumbnailWithRetry(fileId);
   return (
     <img
       src={url}
