@@ -20,11 +20,13 @@ export const useGetClientOptionsQuery = () => {
 
 export const useThumbnailDimensions = () => {
   const { data, isFetched } = useGetClientOptionsQuery();
-  if (isFetched && !data) {
-    return undefined;
-  }
 
   return useMemo(() => {
+    // Return undefined if fetched but no data
+    if (isFetched && !data) {
+      return undefined;
+    }
+
     if (
       !data ||
       !data.old_options?.thumbnail_dimensions ||
@@ -46,7 +48,7 @@ export const useThumbnailDimensions = () => {
       };
     }
     return { width, height };
-  }, [data]);
+  }, [data, isFetched]);
 };
 
 /**
