@@ -74,7 +74,7 @@ export function AccessKeyField() {
     >
       <form.Field
         name={SETTINGS_ACCESS_KEY_FIELD_NAME}
-        validators={{ onChange: accessKeySchema, onBlur: accessKeySchema }}
+        validators={{ onChange: accessKeySchema }}
       >
         {(field) => (
           <Field>

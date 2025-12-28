@@ -37,7 +37,7 @@ export function RequestNewPermissionsField() {
         value={SETTINGS_REQUEST_API_KEY_ACTION}
         onClick={() => {
           mutate(
-            { apiEndpoint: apiEndpoint, name: "hyaway-app" },
+            { name: "hyaway-app" },
             {
               onSuccess: ({ access_key }) => {
                 setApiCredentials(access_key, apiEndpoint);

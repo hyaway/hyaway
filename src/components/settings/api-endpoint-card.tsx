@@ -77,7 +77,7 @@ export function ApiEndpointCard() {
         <CardContent className="flex flex-col gap-4">
           <form.Field
             name={SETTINGS_ENDPOINT_FIELD_NAME}
-            validators={{ onChange: endpointSchema, onBlur: endpointSchema }}
+            validators={{ onChange: endpointSchema }}
           >
             {(field) => (
               <Field>

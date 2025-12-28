@@ -22,14 +22,8 @@ export const useApiVersionQuery = () => {
 
 export const useRequestNewPermissionsMutation = () => {
   return useMutation({
-    mutationFn: async ({
-      apiEndpoint,
-      name,
-    }: {
-      apiEndpoint: string;
-      name: string;
-    }) => {
-      return requestNewPermissions(apiEndpoint, name);
+    mutationFn: async ({ name }: { name: string }) => {
+      return requestNewPermissions(name);
     },
     mutationKey: ["requestNewPermissions"],
   });
