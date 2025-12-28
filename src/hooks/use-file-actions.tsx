@@ -57,7 +57,7 @@ export function useFileActions(
   const { includeOpen = false, includeExternal = true } = options;
 
   const navigate = useNavigate();
-  const fileUrl = useFullFileIdUrl(data.file_id);
+  const { url: fileUrl } = useFullFileIdUrl(data.file_id);
   const downloadUrl = useDownloadFileIdUrl(data.file_id);
 
   const deleteFilesMutation = useDeleteFilesMutation();

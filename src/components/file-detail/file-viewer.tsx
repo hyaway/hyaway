@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   FaceFrownIcon,
   NoSymbolIcon as NoSymbolIconLarge,
@@ -9,7 +9,12 @@ import {
   DefaultVideoLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
-import type { AudioMimeType, VideoMimeType } from "@vidstack/react";
+import type {
+  AudioMimeType,
+  MediaErrorDetail,
+  MediaErrorEvent,
+  VideoMimeType,
+} from "@vidstack/react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
@@ -20,8 +25,19 @@ import "@vidstack/react/player/styles/default/layouts/video.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
 
 export function FileViewer({ data }: { data: FileMetadata }) {
-  const fileUrl = useFullFileIdUrl(data.file_id);
+  const { url: fileUrl, onLoad, onError } = useFullFileIdUrl(data.file_id);
   const activeTheme = useActiveTheme();
+
+  // Handle media errors (video/audio) - check for network errors which may be 419
+  const onMediaError = useCallback(
+    (error: MediaErrorDetail, _nativeEvent: MediaErrorEvent) => {
+      // MEDIA_ERR_NETWORK (2) or MEDIA_ERR_SRC_NOT_SUPPORTED (4) could be 419
+      if (error.code === 2 || error.code === 4) {
+        onError();
+      }
+    },
+    [onError],
+  );
 
   const isDeleted = data.is_deleted && !data.is_trashed;
 
@@ -57,6 +73,8 @@ export function FileViewer({ data }: { data: FileMetadata }) {
               ? "max-h-full cursor-zoom-out"
               : "max-h-[70vh] cursor-zoom-in",
           )}
+          onLoad={onLoad}
+          onError={onError}
           onClick={() => {
             if (isExpanded) {
               window.scrollTo({ top: 0, behavior: "auto" });
@@ -76,6 +94,8 @@ export function FileViewer({ data }: { data: FileMetadata }) {
           src={{ src: fileUrl, type: data.mime as VideoMimeType }}
           playsInline
           crossOrigin={true}
+          onCanPlay={onLoad}
+          onError={onMediaError}
         >
           <MediaProvider
             mediaProps={{
@@ -99,6 +119,8 @@ export function FileViewer({ data }: { data: FileMetadata }) {
           src={{ src: fileUrl, type: data.mime as AudioMimeType }}
           playsInline
           crossOrigin={true}
+          onCanPlay={onLoad}
+          onError={onMediaError}
         >
           <MediaProvider />
           <DefaultAudioLayout

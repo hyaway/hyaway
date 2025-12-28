@@ -25,6 +25,7 @@
     "nums",
     "overscan",
     "partialize",
-    "Retryable"
+    "Retryable",
+    "Undelete"
   ]
 }

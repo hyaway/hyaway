@@ -62,26 +62,12 @@ export const useUrlWithApiKey = (url: string) => {
   return `${url}${url.includes("?") ? "&" : "?"}${headerName}=${authKey}`;
 };
 
-export const useFullFileIdUrl = (fileId: number) => {
-  const apiEndpoint = useApiEndpoint();
-  const { authKey, headerName } = useAuthForUrl();
-  return `${apiEndpoint}/get_files/file?file_id=${fileId}&${headerName}=${authKey}`;
-};
-
-export const useDownloadFileIdUrl = (fileId: number) => {
-  const apiEndpoint = useApiEndpoint();
-  const { authKey, headerName } = useAuthForUrl();
-  return `${apiEndpoint}/get_files/file?file_id=${fileId}&download=true&${headerName}=${authKey}`;
-};
-
 /**
- * Hook for thumbnails that uses store auth until successful load.
+ * Hook for media URLs (files, thumbnails) that handles auth and 419 recovery.
  * After success, freezes the working auth to avoid re-fetching on token refresh.
- * On error, triggers session key refresh (fire-and-forget) if using session auth,
- * then falls back to latest store auth on next render.
+ * On error, triggers session key refresh (fire-and-forget) if 419 detected.
  */
-export const useThumbnailWithRetry = (fileId: number) => {
-  const apiEndpoint = useApiEndpoint();
+const useMediaUrlWithRetry = (baseUrl: string) => {
   const useSessionKey = useAuthWithSessionKey();
   const storeAuth = useAuthForUrl();
   const [frozenAuth, setFrozenAuth] = useState<{
@@ -91,7 +77,7 @@ export const useThumbnailWithRetry = (fileId: number) => {
 
   // Use frozen auth if we had a successful load, otherwise use current store auth
   const auth = frozenAuth ?? storeAuth;
-  const url = `${apiEndpoint}/get_files/thumbnail?file_id=${fileId}&${auth.headerName}=${auth.authKey}`;
+  const url = `${baseUrl}&${auth.headerName}=${auth.authKey}`;
 
   // On success: freeze the working auth
   const onLoad = useCallback(() => {
@@ -113,4 +99,24 @@ export const useThumbnailWithRetry = (fileId: number) => {
   }, [useSessionKey, url, auth.authKey]);
 
   return { url, onLoad, onError };
+};
+
+export const useFullFileIdUrl = (fileId: number) => {
+  const apiEndpoint = useApiEndpoint();
+  return useMediaUrlWithRetry(
+    `${apiEndpoint}/get_files/file?file_id=${fileId}`,
+  );
+};
+
+export const useThumbnailUrl = (fileId: number) => {
+  const apiEndpoint = useApiEndpoint();
+  return useMediaUrlWithRetry(
+    `${apiEndpoint}/get_files/thumbnail?file_id=${fileId}`,
+  );
+};
+
+export const useDownloadFileIdUrl = (fileId: number) => {
+  const apiEndpoint = useApiEndpoint();
+  const { authKey, headerName } = useAuthForUrl();
+  return `${apiEndpoint}/get_files/file?file_id=${fileId}&download=true&${headerName}=${authKey}`;
 };
