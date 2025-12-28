@@ -82,7 +82,9 @@ export const ImageGridCard = memo(function ImageGridCard({
         [`--thumbnail-hover-reverse-scale`]: `${1 / scale}`,
       }}
       className={cn(
-        "group absolute top-0 left-0 z-0 flex h-full w-full justify-center overflow-visible [content-visibility:auto] hover:z-30 hover:[content-visibility:visible]",
+        "group absolute top-0 left-0 z-0 flex h-full w-full justify-center overflow-visible [content-visibility:auto]",
+        "hover:z-30 hover:[content-visibility:visible]",
+        "active:z-30 active:[content-visibility:visible]",
         width < height ? "flex-col" : "flex-row",
         !isScrolling && "transition-transform duration-350 ease-out",
         menuOpen && "z-30 [content-visibility:visible]",
@@ -123,7 +125,9 @@ const ImageCardContent = memo(function ImageCardContent({
     <div
       className={cn(
         "h-full w-full overflow-hidden rounded border object-cover",
-        "pointer-events-none transition-[scale] duration-100 ease-out group-hover:scale-(--thumbnail-hover-scale)",
+        "pointer-events-none transition-[scale] duration-100 ease-out",
+        "group-hover:scale-(--thumbnail-hover-scale)",
+        "group-active:scale-(--thumbnail-hover-scale)",
         originClass,
         menuOpen && "scale-(--thumbnail-hover-scale)",
       )}
@@ -137,8 +141,9 @@ const ImageCardContent = memo(function ImageCardContent({
         <div
           className={cn(
             "bg-secondary text-secondary-foreground absolute top-1 right-1 flex flex-col gap-1 rounded p-1 opacity-60",
-            "pointer-events-none group-hover:top-0.5 group-hover:right-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
-            "transition-opacity duration-350 ease-out",
+            "pointer-events-none transition-opacity duration-350 ease-out",
+            "group-hover:top-0.5 group-hover:right-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
+            "group-active:top-0.5 group-active:right-0.5 group-active:scale-(--thumbnail-hover-reverse-scale) group-active:opacity-30",
             menuOpen &&
               "top-0.5 right-0.5 scale-(--thumbnail-hover-reverse-scale) opacity-30",
           )}
@@ -154,8 +159,9 @@ const ImageCardContent = memo(function ImageCardContent({
         <div
           className={cn(
             "bg-secondary text-secondary-foreground absolute top-1 left-1 flex flex-col gap-1 rounded p-1 opacity-60",
-            "pointer-events-none group-hover:top-0.5 group-hover:left-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
-            "transition-opacity duration-350 ease-out",
+            "pointer-events-none transition-opacity duration-350 ease-out",
+            "group-hover:top-0.5 group-hover:left-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
+            "group-active:top-0.5 group-active:left-0.5 group-active:scale-(--thumbnail-hover-reverse-scale) group-active:opacity-30",
             menuOpen &&
               "top-0.5 left-0.5 scale-(--thumbnail-hover-reverse-scale) opacity-30",
           )}
