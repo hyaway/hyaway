@@ -6,11 +6,16 @@ import type { AxiosRequestConfig } from "axios";
 
 /**
  * Creates a base axios instance with common configuration.
+ * Disables browser caching since Hydrus API has a 4-second server cache.
  */
 export function createBaseClient(config?: AxiosRequestConfig) {
   const client = axios.create({
     headers: {
       "Content-Type": "application/json",
+      // Prevent browser from caching API responses
+      // Hydrus API has a 4-second server-side cache, browser caching on top causes stale data
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      Pragma: "no-cache",
     },
     ...config,
   });
