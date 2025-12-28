@@ -55,7 +55,7 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
           placeholder="Filter tags..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-8 w-48 text-sm"
+          className="w-48 text-sm"
         />
       </div>
       <div className="flex flex-wrap gap-0.5">
