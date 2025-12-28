@@ -60,6 +60,7 @@ export function SidebarThemeSwitcher() {
       <SidebarMenuButton
         onClick={() => setThemePreference(getNextTheme(themePreference))}
         aria-label="Switch theme"
+        tooltip="Switch theme"
       >
         <TouchTarget>
           <ThemeIcon themePreference={themePreference} />
