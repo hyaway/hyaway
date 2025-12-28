@@ -5,69 +5,55 @@ import { fetchSessionKey } from "./access-key-client";
 import { createBaseClient } from "./base-client";
 
 import type { AxiosRequestConfig } from "axios";
-import type { SessionKeyResponse } from "../models";
 
 interface RetryableConfig extends AxiosRequestConfig {
   _retry?: boolean;
+  /** The session key that was used when the request was first made */
+  _sessionKeyUsed?: string;
 }
 
-// Single-flight pattern for session refresh
-let refreshPromise: Promise<SessionKeyResponse> | undefined;
-// Request queue interceptor ID (set during refresh)
-let queueInterceptorId: number | undefined;
+const SESSION_KEY_LOCK = "hyaway-session-key-refresh";
 
 /**
  * Ensure a session key exists, fetching one if needed.
- * If a refresh is in progress, waits for it to complete.
+ * Uses Web Locks to coordinate concurrent requests and cross-tab refresh.
  */
 async function ensureSessionKey(): Promise<string> {
-  // If refresh is in progress, wait for it
-  if (refreshPromise) {
-    const result = await refreshPromise;
-    return result.session_key;
-  }
-
   const { sessionKey } = useAuthStore.getState();
   if (sessionKey) return sessionKey;
 
-  refreshPromise = fetchSessionKey().finally(() => {
-    refreshPromise = undefined;
+  // Acquire exclusive lock and fetch session key
+  return navigator.locks.request(SESSION_KEY_LOCK, async () => {
+    // Double-check after acquiring lock (another tab may have fetched it while we waited)
+    const { sessionKey: currentKey } = useAuthStore.getState();
+    if (currentKey) return currentKey;
+
+    const result = await fetchSessionKey();
+    return result.session_key;
   });
-  const result = await refreshPromise;
-  return result.session_key;
 }
 
 /**
  * Force refresh the session key.
- * Queues all incoming requests until refresh completes.
+ * Uses Web Locks to ensure only one tab/request refreshes at a time.
+ * If another tab already refreshed while we waited for the lock, uses that key.
+ *
+ * @param expiredKey - The session key that triggered the 419. Used to detect if
+ *                     another tab already refreshed while we waited for the lock.
  */
-export async function refreshSessionKey(): Promise<SessionKeyResponse> {
-  const { actions } = useAuthStore.getState();
-  actions.setSessionKey(undefined);
+export async function refreshSessionKey(expiredKey?: string): Promise<string> {
+  return navigator.locks.request(SESSION_KEY_LOCK, async () => {
+    // Check if another tab already refreshed while we waited for the lock
+    const { sessionKey: currentKey } = useAuthStore.getState();
+    if (currentKey && currentKey !== expiredKey) {
+      // Token changed while we waited - another tab refreshed it
+      return currentKey;
+    }
 
-  if (!refreshPromise) {
-    // Queue incoming requests during refresh
-    queueInterceptorId = sessionKeyClient.interceptors.request.use(
-      async (config) => {
-        // Wait for refresh to complete before allowing request
-        if (refreshPromise) {
-          await refreshPromise;
-        }
-        return config;
-      },
-    );
-
-    refreshPromise = fetchSessionKey().finally(() => {
-      // Eject queue interceptor when done
-      if (queueInterceptorId !== undefined) {
-        sessionKeyClient.interceptors.request.eject(queueInterceptorId);
-        queueInterceptorId = undefined;
-      }
-      refreshPromise = undefined;
-    });
-  }
-
-  return refreshPromise;
+    // Fetch new session key (fetchSessionKey stores it automatically)
+    const response = await fetchSessionKey();
+    return response.session_key;
+  });
 }
 
 /**
@@ -76,10 +62,18 @@ export async function refreshSessionKey(): Promise<SessionKeyResponse> {
  */
 export const sessionKeyClient = createBaseClient();
 
-// Request interceptor: inject session key
+// Request interceptor: inject session key (skip if already set for retry)
 sessionKeyClient.interceptors.request.use(async (config) => {
+  // Skip if this is a retry with session key already injected
+  if (config.headers[HYDRUS_API_HEADER_SESSION_KEY]) {
+    return config;
+  }
+
   const sessionKey = await ensureSessionKey();
   config.headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
+
+  // Track which session key we used (for detecting stale 419s)
+  (config as RetryableConfig)._sessionKeyUsed = sessionKey;
 
   return config;
 });
@@ -97,9 +91,12 @@ sessionKeyClient.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
-      const { session_key } = await refreshSessionKey();
+      // Pass the expired key so refreshSessionKey can detect if another tab already refreshed
+      const expiredKey = originalRequest._sessionKeyUsed;
+      const sessionKey = await refreshSessionKey(expiredKey);
+
       originalRequest.headers = originalRequest.headers ?? {};
-      originalRequest.headers[HYDRUS_API_HEADER_SESSION_KEY] = session_key;
+      originalRequest.headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
 
       return sessionKeyClient(originalRequest);
     }
