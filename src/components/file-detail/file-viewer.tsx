@@ -9,6 +9,7 @@ import {
   DefaultVideoLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
+import type { AudioMimeType, VideoMimeType } from "@vidstack/react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
@@ -70,7 +71,12 @@ export function FileViewer({ data }: { data: FileMetadata }) {
   if (isVideo) {
     return (
       <div className="flex max-h-[70svh] flex-row justify-center pb-4 sm:px-4">
-        <MediaPlayer title={`File ${data.file_id}`} src={fileUrl} playsInline>
+        <MediaPlayer
+          title={`File ${data.file_id}`}
+          src={{ src: fileUrl, type: data.mime as VideoMimeType }}
+          playsInline
+          crossOrigin={true}
+        >
           <MediaProvider
             mediaProps={{
               className: "h-full!",
@@ -88,7 +94,12 @@ export function FileViewer({ data }: { data: FileMetadata }) {
   if (isAudio) {
     return (
       <div className="flex max-h-[70svh] flex-row justify-center pb-4 sm:px-4">
-        <MediaPlayer title={`File ${data.file_id}`} src={fileUrl} playsInline>
+        <MediaPlayer
+          title={`File ${data.file_id}`}
+          src={{ src: fileUrl, type: data.mime as AudioMimeType }}
+          playsInline
+          crossOrigin={true}
+        >
           <MediaProvider />
           <DefaultAudioLayout
             icons={defaultLayoutIcons}
