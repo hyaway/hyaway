@@ -58,6 +58,15 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
           sessionKey: "",
         });
         getContext().queryClient.resetQueries();
+      } else {
+        if (endpoint !== undefined) {
+          getContext().queryClient.resetQueries({
+            queryKey: ["apiVersion"],
+          });
+        }
+        getContext().queryClient.resetQueries({
+          queryKey: ["verifyAccess"],
+        });
       }
     },
     setSessionKey: (sessionKey: string | undefined) => {
