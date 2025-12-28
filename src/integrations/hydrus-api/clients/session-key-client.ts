@@ -64,8 +64,10 @@ export const sessionKeyClient = createBaseClient();
 
 // Request interceptor: inject session key (skip if already set for retry)
 sessionKeyClient.interceptors.request.use(async (config) => {
-  // Skip if this is a retry with session key already injected
-  if (config.headers[HYDRUS_API_HEADER_SESSION_KEY]) {
+  const retryableConfig = config as RetryableConfig;
+
+  // Skip session key fetch if this is a retry - the 419 handler already set the new key
+  if (retryableConfig._retry) {
     return config;
   }
 
@@ -73,7 +75,7 @@ sessionKeyClient.interceptors.request.use(async (config) => {
   config.headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
 
   // Track which session key we used (for detecting stale 419s)
-  (config as RetryableConfig)._sessionKeyUsed = sessionKey;
+  retryableConfig._sessionKeyUsed = sessionKey;
 
   return config;
 });
@@ -95,8 +97,14 @@ sessionKeyClient.interceptors.response.use(
       const expiredKey = originalRequest._sessionKeyUsed;
       const sessionKey = await refreshSessionKey(expiredKey);
 
-      originalRequest.headers = originalRequest.headers ?? {};
+      // Update the session key for retry - ensure headers object exists
+      if (!originalRequest.headers) {
+        originalRequest.headers = {};
+      }
+      // Delete old key and set new one (handles both plain objects and AxiosHeaders)
+      delete originalRequest.headers[HYDRUS_API_HEADER_SESSION_KEY];
       originalRequest.headers[HYDRUS_API_HEADER_SESSION_KEY] = sessionKey;
+      originalRequest._sessionKeyUsed = sessionKey;
 
       return sessionKeyClient(originalRequest);
     }
