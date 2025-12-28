@@ -54,6 +54,15 @@ export function RequestNewPermissionsField() {
               : "Request new API access key"}
         </span>
       </Button>
+      {apiEndpoint ? (
+        <p className="text-muted-foreground text-sm">
+          Before requesting open the permission registration dialog in Hydrus:{" "}
+          <b>
+            services → review services → local → client api → add → from api
+            request
+          </b>
+        </p>
+      ) : null}
       {!apiEndpoint ? null : isPending ? (
         <Alert>
           <Spinner />
