@@ -90,7 +90,6 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
                     className="flex-col items-center gap-2 border-none"
                   />
                 }
-                nativeButton={false}
               >
                 <EllipsisHorizontalIcon className="size-6" />
               </DropdownMenuTrigger>
