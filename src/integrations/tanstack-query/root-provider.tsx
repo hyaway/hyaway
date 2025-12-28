@@ -3,15 +3,20 @@ import { AxiosError } from "axios";
 
 /**
  * Determine if a failed query should be retried.
- * Returns false for 419 (session expired) since axios interceptor handles token refresh.
+ * Only retries on 5xx server errors and network failures.
+ * 4xx client errors are non-recoverable and should not be retried.
  */
 function shouldRetryQuery(failureCount: number, error: Error): boolean {
-  // Don't retry 419 - axios interceptor handles session refresh transparently
-  if (error instanceof AxiosError && error.response?.status === 419) {
-    return false;
+  if (error instanceof AxiosError) {
+    const status = error.response?.status;
+    // Don't retry 4xx client errors - they're non-recoverable
+    // (419 session expired is handled transparently by axios interceptor)
+    if (status && status >= 400 && status < 500) {
+      return false;
+    }
   }
 
-  // Default: retry up to 3 times
+  // Retry 5xx server errors and network failures up to 3 times
   return failureCount < 3;
 }
 
