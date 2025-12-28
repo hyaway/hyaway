@@ -210,13 +210,14 @@ export interface ThumbnailProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function ThumbnailImage({ fileId, className }: ThumbnailProps) {
-  const { url, onError } = useThumbnailWithRetry(fileId);
+  const { url, onLoad, onError } = useThumbnailWithRetry(fileId);
   return (
     <img
       src={url}
       alt={`Thumbnail for file ID ${fileId}`}
       className={cn("h-full w-full object-cover", className)}
       loading="lazy"
+      onLoad={onLoad}
       onError={onError}
     />
   );
