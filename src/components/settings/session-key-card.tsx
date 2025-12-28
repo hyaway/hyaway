@@ -95,7 +95,7 @@ export function SessionKeyCard() {
           name={SETTINGS_ACTION}
           value={SETTINGS_REQUEST_SESSION_KEY_ACTION}
           onClick={() => {
-            refreshSessionKey();
+            refreshSessionKey(sessionKey);
           }}
           disabled={
             !apiEndpoint ||

@@ -38,10 +38,10 @@ async function ensureSessionKey(): Promise<string> {
  * Uses Web Locks to ensure only one tab/request refreshes at a time.
  * If another tab already refreshed while we waited for the lock, uses that key.
  *
- * @param expiredKey - The session key that triggered the 419. Used to detect if
- *                     another tab already refreshed while we waited for the lock.
+ * @param expiredKey - The session key to replace. Used to detect if another tab
+ *                     already refreshed while we waited for the lock.
  */
-export async function refreshSessionKey(expiredKey?: string): Promise<string> {
+export async function refreshSessionKey(expiredKey: string): Promise<string> {
   return navigator.locks.request(SESSION_KEY_LOCK, async () => {
     // Check if another tab already refreshed while we waited for the lock
     const { sessionKey: currentKey } = useAuthStore.getState();
@@ -94,7 +94,12 @@ sessionKeyClient.interceptors.response.use(
       originalRequest._retry = true;
 
       // Pass the expired key so refreshSessionKey can detect if another tab already refreshed
-      const expiredKey = originalRequest._sessionKeyUsed;
+      const expiredKey =
+        originalRequest._sessionKeyUsed ??
+        (originalRequest.headers?.[HYDRUS_API_HEADER_SESSION_KEY] as
+          | string
+          | undefined) ??
+        "";
       const sessionKey = await refreshSessionKey(expiredKey);
 
       // Update the session key for retry - ensure headers object exists
