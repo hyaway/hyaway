@@ -15,12 +15,16 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
-export function RandomInboxSettingsPopover() {
+export function RandomInboxSettingsPopover({
+  size,
+}: {
+  size?: "default" | "xl";
+} = {}) {
   const randomInboxLimit = useRandomInboxLimit();
   const { setRandomInboxLimit } = useUxSettingsActions();
 
   return (
-    <SettingsPopover label="Settings">
+    <SettingsPopover label="Settings" size={size}>
       <ImageGallerySettingsContent />
 
       <Separator className="my-4" />

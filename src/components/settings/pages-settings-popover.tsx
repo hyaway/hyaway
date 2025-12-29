@@ -10,12 +10,16 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
-export function PagesSettingsPopover() {
+export function PagesSettingsPopover({
+  size,
+}: {
+  size?: "default" | "xl";
+} = {}) {
   const pagesMaxColumns = usePagesMaxColumns();
   const { setPagesMaxColumns } = useUxSettingsActions();
 
   return (
-    <SettingsPopover label="Page settings">
+    <SettingsPopover label="Page settings" size={size}>
       <PopoverHeader>
         <PopoverTitle>Pages settings</PopoverTitle>
       </PopoverHeader>

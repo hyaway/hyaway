@@ -46,9 +46,13 @@ export function ImageGallerySettingsContent() {
   );
 }
 
-export function ImageGallerySettingsPopover() {
+export function ImageGallerySettingsPopover({
+  size,
+}: {
+  size?: "default" | "xl";
+} = {}) {
   return (
-    <SettingsPopover label="Gallery settings">
+    <SettingsPopover label="Gallery settings" size={size}>
       <ImageGallerySettingsContent />
     </SettingsPopover>
   );

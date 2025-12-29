@@ -1,4 +1,4 @@
-import { CheckIcon } from "@heroicons/react/24/solid";
+import { ArrowPathIcon, CheckIcon } from "@heroicons/react/24/solid";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui-primitives/button";
@@ -29,24 +29,36 @@ export function RefetchButton({ onRefetch, isFetching }: RefetchButtonProps) {
   };
 
   return (
-    <Button onClick={handleClick} disabled={isFetching}>
-      Refetch
+    <Button
+      variant="ghost"
+      size="xl"
+      onClick={handleClick}
+      disabled={isFetching}
+      className="relative flex-col items-center gap-1"
+    >
       {isFetching ? (
-        <Spinner className="size-5" />
+        <Spinner className="size-6" />
       ) : (
-        <AnimatePresence>
-          {showCheck && (
-            <motion.span
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <CheckIcon className="size-5" />
-            </motion.span>
-          )}
-        </AnimatePresence>
+        <span className="relative size-6">
+          <AnimatePresence mode="wait">
+            {showCheck ? (
+              <motion.span
+                key="check"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0"
+              >
+                <CheckIcon className="text-success size-6" />
+              </motion.span>
+            ) : (
+              <ArrowPathIcon className="size-6" />
+            )}
+          </AnimatePresence>
+        </span>
       )}
+      <span className="hidden sm:inline">Refetch</span>
     </Button>
   );
 }

@@ -33,6 +33,8 @@ export interface FileAction {
   download?: boolean;
   external?: boolean;
   isPending?: boolean;
+  /** If true, this action will always be in the overflow menu */
+  overflowOnly?: boolean;
 }
 
 export interface FileActionsGroup {
@@ -86,37 +88,27 @@ export function useFileActions(
     });
   }
 
-  // External actions (download, open in new tab)
-  if (includeExternal) {
-    groups.push({
-      id: "external",
-      actions: [
-        {
-          id: "download",
-          label: "Download",
-          icon: ArrowDownTrayIcon,
-          onClick: () => {
-            window.location.href = downloadUrl;
-          },
-          href: downloadUrl,
-          download: true,
-        },
-        {
-          id: "open-new-tab",
-          label: `View ${data.ext || data.filetype_human}`,
-          icon: ArrowTopRightOnSquareIcon,
-          onClick: () => {
-            window.open(fileUrl, "_blank", "noopener,noreferrer");
-          },
-          href: fileUrl,
-          external: true,
-        },
-      ],
+  // File management actions (these should be visible in the floating bar)
+  const managementActions: Array<FileAction> = [];
+
+  if (data.is_trashed) {
+    managementActions.push({
+      id: "undelete",
+      label: "Restore",
+      icon: ArrowUturnUpIcon,
+      onClick: () => undeleteFilesMutation.mutate({ file_id: data.file_id }),
+      isPending: undeleteFilesMutation.isPending,
+    });
+  } else {
+    managementActions.push({
+      id: "delete",
+      label: "Trash",
+      icon: TrashIcon,
+      onClick: () => deleteFilesMutation.mutate({ file_id: data.file_id }),
+      variant: "destructive",
+      isPending: deleteFilesMutation.isPending,
     });
   }
-
-  // File management actions
-  const managementActions: Array<FileAction> = [];
 
   if (data.is_inbox) {
     managementActions.push({
@@ -136,29 +128,41 @@ export function useFileActions(
     });
   }
 
-  if (data.is_trashed) {
-    managementActions.push({
-      id: "undelete",
-      label: "Undelete",
-      icon: ArrowUturnUpIcon,
-      onClick: () => undeleteFilesMutation.mutate({ file_id: data.file_id }),
-      isPending: undeleteFilesMutation.isPending,
-    });
-  } else {
-    managementActions.push({
-      id: "delete",
-      label: "Trash",
-      icon: TrashIcon,
-      onClick: () => deleteFilesMutation.mutate({ file_id: data.file_id }),
-      variant: "destructive",
-      isPending: deleteFilesMutation.isPending,
-    });
-  }
-
   groups.push({
     id: "management",
     actions: managementActions,
   });
+
+  // External actions (download, open in new tab) - always in overflow
+  if (includeExternal) {
+    groups.push({
+      id: "external",
+      actions: [
+        {
+          id: "download",
+          label: "Download",
+          icon: ArrowDownTrayIcon,
+          onClick: () => {
+            window.location.href = downloadUrl;
+          },
+          href: downloadUrl,
+          download: true,
+          overflowOnly: true,
+        },
+        {
+          id: "open-new-tab",
+          label: `View ${data.ext || data.filetype_human}`,
+          icon: ArrowTopRightOnSquareIcon,
+          onClick: () => {
+            window.open(fileUrl, "_blank", "noopener,noreferrer");
+          },
+          href: fileUrl,
+          external: true,
+          overflowOnly: true,
+        },
+      ],
+    });
+  }
 
   return groups;
 }

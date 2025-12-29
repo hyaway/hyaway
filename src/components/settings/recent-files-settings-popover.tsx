@@ -17,13 +17,17 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
-export function RecentFilesSettingsPopover() {
+export function RecentFilesSettingsPopover({
+  size,
+}: {
+  size?: "default" | "xl";
+} = {}) {
   const recentFilesLimit = useRecentFilesLimit();
   const recentFilesDays = useRecentFilesDays();
   const { setRecentFilesLimit, setRecentFilesDays } = useUxSettingsActions();
 
   return (
-    <SettingsPopover label="Settings">
+    <SettingsPopover label="Settings" size={size}>
       <ImageGallerySettingsContent />
 
       <Separator className="my-4" />

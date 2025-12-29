@@ -1,12 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowPathIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/24/solid";
 import { PageError } from "@/components/page/page-error";
-import { PageFloatingBar } from "@/components/page/page-floating-bar";
+import {
+  PageFloatingBar,
+  type FloatingBarAction,
+} from "@/components/page/page-floating-bar";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
 import { RefetchButton } from "@/components/refetch-button";
 import { ImageGallerySettingsPopover } from "@/components/settings/image-gallery-settings-popover";
-import { Button } from "@/components/ui-primitives/button";
 import {
   useFocusPageMutation,
   useGetPageInfoQuery,
@@ -31,32 +37,44 @@ function RouteComponent() {
   const focusPageMutation = useFocusPageMutation();
   const queryClient = useQueryClient();
 
-  const actionButtons = (
-    <>
-      <RefetchButton
-        isFetching={isFetching}
-        onRefetch={() =>
-          queryClient.invalidateQueries({
-            queryKey: ["getPageInfo", pageId],
-          })
-        }
-      />
-      <Button onClick={() => refreshPageMutation.mutate(pageId)}>
-        Refresh remote
-      </Button>
-      <Button onClick={() => focusPageMutation.mutate(pageId)}>
-        Focus remote
-      </Button>
-    </>
+  const refetchButton = (
+    <RefetchButton
+      isFetching={isFetching}
+      onRefetch={() =>
+        queryClient.invalidateQueries({
+          queryKey: ["getPageInfo", pageId],
+        })
+      }
+    />
   );
+
+  const overflowActions: Array<FloatingBarAction> = [
+    {
+      id: "refresh-remote",
+      label: "Refresh remote",
+      icon: ArrowPathIcon,
+      onClick: () => refreshPageMutation.mutate(pageId),
+      isPending: refreshPageMutation.isPending,
+      overflowOnly: true,
+    },
+    {
+      id: "focus-remote",
+      label: "Focus remote",
+      icon: ArrowTopRightOnSquareIcon,
+      onClick: () => focusPageMutation.mutate(pageId),
+      isPending: focusPageMutation.isPending,
+      overflowOnly: true,
+    },
+  ];
 
   if (isLoading) {
     return (
       <>
         <PageLoading title={`Page: ${pageId.slice(0, 8)}...`} />
         <PageFloatingBar
-          leftActions={actionButtons}
-          rightActions={<ImageGallerySettingsPopover />}
+          leftContent={refetchButton}
+          actions={overflowActions}
+          rightContent={<ImageGallerySettingsPopover size="xl" />}
         />
       </>
     );
@@ -73,8 +91,9 @@ function RouteComponent() {
           />
         </div>
         <PageFloatingBar
-          leftActions={actionButtons}
-          rightActions={<ImageGallerySettingsPopover />}
+          leftContent={refetchButton}
+          actions={overflowActions}
+          rightContent={<ImageGallerySettingsPopover size="xl" />}
         />
       </>
     );
@@ -93,8 +112,9 @@ function RouteComponent() {
         )}
       </div>
       <PageFloatingBar
-        leftActions={actionButtons}
-        rightActions={<ImageGallerySettingsPopover />}
+        leftContent={refetchButton}
+        actions={overflowActions}
+        rightContent={<ImageGallerySettingsPopover size="xl" />}
       />
     </>
   );

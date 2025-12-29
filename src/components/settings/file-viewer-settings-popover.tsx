@@ -35,11 +35,13 @@ export function FileViewerSettingsContent() {
 
 export function FileViewerSettingsPopover({
   className,
+  size,
 }: {
   className?: string;
+  size?: "default" | "xl";
 }) {
   return (
-    <SettingsPopover label="Viewer settings" className={className}>
+    <SettingsPopover label="Viewer settings" className={className} size={size}>
       <FileViewerSettingsContent />
     </SettingsPopover>
   );

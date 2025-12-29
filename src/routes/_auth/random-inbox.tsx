@@ -51,11 +51,18 @@ function RouteComponent() {
   };
 
   const shuffleButton = (
-    <Button onClick={handleShuffle} disabled={isLoading || isError} key="a">
-      <span className="mr-1 size-5">
+    <Button
+      variant="ghost"
+      size="xl"
+      onClick={handleShuffle}
+      disabled={isLoading || isError}
+      className="relative flex-col items-center gap-1"
+      key="a"
+    >
+      <span className="relative size-6">
         <AnimatePresence>
           {isLoading ? (
-            <Spinner />
+            <Spinner className="size-6" />
           ) : (
             <motion.span
               key={diceIndex}
@@ -65,14 +72,14 @@ function RouteComponent() {
                 scale: 1,
                 transition: { duration: 0.15, ease: "easeOut" },
               }}
-              className="absolute block"
+              className="absolute inset-0"
             >
-              <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-5" />
+              <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-6" />
             </motion.span>
           )}
         </AnimatePresence>
       </span>
-      Shuffle
+      <span className="hidden sm:inline">Shuffle</span>
     </Button>
   );
 
@@ -81,8 +88,8 @@ function RouteComponent() {
       <>
         <PageLoading title="Random inbox" />
         <PageFloatingBar
-          leftActions={shuffleButton}
-          rightActions={<RandomInboxSettingsPopover />}
+          leftContent={shuffleButton}
+          rightContent={<RandomInboxSettingsPopover size="xl" />}
         />
       </>
     );
@@ -99,8 +106,8 @@ function RouteComponent() {
           />
         </div>
         <PageFloatingBar
-          leftActions={shuffleButton}
-          rightActions={<RandomInboxSettingsPopover />}
+          leftContent={shuffleButton}
+          rightContent={<RandomInboxSettingsPopover size="xl" />}
         />
       </>
     );
@@ -119,8 +126,8 @@ function RouteComponent() {
         )}
       </div>
       <PageFloatingBar
-        leftActions={shuffleButton}
-        rightActions={<RandomInboxSettingsPopover />}
+        leftContent={shuffleButton}
+        rightContent={<RandomInboxSettingsPopover size="xl" />}
       />
     </>
   );
