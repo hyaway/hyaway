@@ -35,12 +35,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuLinkButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
+              className="group/logo cursor-pointer"
               to="/"
             >
               <TouchTarget>
-                <div className="border-sidebar-primary flex aspect-square size-9 items-center justify-center rounded-lg border">
-                  <span className="size-5">hA</span>
+                <div className="border-sidebar-primary text-foreground bg-background group-data-active/logo:bg-sidebar-primary group-data-active/logo:text-sidebar-primary-foreground group-hover/logo:bg-sidebar-primary group-hover/logo:text-sidebar-primary-foreground flex aspect-square size-9 items-end justify-center border-2">
+                  <span className="text-base font-semibold">hA</span>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <Heading className="truncate font-medium" level={2}>
