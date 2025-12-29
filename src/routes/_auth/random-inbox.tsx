@@ -19,8 +19,7 @@ import { PageLoading } from "@/components/page/page-loading";
 import { RandomInboxSettingsPopover } from "@/components/settings/random-inbox-settings-popover";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
-import { Button } from "@/components/ui-primitives/button";
-import { Spinner } from "@/components/ui-primitives/spinner";
+import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 
 const DICE_ICONS = [
   DiceFaces01Icon,
@@ -50,37 +49,34 @@ function RouteComponent() {
     });
   };
 
+  const diceIcon = (
+    <span className="relative size-6">
+      <AnimatePresence>
+        <motion.span
+          key={diceIndex}
+          initial={{ rotate: -180, scale: 0 }}
+          animate={{
+            rotate: 0,
+            scale: 1,
+            transition: { duration: 0.15, ease: "easeOut" },
+          }}
+          className="absolute inset-0"
+        >
+          <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-6" />
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+
   const shuffleButton = (
-    <Button
-      variant="ghost"
-      size="xl"
+    <BottomNavButton
+      key="shuffle"
+      label="Shuffle"
+      icon={diceIcon}
       onClick={handleShuffle}
-      disabled={isLoading || isError}
-      className="relative flex-col items-center gap-1"
-      key="a"
-    >
-      <span className="relative size-6">
-        <AnimatePresence>
-          {isLoading ? (
-            <Spinner className="size-6" />
-          ) : (
-            <motion.span
-              key={diceIndex}
-              initial={{ rotate: -180, scale: 0 }}
-              animate={{
-                rotate: 0,
-                scale: 1,
-                transition: { duration: 0.15, ease: "easeOut" },
-              }}
-              className="absolute inset-0"
-            >
-              <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-6" />
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </span>
-      <span className="hidden sm:inline">Shuffle</span>
-    </Button>
+      isLoading={isLoading}
+      disabled={isError}
+    />
   );
 
   if (isLoading) {

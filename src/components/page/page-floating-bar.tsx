@@ -3,6 +3,7 @@ import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 import type { ComponentType, ReactNode, SVGProps } from "react";
 
 import { FloatingBar } from "@/components/app-shell/floating-bar";
+import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import { Button } from "@/components/ui-primitives/button";
 import {
   DropdownMenu,
@@ -10,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
-import { Spinner } from "@/components/ui-primitives/spinner";
 import { cn } from "@/lib/utils";
 
 export interface FloatingBarAction {
@@ -115,48 +115,22 @@ export function PageFloatingBar({
 }
 
 function ActionButton({ action }: { action: FloatingBarAction }) {
-  const buttonContent = (
-    <>
-      {action.isPending ? (
-        <Spinner className="size-6" />
-      ) : (
-        <action.icon className="size-6" />
-      )}
-      <span className="hidden sm:inline">{action.label}</span>
-    </>
-  );
-
-  // If action has href, render as link
-  if (action.href) {
-    return (
-      <Button
-        variant="ghost"
-        size="xl"
-        className="relative flex-col items-center gap-1"
-        disabled={action.isPending}
-        render={
+  return (
+    <BottomNavButton
+      label={action.label}
+      icon={<action.icon className="size-6" />}
+      onClick={action.onClick}
+      isLoading={action.isPending}
+      render={
+        action.href ? (
           <a
             href={action.href}
             download={action.download || undefined}
             target={action.external ? "_blank" : undefined}
             rel={action.external ? "noopener noreferrer" : undefined}
           />
-        }
-      >
-        {buttonContent}
-      </Button>
-    );
-  }
-
-  return (
-    <Button
-      variant="ghost"
-      size="xl"
-      onClick={action.onClick}
-      className="relative flex-col items-center gap-1"
-      disabled={action.isPending}
-    >
-      {buttonContent}
-    </Button>
+        ) : undefined
+      }
+    />
   );
 }
