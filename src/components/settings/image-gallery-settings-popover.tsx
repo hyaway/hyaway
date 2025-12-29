@@ -23,7 +23,7 @@ export function ImageGallerySettingsContent() {
   return (
     <>
       <PopoverHeader>
-        <PopoverTitle>Gallery settings</PopoverTitle>
+        <PopoverTitle>Gallery view</PopoverTitle>
       </PopoverHeader>
       <SettingsGroup>
         <SliderField
@@ -52,7 +52,7 @@ export function ImageGallerySettingsPopover({
   size?: "default" | "xl";
 } = {}) {
   return (
-    <SettingsPopover label="Gallery settings" size={size}>
+    <SettingsPopover label="Settings" size={size}>
       <ImageGallerySettingsContent />
     </SettingsPopover>
   );

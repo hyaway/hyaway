@@ -19,9 +19,9 @@ export function PagesSettingsPopover({
   const { setPagesMaxColumns } = useUxSettingsActions();
 
   return (
-    <SettingsPopover label="Page settings" size={size}>
+    <SettingsPopover label="Settings" size={size}>
       <PopoverHeader>
-        <PopoverTitle>Pages settings</PopoverTitle>
+        <PopoverTitle>Pages view</PopoverTitle>
       </PopoverHeader>
       <SliderField
         id="pages-columns-popover-slider"

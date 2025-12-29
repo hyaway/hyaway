@@ -30,16 +30,16 @@ export function RandomInboxSettingsPopover({
       <Separator className="my-4" />
 
       <PopoverHeader>
-        <PopoverTitle>Random inbox settings</PopoverTitle>
+        <PopoverTitle>Random inbox</PopoverTitle>
       </PopoverHeader>
       <SettingsGroup>
         <SliderField
           id="random-inbox-limit-popover-slider"
           label="Limit returned files to"
           value={randomInboxLimit}
-          min={100}
+          min={10}
           max={MAX_RANDOM_INBOX_LIMIT}
-          step={100}
+          step={10}
           onValueChange={setRandomInboxLimit}
           commitOnRelease
         />

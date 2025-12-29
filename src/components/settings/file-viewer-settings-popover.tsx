@@ -19,7 +19,7 @@ export function FileViewerSettingsContent() {
   return (
     <>
       <PopoverHeader>
-        <PopoverTitle>Viewer settings</PopoverTitle>
+        <PopoverTitle>Viewer</PopoverTitle>
       </PopoverHeader>
       <SettingsGroup>
         <SwitchField
@@ -41,7 +41,7 @@ export function FileViewerSettingsPopover({
   size?: "default" | "xl";
 }) {
   return (
-    <SettingsPopover label="Viewer settings" className={className} size={size}>
+    <SettingsPopover label="Settings" className={className} size={size}>
       <FileViewerSettingsContent />
     </SettingsPopover>
   );

@@ -33,7 +33,7 @@ export function RecentFilesSettingsPopover({
       <Separator className="my-4" />
 
       <PopoverHeader>
-        <PopoverTitle>Recency settings</PopoverTitle>
+        <PopoverTitle>Recency</PopoverTitle>
       </PopoverHeader>
       <SettingsGroup>
         <SliderField
