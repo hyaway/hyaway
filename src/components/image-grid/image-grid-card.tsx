@@ -94,21 +94,26 @@ export const ImageGridCard = memo(function ImageGridCard({
       {...props}
     >
       <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
-        <ContextMenuTrigger
-          className={cn(
-            "h-full w-full transition-[scale] duration-100 ease-out",
-            "group-hover:scale-(--thumbnail-hover-scale)",
-            "group-active:scale-(--thumbnail-hover-scale)",
-            menuOpen && "scale-(--thumbnail-hover-scale)",
-            originClass,
-          )}
-        >
-          <Link to="/file/$fileId" params={{ fileId: String(item.file_id) }}>
-            <ImageCardContent item={item} />
-          </Link>
+        <ContextMenuTrigger>
+          <Link
+            to="/file/$fileId"
+            params={{ fileId: String(item.file_id) }}
+            className="absolute inset-0 z-10"
+          />
         </ContextMenuTrigger>
         <ImageCardContextMenu item={item} />
       </ContextMenu>
+      <div
+        className={cn(
+          "pointer-events-none h-full w-full transition-[scale] duration-100 ease-out",
+          "group-hover:scale-(--thumbnail-hover-scale)",
+          "group-active:scale-(--thumbnail-hover-scale)",
+          menuOpen && "scale-(--thumbnail-hover-scale)",
+          originClass,
+        )}
+      >
+        <ImageCardContent item={item} menuOpen={menuOpen} />
+      </div>
     </li>
   );
 });
@@ -117,10 +122,12 @@ export const ImageGridCard = memo(function ImageGridCard({
 
 interface ImageCardContentProps {
   item: FileMetadata;
+  menuOpen: boolean;
 }
 
 const ImageCardContent = memo(function ImageCardContent({
   item,
+  menuOpen,
 }: ImageCardContentProps) {
   return (
     <div
@@ -141,6 +148,8 @@ const ImageCardContent = memo(function ImageCardContent({
             "pointer-events-none origin-top-right transition-[opacity,scale,top,right] duration-100 ease-out",
             "group-hover:top-(--badge-offset-scaled) group-hover:right-(--badge-offset-scaled) group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
             "group-active:top-(--badge-offset-scaled) group-active:right-(--badge-offset-scaled) group-active:scale-(--thumbnail-hover-reverse-scale) group-active:opacity-30",
+            menuOpen &&
+              "top-(--badge-offset-scaled) right-(--badge-offset-scaled) scale-(--thumbnail-hover-reverse-scale) opacity-30",
           )}
         >
           {item.is_inbox && <InboxIcon className="size-4" />}
@@ -157,6 +166,8 @@ const ImageCardContent = memo(function ImageCardContent({
             "pointer-events-none origin-top-left transition-[opacity,scale,top,left] duration-100 ease-out",
             "group-hover:top-(--badge-offset-scaled) group-hover:left-(--badge-offset-scaled) group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
             "group-active:top-(--badge-offset-scaled) group-active:left-(--badge-offset-scaled) group-active:scale-(--thumbnail-hover-reverse-scale) group-active:opacity-30",
+            menuOpen &&
+              "top-(--badge-offset-scaled) left-(--badge-offset-scaled) scale-(--thumbnail-hover-reverse-scale) opacity-30",
           )}
         >
           {item.mime.startsWith("video/") && <FilmIcon className="size-4" />}
