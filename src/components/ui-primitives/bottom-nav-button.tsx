@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { Button } from "@/components/ui-primitives/button";
 import { Spinner } from "@/components/ui-primitives/spinner";
@@ -20,17 +21,16 @@ interface BottomNavButtonProps {
   render?: ReactElement;
 }
 
-export function BottomNavButton({
-  label,
-  icon,
-  onClick,
-  isLoading,
-  disabled,
-  className,
-  render,
-}: BottomNavButtonProps) {
+export const BottomNavButton = forwardRef<
+  HTMLButtonElement,
+  BottomNavButtonProps
+>(function BottomNavButton(
+  { label, icon, onClick, isLoading, disabled, className, render },
+  ref,
+) {
   return (
     <Button
+      ref={ref}
       variant="ghost"
       size="xl"
       onClick={onClick}
@@ -55,4 +55,4 @@ export function BottomNavButton({
       </span>
     </Button>
   );
-}
+});
