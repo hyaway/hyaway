@@ -148,10 +148,10 @@ const ImageCardContent = memo(function ImageCardContent({
               "top-0.5 right-0.5 scale-(--thumbnail-hover-reverse-scale) opacity-30",
           )}
         >
-          {item.is_inbox && <InboxIcon className="h-4 w-4" />}
-          {item.is_trashed && <TrashIcon className="h-4 w-4" />}
+          {item.is_inbox && <InboxIcon className="size-4" />}
+          {item.is_trashed && <TrashIcon className="size-4" />}
           {item.is_deleted && !item.is_trashed && (
-            <ExclamationCircleIcon className="h-4 w-4" />
+            <ExclamationCircleIcon className="size-4" />
           )}
         </div>
       )}
@@ -166,8 +166,8 @@ const ImageCardContent = memo(function ImageCardContent({
               "top-0.5 left-0.5 scale-(--thumbnail-hover-reverse-scale) opacity-30",
           )}
         >
-          {item.mime.startsWith("video/") && <FilmIcon className="h-4 w-4" />}
-          {item.has_audio && <SpeakerWaveIcon className="h-4 w-4" />}
+          {item.mime.startsWith("video/") && <FilmIcon className="size-4" />}
+          {item.has_audio && <SpeakerWaveIcon className="size-4" />}
         </div>
       )}
     </div>

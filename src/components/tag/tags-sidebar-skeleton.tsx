@@ -43,7 +43,7 @@ export function TagsSidebarSkeleton({ tagCount = 20 }: { tagCount?: number }) {
             <Skeleton className="mb-2 h-8 w-full" />
             {widths.map((width, i) => (
               <div key={i} className="flex items-center gap-1">
-                <Skeleton className="h-8 w-8 shrink-0" />
+                <Skeleton className="size-8 shrink-0" />
                 <Skeleton
                   className="h-8 rounded-4xl"
                   style={{ width: `${width}%` }}

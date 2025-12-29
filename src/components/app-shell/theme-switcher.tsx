@@ -84,7 +84,7 @@ function ThemeIcon({
     >
       <SunIcon
         className={cn(
-          "h-4 w-4 rotate-0 transition-all dark:scale-0 dark:-rotate-90",
+          "size-4 rotate-0 transition-all dark:scale-0 dark:-rotate-90",
           themePreference === "system"
             ? "-translate-y-0.5 scale-30"
             : "scale-100",
@@ -92,7 +92,7 @@ function ThemeIcon({
       />
       <MoonIcon
         className={cn(
-          "absolute h-4 w-4 scale-0 rotate-90 transition-all dark:rotate-0",
+          "absolute size-4 scale-0 rotate-90 transition-all dark:rotate-0",
           themePreference === "system"
             ? "-translate-y-0.5 dark:scale-30"
             : "dark:scale-100",
@@ -100,7 +100,7 @@ function ThemeIcon({
       />
       <ComputerDesktopIcon
         className={cn(
-          "absolute h-4 w-4 transition-all",
+          "absolute size-4 transition-all",
           themePreference === "system" ? "scale-100" : "scale-0",
         )}
       />
