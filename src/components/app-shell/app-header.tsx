@@ -144,7 +144,7 @@ export function AppHeader() {
           : "pointer-events-none -translate-y-full opacity-0",
       )}
     >
-      <div className="flex h-14 max-h-short:h-10 shrink-0 items-center gap-2 px-4">
+      <div className="max-h-short:h-10 flex h-14 shrink-0 items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"

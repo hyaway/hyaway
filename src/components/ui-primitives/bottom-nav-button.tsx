@@ -43,13 +43,13 @@ export function BottomNavButton({
       render={render}
     >
       {isLoading ? (
-        <Spinner className="size-5 sm:size-6 max-h-short:size-5" />
+        <Spinner className="max-h-short:size-5 size-5 sm:size-6" />
       ) : (
-        <span className="[&>svg]:size-5 sm:[&>svg]:size-6 max-h-short:[&>svg]:size-5">
+        <span className="max-h-short:[&>svg]:size-5 [&>svg]:size-5 sm:[&>svg]:size-6">
           {icon}
         </span>
       )}
-      <span className="sr-only text-xs sm:not-sr-only sm:inline sm:text-base max-h-short:sr-only">
+      <span className="max-h-short:sr-only sr-only text-xs sm:not-sr-only sm:inline sm:text-base">
         {label}
       </span>
     </Button>
