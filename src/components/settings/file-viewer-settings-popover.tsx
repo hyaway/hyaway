@@ -1,16 +1,12 @@
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/solid";
-import { Button } from "@/components/ui-primitives/button";
 import {
-  Popover,
-  PopoverContent,
   PopoverHeader,
   PopoverTitle,
-  PopoverTrigger,
 } from "@/components/ui-primitives/popover";
 import {
   SettingsGroup,
   SwitchField,
 } from "@/components/settings/setting-fields";
+import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   useFileViewerStartExpanded,
   useUxSettingsActions,
@@ -43,18 +39,8 @@ export function FileViewerSettingsPopover({
   className?: string;
 }) {
   return (
-    <Popover>
-      <PopoverTrigger
-        render={
-          <Button variant="ghost" size="icon" className={className}>
-            <AdjustmentsHorizontalIcon />
-            <span className="sr-only">Viewer settings</span>
-          </Button>
-        }
-      />
-      <PopoverContent align="end" className="w-80">
-        <FileViewerSettingsContent />
-      </PopoverContent>
-    </Popover>
+    <SettingsPopover label="Viewer settings" className={className}>
+      <FileViewerSettingsContent />
+    </SettingsPopover>
   );
 }

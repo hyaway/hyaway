@@ -1,11 +1,6 @@
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/solid";
-import { Button } from "@/components/ui-primitives/button";
 import {
-  Popover,
-  PopoverContent,
   PopoverHeader,
   PopoverTitle,
-  PopoverTrigger,
 } from "@/components/ui-primitives/popover";
 import { Separator } from "@/components/ui-primitives/separator";
 import {
@@ -13,6 +8,7 @@ import {
   SliderField,
 } from "@/components/settings/setting-fields";
 import { ImageGallerySettingsContent } from "@/components/settings/image-gallery-settings-popover";
+import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   MAX_RECENT_FILES_DAYS,
   MAX_RECENT_FILES_LIMIT,
@@ -27,46 +23,36 @@ export function RecentFilesSettingsPopover() {
   const { setRecentFilesLimit, setRecentFilesDays } = useUxSettingsActions();
 
   return (
-    <Popover>
-      <PopoverTrigger
-        render={
-          <Button variant="ghost" size="icon">
-            <AdjustmentsHorizontalIcon />
-            <span className="sr-only">Settings</span>
-          </Button>
-        }
-      />
-      <PopoverContent align="end" className="w-80">
-        <ImageGallerySettingsContent />
+    <SettingsPopover label="Settings">
+      <ImageGallerySettingsContent />
 
-        <Separator className="my-4" />
+      <Separator className="my-4" />
 
-        <PopoverHeader>
-          <PopoverTitle>Recency settings</PopoverTitle>
-        </PopoverHeader>
-        <SettingsGroup>
-          <SliderField
-            id="recent-files-limit-popover-slider"
-            label="Limit returned files to"
-            value={recentFilesLimit}
-            min={100}
-            max={MAX_RECENT_FILES_LIMIT}
-            step={100}
-            onValueChange={setRecentFilesLimit}
-            commitOnRelease
-          />
-          <SliderField
-            id="recent-files-days-popover-slider"
-            label="Days to consider recent"
-            value={recentFilesDays}
-            min={1}
-            max={MAX_RECENT_FILES_DAYS}
-            step={1}
-            onValueChange={setRecentFilesDays}
-            commitOnRelease
-          />
-        </SettingsGroup>
-      </PopoverContent>
-    </Popover>
+      <PopoverHeader>
+        <PopoverTitle>Recency settings</PopoverTitle>
+      </PopoverHeader>
+      <SettingsGroup>
+        <SliderField
+          id="recent-files-limit-popover-slider"
+          label="Limit returned files to"
+          value={recentFilesLimit}
+          min={100}
+          max={MAX_RECENT_FILES_LIMIT}
+          step={100}
+          onValueChange={setRecentFilesLimit}
+          commitOnRelease
+        />
+        <SliderField
+          id="recent-files-days-popover-slider"
+          label="Days to consider recent"
+          value={recentFilesDays}
+          min={1}
+          max={MAX_RECENT_FILES_DAYS}
+          step={1}
+          onValueChange={setRecentFilesDays}
+          commitOnRelease
+        />
+      </SettingsGroup>
+    </SettingsPopover>
   );
 }

@@ -1,17 +1,13 @@
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/solid";
-import { Button } from "@/components/ui-primitives/button";
 import {
-  Popover,
-  PopoverContent,
   PopoverHeader,
   PopoverTitle,
-  PopoverTrigger,
 } from "@/components/ui-primitives/popover";
 import {
   SettingsGroup,
   SliderField,
   SwitchField,
 } from "@/components/settings/setting-fields";
+import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   MAX_GRID_LANES,
   useGridExpandImages,
@@ -52,18 +48,8 @@ export function ImageGallerySettingsContent() {
 
 export function ImageGallerySettingsPopover() {
   return (
-    <Popover>
-      <PopoverTrigger
-        render={
-          <Button variant="ghost" size="icon">
-            <AdjustmentsHorizontalIcon />
-            <span className="sr-only">Gallery settings</span>
-          </Button>
-        }
-      />
-      <PopoverContent align="end" className="w-80">
-        <ImageGallerySettingsContent />
-      </PopoverContent>
-    </Popover>
+    <SettingsPopover label="Gallery settings">
+      <ImageGallerySettingsContent />
+    </SettingsPopover>
   );
 }

@@ -1,13 +1,9 @@
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/solid";
-import { Button } from "@/components/ui-primitives/button";
 import {
-  Popover,
-  PopoverContent,
   PopoverHeader,
   PopoverTitle,
-  PopoverTrigger,
 } from "@/components/ui-primitives/popover";
 import { SliderField } from "@/components/settings/setting-fields";
+import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   MAX_PAGES_COLUMNS,
   usePagesMaxColumns,
@@ -19,29 +15,19 @@ export function PagesSettingsPopover() {
   const { setPagesMaxColumns } = useUxSettingsActions();
 
   return (
-    <Popover>
-      <PopoverTrigger
-        render={
-          <Button variant="ghost" size="icon">
-            <AdjustmentsHorizontalIcon />
-            <span className="sr-only">Page settings</span>
-          </Button>
-        }
+    <SettingsPopover label="Page settings">
+      <PopoverHeader>
+        <PopoverTitle>Pages settings</PopoverTitle>
+      </PopoverHeader>
+      <SliderField
+        id="pages-columns-popover-slider"
+        label="Maximum columns"
+        value={pagesMaxColumns}
+        min={3}
+        max={MAX_PAGES_COLUMNS}
+        step={1}
+        onValueChange={setPagesMaxColumns}
       />
-      <PopoverContent align="end" className="w-80">
-        <PopoverHeader>
-          <PopoverTitle>Pages settings</PopoverTitle>
-        </PopoverHeader>
-        <SliderField
-          id="pages-columns-popover-slider"
-          label="Maximum columns"
-          value={pagesMaxColumns}
-          min={3}
-          max={MAX_PAGES_COLUMNS}
-          step={1}
-          onValueChange={setPagesMaxColumns}
-        />
-      </PopoverContent>
-    </Popover>
+    </SettingsPopover>
   );
 }
