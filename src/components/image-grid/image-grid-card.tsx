@@ -80,6 +80,7 @@ export const ImageGridCard = memo(function ImageGridCard({
         containIntrinsicSize: `${width}px ${height}px`,
         [`--thumbnail-hover-scale`]: `${scale}`,
         [`--thumbnail-hover-reverse-scale`]: `${1 / scale}`,
+        [`--badge-offset-scaled`]: `calc(0.25rem / ${scale})`,
       }}
       className={cn(
         "group absolute top-0 left-0 z-0 flex h-full w-full justify-center overflow-visible [content-visibility:auto]",
@@ -93,13 +94,17 @@ export const ImageGridCard = memo(function ImageGridCard({
       {...props}
     >
       <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
-        <ContextMenuTrigger>
+        <ContextMenuTrigger
+          className={cn(
+            "h-full w-full transition-[scale] duration-100 ease-out",
+            "group-hover:scale-(--thumbnail-hover-scale)",
+            "group-active:scale-(--thumbnail-hover-scale)",
+            menuOpen && "scale-(--thumbnail-hover-scale)",
+            originClass,
+          )}
+        >
           <Link to="/file/$fileId" params={{ fileId: String(item.file_id) }}>
-            <ImageCardContent
-              item={item}
-              originClass={originClass}
-              menuOpen={menuOpen}
-            />
+            <ImageCardContent item={item} />
           </Link>
         </ContextMenuTrigger>
         <ImageCardContextMenu item={item} />
@@ -112,24 +117,16 @@ export const ImageGridCard = memo(function ImageGridCard({
 
 interface ImageCardContentProps {
   item: FileMetadata;
-  originClass: string;
-  menuOpen: boolean;
 }
 
 const ImageCardContent = memo(function ImageCardContent({
   item,
-  originClass,
-  menuOpen,
 }: ImageCardContentProps) {
   return (
     <div
       className={cn(
         "h-full w-full overflow-hidden rounded border object-cover",
-        "pointer-events-none transition-[scale] duration-100 ease-out",
-        "group-hover:scale-(--thumbnail-hover-scale)",
-        "group-active:scale-(--thumbnail-hover-scale)",
-        originClass,
-        menuOpen && "scale-(--thumbnail-hover-scale)",
+        "pointer-events-none",
       )}
     >
       <ThumbnailImage
@@ -141,11 +138,9 @@ const ImageCardContent = memo(function ImageCardContent({
         <div
           className={cn(
             "bg-secondary text-secondary-foreground absolute top-1 right-1 flex flex-col gap-1 rounded p-1 opacity-60",
-            "pointer-events-none transition-opacity duration-350 ease-out",
-            "group-hover:top-0.5 group-hover:right-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
-            "group-active:top-0.5 group-active:right-0.5 group-active:scale-(--thumbnail-hover-reverse-scale) group-active:opacity-30",
-            menuOpen &&
-              "top-0.5 right-0.5 scale-(--thumbnail-hover-reverse-scale) opacity-30",
+            "pointer-events-none origin-top-right transition-[opacity,scale,top,right] duration-100 ease-out",
+            "group-hover:top-(--badge-offset-scaled) group-hover:right-(--badge-offset-scaled) group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
+            "group-active:top-(--badge-offset-scaled) group-active:right-(--badge-offset-scaled) group-active:scale-(--thumbnail-hover-reverse-scale) group-active:opacity-30",
           )}
         >
           {item.is_inbox && <InboxIcon className="size-4" />}
@@ -159,11 +154,9 @@ const ImageCardContent = memo(function ImageCardContent({
         <div
           className={cn(
             "bg-secondary text-secondary-foreground absolute top-1 left-1 flex flex-col gap-1 rounded p-1 opacity-60",
-            "pointer-events-none transition-opacity duration-350 ease-out",
-            "group-hover:top-0.5 group-hover:left-0.5 group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
-            "group-active:top-0.5 group-active:left-0.5 group-active:scale-(--thumbnail-hover-reverse-scale) group-active:opacity-30",
-            menuOpen &&
-              "top-0.5 left-0.5 scale-(--thumbnail-hover-reverse-scale) opacity-30",
+            "pointer-events-none origin-top-left transition-[opacity,scale,top,left] duration-100 ease-out",
+            "group-hover:top-(--badge-offset-scaled) group-hover:left-(--badge-offset-scaled) group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
+            "group-active:top-(--badge-offset-scaled) group-active:left-(--badge-offset-scaled) group-active:scale-(--thumbnail-hover-reverse-scale) group-active:opacity-30",
           )}
         >
           {item.mime.startsWith("video/") && <FilmIcon className="size-4" />}
