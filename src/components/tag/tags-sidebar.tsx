@@ -169,10 +169,10 @@ export const TagsSidebar = memo(function TagsSidebar({
             className="w-full"
           >
             <ToggleGroupItem value="count" className="flex-1">
-              By count
+              Count
             </ToggleGroupItem>
             <ToggleGroupItem value="namespace" className="flex-1">
-              By namespace
+              Namespace
             </ToggleGroupItem>
           </ToggleGroup>
         </SidebarHeader>
@@ -231,7 +231,7 @@ const TagRow = memo(
         ref={ref}
         data-index={index}
         style={style}
-        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-center justify-start gap-1 font-mono text-xs"
+        className="absolute top-0 left-0 flex w-full min-w-0 flex-row flex-nowrap items-center justify-start gap-1 font-mono"
       >
         <span
           aria-hidden="true"
@@ -242,7 +242,6 @@ const TagRow = memo(
         <TagBadge
           tag={tagItem.tag}
           namespace={tagItem.namespace}
-          size="sm"
           className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-1 text-left break-normal wrap-anywhere whitespace-normal"
         >
           {showCount && (
