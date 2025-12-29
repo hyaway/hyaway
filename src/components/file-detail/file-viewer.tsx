@@ -62,7 +62,7 @@ export function FileViewer({ data }: { data: FileMetadata }) {
 
   if (isImage) {
     return (
-      <div className="flex justify-center pb-4">
+      <div className="flex justify-center pb-2 sm:pb-4">
         <img
           src={fileUrl}
           alt={`File ${data.file_id}`}
@@ -71,7 +71,7 @@ export function FileViewer({ data }: { data: FileMetadata }) {
             `max-w-full cursor-pointer object-contain transition-[max-height] duration-300`,
             isExpanded
               ? "max-h-full cursor-zoom-out"
-              : "max-h-[70vh] cursor-zoom-in",
+              : "max-h-[60vh] cursor-zoom-in sm:max-h-[70vh]",
           )}
           onLoad={onLoad}
           onError={onError}

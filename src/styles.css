@@ -4,6 +4,7 @@
 @import "@fontsource-variable/jetbrains-mono";
 
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant max-h-short (@media (max-height: 500px));
 
 :root {
   --background: oklch(0.9383 0.0042 236.4993);

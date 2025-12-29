@@ -9,7 +9,7 @@ export function FloatingBar({ children, className, ...props }: FloatingBarProps)
     <div
       className={cn(
         "bg-background/80 fixed right-0 bottom-0 z-40 border-t backdrop-blur-sm",
-        "flex items-center justify-between px-4 py-2",
+        "flex items-center justify-between px-2 py-0.5 sm:px-4 sm:py-2 max-h-short:px-2 max-h-short:py-0.5",
         "transition-[left] duration-200 ease-linear",
         "left-0 md:left-(--sidebar-width) md:group-data-[state=collapsed]/sidebar-wrapper:left-(--sidebar-width-icon)",
         className,
