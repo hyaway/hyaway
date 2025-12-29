@@ -68,7 +68,10 @@ function FileDetailContent({
   data: NonNullable<ReturnType<typeof useGetSingleFileMetadata>["data"]>;
   fileId: number;
 }) {
-  const actionGroups = useFileActions(data, { includeExternal: true });
+  const actionGroups = useFileActions(data, {
+    includeExternal: true,
+    includeThumbnail: false,
+  });
   const allActions = actionGroups.flatMap((g) => g.actions);
 
   return (

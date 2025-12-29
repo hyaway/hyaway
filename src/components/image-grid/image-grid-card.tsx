@@ -1,5 +1,6 @@
 import { memo, useMemo, useState } from "react";
 import {
+  ArrowTopRightOnSquareIcon,
   ExclamationCircleIcon,
   FilmIcon,
   InboxIcon,
@@ -217,7 +218,7 @@ const ImageCardContent = memo(function ImageCardContent({
 interface ImageCardContextMenuProps {
   item: Pick<
     FileMetadata,
-    "file_id" | "is_inbox" | "is_trashed" | "ext" | "filetype_human"
+    "file_id" | "is_inbox" | "is_trashed" | "ext" | "filetype_human" | "mime"
   >;
 }
 
@@ -242,6 +243,9 @@ const ImageCardContextMenu = memo(function ImageCardContextMenu({
             >
               <action.icon />
               {action.label}
+              {action.external && (
+                <ArrowTopRightOnSquareIcon className="ml-auto size-4 opacity-50" />
+              )}
             </ContextMenuItem>
           ))}
         </div>

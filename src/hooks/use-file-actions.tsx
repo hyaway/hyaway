@@ -1,10 +1,12 @@
 import {
   ArchiveBoxArrowDownIcon,
   ArrowDownTrayIcon,
-  ArrowTopRightOnSquareIcon,
   ArrowUturnUpIcon,
   DocumentTextIcon,
+  FilmIcon,
   InboxArrowDownIcon,
+  MusicalNoteIcon,
+  PhotoIcon,
   TrashIcon,
 } from "@heroicons/react/24/solid";
 import { useNavigate } from "@tanstack/react-router";
@@ -15,6 +17,7 @@ import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import {
   useDownloadFileIdUrl,
   useFullFileIdUrl,
+  useThumbnailUrl,
 } from "@/hooks/use-url-with-api-key";
 import {
   useArchiveFilesMutation,
@@ -47,19 +50,26 @@ interface UseFileActionsOptions {
   includeOpen?: boolean;
   /** Include download and open in new tab actions */
   includeExternal?: boolean;
+  /** Include the thumbnail action (set to false on detail page where full image is shown) */
+  includeThumbnail?: boolean;
 }
 
 export function useFileActions(
   data: Pick<
     FileMetadata,
-    "file_id" | "is_inbox" | "is_trashed" | "ext" | "filetype_human"
+    "file_id" | "is_inbox" | "is_trashed" | "ext" | "filetype_human" | "mime"
   >,
   options: UseFileActionsOptions = {},
 ): Array<FileActionsGroup> {
-  const { includeOpen = false, includeExternal = true } = options;
+  const {
+    includeOpen = false,
+    includeExternal = true,
+    includeThumbnail = true,
+  } = options;
 
   const navigate = useNavigate();
   const { url: fileUrl } = useFullFileIdUrl(data.file_id);
+  const { url: thumbnailUrl } = useThumbnailUrl(data.file_id);
   const downloadUrl = useDownloadFileIdUrl(data.file_id);
 
   const deleteFilesMutation = useDeleteFilesMutation();
@@ -76,13 +86,27 @@ export function useFileActions(
       actions: [
         {
           id: "open",
-          label: "Details",
+          label: "Open",
           icon: DocumentTextIcon,
           onClick: () =>
             navigate({
               to: "/file/$fileId",
               params: { fileId: String(data.file_id) },
             }),
+        },
+        {
+          id: "open-details-new-tab",
+          label: "Open in New Tab",
+          icon: DocumentTextIcon,
+          onClick: () => {
+            window.open(
+              `/file/${data.file_id}`,
+              "_blank",
+              "noopener,noreferrer",
+            );
+          },
+          href: `/file/${data.file_id}`,
+          external: true,
         },
       ],
     });
@@ -135,32 +159,56 @@ export function useFileActions(
 
   // External actions (download, open in new tab) - always in overflow
   if (includeExternal) {
+    const mimeBasedIcon = data.mime.startsWith("image/")
+      ? PhotoIcon
+      : data.mime.startsWith("video/")
+        ? FilmIcon
+        : data.mime.startsWith("audio/")
+          ? MusicalNoteIcon
+          : DocumentTextIcon;
+
+    const externalActions: Array<FileAction> = [
+      {
+        id: "download",
+        label: "Download",
+        icon: ArrowDownTrayIcon,
+        onClick: () => {
+          window.location.href = downloadUrl;
+        },
+        href: downloadUrl,
+        download: true,
+        overflowOnly: true,
+      },
+      {
+        id: "open-new-tab",
+        label: `Open ${data.ext || data.filetype_human}`,
+        icon: mimeBasedIcon,
+        onClick: () => {
+          window.open(fileUrl, "_blank", "noopener,noreferrer");
+        },
+        href: fileUrl,
+        external: true,
+        overflowOnly: true,
+      },
+    ];
+
+    if (includeThumbnail) {
+      externalActions.push({
+        id: "view-thumbnail",
+        label: "Open Thumbnail",
+        icon: PhotoIcon,
+        onClick: () => {
+          window.open(thumbnailUrl, "_blank", "noopener,noreferrer");
+        },
+        href: thumbnailUrl,
+        external: true,
+        overflowOnly: true,
+      });
+    }
+
     groups.push({
       id: "external",
-      actions: [
-        {
-          id: "download",
-          label: "Download",
-          icon: ArrowDownTrayIcon,
-          onClick: () => {
-            window.location.href = downloadUrl;
-          },
-          href: downloadUrl,
-          download: true,
-          overflowOnly: true,
-        },
-        {
-          id: "open-new-tab",
-          label: `View ${data.ext || data.filetype_human}`,
-          icon: ArrowTopRightOnSquareIcon,
-          onClick: () => {
-            window.open(fileUrl, "_blank", "noopener,noreferrer");
-          },
-          href: fileUrl,
-          external: true,
-          overflowOnly: true,
-        },
-      ],
+      actions: externalActions,
     });
   }
 
