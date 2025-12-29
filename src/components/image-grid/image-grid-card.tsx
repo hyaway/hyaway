@@ -151,11 +151,9 @@ export const ImageGridCard = memo(function ImageGridCard({
       <div
         className={cn(
           "pointer-events-none h-full w-full transition-[scale] duration-100 ease-in-out",
-          "group-hover:scale-(--thumbnail-hover-scale)",
-          "group-active:scale-(--thumbnail-hover-scale)",
-          menuOpen
-            ? "ring-primary scale-(--thumbnail-hover-scale) ring-3"
-            : "shadow",
+          "group-hover:scale-(--thumbnail-hover-scale) group-hover:shadow",
+          "group-active:scale-(--thumbnail-hover-scale) group-active:shadow",
+          menuOpen && "ring-primary scale-(--thumbnail-hover-scale) ring-4",
           originClass,
         )}
       >
@@ -205,8 +203,8 @@ const ImageCardContent = memo(function ImageCardContent({
         {item.has_audio && <SpeakerWaveIcon className="size-4" />}
         {fileSize && <span>{fileSize}</span>}
         <span className="flex-1" />
-        {item.is_inbox && <InboxIcon className="size-4" />}
-        {item.is_trashed && <TrashIcon className="size-4" />}
+        {item.is_inbox && <InboxIcon className="text-foreground size-4" />}
+        {item.is_trashed && <TrashIcon className="text-destructive size-4" />}
         {item.is_deleted && !item.is_trashed && (
           <NoSymbolIcon className="text-destructive size-4" />
         )}
