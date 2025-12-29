@@ -1,6 +1,7 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva } from "class-variance-authority";
 import { createLink } from "@tanstack/react-router";
+import * as React from "react";
 import { TouchTarget } from "./touch-target";
 import type { VariantProps } from "class-variance-authority";
 
@@ -43,23 +44,27 @@ const buttonVariants = cva(
   },
 );
 
-function Button({
-  className,
-  variant = "default",
-  size = "default",
-  children,
-  ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
-  return (
-    <ButtonPrimitive
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    >
-      <TouchTarget>{children}</TouchTarget>
-    </ButtonPrimitive>
-  );
-}
+const Button = React.forwardRef<
+  HTMLButtonElement,
+  ButtonPrimitive.Props & VariantProps<typeof buttonVariants>
+>(
+  (
+    { className, variant = "default", size = "default", children, ...props },
+    ref,
+  ) => {
+    return (
+      <ButtonPrimitive
+        ref={ref}
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      >
+        <TouchTarget>{children}</TouchTarget>
+      </ButtonPrimitive>
+    );
+  },
+);
+Button.displayName = "Button";
 
 const LinkButton = createLink(Button);
 
