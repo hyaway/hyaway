@@ -48,28 +48,62 @@ export const ImageGridCard = memo(function ImageGridCard({
 }: ImageCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const scale = Math.max(
-    Math.min(lanes * width, (item.thumbnail_width ?? width) * 1.1) / width,
-    1.05,
-  );
+  const isTopRow = virtualRow.index < lanes;
+  const lastRowStart = totalItemsCount - 2 * lanes;
+  const isBottomRow = virtualRow.index >= lastRowStart;
+
+  const { scale, horizontalOrigin } = useMemo(() => {
+    // Base scale from thumbnail size
+    const baseScale = Math.max(
+      Math.min(lanes * width, (item.thumbnail_width ?? width) * 1.1) / width,
+      1.05,
+    );
+
+    // Calculate max scale for each horizontal origin type
+    const spaceLeft = virtualRow.lane;
+    const spaceRight = lanes - 1 - virtualRow.lane;
+
+    const maxScaleLeft = spaceRight + 1; // origin-left: expands right
+    const maxScaleRight = spaceLeft + 1; // origin-right: expands left
+    const maxScaleCenter = 1 + 2 * Math.min(spaceLeft, spaceRight); // origin-center: both ways
+
+    // Pick the origin that allows the largest scale (up to baseScale)
+    const options = [
+      { origin: "left" as const, maxScale: maxScaleLeft },
+      { origin: "right" as const, maxScale: maxScaleRight },
+      { origin: "center" as const, maxScale: maxScaleCenter },
+    ];
+
+    // Sort by maxScale descending, prefer center if tied
+    options.sort((a, b) => {
+      if (b.maxScale !== a.maxScale) return b.maxScale - a.maxScale;
+      if (a.origin === "center") return -1;
+      if (b.origin === "center") return 1;
+      return 0;
+    });
+
+    const best = options[0];
+    return {
+      scale: Math.min(baseScale, best.maxScale),
+      horizontalOrigin: best.origin,
+    };
+  }, [lanes, width, item.thumbnail_width, virtualRow.lane]);
 
   const originClass = useMemo(() => {
-    const isFirstLane = virtualRow.lane === 0;
-    const isLastLane = virtualRow.lane === lanes - 1;
-    const isTopRow = virtualRow.index < lanes;
-    const lastRowStart = totalItemsCount - 2 * lanes;
-    const isBottomRow = virtualRow.index >= lastRowStart;
-
-    if (isTopRow && isFirstLane) return "origin-top-left";
-    else if (isTopRow && isLastLane) return "origin-top-right";
-    else if (isBottomRow && isFirstLane) return "origin-bottom-left";
-    else if (isBottomRow && isLastLane) return "origin-bottom-right";
-    else if (isTopRow) return "origin-top";
-    else if (isBottomRow) return "origin-bottom";
-    else if (isFirstLane) return "origin-left";
-    else if (isLastLane) return "origin-right";
-    else return "origin-center";
-  }, [virtualRow.lane, virtualRow.index, lanes, totalItemsCount]);
+    if (isTopRow) {
+      if (horizontalOrigin === "left") return "origin-top-left";
+      if (horizontalOrigin === "right") return "origin-top-right";
+      return "origin-top";
+    }
+    if (isBottomRow) {
+      if (horizontalOrigin === "left") return "origin-bottom-left";
+      if (horizontalOrigin === "right") return "origin-bottom-right";
+      return "origin-bottom";
+    }
+    if (horizontalOrigin === "left") return "origin-left";
+    if (horizontalOrigin === "right") return "origin-right";
+    return "origin-center";
+  }, [isTopRow, isBottomRow, horizontalOrigin]);
 
   return (
     <li
