@@ -57,11 +57,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton
-                to="/pages"
-                className="cursor-pointer"
-                tooltip={"Pages"}
-              >
+              <SidebarMenuLinkButton to="/pages" className="cursor-pointer">
                 <TouchTarget>
                   <Squares2X2Icon className="size-8" />
                   <span>Pages</span>
@@ -77,7 +73,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuLinkButton
                 to="/recently-inboxed"
                 className="cursor-pointer"
-                tooltip={"Recently inboxed"}
               >
                 <TouchTarget>
                   <InboxIcon />
@@ -89,7 +84,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuLinkButton
                 to="/recently-archived"
                 className="cursor-pointer"
-                tooltip={"Recently archived"}
               >
                 <TouchTarget>
                   <ArchiveBoxIcon />
@@ -101,7 +95,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuLinkButton
                 to="/recently-deleted"
                 className="cursor-pointer"
-                tooltip={"Recently deleted"}
               >
                 <TouchTarget>
                   <TrashIcon />
@@ -118,7 +111,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuLinkButton
                 to="/random-inbox"
                 className="cursor-pointer"
-                tooltip={"Random inbox"}
               >
                 <TouchTarget>
                   <HugeiconsIcon icon={DiceIcon} />
@@ -133,11 +125,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarThemeSwitcher />
           <SidebarMenuItem>
-            <SidebarMenuLinkButton
-              to="/settings"
-              className="cursor-pointer"
-              tooltip={"Settings"}
-            >
+            <SidebarMenuLinkButton to="/settings" className="cursor-pointer">
               <TouchTarget>
                 <Cog6ToothIcon />
                 <span>Settings</span>
