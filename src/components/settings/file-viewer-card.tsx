@@ -1,3 +1,4 @@
+import type { ImageBackground } from "@/lib/ux-settings-store";
 import {
   Card,
   CardContent,
@@ -14,7 +15,6 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import {
-  type ImageBackground,
   useFileViewerStartExpanded,
   useImageBackground,
   useUxSettingsActions,
@@ -43,7 +43,7 @@ export function FileViewerCard() {
             checked={fileViewerStartExpanded}
             onCheckedChange={setFileViewerStartExpanded}
           />
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             <Label>Image background</Label>
             <ToggleGroup
               value={[imageBackground]}

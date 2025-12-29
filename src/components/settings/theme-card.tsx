@@ -26,7 +26,7 @@ export function ThemeCard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           <Label htmlFor="theme-toggle">Color scheme</Label>
           <ToggleGroup
             id="theme-toggle"

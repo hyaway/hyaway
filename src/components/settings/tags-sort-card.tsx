@@ -26,7 +26,7 @@ export function TagsSortCard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           <Label htmlFor="tags-sort-toggle">Sort tags by</Label>
           <ToggleGroup
             id="tags-sort-toggle"
