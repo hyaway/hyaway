@@ -1,11 +1,11 @@
 import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/solid";
+import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui-primitives/popover";
-import { cn } from "@/lib/utils";
 
 interface SettingsPopoverProps {
   /** Screen reader label for the trigger button */
@@ -29,14 +29,11 @@ export function SettingsPopover({
       <PopoverTrigger
         render={
           size === "xl" ? (
-            <Button
-              variant="ghost"
-              size="xl"
-              className={cn("relative flex-col items-center gap-1", className)}
-            >
-              <AdjustmentsHorizontalIcon className="size-6" />
-              <span className="hidden sm:inline">{label}</span>
-            </Button>
+            <BottomNavButton
+              label={label}
+              icon={<AdjustmentsHorizontalIcon className="size-6" />}
+              className={className}
+            />
           ) : (
             <Button variant="ghost" size="icon" className={className}>
               <AdjustmentsHorizontalIcon />

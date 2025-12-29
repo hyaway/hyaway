@@ -39,7 +39,7 @@ export function BottomNavButton({
       render={render}
     >
       {isLoading ? <Spinner className="size-6" /> : icon}
-      <span className="hidden sm:inline">{label}</span>
+      <span className="inline text-xs sm:text-base">{label}</span>
     </Button>
   );
 }

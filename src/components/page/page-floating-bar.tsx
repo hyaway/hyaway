@@ -4,7 +4,6 @@ import type { ComponentType, ReactNode, SVGProps } from "react";
 
 import { FloatingBar } from "@/components/app-shell/floating-bar";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
-import { Button } from "@/components/ui-primitives/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,16 +72,12 @@ export function PageFloatingBar({
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <Button
-                variant="ghost"
-                size="xl"
-                className="relative flex-col items-center gap-1"
+              <BottomNavButton
+                label="More"
+                icon={<EllipsisHorizontalIcon className="size-6" />}
               />
             }
-          >
-            <EllipsisHorizontalIcon className="size-6" />
-            <span className="hidden sm:inline">More</span>
-          </DropdownMenuTrigger>
+          />
           <DropdownMenuContent side="top" align="center">
             {overflowActions.map((action) => (
               <DropdownMenuItem
