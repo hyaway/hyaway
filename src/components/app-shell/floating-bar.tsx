@@ -5,7 +5,7 @@ interface FloatingBarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const sharedClasses = cn(
-  "bg-background/80 max-h-short:px-2 max-h-short:py-0.5 fixed inset-x-0 bottom-0 z-40 items-center justify-between border-t px-2 py-0.5 backdrop-blur-sm sm:px-4 sm:py-1",
+  "bg-background/80 max-h-short:px-2 fixed inset-x-0 bottom-0 z-40 items-center justify-between border-t px-2 py-0 backdrop-blur-sm sm:px-4",
 );
 
 export function FloatingBar({
