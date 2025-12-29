@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageError } from "@/components/page/page-error";
+import { PageFloatingBar } from "@/components/page/page-floating-bar";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
 import { RefetchButton } from "@/components/refetch-button";
@@ -12,7 +13,6 @@ import {
   useRefreshPageMutation,
 } from "@/integrations/hydrus-api/queries/manage-pages";
 import { ImageGrid } from "@/components/image-grid/image-grid";
-import { Separator } from "@/components/ui-primitives/separator";
 
 export const Route = createFileRoute("/_auth/pages/$pageId")({
   component: RouteComponent,
@@ -31,56 +31,71 @@ function RouteComponent() {
   const focusPageMutation = useFocusPageMutation();
   const queryClient = useQueryClient();
 
+  const actionButtons = (
+    <>
+      <RefetchButton
+        isFetching={isFetching}
+        onRefetch={() =>
+          queryClient.invalidateQueries({
+            queryKey: ["getPageInfo", pageId],
+          })
+        }
+      />
+      <Button onClick={() => refreshPageMutation.mutate(pageId)}>
+        Refresh remote
+      </Button>
+      <Button onClick={() => focusPageMutation.mutate(pageId)}>
+        Focus remote
+      </Button>
+    </>
+  );
+
   if (isLoading) {
     return (
-      <PageLoading title={`Page: ${pageId.slice(0, 8)}...`} buttonCount={3} />
+      <>
+        <PageLoading title={`Page: ${pageId.slice(0, 8)}...`} />
+        <PageFloatingBar
+          leftActions={actionButtons}
+          rightActions={<ImageGallerySettingsPopover />}
+        />
+      </>
     );
   }
 
   if (isError) {
     return (
-      <div>
-        <PageHeading title={`Page: ${pageId.slice(0, 8)}...`} />
-        <PageError
-          error={error}
-          fallbackMessage="An unknown error occurred while fetching pages."
+      <>
+        <div className="pb-16">
+          <PageHeading title={`Page: ${pageId.slice(0, 8)}...`} />
+          <PageError
+            error={error}
+            fallbackMessage="An unknown error occurred while fetching pages."
+          />
+        </div>
+        <PageFloatingBar
+          leftActions={actionButtons}
+          rightActions={<ImageGallerySettingsPopover />}
         />
-      </div>
+      </>
     );
   }
 
   return (
-    <div>
-      <PageHeading
-        title={`Page: ${data?.page_info.name} (${data?.page_info.media.num_files ?? 0} files)`}
-      />
-      <div className="flex flex-row justify-between gap-2">
-        <div className="flex flex-wrap gap-2">
-          <RefetchButton
-            isFetching={isFetching}
-            onRefetch={() =>
-              queryClient.invalidateQueries({
-                queryKey: ["getPageInfo", pageId],
-              })
-            }
-          />
-          <Button onClick={() => refreshPageMutation.mutate(pageId)}>
-            Refresh remote
-          </Button>
-          <Button onClick={() => focusPageMutation.mutate(pageId)}>
-            Focus remote
-          </Button>
-        </div>
-
-        <ImageGallerySettingsPopover />
+    <>
+      <div className="pb-16">
+        <PageHeading
+          title={`Page: ${data?.page_info.name} (${data?.page_info.media.num_files ?? 0} files)`}
+        />
+        {data?.page_info.media ? (
+          <ImageGrid fileIds={data.page_info.media.hash_ids} />
+        ) : (
+          <p>This page has no media.</p>
+        )}
       </div>
-      <Separator className="my-2" />
-
-      {data?.page_info.media ? (
-        <ImageGrid fileIds={data.page_info.media.hash_ids} />
-      ) : (
-        <p>This page has no media.</p>
-      )}
-    </div>
+      <PageFloatingBar
+        leftActions={actionButtons}
+        rightActions={<ImageGallerySettingsPopover />}
+      />
+    </>
   );
 }

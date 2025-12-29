@@ -13,13 +13,13 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PageError } from "@/components/page/page-error";
 import { EmptyState } from "@/components/page/empty-state";
+import { PageFloatingBar } from "@/components/page/page-floating-bar";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
 import { RandomInboxSettingsPopover } from "@/components/settings/random-inbox-settings-popover";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { Button } from "@/components/ui-primitives/button";
-import { Separator } from "@/components/ui-primitives/separator";
 import { Spinner } from "@/components/ui-primitives/spinner";
 
 const DICE_ICONS = [
@@ -78,54 +78,50 @@ function RouteComponent() {
 
   if (isLoading) {
     return (
-      <PageLoading title="Random inbox">
-        <div className="flex items-center gap-2">
-          {shuffleButton}
-          <div className="ml-auto">
-            <RandomInboxSettingsPopover />
-          </div>
-        </div>
-        <Separator className="my-2" />
-      </PageLoading>
+      <>
+        <PageLoading title="Random inbox" />
+        <PageFloatingBar
+          leftActions={shuffleButton}
+          rightActions={<RandomInboxSettingsPopover />}
+        />
+      </>
     );
   }
 
   if (isError) {
     return (
-      <div>
-        <PageHeading title="Random inbox" />
-        <div className="flex items-center gap-2">
-          {shuffleButton}
-          <div className="ml-auto">
-            <RandomInboxSettingsPopover />
-          </div>
+      <>
+        <div className="pb-16">
+          <PageHeading title="Random inbox" />
+          <PageError
+            error={error}
+            fallbackMessage="An unknown error occurred while fetching random inbox files."
+          />
         </div>
-        <Separator className="my-2" />
-        <PageError
-          error={error}
-          fallbackMessage="An unknown error occurred while fetching random inbox files."
+        <PageFloatingBar
+          leftActions={shuffleButton}
+          rightActions={<RandomInboxSettingsPopover />}
         />
-      </div>
+      </>
     );
   }
 
   return (
-    <div>
-      <PageHeading
-        title={`Random inbox (${data?.file_ids?.length ?? 0} files)`}
-      />
-      <div className="flex items-center gap-2">
-        {shuffleButton}
-        <div className="ml-auto">
-          <RandomInboxSettingsPopover />
-        </div>
+    <>
+      <div className="pb-16">
+        <PageHeading
+          title={`Random inbox (${data?.file_ids?.length ?? 0} files)`}
+        />
+        {data?.file_ids && data.file_ids.length > 0 ? (
+          <ImageGrid fileIds={data.file_ids} />
+        ) : (
+          <EmptyState message="No inbox files found." />
+        )}
       </div>
-      <Separator className="my-2" />
-      {data?.file_ids && data.file_ids.length > 0 ? (
-        <ImageGrid fileIds={data.file_ids} />
-      ) : (
-        <EmptyState message="No inbox files found." />
-      )}
-    </div>
+      <PageFloatingBar
+        leftActions={shuffleButton}
+        rightActions={<RandomInboxSettingsPopover />}
+      />
+    </>
   );
 }
