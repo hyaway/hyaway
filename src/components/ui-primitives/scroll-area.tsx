@@ -3,8 +3,15 @@ import { forwardRef } from "react";
 
 import { cn } from "@/lib/utils";
 
-const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaPrimitive.Root.Props>(
-  function ScrollArea({ className, children, ...props }, ref) {
+interface ScrollAreaProps extends ScrollAreaPrimitive.Root.Props {
+  viewportClassName?: string;
+}
+
+const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
+  function ScrollArea(
+    { className, viewportClassName, children, ...props },
+    ref,
+  ) {
     return (
       <ScrollAreaPrimitive.Root
         data-slot="scroll-area"
@@ -14,7 +21,10 @@ const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaPrimitive.Root.Props>(
         <ScrollAreaPrimitive.Viewport
           ref={ref}
           data-slot="scroll-area-viewport"
-          className="focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1"
+          className={cn(
+            "focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1",
+            viewportClassName,
+          )}
         >
           {children}
         </ScrollAreaPrimitive.Viewport>

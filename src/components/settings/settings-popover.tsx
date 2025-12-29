@@ -11,8 +11,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui-primitives/popover";
+import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SettingsPopoverProps {
   /** Screen reader label for the trigger button */
@@ -29,7 +29,10 @@ export function SettingsPopover({
   children,
 }: SettingsPopoverProps) {
   const [open, setOpen] = useState(false);
-  const isMobile = useIsMobile();
+  // Use popover when there's sufficient width AND height, drawer otherwise
+  const usePopover = useMediaQuery(
+    "(min-width: 640px) and (min-height: 500px)",
+  );
 
   const trigger = (
     <BottomNavButton
@@ -39,12 +42,15 @@ export function SettingsPopover({
     />
   );
 
-  if (isMobile) {
+  // Default to popover until we know for sure (avoid flash)
+  if (usePopover === false) {
     return (
       <Drawer open={open} onOpenChange={setOpen} direction="bottom">
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
         <DrawerContent>
-          <div className="flex flex-col gap-4 px-6 pb-6">{children}</div>
+          <ScrollArea viewportClassName="max-h-[60vh]">
+            <div className="flex flex-col gap-4 px-6 pb-6">{children}</div>
+          </ScrollArea>
         </DrawerContent>
       </Drawer>
     );
