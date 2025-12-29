@@ -8,6 +8,7 @@ export const MAX_RECENT_FILES_DAYS = 30;
 export const MAX_RANDOM_INBOX_LIMIT = 1000;
 
 export type TagsSortMode = "count" | "namespace";
+export type ImageBackground = "solid" | "checkerboard";
 
 type UxSettingsState = {
   tagsSortMode: TagsSortMode;
@@ -18,6 +19,7 @@ type UxSettingsState = {
   recentFilesDays: number;
   randomInboxLimit: number;
   fileViewerStartExpanded: boolean;
+  imageBackground: ImageBackground;
   actions: {
     setTagsSortMode: (mode: TagsSortMode) => void;
     setGridMaxLanes: (lanes: number) => void;
@@ -27,6 +29,7 @@ type UxSettingsState = {
     setRecentFilesDays: (days: number) => void;
     setRandomInboxLimit: (limit: number) => void;
     setFileViewerStartExpanded: (expanded: boolean) => void;
+    setImageBackground: (bg: ImageBackground) => void;
   };
 };
 
@@ -41,6 +44,7 @@ export const useUxSettingsStore = create<UxSettingsState>()(
       recentFilesDays: 3,
       randomInboxLimit: 100,
       fileViewerStartExpanded: false,
+      imageBackground: "checkerboard",
       actions: {
         setTagsSortMode: (tagsSortMode: TagsSortMode) => set({ tagsSortMode }),
         setGridMaxLanes: (gridMaxLanes: number) => set({ gridMaxLanes }),
@@ -56,6 +60,8 @@ export const useUxSettingsStore = create<UxSettingsState>()(
           set({ randomInboxLimit }),
         setFileViewerStartExpanded: (fileViewerStartExpanded: boolean) =>
           set({ fileViewerStartExpanded }),
+        setImageBackground: (imageBackground: ImageBackground) =>
+          set({ imageBackground }),
       },
     }),
     {
@@ -89,6 +95,9 @@ export const useRandomInboxLimit = () =>
 
 export const useFileViewerStartExpanded = () =>
   useUxSettingsStore((state) => state.fileViewerStartExpanded);
+
+export const useImageBackground = () =>
+  useUxSettingsStore((state) => state.imageBackground);
 
 export const useUxSettingsActions = () =>
   useUxSettingsStore((state) => state.actions);

@@ -20,7 +20,10 @@ import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { checkerboardBg, cn } from "@/lib/utils";
 import { useActiveTheme } from "@/lib/theme-store";
-import { useFileViewerStartExpanded } from "@/lib/ux-settings-store";
+import {
+  useFileViewerStartExpanded,
+  useImageBackground,
+} from "@/lib/ux-settings-store";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
@@ -68,6 +71,13 @@ export function FileViewer({ data }: { data: FileMetadata }) {
 
   const startExpanded = useFileViewerStartExpanded();
   const [isExpanded, setIsExpanded] = useState(startExpanded);
+  const [loaded, setLoaded] = useState(false);
+  const imageBackground = useImageBackground();
+
+  const handleLoad = () => {
+    setLoaded(true);
+    onLoad();
+  };
 
   if (isImage) {
     return (
@@ -78,12 +88,14 @@ export function FileViewer({ data }: { data: FileMetadata }) {
           loading="eager"
           className={cn(
             "max-w-full cursor-pointer object-contain transition-[max-height] duration-300",
-            checkerboardBg,
+            loaded && imageBackground === "checkerboard"
+              ? checkerboardBg
+              : "bg-background",
             isExpanded
               ? "max-h-full cursor-zoom-out"
               : "max-h-short:max-h-[60vh] max-h-[70vh] cursor-zoom-in",
           )}
-          onLoad={onLoad}
+          onLoad={handleLoad}
           onError={onError}
           onClick={() => {
             if (isExpanded) {

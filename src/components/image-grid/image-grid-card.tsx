@@ -24,6 +24,7 @@ import { useFileActions } from "@/hooks/use-file-actions";
 import { useThumbnailUrl } from "@/hooks/use-url-with-api-key";
 import { formatBytes } from "@/lib/format-utils";
 import { checkerboardBg, cn } from "@/lib/utils";
+import { useImageBackground } from "@/lib/ux-settings-store";
 
 /** Height of the polaroid-style footer strip in pixels (h-6 = 24px) */
 export const CARD_FOOTER_HEIGHT = 24;
@@ -270,6 +271,7 @@ export function ThumbnailImage({
 }: ThumbnailProps) {
   const [loaded, setLoaded] = useState(false);
   const { url, onLoad, onError } = useThumbnailUrl(fileId);
+  const imageBackground = useImageBackground();
 
   const handleLoad = (_e: React.SyntheticEvent<HTMLImageElement>) => {
     setLoaded(true);
@@ -282,7 +284,9 @@ export function ThumbnailImage({
       alt={`Thumbnail for file ID ${fileId}`}
       className={cn(
         "h-full w-full object-cover",
-        loaded ? checkerboardBg : "bg-muted",
+        loaded && imageBackground === "checkerboard"
+          ? checkerboardBg
+          : "bg-muted",
         className,
       )}
       loading="lazy"
