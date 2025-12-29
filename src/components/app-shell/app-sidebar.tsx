@@ -8,7 +8,7 @@ import {
   InboxIcon,
   Squares2X2Icon,
   TrashIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/24/solid";
 import { DiceIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SidebarThemeSwitcher } from "./theme-switcher";
@@ -39,8 +39,8 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               to="/"
             >
               <TouchTarget>
-                <div className="border-sidebar-primary flex aspect-square size-8 items-center justify-center rounded-lg border">
-                  <span className="size-4">hA</span>
+                <div className="border-sidebar-primary flex aspect-square size-9 items-center justify-center rounded-lg border">
+                  <span className="size-5">hA</span>
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <Heading className="truncate font-medium" level={2}>
@@ -113,7 +113,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 className="cursor-pointer"
               >
                 <TouchTarget>
-                  <HugeiconsIcon icon={DiceIcon} className="size-4" />
+                  <HugeiconsIcon icon={DiceIcon} />
                   <span>Random inbox</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>

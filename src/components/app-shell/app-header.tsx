@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { Fragment, useEffect, useRef, useState } from "react";
 
-import { ArrowLeftIcon } from "@heroicons/react/16/solid";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { Button } from "../ui-primitives/button";
 import type { MyRouterContext } from "@/routes/__root";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";
@@ -144,7 +144,7 @@ export function AppHeader() {
           : "pointer-events-none -translate-y-full opacity-0",
       )}
     >
-      <div className="flex h-12 shrink-0 items-center gap-2 px-4">
+      <div className="flex h-14 shrink-0 items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"
@@ -158,7 +158,7 @@ export function AppHeader() {
             aria-label="Go back"
             className={"md:hidden"}
           >
-            <ArrowLeftIcon className="size-4" />
+            <ArrowLeftIcon className="size-5" />
           </Button>
         )}
         <Breadcrumb>

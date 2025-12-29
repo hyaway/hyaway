@@ -1,4 +1,4 @@
-import { CheckIcon } from "@heroicons/react/16/solid";
+import { CheckIcon } from "@heroicons/react/24/solid";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui-primitives/button";
@@ -32,7 +32,7 @@ export function RefetchButton({ onRefetch, isFetching }: RefetchButtonProps) {
     <Button onClick={handleClick} disabled={isFetching}>
       Refetch
       {isFetching ? (
-        <Spinner className="size-4" />
+        <Spinner className="size-5" />
       ) : (
         <AnimatePresence>
           {showCheck && (
@@ -42,7 +42,7 @@ export function RefetchButton({ onRefetch, isFetching }: RefetchButtonProps) {
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.2 }}
             >
-              <CheckIcon className="size-4" />
+              <CheckIcon className="size-5" />
             </motion.span>
           )}
         </AnimatePresence>

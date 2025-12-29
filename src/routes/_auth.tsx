@@ -3,7 +3,7 @@ import {
   ArrowPathIcon,
   ExclamationTriangleIcon,
   LockClosedIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/24/solid";
 import {
   useVerifyPersistentAccessQuery,
   useVerifySessionAccessQuery,

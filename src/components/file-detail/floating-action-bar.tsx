@@ -1,4 +1,4 @@
-import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 
@@ -68,7 +68,7 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
             disabled={leftAction.isPending}
           >
             {leftAction.isPending && (
-              <Spinner className="absolute right-1 size-4" />
+              <Spinner className="absolute right-1 size-5" />
             )}
             <leftAction.icon className="size-8 sm:size-6" />
             <span className="hidden sm:inline">{leftAction.label}</span>
@@ -91,7 +91,7 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
                   />
                 }
               >
-                <EllipsisHorizontalIcon className="size-6" />
+                <EllipsisHorizontalIcon />
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="center">
                 {overflowActions.map((action) => (
@@ -132,7 +132,7 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
             disabled={rightAction.isPending}
           >
             {rightAction.isPending && (
-              <Spinner className="absolute right-1 size-4" />
+              <Spinner className="absolute right-1 size-5" />
             )}
             <rightAction.icon className="size-8 sm:size-6" />
             <span className="hidden sm:inline">{rightAction.label}</span>

@@ -36,7 +36,7 @@ function SettingsComponent() {
           {settingsItems.map((item) => (
             <NavigationMenuItem key={item.to}>
               <RouterNavigationMenuLink to={item.to}>
-                <item.icon aria-hidden="true" className="size-4" />
+                <item.icon aria-hidden="true" />
                 {item.name}
               </RouterNavigationMenuLink>
             </NavigationMenuItem>

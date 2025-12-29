@@ -89,7 +89,7 @@ function BreadcrumbSeparator({
       data-slot="breadcrumb-separator"
       role="presentation"
       aria-hidden="true"
-      className={cn("[&>svg]:size-3.5", className)}
+      className={cn("[&>svg]:size-5", className)}
       {...props}
     >
       {children ?? <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />}
@@ -107,7 +107,7 @@ function BreadcrumbEllipsis({
       role="presentation"
       aria-hidden="true"
       className={cn(
-        "flex size-5 items-center justify-center [&>svg]:size-4",
+        "flex size-7 items-center justify-center [&>svg]:size-6",
         className,
       )}
       {...props}

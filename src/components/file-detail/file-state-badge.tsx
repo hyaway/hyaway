@@ -3,7 +3,7 @@ import {
   InboxIcon,
   NoSymbolIcon,
   TrashIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/24/solid";
 
 import type { ComponentProps } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";

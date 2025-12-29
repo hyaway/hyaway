@@ -52,7 +52,7 @@ function RouteComponent() {
 
   const shuffleButton = (
     <Button onClick={handleShuffle} disabled={isLoading || isError} key="a">
-      <span className="mr-1 size-4">
+      <span className="mr-1 size-5">
         <AnimatePresence>
           {isLoading ? (
             <Spinner />
@@ -67,7 +67,7 @@ function RouteComponent() {
               }}
               className="absolute block"
             >
-              <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-4" />
+              <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-5" />
             </motion.span>
           )}
         </AnimatePresence>

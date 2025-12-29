@@ -2,7 +2,7 @@ import { AxiosError } from "axios";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/24/solid";
 import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
 import {
   useApiVersionQuery,
@@ -31,7 +31,8 @@ export function RequestNewPermissionsField() {
     <div className="flex flex-col gap-4">
       <Button
         type="button"
-        size={apiEndpoint ? "xl" : "default"}
+        size={"default"}
+        className="h-auto py-3 whitespace-normal"
         disabled={isPending || !apiEndpoint || !apiVersionQuery.isSuccess}
         name={SETTINGS_ACTION}
         value={SETTINGS_REQUEST_API_KEY_ACTION}
@@ -46,7 +47,7 @@ export function RequestNewPermissionsField() {
           );
         }}
       >
-        <span className={"text-wrap"}>
+        <span>
           {isPending
             ? `Requesting new API access key for ${apiEndpoint}...`
             : apiEndpoint

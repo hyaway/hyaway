@@ -2,7 +2,7 @@ import { AxiosError } from "axios";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/24/solid";
 import {
   SETTINGS_ACTION,
   SETTINGS_REQUEST_SESSION_KEY_ACTION,

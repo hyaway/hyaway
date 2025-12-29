@@ -5,7 +5,7 @@ import {
   InboxIcon,
   SpeakerWaveIcon,
   TrashIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/24/solid";
 import { Link } from "@tanstack/react-router";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
@@ -202,7 +202,7 @@ const ImageCardContextMenu = memo(function ImageCardContextMenu({
               onClick={action.onClick}
               variant={action.variant}
             >
-              <action.icon className="size-4" />
+              <action.icon />
               {action.label}
             </ContextMenuItem>
           ))}

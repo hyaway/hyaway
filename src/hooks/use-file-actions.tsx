@@ -6,7 +6,7 @@ import {
   DocumentTextIcon,
   InboxArrowDownIcon,
   TrashIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/24/solid";
 import { useNavigate } from "@tanstack/react-router";
 
 import type { ComponentType, SVGProps } from "react";

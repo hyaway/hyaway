@@ -1,4 +1,4 @@
-import { SpeakerWaveIcon } from "@heroicons/react/16/solid";
+import { SpeakerWaveIcon } from "@heroicons/react/24/solid";
 
 import { MimeIcon } from "./mime-icon";
 

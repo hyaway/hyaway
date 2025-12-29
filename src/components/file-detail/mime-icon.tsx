@@ -3,7 +3,7 @@ import {
   FilmIcon,
   PhotoIcon,
   SpeakerWaveIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/24/solid";
 
 export function MimeIcon({
   mime,

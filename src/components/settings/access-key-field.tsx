@@ -4,7 +4,7 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   InformationCircleIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/24/solid";
 import z from "zod";
 import { useEffect } from "react";
 import { SETTINGS_ACCESS_KEY_FIELD_NAME } from "./constants";

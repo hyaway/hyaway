@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
+import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
 
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
 import { PageError } from "@/components/page/page-error";

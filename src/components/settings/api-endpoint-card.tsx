@@ -3,7 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/24/solid";
 import z from "zod";
 import { useEffect } from "react";
 import { SETTINGS_ENDPOINT_FIELD_NAME } from "./constants";

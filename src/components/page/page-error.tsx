@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { ExclamationCircleIcon } from "@heroicons/react/16/solid";
+import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
 import {
   Alert,
   AlertDescription,
