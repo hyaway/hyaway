@@ -59,7 +59,7 @@ export function SettingsPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger render={trigger} />
-      <PopoverContent align="end" className="w-80">
+      <PopoverContent align="end" className="w-80" side="top" sideOffset={8}>
         {children}
       </PopoverContent>
     </Popover>
