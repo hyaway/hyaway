@@ -1,55 +1,13 @@
 import { MetadataList } from "./metadata-list";
 
 import type { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
+import { formatBytes, formatDuration } from "@/lib/format-utils";
 
 export function ContentDetailsTable({
   data,
 }: {
   data: NonNullable<ReturnType<typeof useGetSingleFileMetadata>["data"]>;
 }) {
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-  };
-
-  const formatDuration = (ms: number | null) => {
-    if (ms === null) return null;
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    const parts: Array<string> = [];
-    if (hours > 0) {
-      parts.push(
-        new Intl.NumberFormat(undefined, {
-          style: "unit",
-          unit: "hour",
-        }).format(hours),
-      );
-    }
-    if (minutes > 0) {
-      parts.push(
-        new Intl.NumberFormat(undefined, {
-          style: "unit",
-          unit: "minute",
-        }).format(minutes),
-      );
-    }
-    if (seconds > 0 || parts.length === 0) {
-      parts.push(
-        new Intl.NumberFormat(undefined, {
-          style: "unit",
-          unit: "second",
-        }).format(seconds),
-      );
-    }
-    return parts.join(" ");
-  };
-
   const rows: Array<{ label: string; value: React.ReactNode }> = [
     { label: "Dimensions", value: `${data.width} × ${data.height}` },
     { label: "Size", value: formatBytes(data.size) },
