@@ -39,7 +39,7 @@ function RouteComponent() {
         <PageLoading title="Recently archived" />
         <PageFloatingBar
           leftContent={refetchButton}
-          rightContent={<RecentFilesSettingsPopover size="xl" />}
+          rightContent={<RecentFilesSettingsPopover />}
         />
       </>
     );
@@ -57,7 +57,7 @@ function RouteComponent() {
         </div>
         <PageFloatingBar
           leftContent={refetchButton}
-          rightContent={<RecentFilesSettingsPopover size="xl" />}
+          rightContent={<RecentFilesSettingsPopover />}
         />
       </>
     );
@@ -77,7 +77,7 @@ function RouteComponent() {
       </div>
       <PageFloatingBar
         leftContent={refetchButton}
-        rightContent={<RecentFilesSettingsPopover size="xl" />}
+        rightContent={<RecentFilesSettingsPopover />}
       />
     </>
   );

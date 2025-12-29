@@ -1,7 +1,7 @@
 import {
-  PopoverHeader,
-  PopoverTitle,
-} from "@/components/ui-primitives/popover";
+  SettingsHeader,
+  SettingsTitle,
+} from "@/components/settings/settings-ui";
 import { Separator } from "@/components/ui-primitives/separator";
 import {
   SettingsGroup,
@@ -17,24 +17,20 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
-export function RecentFilesSettingsPopover({
-  size,
-}: {
-  size?: "default" | "xl";
-} = {}) {
+export function RecentFilesSettingsPopover() {
   const recentFilesLimit = useRecentFilesLimit();
   const recentFilesDays = useRecentFilesDays();
   const { setRecentFilesLimit, setRecentFilesDays } = useUxSettingsActions();
 
   return (
-    <SettingsPopover label="Settings" size={size}>
+    <SettingsPopover label="Settings">
       <ImageGallerySettingsContent />
 
       <Separator className="my-4" />
 
-      <PopoverHeader>
-        <PopoverTitle>Recency</PopoverTitle>
-      </PopoverHeader>
+      <SettingsHeader>
+        <SettingsTitle>Recency</SettingsTitle>
+      </SettingsHeader>
       <SettingsGroup>
         <SliderField
           id="recent-files-limit-popover-slider"

@@ -89,7 +89,7 @@ function PagesIndex() {
       </div>
       <PageFloatingBar
         leftContent={refetchButton}
-        rightContent={<PagesSettingsPopover size="xl" />}
+        rightContent={<PagesSettingsPopover />}
       />
     </>
   );

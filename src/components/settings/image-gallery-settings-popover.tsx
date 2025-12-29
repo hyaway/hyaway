@@ -1,7 +1,7 @@
 import {
-  PopoverHeader,
-  PopoverTitle,
-} from "@/components/ui-primitives/popover";
+  SettingsHeader,
+  SettingsTitle,
+} from "@/components/settings/settings-ui";
 import {
   SettingsGroup,
   SliderField,
@@ -22,9 +22,9 @@ export function ImageGallerySettingsContent() {
 
   return (
     <>
-      <PopoverHeader>
-        <PopoverTitle>Gallery view</PopoverTitle>
-      </PopoverHeader>
+      <SettingsHeader>
+        <SettingsTitle>Gallery view</SettingsTitle>
+      </SettingsHeader>
       <SettingsGroup>
         <SliderField
           id="max-lanes-popover-slider"
@@ -46,13 +46,9 @@ export function ImageGallerySettingsContent() {
   );
 }
 
-export function ImageGallerySettingsPopover({
-  size,
-}: {
-  size?: "default" | "xl";
-} = {}) {
+export function ImageGallerySettingsPopover() {
   return (
-    <SettingsPopover label="Settings" size={size}>
+    <SettingsPopover label="Settings">
       <ImageGallerySettingsContent />
     </SettingsPopover>
   );

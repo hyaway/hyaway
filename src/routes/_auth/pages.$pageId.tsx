@@ -74,7 +74,7 @@ function RouteComponent() {
         <PageFloatingBar
           leftContent={refetchButton}
           actions={overflowActions}
-          rightContent={<ImageGallerySettingsPopover size="xl" />}
+          rightContent={<ImageGallerySettingsPopover />}
         />
       </>
     );
@@ -93,7 +93,7 @@ function RouteComponent() {
         <PageFloatingBar
           leftContent={refetchButton}
           actions={overflowActions}
-          rightContent={<ImageGallerySettingsPopover size="xl" />}
+          rightContent={<ImageGallerySettingsPopover />}
         />
       </>
     );
@@ -114,7 +114,7 @@ function RouteComponent() {
       <PageFloatingBar
         leftContent={refetchButton}
         actions={overflowActions}
-        rightContent={<ImageGallerySettingsPopover size="xl" />}
+        rightContent={<ImageGallerySettingsPopover />}
       />
     </>
   );

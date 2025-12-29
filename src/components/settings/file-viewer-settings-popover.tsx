@@ -1,7 +1,7 @@
 import {
-  PopoverHeader,
-  PopoverTitle,
-} from "@/components/ui-primitives/popover";
+  SettingsHeader,
+  SettingsTitle,
+} from "@/components/settings/settings-ui";
 import {
   SettingsGroup,
   SwitchField,
@@ -18,9 +18,9 @@ export function FileViewerSettingsContent() {
 
   return (
     <>
-      <PopoverHeader>
-        <PopoverTitle>Viewer</PopoverTitle>
-      </PopoverHeader>
+      <SettingsHeader>
+        <SettingsTitle>Viewer</SettingsTitle>
+      </SettingsHeader>
       <SettingsGroup>
         <SwitchField
           id="file-viewer-start-expanded-popover-switch"
@@ -35,13 +35,11 @@ export function FileViewerSettingsContent() {
 
 export function FileViewerSettingsPopover({
   className,
-  size,
 }: {
   className?: string;
-  size?: "default" | "xl";
-}) {
+} = {}) {
   return (
-    <SettingsPopover label="Settings" className={className} size={size}>
+    <SettingsPopover label="Settings" className={className}>
       <FileViewerSettingsContent />
     </SettingsPopover>
   );

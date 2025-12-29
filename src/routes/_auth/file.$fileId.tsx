@@ -96,7 +96,7 @@ function FileDetailContent({
 
       <PageFloatingBar
         actions={allActions}
-        rightContent={<FileViewerSettingsPopover size="xl" />}
+        rightContent={<FileViewerSettingsPopover />}
       />
     </>
   );

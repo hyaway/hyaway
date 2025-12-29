@@ -1,7 +1,7 @@
 import {
-  PopoverHeader,
-  PopoverTitle,
-} from "@/components/ui-primitives/popover";
+  SettingsHeader,
+  SettingsTitle,
+} from "@/components/settings/settings-ui";
 import { SliderField } from "@/components/settings/setting-fields";
 import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
@@ -10,19 +10,15 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
-export function PagesSettingsPopover({
-  size,
-}: {
-  size?: "default" | "xl";
-} = {}) {
+export function PagesSettingsPopover() {
   const pagesMaxColumns = usePagesMaxColumns();
   const { setPagesMaxColumns } = useUxSettingsActions();
 
   return (
-    <SettingsPopover label="Settings" size={size}>
-      <PopoverHeader>
-        <PopoverTitle>Pages view</PopoverTitle>
-      </PopoverHeader>
+    <SettingsPopover label="Settings">
+      <SettingsHeader>
+        <SettingsTitle>Pages view</SettingsTitle>
+      </SettingsHeader>
       <SliderField
         id="pages-columns-popover-slider"
         label="Maximum columns"

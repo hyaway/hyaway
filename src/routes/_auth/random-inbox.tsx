@@ -85,7 +85,7 @@ function RouteComponent() {
         <PageLoading title="Random inbox" />
         <PageFloatingBar
           leftContent={shuffleButton}
-          rightContent={<RandomInboxSettingsPopover size="xl" />}
+          rightContent={<RandomInboxSettingsPopover />}
         />
       </>
     );
@@ -103,7 +103,7 @@ function RouteComponent() {
         </div>
         <PageFloatingBar
           leftContent={shuffleButton}
-          rightContent={<RandomInboxSettingsPopover size="xl" />}
+          rightContent={<RandomInboxSettingsPopover />}
         />
       </>
     );
@@ -123,7 +123,7 @@ function RouteComponent() {
       </div>
       <PageFloatingBar
         leftContent={shuffleButton}
-        rightContent={<RandomInboxSettingsPopover size="xl" />}
+        rightContent={<RandomInboxSettingsPopover />}
       />
     </>
   );
