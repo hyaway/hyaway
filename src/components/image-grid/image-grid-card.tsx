@@ -150,10 +150,12 @@ export const ImageGridCard = memo(function ImageGridCard({
       </ContextMenu>
       <div
         className={cn(
-          "pointer-events-none h-full w-full transition-[scale] duration-100 ease-out",
+          "pointer-events-none h-full w-full transition-[scale] duration-100 ease-in-out",
           "group-hover:scale-(--thumbnail-hover-scale)",
           "group-active:scale-(--thumbnail-hover-scale)",
-          menuOpen && "scale-(--thumbnail-hover-scale)",
+          menuOpen
+            ? "ring-primary scale-(--thumbnail-hover-scale) ring-3"
+            : "shadow",
           originClass,
         )}
       >
@@ -178,7 +180,7 @@ const ImageCardContent = memo(function ImageCardContent({
   return (
     <div
       className={cn(
-        "bg-muted text-muted-foreground relative flex h-full w-full flex-col overflow-hidden rounded-sm border shadow-sm",
+        "bg-muted text-muted-foreground relative flex h-full w-full flex-col overflow-hidden rounded-sm shadow-sm",
         "pointer-events-none",
       )}
     >
