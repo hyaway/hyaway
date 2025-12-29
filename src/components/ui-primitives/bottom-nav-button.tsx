@@ -35,7 +35,7 @@ export const BottomNavButton = forwardRef<
       size="xl"
       onClick={onClick}
       className={cn(
-        "h-auto flex-col items-center gap-0.5 px-3 py-1 sm:gap-1 sm:px-5 sm:py-2",
+        "h-auto flex-col items-center gap-0.5 border-none px-3 py-1 sm:gap-1 sm:px-5 sm:py-2",
         "max-h-short:gap-0 max-h-short:px-3 max-h-short:py-1",
         "short-wide:flex-row short-wide:gap-1.5 short-wide:px-4",
         className,
