@@ -4,11 +4,9 @@ import {
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/solid";
+import type { FloatingBarAction } from "@/components/page/page-floating-bar";
 import { PageError } from "@/components/page/page-error";
-import {
-  PageFloatingBar,
-  type FloatingBarAction,
-} from "@/components/page/page-floating-bar";
+import { PageFloatingBar } from "@/components/page/page-floating-bar";
 import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
 import { RefetchButton } from "@/components/refetch-button";

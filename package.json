@@ -28,6 +28,7 @@
     "@tanstack/react-virtual": "^3.13.13",
     "@vidstack/react": "^1.12.13",
     "axios": "^1.13.2",
+    "blurhash": "^2.0.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",

@@ -1,15 +1,17 @@
 import { memo, useMemo, useState } from "react";
 import {
   ArrowTopRightOnSquareIcon,
-  ExclamationCircleIcon,
   FilmIcon,
   InboxIcon,
+  NoSymbolIcon,
   SpeakerWaveIcon,
   TrashIcon,
-} from "@heroicons/react/24/solid";
+} from "@heroicons/react/16/solid";
 import { Link } from "@tanstack/react-router";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+
+import { BlurhashCanvas } from "@/components/blurhash-canvas";
 
 import {
   ContextMenu,
@@ -170,6 +172,7 @@ const ImageCardContent = memo(function ImageCardContent({
   item,
 }: ImageCardContentProps) {
   const fileSize = formatBytes(item.size);
+  const isPermanentlyDeleted = item.is_deleted && !item.is_trashed;
 
   return (
     <div
@@ -179,11 +182,20 @@ const ImageCardContent = memo(function ImageCardContent({
       )}
     >
       <div className="relative min-h-0 flex-1 overflow-hidden">
-        <ThumbnailImage
-          fileId={item.file_id}
-          width={item.thumbnail_width}
-          height={item.thumbnail_height}
-        />
+        {isPermanentlyDeleted && item.blurhash ? (
+          <BlurhashCanvas
+            blurhash={item.blurhash}
+            width={32}
+            height={32}
+            className="h-full w-full"
+          />
+        ) : (
+          <ThumbnailImage
+            fileId={item.file_id}
+            width={item.thumbnail_width}
+            height={item.thumbnail_height}
+          />
+        )}
       </div>
       <div className="bg-muted text-muted-foreground flex h-6 shrink-0 items-center gap-1.5 px-1.5 text-xs">
         {item.mime.startsWith("video/") && <FilmIcon className="size-4" />}
@@ -193,7 +205,7 @@ const ImageCardContent = memo(function ImageCardContent({
         {item.is_inbox && <InboxIcon className="size-4" />}
         {item.is_trashed && <TrashIcon className="size-4" />}
         {item.is_deleted && !item.is_trashed && (
-          <ExclamationCircleIcon className="size-4" />
+          <NoSymbolIcon className="text-destructive size-4" />
         )}
       </div>
     </div>
