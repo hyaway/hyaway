@@ -18,7 +18,7 @@ import type {
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
-import { cn } from "@/lib/utils";
+import { checkerboardBg, cn } from "@/lib/utils";
 import { useActiveTheme } from "@/lib/theme-store";
 import { useFileViewerStartExpanded } from "@/lib/ux-settings-store";
 import "@vidstack/react/player/styles/default/theme.css";
@@ -77,7 +77,8 @@ export function FileViewer({ data }: { data: FileMetadata }) {
           alt={`File ${data.file_id}`}
           loading="eager"
           className={cn(
-            `max-w-full cursor-pointer object-contain transition-[max-height] duration-300`,
+            "max-w-full cursor-pointer object-contain transition-[max-height] duration-300",
+            checkerboardBg,
             isExpanded
               ? "max-h-full cursor-zoom-out"
               : "max-h-short:max-h-[60vh] max-h-[70vh] cursor-zoom-in",
