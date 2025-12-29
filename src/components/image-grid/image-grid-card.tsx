@@ -20,7 +20,11 @@ import {
 } from "@/components/ui-primitives/context-menu";
 import { useFileActions } from "@/hooks/use-file-actions";
 import { useThumbnailUrl } from "@/hooks/use-url-with-api-key";
+import { formatBytes } from "@/lib/format-utils";
 import { cn } from "@/lib/utils";
+
+/** Height of the polaroid-style footer strip in pixels (h-6 = 24px) */
+export const CARD_FOOTER_HEIGHT = 24;
 
 // --- Main Card Component ---
 
@@ -147,7 +151,7 @@ export const ImageGridCard = memo(function ImageGridCard({
           originClass,
         )}
       >
-        <ImageCardContent item={item} menuOpen={menuOpen} />
+        <ImageCardContent item={item} />
       </div>
     </li>
   );
@@ -157,58 +161,38 @@ export const ImageGridCard = memo(function ImageGridCard({
 
 interface ImageCardContentProps {
   item: FileMetadata;
-  menuOpen: boolean;
 }
 
 const ImageCardContent = memo(function ImageCardContent({
   item,
-  menuOpen,
 }: ImageCardContentProps) {
+  const fileSize = formatBytes(item.size);
+
   return (
     <div
       className={cn(
-        "h-full w-full overflow-hidden rounded border object-cover",
+        "bg-card text-card-foreground relative flex h-full w-full flex-col overflow-hidden rounded-sm border shadow-sm",
         "pointer-events-none",
       )}
     >
-      <ThumbnailImage
-        fileId={item.file_id}
-        width={item.thumbnail_width}
-        height={item.thumbnail_height}
-      />
-      {(item.is_inbox || item.is_trashed || item.is_deleted) && (
-        <div
-          className={cn(
-            "bg-secondary text-secondary-foreground absolute top-1 right-1 flex flex-col gap-1 rounded p-1 opacity-60",
-            "pointer-events-none origin-top-right transition-[opacity,scale,top,right] duration-100 ease-out",
-            "group-hover:top-(--badge-offset-scaled) group-hover:right-(--badge-offset-scaled) group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
-            "group-active:top-(--badge-offset-scaled) group-active:right-(--badge-offset-scaled) group-active:scale-(--thumbnail-hover-reverse-scale) group-active:opacity-30",
-            menuOpen &&
-              "top-(--badge-offset-scaled) right-(--badge-offset-scaled) scale-(--thumbnail-hover-reverse-scale) opacity-30",
-          )}
-        >
-          {item.is_inbox && <InboxIcon className="size-4" />}
-          {item.is_trashed && <TrashIcon className="size-4" />}
-          {item.is_deleted && !item.is_trashed && (
-            <ExclamationCircleIcon className="size-4" />
-          )}
-        </div>
-      )}
-      {(item.mime.startsWith("video/") || item.has_audio) && (
-        <div
-          className={cn(
-            "bg-secondary text-secondary-foreground absolute top-1 left-1 flex flex-col gap-1 rounded p-1 opacity-60",
-            "pointer-events-none origin-top-left transition-[opacity,scale,top,left] duration-100 ease-out",
-            "group-hover:top-(--badge-offset-scaled) group-hover:left-(--badge-offset-scaled) group-hover:scale-(--thumbnail-hover-reverse-scale) group-hover:opacity-30",
-            "group-active:top-(--badge-offset-scaled) group-active:left-(--badge-offset-scaled) group-active:scale-(--thumbnail-hover-reverse-scale) group-active:opacity-30",
-            menuOpen &&
-              "top-(--badge-offset-scaled) left-(--badge-offset-scaled) scale-(--thumbnail-hover-reverse-scale) opacity-30",
-          )}
-        >
-          {item.mime.startsWith("video/") && <FilmIcon className="size-4" />}
-          {item.has_audio && <SpeakerWaveIcon className="size-4" />}
-        </div>
-      )}
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        <ThumbnailImage
+          fileId={item.file_id}
+          width={item.thumbnail_width}
+          height={item.thumbnail_height}
+        />
+      </div>
+      <div className="text-muted-foreground flex h-6 shrink-0 items-center gap-1.5 px-1.5 text-xs">
+        {item.mime.startsWith("video/") && <FilmIcon className="size-4" />}
+        {item.has_audio && <SpeakerWaveIcon className="size-4" />}
+        {fileSize && <span>{fileSize}</span>}
+        <span className="flex-1" />
+        {item.is_inbox && <InboxIcon className="size-4" />}
+        {item.is_trashed && <TrashIcon className="size-4" />}
+        {item.is_deleted && !item.is_trashed && (
+          <ExclamationCircleIcon className="size-4" />
+        )}
+      </div>
     </div>
   );
 });
@@ -244,7 +228,7 @@ const ImageCardContextMenu = memo(function ImageCardContextMenu({
               <action.icon />
               {action.label}
               {action.external && (
-                <ArrowTopRightOnSquareIcon className="ml-auto size-4 opacity-50" />
+                <ArrowTopRightOnSquareIcon className="ml-auto opacity-50" />
               )}
             </ContextMenuItem>
           ))}

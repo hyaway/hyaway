@@ -1,6 +1,6 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useDeferredValue, useEffect, useMemo } from "react";
-import { ImageGridCard } from "./image-grid-card";
+import { CARD_FOOTER_HEIGHT, ImageGridCard } from "./image-grid-card";
 import { ImageGridSkeleton } from "./image-grid-skeleton";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
@@ -80,8 +80,7 @@ export function PureImageGrid({
     const cached = heightCache.get(item.file_id);
     if (cached !== undefined) return cached;
     const aspectRatio = Math.max(Math.min(item.height / item.width, 2), 0.33);
-    let height = aspectRatio * width;
-    height = Math.max(height, 64);
+    const height = Math.max(aspectRatio * width, 64) + CARD_FOOTER_HEIGHT;
     heightCache.set(item.file_id, height);
     return height;
   };
