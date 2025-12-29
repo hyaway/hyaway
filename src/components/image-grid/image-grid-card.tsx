@@ -58,10 +58,13 @@ export const ImageGridCard = memo(function ImageGridCard({
   const isBottomRow = virtualRow.index >= lastRowStart;
 
   const { scale, horizontalOrigin } = useMemo(() => {
-    // Base scale from thumbnail size
-    const baseScale = Math.max(
-      Math.min(lanes * width, (item.thumbnail_width ?? width) * 1.1) / width,
-      1.05,
+    // Base scale from thumbnail size (clamped between 1.05 and 3)
+    const baseScale = Math.min(
+      Math.max(
+        Math.min(lanes * width, (item.thumbnail_width ?? width) * 1.1) / width,
+        1.05,
+      ),
+      2.5,
     );
 
     // Calculate max scale for each horizontal origin type
@@ -171,7 +174,7 @@ const ImageCardContent = memo(function ImageCardContent({
   return (
     <div
       className={cn(
-        "bg-card text-card-foreground relative flex h-full w-full flex-col overflow-hidden rounded-sm border shadow-sm",
+        "bg-muted text-muted-foreground relative flex h-full w-full flex-col overflow-hidden rounded-sm border shadow-sm",
         "pointer-events-none",
       )}
     >
@@ -182,7 +185,7 @@ const ImageCardContent = memo(function ImageCardContent({
           height={item.thumbnail_height}
         />
       </div>
-      <div className="text-muted-foreground flex h-6 shrink-0 items-center gap-1.5 px-1.5 text-xs">
+      <div className="bg-muted text-muted-foreground flex h-6 shrink-0 items-center gap-1.5 px-1.5 text-xs">
         {item.mime.startsWith("video/") && <FilmIcon className="size-4" />}
         {item.has_audio && <SpeakerWaveIcon className="size-4" />}
         {fileSize && <span>{fileSize}</span>}
@@ -258,7 +261,7 @@ export function ThumbnailImage({
     <img
       src={url}
       alt={`Thumbnail for file ID ${fileId}`}
-      className={cn("bg-secondary h-full w-full object-cover", className)}
+      className={cn("bg-muted h-full w-full object-cover", className)}
       loading="lazy"
       onLoad={onLoad}
       onError={onError}
