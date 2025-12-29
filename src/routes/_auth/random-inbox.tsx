@@ -50,22 +50,20 @@ function RouteComponent() {
   };
 
   const diceIcon = (
-    <span className="relative size-6">
-      <AnimatePresence>
-        <motion.span
-          key={diceIndex}
-          initial={{ rotate: -180, scale: 0 }}
-          animate={{
-            rotate: 0,
-            scale: 1,
-            transition: { duration: 0.15, ease: "easeOut" },
-          }}
-          className="absolute inset-0"
-        >
-          <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-6" />
-        </motion.span>
-      </AnimatePresence>
-    </span>
+    <AnimatePresence>
+      <motion.span
+        key={diceIndex}
+        initial={{ rotate: -180, scale: 0 }}
+        animate={{
+          rotate: 0,
+          scale: 1,
+          transition: { duration: 0.15, ease: "easeOut" },
+        }}
+        className="absolute inset-0 flex items-center justify-center"
+      >
+        <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-6" />
+      </motion.span>
+    </AnimatePresence>
   );
 
   const shuffleButton = (

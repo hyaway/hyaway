@@ -38,7 +38,7 @@ interface PageFloatingBarProps {
 }
 
 /** Maximum visible action buttons (excluding overflow and settings) */
-const MAX_VISIBLE_ACTIONS = 3;
+const MAX_VISIBLE_ACTIONS = 2;
 
 export function PageFloatingBar({
   actions = [],

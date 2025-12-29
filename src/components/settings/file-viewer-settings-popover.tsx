@@ -19,7 +19,7 @@ export function FileViewerSettingsContent() {
   return (
     <>
       <SettingsHeader>
-        <SettingsTitle>Viewer</SettingsTitle>
+        <SettingsTitle>Media viewer</SettingsTitle>
       </SettingsHeader>
       <SettingsGroup>
         <SwitchField
