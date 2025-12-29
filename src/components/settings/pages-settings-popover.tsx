@@ -1,5 +1,4 @@
-import { Settings01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/solid";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Popover,
@@ -24,7 +23,7 @@ export function PagesSettingsPopover() {
       <PopoverTrigger
         render={
           <Button variant="ghost" size="icon">
-            <HugeiconsIcon icon={Settings01Icon} />
+            <AdjustmentsHorizontalIcon />
             <span className="sr-only">Page settings</span>
           </Button>
         }
