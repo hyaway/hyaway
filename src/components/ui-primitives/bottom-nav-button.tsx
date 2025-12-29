@@ -35,17 +35,17 @@ export function BottomNavButton({
       size="xl"
       onClick={onClick}
       className={cn(
-        "h-10 flex-col items-center gap-0 px-3 sm:h-14 sm:gap-1 sm:px-6",
-        "max-h-short:h-10 max-h-short:gap-0 max-h-short:px-3",
+        "h-auto flex-col items-center gap-0 px-3 py-1 sm:gap-1 sm:px-5 sm:py-2",
+        "max-h-short:gap-0 max-h-short:px-3 max-h-short:py-1",
         className,
       )}
       disabled={disabled || isLoading}
       render={render}
     >
       {isLoading ? (
-        <Spinner className="max-h-short:size-5 size-5 sm:size-6" />
+        <Spinner className="max-h-short:size-5 size-6" />
       ) : (
-        <span className="max-h-short:[&>svg]:size-5 [&>svg]:size-5 sm:[&>svg]:size-6">
+        <span className="max-h-short:[&>svg]:size-5 [&>svg]:size-6">
           {icon}
         </span>
       )}
