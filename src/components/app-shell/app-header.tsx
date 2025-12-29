@@ -138,7 +138,7 @@ export function AppHeader() {
   return (
     <header
       className={cn(
-        "bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-40 flex shrink-0 flex-col backdrop-blur-sm transition-all duration-300 ease-in-out",
+        "bg-background/95 supports-backdrop-filter:bg-background/75 sticky top-0 z-40 flex shrink-0 flex-col backdrop-blur-sm transition-all duration-300 ease-in-out",
         isVisible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none -translate-y-full opacity-0",

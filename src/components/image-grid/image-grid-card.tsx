@@ -233,7 +233,11 @@ const ImageCardContextMenu = memo(function ImageCardContextMenu({
   });
 
   return (
-    <ContextMenuContent>
+    <ContextMenuContent
+      className={
+        "bg-popover/95 supports-backdrop-filter:bg-popover/75 backdrop-blur-sm"
+      }
+    >
       {actionGroups.map((group, groupIndex) => (
         <div key={group.id}>
           {groupIndex > 0 && <ContextMenuSeparator />}
