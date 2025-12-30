@@ -8,6 +8,7 @@ import { PageError } from "@/components/page/page-error";
 import { Badge } from "@/components/ui-primitives/badge";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
+import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useResponsiveGrid } from "@/hooks/use-responsive-grid";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { cn } from "@/lib/utils";
@@ -131,12 +132,21 @@ export function PureImageGrid({
   const maxLanes = useGridMaxLanes();
   const expandImages = useGridExpandImages();
 
+  const { setLinkRef, handleKeyDown, handleItemFocus, getTabIndex } =
+    useMasonryNavigation({
+      lanes,
+      totalItems: deferredItems.length,
+      getVirtualItems: rowVirtualizer.getVirtualItems.bind(rowVirtualizer),
+    });
+
   const maxWidth = !expandImages ? maxLanes * (width + 4) : undefined;
 
   return (
     <div className="flex w-full flex-row" style={{ maxWidth }}>
       <div ref={parentRef} className="@container w-full">
         <ul
+          role="grid"
+          onKeyDown={handleKeyDown}
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
           }}
@@ -158,6 +168,9 @@ export function PureImageGrid({
                   height={itemHeight}
                   scrollMargin={rowVirtualizer.options.scrollMargin}
                   isScrolling={rowVirtualizer.isScrolling}
+                  tabIndex={getTabIndex(virtualRow.index)}
+                  linkRef={setLinkRef(virtualRow.index)}
+                  onFocus={() => handleItemFocus(virtualRow.index)}
                 />
               );
             })}
