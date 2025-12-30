@@ -44,7 +44,7 @@ function RootComponent() {
         <SidebarInset>
           <HeaderPortalProvider>
             <AppHeader />
-            <main className="max-h-short:py-2 px-4 py-4 sm:px-6 sm:py-8">
+            <main className="short:py-2 px-4 py-4 sm:px-6 sm:py-8">
               <Outlet />
             </main>
           </HeaderPortalProvider>

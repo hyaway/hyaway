@@ -68,10 +68,10 @@ export function AppHeader() {
         "after:pointer-events-auto after:absolute after:inset-x-0 after:top-full after:content-['']",
         isVisible
           ? "translate-y-0 opacity-100 after:h-2"
-          : "max-h-short:after:h-10 pointer-events-none -translate-y-full opacity-0 after:h-10 hover:pointer-events-auto hover:translate-y-0 hover:opacity-100 sm:after:h-14",
+          : "short:after:h-10 pointer-events-none -translate-y-full opacity-0 after:h-10 hover:pointer-events-auto hover:translate-y-0 hover:opacity-100 sm:after:h-14",
       )}
     >
-      <div className="max-h-short:h-10 flex h-10 shrink-0 items-center gap-2 px-4 sm:h-14">
+      <div className="short:h-10 flex h-10 shrink-0 items-center gap-2 px-4 sm:h-14">
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"

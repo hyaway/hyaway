@@ -93,7 +93,7 @@ export function FileViewer({ data }: { data: FileMetadata }) {
               : "bg-background",
             isExpanded
               ? "max-h-full cursor-zoom-out"
-              : "max-h-short:max-h-[60vh] max-h-[70vh] cursor-zoom-in",
+              : "short:max-h-[60vh] max-h-[70vh] cursor-zoom-in",
           )}
           onLoad={handleLoad}
           onError={onError}
@@ -110,7 +110,7 @@ export function FileViewer({ data }: { data: FileMetadata }) {
 
   if (isVideo) {
     return (
-      <div className="max-h-short:max-h-[60svh] flex max-h-[70svh] flex-row justify-center pb-2 sm:px-4 sm:pb-4">
+      <div className="short:max-h-[60svh] flex max-h-[70svh] flex-row justify-center pb-2 sm:px-4 sm:pb-4">
         <MediaPlayer
           title={`File ${data.file_id}`}
           src={{ src: fileUrl, type: data.mime as VideoMimeType }}
@@ -135,7 +135,7 @@ export function FileViewer({ data }: { data: FileMetadata }) {
 
   if (isAudio) {
     return (
-      <div className="max-h-short:max-h-[60svh] flex max-h-[70svh] flex-row justify-center pb-2 sm:px-4 sm:pb-4">
+      <div className="short:max-h-[60svh] flex max-h-[70svh] flex-row justify-center pb-2 sm:px-4 sm:pb-4">
         <MediaPlayer
           title={`File ${data.file_id}`}
           src={{ src: fileUrl, type: data.mime as AudioMimeType }}

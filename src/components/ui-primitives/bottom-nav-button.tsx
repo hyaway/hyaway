@@ -37,7 +37,7 @@ export const BottomNavButton = forwardRef<
       className={cn(
         "h-auto flex-col items-center gap-0.5 border-none px-3 py-1",
         "sm:flex-row sm:gap-1.5 sm:px-4 sm:py-2",
-        "max-h-short:gap-0 max-h-short:px-3 max-h-short:py-1",
+        "short:gap-0 short:px-3 short:py-1",
         "short-wide:flex-row short-wide:gap-1.5 short-wide:px-4",
         className,
       )}
@@ -45,13 +45,13 @@ export const BottomNavButton = forwardRef<
       render={render}
     >
       {isLoading ? (
-        <Spinner className="max-h-short:size-5 size-6" />
+        <Spinner className="short:size-5 size-6" />
       ) : (
-        <span className="max-h-short:size-5 max-h-short:[&>svg]:size-5 relative flex size-6 items-center justify-center [&>svg]:size-6">
+        <span className="short:size-5 short:[&>svg]:size-5 relative flex size-6 items-center justify-center [&>svg]:size-6">
           {icon}
         </span>
       )}
-      <span className="max-h-short:sr-only short-wide:not-sr-only text-xs sm:text-sm">
+      <span className="short:sr-only short-wide:not-sr-only text-xs sm:text-sm">
         {label}
       </span>
     </Button>
