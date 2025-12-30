@@ -51,3 +51,33 @@ export function formatDuration(ms: number | null | undefined): string | null {
   }
   return parts.join(" ");
 }
+
+const hoursFormatter = new Intl.NumberFormat(undefined, {
+  style: "unit",
+  unit: "hour",
+  unitDisplay: "narrow",
+});
+
+const daysFormatter = new Intl.NumberFormat(undefined, {
+  style: "unit",
+  unit: "day",
+  unitDisplay: "narrow",
+});
+
+/**
+ * Formats hours into a compact human-readable string.
+ * Shows days + hours when >= 24 hours.
+ * @param hours - Number of hours
+ * @returns Formatted string like "12h" or "2d 12h"
+ */
+export function formatHoursCompact(hours: number): string {
+  if (hours < 24) {
+    return hoursFormatter.format(hours);
+  }
+  const days = Math.floor(hours / 24);
+  const remainingHours = hours % 24;
+  if (remainingHours === 0) {
+    return daysFormatter.format(days);
+  }
+  return `${daysFormatter.format(days)} ${hoursFormatter.format(remainingHours)}`;
+}

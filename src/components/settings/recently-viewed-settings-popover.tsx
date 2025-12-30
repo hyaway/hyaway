@@ -12,15 +12,20 @@ import { ImageGallerySettingsContent } from "@/components/settings/image-gallery
 import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   MAX_RECENTLY_VIEWED_LIMIT,
+  MAX_RETENTION_HOURS,
   useRecentlyViewedActions,
   useRecentlyViewedEnabled,
   useRecentlyViewedLimit,
+  useRecentlyViewedRetentionHours,
 } from "@/lib/recently-viewed-store";
+import { formatHoursCompact } from "@/lib/format-utils";
 
 export function RecentlyViewedSettingsPopover() {
   const enabled = useRecentlyViewedEnabled();
   const limit = useRecentlyViewedLimit();
-  const { setEnabled, setLimit } = useRecentlyViewedActions();
+  const retentionHours = useRecentlyViewedRetentionHours();
+  const { setEnabled, setLimit, setRetentionHours } =
+    useRecentlyViewedActions();
 
   return (
     <SettingsPopover label="Settings">
@@ -47,6 +52,17 @@ export function RecentlyViewedSettingsPopover() {
           step={10}
           onValueChange={setLimit}
           commitOnRelease
+        />
+        <SliderField
+          id="recently-viewed-retention-popover-slider"
+          label="Keep entries for"
+          value={retentionHours}
+          min={1}
+          max={MAX_RETENTION_HOURS}
+          step={1}
+          onValueChange={setRetentionHours}
+          commitOnRelease
+          formatValue={formatHoursCompact}
         />
       </SettingsGroup>
     </SettingsPopover>

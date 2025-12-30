@@ -13,18 +13,23 @@ import {
 } from "@/components/settings/setting-fields";
 import {
   MAX_RECENTLY_VIEWED_LIMIT,
+  MAX_RETENTION_HOURS,
   useRecentlyViewedActions,
   useRecentlyViewedEnabled,
   useRecentlyViewedEntries,
   useRecentlyViewedLimit,
+  useRecentlyViewedRetentionHours,
 } from "@/lib/recently-viewed-store";
 import { Button } from "@/components/ui-primitives/button";
+import { formatHoursCompact } from "@/lib/format-utils";
 
 export function RecentlyViewedCard() {
   const enabled = useRecentlyViewedEnabled();
   const limit = useRecentlyViewedLimit();
+  const retentionHours = useRecentlyViewedRetentionHours();
   const entries = useRecentlyViewedEntries();
-  const { setEnabled, setLimit, clearHistory } = useRecentlyViewedActions();
+  const { setEnabled, setLimit, setRetentionHours, clearHistory } =
+    useRecentlyViewedActions();
 
   return (
     <Card>
@@ -52,6 +57,17 @@ export function RecentlyViewedCard() {
             step={10}
             onValueChange={setLimit}
             commitOnRelease
+          />
+          <SliderField
+            id="recently-viewed-retention-slider"
+            label="Keep entries for"
+            value={retentionHours}
+            min={1}
+            max={MAX_RETENTION_HOURS}
+            step={1}
+            onValueChange={setRetentionHours}
+            commitOnRelease
+            formatValue={formatHoursCompact}
           />
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col gap-1">

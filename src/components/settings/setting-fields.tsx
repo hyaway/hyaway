@@ -13,6 +13,8 @@ interface SliderFieldProps {
   onValueChange?: (value: number) => void;
   /** If true, only calls onValueChange when the slider is released */
   commitOnRelease?: boolean;
+  /** Custom formatter for the displayed value */
+  formatValue?: (value: number) => string;
 }
 
 export function SliderField({
@@ -24,6 +26,7 @@ export function SliderField({
   step,
   onValueChange,
   commitOnRelease = false,
+  formatValue,
 }: SliderFieldProps) {
   const [localValue, setLocalValue] = useState(value);
   const displayValue = commitOnRelease ? localValue : value;
@@ -33,12 +36,16 @@ export function SliderField({
     setLocalValue(value);
   }
 
+  const formattedValue = formatValue
+    ? formatValue(displayValue)
+    : String(displayValue);
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <Label htmlFor={id}>{label}</Label>
         <span className="text-muted-foreground text-base tabular-nums">
-          {displayValue}
+          {formattedValue}
         </span>
       </div>
       <Slider

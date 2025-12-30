@@ -5,10 +5,14 @@ import { setupCrossTabSync } from "./cross-tab-sync";
 
 export const MAX_RECENTLY_VIEWED_LIMIT = 1000;
 export const DEFAULT_RECENTLY_VIEWED_LIMIT = 100;
+export const MAX_RETENTION_HOURS = 168; // 7 days (for UI)
+const MS_PER_HOUR = 60 * 60 * 1000;
+export const DEFAULT_RETENTION_MS = 24 * MS_PER_HOUR; // 1 day
 
 interface RecentlyViewedEntry {
   fileId: number;
   viewedAt: number; // timestamp
+  expiresAt: number; // timestamp, 0 = never expires
 }
 
 type RecentlyViewedState = {
@@ -18,6 +22,8 @@ type RecentlyViewedState = {
   enabled: boolean;
   /** Maximum number of entries to keep */
   limit: number;
+  /** How long to keep entries in ms (0 = forever) */
+  retentionMs: number;
   /** Timestamp of last clear - entries older than this are ignored during merge */
   clearedAt: number;
   actions: {
@@ -31,6 +37,8 @@ type RecentlyViewedState = {
     setEnabled: (enabled: boolean) => void;
     /** Set the maximum number of entries to keep */
     setLimit: (limit: number) => void;
+    /** Set how long to keep entries in hours (0 = forever) */
+    setRetentionHours: (hours: number) => void;
   };
 };
 
@@ -48,13 +56,17 @@ function mergeRecentlyViewed(
 
   // Use the most recent clearedAt timestamp
   const clearedAt = Math.max(persisted.clearedAt ?? 0, current.clearedAt);
+  const retentionMs = persisted.retentionMs ?? current.retentionMs;
+  const now = Date.now();
 
-  // Merge entries, keeping only those newer than clearedAt
+  // Merge entries, filtering out cleared and expired entries
   // and keeping the most recent viewedAt per fileId
   const merged = new Map<number, RecentlyViewedEntry>();
   for (const entry of [...currentEntries, ...persistedEntries]) {
     // Skip entries that were viewed before the last clear
     if (entry.viewedAt <= clearedAt) continue;
+    // Skip expired entries (expiresAt > 0 means it has an expiration)
+    if (entry.expiresAt > 0 && entry.expiresAt < now) continue;
 
     const existing = merged.get(entry.fileId);
     if (!existing || entry.viewedAt > existing.viewedAt) {
@@ -73,6 +85,7 @@ function mergeRecentlyViewed(
     entries: mergedEntries,
     enabled: persisted.enabled ?? current.enabled,
     limit,
+    retentionMs,
     clearedAt,
   };
 }
@@ -83,17 +96,22 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
       entries: [],
       enabled: true,
       limit: DEFAULT_RECENTLY_VIEWED_LIMIT,
+      retentionMs: DEFAULT_RETENTION_MS,
       clearedAt: 0,
       actions: {
         addViewedFile: (fileId: number) => {
-          const { enabled, limit, entries } = get();
+          const { enabled, limit, retentionMs, entries } = get();
           if (!enabled) return;
 
           const now = Date.now();
+          const expiresAt = retentionMs > 0 ? now + retentionMs : 0;
           // Remove existing entry for this file if present
           const filtered = entries.filter((e) => e.fileId !== fileId);
           // Add new entry at the beginning
-          const newEntries = [{ fileId, viewedAt: now }, ...filtered];
+          const newEntries = [
+            { fileId, viewedAt: now, expiresAt },
+            ...filtered,
+          ];
           // Trim to limit
           set({ entries: newEntries.slice(0, limit) });
         },
@@ -116,6 +134,16 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
           } else {
             set({ limit });
           }
+        },
+        setRetentionHours: (hours: number) => {
+          const retentionMs = hours * MS_PER_HOUR;
+          const { entries } = get();
+          // Update expiresAt for all existing entries based on new retention
+          const updatedEntries = entries.map((entry) => ({
+            ...entry,
+            expiresAt: retentionMs > 0 ? entry.viewedAt + retentionMs : 0,
+          }));
+          set({ retentionMs, entries: updatedEntries });
         },
       },
     }),
@@ -149,6 +177,11 @@ export const useRecentlyViewedEnabled = () =>
 
 export const useRecentlyViewedLimit = () =>
   useRecentlyViewedStore((state) => state.limit);
+
+export const useRecentlyViewedRetentionHours = () =>
+  useRecentlyViewedStore((state) =>
+    Math.round(state.retentionMs / MS_PER_HOUR),
+  );
 
 export const useRecentlyViewedActions = () =>
   useRecentlyViewedStore((state) => state.actions);
