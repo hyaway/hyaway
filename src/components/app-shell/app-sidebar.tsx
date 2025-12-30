@@ -97,7 +97,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               >
                 <TouchTarget>
                   <IconTrash />
-                  <span>Recently deleted</span>
+                  <span>Recently trashed</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>

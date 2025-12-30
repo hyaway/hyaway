@@ -205,7 +205,7 @@ export const useDeleteFilesMutation = () => {
         is_deleted: true,
       }));
       queryClient.invalidateQueries({
-        queryKey: ["searchFiles", "recentlyDeleted"],
+        queryKey: ["searchFiles", "recentlyTrashed"],
       });
     },
     mutationKey: ["deleteFiles"],
@@ -228,7 +228,7 @@ export const useUndeleteFilesMutation = () => {
         is_deleted: false,
       }));
       queryClient.invalidateQueries({
-        queryKey: ["searchFiles", "recentlyDeleted"],
+        queryKey: ["searchFiles", "recentlyTrashed"],
       });
     },
     mutationKey: ["undeleteFiles"],

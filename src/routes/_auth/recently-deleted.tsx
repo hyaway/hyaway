@@ -7,19 +7,19 @@ import { PageHeading } from "@/components/page/page-heading";
 import { PageLoading } from "@/components/page/page-loading";
 import { RefetchButton } from "@/components/refetch-button";
 import { RecentFilesSettingsPopover } from "@/components/settings/recent-files-settings-popover";
-import { useRecentlyDeletedFilesQuery } from "@/integrations/hydrus-api/queries/search";
+import { useRecentlyTrashedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 
 export const Route = createFileRoute("/_auth/recently-deleted")({
   component: RouteComponent,
   beforeLoad: () => ({
-    getTitle: () => "Recently deleted",
+    getTitle: () => "Recently trashed",
   }),
 });
 
 function RouteComponent() {
   const { data, isLoading, isFetching, isError, error } =
-    useRecentlyDeletedFilesQuery();
+    useRecentlyTrashedFilesQuery();
   const queryClient = useQueryClient();
 
   const refetchButton = (
@@ -27,7 +27,7 @@ function RouteComponent() {
       isFetching={isFetching}
       onRefetch={() =>
         queryClient.invalidateQueries({
-          queryKey: ["searchFiles", "recentlyDeleted"],
+          queryKey: ["searchFiles", "recentlyTrashed"],
         })
       }
     />
@@ -36,7 +36,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <>
-        <PageLoading title="Recently deleted" />
+        <PageLoading title="Recently trashed" />
         <PageFloatingBar
           leftContent={refetchButton}
           rightContent={<RecentFilesSettingsPopover />}
@@ -49,10 +49,10 @@ function RouteComponent() {
     return (
       <>
         <div className="pb-16">
-          <PageHeading title="Recently deleted" />
+          <PageHeading title="Recently trashed" />
           <PageError
             error={error}
-            fallbackMessage="An unknown error occurred while fetching recently deleted files."
+            fallbackMessage="An unknown error occurred while fetching recently trashed files."
           />
         </div>
         <PageFloatingBar
@@ -67,12 +67,12 @@ function RouteComponent() {
     <>
       <div className="pb-16">
         <PageHeading
-          title={`Recently deleted (${data?.file_ids?.length ?? 0} files)`}
+          title={`Recently trashed (${data?.file_ids?.length ?? 0} files)`}
         />
         {data?.file_ids && data.file_ids.length > 0 ? (
           <ImageGrid fileIds={data.file_ids} />
         ) : (
-          <EmptyState message="No recently deleted files found." />
+          <EmptyState message="No recently trashed files found." />
         )}
       </div>
       <PageFloatingBar

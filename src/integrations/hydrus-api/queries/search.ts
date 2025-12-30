@@ -39,7 +39,7 @@ export const useRecentlyArchivedFilesQuery = () => {
   });
 };
 
-export const useRecentlyDeletedFilesQuery = () => {
+export const useRecentlyTrashedFilesQuery = () => {
   const { data: servicesData } = useGetServicesQuery();
   const recentFilesLimit = useRecentFilesLimit();
   const recentFilesDays = useRecentFilesDays();
@@ -64,7 +64,7 @@ export const useRecentlyDeletedFilesQuery = () => {
   return useQuery({
     queryKey: [
       "searchFiles",
-      "recentlyDeleted",
+      "recentlyTrashed",
       trashServiceKey,
       tags,
       options,
