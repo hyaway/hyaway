@@ -12,62 +12,46 @@ import {
   SwitchField,
 } from "@/components/settings/setting-fields";
 import {
-  MAX_RECENTLY_VIEWED_LIMIT,
-  MAX_RETENTION_HOURS,
-  useRecentlyViewedActions,
-  useRecentlyViewedEnabled,
-  useRecentlyViewedEntries,
-  useRecentlyViewedLimit,
-  useRecentlyViewedRetentionHours,
-} from "@/lib/recently-viewed-store";
+  MAX_HISTORY_LIMIT,
+  useHistoryActions,
+  useHistoryEnabled,
+  useHistoryEntries,
+  useHistoryLimit,
+} from "@/lib/history-store";
 import { Button } from "@/components/ui-primitives/button";
-import { formatHoursCompact } from "@/lib/format-utils";
 
-export function RecentlyViewedCard() {
-  const enabled = useRecentlyViewedEnabled();
-  const limit = useRecentlyViewedLimit();
-  const retentionHours = useRecentlyViewedRetentionHours();
-  const entries = useRecentlyViewedEntries();
-  const { setEnabled, setLimit, setRetentionHours, clearHistory } =
-    useRecentlyViewedActions();
+export function HistoryCard() {
+  const enabled = useHistoryEnabled();
+  const limit = useHistoryLimit();
+  const entries = useHistoryEntries();
+  const { setEnabled, setLimit, clearHistory } = useHistoryActions();
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recently viewed</CardTitle>
+        <CardTitle>History</CardTitle>
         <CardDescription>
-          Configure how recently viewed files are tracked. Files you open are
-          remembered for quick access later.
+          Configure how viewed files are tracked. Files you open are remembered
+          for quick access later.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <SettingsGroup>
           <SwitchField
-            id="recently-viewed-enabled-switch"
-            label="Keep track of recently viewed files"
+            id="history-enabled-switch"
+            label="Keep track of viewed files"
             checked={enabled}
             onCheckedChange={setEnabled}
           />
           <SliderField
-            id="recently-viewed-limit-slider"
+            id="history-limit-slider"
             label="Maximum entries to keep"
             value={limit}
             min={10}
-            max={MAX_RECENTLY_VIEWED_LIMIT}
+            max={MAX_HISTORY_LIMIT}
             step={10}
             onValueChange={setLimit}
             commitOnRelease
-          />
-          <SliderField
-            id="recently-viewed-retention-slider"
-            label="Keep entries for"
-            value={retentionHours}
-            min={1}
-            max={MAX_RETENTION_HOURS}
-            step={1}
-            onValueChange={setRetentionHours}
-            commitOnRelease
-            formatValue={formatHoursCompact}
           />
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col gap-1">

@@ -15,12 +15,12 @@ import { Route as IndexRouteImport } from "./routes/index";
 import { Route as SettingsIndexRouteImport } from "./routes/settings.index";
 import { Route as SettingsUxRouteImport } from "./routes/settings.ux";
 import { Route as SettingsClientApiRouteImport } from "./routes/settings.client-api";
-import { Route as AuthRecentlyViewedRouteImport } from "./routes/_auth/recently-viewed";
 import { Route as AuthRecentlyTrashedRouteImport } from "./routes/_auth/recently-trashed";
 import { Route as AuthRecentlyInboxedRouteImport } from "./routes/_auth/recently-inboxed";
 import { Route as AuthRecentlyArchivedRouteImport } from "./routes/_auth/recently-archived";
 import { Route as AuthRandomInboxRouteImport } from "./routes/_auth/random-inbox";
 import { Route as AuthPagesRouteImport } from "./routes/_auth/pages";
+import { Route as AuthHistoryRouteImport } from "./routes/_auth/history";
 import { Route as AuthPagesIndexRouteImport } from "./routes/_auth/pages.index";
 import { Route as AuthPagesPageIdRouteImport } from "./routes/_auth/pages.$pageId";
 import { Route as AuthFileFileIdRouteImport } from "./routes/_auth/file.$fileId";
@@ -54,11 +54,6 @@ const SettingsClientApiRoute = SettingsClientApiRouteImport.update({
   path: "/client-api",
   getParentRoute: () => SettingsRoute,
 } as any);
-const AuthRecentlyViewedRoute = AuthRecentlyViewedRouteImport.update({
-  id: "/recently-viewed",
-  path: "/recently-viewed",
-  getParentRoute: () => AuthRoute,
-} as any);
 const AuthRecentlyTrashedRoute = AuthRecentlyTrashedRouteImport.update({
   id: "/recently-trashed",
   path: "/recently-trashed",
@@ -84,6 +79,11 @@ const AuthPagesRoute = AuthPagesRouteImport.update({
   path: "/pages",
   getParentRoute: () => AuthRoute,
 } as any);
+const AuthHistoryRoute = AuthHistoryRouteImport.update({
+  id: "/history",
+  path: "/history",
+  getParentRoute: () => AuthRoute,
+} as any);
 const AuthPagesIndexRoute = AuthPagesIndexRouteImport.update({
   id: "/",
   path: "/",
@@ -103,12 +103,12 @@ const AuthFileFileIdRoute = AuthFileFileIdRouteImport.update({
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/settings": typeof SettingsRouteWithChildren;
+  "/history": typeof AuthHistoryRoute;
   "/pages": typeof AuthPagesRouteWithChildren;
   "/random-inbox": typeof AuthRandomInboxRoute;
   "/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/recently-inboxed": typeof AuthRecentlyInboxedRoute;
   "/recently-trashed": typeof AuthRecentlyTrashedRoute;
-  "/recently-viewed": typeof AuthRecentlyViewedRoute;
   "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
@@ -118,11 +118,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/history": typeof AuthHistoryRoute;
   "/random-inbox": typeof AuthRandomInboxRoute;
   "/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/recently-inboxed": typeof AuthRecentlyInboxedRoute;
   "/recently-trashed": typeof AuthRecentlyTrashedRoute;
-  "/recently-viewed": typeof AuthRecentlyViewedRoute;
   "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings": typeof SettingsIndexRoute;
@@ -135,12 +135,12 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/_auth": typeof AuthRouteWithChildren;
   "/settings": typeof SettingsRouteWithChildren;
+  "/_auth/history": typeof AuthHistoryRoute;
   "/_auth/pages": typeof AuthPagesRouteWithChildren;
   "/_auth/random-inbox": typeof AuthRandomInboxRoute;
   "/_auth/recently-archived": typeof AuthRecentlyArchivedRoute;
   "/_auth/recently-inboxed": typeof AuthRecentlyInboxedRoute;
   "/_auth/recently-trashed": typeof AuthRecentlyTrashedRoute;
-  "/_auth/recently-viewed": typeof AuthRecentlyViewedRoute;
   "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
@@ -153,12 +153,12 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/settings"
+    | "/history"
     | "/pages"
     | "/random-inbox"
     | "/recently-archived"
     | "/recently-inboxed"
     | "/recently-trashed"
-    | "/recently-viewed"
     | "/settings/client-api"
     | "/settings/ux"
     | "/settings/"
@@ -168,11 +168,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
+    | "/history"
     | "/random-inbox"
     | "/recently-archived"
     | "/recently-inboxed"
     | "/recently-trashed"
-    | "/recently-viewed"
     | "/settings/client-api"
     | "/settings/ux"
     | "/settings"
@@ -184,12 +184,12 @@ export interface FileRouteTypes {
     | "/"
     | "/_auth"
     | "/settings"
+    | "/_auth/history"
     | "/_auth/pages"
     | "/_auth/random-inbox"
     | "/_auth/recently-archived"
     | "/_auth/recently-inboxed"
     | "/_auth/recently-trashed"
-    | "/_auth/recently-viewed"
     | "/settings/client-api"
     | "/settings/ux"
     | "/settings/"
@@ -248,13 +248,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SettingsClientApiRouteImport;
       parentRoute: typeof SettingsRoute;
     };
-    "/_auth/recently-viewed": {
-      id: "/_auth/recently-viewed";
-      path: "/recently-viewed";
-      fullPath: "/recently-viewed";
-      preLoaderRoute: typeof AuthRecentlyViewedRouteImport;
-      parentRoute: typeof AuthRoute;
-    };
     "/_auth/recently-trashed": {
       id: "/_auth/recently-trashed";
       path: "/recently-trashed";
@@ -288,6 +281,13 @@ declare module "@tanstack/react-router" {
       path: "/pages";
       fullPath: "/pages";
       preLoaderRoute: typeof AuthPagesRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
+    "/_auth/history": {
+      id: "/_auth/history";
+      path: "/history";
+      fullPath: "/history";
+      preLoaderRoute: typeof AuthHistoryRouteImport;
       parentRoute: typeof AuthRoute;
     };
     "/_auth/pages/": {
@@ -329,22 +329,22 @@ const AuthPagesRouteWithChildren = AuthPagesRoute._addFileChildren(
 );
 
 interface AuthRouteChildren {
+  AuthHistoryRoute: typeof AuthHistoryRoute;
   AuthPagesRoute: typeof AuthPagesRouteWithChildren;
   AuthRandomInboxRoute: typeof AuthRandomInboxRoute;
   AuthRecentlyArchivedRoute: typeof AuthRecentlyArchivedRoute;
   AuthRecentlyInboxedRoute: typeof AuthRecentlyInboxedRoute;
   AuthRecentlyTrashedRoute: typeof AuthRecentlyTrashedRoute;
-  AuthRecentlyViewedRoute: typeof AuthRecentlyViewedRoute;
   AuthFileFileIdRoute: typeof AuthFileFileIdRoute;
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthHistoryRoute: AuthHistoryRoute,
   AuthPagesRoute: AuthPagesRouteWithChildren,
   AuthRandomInboxRoute: AuthRandomInboxRoute,
   AuthRecentlyArchivedRoute: AuthRecentlyArchivedRoute,
   AuthRecentlyInboxedRoute: AuthRecentlyInboxedRoute,
   AuthRecentlyTrashedRoute: AuthRecentlyTrashedRoute,
-  AuthRecentlyViewedRoute: AuthRecentlyViewedRoute,
   AuthFileFileIdRoute: AuthFileFileIdRoute,
 };
 

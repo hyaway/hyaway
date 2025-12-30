@@ -138,13 +138,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton
-                to="/recently-viewed"
-                className="cursor-pointer"
-              >
+              <SidebarMenuLinkButton to="/history" className="cursor-pointer">
                 <TouchTarget>
                   <SidebarIcon icon={IconEye} filledIcon={IconEyeFilled} />
-                  <span>Recently viewed</span>
+                  <span>History</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
