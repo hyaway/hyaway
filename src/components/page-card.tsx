@@ -14,12 +14,22 @@ export interface PageCardProps {
   pageKey: string;
   pageName: string;
   className?: string;
+  tabIndex?: number;
+  linkRef?: (el: HTMLAnchorElement | null) => void;
+  onFocus?: () => void;
 }
 
 /**
  * Page card preview component that shows page name and thumbnail previews
  */
-export function PageCard({ pageKey, pageName, className }: PageCardProps) {
+export function PageCard({
+  pageKey,
+  pageName,
+  className,
+  tabIndex = 0,
+  linkRef,
+  onFocus,
+}: PageCardProps) {
   const { data, isLoading } = useGetPageInfoQuery(pageKey, true);
 
   const totalFiles = data?.page_info.media.num_files ?? 0;
@@ -32,10 +42,13 @@ export function PageCard({ pageKey, pageName, className }: PageCardProps) {
 
   return (
     <Link
+      ref={linkRef}
       to="/pages/$pageId"
       params={{ pageId: pageKey }}
-      className="hover:ring-primary focus-visible:ring-primary block h-full transition-transform duration-50 ease-out hover:scale-[1.02] hover:ring-2 focus-visible:scale-[1.02] focus-visible:ring-3 focus-visible:outline-none"
+      className="group hover:ring-primary block h-full transition-transform duration-50 ease-out hover:ring-2 focus-visible:ring-3 focus-visible:ring-white focus-visible:ring-offset-3 focus-visible:ring-offset-black focus-visible:outline-hidden"
       aria-label={`View page "${pageName}" with ${totalFiles} ${totalFiles === 1 ? "file" : "files"}`}
+      tabIndex={tabIndex}
+      onFocus={onFocus}
     >
       <Card className={cn("h-full", className)}>
         <CardContent>
