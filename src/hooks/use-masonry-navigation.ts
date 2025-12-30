@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface VirtualItem {
   index: number;
@@ -6,10 +6,16 @@ interface VirtualItem {
   start: number;
 }
 
+interface ScrollToIndexOptions {
+  align?: "start" | "center" | "end" | "auto";
+  behavior?: "auto" | "smooth";
+}
+
 interface UseMasonryNavigationOptions {
   lanes: number;
   totalItems: number;
   getVirtualItems: () => Array<VirtualItem>;
+  scrollToIndex?: (index: number, options?: ScrollToIndexOptions) => void;
 }
 
 /**
@@ -23,20 +29,38 @@ export function useMasonryNavigation({
   lanes,
   totalItems,
   getVirtualItems,
+  scrollToIndex,
 }: UseMasonryNavigationOptions) {
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const pendingFocusRef = useRef<number | null>(null);
   const linkRefs = useRef<Map<number, HTMLAnchorElement>>(new Map());
 
   const setLinkRef = useCallback(
     (index: number) => (el: HTMLAnchorElement | null) => {
       if (el) {
         linkRefs.current.set(index, el);
+        // If this is the element we're waiting to focus, focus it now
+        if (pendingFocusRef.current === index) {
+          pendingFocusRef.current = null;
+          el.focus({ preventScroll: true });
+        }
       } else {
         linkRefs.current.delete(index);
       }
     },
     [],
   );
+
+  // Effect to focus pending element after it's rendered
+  useEffect(() => {
+    if (pendingFocusRef.current !== null) {
+      const el = linkRefs.current.get(pendingFocusRef.current);
+      if (el) {
+        el.focus({ preventScroll: true });
+        pendingFocusRef.current = null;
+      }
+    }
+  });
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -120,28 +144,49 @@ export function useMasonryNavigation({
       if (nextIndex !== null && nextIndex !== currentIndex) {
         e.preventDefault();
         setFocusedIndex(nextIndex);
+
         const nextEl = linkRefs.current.get(nextIndex);
-        nextEl?.focus({ preventScroll: true });
-        // Use instant scroll when holding key down for faster navigation
-        nextEl?.scrollIntoView({
-          behavior: e.repeat ? "instant" : "smooth",
-          block: "nearest",
-        });
+        if (nextEl) {
+          // Element is in DOM, focus directly
+          nextEl.focus({ preventScroll: true });
+          nextEl.scrollIntoView({
+            behavior: e.repeat ? "instant" : "smooth",
+            block: "nearest",
+          });
+        } else if (scrollToIndex) {
+          // Element is virtualized away, scroll to bring it into view
+          pendingFocusRef.current = nextIndex;
+          scrollToIndex(nextIndex, {
+            align: "auto",
+            behavior: e.repeat ? "auto" : "smooth",
+          });
+        }
       }
     },
-    [lanes, focusedIndex, totalItems, getVirtualItems],
+    [lanes, focusedIndex, totalItems, getVirtualItems, scrollToIndex],
   );
 
   const handleItemFocus = useCallback((index: number) => {
     setFocusedIndex(index);
   }, []);
 
+  /**
+   * Get the tabIndex for a given item. Pass the array of currently visible
+   * indices so we can fall back to the first visible item when the focused
+   * item is virtualized away.
+   */
   const getTabIndex = useCallback(
-    (index: number) => {
-      if (focusedIndex === null) {
-        return index === 0 ? 0 : -1;
+    (index: number, visibleIndices: Array<number>) => {
+      const target = focusedIndex ?? 0;
+
+      // If the focused item is visible, only it gets tabIndex=0
+      if (visibleIndices.includes(target)) {
+        return index === target ? 0 : -1;
       }
-      return index === focusedIndex ? 0 : -1;
+
+      // Focused item is off-screen, make the first visible item tabbable
+      const firstVisible = Math.min(...visibleIndices);
+      return index === firstVisible ? 0 : -1;
     },
     [focusedIndex],
   );

@@ -137,9 +137,15 @@ export function PureImageGrid({
       lanes,
       totalItems: deferredItems.length,
       getVirtualItems: rowVirtualizer.getVirtualItems.bind(rowVirtualizer),
+      scrollToIndex: rowVirtualizer.scrollToIndex.bind(rowVirtualizer),
     });
 
   const maxWidth = !expandImages ? maxLanes * (width + 4) : undefined;
+
+  const visibleIndices = useMemo(
+    () => virtualItems.map((v) => v.index),
+    [virtualItems],
+  );
 
   return (
     <div className="flex w-full flex-row" style={{ maxWidth }}>
@@ -168,7 +174,7 @@ export function PureImageGrid({
                   height={itemHeight}
                   scrollMargin={rowVirtualizer.options.scrollMargin}
                   isScrolling={rowVirtualizer.isScrolling}
-                  tabIndex={getTabIndex(virtualRow.index)}
+                  tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
                   linkRef={setLinkRef(virtualRow.index)}
                   onFocus={() => handleItemFocus(virtualRow.index)}
                 />
