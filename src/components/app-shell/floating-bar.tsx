@@ -9,8 +9,9 @@ const sharedClasses = cn(
   "bg-background/95 supports-backdrop-filter:bg-background/75 short:px-2 fixed inset-x-0 bottom-0 z-40 items-center justify-between border-t px-2 py-0 backdrop-blur-sm sm:px-4",
   // Extended area above bar for hover detection - always interactive
   "before:pointer-events-auto before:absolute before:inset-x-0 before:bottom-full before:content-['']",
-  // Hover brings bar back
+  // Hover/focus brings bar back
   "hover:pointer-events-auto hover:translate-y-0 hover:opacity-100",
+  "focus-within:pointer-events-auto focus-within:translate-y-0 focus-within:opacity-100",
 );
 
 export function FloatingBar({
