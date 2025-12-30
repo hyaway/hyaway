@@ -22,7 +22,7 @@ export function FloatingBar({
 
   const visibilityClasses = isVisible
     ? "translate-y-0 opacity-100 before:h-2"
-    : "pointer-events-none translate-y-full opacity-0 before:h-14 sm:before:h-16 max-h-short:before:h-10 hover:pointer-events-auto hover:translate-y-0 hover:opacity-100";
+    : "pointer-events-none translate-y-full opacity-0 before:h-14 sm:before:h-12 max-h-short:before:h-10 hover:pointer-events-auto hover:translate-y-0 hover:opacity-100";
 
   return (
     <>
