@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { persistNSync } from "persist-and-sync";
 
 export const MAX_RECENTLY_VIEWED_LIMIT = 1000;
 export const DEFAULT_RECENTLY_VIEWED_LIMIT = 100;
@@ -32,7 +32,7 @@ type RecentlyViewedState = {
 };
 
 export const useRecentlyViewedStore = create<RecentlyViewedState>()(
-  persist(
+  persistNSync(
     (set, get) => ({
       entries: [],
       enabled: true,
@@ -71,11 +71,7 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
         },
       },
     }),
-    {
-      name: "recently-viewed",
-      storage: createJSONStorage(() => localStorage),
-      partialize: ({ actions, ...rest }) => rest,
-    },
+    { name: "recently-viewed", exclude: ["actions"] },
   ),
 );
 
