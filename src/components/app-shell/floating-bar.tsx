@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
 
 interface FloatingBarProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -13,21 +14,32 @@ export function FloatingBar({
   className,
   ...props
 }: FloatingBarProps) {
+  const isVisible = useScrollDirection(50);
+
+  const visibilityClasses = isVisible
+    ? "translate-y-0 opacity-100"
+    : "pointer-events-none translate-y-full opacity-0";
+
   return (
     <>
-      {/* Mobile - no sidebar offset, no transition */}
+      {/* Mobile - no sidebar offset */}
       <div
-        className={cn(sharedClasses, "flex md:hidden", className)}
+        className={cn(
+          sharedClasses,
+          visibilityClasses,
+          "flex transition-all duration-300 ease-out md:hidden",
+          className,
+        )}
         {...props}
       >
         {children}
       </div>
-      {/* Desktop - sidebar-aware with transition */}
+      {/* Desktop - sidebar-aware with sidebar transition */}
       <div
         className={cn(
           sharedClasses,
-          "hidden md:left-(--sidebar-width) md:flex md:group-data-[state=collapsed]/sidebar-wrapper:left-(--sidebar-width-icon)",
-          "transition-[left] duration-200 ease-linear",
+          visibilityClasses,
+          "hidden md:left-(--sidebar-width) md:flex md:[transition:translate_300ms_ease-out,opacity_300ms_ease-out,left_200ms_linear] md:group-data-[state=collapsed]/sidebar-wrapper:left-(--sidebar-width-icon)",
           className,
         )}
         {...props}
