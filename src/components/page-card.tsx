@@ -45,7 +45,7 @@ export function PageCard({
       ref={linkRef}
       to="/pages/$pageId"
       params={{ pageId: pageKey }}
-      className="group hover:ring-primary block h-full transition-transform duration-50 ease-out hover:ring-2 focus-visible:ring-3 focus-visible:ring-white focus-visible:ring-offset-3 focus-visible:ring-offset-black focus-visible:outline-hidden"
+      className="block h-full transition-transform duration-50 ease-out hover:scale-[1.02] hover:ring-offset-2 focus-visible:scale-[1.02] focus-visible:ring-3 focus-visible:ring-white focus-visible:ring-offset-3 focus-visible:ring-offset-black focus-visible:outline-hidden"
       aria-label={`View page "${pageName}" with ${totalFiles} ${totalFiles === 1 ? "file" : "files"}`}
       tabIndex={tabIndex}
       onFocus={onFocus}
