@@ -9,8 +9,7 @@ import {
   Squares2X2Icon,
   TrashIcon,
 } from "@heroicons/react/24/solid";
-import { DiceIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { IconDice } from "@tabler/icons-react";
 import { SidebarThemeSwitcher } from "./theme-switcher";
 import { Heading } from "@/components/ui-primitives/heading";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";
@@ -113,7 +112,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 className="cursor-pointer"
               >
                 <TouchTarget>
-                  <HugeiconsIcon icon={DiceIcon} />
+                  <IconDice />
                   <span>Random inbox</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>

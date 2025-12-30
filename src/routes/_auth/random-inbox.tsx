@@ -3,14 +3,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  DiceFaces01Icon,
-  DiceFaces02Icon,
-  DiceFaces03Icon,
-  DiceFaces04Icon,
-  DiceFaces05Icon,
-  DiceFaces06Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+  IconDice1,
+  IconDice2,
+  IconDice3,
+  IconDice4,
+  IconDice5,
+  IconDice6,
+} from "@tabler/icons-react";
 import { PageError } from "@/components/page/page-error";
 import { EmptyState } from "@/components/page/empty-state";
 import { PageFloatingBar } from "@/components/page/page-floating-bar";
@@ -22,12 +21,12 @@ import { ImageGrid } from "@/components/image-grid/image-grid";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 
 const DICE_ICONS = [
-  DiceFaces01Icon,
-  DiceFaces02Icon,
-  DiceFaces03Icon,
-  DiceFaces04Icon,
-  DiceFaces05Icon,
-  DiceFaces06Icon,
+  IconDice1,
+  IconDice2,
+  IconDice3,
+  IconDice4,
+  IconDice5,
+  IconDice6,
 ];
 
 export const Route = createFileRoute("/_auth/random-inbox")({
@@ -61,7 +60,10 @@ function RouteComponent() {
         }}
         className="absolute inset-0 flex items-center justify-center"
       >
-        <HugeiconsIcon icon={DICE_ICONS[diceIndex]} className="size-6" />
+        {(() => {
+          const DiceIcon = DICE_ICONS[diceIndex];
+          return <DiceIcon className="size-6" />;
+        })()}
       </motion.span>
     </AnimatePresence>
   );
