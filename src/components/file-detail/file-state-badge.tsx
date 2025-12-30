@@ -1,9 +1,4 @@
-import {
-  IconArchive,
-  IconBan,
-  IconInbox,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconArchive, IconBan, IconMail, IconTrash } from "@tabler/icons-react";
 
 import type { ComponentProps } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
@@ -42,7 +37,7 @@ export function FileStateBadge({ data, ...badgeProps }: FileStateBadgeProps) {
   if (data.is_inbox) {
     return (
       <Badge variant="secondary" {...badgeProps}>
-        <IconInbox className="mr-1 size-3" />
+        <IconMail className="mr-1 size-3" />
         Inbox
       </Badge>
     );

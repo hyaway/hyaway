@@ -4,11 +4,17 @@ import * as React from "react";
 
 import {
   IconArchive,
+  IconArchiveFilled,
   IconArrowsShuffle,
-  IconInbox,
+  IconArrowsShuffle2,
   IconLayoutGrid,
+  IconLayoutGridFilled,
+  IconMail,
+  IconMailFilled,
   IconSettings,
+  IconSettingsFilled,
   IconTrash,
+  IconTrashFilled,
 } from "@tabler/icons-react";
 import { SidebarThemeSwitcher } from "./theme-switcher";
 import { Heading } from "@/components/ui-primitives/heading";
@@ -25,6 +31,27 @@ import {
   SidebarMenuLinkButton,
   SidebarRail,
 } from "@/components/ui-primitives/sidebar";
+import { cn } from "@/lib/utils";
+
+/** Icon pair component that shows outline icon normally, filled when parent has data-active */
+function SidebarIcon({
+  icon: Icon,
+  filledIcon: FilledIcon,
+  className,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  filledIcon: React.ComponentType<{ className?: string }>;
+  className?: string;
+}) {
+  return (
+    <>
+      <Icon className={cn(className, "group-data-active/menu-button:hidden")} />
+      <FilledIcon
+        className={cn(className, "hidden group-data-active/menu-button:block")}
+      />
+    </>
+  );
+}
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -58,7 +85,11 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuItem>
               <SidebarMenuLinkButton to="/pages" className="cursor-pointer">
                 <TouchTarget>
-                  <IconLayoutGrid className="size-8" />
+                  <SidebarIcon
+                    icon={IconLayoutGrid}
+                    filledIcon={IconLayoutGridFilled}
+                    className="size-8"
+                  />
                   <span>Pages</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>
@@ -74,7 +105,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 className="cursor-pointer"
               >
                 <TouchTarget>
-                  <IconInbox />
+                  <SidebarIcon icon={IconMail} filledIcon={IconMailFilled} />
                   <span>Recently inboxed</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>
@@ -85,7 +116,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 className="cursor-pointer"
               >
                 <TouchTarget>
-                  <IconArchive />
+                  <SidebarIcon
+                    icon={IconArchive}
+                    filledIcon={IconArchiveFilled}
+                  />
                   <span>Recently archived</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>
@@ -96,7 +130,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 className="cursor-pointer"
               >
                 <TouchTarget>
-                  <IconTrash />
+                  <SidebarIcon icon={IconTrash} filledIcon={IconTrashFilled} />
                   <span>Recently trashed</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>
@@ -112,7 +146,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 className="cursor-pointer"
               >
                 <TouchTarget>
-                  <IconArrowsShuffle />
+                  <SidebarIcon
+                    icon={IconArrowsShuffle}
+                    filledIcon={IconArrowsShuffle2}
+                  />
                   <span>Random inbox</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>
@@ -126,7 +163,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuLinkButton to="/settings" className="cursor-pointer">
               <TouchTarget>
-                <IconSettings />
+                <SidebarIcon
+                  icon={IconSettings}
+                  filledIcon={IconSettingsFilled}
+                />
                 <span>Settings</span>
               </TouchTarget>
             </SidebarMenuLinkButton>
