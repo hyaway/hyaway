@@ -1,8 +1,7 @@
 import { NavigationMenu as NavigationMenuPrimitive } from "@base-ui/react/navigation-menu";
 import { cva } from "class-variance-authority";
 
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { IconChevronDown } from "@tabler/icons-react";
 import { createLink } from "@tanstack/react-router";
 import { TouchTarget } from "./touch-target";
 import type { LinkComponent } from "@tanstack/react-router";
@@ -74,9 +73,7 @@ function NavigationMenuTrigger({
     >
       <TouchTarget>
         {children}{" "}
-        <HugeiconsIcon
-          icon={ArrowDown01Icon}
-          strokeWidth={2}
+        <IconChevronDown
           className="relative top-px ml-1 size-5 transition duration-300 group-data-open/navigation-menu-trigger:rotate-180 group-data-popup-open/navigation-menu-trigger:rotate-180"
           aria-hidden="true"
         />
