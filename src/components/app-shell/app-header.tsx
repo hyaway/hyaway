@@ -64,11 +64,11 @@ export function AppHeader() {
     <header
       className={cn(
         "bg-background/95 supports-backdrop-filter:bg-background/75 sticky top-0 z-40 flex shrink-0 flex-col backdrop-blur-sm transition-all duration-300 ease-out",
-        // Extended area below header to prevent accidental hover interactions
-        "after:absolute after:inset-x-0 after:top-full after:h-2 after:content-['']",
+        // Extended area below header for hover detection - always interactive
+        "after:pointer-events-auto after:absolute after:inset-x-0 after:top-full after:content-['']",
         isVisible
-          ? "translate-y-0 opacity-100"
-          : "pointer-events-none -translate-y-full opacity-0",
+          ? "translate-y-0 opacity-100 after:h-2"
+          : "max-h-short:after:h-10 pointer-events-none -translate-y-full opacity-0 after:h-10 hover:pointer-events-auto hover:translate-y-0 hover:opacity-100 sm:after:h-14",
       )}
     >
       <div className="max-h-short:h-10 flex h-10 shrink-0 items-center gap-2 px-4 sm:h-14">

@@ -7,6 +7,10 @@ interface FloatingBarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const sharedClasses = cn(
   "bg-background/95 supports-backdrop-filter:bg-background/75 max-h-short:px-2 fixed inset-x-0 bottom-0 z-40 items-center justify-between border-t px-2 py-0 backdrop-blur-sm sm:px-4",
+  // Extended area above bar for hover detection - always interactive
+  "before:pointer-events-auto before:absolute before:inset-x-0 before:bottom-full before:content-['']",
+  // Hover brings bar back
+  "hover:pointer-events-auto hover:translate-y-0 hover:opacity-100",
 );
 
 export function FloatingBar({
@@ -17,8 +21,8 @@ export function FloatingBar({
   const isVisible = useScrollDirection(50);
 
   const visibilityClasses = isVisible
-    ? "translate-y-0 opacity-100"
-    : "pointer-events-none translate-y-full opacity-0";
+    ? "translate-y-0 opacity-100 before:h-2"
+    : "pointer-events-none translate-y-full opacity-0 before:h-14 sm:before:h-16 max-h-short:before:h-10 hover:pointer-events-auto hover:translate-y-0 hover:opacity-100";
 
   return (
     <>
