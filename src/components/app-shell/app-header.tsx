@@ -5,7 +5,7 @@ import {
   useMatches,
   useRouter,
 } from "@tanstack/react-router";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment } from "react";
 
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { Button } from "../ui-primitives/button";
@@ -23,89 +23,14 @@ import {
 import { Separator } from "@/components/ui-primitives/separator";
 import { SidebarTrigger } from "@/components/ui-primitives/sidebar";
 import { cn } from "@/lib/utils";
+import {
+  SCROLL_RESTORATION_EVENT,
+  dispatchScrollRestoration,
+  useScrollDirection,
+} from "@/hooks/use-scroll-direction";
 
-// Custom event for scroll restoration
-export const SCROLL_RESTORATION_EVENT = "app:scroll-restoration";
-
-export function dispatchScrollRestoration() {
-  window.dispatchEvent(new CustomEvent(SCROLL_RESTORATION_EVENT));
-}
-
-function useScrollDirection(threshold = 10) {
-  const [isVisible, setIsVisible] = useState(true);
-  const lastScrollY = useRef(0);
-  const ticking = useRef(false);
-  const skipNextScroll = useRef(false);
-
-  useEffect(() => {
-    // Initialize with current scroll position
-    lastScrollY.current = window.scrollY;
-
-    const handleScrollRestoration = () => {
-      // Skip the next scroll event and keep header visible
-      skipNextScroll.current = true;
-      setIsVisible(true);
-      // Update lastScrollY to prevent hiding on next scroll
-      lastScrollY.current = window.scrollY;
-    };
-
-    const updateScrollDir = () => {
-      const scrollY = window.scrollY;
-
-      // Skip if scroll restoration just happened
-      if (skipNextScroll.current) {
-        skipNextScroll.current = false;
-        lastScrollY.current = scrollY;
-        ticking.current = false;
-        return;
-      }
-
-      // Ignore if only horizontal scroll occurred
-      if (scrollY === lastScrollY.current) {
-        ticking.current = false;
-        return;
-      }
-
-      // Always show header when at the top
-      if (scrollY < threshold) {
-        setIsVisible(true);
-        lastScrollY.current = scrollY;
-        ticking.current = false;
-        return;
-      }
-
-      const diff = scrollY - lastScrollY.current;
-
-      // Only update if scroll difference exceeds threshold (reduces jitter)
-      if (Math.abs(diff) >= threshold) {
-        setIsVisible(diff < 0); // Scrolling up = visible
-        lastScrollY.current = scrollY;
-      }
-
-      ticking.current = false;
-    };
-
-    const handleScroll = () => {
-      if (!ticking.current) {
-        window.requestAnimationFrame(updateScrollDir);
-        ticking.current = true;
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener(SCROLL_RESTORATION_EVENT, handleScrollRestoration);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener(
-        SCROLL_RESTORATION_EVENT,
-        handleScrollRestoration,
-      );
-    };
-  }, [threshold]);
-
-  return isVisible;
-}
+// Re-export for backwards compatibility
+export { SCROLL_RESTORATION_EVENT, dispatchScrollRestoration };
 
 export function AppHeader() {
   const matches = useMatches();
@@ -138,7 +63,9 @@ export function AppHeader() {
   return (
     <header
       className={cn(
-        "bg-background/95 supports-backdrop-filter:bg-background/75 sticky top-0 z-40 flex shrink-0 flex-col backdrop-blur-sm transition-all duration-300 ease-in-out",
+        "bg-background/95 supports-backdrop-filter:bg-background/75 sticky top-0 z-40 flex shrink-0 flex-col backdrop-blur-sm transition-all duration-300 ease-out",
+        // Extended area below header to prevent accidental hover interactions
+        "after:absolute after:inset-x-0 after:top-full after:h-2 after:content-['']",
         isVisible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none -translate-y-full opacity-0",
@@ -205,8 +132,6 @@ export function AppHeader() {
         </Breadcrumb>
       </div>
       <HeaderPortalSlot className="px-4" />
-      {/* Prevent accidental hover interactions for zoom */}
-      <div aria-hidden="true" className="absolute top-full left-0 h-2 w-full" />
     </header>
   );
 }
