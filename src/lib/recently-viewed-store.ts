@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { create } from "zustand";
-import { persistNSync } from "persist-and-sync";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { setupCrossTabSync } from "./cross-tab-sync";
 
 export const MAX_RECENTLY_VIEWED_LIMIT = 1000;
 export const DEFAULT_RECENTLY_VIEWED_LIMIT = 100;
@@ -31,8 +32,42 @@ type RecentlyViewedState = {
   };
 };
 
+/**
+ * Merge function for recently-viewed entries.
+ * Combines entries from both states, keeping the most recent viewedAt per fileId.
+ */
+function mergeRecentlyViewed(
+  persisted: Partial<Omit<RecentlyViewedState, "actions">>,
+  current: RecentlyViewedState,
+): RecentlyViewedState {
+  const persistedEntries = persisted.entries ?? [];
+  const currentEntries = current.entries;
+
+  // Merge entries, keeping the most recent viewedAt per fileId
+  const merged = new Map<number, RecentlyViewedEntry>();
+  for (const entry of [...currentEntries, ...persistedEntries]) {
+    const existing = merged.get(entry.fileId);
+    if (!existing || entry.viewedAt > existing.viewedAt) {
+      merged.set(entry.fileId, entry);
+    }
+  }
+
+  // Sort by viewedAt descending and apply limit
+  const limit = persisted.limit ?? current.limit;
+  const mergedEntries = Array.from(merged.values())
+    .sort((a, b) => b.viewedAt - a.viewedAt)
+    .slice(0, limit);
+
+  return {
+    ...current,
+    entries: mergedEntries,
+    enabled: persisted.enabled ?? current.enabled,
+    limit,
+  };
+}
+
 export const useRecentlyViewedStore = create<RecentlyViewedState>()(
-  persistNSync(
+  persist(
     (set, get) => ({
       entries: [],
       enabled: true,
@@ -71,9 +106,21 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
         },
       },
     }),
-    { name: "recently-viewed", exclude: ["actions"] },
+    {
+      name: "recently-viewed",
+      storage: createJSONStorage(() => localStorage),
+      partialize: ({ actions, ...rest }) => rest,
+      merge: (persisted, current) =>
+        mergeRecentlyViewed(
+          persisted as Partial<Omit<RecentlyViewedState, "actions">>,
+          current,
+        ),
+    },
   ),
 );
+
+// Cross-tab sync: rehydrate when other tabs update localStorage
+setupCrossTabSync(useRecentlyViewedStore);
 
 // Selector hooks for ergonomic usage
 export const useRecentlyViewedEntries = () =>

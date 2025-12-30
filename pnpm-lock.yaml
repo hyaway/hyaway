@@ -62,9 +62,6 @@ importers:
       motion:
         specifier: ^12.23.26
         version: 12.23.26(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      persist-and-sync:
-        specifier: ^1.2.3
-        version: 1.2.3(zustand@5.0.9(@types/react@19.2.7)(immer@11.0.1)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3)))
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -3177,11 +3174,6 @@ packages:
   pathval@2.0.1:
     resolution: {integrity: sha512-//nshmD55c46FuFw26xV/xFAaB5HF9Xdap7HJBBnrKdAd6/GxDBaNA1870O79+9ueg61cZLSVc+OaFlfmObYVQ==}
     engines: {node: '>= 14.16'}
-
-  persist-and-sync@1.2.3:
-    resolution: {integrity: sha512-narBnOLMCSNbQ8Jw0uElpl78ALkPNFvDiz0tUV/7JM/q90E9dntblDYz9mgEO8F9JT/S5pU7B7jltEDDdidbBw==}
-    peerDependencies:
-      zustand: '>=3'
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -7023,10 +7015,6 @@ snapshots:
   pathe@2.0.3: {}
 
   pathval@2.0.1: {}
-
-  persist-and-sync@1.2.3(zustand@5.0.9(@types/react@19.2.7)(immer@11.0.1)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))):
-    dependencies:
-      zustand: 5.0.9(@types/react@19.2.7)(immer@11.0.1)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
 
   picocolors@1.1.1: {}
 
