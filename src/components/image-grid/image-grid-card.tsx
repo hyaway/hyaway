@@ -220,7 +220,13 @@ const ImageCardContent = memo(function ImageCardContent({
 interface ImageCardContextMenuProps {
   item: Pick<
     FileMetadata,
-    "file_id" | "is_inbox" | "is_trashed" | "ext" | "filetype_human" | "mime"
+    | "file_id"
+    | "is_inbox"
+    | "is_trashed"
+    | "is_deleted"
+    | "ext"
+    | "filetype_human"
+    | "mime"
   >;
 }
 

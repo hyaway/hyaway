@@ -45,6 +45,160 @@ export interface FileActionsGroup {
   actions: Array<FileAction>;
 }
 
+// --- Navigation Actions ---
+
+function useNavigationActions(fileId: number): Array<FileAction> {
+  const navigate = useNavigate();
+
+  return [
+    {
+      id: "open",
+      label: "Open",
+      icon: IconFileText,
+      onClick: () =>
+        navigate({
+          to: "/file/$fileId",
+          params: { fileId: String(fileId) },
+        }),
+    },
+    {
+      id: "open-details-new-tab",
+      label: "Open in new tab",
+      icon: IconFileText,
+      onClick: () => {
+        window.open(`/file/${fileId}`, "_blank", "noopener,noreferrer");
+      },
+      href: `/file/${fileId}`,
+      external: true,
+    },
+  ];
+}
+
+// --- Management Actions (Trash/Archive) ---
+
+interface ManagementActionData {
+  file_id: number;
+  is_inbox?: boolean;
+  is_trashed?: boolean;
+}
+
+function useManagementActions(data: ManagementActionData): Array<FileAction> {
+  const deleteFilesMutation = useDeleteFilesMutation();
+  const undeleteFilesMutation = useUndeleteFilesMutation();
+  const archiveFilesMutation = useArchiveFilesMutation();
+  const unarchiveFilesMutation = useUnarchiveFilesMutation();
+
+  const trashAction: FileAction = data.is_trashed
+    ? {
+        id: "undelete",
+        label: "Undelete",
+        icon: IconTrashOff,
+        onClick: () => undeleteFilesMutation.mutate({ file_id: data.file_id }),
+        isPending: undeleteFilesMutation.isPending,
+      }
+    : {
+        id: "delete",
+        label: "Trash",
+        icon: IconTrash,
+        onClick: () => deleteFilesMutation.mutate({ file_id: data.file_id }),
+        variant: "destructive",
+        isPending: deleteFilesMutation.isPending,
+      };
+
+  const archiveAction: FileAction = data.is_inbox
+    ? {
+        id: "archive",
+        label: "Archive",
+        icon: IconArchive,
+        onClick: () => archiveFilesMutation.mutate({ file_id: data.file_id }),
+        isPending: archiveFilesMutation.isPending,
+      }
+    : {
+        id: "unarchive",
+        label: "Unarchive",
+        icon: IconArchiveOff,
+        onClick: () => unarchiveFilesMutation.mutate({ file_id: data.file_id }),
+        isPending: unarchiveFilesMutation.isPending,
+      };
+
+  return [trashAction, archiveAction];
+}
+
+// --- External Actions (Download/Open File/Thumbnail) ---
+
+interface ExternalActionData {
+  file_id: number;
+  ext?: string;
+  filetype_human?: string;
+  mime: string;
+}
+
+interface UseExternalActionsOptions {
+  includeThumbnail?: boolean;
+}
+
+function useExternalActions(
+  data: ExternalActionData,
+  options: UseExternalActionsOptions = {},
+): Array<FileAction> {
+  const { includeThumbnail = true } = options;
+
+  const { url: fileUrl } = useFullFileIdUrl(data.file_id);
+  const { url: thumbnailUrl } = useThumbnailUrl(data.file_id);
+  const downloadUrl = useDownloadFileIdUrl(data.file_id);
+
+  const mimeBasedIcon = data.mime.startsWith("image/")
+    ? IconPhoto
+    : data.mime.startsWith("video/")
+      ? IconMovie
+      : data.mime.startsWith("audio/")
+        ? IconMusic
+        : IconFileText;
+
+  const actions: Array<FileAction> = [
+    {
+      id: "download",
+      label: "Download",
+      icon: IconFileDownload,
+      onClick: () => {
+        window.location.href = downloadUrl;
+      },
+      href: downloadUrl,
+      download: true,
+      overflowOnly: true,
+    },
+    {
+      id: "open-new-tab",
+      label: `Open ${data.ext || data.filetype_human}`,
+      icon: mimeBasedIcon,
+      onClick: () => {
+        window.open(fileUrl, "_blank", "noopener,noreferrer");
+      },
+      href: fileUrl,
+      external: true,
+      overflowOnly: true,
+    },
+  ];
+
+  if (includeThumbnail) {
+    actions.push({
+      id: "view-thumbnail",
+      label: "Open thumbnail",
+      icon: IconPhoto,
+      onClick: () => {
+        window.open(thumbnailUrl, "_blank", "noopener,noreferrer");
+      },
+      href: thumbnailUrl,
+      external: true,
+      overflowOnly: true,
+    });
+  }
+
+  return actions;
+}
+
+// --- Main Composed Hook ---
+
 interface UseFileActionsOptions {
   /** Include the "Open" action (navigate to file detail page) */
   includeOpen?: boolean;
@@ -57,7 +211,13 @@ interface UseFileActionsOptions {
 export function useFileActions(
   data: Pick<
     FileMetadata,
-    "file_id" | "is_inbox" | "is_trashed" | "ext" | "filetype_human" | "mime"
+    | "file_id"
+    | "is_inbox"
+    | "is_trashed"
+    | "is_deleted"
+    | "ext"
+    | "filetype_human"
+    | "mime"
   >,
   options: UseFileActionsOptions = {},
 ): Array<FileActionsGroup> {
@@ -67,149 +227,26 @@ export function useFileActions(
     includeThumbnail = true,
   } = options;
 
-  const navigate = useNavigate();
-  const { url: fileUrl } = useFullFileIdUrl(data.file_id);
-  const { url: thumbnailUrl } = useThumbnailUrl(data.file_id);
-  const downloadUrl = useDownloadFileIdUrl(data.file_id);
+  const isPermanentlyDeleted = data.is_deleted && !data.is_trashed;
 
-  const deleteFilesMutation = useDeleteFilesMutation();
-  const undeleteFilesMutation = useUndeleteFilesMutation();
-  const archiveFilesMutation = useArchiveFilesMutation();
-  const unarchiveFilesMutation = useUnarchiveFilesMutation();
+  // Always call hooks (rules of hooks), but conditionally include results
+  const navigationActions = useNavigationActions(data.file_id);
+  const managementActions = useManagementActions(data);
+  const externalActions = useExternalActions(data, { includeThumbnail });
 
   const groups: Array<FileActionsGroup> = [];
 
-  // Navigation actions
   if (includeOpen) {
-    groups.push({
-      id: "navigation",
-      actions: [
-        {
-          id: "open",
-          label: "Open",
-          icon: IconFileText,
-          onClick: () =>
-            navigate({
-              to: "/file/$fileId",
-              params: { fileId: String(data.file_id) },
-            }),
-        },
-        {
-          id: "open-details-new-tab",
-          label: "Open in New Tab",
-          icon: IconFileText,
-          onClick: () => {
-            window.open(
-              `/file/${data.file_id}`,
-              "_blank",
-              "noopener,noreferrer",
-            );
-          },
-          href: `/file/${data.file_id}`,
-          external: true,
-        },
-      ],
-    });
+    groups.push({ id: "navigation", actions: navigationActions });
   }
 
-  // File management actions (these should be visible in the floating bar)
-  const managementActions: Array<FileAction> = [];
+  // Skip management and external actions for permanently deleted files
+  if (!isPermanentlyDeleted) {
+    groups.push({ id: "management", actions: managementActions });
 
-  if (data.is_trashed) {
-    managementActions.push({
-      id: "undelete",
-      label: "Undelete",
-      icon: IconTrashOff,
-      onClick: () => undeleteFilesMutation.mutate({ file_id: data.file_id }),
-      isPending: undeleteFilesMutation.isPending,
-    });
-  } else {
-    managementActions.push({
-      id: "delete",
-      label: "Trash",
-      icon: IconTrash,
-      onClick: () => deleteFilesMutation.mutate({ file_id: data.file_id }),
-      variant: "destructive",
-      isPending: deleteFilesMutation.isPending,
-    });
-  }
-
-  if (data.is_inbox) {
-    managementActions.push({
-      id: "archive",
-      label: "Archive",
-      icon: IconArchive,
-      onClick: () => archiveFilesMutation.mutate({ file_id: data.file_id }),
-      isPending: archiveFilesMutation.isPending,
-    });
-  } else {
-    managementActions.push({
-      id: "unarchive",
-      label: "Unarchive",
-      icon: IconArchiveOff,
-      onClick: () => unarchiveFilesMutation.mutate({ file_id: data.file_id }),
-      isPending: unarchiveFilesMutation.isPending,
-    });
-  }
-
-  groups.push({
-    id: "management",
-    actions: managementActions,
-  });
-
-  // External actions (download, open in new tab) - always in overflow
-  if (includeExternal) {
-    const mimeBasedIcon = data.mime.startsWith("image/")
-      ? IconPhoto
-      : data.mime.startsWith("video/")
-        ? IconMovie
-        : data.mime.startsWith("audio/")
-          ? IconMusic
-          : IconFileText;
-
-    const externalActions: Array<FileAction> = [
-      {
-        id: "download",
-        label: "Download",
-        icon: IconFileDownload,
-        onClick: () => {
-          window.location.href = downloadUrl;
-        },
-        href: downloadUrl,
-        download: true,
-        overflowOnly: true,
-      },
-      {
-        id: "open-new-tab",
-        label: `Open ${data.ext || data.filetype_human}`,
-        icon: mimeBasedIcon,
-        onClick: () => {
-          window.open(fileUrl, "_blank", "noopener,noreferrer");
-        },
-        href: fileUrl,
-        external: true,
-        overflowOnly: true,
-      },
-    ];
-
-    if (includeThumbnail) {
-      externalActions.push({
-        id: "view-thumbnail",
-        label: "Open Thumbnail",
-        icon: IconPhoto,
-        onClick: () => {
-          window.open(thumbnailUrl, "_blank", "noopener,noreferrer");
-        },
-        href: thumbnailUrl,
-        external: true,
-        overflowOnly: true,
-      });
+    if (includeExternal) {
+      groups.push({ id: "external", actions: externalActions });
     }
-
-    groups.push({
-      id: "external",
-      actions: externalActions,
-    });
   }
 
   return groups;
