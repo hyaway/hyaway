@@ -39,7 +39,8 @@ export function HistoryCard() {
         <SettingsGroup>
           <SwitchField
             id="history-enabled-switch"
-            label="Keep track of viewed files"
+            label="Record new views"
+            description="Existing history is kept when disabled"
             checked={enabled}
             onCheckedChange={setEnabled}
           />

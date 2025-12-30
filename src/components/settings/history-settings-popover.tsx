@@ -34,7 +34,8 @@ export function HistorySettingsPopover() {
       <SettingsGroup>
         <SwitchField
           id="history-enabled-popover-switch"
-          label="Keep track of viewed files"
+          label="Record new views"
+          description="Existing history is kept when disabled"
           checked={enabled}
           onCheckedChange={setEnabled}
         />

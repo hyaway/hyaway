@@ -76,6 +76,7 @@ export function SliderField({
 interface SwitchFieldProps {
   id: string;
   label: string;
+  description?: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
 }
@@ -83,12 +84,18 @@ interface SwitchFieldProps {
 export function SwitchField({
   id,
   label,
+  description,
   checked,
   onCheckedChange,
 }: SwitchFieldProps) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <Label htmlFor={id}>{label}</Label>
+      <div className="flex flex-col gap-0.5">
+        <Label htmlFor={id}>{label}</Label>
+        {description && (
+          <span className="text-muted-foreground text-xs">{description}</span>
+        )}
+      </div>
       <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
     </div>
   );

@@ -11,6 +11,7 @@ import {
   useHistoryFileIds,
 } from "@/lib/history-store";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
+import { Button } from "@/components/ui-primitives/button";
 
 export const Route = createFileRoute("/_auth/history")({
   component: RouteComponent,
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/_auth/history")({
 function RouteComponent() {
   const fileIds = useHistoryFileIds();
   const enabled = useHistoryEnabled();
-  const { clearHistory } = useHistoryActions();
+  const { clearHistory, setEnabled } = useHistoryActions();
 
   const clearButton = (
     <BottomNavButton
@@ -33,9 +34,18 @@ function RouteComponent() {
     />
   );
 
-  const emptyMessage = enabled
-    ? "No files in history. Open a file to add it to your history."
-    : "No files in history. Tracking is disabled — enable it in settings to start recording your history.";
+  const emptyContent = enabled ? (
+    <EmptyState message="No files in history. Open a file to add it to your history." />
+  ) : (
+    <EmptyState
+      message="History recording is disabled."
+      action={
+        <Button variant="default" onClick={() => setEnabled(true)}>
+          Enable history
+        </Button>
+      }
+    />
+  );
 
   return (
     <>
@@ -43,11 +53,7 @@ function RouteComponent() {
         <PageHeading
           title={`History (${fileIds.length} ${fileIds.length === 1 ? "file" : "files"})`}
         />
-        {fileIds.length > 0 ? (
-          <ImageGrid fileIds={fileIds} />
-        ) : (
-          <EmptyState message={emptyMessage} />
-        )}
+        {fileIds.length > 0 ? <ImageGrid fileIds={fileIds} /> : emptyContent}
       </div>
       <PageFloatingBar
         leftContent={clearButton}
