@@ -1,5 +1,10 @@
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import React, { useMemo, useRef } from "react";
+
+import type { Page } from "@/integrations/hydrus-api/models";
+
 import { PageCard, PageCardSkeleton } from "@/components/page-card";
 import { EmptyState } from "@/components/page/empty-state";
 import { PageError } from "@/components/page/page-error";
@@ -7,16 +12,19 @@ import { PageFloatingBar } from "@/components/page/page-floating-bar";
 import { PageHeading } from "@/components/page/page-heading";
 import { RefetchButton } from "@/components/refetch-button";
 import { PagesSettingsPopover } from "@/components/settings/pages-settings-popover";
+import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { usePagesMaxColumns } from "@/lib/ux-settings-store";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_auth/pages/")({
   component: PagesIndex,
 });
 
+const PAGE_CARD_MIN_WIDTH = 192; // 12rem
+const PAGE_CARD_GAP = 16; // gap-4
+
 /**
- * Pages index component - shows grid of page cards
+ * Pages index component - shows virtualized grid of page cards
  */
 function PagesIndex() {
   const {
@@ -27,23 +35,8 @@ function PagesIndex() {
     error,
   } = useGetMediaPagesQuery();
   const queryClient = useQueryClient();
-  const pagesMaxColumns = usePagesMaxColumns();
 
   const title = isPending ? "Pages" : `Pages (${pages.length} pages)`;
-
-  // Use auto-fit with a clever minmax formula:
-  // - max(12rem, 100%/N) ensures columns are at least 12rem OR 100%/maxColumns wide
-  // - This effectively caps the number of columns at maxColumns on wide screens
-  // - For large N (e.g. 30), 100%/N becomes small, so we just get the 12rem minimum
-  // - On smaller screens, container queries override with fixed column counts
-  // - calc(50% - 0.5rem) accounts for the gap-4 (1rem gap / 2 columns)
-  const gridStyle = {
-    "--pages-max-columns": pagesMaxColumns,
-  } as React.CSSProperties;
-
-  const gridClassName = cn(
-    "grid grid-cols-1 gap-4 @xs:grid-cols-2 @lg:grid-cols-[repeat(auto-fill,minmax(12rem,min(calc(50%-0.5rem),calc(100%/var(--pages-max-columns)-1rem))))]",
-  );
 
   const refetchButton = (
     <RefetchButton
@@ -63,11 +56,10 @@ function PagesIndex() {
 
         {isPending ? (
           <div
-            className={gridClassName}
-            style={gridStyle}
+            className="grid grid-cols-1 gap-4 @xs:grid-cols-2 @lg:grid-cols-3"
             aria-label="Loading pages"
           >
-            {Array.from({ length: 3 }).map((_, i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <PageCardSkeleton key={`page-skeleton-${i}`} />
             ))}
           </div>
@@ -76,15 +68,7 @@ function PagesIndex() {
         ) : pages.length === 0 ? (
           <EmptyState message="No media pages found. Open some file search pages in Hydrus Client." />
         ) : (
-          <div className={gridClassName} style={gridStyle}>
-            {pages.map((page) => (
-              <PageCard
-                key={page.page_key}
-                pageKey={page.page_key}
-                pageName={page.name}
-              />
-            ))}
-          </div>
+          <PagesGrid pages={pages} />
         )}
       </div>
       <PageFloatingBar
@@ -92,5 +76,97 @@ function PagesIndex() {
         rightContent={<PagesSettingsPopover />}
       />
     </>
+  );
+}
+
+function PagesGrid({ pages }: { pages: Array<Page & { id: string }> }) {
+  const pagesMaxColumns = usePagesMaxColumns();
+  const parentRef = useRef<HTMLDivElement>(null);
+  const [lanes, setLanes] = React.useState(1);
+
+  // Calculate lanes based on container width
+  React.useLayoutEffect(() => {
+    if (!parentRef.current) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const containerWidth = entries[0].contentRect.width;
+      const calculatedLanes = Math.max(
+        1,
+        Math.floor(
+          (containerWidth + PAGE_CARD_GAP) /
+            (PAGE_CARD_MIN_WIDTH + PAGE_CARD_GAP),
+        ),
+      );
+      setLanes(Math.min(calculatedLanes, pagesMaxColumns, pages.length));
+    });
+
+    observer.observe(parentRef.current);
+    return () => observer.disconnect();
+  }, [pagesMaxColumns, pages.length]);
+
+  // Fixed card dimensions
+  const cardWidth = PAGE_CARD_MIN_WIDTH;
+  const cardHeight = PAGE_CARD_MIN_WIDTH + 48;
+
+  const rowVirtualizer = useWindowVirtualizer({
+    count: pages.length,
+    estimateSize: () => cardHeight,
+    overscan: 4,
+    gap: PAGE_CARD_GAP,
+    lanes,
+    scrollMargin: parentRef.current?.offsetTop ?? 0,
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
+  const { setLinkRef, handleKeyDown, handleItemFocus, getTabIndex } =
+    useMasonryNavigation({
+      lanes,
+      totalItems: pages.length,
+      getVirtualItems: rowVirtualizer.getVirtualItems.bind(rowVirtualizer),
+      scrollToIndex: rowVirtualizer.scrollToIndex.bind(rowVirtualizer),
+    });
+
+  const visibleIndices = useMemo(
+    () => virtualItems.map((v) => v.index),
+    [virtualItems],
+  );
+
+  return (
+    <div ref={parentRef} className="w-full">
+      <ul
+        role="grid"
+        onKeyDown={handleKeyDown}
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+        }}
+        className="relative w-full"
+      >
+        {lanes > 0 &&
+          virtualItems.map((virtualRow) => {
+            const page = pages[virtualRow.index];
+
+            return (
+              <li
+                key={page.page_key}
+                className="absolute top-0 left-0"
+                style={{
+                  width: `${cardWidth}px`,
+                  height: `${cardHeight}px`,
+                  transform: `translate(${virtualRow.lane * (cardWidth + PAGE_CARD_GAP)}px, ${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
+                }}
+              >
+                <PageCard
+                  pageKey={page.page_key}
+                  pageName={page.name}
+                  tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
+                  linkRef={setLinkRef(virtualRow.index)}
+                  onFocus={() => handleItemFocus(virtualRow.index)}
+                />
+              </li>
+            );
+          })}
+      </ul>
+    </div>
   );
 }
