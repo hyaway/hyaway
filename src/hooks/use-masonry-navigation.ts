@@ -122,7 +122,11 @@ export function useMasonryNavigation({
         setFocusedIndex(nextIndex);
         const nextEl = linkRefs.current.get(nextIndex);
         nextEl?.focus({ preventScroll: true });
-        nextEl?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        // Use instant scroll when holding key down for faster navigation
+        nextEl?.scrollIntoView({
+          behavior: e.repeat ? "instant" : "smooth",
+          block: "nearest",
+        });
       }
     },
     [lanes, focusedIndex, totalItems, getVirtualItems],
