@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/solid";
+import { IconAdjustmentsHorizontal } from "@tabler/icons-react";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import {
   Drawer,
@@ -46,7 +46,7 @@ export function SettingsPopover({
     <BottomNavButton
       ref={setAnchorEl}
       label={label}
-      icon={<AdjustmentsHorizontalIcon className="size-6" />}
+      icon={<IconAdjustmentsHorizontal className="size-6" />}
       className={className}
       onClick={() => {
         // If popover was just closed (within 100ms), don't reopen

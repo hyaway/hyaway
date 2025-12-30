@@ -1,4 +1,4 @@
-import { SpeakerWaveIcon } from "@heroicons/react/24/solid";
+import { IconVolume } from "@tabler/icons-react";
 
 import { MimeIcon } from "./mime-icon";
 
@@ -24,7 +24,7 @@ export function AudioBadge({ data }: { data: AudioBadgeData }) {
 
   return (
     <Badge variant="outline">
-      <SpeakerWaveIcon className="mr-1 size-3" />
+      <IconVolume className="mr-1 size-3" />
       Has audio
     </Badge>
   );

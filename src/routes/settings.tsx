@@ -1,8 +1,5 @@
 import { Outlet, createFileRoute, linkOptions } from "@tanstack/react-router";
-import {
-  FingerPrintIcon,
-  RectangleGroupIcon,
-} from "@heroicons/react/24/outline";
+import { IconLayoutDashboard, IconLock } from "@tabler/icons-react";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -22,9 +19,9 @@ const settingsItems = linkOptions([
   {
     name: "Client API",
     to: "/settings/client-api",
-    icon: FingerPrintIcon,
+    icon: IconLock,
   },
-  { name: "UX", to: "/settings/ux", icon: RectangleGroupIcon },
+  { name: "UX", to: "/settings/ux", icon: IconLayoutDashboard },
 ]);
 
 function SettingsComponent() {

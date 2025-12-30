@@ -9,6 +9,7 @@
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
     "check": "prettier --write . && eslint --fix",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
@@ -16,7 +17,6 @@
   "dependencies": {
     "@base-ui/react": "^1.0.0",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
-    "@heroicons/react": "^2.2.0",
     "@tabler/icons-react": "^3.36.0",
     "@tanstack/react-devtools": "^0.7.11",
     "@tanstack/react-form": "^1.27.6",

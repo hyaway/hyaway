@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { Fragment } from "react";
 
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { IconArrowLeft } from "@tabler/icons-react";
 import { Button } from "../ui-primitives/button";
 import type { MyRouterContext } from "@/routes/__root";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";
@@ -85,7 +85,7 @@ export function AppHeader() {
             aria-label="Go back"
             className={"md:hidden"}
           >
-            <ArrowLeftIcon className="size-5" />
+            <IconArrowLeft className="size-5" />
           </Button>
         )}
         <Breadcrumb>

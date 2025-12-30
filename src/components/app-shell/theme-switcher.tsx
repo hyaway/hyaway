@@ -1,8 +1,8 @@
 import {
-  ComputerDesktopIcon,
-  MoonIcon,
-  SunIcon,
-} from "@heroicons/react/20/solid";
+  IconDeviceDesktop,
+  IconMoonFilled,
+  IconSun,
+} from "@tabler/icons-react";
 import type { Theme } from "@/lib/theme-store";
 import type { ComponentProps } from "react";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";
@@ -82,7 +82,7 @@ function ThemeIcon({
     <span
       className={cn("relative flex items-center justify-center", className)}
     >
-      <SunIcon
+      <IconSun
         className={cn(
           "size-4 rotate-0 transition-all dark:scale-0 dark:-rotate-90",
           themePreference === "system"
@@ -90,7 +90,7 @@ function ThemeIcon({
             : "scale-100",
         )}
       />
-      <MoonIcon
+      <IconMoonFilled
         className={cn(
           "absolute size-4 scale-0 rotate-90 transition-all dark:rotate-0",
           themePreference === "system"
@@ -98,7 +98,7 @@ function ThemeIcon({
             : "dark:scale-100",
         )}
       />
-      <ComputerDesktopIcon
+      <IconDeviceDesktop
         className={cn(
           "absolute size-4 transition-all",
           themePreference === "system" ? "scale-100" : "scale-0",

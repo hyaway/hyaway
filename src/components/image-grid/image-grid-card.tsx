@@ -1,12 +1,12 @@
 import { memo, useMemo, useState } from "react";
 import {
-  ArrowTopRightOnSquareIcon,
-  FilmIcon,
-  InboxIcon,
-  NoSymbolIcon,
-  SpeakerWaveIcon,
-  TrashIcon,
-} from "@heroicons/react/16/solid";
+  IconBan,
+  IconExternalLink,
+  IconMailFilled,
+  IconMovie,
+  IconTrashFilled,
+  IconVolume,
+} from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
@@ -199,14 +199,16 @@ const ImageCardContent = memo(function ImageCardContent({
         )}
       </div>
       <div className="bg-muted text-muted-foreground flex h-6 shrink-0 items-center gap-1.5 px-1.5 text-xs">
-        {item.mime.startsWith("video/") && <FilmIcon className="size-4" />}
-        {item.has_audio && <SpeakerWaveIcon className="size-4" />}
+        {item.mime.startsWith("video/") && <IconMovie className="size-4" />}
+        {item.has_audio && <IconVolume className="size-4" />}
         {fileSize && <span>{fileSize}</span>}
         <span className="flex-1" />
-        {item.is_inbox && <InboxIcon className="text-foreground size-4" />}
-        {item.is_trashed && <TrashIcon className="text-destructive size-4" />}
+        {item.is_inbox && <IconMailFilled className="text-foreground size-4" />}
+        {item.is_trashed && (
+          <IconTrashFilled className="text-destructive size-4" />
+        )}
         {item.is_deleted && !item.is_trashed && (
-          <NoSymbolIcon className="text-destructive size-4" />
+          <IconBan className="text-destructive size-4" />
         )}
       </div>
     </div>
@@ -248,7 +250,7 @@ const ImageCardContextMenu = memo(function ImageCardContextMenu({
               <action.icon />
               {action.label}
               {action.external && (
-                <ArrowTopRightOnSquareIcon className="ml-auto opacity-50" />
+                <IconExternalLink className="ml-auto opacity-50" />
               )}
             </ContextMenuItem>
           ))}

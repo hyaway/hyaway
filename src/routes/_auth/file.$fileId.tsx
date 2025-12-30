@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
+import { IconAlertCircle } from "@tabler/icons-react";
 
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
 import { PageError } from "@/components/page/page-error";
@@ -51,7 +51,7 @@ function RouteComponent() {
       <>
         <FilePageHeader fileId={fileIdNum} />
         <Alert variant="destructive">
-          <ExclamationCircleIcon />
+          <IconAlertCircle />
           <AlertTitle>File not found</AlertTitle>
         </Alert>
       </>

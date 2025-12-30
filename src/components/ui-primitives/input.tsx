@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Input as InputPrimitive } from "@base-ui/react/input";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/20/solid";
+import { IconEye, IconEyeOff } from "@tabler/icons-react";
 import { useState } from "react";
 import {
   InputGroup,
@@ -34,13 +34,14 @@ function SecretInput(props: React.ComponentProps<"input">) {
         <InputGroupButton
           aria-pressed={isVisible}
           onClick={toggleVisibility}
+          size="icon-sm"
           aria-label={
             isVisible
               ? `Hide ${props["aria-label"] ?? "field"}`
               : `Show ${props["aria-label"] ?? "field"}`
           }
         >
-          {isVisible ? <EyeSlashIcon /> : <EyeIcon />}
+          {isVisible ? <IconEyeOff /> : <IconEye />}
         </InputGroupButton>
       </InputGroupAddon>
     </InputGroup>

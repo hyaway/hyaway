@@ -1,14 +1,14 @@
 import {
-  ArchiveBoxArrowDownIcon,
-  ArrowDownTrayIcon,
-  ArrowUturnUpIcon,
-  DocumentTextIcon,
-  FilmIcon,
-  InboxArrowDownIcon,
-  MusicalNoteIcon,
-  PhotoIcon,
-  TrashIcon,
-} from "@heroicons/react/24/solid";
+  IconArchive,
+  IconArchiveOff,
+  IconFileDownload,
+  IconFileText,
+  IconMovie,
+  IconMusic,
+  IconPhoto,
+  IconTrash,
+  IconTrashOff,
+} from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 
 import type { ComponentType, SVGProps } from "react";
@@ -87,7 +87,7 @@ export function useFileActions(
         {
           id: "open",
           label: "Open",
-          icon: DocumentTextIcon,
+          icon: IconFileText,
           onClick: () =>
             navigate({
               to: "/file/$fileId",
@@ -97,7 +97,7 @@ export function useFileActions(
         {
           id: "open-details-new-tab",
           label: "Open in New Tab",
-          icon: DocumentTextIcon,
+          icon: IconFileText,
           onClick: () => {
             window.open(
               `/file/${data.file_id}`,
@@ -118,8 +118,8 @@ export function useFileActions(
   if (data.is_trashed) {
     managementActions.push({
       id: "undelete",
-      label: "Restore",
-      icon: ArrowUturnUpIcon,
+      label: "Undelete",
+      icon: IconTrashOff,
       onClick: () => undeleteFilesMutation.mutate({ file_id: data.file_id }),
       isPending: undeleteFilesMutation.isPending,
     });
@@ -127,7 +127,7 @@ export function useFileActions(
     managementActions.push({
       id: "delete",
       label: "Trash",
-      icon: TrashIcon,
+      icon: IconTrash,
       onClick: () => deleteFilesMutation.mutate({ file_id: data.file_id }),
       variant: "destructive",
       isPending: deleteFilesMutation.isPending,
@@ -138,15 +138,15 @@ export function useFileActions(
     managementActions.push({
       id: "archive",
       label: "Archive",
-      icon: ArchiveBoxArrowDownIcon,
+      icon: IconArchive,
       onClick: () => archiveFilesMutation.mutate({ file_id: data.file_id }),
       isPending: archiveFilesMutation.isPending,
     });
   } else {
     managementActions.push({
       id: "unarchive",
-      label: "Re-inbox",
-      icon: InboxArrowDownIcon,
+      label: "Unarchive",
+      icon: IconArchiveOff,
       onClick: () => unarchiveFilesMutation.mutate({ file_id: data.file_id }),
       isPending: unarchiveFilesMutation.isPending,
     });
@@ -160,18 +160,18 @@ export function useFileActions(
   // External actions (download, open in new tab) - always in overflow
   if (includeExternal) {
     const mimeBasedIcon = data.mime.startsWith("image/")
-      ? PhotoIcon
+      ? IconPhoto
       : data.mime.startsWith("video/")
-        ? FilmIcon
+        ? IconMovie
         : data.mime.startsWith("audio/")
-          ? MusicalNoteIcon
-          : DocumentTextIcon;
+          ? IconMusic
+          : IconFileText;
 
     const externalActions: Array<FileAction> = [
       {
         id: "download",
         label: "Download",
-        icon: ArrowDownTrayIcon,
+        icon: IconFileDownload,
         onClick: () => {
           window.location.href = downloadUrl;
         },
@@ -196,7 +196,7 @@ export function useFileActions(
       externalActions.push({
         id: "view-thumbnail",
         label: "Open Thumbnail",
-        icon: PhotoIcon,
+        icon: IconPhoto,
         onClick: () => {
           window.open(thumbnailUrl, "_blank", "noopener,noreferrer");
         },

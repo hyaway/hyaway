@@ -1,8 +1,5 @@
 import { useCallback, useState } from "react";
-import {
-  FaceFrownIcon,
-  NoSymbolIcon as NoSymbolIconLarge,
-} from "@heroicons/react/24/solid";
+import { IconBan, IconFileSad } from "@tabler/icons-react";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import {
   DefaultAudioLayout,
@@ -57,7 +54,7 @@ export function FileViewer({ data }: { data: FileMetadata }) {
           />
         )}
         <div className="relative z-10 flex flex-col items-center gap-4 rounded-sm bg-black/50 p-8 text-white backdrop-blur-xs">
-          <NoSymbolIconLarge className="size-12" />
+          <IconBan className="size-12" />
           <p>This file has been deleted and is no longer available.</p>
         </div>
       </div>
@@ -157,7 +154,7 @@ export function FileViewer({ data }: { data: FileMetadata }) {
   // Fallback for other types - try to embed or show download link
   return (
     <div className="flex flex-col items-center gap-4 rounded border p-8">
-      <FaceFrownIcon className="text-muted-foreground size-12" />
+      <IconFileSad stroke={1.5} className="text-muted-foreground size-12" />
       <p className="text-muted-foreground">
         This file type ({data.mime}) is not currently viewable inline.
       </p>

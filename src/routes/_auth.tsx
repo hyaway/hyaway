@@ -1,9 +1,5 @@
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowPathIcon,
-  ExclamationTriangleIcon,
-  LockClosedIcon,
-} from "@heroicons/react/24/solid";
+import { IconAlertTriangle, IconLock, IconRefresh } from "@tabler/icons-react";
 import {
   useVerifyPersistentAccessQuery,
   useVerifySessionAccessQuery,
@@ -85,7 +81,7 @@ function AuthErrorScreen({
     <div className="flex min-h-[50vh] items-center justify-center p-4">
       <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
         <div className="bg-destructive/10 flex size-16 items-center justify-center rounded-full">
-          <ExclamationTriangleIcon className="text-destructive size-8" />
+          <IconAlertTriangle className="text-destructive size-8" />
         </div>
         <div className="flex flex-col gap-2">
           <h2 className="text-foreground text-lg font-medium">
@@ -97,7 +93,7 @@ function AuthErrorScreen({
         </div>
         <div className="flex w-full gap-2">
           <Button variant="outline" onClick={onRetry} className="flex-1">
-            <ArrowPathIcon data-icon="inline-start" />
+            <IconRefresh data-icon="inline-start" />
             Retry
           </Button>
           <LinkButton
@@ -118,7 +114,7 @@ function AuthLoginPrompt() {
     <div className="flex min-h-[50vh] items-center justify-center p-4">
       <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
         <div className="bg-muted flex size-16 items-center justify-center rounded-full">
-          <LockClosedIcon className="text-muted-foreground size-8" />
+          <IconLock className="text-muted-foreground size-8" />
         </div>
         <div className="flex flex-col gap-2">
           <h2 className="text-foreground text-lg font-medium">
@@ -130,7 +126,7 @@ function AuthLoginPrompt() {
           </p>
         </div>
         <LinkButton to="/settings/client-api" size="lg">
-          <LockClosedIcon data-icon="inline-start" />
+          <IconLock data-icon="inline-start" />
           Configure connection
         </LinkButton>
         <p className="text-muted-foreground text-xs">

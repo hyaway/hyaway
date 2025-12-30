@@ -1,8 +1,5 @@
 import { AxiosError } from "axios";
-import {
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-} from "@heroicons/react/24/solid";
+import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
 import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
 import {
   useApiVersionQuery,
@@ -71,7 +68,7 @@ export function RequestNewPermissionsField() {
         </Alert>
       ) : isSuccess ? (
         <Alert>
-          <CheckCircleIcon />
+          <IconCircleCheck />
           <AlertTitle>New API access key saved</AlertTitle>
           <AlertDescription>
             New API access key for <b>{apiEndpoint}</b> obtained and saved.
@@ -79,7 +76,7 @@ export function RequestNewPermissionsField() {
         </Alert>
       ) : isError ? (
         <Alert variant="destructive">
-          <ExclamationCircleIcon />
+          <IconAlertCircle />
           <AlertTitle>
             {error instanceof Error
               ? error.message

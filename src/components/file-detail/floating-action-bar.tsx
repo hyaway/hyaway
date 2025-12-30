@@ -1,4 +1,4 @@
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
+import { IconDots } from "@tabler/icons-react";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 
@@ -91,7 +91,7 @@ export function FloatingActionBar({ data, className }: FloatingActionBarProps) {
                   />
                 }
               >
-                <EllipsisHorizontalIcon />
+                <IconDots />
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="center">
                 {overflowActions.map((action) => (

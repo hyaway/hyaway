@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowPathIcon,
-  ArrowTopRightOnSquareIcon,
-} from "@heroicons/react/24/solid";
+import { IconFocusCentered, IconRefreshDot } from "@tabler/icons-react";
 import type { FloatingBarAction } from "@/components/page/page-floating-bar";
 import { PageError } from "@/components/page/page-error";
 import { PageFloatingBar } from "@/components/page/page-floating-bar";
@@ -50,7 +47,7 @@ function RouteComponent() {
     {
       id: "refresh-remote",
       label: "Refresh remote",
-      icon: ArrowPathIcon,
+      icon: IconRefreshDot,
       onClick: () => refreshPageMutation.mutate(pageId),
       isPending: refreshPageMutation.isPending,
       overflowOnly: true,
@@ -58,7 +55,7 @@ function RouteComponent() {
     {
       id: "focus-remote",
       label: "Focus remote",
-      icon: ArrowTopRightOnSquareIcon,
+      icon: IconFocusCentered,
       onClick: () => focusPageMutation.mutate(pageId),
       isPending: focusPageMutation.isPending,
       overflowOnly: true,

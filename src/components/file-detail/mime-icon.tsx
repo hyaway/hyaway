@@ -1,9 +1,9 @@
 import {
-  DocumentIcon,
-  FilmIcon,
-  PhotoIcon,
-  SpeakerWaveIcon,
-} from "@heroicons/react/24/solid";
+  IconFile,
+  IconMovie,
+  IconPhoto,
+  IconVolume,
+} from "@tabler/icons-react";
 
 export function MimeIcon({
   mime,
@@ -13,13 +13,13 @@ export function MimeIcon({
   className?: string;
 }) {
   if (mime.startsWith("image/")) {
-    return <PhotoIcon className={className} />;
+    return <IconPhoto className={className} />;
   }
   if (mime.startsWith("video/")) {
-    return <FilmIcon className={className} />;
+    return <IconMovie className={className} />;
   }
   if (mime.startsWith("audio/")) {
-    return <SpeakerWaveIcon className={className} />;
+    return <IconVolume className={className} />;
   }
-  return <DocumentIcon className={className} />;
+  return <IconFile className={className} />;
 }

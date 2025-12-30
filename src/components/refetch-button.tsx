@@ -1,4 +1,4 @@
-import { ArrowPathIcon, CheckIcon } from "@heroicons/react/24/solid";
+import { IconCheck, IconRefresh } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
@@ -38,10 +38,10 @@ export function RefetchButton({ onRefetch, isFetching }: RefetchButtonProps) {
           transition={{ duration: 0.2 }}
           className="absolute inset-0 flex items-center justify-center"
         >
-          <CheckIcon className="text-success size-6" />
+          <IconCheck className="text-success size-6" />
         </motion.span>
       ) : (
-        <ArrowPathIcon className="size-6" />
+        <IconRefresh className="size-6" />
       )}
     </AnimatePresence>
   );

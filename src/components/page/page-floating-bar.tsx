@@ -1,4 +1,4 @@
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
+import { IconDots } from "@tabler/icons-react";
 
 import type { ComponentType, ReactNode, SVGProps } from "react";
 
@@ -74,7 +74,7 @@ export function PageFloatingBar({
             render={
               <BottomNavButton
                 label="More"
-                icon={<EllipsisHorizontalIcon className="size-6" />}
+                icon={<IconDots className="size-6" />}
               />
             }
           />

@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
+import { IconAlertCircle } from "@tabler/icons-react";
 import {
   Alert,
   AlertDescription,
@@ -17,7 +17,7 @@ export function PageError({
 }: PageErrorProps) {
   return (
     <Alert variant="destructive">
-      <ExclamationCircleIcon />
+      <IconAlertCircle />
       <AlertTitle>
         {error instanceof Error ? error.message : fallbackMessage}
       </AlertTitle>

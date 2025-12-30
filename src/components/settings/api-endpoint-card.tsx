@@ -1,9 +1,6 @@
 import { AxiosError } from "axios";
 import { useForm } from "@tanstack/react-form";
-import {
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-} from "@heroicons/react/24/solid";
+import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
 import z from "zod";
 import { useEffect } from "react";
 import { SETTINGS_ENDPOINT_FIELD_NAME } from "./constants";
@@ -122,7 +119,7 @@ export function ApiEndpointCard() {
             </Alert>
           ) : isSuccess ? (
             <Alert>
-              <CheckCircleIcon />
+              <IconCircleCheck />
               <AlertTitle>Endpoint is valid!</AlertTitle>
               <AlertDescription>
                 API endpoint: <b>{apiEndpoint}</b>
@@ -134,7 +131,7 @@ export function ApiEndpointCard() {
             </Alert>
           ) : isError ? (
             <Alert variant="destructive">
-              <ExclamationCircleIcon />
+              <IconAlertCircle />
               <AlertTitle>
                 {error instanceof Error
                   ? error.message

@@ -1,8 +1,5 @@
 import { AxiosError } from "axios";
-import {
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-} from "@heroicons/react/24/solid";
+import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
 import {
   SETTINGS_ACTION,
   SETTINGS_REQUEST_SESSION_KEY_ACTION,
@@ -108,7 +105,7 @@ export function SessionKeyCard() {
         </Button>
         {!sessionKey ? (
           <Alert>
-            <ExclamationCircleIcon />
+            <IconAlertCircle />
             <AlertTitle>No session key</AlertTitle>
           </Alert>
         ) : isLoading ? (
@@ -122,7 +119,7 @@ export function SessionKeyCard() {
         ) : isSuccess ? (
           data.hasRequiredPermissions ? (
             <Alert>
-              <CheckCircleIcon />
+              <IconCircleCheck />
               <AlertTitle>Session key is valid!</AlertTitle>
               <AlertDescription>
                 Connection to <b>{apiEndpoint}</b> with{" "}
@@ -131,7 +128,7 @@ export function SessionKeyCard() {
             </Alert>
           ) : (
             <Alert>
-              <ExclamationCircleIcon />
+              <IconAlertCircle />
               <AlertTitle>Insufficient permissions</AlertTitle>
               <AlertDescription>
                 Insufficient permissions for <b>{data.raw.name ?? "API"}</b>{" "}
@@ -141,7 +138,7 @@ export function SessionKeyCard() {
           )
         ) : isError ? (
           <Alert variant="destructive">
-            <ExclamationCircleIcon />
+            <IconAlertCircle />
             <AlertTitle>
               {error instanceof Error
                 ? error.message

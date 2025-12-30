@@ -1,9 +1,9 @@
 import {
-  ArchiveBoxIcon,
-  InboxIcon,
-  NoSymbolIcon,
-  TrashIcon,
-} from "@heroicons/react/24/solid";
+  IconArchive,
+  IconBan,
+  IconInbox,
+  IconTrash,
+} from "@tabler/icons-react";
 
 import type { ComponentProps } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
@@ -24,7 +24,7 @@ export function FileStateBadge({ data, ...badgeProps }: FileStateBadgeProps) {
   if (data.is_deleted && !data.is_trashed) {
     return (
       <Badge variant="destructive" {...badgeProps}>
-        <NoSymbolIcon className="mr-1 size-3" />
+        <IconBan className="mr-1 size-3" />
         Permanently deleted
       </Badge>
     );
@@ -33,7 +33,7 @@ export function FileStateBadge({ data, ...badgeProps }: FileStateBadgeProps) {
   if (data.is_trashed) {
     return (
       <Badge variant="destructive" {...badgeProps}>
-        <TrashIcon className="mr-1 size-3" />
+        <IconTrash className="mr-1 size-3" />
         Trashed
       </Badge>
     );
@@ -42,7 +42,7 @@ export function FileStateBadge({ data, ...badgeProps }: FileStateBadgeProps) {
   if (data.is_inbox) {
     return (
       <Badge variant="secondary" {...badgeProps}>
-        <InboxIcon className="mr-1 size-3" />
+        <IconInbox className="mr-1 size-3" />
         Inbox
       </Badge>
     );
@@ -50,7 +50,7 @@ export function FileStateBadge({ data, ...badgeProps }: FileStateBadgeProps) {
 
   return (
     <Badge variant="secondary" {...badgeProps}>
-      <ArchiveBoxIcon className="mr-1 size-3" />
+      <IconArchive className="mr-1 size-3" />
       Archived
     </Badge>
   );

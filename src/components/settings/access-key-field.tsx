@@ -1,10 +1,10 @@
 import { AxiosError } from "axios";
 import { useForm } from "@tanstack/react-form";
 import {
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/solid";
+  IconAlertCircle,
+  IconCircleCheck,
+  IconInfoCircle,
+} from "@tabler/icons-react";
 import z from "zod";
 import { useEffect } from "react";
 import { SETTINGS_ACCESS_KEY_FIELD_NAME } from "./constants";
@@ -127,7 +127,7 @@ export function AccessKeyField() {
       ) : isSuccess ? (
         data.hasRequiredPermissions ? (
           <Alert>
-            <CheckCircleIcon />
+            <IconCircleCheck />
             <AlertTitle>API access key is valid!</AlertTitle>
             <AlertDescription>
               Connection to <b>{apiEndpoint}</b> with{" "}
@@ -136,7 +136,7 @@ export function AccessKeyField() {
           </Alert>
         ) : (
           <Alert>
-            <ExclamationCircleIcon />
+            <IconAlertCircle />
             <AlertTitle>Insufficient permissions</AlertTitle>
             <AlertDescription>
               Insufficient permissions for <b>{data.raw.name ?? "API"}</b>
@@ -148,7 +148,7 @@ export function AccessKeyField() {
         <>
           {error instanceof AxiosError && error.response?.status === 403 ? (
             <Alert>
-              <InformationCircleIcon />
+              <IconInfoCircle />
               <AlertTitle>Complete the Hydrus permissions flow</AlertTitle>
               <AlertDescription>
                 If you just requested a token, complete the permissions flow in
@@ -158,7 +158,7 @@ export function AccessKeyField() {
             </Alert>
           ) : null}
           <Alert variant="destructive">
-            <ExclamationCircleIcon />
+            <IconAlertCircle />
             <AlertTitle>
               {error instanceof Error
                 ? error.message
