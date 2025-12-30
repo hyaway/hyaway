@@ -1,15 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import {
-  IconDice1,
-  IconDice2,
-  IconDice3,
-  IconDice4,
-  IconDice5,
-  IconDice6,
-} from "@tabler/icons-react";
+import { IconArrowsShuffle } from "@tabler/icons-react";
 import { PageError } from "@/components/page/page-error";
 import { EmptyState } from "@/components/page/empty-state";
 import { PageFloatingBar } from "@/components/page/page-floating-bar";
@@ -19,15 +10,6 @@ import { RandomInboxSettingsPopover } from "@/components/settings/random-inbox-s
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
-
-const DICE_ICONS = [
-  IconDice1,
-  IconDice2,
-  IconDice3,
-  IconDice4,
-  IconDice5,
-  IconDice6,
-];
 
 export const Route = createFileRoute("/_auth/random-inbox")({
   component: RouteComponent,
@@ -39,40 +21,18 @@ export const Route = createFileRoute("/_auth/random-inbox")({
 function RouteComponent() {
   const { data, isLoading, isError, error } = useRandomInboxFilesQuery();
   const queryClient = useQueryClient();
-  const [diceIndex, setDiceIndex] = useState(2);
 
   const handleShuffle = () => {
-    setDiceIndex(Math.floor(Math.random() * 6));
     queryClient.resetQueries({
       queryKey: ["searchFiles", "randomInbox"],
     });
   };
 
-  const diceIcon = (
-    <AnimatePresence>
-      <motion.span
-        key={diceIndex}
-        initial={{ rotate: -180, scale: 0 }}
-        animate={{
-          rotate: 0,
-          scale: 1,
-          transition: { duration: 0.15, ease: "easeOut" },
-        }}
-        className="absolute inset-0 flex items-center justify-center"
-      >
-        {(() => {
-          const DiceIcon = DICE_ICONS[diceIndex];
-          return <DiceIcon className="size-6" />;
-        })()}
-      </motion.span>
-    </AnimatePresence>
-  );
-
   const shuffleButton = (
     <BottomNavButton
       key="shuffle"
       label="Shuffle"
-      icon={diceIcon}
+      icon={<IconArrowsShuffle className="size-6" />}
       onClick={handleShuffle}
       isLoading={isLoading}
       disabled={isError}
