@@ -15,8 +15,8 @@ import { Route as IndexRouteImport } from "./routes/index";
 import { Route as SettingsIndexRouteImport } from "./routes/settings.index";
 import { Route as SettingsUxRouteImport } from "./routes/settings.ux";
 import { Route as SettingsClientApiRouteImport } from "./routes/settings.client-api";
+import { Route as AuthRecentlyTrashedRouteImport } from "./routes/_auth/recently-trashed";
 import { Route as AuthRecentlyInboxedRouteImport } from "./routes/_auth/recently-inboxed";
-import { Route as AuthRecentlyDeletedRouteImport } from "./routes/_auth/recently-deleted";
 import { Route as AuthRecentlyArchivedRouteImport } from "./routes/_auth/recently-archived";
 import { Route as AuthRandomInboxRouteImport } from "./routes/_auth/random-inbox";
 import { Route as AuthPagesRouteImport } from "./routes/_auth/pages";
@@ -53,14 +53,14 @@ const SettingsClientApiRoute = SettingsClientApiRouteImport.update({
   path: "/client-api",
   getParentRoute: () => SettingsRoute,
 } as any);
+const AuthRecentlyTrashedRoute = AuthRecentlyTrashedRouteImport.update({
+  id: "/recently-trashed",
+  path: "/recently-trashed",
+  getParentRoute: () => AuthRoute,
+} as any);
 const AuthRecentlyInboxedRoute = AuthRecentlyInboxedRouteImport.update({
   id: "/recently-inboxed",
   path: "/recently-inboxed",
-  getParentRoute: () => AuthRoute,
-} as any);
-const AuthRecentlyDeletedRoute = AuthRecentlyDeletedRouteImport.update({
-  id: "/recently-deleted",
-  path: "/recently-deleted",
   getParentRoute: () => AuthRoute,
 } as any);
 const AuthRecentlyArchivedRoute = AuthRecentlyArchivedRouteImport.update({
@@ -100,8 +100,8 @@ export interface FileRoutesByFullPath {
   "/pages": typeof AuthPagesRouteWithChildren;
   "/random-inbox": typeof AuthRandomInboxRoute;
   "/recently-archived": typeof AuthRecentlyArchivedRoute;
-  "/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/recently-inboxed": typeof AuthRecentlyInboxedRoute;
+  "/recently-trashed": typeof AuthRecentlyTrashedRoute;
   "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
@@ -113,8 +113,8 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/random-inbox": typeof AuthRandomInboxRoute;
   "/recently-archived": typeof AuthRecentlyArchivedRoute;
-  "/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/recently-inboxed": typeof AuthRecentlyInboxedRoute;
+  "/recently-trashed": typeof AuthRecentlyTrashedRoute;
   "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings": typeof SettingsIndexRoute;
@@ -130,8 +130,8 @@ export interface FileRoutesById {
   "/_auth/pages": typeof AuthPagesRouteWithChildren;
   "/_auth/random-inbox": typeof AuthRandomInboxRoute;
   "/_auth/recently-archived": typeof AuthRecentlyArchivedRoute;
-  "/_auth/recently-deleted": typeof AuthRecentlyDeletedRoute;
   "/_auth/recently-inboxed": typeof AuthRecentlyInboxedRoute;
+  "/_auth/recently-trashed": typeof AuthRecentlyTrashedRoute;
   "/settings/client-api": typeof SettingsClientApiRoute;
   "/settings/ux": typeof SettingsUxRoute;
   "/settings/": typeof SettingsIndexRoute;
@@ -147,8 +147,8 @@ export interface FileRouteTypes {
     | "/pages"
     | "/random-inbox"
     | "/recently-archived"
-    | "/recently-deleted"
     | "/recently-inboxed"
+    | "/recently-trashed"
     | "/settings/client-api"
     | "/settings/ux"
     | "/settings/"
@@ -160,8 +160,8 @@ export interface FileRouteTypes {
     | "/"
     | "/random-inbox"
     | "/recently-archived"
-    | "/recently-deleted"
     | "/recently-inboxed"
+    | "/recently-trashed"
     | "/settings/client-api"
     | "/settings/ux"
     | "/settings"
@@ -176,8 +176,8 @@ export interface FileRouteTypes {
     | "/_auth/pages"
     | "/_auth/random-inbox"
     | "/_auth/recently-archived"
-    | "/_auth/recently-deleted"
     | "/_auth/recently-inboxed"
+    | "/_auth/recently-trashed"
     | "/settings/client-api"
     | "/settings/ux"
     | "/settings/"
@@ -236,18 +236,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SettingsClientApiRouteImport;
       parentRoute: typeof SettingsRoute;
     };
+    "/_auth/recently-trashed": {
+      id: "/_auth/recently-trashed";
+      path: "/recently-trashed";
+      fullPath: "/recently-trashed";
+      preLoaderRoute: typeof AuthRecentlyTrashedRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
     "/_auth/recently-inboxed": {
       id: "/_auth/recently-inboxed";
       path: "/recently-inboxed";
       fullPath: "/recently-inboxed";
       preLoaderRoute: typeof AuthRecentlyInboxedRouteImport;
-      parentRoute: typeof AuthRoute;
-    };
-    "/_auth/recently-deleted": {
-      id: "/_auth/recently-deleted";
-      path: "/recently-deleted";
-      fullPath: "/recently-deleted";
-      preLoaderRoute: typeof AuthRecentlyDeletedRouteImport;
       parentRoute: typeof AuthRoute;
     };
     "/_auth/recently-archived": {
@@ -313,8 +313,8 @@ interface AuthRouteChildren {
   AuthPagesRoute: typeof AuthPagesRouteWithChildren;
   AuthRandomInboxRoute: typeof AuthRandomInboxRoute;
   AuthRecentlyArchivedRoute: typeof AuthRecentlyArchivedRoute;
-  AuthRecentlyDeletedRoute: typeof AuthRecentlyDeletedRoute;
   AuthRecentlyInboxedRoute: typeof AuthRecentlyInboxedRoute;
+  AuthRecentlyTrashedRoute: typeof AuthRecentlyTrashedRoute;
   AuthFileFileIdRoute: typeof AuthFileFileIdRoute;
 }
 
@@ -322,8 +322,8 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthPagesRoute: AuthPagesRouteWithChildren,
   AuthRandomInboxRoute: AuthRandomInboxRoute,
   AuthRecentlyArchivedRoute: AuthRecentlyArchivedRoute,
-  AuthRecentlyDeletedRoute: AuthRecentlyDeletedRoute,
   AuthRecentlyInboxedRoute: AuthRecentlyInboxedRoute,
+  AuthRecentlyTrashedRoute: AuthRecentlyTrashedRoute,
   AuthFileFileIdRoute: AuthFileFileIdRoute,
 };
 

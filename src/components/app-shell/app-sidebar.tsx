@@ -92,7 +92,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuLinkButton
-                to="/recently-deleted"
+                to="/recently-trashed"
                 className="cursor-pointer"
               >
                 <TouchTarget>

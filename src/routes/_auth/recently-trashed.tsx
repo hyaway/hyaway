@@ -10,7 +10,7 @@ import { RecentFilesSettingsPopover } from "@/components/settings/recent-files-s
 import { useRecentlyTrashedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 
-export const Route = createFileRoute("/_auth/recently-deleted")({
+export const Route = createFileRoute("/_auth/recently-trashed")({
   component: RouteComponent,
   beforeLoad: () => ({
     getTitle: () => "Recently trashed",
