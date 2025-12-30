@@ -160,9 +160,9 @@ export const ImageGridCard = memo(function ImageGridCard({
           "pointer-events-none h-full w-full transition-[scale] duration-100 ease-in-out",
           "group-hover:scale-(--thumbnail-hover-scale) group-hover:shadow",
           "group-active:scale-(--thumbnail-hover-scale) group-active:shadow",
-          "group-has-focus-visible:ring-3 group-has-focus-visible:ring-white group-has-focus-visible:ring-offset-3 group-has-focus-visible:ring-offset-black",
+          "group-has-focus-visible:ring-3 group-has-focus-visible:ring-black group-has-focus-visible:ring-offset-3 group-has-focus-visible:ring-offset-white dark:group-has-focus-visible:ring-white dark:group-has-focus-visible:ring-offset-black",
           menuOpen &&
-            "ring-primary-foreground ring-offset-primary scale-(--thumbnail-hover-scale) ring-3 ring-offset-3",
+            "ring-primary-foreground ring-offset-primary scale-(--thumbnail-hover-scale) ring-0 ring-offset-3",
           originClass,
         )}
       >
