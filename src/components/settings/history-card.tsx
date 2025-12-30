@@ -29,7 +29,7 @@ export function HistoryCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>History</CardTitle>
+        <CardTitle>Watch history</CardTitle>
         <CardDescription>
           Configure how viewed files are tracked. Files you open are remembered
           for quick access later.

@@ -16,7 +16,7 @@ import { Button } from "@/components/ui-primitives/button";
 export const Route = createFileRoute("/_auth/history")({
   component: RouteComponent,
   beforeLoad: () => ({
-    getTitle: () => "History",
+    getTitle: () => "Watch history",
   }),
 });
 
@@ -38,7 +38,7 @@ function RouteComponent() {
     <EmptyState message="No files in history. Open a file to add it to your history." />
   ) : (
     <EmptyState
-      message="History recording is disabled."
+      message="Watch history recording is disabled."
       action={
         <Button variant="default" onClick={() => setEnabled(true)}>
           Enable history
@@ -51,7 +51,7 @@ function RouteComponent() {
     <>
       <div className="pb-16">
         <PageHeading
-          title={`History (${fileIds.length} ${fileIds.length === 1 ? "file" : "files"})`}
+          title={`Watch history (${fileIds.length} ${fileIds.length === 1 ? "file" : "files"})`}
         />
         {fileIds.length > 0 ? <ImageGrid fileIds={fileIds} /> : emptyContent}
       </div>

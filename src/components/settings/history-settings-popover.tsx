@@ -29,7 +29,7 @@ export function HistorySettingsPopover() {
       <Separator className="my-4" />
 
       <SettingsHeader>
-        <SettingsTitle>History</SettingsTitle>
+        <SettingsTitle>Watch history</SettingsTitle>
       </SettingsHeader>
       <SettingsGroup>
         <SwitchField
