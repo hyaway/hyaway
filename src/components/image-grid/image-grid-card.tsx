@@ -131,6 +131,7 @@ export const ImageGridCard = memo(function ImageGridCard({
         "group absolute top-0 left-0 z-0 flex h-full w-full justify-center overflow-visible [content-visibility:auto]",
         "hover:z-30 hover:[content-visibility:visible]",
         "active:z-30 active:[content-visibility:visible]",
+        "focus-within:z-20 focus-within:[content-visibility:visible]",
         width < height ? "flex-col" : "flex-row",
         !isScrolling && "transition-transform duration-350 ease-out",
         menuOpen && "z-30 [content-visibility:visible]",
@@ -143,7 +144,7 @@ export const ImageGridCard = memo(function ImageGridCard({
           <Link
             to="/file/$fileId"
             params={{ fileId: String(item.file_id) }}
-            className="absolute inset-0 z-10"
+            className="absolute inset-0 z-10 outline-hidden"
           />
         </ContextMenuTrigger>
         <ImageCardContextMenu item={item} />
@@ -153,6 +154,7 @@ export const ImageGridCard = memo(function ImageGridCard({
           "pointer-events-none h-full w-full transition-[scale] duration-100 ease-in-out",
           "group-hover:scale-(--thumbnail-hover-scale) group-hover:shadow",
           "group-active:scale-(--thumbnail-hover-scale) group-active:shadow",
+          "group-focus-within:ring-primary group-focus-within:ring-4",
           menuOpen && "ring-primary scale-(--thumbnail-hover-scale) ring-4",
           originClass,
         )}
