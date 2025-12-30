@@ -18,6 +18,8 @@ type RecentlyViewedState = {
   enabled: boolean;
   /** Maximum number of entries to keep */
   limit: number;
+  /** Timestamp of last clear - entries older than this are ignored during merge */
+  clearedAt: number;
   actions: {
     /** Add a file to recently viewed (moves to front if already exists) */
     addViewedFile: (fileId: number) => void;
@@ -35,6 +37,7 @@ type RecentlyViewedState = {
 /**
  * Merge function for recently-viewed entries.
  * Combines entries from both states, keeping the most recent viewedAt per fileId.
+ * Respects clearedAt timestamp - entries older than the most recent clear are ignored.
  */
 function mergeRecentlyViewed(
   persisted: Partial<Omit<RecentlyViewedState, "actions">>,
@@ -43,9 +46,16 @@ function mergeRecentlyViewed(
   const persistedEntries = persisted.entries ?? [];
   const currentEntries = current.entries;
 
-  // Merge entries, keeping the most recent viewedAt per fileId
+  // Use the most recent clearedAt timestamp
+  const clearedAt = Math.max(persisted.clearedAt ?? 0, current.clearedAt);
+
+  // Merge entries, keeping only those newer than clearedAt
+  // and keeping the most recent viewedAt per fileId
   const merged = new Map<number, RecentlyViewedEntry>();
   for (const entry of [...currentEntries, ...persistedEntries]) {
+    // Skip entries that were viewed before the last clear
+    if (entry.viewedAt <= clearedAt) continue;
+
     const existing = merged.get(entry.fileId);
     if (!existing || entry.viewedAt > existing.viewedAt) {
       merged.set(entry.fileId, entry);
@@ -63,6 +73,7 @@ function mergeRecentlyViewed(
     entries: mergedEntries,
     enabled: persisted.enabled ?? current.enabled,
     limit,
+    clearedAt,
   };
 }
 
@@ -72,6 +83,7 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
       entries: [],
       enabled: true,
       limit: DEFAULT_RECENTLY_VIEWED_LIMIT,
+      clearedAt: 0,
       actions: {
         addViewedFile: (fileId: number) => {
           const { enabled, limit, entries } = get();
@@ -90,7 +102,8 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
           set({ entries: entries.filter((e) => e.fileId !== fileId) });
         },
         clearHistory: () => {
-          set({ entries: [] });
+          // Set clearedAt to now so merge ignores older entries from other tabs
+          set({ entries: [], clearedAt: Date.now() });
         },
         setEnabled: (enabled: boolean) => {
           set({ enabled });

@@ -6,6 +6,7 @@ import {
 } from "./models";
 import type { StateCreator } from "zustand";
 import { getContext } from "@/integrations/tanstack-query/root-provider.tsx";
+import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 type AuthState = {
   api_access_key: string;
@@ -149,3 +150,6 @@ export const useAuthHeaderName = () =>
       ? HYDRUS_API_HEADER_SESSION_KEY
       : HYDRUS_API_HEADER_ACCESS_KEY,
   );
+
+// Sync auth config across tabs
+setupCrossTabSync(useAuthStore);

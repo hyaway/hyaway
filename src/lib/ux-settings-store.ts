@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { setupCrossTabSync } from "./cross-tab-sync";
 
 export const MAX_GRID_LANES = 30;
 export const MAX_PAGES_COLUMNS = 30;
@@ -101,3 +102,6 @@ export const useImageBackground = () =>
 
 export const useUxSettingsActions = () =>
   useUxSettingsStore((state) => state.actions);
+
+// Sync settings across tabs
+setupCrossTabSync(useUxSettingsStore);
