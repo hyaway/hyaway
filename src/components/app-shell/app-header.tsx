@@ -63,7 +63,7 @@ export function AppHeader() {
   return (
     <header
       className={cn(
-        "bg-background/95 supports-backdrop-filter:bg-background/75 sticky top-0 z-40 flex shrink-0 flex-col backdrop-blur-sm transition-all duration-300 ease-out",
+        "bg-background/95 supports-backdrop-filter:bg-background/75 sticky top-0 z-40 flex shrink-0 flex-col backdrop-blur-sm transition-all duration-200 ease-out",
         // Extended area below header for hover detection - always interactive
         "after:pointer-events-auto after:absolute after:inset-x-0 after:top-full after:content-['']",
         isVisible

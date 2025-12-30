@@ -31,7 +31,7 @@ export function FloatingBar({
         className={cn(
           sharedClasses,
           visibilityClasses,
-          "flex transition-all duration-300 ease-out md:hidden",
+          "flex transition-all duration-200 ease-out md:hidden",
           className,
         )}
         {...props}
@@ -43,7 +43,7 @@ export function FloatingBar({
         className={cn(
           sharedClasses,
           visibilityClasses,
-          "hidden md:left-(--sidebar-width) md:flex md:[transition:translate_300ms_ease-out,opacity_300ms_ease-out,left_200ms_linear] md:group-data-[state=collapsed]/sidebar-wrapper:left-(--sidebar-width-icon)",
+          "hidden md:left-(--sidebar-width) md:flex md:[transition:translate_200ms_ease-out,opacity_200ms_ease-out,left_200ms_linear] md:group-data-[state=collapsed]/sidebar-wrapper:left-(--sidebar-width-icon)",
           className,
         )}
         {...props}
