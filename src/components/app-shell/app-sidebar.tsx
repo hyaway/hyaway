@@ -7,6 +7,8 @@ import {
   IconArchiveFilled,
   IconArrowsShuffle,
   IconArrowsShuffle2,
+  IconEye,
+  IconEyeFilled,
   IconLayoutGrid,
   IconLayoutGridFilled,
   IconMail,
@@ -132,6 +134,17 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 <TouchTarget>
                   <SidebarIcon icon={IconTrash} filledIcon={IconTrashFilled} />
                   <span>Recently trashed</span>
+                </TouchTarget>
+              </SidebarMenuLinkButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuLinkButton
+                to="/recently-viewed"
+                className="cursor-pointer"
+              >
+                <TouchTarget>
+                  <SidebarIcon icon={IconEye} filledIcon={IconEyeFilled} />
+                  <span>Recently viewed</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>

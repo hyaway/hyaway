@@ -5,6 +5,7 @@ import { ImageGalleryCard } from "@/components/settings/image-gallery-card";
 import { PagesCard } from "@/components/settings/pages-card";
 import { RandomInboxCard } from "@/components/settings/random-inbox-card";
 import { RecentFilesCard } from "@/components/settings/recent-files-card";
+import { RecentlyViewedCard } from "@/components/settings/recently-viewed-card";
 import { TagsSortCard } from "@/components/settings/tags-sort-card";
 import { ThemeCard } from "@/components/settings/theme-card";
 
@@ -27,6 +28,7 @@ function SettingsUXComponent() {
       <TagsSortCard />
       <PagesCard />
       <RecentFilesCard />
+      <RecentlyViewedCard />
       <RandomInboxCard />
     </div>
   );

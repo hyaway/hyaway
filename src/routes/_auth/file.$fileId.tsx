@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { IconAlertCircle } from "@tabler/icons-react";
 
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
@@ -8,6 +9,7 @@ import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { useFileActions } from "@/hooks/use-file-actions";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
+import { useRecentlyViewedActions } from "@/lib/recently-viewed-store";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
 import { ContentDetailsTable } from "@/components/file-detail/content-details-table";
 import { FileDetailSkeleton } from "@/components/file-detail/file-detail-skeleton";
@@ -68,6 +70,13 @@ function FileDetailContent({
   data: NonNullable<ReturnType<typeof useGetSingleFileMetadata>["data"]>;
   fileId: number;
 }) {
+  const { addViewedFile } = useRecentlyViewedActions();
+
+  // Track file view when component mounts with valid data
+  useEffect(() => {
+    addViewedFile(fileId);
+  }, [fileId, addViewedFile]);
+
   const actionGroups = useFileActions(data, {
     includeExternal: true,
     includeThumbnail: false,
