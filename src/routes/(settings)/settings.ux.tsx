@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FileViewerCard } from "./-components/file-viewer-card";
-import { ImageGalleryCard } from "./-components/image-gallery-card";
-import { PagesCard } from "./-components/pages-card";
-import { RandomInboxCard } from "./-components/random-inbox-card";
-import { RecentFilesCard } from "./-components/recent-files-card";
-import { HistoryCard } from "./-components/history-card";
+import { FileViewerSettingsCard } from "./-components/file-viewer-settings-card";
+import { ImageGallerySettingsCard } from "./-components/image-gallery-settings-card";
+import { PagesSettingsCard } from "./-components/pages-settings-card";
+import { RandomInboxSettingsCard } from "./-components/random-inbox-settings-card";
+import { RecentFilesSettingsCard } from "./-components/recent-files-settings-card";
+import { HistorySettingsCard } from "./-components/history-settings-card";
 import { TagsSortCard } from "./-components/tags-sort-card";
 import { ThemeCard } from "./-components/theme-card";
 import { Heading } from "@/components/ui-primitives/heading";
@@ -23,13 +23,13 @@ function SettingsUXComponent() {
         UX Settings
       </Heading>
       <ThemeCard />
-      <FileViewerCard />
-      <ImageGalleryCard />
+      <FileViewerSettingsCard />
+      <ImageGallerySettingsCard />
       <TagsSortCard />
-      <PagesCard />
-      <RecentFilesCard />
-      <HistoryCard />
-      <RandomInboxCard />
+      <PagesSettingsCard />
+      <RecentFilesSettingsCard />
+      <HistorySettingsCard />
+      <RandomInboxSettingsCard />
     </div>
   );
 }

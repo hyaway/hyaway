@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { focusPage, getPageInfo, getPages, refreshPage } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
 import { PageState } from "../models";
-import { useIsAuthenticated } from "./access";
 import type { Page } from "../models";
 
 /**
