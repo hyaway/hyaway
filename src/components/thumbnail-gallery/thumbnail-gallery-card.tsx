@@ -23,7 +23,8 @@ import {
 import { useFileActions } from "@/hooks/use-file-actions";
 import { useThumbnailUrl } from "@/hooks/use-url-with-api-key";
 import { formatBytes } from "@/lib/format-utils";
-import { checkerboardBg, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { checkerboardBg } from "@/lib/style-constants";
 import { useImageBackground } from "@/lib/ux-settings-store";
 
 /** Height of the polaroid-style footer strip in pixels (h-6 = 24px) */

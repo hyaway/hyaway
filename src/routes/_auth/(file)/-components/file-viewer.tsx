@@ -15,7 +15,8 @@ import type {
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
-import { checkerboardBg, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { checkerboardBg } from "@/lib/style-constants";
 import { useActiveTheme } from "@/lib/theme-store";
 import {
   useFileViewerStartExpanded,
