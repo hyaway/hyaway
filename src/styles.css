@@ -133,6 +133,13 @@
  *   --header-height-short: Compact height for short viewports (2.5rem / 40px)
  *   Used with short variant: `h-(--header-height) short:h-(--header-height-short)`
  *
+ * FOOTER HEIGHTS (3 variants - derived from button sizing):
+ *   --footer-height: Mobile default (3.5rem / 56px)
+ *   --footer-height-sm: Tablet/desktop (3rem / 48px)
+ *   --footer-height-short: Compact for short viewports (2.5rem / 40px)
+ *   Usage: `h-(--footer-height) sm:h-(--footer-height-sm) short:h-(--footer-height-short)`
+ *   Also used for hover zone height (::before) when footer is scroll-hidden.
+ *
  * SIDEBAR WIDTHS:
  *   --sidebar-width: Desktop expanded width (16rem / 256px)
  *   --sidebar-width-mobile: Mobile sheet width (18rem / 288px)
@@ -147,6 +154,9 @@
 :root {
   --header-height: 3.5rem;
   --header-height-short: 2.5rem;
+  --footer-height: 3.5rem;
+  --footer-height-sm: 3rem;
+  --footer-height-short: 2.5rem;
   --sidebar-width: 16rem;
   --sidebar-width-mobile: 18rem;
   --sidebar-width-icon: 3.5rem;

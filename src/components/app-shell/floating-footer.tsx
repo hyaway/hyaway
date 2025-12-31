@@ -14,12 +14,13 @@ export function FloatingFooter({
 
   const visibilityClasses = isVisible
     ? "translate-y-0 opacity-100 before:h-2"
-    : "pointer-events-none translate-y-full opacity-0 before:h-14 sm:before:h-12 short:before:h-10 hover:pointer-events-auto hover:translate-y-0 hover:opacity-100";
+    : "pointer-events-none translate-y-full opacity-0 before:h-(--footer-height) sm:before:h-(--footer-height-sm) short:before:h-(--footer-height-short) hover:pointer-events-auto hover:translate-y-0 hover:opacity-100";
 
   return (
     <div
       className={cn(
-        "bg-background/95 supports-backdrop-filter:bg-background/75 short:px-2 fixed inset-x-0 bottom-0 z-40 flex items-center justify-between border-t px-2 py-0 backdrop-blur-sm sm:px-4",
+        "bg-background/95 supports-backdrop-filter:bg-background/75 short:px-2 fixed inset-x-0 bottom-0 z-40 flex items-center justify-between border-t px-2 backdrop-blur-sm sm:px-4",
+        "short:h-(--footer-height-short) h-(--footer-height) sm:h-(--footer-height-sm)",
         // Extended area above bar for hover detection
         "before:pointer-events-auto before:absolute before:inset-x-0 before:bottom-full before:content-['']",
         // Hover/focus brings bar back
