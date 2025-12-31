@@ -81,6 +81,11 @@
 :root {
   --header-height: 3.5rem;
   --header-height-short: 2.5rem;
+  --sidebar-width: 16rem;
+  --sidebar-width-mobile: 18rem;
+  --sidebar-width-icon: 3.5rem;
+  --sidebar-open-close-duration: 200ms;
+  --sidebar-open-close-easing: linear;
 }
 
 @theme inline {

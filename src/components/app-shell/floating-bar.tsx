@@ -26,7 +26,7 @@ export function FloatingBar({
         "hover:pointer-events-auto hover:translate-y-0 hover:opacity-100",
         "focus-within:pointer-events-auto focus-within:translate-y-0 focus-within:opacity-100",
         // Visibility transition (always)
-        "transition-[translate,opacity] duration-200 ease-out",
+        "transition-[translate,opacity] duration-(--sidebar-open-close-duration) ease-(--sidebar-open-close-easing)",
         // Sidebar offset on desktop - transition only on md+ (avoids animation when crossing breakpoint)
         "md:left-(--sidebar-width) md:transition-[translate,opacity,left] md:group-data-[state=collapsed]/sidebar-wrapper:left-(--sidebar-width-icon)",
         visibilityClasses,
