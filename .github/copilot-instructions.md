@@ -232,3 +232,19 @@ Files/folders starting with `-` are ignored by TanStack Router. Use for:
 ### No Cross-Route Imports
 
 Each route group should be self-contained. If a component is needed by multiple routes, move it to `components/`.
+
+## Tailwind Custom Variants
+
+The project defines custom Tailwind variants in `src/styles.css` for responsive design:
+
+- **`short:`** - Limited vertical space (max-height: 500px). Covers tiny phones, foldable secondary screens, and landscape phones.
+- **`short-wide:`** - Phone landscape specifically (short + min-width: 640px). Overrides `short:` when horizontal space is available.
+
+**Usage pattern:** Use `short:` as the base for all constrained-height layouts, then `short-wide:` to refine for landscape:
+
+```tsx
+className =
+  "h-(--header-height) short:h-(--header-height-short) short:hidden short-wide:flex";
+```
+
+See `src/styles.css` for full documentation on variants and app layout CSS variables.

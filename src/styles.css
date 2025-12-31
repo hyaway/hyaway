@@ -3,6 +3,36 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/jetbrains-mono";
 
+/*
+ * =============================================================================
+ * CUSTOM VARIANTS
+ * =============================================================================
+ *
+ * dark:
+ *   Standard dark mode variant using class-based detection.
+ *
+ * short + short-wide (used together):
+ *   These variants handle limited vertical space and are typically used together
+ *   in a mobile-first pattern where `short:` is the base and `short-wide:` refines.
+ *
+ *   short:
+ *     Targets ANY device with limited vertical space (max-height: 500px).
+ *     This includes very small phones, foldable secondary screens, and landscape phones.
+ *     Use as the baseline for all short viewports.
+ *
+ *   short-wide:
+ *     Targets phone landscape specifically (max-height: 500px AND min-width: 640px).
+ *     Overrides `short:` styles when there's horizontal space available.
+ *     Use for layouts that benefit from side-by-side content in landscape.
+ *
+ *   Pattern:
+ *     `short:compact-mobile-style short-wide:landscape-optimized-style`
+ *
+ *   Example - header with settings popover:
+ *     - Default: Full header with inline settings
+ *     - short: Minimal header, settings in overflow menu (tiny screens)
+ *     - short-wide: Compact header, settings visible (landscape has width)
+ */
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant short (@media (max-height: 500px));
 @custom-variant short-wide (@media (max-height: 500px) and (min-width: 640px));
@@ -77,6 +107,42 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/*
+ * =============================================================================
+ * APP LAYOUT VARIABLES
+ * =============================================================================
+ *
+ * These variables define layout dimensions and animations for the app shell.
+ * They are separate from shadcn theme variables to keep concerns isolated.
+ *
+ * USAGE IN TAILWIND:
+ *   Use parentheses syntax to reference CSS variables in Tailwind classes:
+ *   - `h-(--header-height)` → height using the variable
+ *   - `w-(--sidebar-width)` → width using the variable
+ *   - `duration-(--sidebar-open-close-duration)` → transition duration
+ *   - `ease-(--sidebar-open-close-easing)` → transition timing function
+ *
+ * WHY CSS VARIABLES:
+ *   1. Single source of truth for layout dimensions
+ *   2. Can be overridden per-context if needed
+ *   3. Accessible in both CSS and JavaScript (getComputedStyle)
+ *   4. Enables consistent animations across related components
+ *
+ * HEADER HEIGHTS:
+ *   --header-height: Default header height (3.5rem / 56px)
+ *   --header-height-short: Compact height for short viewports (2.5rem / 40px)
+ *   Used with short variant: `h-(--header-height) short:h-(--header-height-short)`
+ *
+ * SIDEBAR WIDTHS:
+ *   --sidebar-width: Desktop expanded width (16rem / 256px)
+ *   --sidebar-width-mobile: Mobile sheet width (18rem / 288px)
+ *   --sidebar-width-icon: Collapsed icon-only width (3.5rem / 56px)
+ *
+ * SIDEBAR ANIMATION:
+ *   --sidebar-open-close-duration: Timing for expand/collapse (200ms)
+ *   --sidebar-open-close-easing: Easing function (linear)
+ *   Apply to elements that animate with sidebar state changes.
+ */
 /* App layout variables */
 :root {
   --header-height: 3.5rem;
