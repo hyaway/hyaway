@@ -1,25 +1,9 @@
-import {
-  Link,
-  useCanGoBack,
-  useMatchRoute,
-  useMatches,
-  useRouter,
-} from "@tanstack/react-router";
-import { Fragment } from "react";
+import { useCanGoBack, useRouter } from "@tanstack/react-router";
 
 import { IconArrowLeft } from "@tabler/icons-react";
 import { Button } from "../ui-primitives/button";
-import type { MyRouterContext } from "@/routes/__root";
-import { TouchTarget } from "@/components/ui-primitives/touch-target";
+import { AppBreadcrumb } from "@/components/app-shell/app-breadcrumb";
 import { HeaderPortalSlot } from "@/components/app-shell/header-portal";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui-primitives/breadcrumb";
 import { Separator } from "@/components/ui-primitives/separator";
 import { SidebarTrigger } from "@/components/ui-primitives/sidebar";
 import { cn } from "@/lib/utils";
@@ -33,32 +17,9 @@ import {
 export { SCROLL_RESTORATION_EVENT, dispatchScrollRestoration };
 
 export function AppHeader() {
-  const matches = useMatches();
   const isVisible = useScrollDirection(50);
-
-  // Filter routes that define their own getTitle (not inherited from parent)
-  // by comparing the getTitle function reference to the previous match's
-  const breadcrumbs: Array<{ title: string; path: string }> = [];
-  let prevGetTitle: (() => string) | undefined;
-
-  for (const match of matches) {
-    const context = match.context as MyRouterContext | undefined;
-    const getTitle = context?.getTitle;
-
-    // Only add if this route defines its own getTitle (different from parent's)
-    if (getTitle && getTitle !== prevGetTitle) {
-      breadcrumbs.push({
-        title: getTitle(),
-        path: match.pathname,
-      });
-    }
-
-    prevGetTitle = getTitle;
-  }
   const router = useRouter();
   const canGoBack = useCanGoBack();
-  const matchRoute = useMatchRoute();
-  const isFilePage = matchRoute({ to: "/file/$fileId" }) && canGoBack;
 
   return (
     <header
@@ -88,48 +49,7 @@ export function AppHeader() {
             <IconArrowLeft className="size-5" />
           </Button>
         )}
-        <Breadcrumb>
-          <BreadcrumbList>
-            {isFilePage && (
-              <>
-                <BreadcrumbItem>
-                  <BreadcrumbLink
-                    onClick={() => router.history.back()}
-                    className="hidden cursor-pointer md:block"
-                  >
-                    <TouchTarget>Gallery</TouchTarget>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                {breadcrumbs.length > 0 && (
-                  <BreadcrumbSeparator className="hidden md:block" />
-                )}
-              </>
-            )}
-            {breadcrumbs.map((crumb, index) => {
-              const isLast = index === breadcrumbs.length - 1;
-
-              return (
-                <Fragment key={crumb.path}>
-                  <BreadcrumbItem>
-                    {isLast ? (
-                      <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
-                    ) : (
-                      <BreadcrumbLink
-                        render={<Link to={crumb.path} />}
-                        className="hidden md:block"
-                      >
-                        <TouchTarget>{crumb.title}</TouchTarget>
-                      </BreadcrumbLink>
-                    )}
-                  </BreadcrumbItem>
-                  {!isLast && (
-                    <BreadcrumbSeparator className="hidden md:block" />
-                  )}
-                </Fragment>
-              );
-            })}
-          </BreadcrumbList>
-        </Breadcrumb>
+        <AppBreadcrumb />
       </div>
       <HeaderPortalSlot className="px-4" />
     </header>
