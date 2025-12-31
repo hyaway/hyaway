@@ -11,6 +11,8 @@ import {
 } from "@/lib/ux-settings-store";
 import { Label } from "@/components/ui-primitives/label";
 
+export const FILE_VIEWER_SETTINGS_TITLE = "Media viewer";
+
 export interface FileViewerSettingsProps {
   idPrefix?: string;
 }

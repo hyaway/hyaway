@@ -1,4 +1,7 @@
-import { FileViewerSettings } from "@/components/settings/file-viewer-settings";
+import {
+  FILE_VIEWER_SETTINGS_TITLE,
+  FileViewerSettings,
+} from "@/components/settings/file-viewer-settings";
 import {
   SettingsHeader,
   SettingsTitle,
@@ -13,7 +16,7 @@ export function FileViewerSettingsPopover({
   return (
     <SettingsPopover label="Settings" className={className}>
       <SettingsHeader>
-        <SettingsTitle>Media viewer</SettingsTitle>
+        <SettingsTitle>{FILE_VIEWER_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
       <FileViewerSettings idPrefix="popover-" />
     </SettingsPopover>

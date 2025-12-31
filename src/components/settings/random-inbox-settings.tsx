@@ -5,6 +5,8 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
+export const RANDOM_INBOX_SETTINGS_TITLE = "Random inbox";
+
 export interface RandomInboxSettingsProps {
   idPrefix?: string;
   /** Minimum value for the slider (card uses 100, popover uses 10) */

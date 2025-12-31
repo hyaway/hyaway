@@ -1,4 +1,7 @@
-import { PagesDisplaySettings } from "@/components/settings/pages-display-settings";
+import {
+  PAGES_DISPLAY_SETTINGS_TITLE,
+  PagesDisplaySettings,
+} from "@/components/settings/pages-display-settings";
 import {
   SettingsHeader,
   SettingsTitle,
@@ -9,7 +12,7 @@ export function PagesDisplaySettingsPopover() {
   return (
     <SettingsPopover label="Settings">
       <SettingsHeader>
-        <SettingsTitle>Pages display</SettingsTitle>
+        <SettingsTitle>{PAGES_DISPLAY_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
       <PagesDisplaySettings idPrefix="popover-" />
     </SettingsPopover>

@@ -1,4 +1,7 @@
-import { ThumbnailGalleryDisplaySettings } from "@/components/settings/thumbnail-gallery-display-settings";
+import {
+  THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE,
+  ThumbnailGalleryDisplaySettings,
+} from "@/components/settings/thumbnail-gallery-display-settings";
 import {
   SettingsHeader,
   SettingsTitle,
@@ -9,7 +12,9 @@ export function ThumbnailGalleryDisplaySettingsContent() {
   return (
     <>
       <SettingsHeader>
-        <SettingsTitle>Thumbnail gallery display</SettingsTitle>
+        <SettingsTitle>
+          {THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE}
+        </SettingsTitle>
       </SettingsHeader>
       <ThumbnailGalleryDisplaySettings idPrefix="popover-" />
     </>

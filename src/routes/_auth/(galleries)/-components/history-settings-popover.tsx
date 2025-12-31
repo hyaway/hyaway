@@ -1,5 +1,8 @@
 import { ThumbnailGalleryDisplaySettingsContent } from "@/components/image-grid/thumbnail-gallery-display-settings-popover";
-import { HistorySettings } from "@/components/settings/history-settings";
+import {
+  HISTORY_SETTINGS_TITLE,
+  HistorySettings,
+} from "@/components/settings/history-settings";
 import {
   SettingsHeader,
   SettingsTitle,
@@ -15,7 +18,7 @@ export function HistorySettingsPopover() {
       <Separator className="my-4" />
 
       <SettingsHeader>
-        <SettingsTitle>Watch history</SettingsTitle>
+        <SettingsTitle>{HISTORY_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
       <HistorySettings idPrefix="popover-" />
     </SettingsPopover>

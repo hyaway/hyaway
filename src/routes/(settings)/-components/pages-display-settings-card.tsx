@@ -1,4 +1,7 @@
-import { PagesDisplaySettings } from "@/components/settings/pages-display-settings";
+import {
+  PAGES_DISPLAY_SETTINGS_TITLE,
+  PagesDisplaySettings,
+} from "@/components/settings/pages-display-settings";
 import {
   Card,
   CardContent,
@@ -11,7 +14,7 @@ export function PagesDisplaySettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pages display</CardTitle>
+        <CardTitle>{PAGES_DISPLAY_SETTINGS_TITLE}</CardTitle>
         <CardDescription>
           Configure how page cards are displayed.
         </CardDescription>

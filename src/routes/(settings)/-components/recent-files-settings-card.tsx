@@ -1,4 +1,7 @@
-import { RecentFilesSettings } from "@/components/settings/recent-files-settings";
+import {
+  RECENT_FILES_SETTINGS_TITLE,
+  RecentFilesSettings,
+} from "@/components/settings/recent-files-settings";
 import {
   Card,
   CardContent,
@@ -11,7 +14,7 @@ export function RecentFilesSettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent files</CardTitle>
+        <CardTitle>{RECENT_FILES_SETTINGS_TITLE}</CardTitle>
         <CardDescription>
           Configure how recent files are fetched for inbox, archive, and trash
           views.

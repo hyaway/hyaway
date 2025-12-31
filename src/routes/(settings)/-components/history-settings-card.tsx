@@ -1,5 +1,8 @@
 import { IconTrashX } from "@tabler/icons-react";
-import { HistorySettings } from "@/components/settings/history-settings";
+import {
+  HISTORY_SETTINGS_TITLE,
+  HistorySettings,
+} from "@/components/settings/history-settings";
 import {
   Card,
   CardContent,
@@ -17,7 +20,7 @@ export function HistorySettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Watch history</CardTitle>
+        <CardTitle>{HISTORY_SETTINGS_TITLE}</CardTitle>
         <CardDescription>
           Configure how viewed files are tracked. Files you open are remembered
           for quick access later.

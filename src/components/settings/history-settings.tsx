@@ -6,6 +6,8 @@ import {
   useHistoryLimit,
 } from "@/lib/history-store";
 
+export const HISTORY_SETTINGS_TITLE = "Watch history";
+
 export interface HistorySettingsProps {
   idPrefix?: string;
 }

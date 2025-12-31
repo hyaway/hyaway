@@ -7,6 +7,8 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
+export const RECENT_FILES_SETTINGS_TITLE = "Recent files";
+
 export interface RecentFilesSettingsProps {
   idPrefix?: string;
 }

@@ -1,4 +1,7 @@
-import { RandomInboxSettings } from "@/components/settings/random-inbox-settings";
+import {
+  RANDOM_INBOX_SETTINGS_TITLE,
+  RandomInboxSettings,
+} from "@/components/settings/random-inbox-settings";
 import {
   Card,
   CardContent,
@@ -11,7 +14,7 @@ export function RandomInboxSettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Random inbox</CardTitle>
+        <CardTitle>{RANDOM_INBOX_SETTINGS_TITLE}</CardTitle>
         <CardDescription>
           Configure how many files are fetched for the random inbox view.
         </CardDescription>

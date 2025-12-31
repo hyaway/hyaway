@@ -6,6 +6,9 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
+export const THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE =
+  "Thumbnail gallery display";
+
 export interface ThumbnailGalleryDisplaySettingsProps {
   idPrefix?: string;
 }

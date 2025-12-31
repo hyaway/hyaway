@@ -1,5 +1,8 @@
 import { ThumbnailGalleryDisplaySettingsContent } from "@/components/image-grid/thumbnail-gallery-display-settings-popover";
-import { RecentFilesSettings } from "@/components/settings/recent-files-settings";
+import {
+  RECENT_FILES_SETTINGS_TITLE,
+  RecentFilesSettings,
+} from "@/components/settings/recent-files-settings";
 import {
   SettingsHeader,
   SettingsTitle,
@@ -15,7 +18,7 @@ export function RecentFilesSettingsPopover() {
       <Separator className="my-4" />
 
       <SettingsHeader>
-        <SettingsTitle>Recent files</SettingsTitle>
+        <SettingsTitle>{RECENT_FILES_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
       <RecentFilesSettings idPrefix="popover-" />
     </SettingsPopover>

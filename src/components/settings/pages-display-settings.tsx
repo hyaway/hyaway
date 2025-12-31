@@ -5,6 +5,8 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
+export const PAGES_DISPLAY_SETTINGS_TITLE = "Pages display";
+
 export interface PagesDisplaySettingsProps {
   idPrefix?: string;
 }
