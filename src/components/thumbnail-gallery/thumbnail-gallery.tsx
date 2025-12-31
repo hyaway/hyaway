@@ -5,6 +5,7 @@ import {
   ThumbnailGalleryCard,
 } from "./thumbnail-gallery-card";
 import { ThumbnailGallerySkeleton } from "./thumbnail-gallery-skeleton";
+import type { FileLinkBuilder } from "./thumbnail-gallery-card";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { PageError } from "@/components/page-shell/page-error";
@@ -17,7 +18,16 @@ import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { cn } from "@/lib/utils";
 import { useGridExpandImages, useGridMaxLanes } from "@/lib/ux-settings-store";
 
-export function ThumbnailGallery({ fileIds }: { fileIds: Array<number> }) {
+export interface ThumbnailGalleryProps {
+  fileIds: Array<number>;
+  /** Custom link builder for contextual navigation */
+  getFileLink?: FileLinkBuilder;
+}
+
+export function ThumbnailGallery({
+  fileIds,
+  getFileLink,
+}: ThumbnailGalleryProps) {
   const itemsQuery = useInfiniteGetFilesMetadata(fileIds, false);
   const defaultDimensions = useThumbnailDimensions();
 
@@ -47,6 +57,7 @@ export function ThumbnailGallery({ fileIds }: { fileIds: Array<number> }) {
       itemsQuery={itemsQuery}
       totalItems={fileIds.length}
       defaultDimensions={defaultDimensions}
+      getFileLink={getFileLink}
     />
   );
 }
@@ -55,10 +66,12 @@ export function PureThumbnailGallery({
   itemsQuery,
   totalItems,
   defaultDimensions,
+  getFileLink,
 }: {
   itemsQuery: ReturnType<typeof useInfiniteGetFilesMetadata>;
   totalItems: number;
   defaultDimensions: { width: number; height: number };
+  getFileLink?: FileLinkBuilder;
 }) {
   const { data, isFetchingNextPage, fetchNextPage, hasNextPage } = itemsQuery;
 
@@ -180,6 +193,7 @@ export function PureThumbnailGallery({
                   tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
                   linkRef={setLinkRef(virtualRow.index)}
                   onFocus={() => handleItemFocus(virtualRow.index)}
+                  getFileLink={getFileLink}
                 />
               );
             })}

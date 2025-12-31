@@ -7,7 +7,8 @@ import {
   IconTrashFilled,
   IconVolume,
 } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
+import { Link, linkOptions } from "@tanstack/react-router";
+import type { LinkOptions } from "@tanstack/react-router";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 
@@ -30,6 +31,19 @@ import { useImageBackground } from "@/lib/ux-settings-store";
 /** Height of the polaroid-style footer strip in pixels (h-6 = 24px) */
 export const CARD_FOOTER_HEIGHT = 24;
 
+/**
+ * Function to build a link for a file in the current context.
+ * Returns type-safe link options for TanStack Router Link.
+ */
+export type FileLinkBuilder = (fileId: number) => LinkOptions;
+
+/** Default link builder - goes to /file/$fileId */
+export const defaultFileLinkBuilder: FileLinkBuilder = (fileId) =>
+  linkOptions({
+    to: "/file/$fileId",
+    params: { fileId: String(fileId) },
+  });
+
 // --- Main Card Component ---
 
 export interface ThumbnailGalleryCardProps extends React.HTMLAttributes<HTMLLIElement> {
@@ -43,6 +57,8 @@ export interface ThumbnailGalleryCardProps extends React.HTMLAttributes<HTMLLIEl
   isScrolling?: boolean;
   tabIndex?: number;
   linkRef?: (el: HTMLAnchorElement | null) => void;
+  /** Custom link builder for contextual navigation */
+  getFileLink?: FileLinkBuilder;
 }
 
 export const ThumbnailGalleryCard = memo(function ThumbnailGalleryCard({
@@ -57,9 +73,11 @@ export const ThumbnailGalleryCard = memo(function ThumbnailGalleryCard({
   isScrolling,
   tabIndex = 0,
   linkRef,
+  getFileLink = defaultFileLinkBuilder,
   ...props
 }: ThumbnailGalleryCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const fileLink = getFileLink(item.file_id);
 
   const isTopRow = virtualRow.index < lanes;
   const lastRowStart = totalItemsCount - 2 * lanes;
@@ -148,8 +166,8 @@ export const ThumbnailGalleryCard = memo(function ThumbnailGalleryCard({
         <ContextMenuTrigger>
           <Link
             ref={linkRef}
-            to="/file/$fileId"
-            params={{ fileId: String(item.file_id) }}
+            to={fileLink.to}
+            params={fileLink.params}
             className="absolute inset-0 z-10 outline-hidden"
             tabIndex={tabIndex}
           />
