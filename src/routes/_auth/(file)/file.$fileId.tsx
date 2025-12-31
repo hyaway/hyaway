@@ -8,6 +8,7 @@ import { FileInfoTable } from "./-components/file-info-table";
 import { FilePageHeader } from "./-components/file-page-header";
 import { FileStatusBadges } from "./-components/file-status-badges";
 import { FileViewer } from "./-components/file-viewer";
+import { FileViewerSettingsPopover } from "./-components/file-viewer-settings-popover";
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
@@ -17,7 +18,6 @@ import { useFileActions } from "@/hooks/use-file-actions";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useHistoryActions } from "@/lib/history-store";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
-import { FileViewerSettingsPopover } from "@/routes/(settings)/-components/file-viewer-settings-popover";
 
 export const Route = createFileRoute("/_auth/(file)/file/$fileId")({
   component: RouteComponent,

@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import React, { useMemo, useRef } from "react";
 
 import { PageCard, PageCardSkeleton } from "./-components/page-card";
+import { PagesSettingsPopover } from "./-components/pages-settings-popover";
 import type { Page } from "@/integrations/hydrus-api/models";
 
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -11,7 +12,6 @@ import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
-import { PagesSettingsPopover } from "@/routes/(settings)/-components/pages-settings-popover";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { usePagesMaxColumns } from "@/lib/ux-settings-store";

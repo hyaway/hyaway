@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
-import { RandomInboxSettingsPopover } from "@/routes/(settings)/-components/random-inbox-settings-popover";
+import { RandomInboxSettingsPopover } from "./-components/random-inbox-settings-popover";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";

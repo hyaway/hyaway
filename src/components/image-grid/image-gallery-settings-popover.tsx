@@ -1,6 +1,13 @@
-import { SettingsHeader, SettingsTitle } from "./settings-ui";
-import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
-import { SettingsPopover } from "./settings-popover";
+import {
+  SettingsHeader,
+  SettingsTitle,
+} from "@/components/settings/settings-ui";
+import {
+  SettingsGroup,
+  SliderField,
+  SwitchField,
+} from "@/components/settings/setting-fields";
+import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   MAX_GRID_LANES,
   useGridExpandImages,

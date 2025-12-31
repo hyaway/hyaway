@@ -6,7 +6,7 @@ import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
-import { RecentFilesSettingsPopover } from "@/routes/(settings)/-components/recent-files-settings-popover";
+import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
 import { useRecentlyTrashedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 

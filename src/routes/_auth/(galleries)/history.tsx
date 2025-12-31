@@ -3,7 +3,7 @@ import { IconTrashX } from "@tabler/icons-react";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
 import { PageHeading } from "@/components/page-shell/page-heading";
-import { HistorySettingsPopover } from "@/routes/(settings)/-components/history-settings-popover";
+import { HistorySettingsPopover } from "./-components/history-settings-popover";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import {
   useHistoryActions,

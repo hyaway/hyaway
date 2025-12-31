@@ -7,7 +7,7 @@ import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
-import { ImageGallerySettingsPopover } from "@/routes/(settings)/-components/image-gallery-settings-popover";
+import { ImageGallerySettingsPopover } from "@/components/image-grid/image-gallery-settings-popover";
 import {
   useFocusPageMutation,
   useGetPageInfoQuery,

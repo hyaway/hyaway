@@ -1,4 +1,7 @@
-import { SettingsGroup, SwitchField } from "./setting-fields";
+import {
+  SettingsGroup,
+  SwitchField,
+} from "@/components/settings/setting-fields";
 import type { ImageBackground } from "@/lib/ux-settings-store";
 import {
   Card,

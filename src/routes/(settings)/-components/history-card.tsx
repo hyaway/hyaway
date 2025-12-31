@@ -1,5 +1,9 @@
 import { IconTrashX } from "@tabler/icons-react";
-import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
+import {
+  SettingsGroup,
+  SliderField,
+  SwitchField,
+} from "@/components/settings/setting-fields";
 import {
   Card,
   CardContent,

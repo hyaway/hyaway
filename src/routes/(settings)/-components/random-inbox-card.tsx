@@ -1,4 +1,4 @@
-import { SliderField } from "./setting-fields";
+import { SliderField } from "@/components/settings/setting-fields";
 import {
   Card,
   CardContent,
