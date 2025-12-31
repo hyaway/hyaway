@@ -30,7 +30,8 @@ export function VideoViewer({
     <div
       className={cn(
         // Full available height minus header and footer
-        "short:h-[calc(100svh-var(--header-height-short)-var(--footer-height-short))] h-[calc(100svh-var(--header-height)-var(--footer-height))]",
+        "short:max-h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1.5rem)] max-h-[calc(100svh-var(--header-height)-var(--footer-height)-2rem)] cursor-zoom-in",
+
         "flex flex-row justify-center pb-2 sm:px-4 sm:pb-4",
       )}
     >
