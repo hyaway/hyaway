@@ -111,7 +111,7 @@ function FileDetailContent({
       <div className="flex min-w-0 flex-1 flex-col gap-1 pb-12 sm:gap-2 sm:pb-16">
         <FileViewer data={data} />
         <FilePageHeader fileId={fileId} />
-        <Separator />
+        <Separator className={"mt-4"} />
         <div className="flex items-center justify-between gap-2">
           <FileStatusBadges data={data} />
         </div>
