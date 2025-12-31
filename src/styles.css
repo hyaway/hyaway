@@ -77,6 +77,12 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* App layout variables */
+:root {
+  --header-height: 3.5rem;
+  --header-height-short: 2.5rem;
+}
+
 @theme inline {
   --font-sans: "JetBrains Mono Variable", monospace;
   --font-mono: "JetBrains Mono Variable", monospace;
