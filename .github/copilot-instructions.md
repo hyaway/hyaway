@@ -60,6 +60,7 @@ src/components/
 - **`@/`** - Alias for `src/`, use for shared components and utilities
 - **Relative paths** - Use for route-specific components in `-components/` folders
 - **Never import across route groups** - Each route group should be self-contained
+- **No barrel files** - Import directly from source files, not `index.ts` re-exports
 
 ## Settings Architecture
 
