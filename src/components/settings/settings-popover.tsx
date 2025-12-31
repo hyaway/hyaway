@@ -64,7 +64,7 @@ export function SettingsPopover({
   if (usePopover === false) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange} direction="bottom">
-        <DrawerTrigger>{button}</DrawerTrigger>
+        <DrawerTrigger render={button} />
         <DrawerContent>
           <ScrollArea viewportClassName="max-h-[60vh]">
             <div className="flex flex-col gap-4 px-6 pb-6">{children}</div>
