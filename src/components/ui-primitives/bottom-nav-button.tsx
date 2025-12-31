@@ -11,6 +11,8 @@ interface BottomNavButtonProps {
   icon: ReactNode;
   /** Click handler */
   onClick?: () => void;
+  /** Visual variant */
+  variant?: "default" | "destructive";
   /** Whether the button is in a loading state */
   isLoading?: boolean;
   /** Whether the button is disabled */
@@ -25,7 +27,16 @@ export const BottomNavButton = forwardRef<
   HTMLButtonElement,
   BottomNavButtonProps
 >(function BottomNavButton(
-  { label, icon, onClick, isLoading, disabled, className, render },
+  {
+    label,
+    icon,
+    onClick,
+    variant = "default",
+    isLoading,
+    disabled,
+    className,
+    render,
+  },
   ref,
 ) {
   return (
@@ -39,6 +50,7 @@ export const BottomNavButton = forwardRef<
         "sm:flex-row sm:gap-1.5 sm:px-4 sm:py-2",
         "short:gap-0 short:px-3 short:py-1",
         "short-wide:flex-row short-wide:gap-1.5 short-wide:px-4",
+        variant === "destructive" && "text-destructive hover:text-destructive",
         className,
       )}
       disabled={disabled || isLoading}
