@@ -36,7 +36,7 @@ function PagesIndex() {
   } = useGetMediaPagesQuery();
   const queryClient = useQueryClient();
 
-  const title = isPending ? "Pages" : "Pages (${pages.length} pages)";
+  const title = isPending ? "Pages" : `Pages (${pages.length} pages)`;
 
   const refetchButton = (
     <RefetchButton
