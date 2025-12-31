@@ -30,20 +30,24 @@ export function ImageViewer({
   };
 
   return (
-    <div className="flex justify-center pb-2 sm:pb-4">
+    <div
+      className={cn(
+        "flex items-center justify-center",
+        isExpanded
+          ? "short:min-h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1rem)] min-h-[calc(100svh-var(--header-height)-var(--footer-height)-2rem)]"
+          : "short:h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1rem)] h-[calc(100svh-var(--header-height)-var(--footer-height)-2rem)]",
+      )}
+    >
       <img
         src={fileUrl}
         alt={`File ${fileId}`}
         loading="eager"
         className={cn(
-          "max-w-full cursor-pointer object-contain transition-[max-height] duration-300",
+          "max-h-full max-w-full object-contain",
           loaded && imageBackground === "checkerboard"
             ? checkerboardBg
             : "bg-background",
-          isExpanded
-            ? "max-h-full cursor-zoom-out"
-            : // Full available max-height minus header, footer, main padding-top, and small buffer
-              "short:max-h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1rem)] max-h-[calc(100svh-var(--header-height)-var(--footer-height)-1.5rem)] cursor-zoom-in sm:max-h-[calc(100svh-var(--header-height)-var(--footer-height)-2.5rem)]",
+          isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
         )}
         onLoad={handleLoad}
         onError={onError}
