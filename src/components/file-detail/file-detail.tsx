@@ -17,16 +17,22 @@ import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { useFileActions } from "@/hooks/use-file-actions";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
-import { useHistoryActions } from "@/lib/history-store";
+import { useHistoryActions, useHistoryEnabled } from "@/lib/history-store";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
 
 export interface FileDetailProps {
   fileId: number;
   /** Additional actions to prepend (e.g., prev/next navigation) */
   prependActions?: Array<FloatingFooterAction>;
+  /** Whether to track this file view in history (default: true) */
+  trackHistory?: boolean;
 }
 
-export function FileDetail({ fileId, prependActions }: FileDetailProps) {
+export function FileDetail({
+  fileId,
+  prependActions,
+  trackHistory = true,
+}: FileDetailProps) {
   const { data, isLoading, isError, error } = useGetSingleFileMetadata(fileId);
 
   if (isLoading) {
@@ -62,6 +68,7 @@ export function FileDetail({ fileId, prependActions }: FileDetailProps) {
       data={data}
       fileId={fileId}
       prependActions={prependActions}
+      trackHistory={trackHistory}
     />
   );
 }
@@ -70,17 +77,23 @@ function FileDetailContent({
   data,
   fileId,
   prependActions,
+  trackHistory,
 }: {
   data: FileMetadata;
   fileId: number;
   prependActions?: Array<FloatingFooterAction>;
+  trackHistory: boolean;
 }) {
   const { addViewedFile } = useHistoryActions();
+  const historyEnabled = useHistoryEnabled();
 
   // Track file view when component mounts with valid data
+  // Respects both the page-level trackHistory prop and global enabled setting
   useEffect(() => {
-    addViewedFile(fileId);
-  }, [fileId, addViewedFile]);
+    if (trackHistory && historyEnabled) {
+      addViewedFile(fileId);
+    }
+  }, [fileId, addViewedFile, trackHistory, historyEnabled]);
 
   const actionGroups = useFileActions(data, {
     includeExternal: true,

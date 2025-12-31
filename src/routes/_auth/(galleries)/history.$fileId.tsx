@@ -38,5 +38,11 @@ function RouteComponent() {
     return null;
   }
 
-  return <FileDetail fileId={fileIdNum} prependActions={navActions} />;
+  return (
+    <FileDetail
+      fileId={fileIdNum}
+      prependActions={navActions}
+      trackHistory={false}
+    />
+  );
 }
