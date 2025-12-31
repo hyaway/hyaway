@@ -1,4 +1,4 @@
-import { ThumbnailGalleryDisplaySettingsContent } from "@/components/image-grid/thumbnail-gallery-display-settings-popover";
+import { ThumbnailGalleryDisplaySettingsContent } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
 import {
   RECENT_FILES_SETTINGS_TITLE,
   RecentFilesSettings,

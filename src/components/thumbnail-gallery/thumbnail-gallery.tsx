@@ -1,7 +1,10 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useDeferredValue, useEffect, useMemo } from "react";
-import { CARD_FOOTER_HEIGHT, ImageGridCard } from "./image-grid-card";
-import { ImageGridSkeleton } from "./image-grid-skeleton";
+import {
+  CARD_FOOTER_HEIGHT,
+  ThumbnailGalleryCard,
+} from "./thumbnail-gallery-card";
+import { ThumbnailGallerySkeleton } from "./thumbnail-gallery-skeleton";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { PageError } from "@/components/page-shell/page-error";
@@ -14,7 +17,7 @@ import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { cn } from "@/lib/utils";
 import { useGridExpandImages, useGridMaxLanes } from "@/lib/ux-settings-store";
 
-export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
+export function ThumbnailGallery({ fileIds }: { fileIds: Array<number> }) {
   const itemsQuery = useInfiniteGetFilesMetadata(fileIds, false);
   const defaultDimensions = useThumbnailDimensions();
 
@@ -23,7 +26,7 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
   }
 
   if (!defaultDimensions || itemsQuery.isPending) {
-    return <ImageGridSkeleton />;
+    return <ThumbnailGallerySkeleton />;
   }
 
   if (itemsQuery.isError) {
@@ -40,7 +43,7 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
   }
 
   return (
-    <PureImageGrid
+    <PureThumbnailGallery
       itemsQuery={itemsQuery}
       totalItems={fileIds.length}
       defaultDimensions={defaultDimensions}
@@ -48,7 +51,7 @@ export function ImageGrid({ fileIds }: { fileIds: Array<number> }) {
   );
 }
 
-export function PureImageGrid({
+export function PureThumbnailGallery({
   itemsQuery,
   totalItems,
   defaultDimensions,
@@ -164,7 +167,7 @@ export function PureImageGrid({
               const itemHeight = getItemHeight(item);
 
               return (
-                <ImageGridCard
+                <ThumbnailGalleryCard
                   key={virtualRow.index}
                   virtualRow={virtualRow}
                   lanes={lanes}

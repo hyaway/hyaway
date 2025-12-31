@@ -8,7 +8,7 @@ import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RandomInboxSettingsPopover } from "./-components/random-inbox-settings-popover";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
-import { ImageGrid } from "@/components/image-grid/image-grid";
+import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 
 export const Route = createFileRoute("/_auth/(galleries)/random-inbox")({
@@ -76,7 +76,7 @@ function RouteComponent() {
           title={`Random inbox (${data?.file_ids?.length ?? 0} files)`}
         />
         {data?.file_ids && data.file_ids.length > 0 ? (
-          <ImageGrid fileIds={data.file_ids} />
+          <ThumbnailGallery fileIds={data.file_ids} />
         ) : (
           <EmptyState message="No inbox files found." />
         )}

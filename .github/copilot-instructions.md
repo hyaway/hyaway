@@ -8,7 +8,7 @@ Hyaway is a React + TypeScript frontend application for browsing Hydrus Network 
 - **TanStack Router** for file-based routing
 - **TanStack Query** for data fetching
 - **Tailwind CSS v4** for styling
-- **Radix UI** primitives via shadcn/ui
+- **Base UI** primitives via shadcn/ui
 - **Vite** as the build tool
 
 ## Project Structure
@@ -48,7 +48,7 @@ src/routes/
 ```
 src/components/
 ├── app-shell/          # App-level layout components (header, sidebar)
-├── image-grid/         # Image grid + related components
+├── thumbnail-gallery/  # Thumbnail gallery + related components
 ├── page-shell/         # Page-level layout primitives
 ├── settings/           # Shared settings components (controls, primitives)
 ├── tag/                # Tag-related components
@@ -108,7 +108,7 @@ Cards live in `routes/(settings)/-components/` and are named `{feature}-settings
 
 Popovers live near their usage:
 
-- `components/image-grid/thumbnail-gallery-display-settings-popover.tsx` - Used across multiple gallery pages
+- `components/thumbnail-gallery/thumbnail-gallery-display-settings-popover.tsx` - Used across multiple gallery pages
 - `routes/_auth/(file)/-components/file-viewer-settings-popover.tsx` - File detail page only
 - `routes/_auth/(galleries)/-components/` - Gallery-specific popovers
 - `routes/_auth/(remote-pages)/-components/pages-display-settings-popover.tsx` - Pages only

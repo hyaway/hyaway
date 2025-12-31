@@ -1,6 +1,6 @@
 import { PageHeading } from "./page-heading";
 import type { ReactNode } from "react";
-import { ImageGridSkeleton } from "@/components/image-grid/image-grid-skeleton";
+import { ThumbnailGallerySkeleton } from "@/components/thumbnail-gallery/thumbnail-gallery-skeleton";
 
 interface PageLoadingProps {
   title: string;
@@ -12,7 +12,7 @@ export function PageLoading({ title, children }: PageLoadingProps) {
     <div className="pb-16">
       {title && <PageHeading title={title} />}
       {children}
-      <ImageGridSkeleton />
+      <ThumbnailGallerySkeleton />
     </div>
   );
 }

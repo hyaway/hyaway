@@ -7,13 +7,13 @@ import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
-import { ThumbnailGalleryDisplaySettingsPopover } from "@/components/image-grid/thumbnail-gallery-display-settings-popover";
+import { ThumbnailGalleryDisplaySettingsPopover } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
 import {
   useFocusPageMutation,
   useGetPageInfoQuery,
   useRefreshPageMutation,
 } from "@/integrations/hydrus-api/queries/manage-pages";
-import { ImageGrid } from "@/components/image-grid/image-grid";
+import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 
 export const Route = createFileRoute("/_auth/(remote-pages)/pages/$pageId")({
   component: RouteComponent,
@@ -101,7 +101,7 @@ function RouteComponent() {
           title={`Page: ${data?.page_info.name} (${data?.page_info.media.num_files ?? 0} files)`}
         />
         {data?.page_info.media ? (
-          <ImageGrid fileIds={data.page_info.media.hash_ids} />
+          <ThumbnailGallery fileIds={data.page_info.media.hash_ids} />
         ) : (
           <p>This page has no media.</p>
         )}

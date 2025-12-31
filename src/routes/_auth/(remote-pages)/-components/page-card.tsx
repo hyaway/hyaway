@@ -5,7 +5,7 @@ import {
   CardFooter,
   CardTitle,
 } from "@/components/ui-primitives/card";
-import { ThumbnailImage } from "@/components/image-grid/image-grid-card";
+import { ThumbnailImage } from "@/components/thumbnail-gallery/thumbnail-gallery-card";
 import { useGetPageInfoQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { cn } from "@/lib/utils";

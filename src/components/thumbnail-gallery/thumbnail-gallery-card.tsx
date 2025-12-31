@@ -31,7 +31,7 @@ export const CARD_FOOTER_HEIGHT = 24;
 
 // --- Main Card Component ---
 
-export interface ImageCardProps extends React.HTMLAttributes<HTMLLIElement> {
+export interface ThumbnailGalleryCardProps extends React.HTMLAttributes<HTMLLIElement> {
   virtualRow: { lane: number; index: number; start: number };
   lanes: number;
   totalItemsCount: number;
@@ -44,7 +44,7 @@ export interface ImageCardProps extends React.HTMLAttributes<HTMLLIElement> {
   linkRef?: (el: HTMLAnchorElement | null) => void;
 }
 
-export const ImageGridCard = memo(function ImageGridCard({
+export const ThumbnailGalleryCard = memo(function ThumbnailGalleryCard({
   virtualRow,
   lanes,
   totalItemsCount,
@@ -57,7 +57,7 @@ export const ImageGridCard = memo(function ImageGridCard({
   tabIndex = 0,
   linkRef,
   ...props
-}: ImageCardProps) {
+}: ThumbnailGalleryCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isTopRow = virtualRow.index < lanes;
@@ -153,7 +153,7 @@ export const ImageGridCard = memo(function ImageGridCard({
             tabIndex={tabIndex}
           />
         </ContextMenuTrigger>
-        <ImageCardContextMenu item={item} />
+        <ThumbnailGalleryCardContextMenu item={item} />
       </ContextMenu>
       <div
         className={cn(
@@ -166,7 +166,7 @@ export const ImageGridCard = memo(function ImageGridCard({
           originClass,
         )}
       >
-        <ImageCardContent item={item} />
+        <ThumbnailGalleryCardContent item={item} />
       </div>
     </li>
   );
@@ -174,13 +174,13 @@ export const ImageGridCard = memo(function ImageGridCard({
 
 // --- Card Content (badges + thumbnail) ---
 
-interface ImageCardContentProps {
+interface ThumbnailGalleryCardContentProps {
   item: FileMetadata;
 }
 
-const ImageCardContent = memo(function ImageCardContent({
+const ThumbnailGalleryCardContent = memo(function ThumbnailGalleryCardContent({
   item,
-}: ImageCardContentProps) {
+}: ThumbnailGalleryCardContentProps) {
   const fileSize = formatBytes(item.size);
   const isPermanentlyDeleted = item.is_deleted && !item.is_trashed;
 
@@ -226,7 +226,7 @@ const ImageCardContent = memo(function ImageCardContent({
 
 // --- Context Menu Actions ---
 
-interface ImageCardContextMenuProps {
+interface ThumbnailGalleryCardContextMenuProps {
   item: Pick<
     FileMetadata,
     | "file_id"
@@ -239,41 +239,43 @@ interface ImageCardContextMenuProps {
   >;
 }
 
-const ImageCardContextMenu = memo(function ImageCardContextMenu({
-  item,
-}: ImageCardContextMenuProps) {
-  const actionGroups = useFileActions(item, {
-    includeOpen: true,
-    includeExternal: true,
-  });
+const ThumbnailGalleryCardContextMenu = memo(
+  function ThumbnailGalleryCardContextMenu({
+    item,
+  }: ThumbnailGalleryCardContextMenuProps) {
+    const actionGroups = useFileActions(item, {
+      includeOpen: true,
+      includeExternal: true,
+    });
 
-  return (
-    <ContextMenuContent
-      className={
-        "bg-popover/95 supports-backdrop-filter:bg-popover/75 backdrop-blur-sm"
-      }
-    >
-      {actionGroups.map((group, groupIndex) => (
-        <div key={group.id}>
-          {groupIndex > 0 && <ContextMenuSeparator />}
-          {group.actions.map((action) => (
-            <ContextMenuItem
-              key={action.id}
-              onClick={action.onClick}
-              variant={action.variant}
-            >
-              <action.icon />
-              {action.label}
-              {action.external && (
-                <IconExternalLink className="ml-auto opacity-50" />
-              )}
-            </ContextMenuItem>
-          ))}
-        </div>
-      ))}
-    </ContextMenuContent>
-  );
-});
+    return (
+      <ContextMenuContent
+        className={
+          "bg-popover/95 supports-backdrop-filter:bg-popover/75 backdrop-blur-sm"
+        }
+      >
+        {actionGroups.map((group, groupIndex) => (
+          <div key={group.id}>
+            {groupIndex > 0 && <ContextMenuSeparator />}
+            {group.actions.map((action) => (
+              <ContextMenuItem
+                key={action.id}
+                onClick={action.onClick}
+                variant={action.variant}
+              >
+                <action.icon />
+                {action.label}
+                {action.external && (
+                  <IconExternalLink className="ml-auto opacity-50" />
+                )}
+              </ContextMenuItem>
+            ))}
+          </div>
+        ))}
+      </ContextMenuContent>
+    );
+  },
+);
 
 // --- Thumbnail Image ---
 

@@ -5,10 +5,14 @@ import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 
 /**
- * Skeleton component for the image grid while loading.
+ * Skeleton component for the thumbnail gallery while loading.
  * Uses CSS columns for responsive masonry layout with 200px item width.
  */
-export function ImageGridSkeleton({ itemCount = 12 }: { itemCount?: number }) {
+export function ThumbnailGallerySkeleton({
+  itemCount = 12,
+}: {
+  itemCount?: number;
+}) {
   const dimensions = useThumbnailDimensions() || { width: 200, height: 200 };
   // Generate random but stable heights for skeleton items
   const heights = useMemo(

@@ -8,7 +8,7 @@ import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
 import { useRecentlyInboxedFilesQuery } from "@/integrations/hydrus-api/queries/search";
-import { ImageGrid } from "@/components/image-grid/image-grid";
+import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 
 export const Route = createFileRoute("/_auth/(galleries)/recently-inboxed")({
   component: RouteComponent,
@@ -70,7 +70,7 @@ function RouteComponent() {
           title={`Recently inboxed (${data?.file_ids?.length ?? 0} files)`}
         />
         {data?.file_ids && data.file_ids.length > 0 ? (
-          <ImageGrid fileIds={data.file_ids} />
+          <ThumbnailGallery fileIds={data.file_ids} />
         ) : (
           <EmptyState message="No recently inboxed files found." />
         )}

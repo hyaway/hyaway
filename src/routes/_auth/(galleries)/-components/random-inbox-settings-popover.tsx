@@ -1,4 +1,4 @@
-import { ThumbnailGalleryDisplaySettingsContent } from "@/components/image-grid/thumbnail-gallery-display-settings-popover";
+import { ThumbnailGalleryDisplaySettingsContent } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
 import {
   RANDOM_INBOX_SETTINGS_TITLE,
   RandomInboxSettings,

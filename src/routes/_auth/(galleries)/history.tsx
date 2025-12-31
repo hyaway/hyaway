@@ -4,7 +4,7 @@ import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { HistorySettingsPopover } from "./-components/history-settings-popover";
-import { ImageGrid } from "@/components/image-grid/image-grid";
+import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import {
   useHistoryActions,
   useHistoryEnabled,
@@ -53,7 +53,11 @@ function RouteComponent() {
         <PageHeading
           title={`Watch history (${fileIds.length} ${fileIds.length === 1 ? "file" : "files"})`}
         />
-        {fileIds.length > 0 ? <ImageGrid fileIds={fileIds} /> : emptyContent}
+        {fileIds.length > 0 ? (
+          <ThumbnailGallery fileIds={fileIds} />
+        ) : (
+          emptyContent
+        )}
       </div>
       <PageFloatingBar
         leftContent={clearButton}
