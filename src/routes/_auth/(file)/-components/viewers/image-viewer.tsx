@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { VIEWER_MAX_HEIGHT } from "./viewer-styles";
 import { cn } from "@/lib/utils";
 import { checkerboardBg } from "@/lib/style-constants";
 import {
@@ -43,7 +42,8 @@ export function ImageViewer({
             : "bg-background",
           isExpanded
             ? "max-h-full cursor-zoom-out"
-            : cn(VIEWER_MAX_HEIGHT, "cursor-zoom-in"),
+            : // Full available max-height minus header, footer, and content padding
+              "short:max-h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1.5rem)] max-h-[calc(100svh-var(--header-height)-var(--footer-height)-2rem)] cursor-zoom-in",
         )}
         onLoad={handleLoad}
         onError={onError}

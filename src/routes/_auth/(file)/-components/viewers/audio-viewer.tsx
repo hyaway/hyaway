@@ -3,7 +3,6 @@ import {
   DefaultAudioLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
-import { VIEWER_MAX_HEIGHT } from "./viewer-styles";
 import type { AudioMimeType } from "@vidstack/react";
 import { useActiveTheme } from "@/lib/theme-store";
 import { cn } from "@/lib/utils";
@@ -30,7 +29,8 @@ export function AudioViewer({
   return (
     <div
       className={cn(
-        VIEWER_MAX_HEIGHT,
+        // Full available max-height minus header, footer, and content padding
+        "short:max-h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1.5rem)] max-h-[calc(100svh-var(--header-height)-var(--footer-height)-2rem)]",
         "flex flex-row justify-center pb-2 sm:px-4 sm:pb-4",
       )}
     >
