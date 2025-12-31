@@ -2,24 +2,24 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { IconAlertCircle } from "@tabler/icons-react";
 
+import { ContentDetailsTable } from "./-components/content-details-table";
+import { FileDetailSkeleton } from "./-components/file-detail-skeleton";
+import { FileInfoTable } from "./-components/file-info-table";
+import { FilePageHeader } from "./-components/file-page-header";
+import { FileStatusBadges } from "./-components/file-status-badges";
+import { FileViewer } from "./-components/file-viewer";
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
-import { PageError } from "@/components/page/page-error";
-import { PageFloatingBar } from "@/components/page/page-floating-bar";
+import { PageError } from "@/components/page-shell/page-error";
+import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { useFileActions } from "@/hooks/use-file-actions";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useHistoryActions } from "@/lib/history-store";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
-import { ContentDetailsTable } from "@/components/file-detail/content-details-table";
-import { FileDetailSkeleton } from "@/components/file-detail/file-detail-skeleton";
-import { FileInfoTable } from "@/components/file-detail/file-info-table";
-import { FilePageHeader } from "@/components/file-detail/file-page-header";
-import { FileStatusBadges } from "@/components/file-detail/file-status-badges";
-import { FileViewer } from "@/components/file-detail/file-viewer";
-import { FileViewerSettingsPopover } from "@/components/settings/file-viewer-settings-popover";
+import { FileViewerSettingsPopover } from "@/routes/(settings)/-components/file-viewer-settings-popover";
 
-export const Route = createFileRoute("/_auth/file/$fileId")({
+export const Route = createFileRoute("/_auth/(file)/file/$fileId")({
   component: RouteComponent,
   beforeLoad: ({ params }) => ({
     getTitle: () => `File ${params.fileId}`,

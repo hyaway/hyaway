@@ -1,17 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconArrowsShuffle } from "@tabler/icons-react";
-import { PageError } from "@/components/page/page-error";
-import { EmptyState } from "@/components/page/empty-state";
-import { PageFloatingBar } from "@/components/page/page-floating-bar";
-import { PageHeading } from "@/components/page/page-heading";
-import { PageLoading } from "@/components/page/page-loading";
-import { RandomInboxSettingsPopover } from "@/components/settings/random-inbox-settings-popover";
+import { PageError } from "@/components/page-shell/page-error";
+import { EmptyState } from "@/components/page-shell/empty-state";
+import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageHeading } from "@/components/page-shell/page-heading";
+import { PageLoading } from "@/components/page-shell/page-loading";
+import { RandomInboxSettingsPopover } from "@/routes/(settings)/-components/random-inbox-settings-popover";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 
-export const Route = createFileRoute("/_auth/random-inbox")({
+export const Route = createFileRoute("/_auth/(galleries)/random-inbox")({
   component: RouteComponent,
   beforeLoad: () => ({
     getTitle: () => "Random inbox",

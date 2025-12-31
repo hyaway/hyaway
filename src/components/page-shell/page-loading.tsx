@@ -1,6 +1,6 @@
+import { PageHeading } from "./page-heading";
 import type { ReactNode } from "react";
 import { ImageGridSkeleton } from "@/components/image-grid/image-grid-skeleton";
-import { PageHeading } from "@/components/page/page-heading";
 
 interface PageLoadingProps {
   title: string;

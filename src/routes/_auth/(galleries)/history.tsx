@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { IconTrashX } from "@tabler/icons-react";
-import { EmptyState } from "@/components/page/empty-state";
-import { PageFloatingBar } from "@/components/page/page-floating-bar";
-import { PageHeading } from "@/components/page/page-heading";
-import { HistorySettingsPopover } from "@/components/settings/history-settings-popover";
+import { EmptyState } from "@/components/page-shell/empty-state";
+import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageHeading } from "@/components/page-shell/page-heading";
+import { HistorySettingsPopover } from "@/routes/(settings)/-components/history-settings-popover";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 import {
   useHistoryActions,
@@ -13,7 +13,7 @@ import {
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import { Button } from "@/components/ui-primitives/button";
 
-export const Route = createFileRoute("/_auth/history")({
+export const Route = createFileRoute("/_auth/(galleries)/history")({
   component: RouteComponent,
   beforeLoad: () => ({
     getTitle: () => "Watch history",

@@ -12,10 +12,10 @@ import {
   NavigationMenuList,
   RouterNavigationMenuLink,
 } from "@/components/ui-primitives/navigation-menu";
-import { PageHeading } from "@/components/page/page-heading";
+import { PageHeading } from "@/components/page-shell/page-heading";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/(settings)/settings")({
   component: SettingsComponent,
   beforeLoad: () => ({
     getTitle: () => "Settings",

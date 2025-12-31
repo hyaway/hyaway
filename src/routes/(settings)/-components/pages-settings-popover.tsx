@@ -1,9 +1,6 @@
-import {
-  SettingsHeader,
-  SettingsTitle,
-} from "@/components/settings/settings-ui";
-import { SliderField } from "@/components/settings/setting-fields";
-import { SettingsPopover } from "@/components/settings/settings-popover";
+import { SettingsHeader, SettingsTitle } from "./settings-ui";
+import { SliderField } from "./setting-fields";
+import { SettingsPopover } from "./settings-popover";
 import {
   MAX_PAGES_COLUMNS,
   usePagesMaxColumns,

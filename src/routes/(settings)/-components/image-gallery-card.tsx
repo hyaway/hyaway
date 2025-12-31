@@ -1,3 +1,4 @@
+import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
 import {
   Card,
   CardContent,
@@ -5,11 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui-primitives/card";
-import {
-  SettingsGroup,
-  SliderField,
-  SwitchField,
-} from "@/components/settings/setting-fields";
 import {
   MAX_GRID_LANES,
   useGridExpandImages,

@@ -1,3 +1,4 @@
+import { SettingsGroup, SwitchField } from "./setting-fields";
 import type { ImageBackground } from "@/lib/ux-settings-store";
 import {
   Card,
@@ -6,10 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui-primitives/card";
-import {
-  SettingsGroup,
-  SwitchField,
-} from "@/components/settings/setting-fields";
 import {
   ToggleGroup,
   ToggleGroupItem,

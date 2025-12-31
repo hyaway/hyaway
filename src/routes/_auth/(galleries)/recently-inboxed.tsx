@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { EmptyState } from "@/components/page/empty-state";
-import { PageError } from "@/components/page/page-error";
-import { PageFloatingBar } from "@/components/page/page-floating-bar";
-import { PageHeading } from "@/components/page/page-heading";
-import { PageLoading } from "@/components/page/page-loading";
-import { RefetchButton } from "@/components/refetch-button";
-import { RecentFilesSettingsPopover } from "@/components/settings/recent-files-settings-popover";
+import { EmptyState } from "@/components/page-shell/empty-state";
+import { PageError } from "@/components/page-shell/page-error";
+import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageHeading } from "@/components/page-shell/page-heading";
+import { PageLoading } from "@/components/page-shell/page-loading";
+import { RefetchButton } from "@/components/page-shell/refetch-button";
+import { RecentFilesSettingsPopover } from "@/routes/(settings)/-components/recent-files-settings-popover";
 import { useRecentlyInboxedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 
-export const Route = createFileRoute("/_auth/recently-inboxed")({
+export const Route = createFileRoute("/_auth/(galleries)/recently-inboxed")({
   component: RouteComponent,
   beforeLoad: () => ({
     getTitle: () => "Recently inboxed",

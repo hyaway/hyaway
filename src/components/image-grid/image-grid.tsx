@@ -4,7 +4,7 @@ import { CARD_FOOTER_HEIGHT, ImageGridCard } from "./image-grid-card";
 import { ImageGridSkeleton } from "./image-grid-skeleton";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
-import { PageError } from "@/components/page/page-error";
+import { PageError } from "@/components/page-shell/page-error";
 import { Badge } from "@/components/ui-primitives/badge";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";

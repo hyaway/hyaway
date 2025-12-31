@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconFocusCentered, IconRefreshDot } from "@tabler/icons-react";
-import type { FloatingBarAction } from "@/components/page/page-floating-bar";
-import { PageError } from "@/components/page/page-error";
-import { PageFloatingBar } from "@/components/page/page-floating-bar";
-import { PageHeading } from "@/components/page/page-heading";
-import { PageLoading } from "@/components/page/page-loading";
-import { RefetchButton } from "@/components/refetch-button";
-import { ImageGallerySettingsPopover } from "@/components/settings/image-gallery-settings-popover";
+import type { FloatingBarAction } from "@/components/page-shell/page-floating-bar";
+import { PageError } from "@/components/page-shell/page-error";
+import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageHeading } from "@/components/page-shell/page-heading";
+import { PageLoading } from "@/components/page-shell/page-loading";
+import { RefetchButton } from "@/components/page-shell/refetch-button";
+import { ImageGallerySettingsPopover } from "@/routes/(settings)/-components/image-gallery-settings-popover";
 import {
   useFocusPageMutation,
   useGetPageInfoQuery,
@@ -15,7 +15,7 @@ import {
 } from "@/integrations/hydrus-api/queries/manage-pages";
 import { ImageGrid } from "@/components/image-grid/image-grid";
 
-export const Route = createFileRoute("/_auth/pages/$pageId")({
+export const Route = createFileRoute("/_auth/(remote-pages)/pages/$pageId")({
   component: RouteComponent,
   beforeLoad: ({ params }) => ({
     getTitle: () => `${params.pageId.slice(0, 8)}...`,

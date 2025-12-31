@@ -1,4 +1,5 @@
 import { IconTrashX } from "@tabler/icons-react";
+import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
 import {
   Card,
   CardContent,
@@ -6,11 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui-primitives/card";
-import {
-  SettingsGroup,
-  SliderField,
-  SwitchField,
-} from "@/components/settings/setting-fields";
 import {
   MAX_HISTORY_LIMIT,
   useHistoryActions,

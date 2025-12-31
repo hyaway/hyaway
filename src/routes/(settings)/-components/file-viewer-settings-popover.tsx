@@ -1,13 +1,7 @@
+import { SettingsHeader, SettingsTitle } from "./settings-ui";
+import { SettingsGroup, SwitchField } from "./setting-fields";
+import { SettingsPopover } from "./settings-popover";
 import type { ImageBackground } from "@/lib/ux-settings-store";
-import {
-  SettingsHeader,
-  SettingsTitle,
-} from "@/components/settings/settings-ui";
-import {
-  SettingsGroup,
-  SwitchField,
-} from "@/components/settings/setting-fields";
-import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   ToggleGroup,
   ToggleGroupItem,

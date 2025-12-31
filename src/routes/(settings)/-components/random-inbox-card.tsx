@@ -1,3 +1,4 @@
+import { SliderField } from "./setting-fields";
 import {
   Card,
   CardContent,
@@ -5,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui-primitives/card";
-import { SliderField } from "@/components/settings/setting-fields";
 import {
   MAX_RANDOM_INBOX_LIMIT,
   useRandomInboxLimit,

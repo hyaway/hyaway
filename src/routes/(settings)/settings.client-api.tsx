@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Login } from "@/components/settings/login";
+import { Login } from "./-components/login";
 
-export const Route = createFileRoute("/settings/client-api")({
+export const Route = createFileRoute("/(settings)/settings/client-api")({
   component: SettingsClientApiComponent,
   beforeLoad: () => ({
     getTitle: () => "Client API settings",

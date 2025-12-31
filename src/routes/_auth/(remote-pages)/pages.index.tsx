@@ -3,20 +3,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useMemo, useRef } from "react";
 
+import { PageCard, PageCardSkeleton } from "./-components/page-card";
 import type { Page } from "@/integrations/hydrus-api/models";
 
-import { PageCard, PageCardSkeleton } from "@/components/page-card";
-import { EmptyState } from "@/components/page/empty-state";
-import { PageError } from "@/components/page/page-error";
-import { PageFloatingBar } from "@/components/page/page-floating-bar";
-import { PageHeading } from "@/components/page/page-heading";
-import { RefetchButton } from "@/components/refetch-button";
-import { PagesSettingsPopover } from "@/components/settings/pages-settings-popover";
+import { EmptyState } from "@/components/page-shell/empty-state";
+import { PageError } from "@/components/page-shell/page-error";
+import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageHeading } from "@/components/page-shell/page-heading";
+import { RefetchButton } from "@/components/page-shell/refetch-button";
+import { PagesSettingsPopover } from "@/routes/(settings)/-components/pages-settings-popover";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { usePagesMaxColumns } from "@/lib/ux-settings-store";
 
-export const Route = createFileRoute("/_auth/pages/")({
+export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
   component: PagesIndex,
 });
 
@@ -36,7 +36,7 @@ function PagesIndex() {
   } = useGetMediaPagesQuery();
   const queryClient = useQueryClient();
 
-  const title = isPending ? "Pages" : `Pages (${pages.length} pages)`;
+  const title = isPending ? "Pages" : "Pages (${pages.length} pages)";
 
   const refetchButton = (
     <RefetchButton

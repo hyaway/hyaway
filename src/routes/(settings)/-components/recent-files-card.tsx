@@ -1,3 +1,4 @@
+import { SettingsGroup, SliderField } from "./setting-fields";
 import {
   Card,
   CardContent,
@@ -5,10 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui-primitives/card";
-import {
-  SettingsGroup,
-  SliderField,
-} from "@/components/settings/setting-fields";
 import {
   MAX_RECENT_FILES_DAYS,
   MAX_RECENT_FILES_LIMIT,
