@@ -1,4 +1,4 @@
-import { ImageGallerySettingsContent } from "@/components/image-grid/image-gallery-settings-popover";
+import { ThumbnailGalleryDisplaySettingsContent } from "@/components/image-grid/thumbnail-gallery-display-settings-popover";
 import { RecentFilesSettings } from "@/components/settings/recent-files-settings";
 import {
   SettingsHeader,
@@ -10,12 +10,12 @@ import { Separator } from "@/components/ui-primitives/separator";
 export function RecentFilesSettingsPopover() {
   return (
     <SettingsPopover label="Settings">
-      <ImageGallerySettingsContent />
+      <ThumbnailGalleryDisplaySettingsContent />
 
       <Separator className="my-4" />
 
       <SettingsHeader>
-        <SettingsTitle>Recency</SettingsTitle>
+        <SettingsTitle>Recent files</SettingsTitle>
       </SettingsHeader>
       <RecentFilesSettings idPrefix="popover-" />
     </SettingsPopover>

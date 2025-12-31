@@ -1,4 +1,4 @@
-import { ImageGallerySettings } from "@/components/settings/image-gallery-settings";
+import { PagesDisplaySettings } from "@/components/settings/pages-display-settings";
 import {
   Card,
   CardContent,
@@ -7,17 +7,17 @@ import {
   CardTitle,
 } from "@/components/ui-primitives/card";
 
-export function ImageGallerySettingsCard() {
+export function PagesDisplaySettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Thumbnail gallery display</CardTitle>
+        <CardTitle>Pages display</CardTitle>
         <CardDescription>
-          Configure how images are displayed in the gallery grid.
+          Configure how page cards are displayed.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ImageGallerySettings />
+        <PagesDisplaySettings />
       </CardContent>
     </Card>
   );

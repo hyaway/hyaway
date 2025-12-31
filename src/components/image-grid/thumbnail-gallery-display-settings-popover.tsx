@@ -1,25 +1,25 @@
-import { ImageGallerySettings } from "@/components/settings/image-gallery-settings";
+import { ThumbnailGalleryDisplaySettings } from "@/components/settings/thumbnail-gallery-display-settings";
 import {
   SettingsHeader,
   SettingsTitle,
 } from "@/components/settings/settings-ui";
 import { SettingsPopover } from "@/components/settings/settings-popover";
 
-export function ImageGallerySettingsContent() {
+export function ThumbnailGalleryDisplaySettingsContent() {
   return (
     <>
       <SettingsHeader>
         <SettingsTitle>Thumbnail gallery display</SettingsTitle>
       </SettingsHeader>
-      <ImageGallerySettings idPrefix="popover-" />
+      <ThumbnailGalleryDisplaySettings idPrefix="popover-" />
     </>
   );
 }
 
-export function ImageGallerySettingsPopover() {
+export function ThumbnailGalleryDisplaySettingsPopover() {
   return (
     <SettingsPopover label="Settings">
-      <ImageGallerySettingsContent />
+      <ThumbnailGalleryDisplaySettingsContent />
     </SettingsPopover>
   );
 }

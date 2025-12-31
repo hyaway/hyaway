@@ -6,13 +6,13 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
-export interface ImageGallerySettingsProps {
+export interface ThumbnailGalleryDisplaySettingsProps {
   idPrefix?: string;
 }
 
-export function ImageGallerySettings({
+export function ThumbnailGalleryDisplaySettings({
   idPrefix = "",
-}: ImageGallerySettingsProps) {
+}: ThumbnailGalleryDisplaySettingsProps) {
   const gridMaxLanes = useGridMaxLanes();
   const gridExpandImages = useGridExpandImages();
   const { setGridMaxLanes, setGridExpandImages } = useUxSettingsActions();

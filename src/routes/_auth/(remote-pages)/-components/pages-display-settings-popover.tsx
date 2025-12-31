@@ -1,17 +1,17 @@
-import { PagesSettings } from "@/components/settings/pages-settings";
+import { PagesDisplaySettings } from "@/components/settings/pages-display-settings";
 import {
   SettingsHeader,
   SettingsTitle,
 } from "@/components/settings/settings-ui";
 import { SettingsPopover } from "@/components/settings/settings-popover";
 
-export function PagesSettingsPopover() {
+export function PagesDisplaySettingsPopover() {
   return (
     <SettingsPopover label="Settings">
       <SettingsHeader>
         <SettingsTitle>Pages display</SettingsTitle>
       </SettingsHeader>
-      <PagesSettings idPrefix="popover-" />
+      <PagesDisplaySettings idPrefix="popover-" />
     </SettingsPopover>
   );
 }

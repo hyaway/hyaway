@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FileViewerSettingsCard } from "./-components/file-viewer-settings-card";
-import { ImageGallerySettingsCard } from "./-components/image-gallery-settings-card";
-import { PagesSettingsCard } from "./-components/pages-settings-card";
+import { ThumbnailGalleryDisplaySettingsCard } from "./-components/thumbnail-gallery-display-settings-card";
+import { PagesDisplaySettingsCard } from "./-components/pages-display-settings-card";
 import { RandomInboxSettingsCard } from "./-components/random-inbox-settings-card";
 import { RecentFilesSettingsCard } from "./-components/recent-files-settings-card";
 import { HistorySettingsCard } from "./-components/history-settings-card";
@@ -24,9 +24,9 @@ function SettingsUXComponent() {
       </Heading>
       <ThemeCard />
       <FileViewerSettingsCard />
-      <ImageGallerySettingsCard />
+      <ThumbnailGalleryDisplaySettingsCard />
       <TagsSortCard />
-      <PagesSettingsCard />
+      <PagesDisplaySettingsCard />
       <RecentFilesSettingsCard />
       <HistorySettingsCard />
       <RandomInboxSettingsCard />

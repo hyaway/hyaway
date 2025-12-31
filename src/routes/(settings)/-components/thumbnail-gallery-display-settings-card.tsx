@@ -1,4 +1,4 @@
-import { ImageGallerySettings } from "@/components/settings/image-gallery-settings";
+import { ThumbnailGalleryDisplaySettings } from "@/components/settings/thumbnail-gallery-display-settings";
 import {
   Card,
   CardContent,
@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui-primitives/card";
 
-export function ImageGallerySettingsCard() {
+export function ThumbnailGalleryDisplaySettingsCard() {
   return (
     <Card>
       <CardHeader>
@@ -17,7 +17,7 @@ export function ImageGallerySettingsCard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ImageGallerySettings />
+        <ThumbnailGalleryDisplaySettings />
       </CardContent>
     </Card>
   );

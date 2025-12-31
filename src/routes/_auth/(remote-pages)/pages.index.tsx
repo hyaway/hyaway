@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import React, { useMemo, useRef } from "react";
 
 import { PageCard, PageCardSkeleton } from "./-components/page-card";
-import { PagesSettingsPopover } from "./-components/pages-settings-popover";
+import { PagesDisplaySettingsPopover } from "./-components/pages-display-settings-popover";
 import type { Page } from "@/integrations/hydrus-api/models";
 
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -73,7 +73,7 @@ function PagesIndex() {
       </div>
       <PageFloatingBar
         leftContent={refetchButton}
-        rightContent={<PagesSettingsPopover />}
+        rightContent={<PagesDisplaySettingsPopover />}
       />
     </>
   );

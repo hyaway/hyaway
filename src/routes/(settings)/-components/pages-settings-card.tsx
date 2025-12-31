@@ -11,7 +11,7 @@ export function PagesSettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pages</CardTitle>
+        <CardTitle>Pages display</CardTitle>
         <CardDescription>
           Configure how page cards are displayed.
         </CardDescription>

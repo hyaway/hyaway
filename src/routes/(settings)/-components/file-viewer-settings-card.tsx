@@ -11,7 +11,7 @@ export function FileViewerSettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>File viewer</CardTitle>
+        <CardTitle>Media viewer</CardTitle>
         <CardDescription>
           Configure how the file viewer is displayed.
         </CardDescription>

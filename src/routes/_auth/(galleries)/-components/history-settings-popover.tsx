@@ -1,4 +1,4 @@
-import { ImageGallerySettingsContent } from "@/components/image-grid/image-gallery-settings-popover";
+import { ThumbnailGalleryDisplaySettingsContent } from "@/components/image-grid/thumbnail-gallery-display-settings-popover";
 import { HistorySettings } from "@/components/settings/history-settings";
 import {
   SettingsHeader,
@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui-primitives/separator";
 export function HistorySettingsPopover() {
   return (
     <SettingsPopover label="Settings">
-      <ImageGallerySettingsContent />
+      <ThumbnailGalleryDisplaySettingsContent />
 
       <Separator className="my-4" />
 

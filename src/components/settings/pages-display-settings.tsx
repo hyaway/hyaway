@@ -5,11 +5,13 @@ import {
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
-export interface PagesSettingsProps {
+export interface PagesDisplaySettingsProps {
   idPrefix?: string;
 }
 
-export function PagesSettings({ idPrefix = "" }: PagesSettingsProps) {
+export function PagesDisplaySettings({
+  idPrefix = "",
+}: PagesDisplaySettingsProps) {
   const pagesMaxColumns = usePagesMaxColumns();
   const { setPagesMaxColumns } = useUxSettingsActions();
 
