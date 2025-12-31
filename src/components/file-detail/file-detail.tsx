@@ -1,0 +1,132 @@
+import { useEffect } from "react";
+import { IconAlertCircle } from "@tabler/icons-react";
+
+import { ContentDetailsTable } from "./content-details-table";
+import { FileDetailSkeleton } from "./file-detail-skeleton";
+import { FileInfoTable } from "./file-info-table";
+import { FilePageHeader } from "./file-page-header";
+import { FileStatusBadges } from "./file-status-badges";
+import { FileViewer } from "./file-viewer";
+import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
+import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
+import { PageError } from "@/components/page-shell/page-error";
+import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
+import { Heading } from "@/components/ui-primitives/heading";
+import { Separator } from "@/components/ui-primitives/separator";
+import { useFileActions } from "@/hooks/use-file-actions";
+import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
+import { useHistoryActions } from "@/lib/history-store";
+import { InlineTagsList } from "@/components/tag/inline-tags-list";
+
+export interface FileDetailProps {
+  fileId: number;
+  /** Additional actions to prepend (e.g., prev/next navigation) */
+  prependActions?: Array<FloatingFooterAction>;
+  /** Content for the right side of the footer (e.g., settings popover) */
+  footerRightContent?: React.ReactNode;
+}
+
+export function FileDetail({
+  fileId,
+  prependActions,
+  footerRightContent,
+}: FileDetailProps) {
+  const { data, isLoading, isError, error } = useGetSingleFileMetadata(fileId);
+
+  if (isLoading) {
+    return <FileDetailSkeleton fileId={fileId} />;
+  }
+
+  if (isError) {
+    return (
+      <>
+        <FilePageHeader fileId={fileId} />
+        <PageError
+          error={error}
+          fallbackMessage="An unknown error occurred while fetching file."
+        />
+      </>
+    );
+  }
+
+  if (!data) {
+    return (
+      <>
+        <FilePageHeader fileId={fileId} />
+        <Alert variant="destructive">
+          <IconAlertCircle />
+          <AlertTitle>File not found</AlertTitle>
+        </Alert>
+      </>
+    );
+  }
+
+  return (
+    <FileDetailContent
+      data={data}
+      fileId={fileId}
+      prependActions={prependActions}
+      footerRightContent={footerRightContent}
+    />
+  );
+}
+
+function FileDetailContent({
+  data,
+  fileId,
+  prependActions,
+  footerRightContent,
+}: {
+  data: FileMetadata;
+  fileId: number;
+  prependActions?: Array<FloatingFooterAction>;
+  footerRightContent?: React.ReactNode;
+}) {
+  const { addViewedFile } = useHistoryActions();
+
+  // Track file view when component mounts with valid data
+  useEffect(() => {
+    addViewedFile(fileId);
+  }, [fileId, addViewedFile]);
+
+  const actionGroups = useFileActions(data, {
+    includeExternal: true,
+    includeThumbnail: false,
+  });
+  const allActions = actionGroups.flatMap((g) => g.actions);
+
+  // Combine prepended actions with file actions
+  const combinedActions = prependActions
+    ? [...prependActions, ...allActions]
+    : allActions;
+
+  return (
+    <>
+      <div className="flex min-w-0 flex-1 flex-col gap-1 pb-12 sm:gap-2 sm:pb-16">
+        <FileViewer data={data} />
+        <FilePageHeader fileId={fileId} />
+        <Separator />
+        <div className="flex items-center justify-between gap-2">
+          <FileStatusBadges data={data} />
+        </div>
+        <Separator className={"mb-4"} />
+
+        <div className="@container space-y-4">
+          <Heading level={2}>File metadata</Heading>
+          <div className="grid gap-4 @lg:grid-cols-2">
+            <ContentDetailsTable data={data} />
+            <FileInfoTable data={data} />
+          </div>
+        </div>
+        <Separator className={"mt-2 mb-4"} />
+        <InlineTagsList data={data} />
+      </div>
+
+      <PageFloatingFooter
+        actions={combinedActions}
+        rightContent={footerRightContent}
+      />
+    </>
+  );
+}

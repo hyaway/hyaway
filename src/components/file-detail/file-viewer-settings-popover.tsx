@@ -2,11 +2,11 @@ import {
   FILE_VIEWER_SETTINGS_TITLE,
   FileViewerSettings,
 } from "@/components/settings/file-viewer-settings";
+import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   SettingsHeader,
   SettingsTitle,
 } from "@/components/settings/settings-ui";
-import { SettingsPopover } from "@/components/settings/settings-popover";
 
 export function FileViewerSettingsPopover({
   className,

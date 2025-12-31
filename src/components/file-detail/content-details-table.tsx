@@ -1,13 +1,9 @@
 import { MetadataList } from "./metadata-list";
 
-import type { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
+import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { formatBytes, formatDuration } from "@/lib/format-utils";
 
-export function ContentDetailsTable({
-  data,
-}: {
-  data: NonNullable<ReturnType<typeof useGetSingleFileMetadata>["data"]>;
-}) {
+export function ContentDetailsTable({ data }: { data: FileMetadata }) {
   const rows: Array<{ label: string; value: React.ReactNode }> = [
     { label: "Dimensions", value: `${data.width} × ${data.height}` },
     { label: "Size", value: formatBytes(data.size) },

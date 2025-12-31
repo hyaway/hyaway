@@ -1,11 +1,7 @@
 import { MetadataList } from "./metadata-list";
-import type { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
+import type { FileMetadata } from "@/integrations/hydrus-api/models";
 
-export function FileInfoTable({
-  data,
-}: {
-  data: NonNullable<ReturnType<typeof useGetSingleFileMetadata>["data"]>;
-}) {
+export function FileInfoTable({ data }: { data: FileMetadata }) {
   const rows: Array<{ label: string; value: React.ReactNode }> = [
     { label: "File ID", value: data.file_id },
     {
