@@ -137,6 +137,11 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Other</SidebarGroupLabel>
+          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuLinkButton to="/history" className="cursor-pointer">
                 <TouchTarget>
@@ -145,11 +150,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Other</SidebarGroupLabel>
-          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuLinkButton
                 to="/random-inbox"
