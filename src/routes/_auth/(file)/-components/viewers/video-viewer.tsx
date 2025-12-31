@@ -3,8 +3,10 @@ import {
   DefaultVideoLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
+import { VIEWER_MAX_HEIGHT } from "./viewer-styles";
 import type { VideoMimeType } from "@vidstack/react";
 import { useActiveTheme } from "@/lib/theme-store";
+import { cn } from "@/lib/utils";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 
@@ -26,7 +28,12 @@ export function VideoViewer({
   const activeTheme = useActiveTheme();
 
   return (
-    <div className="short:max-h-[60svh] flex max-h-[70svh] flex-row justify-center pb-2 sm:px-4 sm:pb-4">
+    <div
+      className={cn(
+        VIEWER_MAX_HEIGHT,
+        "flex flex-row justify-center pb-2 sm:px-4 sm:pb-4",
+      )}
+    >
       <MediaPlayer
         title={`File ${fileId}`}
         src={{ src: fileUrl, type: mime as VideoMimeType }}
