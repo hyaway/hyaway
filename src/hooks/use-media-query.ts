@@ -1,20 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 export const useMediaQuery = (query: string) => {
-  const [value, setValue] = useState<boolean | undefined>();
+  const [value, setValue] = useState(() => matchMedia(query).matches);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const mediaQueryList = matchMedia(query);
+
+    // Sync state in case query changed between render and effect
+    setValue(mediaQueryList.matches);
+
     const onChange = (event: MediaQueryListEvent) => {
       setValue(event.matches);
     };
 
-    const result = matchMedia(query);
-    setValue(result.matches);
-    result.addEventListener("change", onChange);
-
-    return () => result.removeEventListener("change", onChange);
+    mediaQueryList.addEventListener("change", onChange);
+    return () => mediaQueryList.removeEventListener("change", onChange);
   }, [query]);
 
   return value;
