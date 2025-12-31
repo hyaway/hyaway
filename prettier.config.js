@@ -2,6 +2,7 @@
 
 /** @type {import('prettier').Config} */
 const config = {
+  endOfLine: "lf",
   plugins: ["prettier-plugin-tailwindcss"],
   tailwindFunctions: [
     "tv",
