@@ -1,5 +1,4 @@
 import { AppBreadcrumb } from "@/components/app-shell/app-breadcrumb";
-import { BackButton } from "@/components/app-shell/back-button";
 import { FloatingHeader } from "@/components/app-shell/floating-header";
 import { HeaderPortalSlot } from "@/components/app-shell/header-portal";
 import { Separator } from "@/components/ui-primitives/separator";
@@ -21,7 +20,6 @@ export function AppHeader() {
           orientation="vertical"
           className="my-auto mr-2 data-[orientation=vertical]:h-4"
         />
-        <BackButton className="md:hidden" />
         <AppBreadcrumb />
       </div>
       <HeaderPortalSlot className="px-4" />
