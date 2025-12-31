@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconArrowsShuffle } from "@tabler/icons-react";
+import { RandomInboxSettingsPopover } from "./-components/random-inbox-settings-popover";
 import { PageError } from "@/components/page-shell/page-error";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
-import { RandomInboxSettingsPopover } from "./-components/random-inbox-settings-popover";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";

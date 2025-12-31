@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
-import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
 import { useRecentlyArchivedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 

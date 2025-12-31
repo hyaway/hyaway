@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { IconTrashX } from "@tabler/icons-react";
+import { HistorySettingsPopover } from "./-components/history-settings-popover";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";
-import { HistorySettingsPopover } from "./-components/history-settings-popover";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import {
   useHistoryActions,
