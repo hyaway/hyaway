@@ -11,7 +11,7 @@ import { FileViewer } from "./-components/file-viewer";
 import { FileViewerSettingsPopover } from "./-components/file-viewer-settings-popover";
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
 import { PageError } from "@/components/page-shell/page-error";
-import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { useFileActions } from "@/hooks/use-file-actions";
@@ -105,7 +105,7 @@ function FileDetailContent({
         <InlineTagsList data={data} />
       </div>
 
-      <PageFloatingBar
+      <PageFloatingFooter
         actions={allActions}
         rightContent={<FileViewerSettingsPopover />}
       />

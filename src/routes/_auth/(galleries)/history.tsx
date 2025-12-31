@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { IconTrashX } from "@tabler/icons-react";
 import { EmptyState } from "@/components/page-shell/empty-state";
-import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { HistorySettingsPopover } from "./-components/history-settings-popover";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
@@ -59,7 +59,7 @@ function RouteComponent() {
           emptyContent
         )}
       </div>
-      <PageFloatingBar
+      <PageFloatingFooter
         leftContent={clearButton}
         rightContent={<HistorySettingsPopover />}
       />

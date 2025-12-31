@@ -2,7 +2,7 @@ import { IconDots } from "@tabler/icons-react";
 
 import type { ComponentType, ReactNode, SVGProps } from "react";
 
-import { FloatingBar } from "@/components/app-shell/floating-bar";
+import { FloatingFooter } from "@/components/app-shell/floating-footer";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import {
   DropdownMenu,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui-primitives/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-export interface FloatingBarAction {
+export interface FloatingFooterAction {
   id: string;
   label: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
@@ -26,26 +26,26 @@ export interface FloatingBarAction {
   overflowOnly?: boolean;
 }
 
-interface PageFloatingBarProps {
+interface PageFloatingFooterProps {
   /** Actions to display */
-  actions?: Array<FloatingBarAction>;
+  actions?: Array<FloatingFooterAction>;
   /** Content to display on the left (e.g., refetch button) */
   leftContent?: ReactNode;
   /** Content to display on the right (e.g., settings popover) */
   rightContent?: ReactNode;
-  /** Optional className for the floating bar */
+  /** Optional className for the floating footer */
   className?: string;
 }
 
 /** Maximum visible action buttons (excluding overflow and settings) */
 const MAX_VISIBLE_ACTIONS = 2;
 
-export function PageFloatingBar({
+export function PageFloatingFooter({
   actions = [],
   leftContent,
   rightContent,
   className,
-}: PageFloatingBarProps) {
+}: PageFloatingFooterProps) {
   // Separate actions into always-overflow and normal actions
   const alwaysOverflowActions = actions.filter((a) => a.overflowOnly);
   const normalActions = actions.filter((a) => !a.overflowOnly);
@@ -59,7 +59,7 @@ export function PageFloatingBar({
   const hasOverflow = overflowActions.length > 0;
 
   return (
-    <FloatingBar className={cn("justify-center gap-1", className)}>
+    <FloatingFooter className={cn("justify-center gap-1", className)}>
       {/* Left content (e.g., refetch button) */}
       {leftContent}
       {/* Visible actions */}
@@ -105,11 +105,11 @@ export function PageFloatingBar({
 
       {/* Settings (popover or other content) */}
       {rightContent}
-    </FloatingBar>
+    </FloatingFooter>
   );
 }
 
-function ActionButton({ action }: { action: FloatingBarAction }) {
+function ActionButton({ action }: { action: FloatingFooterAction }) {
   return (
     <BottomNavButton
       label={action.label}

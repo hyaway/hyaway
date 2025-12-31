@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconFocusCentered, IconRefreshDot } from "@tabler/icons-react";
-import type { FloatingBarAction } from "@/components/page-shell/page-floating-bar";
+import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import { PageError } from "@/components/page-shell/page-error";
-import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
@@ -43,7 +43,7 @@ function RouteComponent() {
     />
   );
 
-  const overflowActions: Array<FloatingBarAction> = [
+  const overflowActions: Array<FloatingFooterAction> = [
     {
       id: "refresh-remote",
       label: "Refresh remote",
@@ -66,7 +66,7 @@ function RouteComponent() {
     return (
       <>
         <PageLoading title={`Page: ${pageId.slice(0, 8)}...`} />
-        <PageFloatingBar
+        <PageFloatingFooter
           leftContent={refetchButton}
           actions={overflowActions}
           rightContent={<ThumbnailGalleryDisplaySettingsPopover />}
@@ -85,7 +85,7 @@ function RouteComponent() {
             fallbackMessage="An unknown error occurred while fetching pages."
           />
         </div>
-        <PageFloatingBar
+        <PageFloatingFooter
           leftContent={refetchButton}
           actions={overflowActions}
           rightContent={<ThumbnailGalleryDisplaySettingsPopover />}
@@ -106,7 +106,7 @@ function RouteComponent() {
           <p>This page has no media.</p>
         )}
       </div>
-      <PageFloatingBar
+      <PageFloatingFooter
         leftContent={refetchButton}
         actions={overflowActions}
         rightContent={<ThumbnailGalleryDisplaySettingsPopover />}

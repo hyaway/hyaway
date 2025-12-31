@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
-import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
-import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
 import { useRecentlyInboxedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 
@@ -37,7 +37,7 @@ function RouteComponent() {
     return (
       <>
         <PageLoading title="Recently inboxed" />
-        <PageFloatingBar
+        <PageFloatingFooter
           leftContent={refetchButton}
           rightContent={<RecentFilesSettingsPopover />}
         />
@@ -55,7 +55,7 @@ function RouteComponent() {
             fallbackMessage="An unknown error occurred while fetching recently inboxed files."
           />
         </div>
-        <PageFloatingBar
+        <PageFloatingFooter
           leftContent={refetchButton}
           rightContent={<RecentFilesSettingsPopover />}
         />
@@ -75,7 +75,7 @@ function RouteComponent() {
           <EmptyState message="No recently inboxed files found." />
         )}
       </div>
-      <PageFloatingBar
+      <PageFloatingFooter
         leftContent={refetchButton}
         rightContent={<RecentFilesSettingsPopover />}
       />

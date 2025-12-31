@@ -9,7 +9,7 @@ import type { Page } from "@/integrations/hydrus-api/models";
 
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
-import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
@@ -71,7 +71,7 @@ function PagesIndex() {
           <PagesGrid pages={pages} />
         )}
       </div>
-      <PageFloatingBar
+      <PageFloatingFooter
         leftContent={refetchButton}
         rightContent={<PagesDisplaySettingsPopover />}
       />

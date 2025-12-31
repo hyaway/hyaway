@@ -1,15 +1,15 @@
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 
-interface FloatingBarProps extends React.HTMLAttributes<HTMLDivElement> {
+interface FloatingFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-export function FloatingBar({
+export function FloatingFooter({
   children,
   className,
   ...props
-}: FloatingBarProps) {
+}: FloatingFooterProps) {
   const isVisible = useScrollDirection(50);
 
   const visibilityClasses = isVisible

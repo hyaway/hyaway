@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { IconArrowsShuffle } from "@tabler/icons-react";
 import { PageError } from "@/components/page-shell/page-error";
 import { EmptyState } from "@/components/page-shell/empty-state";
-import { PageFloatingBar } from "@/components/page-shell/page-floating-bar";
+import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RandomInboxSettingsPopover } from "./-components/random-inbox-settings-popover";
@@ -43,7 +43,7 @@ function RouteComponent() {
     return (
       <>
         <PageLoading title="Random inbox" />
-        <PageFloatingBar
+        <PageFloatingFooter
           leftContent={shuffleButton}
           rightContent={<RandomInboxSettingsPopover />}
         />
@@ -61,7 +61,7 @@ function RouteComponent() {
             fallbackMessage="An unknown error occurred while fetching random inbox files."
           />
         </div>
-        <PageFloatingBar
+        <PageFloatingFooter
           leftContent={shuffleButton}
           rightContent={<RandomInboxSettingsPopover />}
         />
@@ -81,7 +81,7 @@ function RouteComponent() {
           <EmptyState message="No inbox files found." />
         )}
       </div>
-      <PageFloatingBar
+      <PageFloatingFooter
         leftContent={shuffleButton}
         rightContent={<RandomInboxSettingsPopover />}
       />
