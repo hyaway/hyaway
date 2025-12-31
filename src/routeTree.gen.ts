@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from "./routes/_auth";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as settingsSettingsRouteImport } from "./routes/(settings)/settings";
 import { Route as settingsSettingsIndexRouteImport } from "./routes/(settings)/settings.index";
+import { Route as AuthFileFileIdRouteImport } from "./routes/_auth/file.$fileId";
 import { Route as AuthremotePagesPagesRouteImport } from "./routes/_auth/(remote-pages)/pages";
 import { Route as AuthgalleriesRecentlyTrashedRouteImport } from "./routes/_auth/(galleries)/recently-trashed";
 import { Route as AuthgalleriesRecentlyInboxedRouteImport } from "./routes/_auth/(galleries)/recently-inboxed";
@@ -22,8 +23,19 @@ import { Route as AuthgalleriesHistoryRouteImport } from "./routes/_auth/(galler
 import { Route as settingsSettingsUxRouteImport } from "./routes/(settings)/settings.ux";
 import { Route as settingsSettingsClientApiRouteImport } from "./routes/(settings)/settings.client-api";
 import { Route as AuthremotePagesPagesIndexRouteImport } from "./routes/_auth/(remote-pages)/pages.index";
+import { Route as AuthgalleriesRecentlyTrashedIndexRouteImport } from "./routes/_auth/(galleries)/recently-trashed.index";
+import { Route as AuthgalleriesRecentlyInboxedIndexRouteImport } from "./routes/_auth/(galleries)/recently-inboxed.index";
+import { Route as AuthgalleriesRecentlyArchivedIndexRouteImport } from "./routes/_auth/(galleries)/recently-archived.index";
+import { Route as AuthgalleriesRandomInboxIndexRouteImport } from "./routes/_auth/(galleries)/random-inbox.index";
+import { Route as AuthgalleriesHistoryIndexRouteImport } from "./routes/_auth/(galleries)/history.index";
 import { Route as AuthremotePagesPagesPageIdRouteImport } from "./routes/_auth/(remote-pages)/pages.$pageId";
-import { Route as AuthfileFileFileIdRouteImport } from "./routes/_auth/(file)/file.$fileId";
+import { Route as AuthgalleriesRecentlyTrashedFileIdRouteImport } from "./routes/_auth/(galleries)/recently-trashed.$fileId";
+import { Route as AuthgalleriesRecentlyInboxedFileIdRouteImport } from "./routes/_auth/(galleries)/recently-inboxed.$fileId";
+import { Route as AuthgalleriesRecentlyArchivedFileIdRouteImport } from "./routes/_auth/(galleries)/recently-archived.$fileId";
+import { Route as AuthgalleriesRandomInboxFileIdRouteImport } from "./routes/_auth/(galleries)/random-inbox.$fileId";
+import { Route as AuthgalleriesHistoryFileIdRouteImport } from "./routes/_auth/(galleries)/history.$fileId";
+import { Route as AuthremotePagesPagesPageIdIndexRouteImport } from "./routes/_auth/(remote-pages)/pages.$pageId.index";
+import { Route as AuthremotePagesPagesPageIdFileIdRouteImport } from "./routes/_auth/(remote-pages)/pages.$pageId.$fileId";
 
 const AuthRoute = AuthRouteImport.update({
   id: "/_auth",
@@ -43,6 +55,11 @@ const settingsSettingsIndexRoute = settingsSettingsIndexRouteImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => settingsSettingsRoute,
+} as any);
+const AuthFileFileIdRoute = AuthFileFileIdRouteImport.update({
+  id: "/file/$fileId",
+  path: "/file/$fileId",
+  getParentRoute: () => AuthRoute,
 } as any);
 const AuthremotePagesPagesRoute = AuthremotePagesPagesRouteImport.update({
   id: "/(remote-pages)/pages",
@@ -95,47 +112,132 @@ const AuthremotePagesPagesIndexRoute =
     path: "/",
     getParentRoute: () => AuthremotePagesPagesRoute,
   } as any);
+const AuthgalleriesRecentlyTrashedIndexRoute =
+  AuthgalleriesRecentlyTrashedIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthgalleriesRecentlyTrashedRoute,
+  } as any);
+const AuthgalleriesRecentlyInboxedIndexRoute =
+  AuthgalleriesRecentlyInboxedIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthgalleriesRecentlyInboxedRoute,
+  } as any);
+const AuthgalleriesRecentlyArchivedIndexRoute =
+  AuthgalleriesRecentlyArchivedIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthgalleriesRecentlyArchivedRoute,
+  } as any);
+const AuthgalleriesRandomInboxIndexRoute =
+  AuthgalleriesRandomInboxIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthgalleriesRandomInboxRoute,
+  } as any);
+const AuthgalleriesHistoryIndexRoute =
+  AuthgalleriesHistoryIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthgalleriesHistoryRoute,
+  } as any);
 const AuthremotePagesPagesPageIdRoute =
   AuthremotePagesPagesPageIdRouteImport.update({
     id: "/$pageId",
     path: "/$pageId",
     getParentRoute: () => AuthremotePagesPagesRoute,
   } as any);
-const AuthfileFileFileIdRoute = AuthfileFileFileIdRouteImport.update({
-  id: "/(file)/file/$fileId",
-  path: "/file/$fileId",
-  getParentRoute: () => AuthRoute,
-} as any);
+const AuthgalleriesRecentlyTrashedFileIdRoute =
+  AuthgalleriesRecentlyTrashedFileIdRouteImport.update({
+    id: "/$fileId",
+    path: "/$fileId",
+    getParentRoute: () => AuthgalleriesRecentlyTrashedRoute,
+  } as any);
+const AuthgalleriesRecentlyInboxedFileIdRoute =
+  AuthgalleriesRecentlyInboxedFileIdRouteImport.update({
+    id: "/$fileId",
+    path: "/$fileId",
+    getParentRoute: () => AuthgalleriesRecentlyInboxedRoute,
+  } as any);
+const AuthgalleriesRecentlyArchivedFileIdRoute =
+  AuthgalleriesRecentlyArchivedFileIdRouteImport.update({
+    id: "/$fileId",
+    path: "/$fileId",
+    getParentRoute: () => AuthgalleriesRecentlyArchivedRoute,
+  } as any);
+const AuthgalleriesRandomInboxFileIdRoute =
+  AuthgalleriesRandomInboxFileIdRouteImport.update({
+    id: "/$fileId",
+    path: "/$fileId",
+    getParentRoute: () => AuthgalleriesRandomInboxRoute,
+  } as any);
+const AuthgalleriesHistoryFileIdRoute =
+  AuthgalleriesHistoryFileIdRouteImport.update({
+    id: "/$fileId",
+    path: "/$fileId",
+    getParentRoute: () => AuthgalleriesHistoryRoute,
+  } as any);
+const AuthremotePagesPagesPageIdIndexRoute =
+  AuthremotePagesPagesPageIdIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthremotePagesPagesPageIdRoute,
+  } as any);
+const AuthremotePagesPagesPageIdFileIdRoute =
+  AuthremotePagesPagesPageIdFileIdRouteImport.update({
+    id: "/$fileId",
+    path: "/$fileId",
+    getParentRoute: () => AuthremotePagesPagesPageIdRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/settings": typeof settingsSettingsRouteWithChildren;
   "/settings/client-api": typeof settingsSettingsClientApiRoute;
   "/settings/ux": typeof settingsSettingsUxRoute;
-  "/history": typeof AuthgalleriesHistoryRoute;
-  "/random-inbox": typeof AuthgalleriesRandomInboxRoute;
-  "/recently-archived": typeof AuthgalleriesRecentlyArchivedRoute;
-  "/recently-inboxed": typeof AuthgalleriesRecentlyInboxedRoute;
-  "/recently-trashed": typeof AuthgalleriesRecentlyTrashedRoute;
+  "/history": typeof AuthgalleriesHistoryRouteWithChildren;
+  "/random-inbox": typeof AuthgalleriesRandomInboxRouteWithChildren;
+  "/recently-archived": typeof AuthgalleriesRecentlyArchivedRouteWithChildren;
+  "/recently-inboxed": typeof AuthgalleriesRecentlyInboxedRouteWithChildren;
+  "/recently-trashed": typeof AuthgalleriesRecentlyTrashedRouteWithChildren;
   "/pages": typeof AuthremotePagesPagesRouteWithChildren;
+  "/file/$fileId": typeof AuthFileFileIdRoute;
   "/settings/": typeof settingsSettingsIndexRoute;
-  "/file/$fileId": typeof AuthfileFileFileIdRoute;
-  "/pages/$pageId": typeof AuthremotePagesPagesPageIdRoute;
+  "/history/$fileId": typeof AuthgalleriesHistoryFileIdRoute;
+  "/random-inbox/$fileId": typeof AuthgalleriesRandomInboxFileIdRoute;
+  "/recently-archived/$fileId": typeof AuthgalleriesRecentlyArchivedFileIdRoute;
+  "/recently-inboxed/$fileId": typeof AuthgalleriesRecentlyInboxedFileIdRoute;
+  "/recently-trashed/$fileId": typeof AuthgalleriesRecentlyTrashedFileIdRoute;
+  "/pages/$pageId": typeof AuthremotePagesPagesPageIdRouteWithChildren;
+  "/history/": typeof AuthgalleriesHistoryIndexRoute;
+  "/random-inbox/": typeof AuthgalleriesRandomInboxIndexRoute;
+  "/recently-archived/": typeof AuthgalleriesRecentlyArchivedIndexRoute;
+  "/recently-inboxed/": typeof AuthgalleriesRecentlyInboxedIndexRoute;
+  "/recently-trashed/": typeof AuthgalleriesRecentlyTrashedIndexRoute;
   "/pages/": typeof AuthremotePagesPagesIndexRoute;
+  "/pages/$pageId/$fileId": typeof AuthremotePagesPagesPageIdFileIdRoute;
+  "/pages/$pageId/": typeof AuthremotePagesPagesPageIdIndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/settings/client-api": typeof settingsSettingsClientApiRoute;
   "/settings/ux": typeof settingsSettingsUxRoute;
-  "/history": typeof AuthgalleriesHistoryRoute;
-  "/random-inbox": typeof AuthgalleriesRandomInboxRoute;
-  "/recently-archived": typeof AuthgalleriesRecentlyArchivedRoute;
-  "/recently-inboxed": typeof AuthgalleriesRecentlyInboxedRoute;
-  "/recently-trashed": typeof AuthgalleriesRecentlyTrashedRoute;
+  "/file/$fileId": typeof AuthFileFileIdRoute;
   "/settings": typeof settingsSettingsIndexRoute;
-  "/file/$fileId": typeof AuthfileFileFileIdRoute;
-  "/pages/$pageId": typeof AuthremotePagesPagesPageIdRoute;
+  "/history/$fileId": typeof AuthgalleriesHistoryFileIdRoute;
+  "/random-inbox/$fileId": typeof AuthgalleriesRandomInboxFileIdRoute;
+  "/recently-archived/$fileId": typeof AuthgalleriesRecentlyArchivedFileIdRoute;
+  "/recently-inboxed/$fileId": typeof AuthgalleriesRecentlyInboxedFileIdRoute;
+  "/recently-trashed/$fileId": typeof AuthgalleriesRecentlyTrashedFileIdRoute;
+  "/history": typeof AuthgalleriesHistoryIndexRoute;
+  "/random-inbox": typeof AuthgalleriesRandomInboxIndexRoute;
+  "/recently-archived": typeof AuthgalleriesRecentlyArchivedIndexRoute;
+  "/recently-inboxed": typeof AuthgalleriesRecentlyInboxedIndexRoute;
+  "/recently-trashed": typeof AuthgalleriesRecentlyTrashedIndexRoute;
   "/pages": typeof AuthremotePagesPagesIndexRoute;
+  "/pages/$pageId/$fileId": typeof AuthremotePagesPagesPageIdFileIdRoute;
+  "/pages/$pageId": typeof AuthremotePagesPagesPageIdIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -144,16 +246,28 @@ export interface FileRoutesById {
   "/(settings)/settings": typeof settingsSettingsRouteWithChildren;
   "/(settings)/settings/client-api": typeof settingsSettingsClientApiRoute;
   "/(settings)/settings/ux": typeof settingsSettingsUxRoute;
-  "/_auth/(galleries)/history": typeof AuthgalleriesHistoryRoute;
-  "/_auth/(galleries)/random-inbox": typeof AuthgalleriesRandomInboxRoute;
-  "/_auth/(galleries)/recently-archived": typeof AuthgalleriesRecentlyArchivedRoute;
-  "/_auth/(galleries)/recently-inboxed": typeof AuthgalleriesRecentlyInboxedRoute;
-  "/_auth/(galleries)/recently-trashed": typeof AuthgalleriesRecentlyTrashedRoute;
+  "/_auth/(galleries)/history": typeof AuthgalleriesHistoryRouteWithChildren;
+  "/_auth/(galleries)/random-inbox": typeof AuthgalleriesRandomInboxRouteWithChildren;
+  "/_auth/(galleries)/recently-archived": typeof AuthgalleriesRecentlyArchivedRouteWithChildren;
+  "/_auth/(galleries)/recently-inboxed": typeof AuthgalleriesRecentlyInboxedRouteWithChildren;
+  "/_auth/(galleries)/recently-trashed": typeof AuthgalleriesRecentlyTrashedRouteWithChildren;
   "/_auth/(remote-pages)/pages": typeof AuthremotePagesPagesRouteWithChildren;
+  "/_auth/file/$fileId": typeof AuthFileFileIdRoute;
   "/(settings)/settings/": typeof settingsSettingsIndexRoute;
-  "/_auth/(file)/file/$fileId": typeof AuthfileFileFileIdRoute;
-  "/_auth/(remote-pages)/pages/$pageId": typeof AuthremotePagesPagesPageIdRoute;
+  "/_auth/(galleries)/history/$fileId": typeof AuthgalleriesHistoryFileIdRoute;
+  "/_auth/(galleries)/random-inbox/$fileId": typeof AuthgalleriesRandomInboxFileIdRoute;
+  "/_auth/(galleries)/recently-archived/$fileId": typeof AuthgalleriesRecentlyArchivedFileIdRoute;
+  "/_auth/(galleries)/recently-inboxed/$fileId": typeof AuthgalleriesRecentlyInboxedFileIdRoute;
+  "/_auth/(galleries)/recently-trashed/$fileId": typeof AuthgalleriesRecentlyTrashedFileIdRoute;
+  "/_auth/(remote-pages)/pages/$pageId": typeof AuthremotePagesPagesPageIdRouteWithChildren;
+  "/_auth/(galleries)/history/": typeof AuthgalleriesHistoryIndexRoute;
+  "/_auth/(galleries)/random-inbox/": typeof AuthgalleriesRandomInboxIndexRoute;
+  "/_auth/(galleries)/recently-archived/": typeof AuthgalleriesRecentlyArchivedIndexRoute;
+  "/_auth/(galleries)/recently-inboxed/": typeof AuthgalleriesRecentlyInboxedIndexRoute;
+  "/_auth/(galleries)/recently-trashed/": typeof AuthgalleriesRecentlyTrashedIndexRoute;
   "/_auth/(remote-pages)/pages/": typeof AuthremotePagesPagesIndexRoute;
+  "/_auth/(remote-pages)/pages/$pageId/$fileId": typeof AuthremotePagesPagesPageIdFileIdRoute;
+  "/_auth/(remote-pages)/pages/$pageId/": typeof AuthremotePagesPagesPageIdIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -168,24 +282,42 @@ export interface FileRouteTypes {
     | "/recently-inboxed"
     | "/recently-trashed"
     | "/pages"
-    | "/settings/"
     | "/file/$fileId"
+    | "/settings/"
+    | "/history/$fileId"
+    | "/random-inbox/$fileId"
+    | "/recently-archived/$fileId"
+    | "/recently-inboxed/$fileId"
+    | "/recently-trashed/$fileId"
     | "/pages/$pageId"
-    | "/pages/";
+    | "/history/"
+    | "/random-inbox/"
+    | "/recently-archived/"
+    | "/recently-inboxed/"
+    | "/recently-trashed/"
+    | "/pages/"
+    | "/pages/$pageId/$fileId"
+    | "/pages/$pageId/";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
     | "/settings/client-api"
     | "/settings/ux"
+    | "/file/$fileId"
+    | "/settings"
+    | "/history/$fileId"
+    | "/random-inbox/$fileId"
+    | "/recently-archived/$fileId"
+    | "/recently-inboxed/$fileId"
+    | "/recently-trashed/$fileId"
     | "/history"
     | "/random-inbox"
     | "/recently-archived"
     | "/recently-inboxed"
     | "/recently-trashed"
-    | "/settings"
-    | "/file/$fileId"
-    | "/pages/$pageId"
-    | "/pages";
+    | "/pages"
+    | "/pages/$pageId/$fileId"
+    | "/pages/$pageId";
   id:
     | "__root__"
     | "/"
@@ -199,10 +331,22 @@ export interface FileRouteTypes {
     | "/_auth/(galleries)/recently-inboxed"
     | "/_auth/(galleries)/recently-trashed"
     | "/_auth/(remote-pages)/pages"
+    | "/_auth/file/$fileId"
     | "/(settings)/settings/"
-    | "/_auth/(file)/file/$fileId"
+    | "/_auth/(galleries)/history/$fileId"
+    | "/_auth/(galleries)/random-inbox/$fileId"
+    | "/_auth/(galleries)/recently-archived/$fileId"
+    | "/_auth/(galleries)/recently-inboxed/$fileId"
+    | "/_auth/(galleries)/recently-trashed/$fileId"
     | "/_auth/(remote-pages)/pages/$pageId"
-    | "/_auth/(remote-pages)/pages/";
+    | "/_auth/(galleries)/history/"
+    | "/_auth/(galleries)/random-inbox/"
+    | "/_auth/(galleries)/recently-archived/"
+    | "/_auth/(galleries)/recently-inboxed/"
+    | "/_auth/(galleries)/recently-trashed/"
+    | "/_auth/(remote-pages)/pages/"
+    | "/_auth/(remote-pages)/pages/$pageId/$fileId"
+    | "/_auth/(remote-pages)/pages/$pageId/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -240,6 +384,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/settings/";
       preLoaderRoute: typeof settingsSettingsIndexRouteImport;
       parentRoute: typeof settingsSettingsRoute;
+    };
+    "/_auth/file/$fileId": {
+      id: "/_auth/file/$fileId";
+      path: "/file/$fileId";
+      fullPath: "/file/$fileId";
+      preLoaderRoute: typeof AuthFileFileIdRouteImport;
+      parentRoute: typeof AuthRoute;
     };
     "/_auth/(remote-pages)/pages": {
       id: "/_auth/(remote-pages)/pages";
@@ -304,6 +455,41 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthremotePagesPagesIndexRouteImport;
       parentRoute: typeof AuthremotePagesPagesRoute;
     };
+    "/_auth/(galleries)/recently-trashed/": {
+      id: "/_auth/(galleries)/recently-trashed/";
+      path: "/";
+      fullPath: "/recently-trashed/";
+      preLoaderRoute: typeof AuthgalleriesRecentlyTrashedIndexRouteImport;
+      parentRoute: typeof AuthgalleriesRecentlyTrashedRoute;
+    };
+    "/_auth/(galleries)/recently-inboxed/": {
+      id: "/_auth/(galleries)/recently-inboxed/";
+      path: "/";
+      fullPath: "/recently-inboxed/";
+      preLoaderRoute: typeof AuthgalleriesRecentlyInboxedIndexRouteImport;
+      parentRoute: typeof AuthgalleriesRecentlyInboxedRoute;
+    };
+    "/_auth/(galleries)/recently-archived/": {
+      id: "/_auth/(galleries)/recently-archived/";
+      path: "/";
+      fullPath: "/recently-archived/";
+      preLoaderRoute: typeof AuthgalleriesRecentlyArchivedIndexRouteImport;
+      parentRoute: typeof AuthgalleriesRecentlyArchivedRoute;
+    };
+    "/_auth/(galleries)/random-inbox/": {
+      id: "/_auth/(galleries)/random-inbox/";
+      path: "/";
+      fullPath: "/random-inbox/";
+      preLoaderRoute: typeof AuthgalleriesRandomInboxIndexRouteImport;
+      parentRoute: typeof AuthgalleriesRandomInboxRoute;
+    };
+    "/_auth/(galleries)/history/": {
+      id: "/_auth/(galleries)/history/";
+      path: "/";
+      fullPath: "/history/";
+      preLoaderRoute: typeof AuthgalleriesHistoryIndexRouteImport;
+      parentRoute: typeof AuthgalleriesHistoryRoute;
+    };
     "/_auth/(remote-pages)/pages/$pageId": {
       id: "/_auth/(remote-pages)/pages/$pageId";
       path: "/$pageId";
@@ -311,23 +497,165 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthremotePagesPagesPageIdRouteImport;
       parentRoute: typeof AuthremotePagesPagesRoute;
     };
-    "/_auth/(file)/file/$fileId": {
-      id: "/_auth/(file)/file/$fileId";
-      path: "/file/$fileId";
-      fullPath: "/file/$fileId";
-      preLoaderRoute: typeof AuthfileFileFileIdRouteImport;
-      parentRoute: typeof AuthRoute;
+    "/_auth/(galleries)/recently-trashed/$fileId": {
+      id: "/_auth/(galleries)/recently-trashed/$fileId";
+      path: "/$fileId";
+      fullPath: "/recently-trashed/$fileId";
+      preLoaderRoute: typeof AuthgalleriesRecentlyTrashedFileIdRouteImport;
+      parentRoute: typeof AuthgalleriesRecentlyTrashedRoute;
+    };
+    "/_auth/(galleries)/recently-inboxed/$fileId": {
+      id: "/_auth/(galleries)/recently-inboxed/$fileId";
+      path: "/$fileId";
+      fullPath: "/recently-inboxed/$fileId";
+      preLoaderRoute: typeof AuthgalleriesRecentlyInboxedFileIdRouteImport;
+      parentRoute: typeof AuthgalleriesRecentlyInboxedRoute;
+    };
+    "/_auth/(galleries)/recently-archived/$fileId": {
+      id: "/_auth/(galleries)/recently-archived/$fileId";
+      path: "/$fileId";
+      fullPath: "/recently-archived/$fileId";
+      preLoaderRoute: typeof AuthgalleriesRecentlyArchivedFileIdRouteImport;
+      parentRoute: typeof AuthgalleriesRecentlyArchivedRoute;
+    };
+    "/_auth/(galleries)/random-inbox/$fileId": {
+      id: "/_auth/(galleries)/random-inbox/$fileId";
+      path: "/$fileId";
+      fullPath: "/random-inbox/$fileId";
+      preLoaderRoute: typeof AuthgalleriesRandomInboxFileIdRouteImport;
+      parentRoute: typeof AuthgalleriesRandomInboxRoute;
+    };
+    "/_auth/(galleries)/history/$fileId": {
+      id: "/_auth/(galleries)/history/$fileId";
+      path: "/$fileId";
+      fullPath: "/history/$fileId";
+      preLoaderRoute: typeof AuthgalleriesHistoryFileIdRouteImport;
+      parentRoute: typeof AuthgalleriesHistoryRoute;
+    };
+    "/_auth/(remote-pages)/pages/$pageId/": {
+      id: "/_auth/(remote-pages)/pages/$pageId/";
+      path: "/";
+      fullPath: "/pages/$pageId/";
+      preLoaderRoute: typeof AuthremotePagesPagesPageIdIndexRouteImport;
+      parentRoute: typeof AuthremotePagesPagesPageIdRoute;
+    };
+    "/_auth/(remote-pages)/pages/$pageId/$fileId": {
+      id: "/_auth/(remote-pages)/pages/$pageId/$fileId";
+      path: "/$fileId";
+      fullPath: "/pages/$pageId/$fileId";
+      preLoaderRoute: typeof AuthremotePagesPagesPageIdFileIdRouteImport;
+      parentRoute: typeof AuthremotePagesPagesPageIdRoute;
     };
   }
 }
 
+interface AuthgalleriesHistoryRouteChildren {
+  AuthgalleriesHistoryFileIdRoute: typeof AuthgalleriesHistoryFileIdRoute;
+  AuthgalleriesHistoryIndexRoute: typeof AuthgalleriesHistoryIndexRoute;
+}
+
+const AuthgalleriesHistoryRouteChildren: AuthgalleriesHistoryRouteChildren = {
+  AuthgalleriesHistoryFileIdRoute: AuthgalleriesHistoryFileIdRoute,
+  AuthgalleriesHistoryIndexRoute: AuthgalleriesHistoryIndexRoute,
+};
+
+const AuthgalleriesHistoryRouteWithChildren =
+  AuthgalleriesHistoryRoute._addFileChildren(AuthgalleriesHistoryRouteChildren);
+
+interface AuthgalleriesRandomInboxRouteChildren {
+  AuthgalleriesRandomInboxFileIdRoute: typeof AuthgalleriesRandomInboxFileIdRoute;
+  AuthgalleriesRandomInboxIndexRoute: typeof AuthgalleriesRandomInboxIndexRoute;
+}
+
+const AuthgalleriesRandomInboxRouteChildren: AuthgalleriesRandomInboxRouteChildren =
+  {
+    AuthgalleriesRandomInboxFileIdRoute: AuthgalleriesRandomInboxFileIdRoute,
+    AuthgalleriesRandomInboxIndexRoute: AuthgalleriesRandomInboxIndexRoute,
+  };
+
+const AuthgalleriesRandomInboxRouteWithChildren =
+  AuthgalleriesRandomInboxRoute._addFileChildren(
+    AuthgalleriesRandomInboxRouteChildren,
+  );
+
+interface AuthgalleriesRecentlyArchivedRouteChildren {
+  AuthgalleriesRecentlyArchivedFileIdRoute: typeof AuthgalleriesRecentlyArchivedFileIdRoute;
+  AuthgalleriesRecentlyArchivedIndexRoute: typeof AuthgalleriesRecentlyArchivedIndexRoute;
+}
+
+const AuthgalleriesRecentlyArchivedRouteChildren: AuthgalleriesRecentlyArchivedRouteChildren =
+  {
+    AuthgalleriesRecentlyArchivedFileIdRoute:
+      AuthgalleriesRecentlyArchivedFileIdRoute,
+    AuthgalleriesRecentlyArchivedIndexRoute:
+      AuthgalleriesRecentlyArchivedIndexRoute,
+  };
+
+const AuthgalleriesRecentlyArchivedRouteWithChildren =
+  AuthgalleriesRecentlyArchivedRoute._addFileChildren(
+    AuthgalleriesRecentlyArchivedRouteChildren,
+  );
+
+interface AuthgalleriesRecentlyInboxedRouteChildren {
+  AuthgalleriesRecentlyInboxedFileIdRoute: typeof AuthgalleriesRecentlyInboxedFileIdRoute;
+  AuthgalleriesRecentlyInboxedIndexRoute: typeof AuthgalleriesRecentlyInboxedIndexRoute;
+}
+
+const AuthgalleriesRecentlyInboxedRouteChildren: AuthgalleriesRecentlyInboxedRouteChildren =
+  {
+    AuthgalleriesRecentlyInboxedFileIdRoute:
+      AuthgalleriesRecentlyInboxedFileIdRoute,
+    AuthgalleriesRecentlyInboxedIndexRoute:
+      AuthgalleriesRecentlyInboxedIndexRoute,
+  };
+
+const AuthgalleriesRecentlyInboxedRouteWithChildren =
+  AuthgalleriesRecentlyInboxedRoute._addFileChildren(
+    AuthgalleriesRecentlyInboxedRouteChildren,
+  );
+
+interface AuthgalleriesRecentlyTrashedRouteChildren {
+  AuthgalleriesRecentlyTrashedFileIdRoute: typeof AuthgalleriesRecentlyTrashedFileIdRoute;
+  AuthgalleriesRecentlyTrashedIndexRoute: typeof AuthgalleriesRecentlyTrashedIndexRoute;
+}
+
+const AuthgalleriesRecentlyTrashedRouteChildren: AuthgalleriesRecentlyTrashedRouteChildren =
+  {
+    AuthgalleriesRecentlyTrashedFileIdRoute:
+      AuthgalleriesRecentlyTrashedFileIdRoute,
+    AuthgalleriesRecentlyTrashedIndexRoute:
+      AuthgalleriesRecentlyTrashedIndexRoute,
+  };
+
+const AuthgalleriesRecentlyTrashedRouteWithChildren =
+  AuthgalleriesRecentlyTrashedRoute._addFileChildren(
+    AuthgalleriesRecentlyTrashedRouteChildren,
+  );
+
+interface AuthremotePagesPagesPageIdRouteChildren {
+  AuthremotePagesPagesPageIdFileIdRoute: typeof AuthremotePagesPagesPageIdFileIdRoute;
+  AuthremotePagesPagesPageIdIndexRoute: typeof AuthremotePagesPagesPageIdIndexRoute;
+}
+
+const AuthremotePagesPagesPageIdRouteChildren: AuthremotePagesPagesPageIdRouteChildren =
+  {
+    AuthremotePagesPagesPageIdFileIdRoute:
+      AuthremotePagesPagesPageIdFileIdRoute,
+    AuthremotePagesPagesPageIdIndexRoute: AuthremotePagesPagesPageIdIndexRoute,
+  };
+
+const AuthremotePagesPagesPageIdRouteWithChildren =
+  AuthremotePagesPagesPageIdRoute._addFileChildren(
+    AuthremotePagesPagesPageIdRouteChildren,
+  );
+
 interface AuthremotePagesPagesRouteChildren {
-  AuthremotePagesPagesPageIdRoute: typeof AuthremotePagesPagesPageIdRoute;
+  AuthremotePagesPagesPageIdRoute: typeof AuthremotePagesPagesPageIdRouteWithChildren;
   AuthremotePagesPagesIndexRoute: typeof AuthremotePagesPagesIndexRoute;
 }
 
 const AuthremotePagesPagesRouteChildren: AuthremotePagesPagesRouteChildren = {
-  AuthremotePagesPagesPageIdRoute: AuthremotePagesPagesPageIdRoute,
+  AuthremotePagesPagesPageIdRoute: AuthremotePagesPagesPageIdRouteWithChildren,
   AuthremotePagesPagesIndexRoute: AuthremotePagesPagesIndexRoute,
 };
 
@@ -335,23 +663,26 @@ const AuthremotePagesPagesRouteWithChildren =
   AuthremotePagesPagesRoute._addFileChildren(AuthremotePagesPagesRouteChildren);
 
 interface AuthRouteChildren {
-  AuthgalleriesHistoryRoute: typeof AuthgalleriesHistoryRoute;
-  AuthgalleriesRandomInboxRoute: typeof AuthgalleriesRandomInboxRoute;
-  AuthgalleriesRecentlyArchivedRoute: typeof AuthgalleriesRecentlyArchivedRoute;
-  AuthgalleriesRecentlyInboxedRoute: typeof AuthgalleriesRecentlyInboxedRoute;
-  AuthgalleriesRecentlyTrashedRoute: typeof AuthgalleriesRecentlyTrashedRoute;
+  AuthgalleriesHistoryRoute: typeof AuthgalleriesHistoryRouteWithChildren;
+  AuthgalleriesRandomInboxRoute: typeof AuthgalleriesRandomInboxRouteWithChildren;
+  AuthgalleriesRecentlyArchivedRoute: typeof AuthgalleriesRecentlyArchivedRouteWithChildren;
+  AuthgalleriesRecentlyInboxedRoute: typeof AuthgalleriesRecentlyInboxedRouteWithChildren;
+  AuthgalleriesRecentlyTrashedRoute: typeof AuthgalleriesRecentlyTrashedRouteWithChildren;
   AuthremotePagesPagesRoute: typeof AuthremotePagesPagesRouteWithChildren;
-  AuthfileFileFileIdRoute: typeof AuthfileFileFileIdRoute;
+  AuthFileFileIdRoute: typeof AuthFileFileIdRoute;
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
-  AuthgalleriesHistoryRoute: AuthgalleriesHistoryRoute,
-  AuthgalleriesRandomInboxRoute: AuthgalleriesRandomInboxRoute,
-  AuthgalleriesRecentlyArchivedRoute: AuthgalleriesRecentlyArchivedRoute,
-  AuthgalleriesRecentlyInboxedRoute: AuthgalleriesRecentlyInboxedRoute,
-  AuthgalleriesRecentlyTrashedRoute: AuthgalleriesRecentlyTrashedRoute,
+  AuthgalleriesHistoryRoute: AuthgalleriesHistoryRouteWithChildren,
+  AuthgalleriesRandomInboxRoute: AuthgalleriesRandomInboxRouteWithChildren,
+  AuthgalleriesRecentlyArchivedRoute:
+    AuthgalleriesRecentlyArchivedRouteWithChildren,
+  AuthgalleriesRecentlyInboxedRoute:
+    AuthgalleriesRecentlyInboxedRouteWithChildren,
+  AuthgalleriesRecentlyTrashedRoute:
+    AuthgalleriesRecentlyTrashedRouteWithChildren,
   AuthremotePagesPagesRoute: AuthremotePagesPagesRouteWithChildren,
-  AuthfileFileFileIdRoute: AuthfileFileFileIdRoute,
+  AuthFileFileIdRoute: AuthFileFileIdRoute,
 };
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);

@@ -7,6 +7,7 @@ import { FileInfoTable } from "./file-info-table";
 import { FilePageHeader } from "./file-page-header";
 import { FileStatusBadges } from "./file-status-badges";
 import { FileViewer } from "./file-viewer";
+import { FileViewerSettingsPopover } from "./file-viewer-settings-popover";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
@@ -23,15 +24,9 @@ export interface FileDetailProps {
   fileId: number;
   /** Additional actions to prepend (e.g., prev/next navigation) */
   prependActions?: Array<FloatingFooterAction>;
-  /** Content for the right side of the footer (e.g., settings popover) */
-  footerRightContent?: React.ReactNode;
 }
 
-export function FileDetail({
-  fileId,
-  prependActions,
-  footerRightContent,
-}: FileDetailProps) {
+export function FileDetail({ fileId, prependActions }: FileDetailProps) {
   const { data, isLoading, isError, error } = useGetSingleFileMetadata(fileId);
 
   if (isLoading) {
@@ -67,7 +62,6 @@ export function FileDetail({
       data={data}
       fileId={fileId}
       prependActions={prependActions}
-      footerRightContent={footerRightContent}
     />
   );
 }
@@ -76,12 +70,10 @@ function FileDetailContent({
   data,
   fileId,
   prependActions,
-  footerRightContent,
 }: {
   data: FileMetadata;
   fileId: number;
   prependActions?: Array<FloatingFooterAction>;
-  footerRightContent?: React.ReactNode;
 }) {
   const { addViewedFile } = useHistoryActions();
 
@@ -125,7 +117,7 @@ function FileDetailContent({
 
       <PageFloatingFooter
         actions={combinedActions}
-        rightContent={footerRightContent}
+        rightContent={<FileViewerSettingsPopover />}
       />
     </>
   );
