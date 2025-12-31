@@ -22,6 +22,8 @@ export interface FloatingFooterAction {
   download?: boolean;
   external?: boolean;
   isPending?: boolean;
+  /** Whether the action is disabled */
+  disabled?: boolean;
   /** If true, this action will always be in the overflow menu */
   overflowOnly?: boolean;
 }
@@ -115,7 +117,9 @@ function ActionButton({ action }: { action: FloatingFooterAction }) {
       label={action.label}
       icon={<action.icon className="size-6" />}
       onClick={action.onClick}
+      variant={action.variant}
       isLoading={action.isPending}
+      disabled={action.disabled}
       render={
         action.href ? (
           <a
