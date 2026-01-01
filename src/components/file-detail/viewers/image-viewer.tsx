@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
 import { cn } from "@/lib/utils";
 import { checkerboardBg } from "@/lib/style-constants";
 import {
@@ -33,9 +34,7 @@ export function ImageViewer({
     <div
       className={cn(
         "flex items-center justify-center",
-        isExpanded
-          ? "short:min-h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1rem)] min-h-[calc(100svh-var(--header-height)-var(--footer-height)-2rem)]"
-          : "short:h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1rem)] h-[calc(100svh-var(--header-height)-var(--footer-height)-2rem)]",
+        isExpanded ? viewerMinHeight : viewerFixedHeight,
       )}
     >
       <img

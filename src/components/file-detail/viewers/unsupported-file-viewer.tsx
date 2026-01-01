@@ -1,4 +1,5 @@
 import { IconFileSad } from "@tabler/icons-react";
+import { viewerFixedHeight } from "./style-constants";
 import { cn } from "@/lib/utils";
 
 interface UnsupportedFileViewerProps {
@@ -14,7 +15,7 @@ export function UnsupportedFileViewer({
     <div
       className={cn(
         "flex flex-col items-center justify-center gap-4 rounded border p-8",
-        "short:h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1rem)] h-[calc(100svh-var(--header-height)-var(--footer-height)-2rem)]",
+        viewerFixedHeight,
       )}
     >
       <IconFileSad stroke={1.5} className="text-muted-foreground size-12" />
