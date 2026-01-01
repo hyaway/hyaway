@@ -3,7 +3,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useRef } from "react";
 
-import { PageCard, PageCardSkeleton } from "./-components/page-card";
+import {
+  PagesGridItem,
+  PagesGridItemSkeleton,
+} from "./-components/pages-grid-item";
 import { PagesDisplaySettingsPopover } from "./-components/pages-display-settings-popover";
 import {
   PAGE_CARD_GAP,
@@ -27,7 +30,7 @@ export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
 });
 
 /**
- * Pages index component - shows virtualized grid of page cards
+ * Pages index component - shows virtualized grid of pages grid items
  */
 function PagesIndex() {
   const {
@@ -67,7 +70,7 @@ function PagesIndex() {
         {isPending ? (
           <div className="flex flex-wrap gap-4" aria-label="Loading pages">
             {Array.from({ length: 6 }).map((_, i) => (
-              <PageCardSkeleton key={`page-skeleton-${i}`} />
+              <PagesGridItemSkeleton key={`page-skeleton-${i}`} />
             ))}
           </div>
         ) : isError ? (
@@ -143,7 +146,7 @@ function PagesGrid({
                   transform: `translate(${virtualRow.lane * (PAGE_CARD_WIDTH + PAGE_CARD_GAP)}px, ${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
                 }}
               >
-                <PageCard
+                <PagesGridItem
                   pageKey={page.page_key}
                   pageName={page.name}
                   tabIndex={getTabIndex(virtualRow.index, visibleIndices)}

@@ -16,7 +16,7 @@ export function PagesDisplaySettingsCard() {
       <CardHeader>
         <CardTitle>{PAGES_DISPLAY_SETTINGS_TITLE}</CardTitle>
         <CardDescription>
-          Configure how page cards are displayed.
+          Configure how pages grid items are displayed.
         </CardDescription>
       </CardHeader>
       <CardContent>

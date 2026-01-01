@@ -22,11 +22,14 @@ export interface ThumbnailGalleryProps {
   fileIds: Array<number>;
   /** Custom link builder for contextual navigation */
   getFileLink?: FileLinkBuilder;
+  /** Accessible label for the gallery */
+  "aria-label"?: string;
 }
 
 export function ThumbnailGallery({
   fileIds,
   getFileLink,
+  "aria-label": ariaLabel = "File gallery",
 }: ThumbnailGalleryProps) {
   const itemsQuery = useInfiniteGetFilesMetadata(fileIds, false);
   const defaultDimensions = useThumbnailDimensions();
@@ -58,6 +61,7 @@ export function ThumbnailGallery({
       totalItems={fileIds.length}
       defaultDimensions={defaultDimensions}
       getFileLink={getFileLink}
+      aria-label={ariaLabel}
     />
   );
 }
@@ -67,11 +71,13 @@ export function PureThumbnailGallery({
   totalItems,
   defaultDimensions,
   getFileLink,
+  "aria-label": ariaLabel,
 }: {
   itemsQuery: ReturnType<typeof useInfiniteGetFilesMetadata>;
   totalItems: number;
   defaultDimensions: { width: number; height: number };
   getFileLink?: FileLinkBuilder;
+  "aria-label"?: string;
 }) {
   const { data, isFetchingNextPage, fetchNextPage, hasNextPage } = itemsQuery;
 
@@ -168,6 +174,7 @@ export function PureThumbnailGallery({
       <div ref={parentRef} className="@container w-full">
         <ul
           role="grid"
+          aria-label={ariaLabel}
           onKeyDown={handleKeyDown}
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,

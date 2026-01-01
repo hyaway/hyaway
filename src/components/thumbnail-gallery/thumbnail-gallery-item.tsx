@@ -59,6 +59,8 @@ export interface ThumbnailGalleryItemProps extends React.HTMLAttributes<HTMLLIEl
   linkRef?: (el: HTMLAnchorElement | null) => void;
   /** Custom link builder for contextual navigation */
   getFileLink?: FileLinkBuilder;
+  /** Accessible label for the item link */
+  "aria-label"?: string;
 }
 
 export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
@@ -170,6 +172,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
             params={fileLink.params}
             className="absolute inset-0 z-10 outline-hidden"
             tabIndex={tabIndex}
+            aria-label={`File ${item.file_id}, ${item.mime.split("/")[0]}`}
           />
         </ContextMenuTrigger>
         <ThumbnailGalleryItemContextMenu item={item} />
@@ -217,6 +220,7 @@ const ThumbnailGalleryItemContent = memo(function ThumbnailGalleryItemContent({
             width={32}
             height={32}
             className="h-full w-full"
+            aria-label={`Blurhash for file ${item.file_id}`}
           />
         ) : (
           <ThumbnailImage
@@ -227,16 +231,33 @@ const ThumbnailGalleryItemContent = memo(function ThumbnailGalleryItemContent({
         )}
       </div>
       <div className="bg-muted text-muted-foreground flex h-6 shrink-0 items-center gap-1.5 px-1.5 text-xs">
-        {item.mime.startsWith("video/") && <IconMovie className="size-4" />}
-        {item.has_audio && <IconVolume className="size-4" />}
-        {fileSize && <span>{fileSize}</span>}
+        {item.mime.startsWith("video/") && (
+          <IconMovie className="size-4" aria-label="Video" />
+        )}
+        {item.has_audio && (
+          <IconVolume className="size-4" aria-label="Has audio" />
+        )}
+        {fileSize && (
+          <span aria-label={`File size: ${fileSize}`}>{fileSize}</span>
+        )}
         <span className="flex-1" />
-        {item.is_inbox && <IconMailFilled className="text-foreground size-4" />}
+        {item.is_inbox && (
+          <IconMailFilled
+            className="text-foreground size-4"
+            aria-label="In inbox"
+          />
+        )}
         {item.is_trashed && (
-          <IconTrashFilled className="text-destructive size-4" />
+          <IconTrashFilled
+            className="text-destructive size-4"
+            aria-label="Trashed"
+          />
         )}
         {item.is_deleted && !item.is_trashed && (
-          <IconBan className="text-destructive size-4" />
+          <IconBan
+            className="text-destructive size-4"
+            aria-label="Permanently deleted"
+          />
         )}
       </div>
     </div>

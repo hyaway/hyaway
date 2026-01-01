@@ -13,7 +13,7 @@ const PAGE_STATE_LABELS: Partial<Record<PageState, string>> = {
   [PageState.SEARCH_CANCELLED]: "Cancelled",
 };
 
-export interface PageCardProps {
+export interface PagesGridItemProps {
   pageKey: string;
   pageName: string;
   className?: string;
@@ -23,16 +23,16 @@ export interface PageCardProps {
 }
 
 /**
- * Page card preview component that shows page name and thumbnail previews
+ * Pages grid item component that shows page name and thumbnail previews
  */
-export function PageCard({
+export function PagesGridItem({
   pageKey,
   pageName,
   className,
   tabIndex = 0,
   linkRef,
   onFocus,
-}: PageCardProps) {
+}: PagesGridItemProps) {
   const { data, isLoading } = useGetPageInfoQuery(pageKey, true);
 
   const pageState = data?.page_info.page_state;
@@ -131,9 +131,9 @@ export function PageCard({
 }
 
 /**
- * Skeleton placeholder for PageCard during loading state
+ * Skeleton placeholder for PagesGridItem during loading state
  */
-export function PageCardSkeleton({ className }: { className?: string }) {
+export function PagesGridItemSkeleton({ className }: { className?: string }) {
   return (
     <Item variant="muted" className={cn("block h-60 w-48", className)}>
       <ItemContent className="mb-3.5">
