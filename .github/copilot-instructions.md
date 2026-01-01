@@ -13,20 +13,20 @@ Hyaway is a React + TypeScript frontend application for browsing Hydrus Network 
 
 ## Documentation
 
-Detailed documentation lives in `.github/docs/`. Reference the appropriate doc for in-depth information:
+Detailed documentation lives in `.github/docs/`. Path-specific instructions in `.github/instructions/` automatically load relevant docs based on the files you're working with.
 
-| Topic               | Document                                                              | When to Reference                     |
-| ------------------- | --------------------------------------------------------------------- | ------------------------------------- |
-| Settings patterns   | [settings-architecture.md](docs/settings-architecture.md)             | Creating/modifying settings           |
-| File-based routing  | [routing-conventions.md](docs/routing-conventions.md)                 | Adding routes, organizing route files |
-| Component placement | [component-organization.md](docs/component-organization.md)           | Creating new components               |
-| Thumbnail gallery   | [features/thumbnail-gallery.md](docs/features/thumbnail-gallery.md)   | Gallery display work                  |
-| File viewer         | [features/file-viewer.md](docs/features/file-viewer.md)               | Media viewer work                     |
-| Tags system         | [features/tags-system.md](docs/features/tags-system.md)               | Tag-related work                      |
-| Hydrus API          | [integrations/hydrus-api.md](docs/integrations/hydrus-api.md)         | API integration work                  |
-| TanStack Query      | [integrations/tanstack-query.md](docs/integrations/tanstack-query.md) | Data fetching patterns                |
-| UI primitives       | [ui/primitives.md](docs/ui/primitives.md)                             | Base component usage                  |
-| Responsive design   | [ui/responsive-design.md](docs/ui/responsive-design.md)               | Layout and breakpoints                |
+| Topic               | Document                              | Loaded When Working On                  |
+| ------------------- | ------------------------------------- | --------------------------------------- |
+| Settings patterns   | `docs/settings-architecture.md`       | `components/settings/`, settings routes |
+| File-based routing  | `docs/routing-conventions.md`         | `routes/` files                         |
+| Component placement | `docs/component-organization.md`      | `components/` files                     |
+| Thumbnail gallery   | `docs/features/thumbnail-gallery.md`  | `thumbnail-gallery/` components         |
+| File viewer         | `docs/features/file-viewer.md`        | `file-detail/` components               |
+| Tags system         | `docs/features/tags-system.md`        | `tag/` components                       |
+| Hydrus API          | `docs/integrations/hydrus-api.md`     | `integrations/hydrus-api/`              |
+| TanStack Query      | `docs/integrations/tanstack-query.md` | Query files                             |
+| UI primitives       | `docs/ui/primitives.md`               | `ui-primitives/` components             |
+| Responsive design   | `docs/ui/responsive-design.md`        | CSS and layout components               |
 
 ## Quick Reference
 
@@ -102,15 +102,15 @@ See `src/styles.css` for full documentation.
 
 When making significant changes, update the relevant documentation in `.github/docs/`:
 
-| Change Type                 | Update                                                                              |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| New settings module         | [settings-architecture.md](docs/settings-architecture.md) - add to modules table    |
-| New route or route group    | [routing-conventions.md](docs/routing-conventions.md) - update structure            |
-| New shared component folder | [component-organization.md](docs/component-organization.md) - add category          |
-| New API endpoint            | [integrations/hydrus-api.md](docs/integrations/hydrus-api.md) - document endpoint   |
-| New query pattern           | [integrations/tanstack-query.md](docs/integrations/tanstack-query.md) - add example |
-| New UI primitive            | [ui/primitives.md](docs/ui/primitives.md) - add to component list                   |
-| New Tailwind variant        | [ui/responsive-design.md](docs/ui/responsive-design.md) - document variant          |
-| New feature area            | Create new doc in `docs/features/` and add to README index                          |
+| Change Type                 | Update                                              |
+| --------------------------- | --------------------------------------------------- |
+| New settings module         | `docs/settings-architecture.md` - modules table     |
+| New route or route group    | `docs/routing-conventions.md` - update structure    |
+| New shared component folder | `docs/component-organization.md` - add category     |
+| New API endpoint            | `docs/integrations/hydrus-api.md` - document it     |
+| New query pattern           | `docs/integrations/tanstack-query.md` - add example |
+| New UI primitive            | `docs/ui/primitives.md` - add to component list     |
+| New Tailwind variant        | `docs/ui/responsive-design.md` - document variant   |
+| New feature area            | Create new doc in `docs/features/`                  |
 
 **When to update:** After implementing a feature, pattern, or convention that others would need to understand or follow.
