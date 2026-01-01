@@ -11,48 +11,46 @@ Hyaway is a React + TypeScript frontend application for browsing Hydrus Network 
 - **Base UI** primitives via shadcn/ui
 - **Vite** as the build tool
 
-## Project Structure
+## Documentation
 
-### Route Organization
+Detailed documentation lives in `.github/docs/`. Reference the appropriate doc for in-depth information:
 
-The project uses TanStack Router's file-based routing with **pathless route groups** `()` for organizing routes without affecting URLs, and the **`-` prefix** (default `routeFileIgnorePrefix`) to co-locate components with their routes.
+| Topic               | Document                                                              | When to Reference                     |
+| ------------------- | --------------------------------------------------------------------- | ------------------------------------- |
+| Settings patterns   | [settings-architecture.md](docs/settings-architecture.md)             | Creating/modifying settings           |
+| File-based routing  | [routing-conventions.md](docs/routing-conventions.md)                 | Adding routes, organizing route files |
+| Component placement | [component-organization.md](docs/component-organization.md)           | Creating new components               |
+| Thumbnail gallery   | [features/thumbnail-gallery.md](docs/features/thumbnail-gallery.md)   | Gallery display work                  |
+| File viewer         | [features/file-viewer.md](docs/features/file-viewer.md)               | Media viewer work                     |
+| Tags system         | [features/tags-system.md](docs/features/tags-system.md)               | Tag-related work                      |
+| Hydrus API          | [integrations/hydrus-api.md](docs/integrations/hydrus-api.md)         | API integration work                  |
+| TanStack Query      | [integrations/tanstack-query.md](docs/integrations/tanstack-query.md) | Data fetching patterns                |
+| UI primitives       | [ui/primitives.md](docs/ui/primitives.md)                             | Base component usage                  |
+| Responsive design   | [ui/responsive-design.md](docs/ui/responsive-design.md)               | Layout and breakpoints                |
 
-```
-src/routes/
-├── __root.tsx              # Root layout
-├── _auth.tsx               # Auth layout route
-├── index.tsx               # Home page
-├── (settings)/             # Pathless group - doesn't add to URL
-│   ├── -components/        # Settings-specific components (ignored by router)
-│   │   ├── thumbnail-gallery-display-settings-card.tsx
-│   │   ├── pages-display-settings-card.tsx
-│   │   └── ...
-│   ├── settings.tsx        # /settings layout
-│   ├── settings.index.tsx  # /settings (index)
-│   ├── settings.ux.tsx     # /settings/ux
-│   └── settings.client-api.tsx
-└── _auth/                  # Protected routes under auth layout
-    ├── (file)/             # Pathless group
-    │   ├── -components/    # File-specific components
-    │   └── file.$fileId.tsx
-    ├── (galleries)/        # Pathless group
-    │   ├── -components/    # Gallery-specific components
-    │   └── ...gallery routes
-    └── (remote-pages)/     # Pathless group
-        ├── -components/    # Pages-specific components
-        └── ...pages routes
-```
+## Quick Reference
 
-### Component Organization
+### Project Structure
 
 ```
-src/components/
-├── app-shell/          # App-level layout components (header, sidebar)
-├── thumbnail-gallery/  # Thumbnail gallery + related components
-├── page-shell/         # Page-level layout primitives
-├── settings/           # Shared settings components (controls, primitives)
-├── tag/                # Tag-related components
-└── ui-primitives/      # Base UI components (shadcn/ui style)
+src/
+├── components/           # Shared components
+│   ├── app-shell/        # Header, sidebar, layout
+│   ├── file-detail/      # File viewer components
+│   ├── page-shell/       # Page layout primitives
+│   ├── settings/         # Settings controls
+│   ├── tag/              # Tag components
+│   ├── thumbnail-gallery/# Gallery components
+│   └── ui-primitives/    # Base UI (shadcn/ui style)
+├── hooks/                # Shared hooks
+├── integrations/         # External integrations
+├── lib/                  # Utilities and stores
+└── routes/               # File-based routing
+    ├── (settings)/       # Settings routes (pathless group)
+    └── _auth/            # Protected routes
+        ├── (file)/       # File detail routes
+        ├── (galleries)/  # Gallery routes
+        └── (remote-pages)/ # Pages routes
 ```
 
 ### Import Conventions
@@ -62,190 +60,40 @@ src/components/
 - **Never import across route groups** - Each route group should be self-contained
 - **No barrel files** - Import directly from source files, not `index.ts` re-exports
 
-## Settings Architecture
-
-Settings follow a **shared controls + thin wrappers** pattern to eliminate duplication between settings pages and inline popovers.
-
-### The Pattern
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  components/settings/                                           │
-│  └── {feature}-settings.tsx                                     │
-│      - Exports TITLE constant                                   │
-│      - Exports shared <{Feature}Settings /> component           │
-│      - Contains all form controls and state bindings            │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-┌─────────────────────────────┐   ┌─────────────────────────────┐
-│  Settings Card              │   │  Settings Popover           │
-│  (settings page)            │   │  (inline on gallery pages)  │
-│                             │   │                             │
-│  - Thin wrapper             │   │  - Thin wrapper             │
-│  - Imports shared component │   │  - Imports shared component │
-│  - Wraps in <Card>          │   │  - Wraps in <SettingsPopover>│
-│  - Uses TITLE constant      │   │  - Uses TITLE constant      │
-└─────────────────────────────┘   └─────────────────────────────┘
-```
-
-### Current Settings Modules
-
-| Feature           | Shared File                              | Title Constant                             |
-| ----------------- | ---------------------------------------- | ------------------------------------------ |
-| Thumbnail gallery | `thumbnail-gallery-display-settings.tsx` | `THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE` |
-| Pages display     | `pages-display-settings.tsx`             | `PAGES_DISPLAY_SETTINGS_TITLE`             |
-| Media viewer      | `file-viewer-settings.tsx`               | `FILE_VIEWER_SETTINGS_TITLE`               |
-| Watch history     | `history-settings.tsx`                   | `HISTORY_SETTINGS_TITLE`                   |
-| Random inbox      | `random-inbox-settings.tsx`              | `RANDOM_INBOX_SETTINGS_TITLE`              |
-| Recent files      | `recent-files-settings.tsx`              | `RECENT_FILES_SETTINGS_TITLE`              |
-
-### Settings Card Location
-
-Cards live in `routes/(settings)/-components/` and are named `{feature}-settings-card.tsx`.
-
-### Settings Popover Location
-
-Popovers live near their usage:
-
-- `components/thumbnail-gallery/thumbnail-gallery-display-settings-popover.tsx` - Used across multiple gallery pages
-- `routes/_auth/(file)/-components/file-viewer-settings-popover.tsx` - File detail page only
-- `routes/_auth/(galleries)/-components/` - Gallery-specific popovers
-- `routes/_auth/(remote-pages)/-components/pages-display-settings-popover.tsx` - Pages only
-
-### Creating New Settings
-
-1. **Create shared settings file** in `components/settings/{feature}-settings.tsx`:
-
-   ```tsx
-   import { SettingsGroup, SwitchField, SliderField } from "./setting-fields";
-
-   export const FEATURE_SETTINGS_TITLE = "Feature name";
-
-   export interface FeatureSettingsProps {
-     idPrefix?: string; // For accessibility when multiple instances exist
-   }
-
-   export function FeatureSettings({ idPrefix = "" }: FeatureSettingsProps) {
-     // Hook into settings store
-     // Return <SettingsGroup> with form fields
-   }
-   ```
-
-2. **Create settings card** in `routes/(settings)/-components/{feature}-settings-card.tsx`:
-
-   ```tsx
-   import {
-     FEATURE_SETTINGS_TITLE,
-     FeatureSettings,
-   } from "@/components/settings/feature-settings";
-   import {
-     Card,
-     CardContent,
-     CardDescription,
-     CardHeader,
-     CardTitle,
-   } from "@/components/ui-primitives/card";
-
-   export function FeatureSettingsCard() {
-     return (
-       <Card>
-         <CardHeader>
-           <CardTitle>{FEATURE_SETTINGS_TITLE}</CardTitle>
-           <CardDescription>Description here.</CardDescription>
-         </CardHeader>
-         <CardContent>
-           <FeatureSettings />
-         </CardContent>
-       </Card>
-     );
-   }
-   ```
-
-3. **Create settings popover** near its usage:
-
-   ```tsx
-   import {
-     FEATURE_SETTINGS_TITLE,
-     FeatureSettings,
-   } from "@/components/settings/feature-settings";
-   import {
-     SettingsHeader,
-     SettingsTitle,
-   } from "@/components/settings/settings-ui";
-   import { SettingsPopover } from "@/components/settings/settings-popover";
-
-   export function FeatureSettingsPopover() {
-     return (
-       <SettingsPopover label="Settings">
-         <SettingsHeader>
-           <SettingsTitle>{FEATURE_SETTINGS_TITLE}</SettingsTitle>
-         </SettingsHeader>
-         <FeatureSettings idPrefix="popover-" />
-       </SettingsPopover>
-     );
-   }
-   ```
-
-## Settings Primitives
-
-The project provides reusable settings field components in `components/settings/setting-fields.tsx`:
-
-- `<SettingsGroup>` - Container with consistent spacing
-- `<SwitchField>` - Label + Switch toggle
-- `<SliderField>` - Label + Slider with value display
-- `<ToggleGroupField>` - Label + Toggle group for enum selection
-
-Use `<SettingsPopover>` from `components/settings/settings-popover.tsx` for the popover container - it handles responsive behavior (drawer on mobile, popover on desktop).
-
-## State Management
-
-- **UX Settings**: `lib/ux-settings-store.ts` - Zustand store with persistence for UI preferences
-- **Hydrus Config**: `lib/hydrus-config-store.ts` - API connection settings
-- **History**: `lib/history-store.ts` - Watch history tracking
-
-## Naming Conventions
-
-- **Files**: kebab-case (`thumbnail-gallery-display-settings.tsx`)
-- **Components**: PascalCase (`ThumbnailGalleryDisplaySettings`)
-- **Constants**: SCREAMING_SNAKE_CASE (`THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE`)
-- **Settings files**: `{feature}-settings.tsx` for shared, `{feature}-settings-card.tsx` for cards, `{feature}-settings-popover.tsx` for popovers
-
-## Key Patterns
-
-### Pathless Route Groups `()`
-
-Use `()` folders to organize routes without affecting the URL structure. Great for:
-
-- Grouping related routes
-- Co-locating route-specific components
-- Keeping the routes folder organized
-
-### Component Co-location with `-` Prefix
-
-Files/folders starting with `-` are ignored by TanStack Router. Use for:
-
-- Route-specific components (`-components/`)
-- Route-specific hooks
-- Route-specific utilities
-
-### No Cross-Route Imports
-
-Each route group should be self-contained. If a component is needed by multiple routes, move it to `components/`.
-
-## Tailwind Custom Variants
-
-The project defines custom Tailwind variants in `src/styles.css` for responsive design:
-
-- **`short:`** - Limited vertical space (max-height: 500px). Covers tiny phones, foldable secondary screens, and landscape phones.
-- **`short-wide:`** - Phone landscape specifically (short + min-width: 640px). Overrides `short:` when horizontal space is available.
-
-**Usage pattern:** Use `short:` as the base for all constrained-height layouts, then `short-wide:` to refine for landscape:
-
 ```tsx
-className =
-  "h-(--header-height) short:h-(--header-height-short) short:hidden short-wide:flex";
+// Shared components: use @/ alias
+import { Button } from "@/components/ui-primitives/button";
+
+// Route-specific components: use relative paths
+import { FeatureCard } from "./-components/feature-card";
 ```
 
-See `src/styles.css` for full documentation on variants and app layout CSS variables.
+### Naming Conventions
+
+| Type       | Convention           | Example                      |
+| ---------- | -------------------- | ---------------------------- |
+| Files      | kebab-case           | `thumbnail-gallery-card.tsx` |
+| Components | PascalCase           | `ThumbnailGalleryCard`       |
+| Constants  | SCREAMING_SNAKE_CASE | `GALLERY_SETTINGS_TITLE`     |
+
+### Key Patterns
+
+- **Pathless groups `()`** - Organize routes without affecting URLs
+- **`-` prefix** - Co-locate route-specific files (ignored by router)
+- **Layout routes `_`** - Wrap child routes (e.g., `_auth.tsx`)
+- **Settings** - Shared controls + thin wrappers pattern
+
+### State Management
+
+| Store         | Purpose        | Location                     |
+| ------------- | -------------- | ---------------------------- |
+| UX Settings   | UI preferences | `lib/ux-settings-store.ts`   |
+| Hydrus Config | API connection | `lib/hydrus-config-store.ts` |
+| History       | Watch history  | `lib/history-store.ts`       |
+
+### Tailwind Custom Variants
+
+- **`short:`** - Limited vertical space (max-height: 500px)
+- **`short-wide:`** - Phone landscape (short + min-width: 640px)
+
+See `src/styles.css` for full documentation.
