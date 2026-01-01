@@ -21,6 +21,10 @@ import {
   RightSidebarSlot,
 } from "@/components/app-shell/right-sidebar-portal";
 import { HeaderPortalProvider } from "@/components/app-shell/header-portal";
+import {
+  FooterPortalProvider,
+  FooterPortalSlot,
+} from "@/components/app-shell/footer-portal";
 
 export interface MyRouterContext {
   queryClient: QueryClient;
@@ -41,13 +45,16 @@ function RootComponent() {
     <SidebarProvider>
       <AppSidebar />
       <RightSidebarProvider>
-        <SidebarInset>
-          <HeaderPortalProvider>
-            <AppHeader />
-            <main className="short:py-2 px-4 py-4 sm:px-6 sm:py-8">
-              <Outlet />
-            </main>
-          </HeaderPortalProvider>
+        <SidebarInset className="relative">
+          <FooterPortalProvider>
+            <HeaderPortalProvider>
+              <AppHeader />
+              <main className="short:py-2 px-4 py-4 sm:px-6 sm:py-8">
+                <Outlet />
+              </main>
+            </HeaderPortalProvider>
+            <FooterPortalSlot className="sticky bottom-0 z-40" />
+          </FooterPortalProvider>
         </SidebarInset>
         <RightSidebarSlot className="hidden xl:block" />
       </RightSidebarProvider>
