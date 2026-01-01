@@ -15,8 +15,13 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always" // Or "always"
   },
-  "tailwindCSS.experimental.classRegex": [
-    ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  "tailwindCSS.classFunctions": [
+    "tv",
+    "composeTailwindRenderProps",
+    "twMerge",
+    "cn",
+    "cx",
+    "clsx"
   ],
   "tailwindCSS.experimental.configFile": "src/styles.css",
   "tailwindCSS.files.exclude": ["**/*.md", ".github/**/*.md"],
