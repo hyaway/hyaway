@@ -1,6 +1,6 @@
 import { useElementScrollRestoration } from "@tanstack/react-router";
 import { useLayoutEffect, useState } from "react";
-import { dispatchScrollRestoration } from "@/components/app-shell/app-header";
+import { dispatchScrollRestoration } from "./use-scroll-direction";
 
 /**
  * Hook to handle scroll restoration for virtualized lists.

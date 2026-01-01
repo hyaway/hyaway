@@ -3,13 +3,6 @@ import { FloatingHeader } from "@/components/app-shell/floating-header";
 import { HeaderPortalSlot } from "@/components/app-shell/header-portal";
 import { Separator } from "@/components/ui-primitives/separator";
 import { SidebarTrigger } from "@/components/ui-primitives/sidebar";
-import {
-  SCROLL_RESTORATION_EVENT,
-  dispatchScrollRestoration,
-} from "@/hooks/use-scroll-direction";
-
-// Re-export for backwards compatibility
-export { SCROLL_RESTORATION_EVENT, dispatchScrollRestoration };
 
 export function AppHeader() {
   return (
