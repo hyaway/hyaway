@@ -8,6 +8,13 @@ The Hydrus API integration connects to a local [Hydrus Network](https://hydrusne
 
 **For official Hydrus API documentation**, see the [Hydrus Client API docs](https://hydrusnetwork.github.io/hydrus/developer_api.html).
 
+## Common Response Fields
+
+All JSON responses include the following fields indicating the API and client versions:
+
+- `version`: The version of the Client API (e.g., 83).
+- `hydrus_version`: The version of the Hydrus client (e.g., 653).
+
 ## Architecture
 
 ```
@@ -148,8 +155,8 @@ Gets the current API version. No authentication required.
 
 ```json
 {
-  "version": 17,
-  "hydrus_version": 441
+  "version": 83,
+  "hydrus_version": 653
 }
 ```
 
@@ -207,10 +214,10 @@ Check if your access key is valid and get permission info.
 
 ```json
 {
-  "name": "autotagger",
-  "permits_everything": false,
-  "basic_permissions": [0, 1, 3],
-  "human_description": "API Permissions (autotagger): add tags to files, import files, search for files"
+  "name": "hyaway-app",
+  "permits_everything": true,
+  "basic_permissions": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+  "human_description": "API Permissions (hyaway-app): can do anything"
 }
 ```
 
