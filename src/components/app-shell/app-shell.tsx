@@ -20,8 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <RightSidebarProvider>
         {/* Center column: header + content + floating footer - uses page scroll */}
-        {/* lg:mr-64 accounts for fixed right sidebar width */}
-        <div className="relative flex min-w-0 flex-1 flex-col lg:mr-64">
+        <div className="relative flex min-w-0 flex-1 flex-col">
           {/* Floating header - sticky with hide on scroll */}
           <FloatingHeader>
             <AppHeader />
@@ -41,7 +40,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Full-height right sidebar - fixed position */}
-        <RightSidebar className="fixed inset-y-0 right-0 z-10 hidden w-64 lg:block" />
+        <RightSidebar />
       </RightSidebarProvider>
     </SidebarProvider>
   );
