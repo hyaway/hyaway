@@ -11,10 +11,7 @@ import {
   useSystemThemeListener,
   useThemeHydrated,
 } from "@/lib/theme-store";
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui-primitives/sidebar";
+import { SidebarProvider } from "@/components/ui-primitives/sidebar";
 import { AppSidebar } from "@/components/app-shell/app-sidebar";
 import {
   RightSidebarProvider,
@@ -24,6 +21,7 @@ import {
   FooterPortalProvider,
   FooterPortalSlot,
 } from "@/components/app-shell/footer-portal";
+import { FloatingFooter } from "@/components/app-shell/floating-footer";
 import { FloatingHeader } from "@/components/app-shell/floating-header";
 
 export interface MyRouterContext {
@@ -43,21 +41,35 @@ function RootComponent() {
 
   return (
     <SidebarProvider>
+      {/* Full-height left sidebar (uses fixed positioning internally) */}
       <AppSidebar />
+
       <RightSidebarProvider>
-        <SidebarInset className="relative min-h-svh">
-          <FloatingHeader>
+        {/* Center column: header + content + floating footer - uses page scroll */}
+        {/* lg:mr-64 accounts for fixed right sidebar width */}
+        <div className="relative flex min-w-0 flex-1 flex-col lg:mr-64">
+          {/* Floating header - sticky with hide on scroll */}
+          <FloatingHeader className="border-b">
             <AppHeader />
           </FloatingHeader>
+
+          {/* Content area - grows naturally, page scrolls */}
           <FooterPortalProvider>
-            <main className="short:py-2 h-full px-4 py-4 sm:px-6 sm:py-8">
+            <main className="short:py-2 flex-1 px-4 py-4 sm:px-6 sm:py-8">
               <Outlet />
             </main>
-            <FooterPortalSlot className="sticky bottom-0 z-40" />
+
+            {/* Floating footer - sticky at bottom of center column */}
+            <FloatingFooter className="sticky bottom-0 justify-center">
+              <FooterPortalSlot />
+            </FloatingFooter>
           </FooterPortalProvider>
-        </SidebarInset>
-        <RightSidebarSlot className="hidden xl:block" />
+        </div>
+
+        {/* Full-height right sidebar - fixed position */}
+        <RightSidebarSlot className="bg-sidebar fixed inset-y-0 right-0 z-10 hidden w-64 overflow-y-auto border-l lg:block" />
       </RightSidebarProvider>
+
       <TanStackDevtools
         config={{
           position: "bottom-right",
