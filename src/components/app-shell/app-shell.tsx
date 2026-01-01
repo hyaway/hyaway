@@ -7,7 +7,8 @@ import { AppSidebar } from "./app-sidebar";
 import { FloatingFooter } from "./floating-footer";
 import { FloatingHeader } from "./floating-header";
 import { FooterPortalProvider, FooterPortalSlot } from "./footer-portal";
-import { RightSidebarProvider, RightSidebarSlot } from "./right-sidebar-portal";
+import { RightSidebarProvider } from "./right-sidebar-portal";
+import { RightSidebar } from "./right-sidebar";
 import { Sidebar, SidebarProvider } from "@/components/ui-primitives/sidebar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -40,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Full-height right sidebar - fixed position */}
-        <RightSidebarSlot className="bg-sidebar fixed inset-y-0 right-0 z-10 hidden w-64 overflow-y-auto border-l lg:block" />
+        <RightSidebar className="fixed inset-y-0 right-0 z-10 hidden w-64 lg:block" />
       </RightSidebarProvider>
     </SidebarProvider>
   );
