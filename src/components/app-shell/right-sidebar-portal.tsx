@@ -6,10 +6,22 @@ import { createPortal } from "react-dom";
 type RightSidebarContextValue = {
   container: HTMLElement | null;
   setContainer: (container: HTMLElement | null) => void;
+  hasContent: boolean;
+  setHasContent: (hasContent: boolean) => void;
 };
 
 const RightSidebarContext =
   React.createContext<RightSidebarContextValue | null>(null);
+
+export function useRightSidebarHasContent() {
+  const context = React.useContext(RightSidebarContext);
+  if (!context) {
+    throw new Error(
+      "useRightSidebarHasContent must be used within a RightSidebarProvider",
+    );
+  }
+  return context.hasContent;
+}
 
 export function RightSidebarProvider({
   children,
@@ -17,9 +29,13 @@ export function RightSidebarProvider({
   children: React.ReactNode;
 }) {
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
+  const [hasContent, setHasContent] = React.useState(false);
 
-  // useMemo needed to avoid new object every render; setContainer is already stable
-  const value = React.useMemo(() => ({ container, setContainer }), [container]);
+  // useMemo needed to avoid new object every render; setContainer/setHasContent are already stable
+  const value = React.useMemo(
+    () => ({ container, setContainer, hasContent, setHasContent }),
+    [container, hasContent],
+  );
 
   return (
     <RightSidebarContext.Provider value={value}>
@@ -58,6 +74,12 @@ export function RightSidebarPortal({
       "RightSidebarPortal must be used within a RightSidebarProvider",
     );
   }
+
+  // Track when content is mounted/unmounted
+  React.useEffect(() => {
+    context.setHasContent(true);
+    return () => context.setHasContent(false);
+  }, [context]);
 
   if (!context.container) {
     return null;

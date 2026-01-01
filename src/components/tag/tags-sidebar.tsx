@@ -137,6 +137,15 @@ export const TagsSidebar = memo(function TagsSidebar({
     getScrollElement: () => parentRef.current,
   });
 
+  // Force virtualizer to re-measure after portal mounts and container has dimensions
+  // Use rAF to wait for browser to complete layout calculation
+  React.useEffect(() => {
+    const rafId = requestAnimationFrame(() => {
+      rowVirtualizer.measure();
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, [rowVirtualizer]);
+
   // Cache virtual items
   const virtualItems = rowVirtualizer.getVirtualItems();
 
