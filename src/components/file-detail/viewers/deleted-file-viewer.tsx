@@ -1,10 +1,16 @@
 import { IconBan } from "@tabler/icons-react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
+import { cn } from "@/lib/utils";
 
 export function DeletedFileViewer({ data }: { data: FileMetadata }) {
   return (
-    <div className="relative flex flex-col items-center justify-center gap-4 overflow-hidden rounded-sm border p-8">
+    <div
+      className={cn(
+        "relative flex flex-col items-center justify-center gap-4 overflow-hidden rounded-sm border p-8",
+        "short:h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1rem)] h-[calc(100svh-var(--header-height)-var(--footer-height)-2rem)]",
+      )}
+    >
       {data.blurhash && (
         <BlurhashCanvas
           blurhash={data.blurhash}

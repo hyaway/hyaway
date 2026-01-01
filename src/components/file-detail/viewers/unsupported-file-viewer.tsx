@@ -1,4 +1,5 @@
 import { IconFileSad } from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
 
 interface UnsupportedFileViewerProps {
   fileUrl: string;
@@ -10,7 +11,12 @@ export function UnsupportedFileViewer({
   mime,
 }: UnsupportedFileViewerProps) {
   return (
-    <div className="flex flex-col items-center gap-4 rounded border p-8">
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center gap-4 rounded border p-8",
+        "short:h-[calc(100svh-var(--header-height-short)-var(--footer-height-short)-1rem)] h-[calc(100svh-var(--header-height)-var(--footer-height)-2rem)]",
+      )}
+    >
       <IconFileSad stroke={1.5} className="text-muted-foreground size-12" />
       <p className="text-muted-foreground">
         This file type ({mime}) is not currently viewable inline.
