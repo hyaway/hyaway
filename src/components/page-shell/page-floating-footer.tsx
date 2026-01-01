@@ -1,8 +1,8 @@
 import { IconDots } from "@tabler/icons-react";
 
+import { FooterPortal } from "../app-shell/footer-portal";
 import type { ComponentType, ReactNode, SVGProps } from "react";
 
-import { FloatingFooter } from "@/components/app-shell/floating-footer";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import {
   DropdownMenu,
@@ -61,54 +61,58 @@ export function PageFloatingFooter({
   const hasOverflow = overflowActions.length > 0;
 
   return (
-    <FloatingFooter className={cn("justify-center gap-1", className)}>
-      {/* Left content (e.g., refetch button) */}
-      {leftContent}
-      {/* Visible actions */}
-      {visibleActions.map((action) => (
-        <ActionButton key={action.id} action={action} />
-      ))}
+    <FooterPortal>
+      <div className={cn("justify-center gap-1", className)}>
+        {/* Left content (e.g., refetch button) */}
+        {leftContent}
+        {/* Visible actions */}
+        {visibleActions.map((action) => (
+          <ActionButton key={action.id} action={action} />
+        ))}
 
-      {/* Overflow menu */}
-      {hasOverflow && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <BottomNavButton
-                label="More"
-                icon={<IconDots className="size-6" />}
-              />
-            }
-          />
-          <DropdownMenuContent side="top" align="center">
-            {overflowActions.map((action) => (
-              <DropdownMenuItem
-                key={action.id}
-                onClick={action.onClick}
-                variant={action.variant}
-                disabled={action.disabled}
-                render={
-                  action.href ? (
-                    <a
-                      href={action.href}
-                      download={action.download || undefined}
-                      target={action.external ? "_blank" : undefined}
-                      rel={action.external ? "noopener noreferrer" : undefined}
-                    />
-                  ) : undefined
-                }
-              >
-                <action.icon />
-                {action.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+        {/* Overflow menu */}
+        {hasOverflow && (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <BottomNavButton
+                  label="More"
+                  icon={<IconDots className="size-6" />}
+                />
+              }
+            />
+            <DropdownMenuContent side="top" align="center">
+              {overflowActions.map((action) => (
+                <DropdownMenuItem
+                  key={action.id}
+                  onClick={action.onClick}
+                  variant={action.variant}
+                  disabled={action.disabled}
+                  render={
+                    action.href ? (
+                      <a
+                        href={action.href}
+                        download={action.download || undefined}
+                        target={action.external ? "_blank" : undefined}
+                        rel={
+                          action.external ? "noopener noreferrer" : undefined
+                        }
+                      />
+                    ) : undefined
+                  }
+                >
+                  <action.icon />
+                  {action.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
-      {/* Settings (popover or other content) */}
-      {rightContent}
-    </FloatingFooter>
+        {/* Settings (popover or other content) */}
+        {rightContent}
+      </div>
+    </FooterPortal>
   );
 }
 
