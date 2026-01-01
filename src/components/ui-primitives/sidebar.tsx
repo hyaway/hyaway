@@ -217,6 +217,8 @@ function Sidebar({
       />
       <div
         data-slot="sidebar-container"
+        // Prevent focus when collapsed offscreen
+        inert={state === "collapsed" && collapsible === "offExamples"}
         className={cn(
           "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-(--sidebar-open-close-duration) ease-(--sidebar-open-close-easing) md:flex",
           side === "left"
