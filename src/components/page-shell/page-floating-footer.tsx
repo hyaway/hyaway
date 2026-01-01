@@ -86,6 +86,7 @@ export function PageFloatingFooter({
                 key={action.id}
                 onClick={action.onClick}
                 variant={action.variant}
+                disabled={action.disabled}
                 render={
                   action.href ? (
                     <a
