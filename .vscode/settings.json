@@ -9,6 +9,9 @@
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true
   },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always" // Or "always"
   },
@@ -16,6 +19,7 @@
     ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
   ],
   "tailwindCSS.experimental.configFile": "src/styles.css",
+  "tailwindCSS.files.exclude": ["**/*.md", ".github/**/*.md"],
   "cSpell.words": [
     "blurhash",
     "BOORU",
