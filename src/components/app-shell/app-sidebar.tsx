@@ -22,7 +22,6 @@ import { SidebarThemeSwitcher } from "./theme-switcher";
 import { Heading } from "@/components/ui-primitives/heading";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";
 import {
-  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -55,9 +54,9 @@ function SidebarIcon({
   );
 }
 
-export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar() {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -184,6 +183,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
-    </Sidebar>
+    </>
   );
 }

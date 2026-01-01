@@ -11,7 +11,7 @@ import {
   useSystemThemeListener,
   useThemeHydrated,
 } from "@/lib/theme-store";
-import { SidebarProvider } from "@/components/ui-primitives/sidebar";
+import { Sidebar, SidebarProvider } from "@/components/ui-primitives/sidebar";
 import { AppSidebar } from "@/components/app-shell/app-sidebar";
 import {
   RightSidebarProvider,
@@ -42,8 +42,9 @@ function RootComponent() {
   return (
     <SidebarProvider>
       {/* Full-height left sidebar (uses fixed positioning internally) */}
-      <AppSidebar />
-
+      <Sidebar side="left" collapsible="icon">
+        <AppSidebar />
+      </Sidebar>
       <RightSidebarProvider>
         {/* Center column: header + content + floating footer - uses page scroll */}
         {/* lg:mr-64 accounts for fixed right sidebar width */}
