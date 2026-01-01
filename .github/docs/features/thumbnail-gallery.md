@@ -147,7 +147,7 @@ See [Settings Architecture](../settings-architecture.md) for the settings UI pat
 | File                                             | Purpose                                 |
 | ------------------------------------------------ | --------------------------------------- |
 | `thumbnail-gallery.tsx`                          | Main component with virtualization      |
-| `thumbnail-gallery-card.tsx`                     | Individual card with hover/context menu |
+| `thumbnail-gallery-item.tsx`                     | Individual item with hover/context menu |
 | `thumbnail-gallery-skeleton.tsx`                 | Loading state                           |
 | `thumbnail-gallery-display-settings-popover.tsx` | Inline settings                         |
 | `use-responsive-grid.ts`                         | Grid dimension calculation              |

@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { IconFocusCentered, IconRefreshDot } from "@tabler/icons-react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
-import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-card";
+import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";

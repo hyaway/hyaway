@@ -155,7 +155,7 @@ import { Button } from "@/components/ui-primitives";
 - **One component per file** (with small helpers allowed)
 
 ```tsx
-// thumbnail-gallery-card.tsx
+// thumbnail-gallery-item.tsx
 export function ThumbnailGalleryCard() { ... }
 ```
 
@@ -166,7 +166,7 @@ Keep related files together:
 ```
 thumbnail-gallery/
 ├── thumbnail-gallery.tsx           # Main component
-├── thumbnail-gallery-card.tsx      # Card subcomponent
+├── thumbnail-gallery-item.tsx      # Item subcomponent
 ├── thumbnail-gallery-skeleton.tsx  # Loading state
 └── thumbnail-gallery-display-settings-popover.tsx  # Settings
 ```

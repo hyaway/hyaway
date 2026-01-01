@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Item, ItemContent, ItemTitle } from "@/components/ui-primitives/item";
-import { ThumbnailImage } from "@/components/thumbnail-gallery/thumbnail-gallery-card";
+import { ThumbnailImage } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { useGetPageInfoQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { PageState } from "@/integrations/hydrus-api/models";
 import { Skeleton } from "@/components/ui-primitives/skeleton";

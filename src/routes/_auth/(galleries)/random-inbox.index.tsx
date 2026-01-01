@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { IconArrowsShuffle } from "@tabler/icons-react";
 import { RandomInboxSettingsPopover } from "./-components/random-inbox-settings-popover";
-import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-card";
+import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";

@@ -1,11 +1,11 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useDeferredValue, useEffect, useMemo } from "react";
 import {
-  CARD_FOOTER_HEIGHT,
-  ThumbnailGalleryCard,
-} from "./thumbnail-gallery-card";
+  ITEM_FOOTER_HEIGHT,
+  ThumbnailGalleryItem,
+} from "./thumbnail-gallery-item";
 import { ThumbnailGallerySkeleton } from "./thumbnail-gallery-skeleton";
-import type { FileLinkBuilder } from "./thumbnail-gallery-card";
+import type { FileLinkBuilder } from "./thumbnail-gallery-item";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { PageError } from "@/components/page-shell/page-error";
@@ -97,7 +97,7 @@ export function PureThumbnailGallery({
     const cached = heightCache.get(item.file_id);
     if (cached !== undefined) return cached;
     const aspectRatio = Math.max(Math.min(item.height / item.width, 2), 0.33);
-    const height = Math.max(aspectRatio * width, 64) + CARD_FOOTER_HEIGHT;
+    const height = Math.max(aspectRatio * width, 64) + ITEM_FOOTER_HEIGHT;
     heightCache.set(item.file_id, height);
     return height;
   };
@@ -180,7 +180,7 @@ export function PureThumbnailGallery({
               const itemHeight = getItemHeight(item);
 
               return (
-                <ThumbnailGalleryCard
+                <ThumbnailGalleryItem
                   key={virtualRow.index}
                   virtualRow={virtualRow}
                   lanes={lanes}

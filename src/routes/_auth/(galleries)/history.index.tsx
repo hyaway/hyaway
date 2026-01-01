@@ -2,7 +2,7 @@ import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { IconTrashX } from "@tabler/icons-react";
 import { HistorySettingsPopover } from "./-components/history-settings-popover";
-import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-card";
+import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";

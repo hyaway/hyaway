@@ -29,7 +29,7 @@ import { checkerboardBg } from "@/lib/style-constants";
 import { useImageBackground } from "@/lib/ux-settings-store";
 
 /** Height of the polaroid-style footer strip in pixels (h-6 = 24px) */
-export const CARD_FOOTER_HEIGHT = 24;
+export const ITEM_FOOTER_HEIGHT = 24;
 
 /**
  * Function to build a link for a file in the current context.
@@ -44,7 +44,7 @@ export const defaultFileLinkBuilder: FileLinkBuilder = (fileId) =>
     params: { fileId: String(fileId) },
   });
 
-// --- Main Card Component ---
+// --- Main Item Component ---
 
 export interface ThumbnailGalleryItemProps extends React.HTMLAttributes<HTMLLIElement> {
   virtualRow: { lane: number; index: number; start: number };
@@ -172,7 +172,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
             tabIndex={tabIndex}
           />
         </ContextMenuTrigger>
-        <ThumbnailGalleryCardContextMenu item={item} />
+        <ThumbnailGalleryItemContextMenu item={item} />
       </ContextMenu>
       <div
         className={cn(
@@ -185,21 +185,21 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
           originClass,
         )}
       >
-        <ThumbnailGalleryCardContent item={item} />
+        <ThumbnailGalleryItemContent item={item} />
       </div>
     </li>
   );
 });
 
-// --- Card Content (badges + thumbnail) ---
+// --- Item Content (badges + thumbnail) ---
 
-interface ThumbnailGalleryCardContentProps {
+interface ThumbnailGalleryItemContentProps {
   item: FileMetadata;
 }
 
-const ThumbnailGalleryCardContent = memo(function ThumbnailGalleryCardContent({
+const ThumbnailGalleryItemContent = memo(function ThumbnailGalleryItemContent({
   item,
-}: ThumbnailGalleryCardContentProps) {
+}: ThumbnailGalleryItemContentProps) {
   const fileSize = formatBytes(item.size);
   const isPermanentlyDeleted = item.is_deleted && !item.is_trashed;
 
@@ -245,7 +245,7 @@ const ThumbnailGalleryCardContent = memo(function ThumbnailGalleryCardContent({
 
 // --- Context Menu Actions ---
 
-interface ThumbnailGalleryCardContextMenuProps {
+interface ThumbnailGalleryItemContextMenuProps {
   item: Pick<
     FileMetadata,
     | "file_id"
@@ -258,10 +258,10 @@ interface ThumbnailGalleryCardContextMenuProps {
   >;
 }
 
-const ThumbnailGalleryCardContextMenu = memo(
-  function ThumbnailGalleryCardContextMenu({
+const ThumbnailGalleryItemContextMenu = memo(
+  function ThumbnailGalleryItemContextMenu({
     item,
-  }: ThumbnailGalleryCardContextMenuProps) {
+  }: ThumbnailGalleryItemContextMenuProps) {
     const actionGroups = useFileActions(item, {
       includeOpen: true,
       includeExternal: true,
