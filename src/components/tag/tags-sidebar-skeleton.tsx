@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 
 import {
-  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -28,34 +27,32 @@ export function TagsSidebarSkeleton({ tagCount = 20 }: { tagCount?: number }) {
 
   return (
     <RightSidebarPortal>
-      <Sidebar
-        side="right"
-        collapsible="none"
-        className="sticky top-0 h-svh border-l"
-      >
-        <SidebarHeader>
-          <Heading level={3} className="text-lg font-semibold">
-            Tags
-          </Heading>
-        </SidebarHeader>
-        <SidebarContent className="p-1 pe-3">
-          <SidebarGroup className="gap-2">
-            <Skeleton className="mb-2 h-8 w-full" />
-            {widths.map((width, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <Skeleton className="size-8 shrink-0" />
-                <Skeleton
-                  className="h-8 rounded-4xl"
-                  style={{ width: `${width}%` }}
-                />
-              </div>
-            ))}
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter>
-          <Skeleton className="h-16 w-full" />
-        </SidebarFooter>
-      </Sidebar>
+      <SidebarHeader className="gap-4">
+        <Heading level={3} className="text-lg font-semibold">
+          Tags
+        </Heading>
+        {/* Search input skeleton */}
+        <Skeleton className="h-8 w-full" />
+        {/* Toggle group skeleton */}
+        <div className="flex w-full gap-1">
+          <Skeleton className="h-8 flex-1" />
+          <Skeleton className="h-8 flex-1" />
+        </div>
+      </SidebarHeader>
+      <SidebarContent className="min-h-0 flex-1 pe-1">
+        <SidebarGroup className="gap-1.5 pe-2.5">
+          {widths.map((width, i) => (
+            <Skeleton
+              key={i}
+              className="h-6 rounded-sm"
+              style={{ width: `${width}%` }}
+            />
+          ))}
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <Skeleton className="h-5 w-3/4" />
+      </SidebarFooter>
     </RightSidebarPortal>
   );
 }
