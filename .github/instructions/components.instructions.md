@@ -1,5 +1,5 @@
 ---
-applyTo: "**/components/**"
+applyTo: "**/components/**,**/-components/**"
 ---
 
 # Component Organization

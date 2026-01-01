@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.css,**/components/app-shell/**,**/components/page-shell/**"
+applyTo: "**/*.css,**/components/**,**/-components/**"
 ---
 
 # Responsive Design

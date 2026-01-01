@@ -1,5 +1,5 @@
 ---
-applyTo: "**/components/settings/**,**/routes/(settings)/**"
+applyTo: "**settings**"
 ---
 
 # Settings Development

@@ -1,5 +1,5 @@
 ---
-applyTo: "**/components/ui-primitives/**"
+applyTo: "**/components/**,**/-components/**"
 ---
 
 # UI Primitives Development
