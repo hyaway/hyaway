@@ -97,3 +97,20 @@ import { FeatureCard } from "./-components/feature-card";
 - **`short-wide:`** - Phone landscape (short + min-width: 640px)
 
 See `src/styles.css` for full documentation.
+
+## Maintaining Documentation
+
+When making significant changes, update the relevant documentation in `.github/docs/`:
+
+| Change Type                 | Update                                                                              |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| New settings module         | [settings-architecture.md](docs/settings-architecture.md) - add to modules table    |
+| New route or route group    | [routing-conventions.md](docs/routing-conventions.md) - update structure            |
+| New shared component folder | [component-organization.md](docs/component-organization.md) - add category          |
+| New API endpoint            | [integrations/hydrus-api.md](docs/integrations/hydrus-api.md) - document endpoint   |
+| New query pattern           | [integrations/tanstack-query.md](docs/integrations/tanstack-query.md) - add example |
+| New UI primitive            | [ui/primitives.md](docs/ui/primitives.md) - add to component list                   |
+| New Tailwind variant        | [ui/responsive-design.md](docs/ui/responsive-design.md) - document variant          |
+| New feature area            | Create new doc in `docs/features/` and add to README index                          |
+
+**When to update:** After implementing a feature, pattern, or convention that others would need to understand or follow.

@@ -38,7 +38,21 @@ This folder contains detailed documentation for specific features and patterns u
 
 1. Create a new `.md` file in the appropriate subfolder
 2. Add an entry to this README's index
-3. Reference from `copilot-instructions.md` if it should be auto-included for relevant files
+3. Add to the documentation table in `copilot-instructions.md`
+
+## Maintaining Existing Documentation
+
+Update docs when making significant changes:
+
+- **New settings module** → Update [settings-architecture.md](./settings-architecture.md) modules table
+- **New route/group** → Update [routing-conventions.md](./routing-conventions.md) structure diagram
+- **New component folder** → Update [component-organization.md](./component-organization.md)
+- **New API endpoint** → Document in [integrations/hydrus-api.md](./integrations/hydrus-api.md)
+- **New query pattern** → Add example to [integrations/tanstack-query.md](./integrations/tanstack-query.md)
+- **New UI primitive** → Add to [ui/primitives.md](./ui/primitives.md) component list
+- **New feature** → Create doc in `features/` subfolder
+
+**Keep docs in sync** - If you change how something works, update its documentation.
 
 ## For AI Assistants
 
