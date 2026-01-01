@@ -10,7 +10,6 @@ import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import type { TagsSortMode } from "@/lib/ux-settings-store";
 import { useTagsSortMode, useUxSettingsActions } from "@/lib/ux-settings-store";
 import {
-  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -143,74 +142,68 @@ export const TagsSidebar = memo(function TagsSidebar({
 
   return (
     <RightSidebarPortal>
-      <Sidebar
-        side="right"
-        collapsible="none"
-        className="sticky top-0 h-svh border-l p-1"
-      >
-        <SidebarHeader className="gap-4">
-          <Heading level={3} className="text-lg font-semibold">
-            Tags
-          </Heading>
-          <SidebarInput
-            type="search"
-            placeholder="Filter tags..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <ToggleGroup
-            value={[sortMode]}
-            onValueChange={(value) => {
-              const newValue = value[0] as TagsSortMode | undefined;
-              if (newValue) setTagsSortMode(newValue);
-            }}
-            variant="outline"
-            size="sm"
-            className="w-full"
-          >
-            <ToggleGroupItem value="count" className="flex-1">
-              Count
-            </ToggleGroupItem>
-            <ToggleGroupItem value="namespace" className="flex-1">
-              Namespace
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </SidebarHeader>
-        <SidebarContent>
-          <ScrollArea className="h-full pe-2" ref={parentRef}>
-            <SidebarGroup>
-              <ol
-                style={{
-                  height: `${rowVirtualizer.getTotalSize()}px`,
-                }}
-                className="relative"
-              >
-                {virtualItems.map((virtualRow) => (
-                  <TagRow
-                    key={virtualRow.index}
-                    ref={rowVirtualizer.measureElement}
-                    tagItem={filteredTags[virtualRow.index]}
-                    index={virtualRow.index}
-                    showCount={deferredItems.length > 1}
-                    style={{
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                  />
-                ))}
-              </ol>
-            </SidebarGroup>
-          </ScrollArea>
-        </SidebarContent>
-        <SidebarFooter>
-          <span className="text-muted-foreground text-sm">
-            {deferredSearch.trim()
-              ? `${filteredTags.length} of ${tags.length} tags`
-              : deferredItems.length === 1
-                ? `${tags.length} tags`
-                : `${tags.length} unique tags for ${deferredItems.length} loaded files`}
-          </span>
-        </SidebarFooter>
-      </Sidebar>
+      <SidebarHeader className="gap-4">
+        <Heading level={3} className="text-lg font-semibold">
+          Tags
+        </Heading>
+        <SidebarInput
+          type="search"
+          placeholder="Filter tags..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <ToggleGroup
+          value={[sortMode]}
+          onValueChange={(value) => {
+            const newValue = value[0] as TagsSortMode | undefined;
+            if (newValue) setTagsSortMode(newValue);
+          }}
+          variant="outline"
+          size="sm"
+          className="w-full"
+        >
+          <ToggleGroupItem value="count" className="flex-1">
+            Count
+          </ToggleGroupItem>
+          <ToggleGroupItem value="namespace" className="flex-1">
+            Namespace
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </SidebarHeader>
+      <SidebarContent className="min-h-0 flex-1 pe-1">
+        <ScrollArea viewportClassName="h-full max-h-svh pe-2.5" ref={parentRef}>
+          <SidebarGroup>
+            <ol
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+              }}
+              className="relative"
+            >
+              {virtualItems.map((virtualRow) => (
+                <TagRow
+                  key={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
+                  tagItem={filteredTags[virtualRow.index]}
+                  index={virtualRow.index}
+                  showCount={deferredItems.length > 1}
+                  style={{
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                />
+              ))}
+            </ol>
+          </SidebarGroup>
+        </ScrollArea>
+      </SidebarContent>
+      <SidebarFooter>
+        <span className="text-muted-foreground text-sm">
+          {deferredSearch.trim()
+            ? `${filteredTags.length} of ${tags.length} tags`
+            : deferredItems.length === 1
+              ? `${tags.length} tags`
+              : `${tags.length} unique tags for ${deferredItems.length} loaded files`}
+        </span>
+      </SidebarFooter>
     </RightSidebarPortal>
   );
 });
