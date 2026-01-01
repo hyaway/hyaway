@@ -12,6 +12,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 
 import type { ComponentType, SVGProps } from "react";
+import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 
 import {
@@ -196,6 +197,29 @@ function useExternalActions(
 
   return actions;
 }
+
+// --- Loading Placeholder Actions ---
+
+/**
+ * Placeholder actions to show during loading states.
+ * These maintain layout consistency while data is being fetched.
+ */
+export const LOADING_ACTIONS = [
+  {
+    id: "loading-trash",
+    label: "Trash",
+    icon: IconTrash,
+    onClick: () => {},
+    disabled: true,
+  },
+  {
+    id: "loading-archive",
+    label: "Archive",
+    icon: IconArchive,
+    onClick: () => {},
+    disabled: true,
+  },
+] as const satisfies ReadonlyArray<FloatingFooterAction>;
 
 // --- Main Composed Hook ---
 

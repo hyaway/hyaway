@@ -15,7 +15,7 @@ import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
-import { useFileActions } from "@/hooks/use-file-actions";
+import { LOADING_ACTIONS, useFileActions } from "@/hooks/use-file-actions";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useHistoryActions, useHistoryEnabled } from "@/lib/history-store";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
@@ -36,7 +36,9 @@ export function FileDetail({
   const { data, isLoading, isError, error } = useGetSingleFileMetadata(fileId);
 
   if (isLoading) {
-    return <FileDetailSkeleton fileId={fileId} />;
+    return (
+      <FileDetailSkeleton fileId={fileId} prependActions={prependActions} />
+    );
   }
 
   if (isError) {
@@ -46,6 +48,10 @@ export function FileDetail({
         <PageError
           error={error}
           fallbackMessage="An unknown error occurred while fetching file."
+        />
+        <PageFloatingFooter
+          actions={[...(prependActions ?? []), ...LOADING_ACTIONS]}
+          rightContent={<FileViewerSettingsPopover />}
         />
       </>
     );
@@ -59,6 +65,10 @@ export function FileDetail({
           <IconAlertCircle />
           <AlertTitle>File not found</AlertTitle>
         </Alert>
+        <PageFloatingFooter
+          actions={[...(prependActions ?? []), ...LOADING_ACTIONS]}
+          rightContent={<FileViewerSettingsPopover />}
+        />
       </>
     );
   }
