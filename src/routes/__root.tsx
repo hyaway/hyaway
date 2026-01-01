@@ -45,16 +45,16 @@ function RootComponent() {
     <SidebarProvider>
       <AppSidebar />
       <RightSidebarProvider>
-        <SidebarInset className="relative">
-          <FooterPortalProvider>
-            <HeaderPortalProvider>
-              <AppHeader />
-              <main className="short:py-2 px-4 py-4 sm:px-6 sm:py-8">
+        <SidebarInset className="relative min-h-svh">
+          <HeaderPortalProvider>
+            <AppHeader />
+            <FooterPortalProvider>
+              <main className="short:py-2 h-full px-4 py-4 sm:px-6 sm:py-8">
                 <Outlet />
               </main>
-            </HeaderPortalProvider>
-            <FooterPortalSlot className="sticky bottom-0 z-40" />
-          </FooterPortalProvider>
+              <FooterPortalSlot className="sticky bottom-0 z-40" />
+            </FooterPortalProvider>
+          </HeaderPortalProvider>
         </SidebarInset>
         <RightSidebarSlot className="hidden xl:block" />
       </RightSidebarProvider>
