@@ -19,7 +19,7 @@ export function FloatingFooter({
   return (
     <div
       className={cn(
-        "bg-background/95 supports-backdrop-filter:bg-background/75 short:px-2 z-40 flex items-center justify-between border-t px-2 backdrop-blur-sm sm:px-4",
+        "bg-background/95 supports-backdrop-filter:bg-background/75 short:px-2 sticky bottom-0 z-40 flex items-center justify-between border-t px-2 backdrop-blur-sm sm:px-4",
         "short:h-(--footer-height-short) h-(--footer-height) sm:h-(--footer-height-sm)",
         // Extended area above bar for hover detection
         "before:pointer-events-auto before:absolute before:inset-x-0 before:bottom-full before:content-['']",

@@ -49,7 +49,7 @@ function RootComponent() {
         {/* lg:mr-64 accounts for fixed right sidebar width */}
         <div className="relative flex min-w-0 flex-1 flex-col lg:mr-64">
           {/* Floating header - sticky with hide on scroll */}
-          <FloatingHeader className="border-b">
+          <FloatingHeader>
             <AppHeader />
           </FloatingHeader>
 
@@ -60,7 +60,7 @@ function RootComponent() {
             </main>
 
             {/* Floating footer - sticky at bottom of center column */}
-            <FloatingFooter className="sticky bottom-0 justify-center">
+            <FloatingFooter className="justify-center">
               <FooterPortalSlot />
             </FloatingFooter>
           </FooterPortalProvider>
