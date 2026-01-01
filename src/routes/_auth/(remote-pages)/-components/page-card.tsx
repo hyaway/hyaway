@@ -135,7 +135,7 @@ export function PageCard({
  */
 export function PageCardSkeleton({ className }: { className?: string }) {
   return (
-    <Item variant="muted" className={cn("block h-full", className)}>
+    <Item variant="muted" className={cn("block h-60 w-48", className)}>
       <ItemContent className="mb-3.5">
         <div className="grid grid-cols-2 gap-2">
           {Array.from({ length: 4 }).map((_, i) => (

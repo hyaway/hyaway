@@ -1,10 +1,16 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 
 import { PageCard, PageCardSkeleton } from "./-components/page-card";
 import { PagesDisplaySettingsPopover } from "./-components/pages-display-settings-popover";
+import {
+  PAGE_CARD_GAP,
+  PAGE_CARD_HEIGHT,
+  PAGE_CARD_WIDTH,
+  usePageGridLanes,
+} from "./-hooks/use-page-grid-lanes";
 import type { Page } from "@/integrations/hydrus-api/models";
 
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -20,9 +26,6 @@ export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
   component: PagesIndex,
 });
 
-const PAGE_CARD_MIN_WIDTH = 192; // 12rem
-const PAGE_CARD_GAP = 16; // gap-4
-
 /**
  * Pages index component - shows virtualized grid of page cards
  */
@@ -35,6 +38,13 @@ function PagesIndex() {
     error,
   } = useGetMediaPagesQuery();
   const queryClient = useQueryClient();
+  const pagesMaxColumns = usePagesMaxColumns();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const lanes = usePageGridLanes(
+    containerRef,
+    pagesMaxColumns,
+    isPending ? 6 : pages.length,
+  );
 
   const title = isPending ? "Pages" : `Pages (${pages.length} pages)`;
 
@@ -51,14 +61,11 @@ function PagesIndex() {
 
   return (
     <>
-      <div className="@container pb-16">
+      <div ref={containerRef} className="pb-16">
         <PageHeading title={title} />
 
         {isPending ? (
-          <div
-            className="grid grid-cols-1 gap-4 @xs:grid-cols-2 @lg:grid-cols-3"
-            aria-label="Loading pages"
-          >
+          <div className="flex flex-wrap gap-4" aria-label="Loading pages">
             {Array.from({ length: 6 }).map((_, i) => (
               <PageCardSkeleton key={`page-skeleton-${i}`} />
             ))}
@@ -68,7 +75,7 @@ function PagesIndex() {
         ) : pages.length === 0 ? (
           <EmptyState message="No media pages found. Open some file search pages in Hydrus Client." />
         ) : (
-          <PagesGrid pages={pages} />
+          <PagesGrid pages={pages} containerRef={containerRef} lanes={lanes} />
         )}
       </div>
       <PageFloatingFooter
@@ -79,42 +86,22 @@ function PagesIndex() {
   );
 }
 
-function PagesGrid({ pages }: { pages: Array<Page & { id: string }> }) {
-  const pagesMaxColumns = usePagesMaxColumns();
-  const parentRef = useRef<HTMLDivElement>(null);
-  const [lanes, setLanes] = React.useState(1);
-
-  // Calculate lanes based on container width
-  React.useLayoutEffect(() => {
-    if (!parentRef.current) return;
-
-    const observer = new ResizeObserver((entries) => {
-      const containerWidth = entries[0].contentRect.width;
-      const calculatedLanes = Math.max(
-        1,
-        Math.floor(
-          (containerWidth + PAGE_CARD_GAP) /
-            (PAGE_CARD_MIN_WIDTH + PAGE_CARD_GAP),
-        ),
-      );
-      setLanes(Math.min(calculatedLanes, pagesMaxColumns, pages.length));
-    });
-
-    observer.observe(parentRef.current);
-    return () => observer.disconnect();
-  }, [pagesMaxColumns, pages.length]);
-
-  // Fixed card dimensions
-  const cardWidth = PAGE_CARD_MIN_WIDTH;
-  const cardHeight = PAGE_CARD_MIN_WIDTH + 48;
-
+function PagesGrid({
+  pages,
+  containerRef,
+  lanes,
+}: {
+  pages: Array<Page & { id: string }>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  lanes: number;
+}) {
   const rowVirtualizer = useWindowVirtualizer({
     count: pages.length,
-    estimateSize: () => cardHeight,
+    estimateSize: () => PAGE_CARD_HEIGHT,
     overscan: 4,
     gap: PAGE_CARD_GAP,
     lanes,
-    scrollMargin: parentRef.current?.offsetTop ?? 0,
+    scrollMargin: containerRef.current?.offsetTop ?? 0,
   });
 
   const virtualItems = rowVirtualizer.getVirtualItems();
@@ -133,7 +120,7 @@ function PagesGrid({ pages }: { pages: Array<Page & { id: string }> }) {
   );
 
   return (
-    <div ref={parentRef} className="w-full">
+    <div className="w-full">
       <ul
         role="grid"
         onKeyDown={handleKeyDown}
@@ -151,9 +138,9 @@ function PagesGrid({ pages }: { pages: Array<Page & { id: string }> }) {
                 key={page.page_key}
                 className="absolute top-0 left-0"
                 style={{
-                  width: `${cardWidth}px`,
-                  height: `${cardHeight}px`,
-                  transform: `translate(${virtualRow.lane * (cardWidth + PAGE_CARD_GAP)}px, ${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
+                  width: `${PAGE_CARD_WIDTH}px`,
+                  height: `${PAGE_CARD_HEIGHT}px`,
+                  transform: `translate(${virtualRow.lane * (PAGE_CARD_WIDTH + PAGE_CARD_GAP)}px, ${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
                 }}
               >
                 <PageCard
