@@ -206,6 +206,7 @@ export const useDeleteFilesMutation = () => {
       }));
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyTrashed"],
+        refetchType: "none",
       });
     },
     mutationKey: ["deleteFiles"],
@@ -229,6 +230,7 @@ export const useUndeleteFilesMutation = () => {
       }));
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyTrashed"],
+        refetchType: "none",
       });
     },
     mutationKey: ["undeleteFiles"],
@@ -251,9 +253,11 @@ export const useArchiveFilesMutation = () => {
       }));
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyArchived"],
+        refetchType: "none",
       });
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyInboxed"],
+        refetchType: "none",
       });
     },
     mutationKey: ["archiveFiles"],
@@ -276,9 +280,11 @@ export const useUnarchiveFilesMutation = () => {
       }));
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyArchived"],
+        refetchType: "none",
       });
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyInboxed"],
+        refetchType: "none",
       });
     },
     mutationKey: ["unarchiveFiles"],
