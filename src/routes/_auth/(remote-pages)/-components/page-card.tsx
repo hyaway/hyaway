@@ -7,8 +7,16 @@ import {
 } from "@/components/ui-primitives/card";
 import { ThumbnailImage } from "@/components/thumbnail-gallery/thumbnail-gallery-card";
 import { useGetPageInfoQuery } from "@/integrations/hydrus-api/queries/manage-pages";
+import { PageState } from "@/integrations/hydrus-api/models";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
+import { Spinner } from "@/components/ui-primitives/spinner";
 import { cn } from "@/lib/utils";
+
+const PAGE_STATE_LABELS: Partial<Record<PageState, string>> = {
+  [PageState.INITIALIZING]: "Initializing…",
+  [PageState.SEARCHING_LOADING]: "Searching…",
+  [PageState.SEARCH_CANCELLED]: "Cancelled",
+};
 
 export interface PageCardProps {
   pageKey: string;
@@ -32,6 +40,9 @@ export function PageCard({
 }: PageCardProps) {
   const { data, isLoading } = useGetPageInfoQuery(pageKey, true);
 
+  const pageState = data?.page_info.page_state;
+  const pageStateLabel = pageState ? PAGE_STATE_LABELS[pageState] : undefined;
+
   const totalFiles = data?.page_info.media.num_files ?? 0;
   // Show all 4 thumbnails if 4 or fewer files, otherwise show 3 + count card
   const showCountCard = totalFiles > 4;
@@ -54,15 +65,11 @@ export function PageCard({
         <CardContent>
           {isLoading ? (
             <div
-              className="grid grid-cols-2 gap-2"
+              className="text-muted-foreground flex aspect-square flex-col items-center justify-center gap-2 rounded border border-dashed text-center text-sm"
               aria-label="Loading page preview"
             >
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton
-                  key={`skeleton-${i}`}
-                  className="aspect-square rounded"
-                />
-              ))}
+              <Spinner className="size-5" />
+              <span>Loading…</span>
             </div>
           ) : previewFileIds.length > 0 ? (
             <div
@@ -100,6 +107,16 @@ export function PageCard({
                   aria-hidden="true"
                 />
               ))}
+            </div>
+          ) : pageStateLabel ? (
+            <div
+              className="text-muted-foreground flex aspect-square flex-col items-center justify-center gap-2 rounded border border-dashed text-center text-sm"
+              aria-label={pageStateLabel}
+            >
+              {pageState !== PageState.SEARCH_CANCELLED && (
+                <Spinner className="size-5" />
+              )}
+              <span>{pageStateLabel}</span>
             </div>
           ) : (
             <div className="text-muted-foreground flex aspect-square items-center justify-center rounded border border-dashed text-sm">
