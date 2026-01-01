@@ -39,9 +39,9 @@ import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-galle
 - `fileIds` - Array of Hydrus file IDs to display
 - `getFileLink` - Optional custom link builder for contextual navigation
 
-### `ThumbnailGalleryCard`
+### `ThumbnailGalleryItem`
 
-Individual card component (memoized). Renders thumbnail, blurhash placeholder, status badges, and handles hover/focus states.
+Individual itm component (memoized). Renders thumbnail, blurhash placeholder, status badges, and handles hover/focus states.
 
 **Features:**
 
@@ -116,7 +116,7 @@ useResponsiveGrid() → { width, lanes }
 useWindowVirtualizer() → virtual items
     │
     ▼
-ThumbnailGalleryCard × N (only visible items)
+ThumbnailGalleryItem × N (only visible items)
     │
     ├─► TagsSidebar (aggregated tags from loaded items)
     └─► Badge (scroll position indicator)
@@ -139,7 +139,7 @@ See [Settings Architecture](../settings-architecture.md) for the settings UI pat
 - **Window virtualization** - Only DOM nodes for visible items
 - **useDeferredValue** - Old grid stays visible while new items load
 - **Height caching** - Item heights cached, invalidated on width change
-- **Memoized cards** - `ThumbnailGalleryCard` is wrapped in `memo()`
+- **Memoized items** - `ThumbnailGalleryItem` is wrapped in `memo()`
 - **Scroll restoration** - Uses `useScrollRestoration` hook
 
 ## Related Files

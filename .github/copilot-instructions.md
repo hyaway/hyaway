@@ -73,7 +73,7 @@ import { FeatureCard } from "./-components/feature-card";
 | Type       | Convention           | Example                      |
 | ---------- | -------------------- | ---------------------------- |
 | Files      | kebab-case           | `thumbnail-gallery-item.tsx` |
-| Components | PascalCase           | `ThumbnailGalleryCard`       |
+| Components | PascalCase           | `ThumbnailGalleryItem`       |
 | Constants  | SCREAMING_SNAKE_CASE | `GALLERY_SETTINGS_TITLE`     |
 
 ### Key Patterns

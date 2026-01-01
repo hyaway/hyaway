@@ -156,7 +156,7 @@ import { Button } from "@/components/ui-primitives";
 
 ```tsx
 // thumbnail-gallery-item.tsx
-export function ThumbnailGalleryCard() { ... }
+export function ThumbnailGalleryItem() { ... }
 ```
 
 ## Co-located Files
