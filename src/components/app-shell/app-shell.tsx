@@ -1,0 +1,47 @@
+"use client";
+
+import * as React from "react";
+
+import { AppHeader } from "./app-header";
+import { AppSidebar } from "./app-sidebar";
+import { FloatingFooter } from "./floating-footer";
+import { FloatingHeader } from "./floating-header";
+import { FooterPortalProvider, FooterPortalSlot } from "./footer-portal";
+import { RightSidebarProvider, RightSidebarSlot } from "./right-sidebar-portal";
+import { Sidebar, SidebarProvider } from "@/components/ui-primitives/sidebar";
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      {/* Full-height left sidebar (uses fixed positioning internally) */}
+      <Sidebar side="left" collapsible="icon">
+        <AppSidebar />
+      </Sidebar>
+      <RightSidebarProvider>
+        {/* Center column: header + content + floating footer - uses page scroll */}
+        {/* lg:mr-64 accounts for fixed right sidebar width */}
+        <div className="relative flex min-w-0 flex-1 flex-col lg:mr-64">
+          {/* Floating header - sticky with hide on scroll */}
+          <FloatingHeader>
+            <AppHeader />
+          </FloatingHeader>
+
+          {/* Content area - grows naturally, page scrolls */}
+          <FooterPortalProvider>
+            <main className="short:py-2 flex-1 px-4 py-4 sm:px-6 sm:py-8">
+              {children}
+            </main>
+
+            {/* Floating footer - sticky at bottom of center column */}
+            <FloatingFooter className="justify-center">
+              <FooterPortalSlot />
+            </FloatingFooter>
+          </FooterPortalProvider>
+        </div>
+
+        {/* Full-height right sidebar - fixed position */}
+        <RightSidebarSlot className="bg-sidebar fixed inset-y-0 right-0 z-10 hidden w-64 overflow-y-auto border-l lg:block" />
+      </RightSidebarProvider>
+    </SidebarProvider>
+  );
+}
