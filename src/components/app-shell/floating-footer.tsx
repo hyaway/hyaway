@@ -13,8 +13,8 @@ export function FloatingFooter({
   const isVisible = useScrollDirection(50);
 
   const visibilityClasses = isVisible
-    ? "translate-y-0 opacity-100 before:h-2"
-    : "pointer-events-none translate-y-full opacity-0 before:h-(--footer-height) sm:before:h-(--footer-height-sm) short:before:h-(--footer-height-short) hover:pointer-events-auto hover:translate-y-0 hover:opacity-100";
+    ? "translate-y-0 opacity-100 short:before:h-[calc(var(--footer-height-short)*0.75)] before:h-[calc(var(--footer-height)*0.75)] @lg:before:h-[calc(var(--footer-height-sm)*0.75)]"
+    : "pointer-events-none translate-y-full opacity-0 short:before:h-[calc(var(--footer-height-short)*2)] before:h-[calc(var(--footer-height)*2)] @lg:before:h-[calc(var(--footer-height-sm)*2)] hover:pointer-events-auto hover:translate-y-0 hover:opacity-100";
 
   return (
     <div
