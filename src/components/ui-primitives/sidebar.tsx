@@ -4,7 +4,12 @@ import * as React from "react";
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import { cva } from "class-variance-authority";
-import { IconLayoutSidebar } from "@tabler/icons-react";
+import {
+  IconLayoutSidebar,
+  IconLayoutSidebarFilled,
+  IconLayoutSidebarRight,
+  IconLayoutSidebarRightFilled,
+} from "@tabler/icons-react";
 import { createLink } from "@tanstack/react-router";
 import type { LinkComponent } from "@tanstack/react-router";
 import type { VariantProps } from "class-variance-authority";
@@ -347,6 +352,7 @@ function SidebarTrigger({
   const context = useSidebarOptional();
   const storeActions = useSidebarStoreActions();
   const isMobile = useIsMobile();
+  const sidebarState = useSidebarSide(side ?? context?.side ?? "left");
 
   const toggleSidebar = React.useCallback(() => {
     if (context) {
@@ -368,6 +374,20 @@ function SidebarTrigger({
 
   // Determine which side for aria-label
   const effectiveSide = context?.side ?? side ?? "left";
+  const isExpanded = isMobile
+    ? sidebarState.mobileOpen
+    : sidebarState.desktopOpen;
+
+  // Select icon based on side and expanded state
+  // Filled when expanded, outline when collapsed
+  const Icon =
+    effectiveSide === "left"
+      ? isExpanded
+        ? IconLayoutSidebarFilled
+        : IconLayoutSidebar
+      : isExpanded
+        ? IconLayoutSidebarRightFilled
+        : IconLayoutSidebarRight;
 
   return (
     <Button
@@ -384,7 +404,7 @@ function SidebarTrigger({
       aria-label={`Toggle ${effectiveSide} sidebar`}
       {...props}
     >
-      <IconLayoutSidebar />
+      <Icon />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
