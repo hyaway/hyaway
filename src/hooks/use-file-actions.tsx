@@ -162,7 +162,10 @@ function useExternalActions(
       label: "Download",
       icon: IconFileDownload,
       onClick: () => {
-        window.location.href = downloadUrl;
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = "";
+        link.click();
       },
       href: downloadUrl,
       download: true,
