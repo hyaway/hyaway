@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { createSelectors } from "./create-selectors";
 
 export type SidebarSide = "left" | "right";
 
@@ -55,7 +54,7 @@ const openMobile = (side: SidebarSide) =>
         leftMobileOpen: false,
       };
 
-const useSidebarStoreBase = create<SidebarStoreState>()(
+const useSidebarStore = create<SidebarStoreState>()(
   persist(
     (set) => ({
       leftDesktopOpen: true,
@@ -94,21 +93,6 @@ const useSidebarStoreBase = create<SidebarStoreState>()(
 );
 
 /**
- * Sidebar store with auto-generated selectors.
- *
- * Stores persisted open/closed state for left and right sidebars.
- * Used internally by the Sidebar component.
- *
- * @example
- * ```tsx
- * const leftOpen = useSidebarStore.use.leftDesktopOpen();
- * const { toggleDesktop } = useSidebarStore.use.actions();
- * toggleDesktop('left');
- * ```
- */
-export const useSidebarStore = createSelectors(useSidebarStoreBase);
-
-/**
  * Hook to get sidebar state and bound actions for a specific side.
  * Simplifies consuming sidebar state by binding the side parameter.
  *
@@ -118,14 +102,14 @@ export const useSidebarStore = createSelectors(useSidebarStoreBase);
  * ```
  */
 export function useSidebarSide(side: SidebarSide) {
-  const use = useSidebarStore.use;
+  const store = useSidebarStore();
 
   // Conditional hooks - same count per branch, so safe
   const desktopOpen =
-    side === "left" ? use.leftDesktopOpen() : use.rightDesktopOpen();
+    side === "left" ? store.leftDesktopOpen : store.rightDesktopOpen;
   const mobileOpen =
-    side === "left" ? use.leftMobileOpen() : use.rightMobileOpen();
-  const actions = use.actions();
+    side === "left" ? store.leftMobileOpen : store.rightMobileOpen;
+  const actions = store.actions;
 
   return {
     desktopOpen,
