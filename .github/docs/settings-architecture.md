@@ -35,7 +35,7 @@ Settings follow a **shared controls + thin wrappers** pattern to eliminate dupli
 | Thumbnail gallery | `thumbnail-gallery-display-settings.tsx` | `THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE` |
 | Pages display     | `pages-display-settings.tsx`             | `PAGES_DISPLAY_SETTINGS_TITLE`             |
 | Media viewer      | `file-viewer-settings.tsx`               | `FILE_VIEWER_SETTINGS_TITLE`               |
-| Watch history     | `history-settings.tsx`                   | `HISTORY_SETTINGS_TITLE`                   |
+| Watch history     | `watch-history-settings.tsx`             | `WATCH_HISTORY_SETTINGS_TITLE`             |
 | Random inbox      | `random-inbox-settings.tsx`              | `RANDOM_INBOX_SETTINGS_TITLE`              |
 | Recent files      | `recent-files-settings.tsx`              | `RECENT_FILES_SETTINGS_TITLE`              |
 
@@ -69,7 +69,7 @@ Popovers live near their usage:
 Create `src/components/settings/{feature}-settings.tsx`:
 
 ```tsx
-import { useSettingsStore } from "@/lib/settings-store";
+import { useSettings } from "@/lib/settings-store";
 import { SettingsGroup, SwitchField, SliderField } from "./setting-fields";
 
 export const FEATURE_SETTINGS_TITLE = "Feature Name";
@@ -79,7 +79,8 @@ export interface FeatureSettingsProps {
 }
 
 export function FeatureSettings({ idPrefix = "" }: FeatureSettingsProps) {
-  const { someSetting, setSomeSetting } = useSettingsStore();
+  const someSetting = useSettings.someSetting();
+  const { setSomeSetting } = useSettings.actions();
 
   return (
     <SettingsGroup>

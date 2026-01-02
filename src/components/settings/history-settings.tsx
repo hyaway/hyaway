@@ -4,7 +4,7 @@ import {
   useWatchHistory,
 } from "@/lib/watch-history-store";
 
-export const HISTORY_SETTINGS_TITLE = "Watch history";
+export const WATCH_HISTORY_SETTINGS_TITLE = "Watch history";
 
 export interface HistorySettingsProps {
   idPrefix?: string;

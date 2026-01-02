@@ -6,11 +6,12 @@ This folder contains detailed documentation for specific features and patterns u
 
 ### Architecture & Patterns
 
-| Document                                              | Description                                 |
-| ----------------------------------------------------- | ------------------------------------------- |
-| [Settings Architecture](./settings-architecture.md)   | Shared controls + thin wrappers pattern     |
-| [Routing Conventions](./routing-conventions.md)       | TanStack Router file-based routing patterns |
-| [Component Organization](./component-organization.md) | Where components live and why               |
+| Document                                              | Description                                    |
+| ----------------------------------------------------- | ---------------------------------------------- |
+| [State Management](./state-management.md)             | Zustand stores, auto-selectors, cross-tab sync |
+| [Settings Architecture](./settings-architecture.md)   | Shared controls + thin wrappers pattern        |
+| [Routing Conventions](./routing-conventions.md)       | TanStack Router file-based routing patterns    |
+| [Component Organization](./component-organization.md) | Where components live and why                  |
 
 ### Features
 
@@ -44,6 +45,7 @@ This folder contains detailed documentation for specific features and patterns u
 
 Update docs when making significant changes:
 
+- **New store** → Update [state-management.md](./state-management.md) stores table
 - **New settings module** → Update [settings-architecture.md](./settings-architecture.md) modules table
 - **New route/group** → Update [routing-conventions.md](./routing-conventions.md) structure diagram
 - **New component folder** → Update [component-organization.md](./component-organization.md)
