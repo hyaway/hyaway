@@ -28,7 +28,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {/* Content area - grows naturally, page scrolls */}
           <FooterPortalProvider>
-            <main className="flex-1 px-4 py-4 sm:px-6">{children}</main>
+            <main className="flex-1 px-4 py-2 sm:px-6">{children}</main>
 
             {/* Floating footer - sticky at bottom of center column */}
             <FloatingFooter className="justify-center">
