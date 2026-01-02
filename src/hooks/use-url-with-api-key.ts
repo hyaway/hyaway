@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import {
   useApiAccessKey,
   useApiEndpoint,
@@ -80,12 +80,12 @@ const useMediaUrlWithRetry = (baseUrl: string) => {
   const url = `${baseUrl}&${auth.headerName}=${auth.authKey}`;
 
   // On success: freeze the working auth
-  const onLoad = useCallback(() => {
+  const onLoad = () => {
     setFrozenAuth((current) => current ?? storeAuth);
-  }, [storeAuth]);
+  };
 
   // On error: check if 419 (debounced probe), trigger refresh if so
-  const onError = useCallback(() => {
+  const onError = () => {
     if (useSessionKey) {
       // Debounced probe - only one HEAD request per second across all images
       probeSessionExpired(url).then((is419) => {
@@ -96,7 +96,7 @@ const useMediaUrlWithRetry = (baseUrl: string) => {
       });
     }
     setFrozenAuth(null);
-  }, [useSessionKey, url, auth.authKey]);
+  };
 
   return { url, onLoad, onError };
 };

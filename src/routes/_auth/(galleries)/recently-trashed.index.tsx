@@ -1,6 +1,5 @@
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
 import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -22,14 +21,11 @@ function RouteComponent() {
   const queryClient = useQueryClient();
 
   // Link builder for contextual navigation
-  const getFileLink: FileLinkBuilder = useCallback(
-    (fileId) =>
-      linkOptions({
-        to: "/recently-trashed/$fileId",
-        params: { fileId: String(fileId) },
-      }),
-    [],
-  );
+  const getFileLink: FileLinkBuilder = (fileId) =>
+    linkOptions({
+      to: "/recently-trashed/$fileId",
+      params: { fileId: String(fileId) },
+    });
 
   const refetchButton = (
     <RefetchButton

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -45,33 +45,21 @@ export function useFileContextNavigation({
 }: FileContextNavigationOptions): FileContextNavigationResult {
   const navigate = useNavigate();
 
-  const { prevId, nextId, currentIndex } = useMemo(() => {
-    if (!fileIds || fileIds.length === 0) {
-      return { prevId: null, nextId: null, currentIndex: -1 };
-    }
-
-    const idx = fileIds.indexOf(fileId);
-    if (idx === -1) {
-      return { prevId: null, nextId: null, currentIndex: -1 };
-    }
-
-    return {
-      prevId: idx > 0 ? fileIds[idx - 1] : null,
-      nextId: idx < fileIds.length - 1 ? fileIds[idx + 1] : null,
-      currentIndex: idx,
-    };
-  }, [fileId, fileIds]);
+  const currentIndex = fileIds?.indexOf(fileId) ?? -1;
+  const prevId = currentIndex > 0 ? fileIds![currentIndex - 1] : null;
+  const nextId =
+    fileIds && currentIndex >= 0 && currentIndex < fileIds.length - 1
+      ? fileIds[currentIndex + 1]
+      : null;
 
   // Determine if we should fallback to /file/$fileId
-  const shouldFallback = useMemo(() => {
-    // Don't fallback while still loading
-    if (isLoading) return false;
-    // Fallback on error
-    if (isError) return true;
-    // Fallback if file not in list
-    if (fileIds && currentIndex === -1) return true;
-    return false;
-  }, [isLoading, isError, fileIds, currentIndex]);
+  const shouldFallback = isLoading
+    ? false
+    : isError
+      ? true
+      : fileIds && currentIndex === -1
+        ? true
+        : false;
 
   // Perform the fallback redirect
   useEffect(() => {
@@ -84,10 +72,8 @@ export function useFileContextNavigation({
     }
   }, [shouldFallback, fileId, navigate]);
 
-  const navActions: Array<FloatingFooterAction> = useMemo(() => {
-    const actions: Array<FloatingFooterAction> = [];
-
-    actions.push({
+  const navActions: Array<FloatingFooterAction> = [
+    {
       id: "nav-prev",
       label: "Previous",
       icon: IconChevronLeft,
@@ -100,9 +86,8 @@ export function useFileContextNavigation({
         }
       },
       disabled: prevId === null,
-    });
-
-    actions.push({
+    },
+    {
       id: "nav-next",
       label: "Next",
       icon: IconChevronRight,
@@ -115,10 +100,8 @@ export function useFileContextNavigation({
         }
       },
       disabled: nextId === null,
-    });
-
-    return actions;
-  }, [prevId, nextId, navigate, contextRoute, buildParams]);
+    },
+  ];
 
   return {
     navActions,

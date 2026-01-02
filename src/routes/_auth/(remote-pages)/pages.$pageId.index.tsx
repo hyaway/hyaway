@@ -1,6 +1,5 @@
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
 import { IconFocusCentered, IconRefreshDot } from "@tabler/icons-react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
@@ -32,14 +31,11 @@ function RouteComponent() {
   const queryClient = useQueryClient();
 
   // Link builder for contextual navigation
-  const getFileLink: FileLinkBuilder = useCallback(
-    (fileId) =>
-      linkOptions({
-        to: "/pages/$pageId/$fileId",
-        params: { pageId, fileId: String(fileId) },
-      }),
-    [pageId],
-  );
+  const getFileLink: FileLinkBuilder = (fileId) =>
+    linkOptions({
+      to: "/pages/$pageId/$fileId",
+      params: { pageId, fileId: String(fileId) },
+    });
 
   const refetchButton = (
     <RefetchButton

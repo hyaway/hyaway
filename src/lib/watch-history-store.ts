@@ -1,6 +1,6 @@
-import { useMemo } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { useShallow } from "zustand/react/shallow";
 import { setupCrossTabSync } from "./cross-tab-sync";
 
 export const MAX_WATCH_HISTORY_LIMIT = 1000;
@@ -140,8 +140,8 @@ export const useWatchHistoryEntries = () =>
   useWatchHistoryStore((state) => state.entries);
 
 export const useWatchHistoryFileIds = () => {
-  const entries = useWatchHistoryStore((state) => state.entries);
-  return useMemo(() => entries.map((e) => e.fileId), [entries]);
+  const entries = useWatchHistoryStore(useShallow((state) => state.entries));
+  return entries.map((e) => e.fileId);
 };
 
 export const useWatchHistoryEnabled = () =>

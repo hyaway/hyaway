@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useMemo } from "react";
 
 import { FileDetail } from "@/components/file-detail/file-detail";
 import { useFileContextNavigation } from "@/hooks/use-file-context-navigation";
@@ -21,12 +20,9 @@ function RouteComponent() {
   // Load the context (list of file IDs in this page)
   const { data, isLoading, isError } = useGetPageInfoQuery(pageId, true);
 
-  const fileIds = useMemo(() => data?.page_info.media.hash_ids, [data]);
+  const fileIds = data?.page_info.media.hash_ids;
 
-  const buildParams = useCallback(
-    (fid: number) => ({ pageId, fileId: String(fid) }),
-    [pageId],
-  );
+  const buildParams = (fid: number) => ({ pageId, fileId: String(fid) });
 
   const { navActions, shouldFallback } = useFileContextNavigation({
     fileId: fileIdNum,

@@ -1,6 +1,5 @@
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
 import { IconArrowsShuffle } from "@tabler/icons-react";
 import { RandomInboxSettingsPopover } from "./-components/random-inbox-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
@@ -22,14 +21,11 @@ function RouteComponent() {
   const queryClient = useQueryClient();
 
   // Link builder for contextual navigation
-  const getFileLink: FileLinkBuilder = useCallback(
-    (fileId) =>
-      linkOptions({
-        to: "/random-inbox/$fileId",
-        params: { fileId: String(fileId) },
-      }),
-    [],
-  );
+  const getFileLink: FileLinkBuilder = (fileId) =>
+    linkOptions({
+      to: "/random-inbox/$fileId",
+      params: { fileId: String(fileId) },
+    });
 
   const handleShuffle = () => {
     queryClient.resetQueries({

@@ -1,5 +1,4 @@
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
-import { useCallback } from "react";
 import { IconTrashX } from "@tabler/icons-react";
 import { HistorySettingsPopover } from "./-components/history-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
@@ -25,14 +24,11 @@ function RouteComponent() {
   const { clearHistory, setEnabled } = useWatchHistoryActions();
 
   // Link builder for contextual navigation
-  const getFileLink: FileLinkBuilder = useCallback(
-    (fileId) =>
-      linkOptions({
-        to: "/history/$fileId",
-        params: { fileId: String(fileId) },
-      }),
-    [],
-  );
+  const getFileLink: FileLinkBuilder = (fileId) =>
+    linkOptions({
+      to: "/history/$fileId",
+      params: { fileId: String(fileId) },
+    });
 
   const clearButton = (
     <BottomNavButton
