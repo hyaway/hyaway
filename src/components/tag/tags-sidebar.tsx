@@ -17,12 +17,10 @@ import {
   SidebarInput,
   useSidebarOptional,
 } from "@/components/ui-primitives/sidebar";
-import { useSidebarStore } from "@/lib/sidebar-store";
 import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
-import { RightSidebarPortal } from "@/components/app-shell/right-sidebar-portal";
 import { TagBadge } from "@/components/tag/tag-badge";
 import { compareTags, parseTag } from "@/lib/tag-utils";
 import {
@@ -142,8 +140,6 @@ export const TagsSidebar = memo(function TagsSidebar({
   // Get sidebar state for remeasuring virtualizer when sidebar opens/closes
   // Use optional context (for when inside Sidebar) with store fallback (for portaled content)
   const context = useSidebarOptional();
-  const rightDesktopOpen = useSidebarStore.use.rightDesktopOpen();
-  const sidebarOpen = context?.open ?? rightDesktopOpen;
 
   // Force virtualizer to re-measure after portal mounts and container has dimensions
   // Use rAF to wait for browser to complete layout calculation
@@ -152,13 +148,13 @@ export const TagsSidebar = memo(function TagsSidebar({
       rowVirtualizer.measure();
     });
     return () => cancelAnimationFrame(rafId);
-  }, [rowVirtualizer, sidebarOpen]);
+  }, [rowVirtualizer, context?.open, context?.openMobile, context?.isMobile]);
 
   // Cache virtual items
   const virtualItems = rowVirtualizer.getVirtualItems();
 
   return (
-    <RightSidebarPortal>
+    <>
       <SidebarHeader className="gap-4">
         <Heading level={3} className="text-lg font-semibold">
           Tags
@@ -221,7 +217,7 @@ export const TagsSidebar = memo(function TagsSidebar({
               : `${tags.length} unique tags for ${deferredItems.length} loaded files`}
         </span>
       </SidebarFooter>
-    </RightSidebarPortal>
+    </>
   );
 });
 

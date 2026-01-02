@@ -6,7 +6,6 @@ import {
   SidebarGroup,
   SidebarHeader,
 } from "@/components/ui-primitives/sidebar";
-import { RightSidebarPortal } from "@/components/app-shell/right-sidebar-portal";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 
@@ -26,7 +25,7 @@ export function TagsSidebarSkeleton({ tagCount = 20 }: { tagCount?: number }) {
   );
 
   return (
-    <RightSidebarPortal>
+    <>
       <SidebarHeader className="gap-4">
         <Heading level={3} className="text-lg font-semibold">
           Tags
@@ -53,6 +52,6 @@ export function TagsSidebarSkeleton({ tagCount = 20 }: { tagCount?: number }) {
       <SidebarFooter>
         <Skeleton className="h-5 w-3/4" />
       </SidebarFooter>
-    </RightSidebarPortal>
+    </>
   );
 }

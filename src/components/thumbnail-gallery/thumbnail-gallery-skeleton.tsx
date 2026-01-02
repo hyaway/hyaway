@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { RightSidebarPortal } from "../app-shell/right-sidebar-portal";
 import { TagsSidebarSkeleton } from "@/components/tag/tags-sidebar-skeleton";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
@@ -43,7 +44,9 @@ export function ThumbnailGallerySkeleton({
           />
         ))}
       </div>
-      <TagsSidebarSkeleton />
+      <RightSidebarPortal>
+        <TagsSidebarSkeleton />
+      </RightSidebarPortal>
     </div>
   );
 }

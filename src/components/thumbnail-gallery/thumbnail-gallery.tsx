@@ -1,5 +1,6 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useDeferredValue, useEffect, useMemo } from "react";
+import { RightSidebarPortal } from "../app-shell/right-sidebar-portal";
 import {
   ITEM_FOOTER_HEIGHT,
   ThumbnailGalleryItem,
@@ -213,8 +214,9 @@ export function PureThumbnailGallery({
           show={showScrollBadge}
         />
       </div>
-
-      <TagsSidebar items={deferredItems} />
+      <RightSidebarPortal>
+        <TagsSidebar items={deferredItems} />
+      </RightSidebarPortal>
     </div>
   );
 }
