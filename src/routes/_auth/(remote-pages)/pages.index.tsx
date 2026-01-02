@@ -153,9 +153,10 @@ function PagesGrid({
                 <PagesGridItem
                   pageKey={page.page_key}
                   pageName={page.name}
+                  index={virtualRow.index}
                   tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
-                  linkRef={setLinkRef(virtualRow.index)}
-                  onFocus={() => handleItemFocus(virtualRow.index)}
+                  setLinkRef={setLinkRef}
+                  onItemFocus={handleItemFocus}
                 />
               </li>
             );

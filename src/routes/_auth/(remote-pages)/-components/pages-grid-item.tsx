@@ -16,10 +16,13 @@ const PAGE_STATE_LABELS: Partial<Record<PageState, string>> = {
 export interface PagesGridItemProps {
   pageKey: string;
   pageName: string;
+  index: number;
   className?: string;
   tabIndex?: number;
-  linkRef?: (el: HTMLAnchorElement | null) => void;
-  onFocus?: () => void;
+  /** Stable callback to register link refs - receives (element, index) */
+  setLinkRef?: (el: HTMLAnchorElement | null, index: number) => void;
+  /** Stable callback for focus events - receives index */
+  onItemFocus?: (index: number) => void;
 }
 
 /**
@@ -28,10 +31,11 @@ export interface PagesGridItemProps {
 export function PagesGridItem({
   pageKey,
   pageName,
+  index,
   className,
   tabIndex = 0,
-  linkRef,
-  onFocus,
+  setLinkRef,
+  onItemFocus,
 }: PagesGridItemProps) {
   const { data, isLoading } = useGetPageInfoQuery(pageKey, true);
 
@@ -51,12 +55,12 @@ export function PagesGridItem({
       variant="muted"
       render={
         <Link
-          ref={linkRef}
+          ref={(el) => setLinkRef?.(el, index)}
           to="/pages/$pageId"
           params={{ pageId: pageKey }}
           aria-label={`View page "${pageName}" with ${totalFiles} ${totalFiles === 1 ? "file" : "files"}`}
           tabIndex={tabIndex}
-          onFocus={onFocus}
+          onFocus={() => onItemFocus?.(index)}
         />
       }
       className={cn("block h-full", className)}

@@ -35,8 +35,9 @@ export function useMasonryNavigation({
   const pendingFocusRef = useRef<number | null>(null);
   const linkRefs = useRef<Map<number, HTMLAnchorElement>>(new Map());
 
+  // Stable ref callback that handles both setting refs and pending focus
   const setLinkRef = useCallback(
-    (index: number) => (el: HTMLAnchorElement | null) => {
+    (el: HTMLAnchorElement | null, index: number) => {
       if (el) {
         linkRefs.current.set(index, el);
         // If this is the element we're waiting to focus, focus it now

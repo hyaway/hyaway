@@ -15,8 +15,10 @@ import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/option
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGalleryResponsiveLanes } from "@/hooks/use-responsive-lanes";
+import { useSidebarStore } from "@/lib/sidebar-store";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { useSettings } from "@/lib/settings-store";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface ThumbnailGalleryProps {
   fileIds: Array<number>;
@@ -199,8 +201,8 @@ export function PureThumbnailGallery({
                   scrollMargin={rowVirtualizer.options.scrollMargin}
                   isScrolling={rowVirtualizer.isScrolling}
                   tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
-                  linkRef={setLinkRef(virtualRow.index)}
-                  onFocus={() => handleItemFocus(virtualRow.index)}
+                  setLinkRef={setLinkRef}
+                  onItemFocus={handleItemFocus}
                   getFileLink={getFileLink}
                 />
               );

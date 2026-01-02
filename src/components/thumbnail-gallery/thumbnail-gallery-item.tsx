@@ -56,7 +56,10 @@ export interface ThumbnailGalleryItemProps extends React.HTMLAttributes<HTMLLIEl
   scrollMargin: number;
   isScrolling?: boolean;
   tabIndex?: number;
-  linkRef?: (el: HTMLAnchorElement | null) => void;
+  /** Stable callback to register link refs - receives (element, index) */
+  setLinkRef?: (el: HTMLAnchorElement | null, index: number) => void;
+  /** Stable callback for focus events - receives index */
+  onItemFocus?: (index: number) => void;
   /** Custom link builder for contextual navigation */
   getFileLink?: FileLinkBuilder;
   /** Accessible label for the item link */
@@ -74,7 +77,8 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
   scrollMargin,
   isScrolling,
   tabIndex = 0,
-  linkRef,
+  setLinkRef,
+  onItemFocus,
   getFileLink = defaultFileLinkBuilder,
   ...props
 }: ThumbnailGalleryItemProps) {
@@ -167,12 +171,13 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
       <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <ContextMenuTrigger>
           <Link
-            ref={linkRef}
+            ref={(el) => setLinkRef?.(el, virtualRow.index)}
             to={fileLink.to}
             params={fileLink.params}
             className="absolute inset-0 z-10 outline-hidden"
             tabIndex={tabIndex}
             aria-label={`File ${item.file_id}, ${item.mime.split("/")[0]}`}
+            onFocus={() => onItemFocus?.(virtualRow.index)}
           />
         </ContextMenuTrigger>
         <ThumbnailGalleryItemContextMenu item={item} />
