@@ -26,7 +26,7 @@ import { useThumbnailUrl } from "@/hooks/use-url-with-api-key";
 import { formatBytes } from "@/lib/format-utils";
 import { cn } from "@/lib/utils";
 import { checkerboardBg } from "@/lib/style-constants";
-import { useImageBackground } from "@/lib/ux-settings-store";
+import { useSettings } from "@/lib/settings-store";
 
 /** Height of the polaroid-style footer strip in pixels (h-6 = 24px) */
 export const ITEM_FOOTER_HEIGHT = 24;
@@ -334,7 +334,7 @@ export function ThumbnailImage({
 }: ThumbnailProps) {
   const [loaded, setLoaded] = useState(false);
   const { url, onLoad, onError } = useThumbnailUrl(fileId);
-  const imageBackground = useImageBackground();
+  const imageBackground = useSettings.imageBackground();
 
   const handleLoad = (_e: React.SyntheticEvent<HTMLImageElement>) => {
     setLoaded(true);

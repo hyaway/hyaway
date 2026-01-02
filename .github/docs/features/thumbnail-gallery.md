@@ -124,7 +124,7 @@ ThumbnailGalleryItem × N (only visible items)
 
 ## Settings
 
-Stored in `ux-settings-store.ts`:
+Stored in `settings-store.ts`:
 
 | Setting                  | Type                         | Description                                      |
 | ------------------------ | ---------------------------- | ------------------------------------------------ |

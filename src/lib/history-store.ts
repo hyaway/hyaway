@@ -148,6 +148,16 @@ const useHistoryStoreBase = create<HistoryState>()(
  */
 export const useHistoryStore = createSelectors(useHistoryStoreBase);
 
+/**
+ * Shorthand for `useHistoryStore.use`.
+ * @example
+ * ```tsx
+ * const entries = useHistory.entries();
+ * const { addViewedFile } = useHistory.actions();
+ * ```
+ */
+export const useHistory = useHistoryStore.use;
+
 // Cross-tab sync: rehydrate when other tabs update localStorage
 setupCrossTabSync(useHistoryStore);
 
@@ -161,22 +171,3 @@ setupCrossTabSync(useHistoryStore);
  */
 export const useHistoryFileIds = () =>
   useHistoryStore(useShallow((state) => state.entries.map((e) => e.fileId)));
-
-// ============================================================================
-// Legacy selector exports (for backward compatibility)
-// ============================================================================
-
-/** @deprecated Use `useHistoryStore.use.entries()` */
-export const useHistoryEntries = () =>
-  useHistoryStore((state) => state.entries);
-
-/** @deprecated Use `useHistoryStore.use.enabled()` */
-export const useHistoryEnabled = () =>
-  useHistoryStore((state) => state.enabled);
-
-/** @deprecated Use `useHistoryStore.use.limit()` */
-export const useHistoryLimit = () => useHistoryStore((state) => state.limit);
-
-/** @deprecated Use `useHistoryStore.use.actions()` */
-export const useHistoryActions = () =>
-  useHistoryStore((state) => state.actions);

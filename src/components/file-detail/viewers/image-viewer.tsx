@@ -2,10 +2,7 @@ import { useState } from "react";
 import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
 import { cn } from "@/lib/utils";
 import { checkerboardBg } from "@/lib/style-constants";
-import {
-  useFileViewerStartExpanded,
-  useImageBackground,
-} from "@/lib/ux-settings-store";
+import { useSettings } from "@/lib/settings-store";
 
 interface ImageViewerProps {
   fileUrl: string;
@@ -20,10 +17,10 @@ export function ImageViewer({
   onLoad,
   onError,
 }: ImageViewerProps) {
-  const startExpanded = useFileViewerStartExpanded();
+  const startExpanded = useSettings.fileViewerStartExpanded();
   const [isExpanded, setIsExpanded] = useState(startExpanded);
   const [loaded, setLoaded] = useState(false);
-  const imageBackground = useImageBackground();
+  const imageBackground = useSettings.imageBackground();
 
   const handleLoad = () => {
     setLoaded(true);

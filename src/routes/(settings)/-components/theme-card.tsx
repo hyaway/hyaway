@@ -11,11 +11,11 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { Label } from "@/components/ui-primitives/label";
-import { useThemeActions, useThemePreference } from "@/lib/theme-store";
+import { useTheme } from "@/lib/theme-store";
 
 export function ThemeCard() {
-  const themePreference = useThemePreference();
-  const { setThemePreference } = useThemeActions();
+  const themePreference = useTheme.themePreference();
+  const { setThemePreference } = useTheme.actions();
 
   return (
     <Card>

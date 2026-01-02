@@ -67,40 +67,21 @@ const useThemeStoreBase = create<ThemeState>()(
  */
 export const useThemeStore = createSelectors(useThemeStoreBase);
 
+/**
+ * Shorthand for `useThemeStore.use`.
+ * @example
+ * ```tsx
+ * const activeTheme = useTheme.activeTheme();
+ * const { setThemePreference } = useTheme.actions();
+ * ```
+ */
+export const useTheme = useThemeStore.use;
+
 export function getWindowSystemTheme(): ActiveTheme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
 }
-
-// ============================================================================
-// Snapshot getters (for use outside React)
-// ============================================================================
-
-export const getActiveThemeSnapshot = () =>
-  useThemeStore.getState().activeTheme;
-export const getThemePreferenceSnapshot = () =>
-  useThemeStore.getState().themePreference;
-export const getThemeActionsSnapshot = () => useThemeStore.getState().actions;
-
-// ============================================================================
-// Legacy selector exports (for backward compatibility)
-// ============================================================================
-
-/** @deprecated Use `useThemeStore.use.activeTheme()` */
-export const useActiveTheme = () => useThemeStore((state) => state.activeTheme);
-
-/** @deprecated Use `useThemeStore.use.themePreference()` */
-export const useThemePreference = () =>
-  useThemeStore((state) => state.themePreference);
-
-/** @deprecated Use `useThemeStore.use.actions()` */
-export const useThemeActions = () => useThemeStore((state) => state.actions);
-
-/** @deprecated Use `useThemeStore.use._hasHydrated()` */
-export const useThemeHydrated = () =>
-  useThemeStore((state) => state._hasHydrated);
-
 function applyTheme(theme: ActiveTheme) {
   const root = window.document.documentElement;
   root.classList.remove("light", "dark");
@@ -108,7 +89,7 @@ function applyTheme(theme: ActiveTheme) {
 }
 
 export function useSystemThemeListener() {
-  const { resetSystemTheme } = useThemeActions();
+  const { resetSystemTheme } = useTheme.actions();
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     mediaQuery.addEventListener("change", resetSystemTheme);
@@ -119,7 +100,7 @@ export function useSystemThemeListener() {
 }
 
 export function useApplyTheme() {
-  const activeTheme = useActiveTheme();
+  const activeTheme = useTheme.activeTheme();
   useLayoutEffect(() => {
     applyTheme(activeTheme);
   }, [activeTheme]);

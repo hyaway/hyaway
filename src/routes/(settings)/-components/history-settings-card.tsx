@@ -10,12 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui-primitives/card";
-import { useHistoryActions, useHistoryEntries } from "@/lib/history-store";
+import { useHistory } from "@/lib/history-store";
 import { Button } from "@/components/ui-primitives/button";
 
 export function HistorySettingsCard() {
-  const entries = useHistoryEntries();
-  const { clearHistory } = useHistoryActions();
+  const entries = useHistory.entries();
+  const { clearHistory } = useHistory.actions();
 
   return (
     <Card>

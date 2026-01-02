@@ -47,7 +47,7 @@ type UxSettingsState = {
   };
 };
 
-const useUxSettingsStoreBase = create<UxSettingsState>()(
+const useSettingsStoreBase = create<UxSettingsState>()(
   persist(
     (set) => ({
       tagsSortMode: "count",
@@ -80,7 +80,7 @@ const useUxSettingsStoreBase = create<UxSettingsState>()(
       },
     }),
     {
-      name: "ux-settings",
+      name: "settings",
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
     },
@@ -93,66 +93,24 @@ const useUxSettingsStoreBase = create<UxSettingsState>()(
  * @example
  * ```tsx
  * // Use auto-generated selectors
- * const tagsSortMode = useUxSettingsStore.use.tagsSortMode();
- * const { setGalleryMaxLanes } = useUxSettingsStore.use.actions();
+ * const tagsSortMode = useSettingsStore.use.tagsSortMode();
+ * const { setGalleryMaxLanes } = useSettingsStore.use.actions();
  *
  * // Or use direct selector
- * const lanes = useUxSettingsStore((s) => s.galleryMaxLanes);
+ * const lanes = useSettingsStore((s) => s.galleryMaxLanes);
  * ```
  */
-export const useUxSettingsStore = createSelectors(useUxSettingsStoreBase);
+export const useSettingsStore = createSelectors(useSettingsStoreBase);
+
+/**
+ * Shorthand for `useSettingsStore.use`.
+ * @example
+ * ```tsx
+ * const tagsSortMode = useSettings.tagsSortMode();
+ * const { setGalleryMaxLanes } = useSettings.actions();
+ * ```
+ */
+export const useSettings = useSettingsStore.use;
 
 // Sync settings across tabs
-setupCrossTabSync(useUxSettingsStore);
-
-// ============================================================================
-// Legacy selector exports (for backward compatibility)
-// ============================================================================
-
-/** @deprecated Use `useUxSettingsStore.use.tagsSortMode()` */
-export const useTagsSortMode = () =>
-  useUxSettingsStore((state) => state.tagsSortMode);
-
-/** @deprecated Use `useUxSettingsStore.use.galleryMaxLanes()` */
-export const useGalleryMaxLanes = () =>
-  useUxSettingsStore((state) => state.galleryMaxLanes);
-
-/** @deprecated Use `useUxSettingsStore.use.galleryExpandImages()` */
-export const useGalleryExpandImages = () =>
-  useUxSettingsStore((state) => state.galleryExpandImages);
-
-/** @deprecated Use `useUxSettingsStore.use.galleryShowScrollBadge()` */
-export const useGalleryShowScrollBadge = () =>
-  useUxSettingsStore((state) => state.galleryShowScrollBadge);
-
-/** @deprecated Use `useUxSettingsStore.use.pagesMaxColumns()` */
-export const usePagesMaxColumns = () =>
-  useUxSettingsStore((state) => state.pagesMaxColumns);
-
-/** @deprecated Use `useUxSettingsStore.use.pagesShowScrollBadge()` */
-export const usePagesShowScrollBadge = () =>
-  useUxSettingsStore((state) => state.pagesShowScrollBadge);
-
-/** @deprecated Use `useUxSettingsStore.use.recentFilesLimit()` */
-export const useRecentFilesLimit = () =>
-  useUxSettingsStore((state) => state.recentFilesLimit);
-
-/** @deprecated Use `useUxSettingsStore.use.recentFilesDays()` */
-export const useRecentFilesDays = () =>
-  useUxSettingsStore((state) => state.recentFilesDays);
-
-/** @deprecated Use `useUxSettingsStore.use.randomInboxLimit()` */
-export const useRandomInboxLimit = () =>
-  useUxSettingsStore((state) => state.randomInboxLimit);
-
-/** @deprecated Use `useUxSettingsStore.use.fileViewerStartExpanded()` */
-export const useFileViewerStartExpanded = () =>
-  useUxSettingsStore((state) => state.fileViewerStartExpanded);
-
-/** @deprecated Use `useUxSettingsStore.use.imageBackground()` */
-export const useImageBackground = () =>
-  useUxSettingsStore((state) => state.imageBackground);
-
-/** @deprecated Use `useUxSettingsStore.use.actions()` */
-export const useUxSettingsActions = () =>
-  useUxSettingsStore((state) => state.actions);
+setupCrossTabSync(useSettingsStore);

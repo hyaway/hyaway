@@ -5,15 +5,11 @@ import { useIsApiConfigured } from "../hydrus-config-store";
 import { HydrusFileSortType, ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
 import type { HydrusTagSearch, SearchFilesOptions } from "../models";
-import {
-  useRandomInboxLimit,
-  useRecentFilesDays,
-  useRecentFilesLimit,
-} from "@/lib/ux-settings-store";
+import { useSettings } from "@/lib/settings-store";
 
 export const useRecentlyArchivedFilesQuery = () => {
-  const recentFilesLimit = useRecentFilesLimit();
-  const recentFilesDays = useRecentFilesDays();
+  const recentFilesLimit = useSettings.recentFilesLimit();
+  const recentFilesDays = useSettings.recentFilesDays();
 
   const tags: HydrusTagSearch = [
     `system:limit=${recentFilesLimit}`,
@@ -41,8 +37,8 @@ export const useRecentlyArchivedFilesQuery = () => {
 
 export const useRecentlyTrashedFilesQuery = () => {
   const { data: servicesData } = useGetServicesQuery();
-  const recentFilesLimit = useRecentFilesLimit();
-  const recentFilesDays = useRecentFilesDays();
+  const recentFilesLimit = useSettings.recentFilesLimit();
+  const recentFilesDays = useSettings.recentFilesDays();
 
   const trashServiceKey = useMemo(() => {
     if (!servicesData) return undefined;
@@ -84,8 +80,8 @@ export const useRecentlyTrashedFilesQuery = () => {
 };
 
 export const useRecentlyInboxedFilesQuery = () => {
-  const recentFilesLimit = useRecentFilesLimit();
-  const recentFilesDays = useRecentFilesDays();
+  const recentFilesLimit = useSettings.recentFilesLimit();
+  const recentFilesDays = useSettings.recentFilesDays();
 
   const tags: HydrusTagSearch = [
     `system:limit=${recentFilesLimit}`,
@@ -112,7 +108,7 @@ export const useRecentlyInboxedFilesQuery = () => {
 };
 
 export const useRandomInboxFilesQuery = () => {
-  const randomInboxLimit = useRandomInboxLimit();
+  const randomInboxLimit = useSettings.randomInboxLimit();
   const tags: HydrusTagSearch = [
     `system:limit=${randomInboxLimit}`,
     "system:inbox",

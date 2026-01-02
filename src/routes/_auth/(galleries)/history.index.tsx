@@ -9,11 +9,7 @@ import { PageHeading } from "@/components/page-shell/page-heading";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import { Button } from "@/components/ui-primitives/button";
-import {
-  useHistoryActions,
-  useHistoryEnabled,
-  useHistoryFileIds,
-} from "@/lib/history-store";
+import { useHistory, useHistoryFileIds } from "@/lib/history-store";
 
 export const Route = createFileRoute("/_auth/(galleries)/history/")({
   component: RouteComponent,
@@ -21,8 +17,8 @@ export const Route = createFileRoute("/_auth/(galleries)/history/")({
 
 function RouteComponent() {
   const fileIds = useHistoryFileIds();
-  const enabled = useHistoryEnabled();
-  const { clearHistory, setEnabled } = useHistoryActions();
+  const enabled = useHistory.enabled();
+  const { clearHistory, setEnabled } = useHistory.actions();
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = useCallback(

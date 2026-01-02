@@ -136,7 +136,7 @@ useGetSingleFileMetadata() → FileMetadata
 
 ## Settings
 
-Stored in `ux-settings-store.ts`:
+Stored in `settings-store.ts`:
 
 | Setting                   | Type                          | Description                       |
 | ------------------------- | ----------------------------- | --------------------------------- |

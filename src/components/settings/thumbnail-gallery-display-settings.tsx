@@ -1,11 +1,5 @@
 import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
-import {
-  MAX_GALLERY_LANES,
-  useGalleryExpandImages,
-  useGalleryMaxLanes,
-  useGalleryShowScrollBadge,
-  useUxSettingsActions,
-} from "@/lib/ux-settings-store";
+import { MAX_GALLERY_LANES, useSettings } from "@/lib/settings-store";
 
 export const THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE =
   "Thumbnail gallery display";
@@ -17,14 +11,14 @@ export interface ThumbnailGalleryDisplaySettingsProps {
 export function ThumbnailGalleryDisplaySettings({
   idPrefix = "",
 }: ThumbnailGalleryDisplaySettingsProps) {
-  const galleryMaxLanes = useGalleryMaxLanes();
-  const galleryExpandImages = useGalleryExpandImages();
-  const galleryShowScrollBadge = useGalleryShowScrollBadge();
+  const galleryMaxLanes = useSettings.galleryMaxLanes();
+  const galleryExpandImages = useSettings.galleryExpandImages();
+  const galleryShowScrollBadge = useSettings.galleryShowScrollBadge();
   const {
     setGalleryMaxLanes,
     setGalleryExpandImages,
     setGalleryShowScrollBadge,
-  } = useUxSettingsActions();
+  } = useSettings.actions();
 
   return (
     <SettingsGroup>

@@ -7,7 +7,7 @@ import { viewerMaxHeight } from "./style-constants";
 import type { VideoMimeType } from "@vidstack/react";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
-import { useActiveTheme } from "@/lib/theme-store";
+import { useTheme } from "@/lib/theme-store";
 import { cn } from "@/lib/utils";
 
 interface VideoViewerProps {
@@ -25,7 +25,7 @@ export function VideoViewer({
   onLoad,
   onError,
 }: VideoViewerProps) {
-  const activeTheme = useActiveTheme();
+  const activeTheme = useTheme.activeTheme();
 
   return (
     <div className={cn(viewerMaxHeight, "flex flex-row justify-center")}>

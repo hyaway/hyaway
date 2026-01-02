@@ -15,11 +15,7 @@ import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/m
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGalleryResponsiveLanes } from "@/hooks/use-responsive-lanes";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
-import {
-  useGalleryExpandImages,
-  useGalleryMaxLanes,
-  useGalleryShowScrollBadge,
-} from "@/lib/ux-settings-store";
+import { useSettings } from "@/lib/settings-store";
 
 export interface ThumbnailGalleryProps {
   fileIds: Array<number>;
@@ -154,9 +150,9 @@ export function PureThumbnailGallery({
     rowVirtualizer.measure();
   }, [deferredItems, width, lanes, rowVirtualizer]);
 
-  const maxLanes = useGalleryMaxLanes();
-  const expandImages = useGalleryExpandImages();
-  const showScrollBadge = useGalleryShowScrollBadge();
+  const maxLanes = useSettings.galleryMaxLanes();
+  const expandImages = useSettings.galleryExpandImages();
+  const showScrollBadge = useSettings.galleryShowScrollBadge();
 
   const { setLinkRef, handleKeyDown, handleItemFocus, getTabIndex } =
     useMasonryNavigation({

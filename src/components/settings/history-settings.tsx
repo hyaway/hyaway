@@ -1,10 +1,5 @@
 import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
-import {
-  MAX_HISTORY_LIMIT,
-  useHistoryActions,
-  useHistoryEnabled,
-  useHistoryLimit,
-} from "@/lib/history-store";
+import { MAX_HISTORY_LIMIT, useHistory } from "@/lib/history-store";
 
 export const HISTORY_SETTINGS_TITLE = "Watch history";
 
@@ -13,9 +8,9 @@ export interface HistorySettingsProps {
 }
 
 export function HistorySettings({ idPrefix = "" }: HistorySettingsProps) {
-  const enabled = useHistoryEnabled();
-  const limit = useHistoryLimit();
-  const { setEnabled, setLimit } = useHistoryActions();
+  const enabled = useHistory.enabled();
+  const limit = useHistory.limit();
+  const { setEnabled, setLimit } = useHistory.actions();
 
   return (
     <SettingsGroup>

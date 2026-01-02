@@ -133,7 +133,7 @@ Use relative imports:
 
 ```tsx
 // In routes/(settings)/settings.ux.tsx
-import { UxSettingsCard } from "./-components/ux-settings-card";
+import { ThemeCard } from "./-components/theme-card";
 ```
 
 ### No Barrel Files

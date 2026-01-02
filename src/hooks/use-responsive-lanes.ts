@@ -1,8 +1,5 @@
 import { startTransition, useLayoutEffect, useState } from "react";
-import {
-  useGalleryExpandImages,
-  useGalleryMaxLanes,
-} from "@/lib/ux-settings-store";
+import { useSettings } from "@/lib/settings-store";
 
 interface ResponsiveLanesState {
   width: number;
@@ -77,8 +74,8 @@ export function useGalleryResponsiveLanes(
   defaultWidth: number,
   itemCount: number,
 ): ResponsiveLanesState {
-  const maxLanes = useGalleryMaxLanes();
-  const expandImages = useGalleryExpandImages();
+  const maxLanes = useSettings.galleryMaxLanes();
+  const expandImages = useSettings.galleryExpandImages();
 
   return useResponsiveLanes({
     containerRef,

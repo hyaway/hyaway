@@ -9,7 +9,7 @@ import { AppShell } from "@/components/app-shell/app-shell";
 import {
   useApplyTheme,
   useSystemThemeListener,
-  useThemeHydrated,
+  useTheme,
 } from "@/lib/theme-store";
 
 export interface MyRouterContext {
@@ -18,7 +18,7 @@ export interface MyRouterContext {
 }
 
 function RootComponent() {
-  const hasHydrated = useThemeHydrated();
+  const hasHydrated = useTheme._hasHydrated();
   useApplyTheme();
   useSystemThemeListener();
 

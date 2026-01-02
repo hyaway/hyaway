@@ -1,10 +1,5 @@
 import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
-import {
-  MAX_PAGES_COLUMNS,
-  usePagesMaxColumns,
-  usePagesShowScrollBadge,
-  useUxSettingsActions,
-} from "@/lib/ux-settings-store";
+import { MAX_PAGES_COLUMNS, useSettings } from "@/lib/settings-store";
 
 export const PAGES_DISPLAY_SETTINGS_TITLE = "Pages display";
 
@@ -15,10 +10,9 @@ export interface PagesDisplaySettingsProps {
 export function PagesDisplaySettings({
   idPrefix = "",
 }: PagesDisplaySettingsProps) {
-  const pagesMaxColumns = usePagesMaxColumns();
-  const pagesShowScrollBadge = usePagesShowScrollBadge();
-  const { setPagesMaxColumns, setPagesShowScrollBadge } =
-    useUxSettingsActions();
+  const pagesMaxColumns = useSettings.pagesMaxColumns();
+  const pagesShowScrollBadge = useSettings.pagesShowScrollBadge();
+  const { setPagesMaxColumns, setPagesShowScrollBadge } = useSettings.actions();
 
   return (
     <SettingsGroup>

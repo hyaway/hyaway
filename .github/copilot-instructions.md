@@ -87,7 +87,7 @@ import { FeatureCard } from "./-components/feature-card";
 
 | Store         | Purpose        | Location                     |
 | ------------- | -------------- | ---------------------------- |
-| UX Settings   | UI preferences | `lib/ux-settings-store.ts`   |
+| UX Settings   | UI preferences | `lib/settings-store.ts`      |
 | Hydrus Config | API connection | `lib/hydrus-config-store.ts` |
 | History       | Watch history  | `lib/history-store.ts`       |
 

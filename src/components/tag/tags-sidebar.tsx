@@ -7,8 +7,8 @@ import React, {
   useState,
 } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import type { TagsSortMode } from "@/lib/ux-settings-store";
-import { useTagsSortMode, useUxSettingsActions } from "@/lib/ux-settings-store";
+import type { TagsSortMode } from "@/lib/settings-store";
+import { useSettings } from "@/lib/settings-store";
 import {
   SidebarContent,
   SidebarFooter,
@@ -42,8 +42,8 @@ export const TagsSidebar = memo(function TagsSidebar({
 }) {
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
   const [search, setSearch] = useState("");
-  const sortMode = useTagsSortMode();
-  const { setTagsSortMode } = useUxSettingsActions();
+  const sortMode = useSettings.tagsSortMode();
+  const { setTagsSortMode } = useSettings.actions();
 
   // Defer heavy computation so UI stays responsive
   const deferredItems = useDeferredValue(items);
