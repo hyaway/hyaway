@@ -94,7 +94,8 @@ import { FeatureCard } from "./-components/feature-card";
 ### Tailwind Custom Variants
 
 - **`short:`** - Limited vertical space (max-height: 500px)
-- **`short-wide:`** - Phone landscape (short + min-width: 640px)
+- Combine with breakpoints: `short:sm:`, `short:md:`, etc.
+- Combine with container queries: `short:@sm:`, `short:@xl:`, etc.
 
 See `src/styles.css` for full documentation.
 

@@ -47,9 +47,10 @@ export const BottomNavButton = forwardRef<
       onClick={onClick}
       className={cn(
         "h-auto flex-col items-center gap-0.5 border-none px-3 py-1",
-        "sm:flex-row sm:gap-1.5 sm:px-4 sm:py-2",
+        "@xl:flex-row @xl:gap-1.5 @xl:px-4 @xl:py-2",
         "short:gap-0 short:px-3 short:py-1",
-        "short-wide:flex-row short-wide:gap-1.5 short-wide:px-4",
+        "short:@xl:flex-row short:@xl:gap-1.5 short:@xl:px-4",
+        "transition-[gap,padding] duration-200",
         variant === "destructive" && "text-destructive hover:text-destructive",
         className,
       )}
@@ -63,7 +64,7 @@ export const BottomNavButton = forwardRef<
           {icon}
         </span>
       )}
-      <span className="short:sr-only short-wide:not-sr-only text-xs sm:text-sm">
+      <span className="short:sr-only short:@xl:not-sr-only text-xs @xl:text-sm">
         {label}
       </span>
     </Button>

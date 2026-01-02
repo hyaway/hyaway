@@ -11,31 +11,23 @@
  * dark:
  *   Standard dark mode variant using class-based detection.
  *
- * short + short-wide (used together):
- *   These variants handle limited vertical space and are typically used together
- *   in a mobile-first pattern where `short:` is the base and `short-wide:` refines.
+ * short:
+ *   Targets devices with limited vertical space (max-height: 500px).
+ *   Includes tiny phones, foldable secondary screens, and landscape phones.
+ *   Use for reducing vertical spacing, hiding non-essential UI, compact layouts.
  *
- *   short:
- *     Targets ANY device with limited vertical space (max-height: 500px).
- *     This includes very small phones, foldable secondary screens, and landscape phones.
- *     Use as the baseline for all short viewports.
+ *   Can be combined with other variants:
+ *   - `short:sm:flex` - short viewport + viewport width >= 640px
+ *   - `short:@xl:flex` - short viewport + container width >= 36rem
  *
- *   short-wide:
- *     Targets phone landscape specifically (max-height: 500px AND min-width: 640px).
- *     Overrides `short:` styles when there's horizontal space available.
- *     Use for layouts that benefit from side-by-side content in landscape.
- *
- *   Pattern:
- *     `short:compact-mobile-style short-wide:landscape-optimized-style`
- *
- *   Example - header with settings popover:
- *     - Default: Full header with inline settings
- *     - short: Minimal header, settings in overflow menu (tiny screens)
- *     - short-wide: Compact header, settings visible (landscape has width)
+ *   Examples:
+ *   - `short:hidden short:sm:flex` - hide on tiny screens, show on short+wide viewport
+ *   - `short:sr-only short:@xl:not-sr-only` - hide label unless container is wide
  */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Short viewport (limited height) - combine with other variants like short:sm: or short:@xl: */
 @custom-variant short (@media (max-height: 500px));
-@custom-variant short-wide (@media (max-height: 500px) and (min-width: 640px));
 
 :root {
   --background: oklch(0.9383 0.0042 236.4993);

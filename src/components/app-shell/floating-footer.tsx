@@ -19,15 +19,15 @@ export function FloatingFooter({
   return (
     <div
       className={cn(
-        "bg-background/95 supports-backdrop-filter:bg-background/75 short:px-2 sticky bottom-0 z-40 flex items-center justify-between border-t px-2 backdrop-blur-sm sm:px-4",
-        "short:h-(--footer-height-short) h-(--footer-height) sm:h-(--footer-height-sm)",
+        "bg-background/95 supports-backdrop-filter:bg-background/75 short:px-2 @container sticky bottom-0 z-40 flex items-center justify-between border-t px-2 backdrop-blur-sm sm:px-4",
+        "short:h-(--footer-height-short) h-(--footer-height) @lg:h-(--footer-height-sm)",
         // Extended area above bar for hover detection
         "before:pointer-events-auto before:absolute before:inset-x-0 before:bottom-full before:content-['']",
         // Hover/focus brings bar back
         "hover:pointer-events-auto hover:translate-y-0 hover:opacity-100",
         "focus-within:pointer-events-auto focus-within:translate-y-0 focus-within:opacity-100",
-        // Visibility transition
-        "transition-[translate,opacity] duration-200",
+        // Visibility transition (includes height for reflow animation)
+        "transition-[translate,opacity,height] duration-200",
         visibilityClasses,
         className,
       )}

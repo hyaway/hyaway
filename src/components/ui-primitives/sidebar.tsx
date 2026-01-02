@@ -134,7 +134,7 @@ function SidebarProvider({
         data-state={state}
         style={style}
         className={cn(
-          "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
+          "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full overflow-x-clip",
           className,
         )}
         {...props}
