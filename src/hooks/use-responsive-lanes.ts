@@ -46,9 +46,9 @@ export function useResponsiveLanes(
       const newLanes = Math.min(calculatedLanes, maxLanes);
       const newWidth =
         calculatedLanes > maxLanes && expandImages
-          ? entry.contentRect.width / newLanes - 16
+          ? entry.contentRect.width / newLanes - 4
           : calculatedLanes < 3
-            ? entry.contentRect.width / newLanes - 4
+            ? entry.contentRect.width / newLanes - 8
             : defaultWidth;
 
       startTransition(() => {
