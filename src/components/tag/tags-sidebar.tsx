@@ -15,6 +15,7 @@ import {
   SidebarGroup,
   SidebarHeader,
   SidebarInput,
+  useSidebar,
 } from "@/components/ui-primitives/sidebar";
 import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 import { Heading } from "@/components/ui-primitives/heading";
@@ -137,6 +138,8 @@ export const TagsSidebar = memo(function TagsSidebar({
     getScrollElement: () => parentRef.current,
   });
 
+  const { open, openMobile, isMobile } = useSidebar();
+
   // Force virtualizer to re-measure after portal mounts and container has dimensions
   // Use rAF to wait for browser to complete layout calculation
   React.useEffect(() => {
@@ -144,7 +147,7 @@ export const TagsSidebar = memo(function TagsSidebar({
       rowVirtualizer.measure();
     });
     return () => cancelAnimationFrame(rafId);
-  }, [rowVirtualizer]);
+  }, [rowVirtualizer, open, openMobile, isMobile]);
 
   // Cache virtual items
   const virtualItems = rowVirtualizer.getVirtualItems();
