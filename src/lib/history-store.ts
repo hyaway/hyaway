@@ -1,6 +1,7 @@
-import { useMemo } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { useShallow } from "zustand/react/shallow";
+import { createSelectors } from "./create-selectors";
 import { setupCrossTabSync } from "./cross-tab-sync";
 
 export const MAX_HISTORY_LIMIT = 1000;
@@ -77,7 +78,7 @@ function mergeHistory(
   };
 }
 
-export const useHistoryStore = create<HistoryState>()(
+const useHistoryStoreBase = create<HistoryState>()(
   persist(
     (set, get) => ({
       entries: [],
@@ -132,22 +133,50 @@ export const useHistoryStore = create<HistoryState>()(
   ),
 );
 
+/**
+ * History store with auto-generated selectors.
+ *
+ * @example
+ * ```tsx
+ * // Use auto-generated selectors
+ * const entries = useHistoryStore.use.entries();
+ * const actions = useHistoryStore.use.actions();
+ *
+ * // Or use direct selector
+ * const enabled = useHistoryStore((s) => s.enabled);
+ * ```
+ */
+export const useHistoryStore = createSelectors(useHistoryStoreBase);
+
 // Cross-tab sync: rehydrate when other tabs update localStorage
 setupCrossTabSync(useHistoryStore);
 
-// Selector hooks for ergonomic usage
+// ============================================================================
+// Derived selectors (useShallow for array equality)
+// ============================================================================
+
+/**
+ * Returns just the file IDs from history entries.
+ * Uses useShallow to prevent re-renders when the array contents haven't changed.
+ */
+export const useHistoryFileIds = () =>
+  useHistoryStore(useShallow((state) => state.entries.map((e) => e.fileId)));
+
+// ============================================================================
+// Legacy selector exports (for backward compatibility)
+// ============================================================================
+
+/** @deprecated Use `useHistoryStore.use.entries()` */
 export const useHistoryEntries = () =>
   useHistoryStore((state) => state.entries);
 
-export const useHistoryFileIds = () => {
-  const entries = useHistoryStore((state) => state.entries);
-  return useMemo(() => entries.map((e) => e.fileId), [entries]);
-};
-
+/** @deprecated Use `useHistoryStore.use.enabled()` */
 export const useHistoryEnabled = () =>
   useHistoryStore((state) => state.enabled);
 
+/** @deprecated Use `useHistoryStore.use.limit()` */
 export const useHistoryLimit = () => useHistoryStore((state) => state.limit);
 
+/** @deprecated Use `useHistoryStore.use.actions()` */
 export const useHistoryActions = () =>
   useHistoryStore((state) => state.actions);

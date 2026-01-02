@@ -1,12 +1,21 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { createSelectors } from "./create-selectors";
 import { setupCrossTabSync } from "./cross-tab-sync";
+
+// ============================================================================
+// Constants
+// ============================================================================
 
 export const MAX_GALLERY_LANES = 30;
 export const MAX_PAGES_COLUMNS = 30;
 export const MAX_RECENT_FILES_LIMIT = 10000;
 export const MAX_RECENT_FILES_DAYS = 30;
 export const MAX_RANDOM_INBOX_LIMIT = 1000;
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export type TagsSortMode = "count" | "namespace";
 export type ImageBackground = "solid" | "checkerboard";
@@ -38,7 +47,7 @@ type UxSettingsState = {
   };
 };
 
-export const useUxSettingsStore = create<UxSettingsState>()(
+const useUxSettingsStoreBase = create<UxSettingsState>()(
   persist(
     (set) => ({
       tagsSortMode: "count",
@@ -53,27 +62,21 @@ export const useUxSettingsStore = create<UxSettingsState>()(
       fileViewerStartExpanded: false,
       imageBackground: "checkerboard",
       actions: {
-        setTagsSortMode: (tagsSortMode: TagsSortMode) => set({ tagsSortMode }),
-        setGalleryMaxLanes: (galleryMaxLanes: number) =>
-          set({ galleryMaxLanes }),
-        setGalleryExpandImages: (galleryExpandImages: boolean) =>
+        setTagsSortMode: (tagsSortMode) => set({ tagsSortMode }),
+        setGalleryMaxLanes: (galleryMaxLanes) => set({ galleryMaxLanes }),
+        setGalleryExpandImages: (galleryExpandImages) =>
           set({ galleryExpandImages }),
-        setGalleryShowScrollBadge: (galleryShowScrollBadge: boolean) =>
+        setGalleryShowScrollBadge: (galleryShowScrollBadge) =>
           set({ galleryShowScrollBadge }),
-        setPagesMaxColumns: (pagesMaxColumns: number) =>
-          set({ pagesMaxColumns }),
-        setPagesShowScrollBadge: (pagesShowScrollBadge: boolean) =>
+        setPagesMaxColumns: (pagesMaxColumns) => set({ pagesMaxColumns }),
+        setPagesShowScrollBadge: (pagesShowScrollBadge) =>
           set({ pagesShowScrollBadge }),
-        setRecentFilesLimit: (recentFilesLimit: number) =>
-          set({ recentFilesLimit }),
-        setRecentFilesDays: (recentFilesDays: number) =>
-          set({ recentFilesDays }),
-        setRandomInboxLimit: (randomInboxLimit: number) =>
-          set({ randomInboxLimit }),
-        setFileViewerStartExpanded: (fileViewerStartExpanded: boolean) =>
+        setRecentFilesLimit: (recentFilesLimit) => set({ recentFilesLimit }),
+        setRecentFilesDays: (recentFilesDays) => set({ recentFilesDays }),
+        setRandomInboxLimit: (randomInboxLimit) => set({ randomInboxLimit }),
+        setFileViewerStartExpanded: (fileViewerStartExpanded) =>
           set({ fileViewerStartExpanded }),
-        setImageBackground: (imageBackground: ImageBackground) =>
-          set({ imageBackground }),
+        setImageBackground: (imageBackground) => set({ imageBackground }),
       },
     }),
     {
@@ -84,41 +87,72 @@ export const useUxSettingsStore = create<UxSettingsState>()(
   ),
 );
 
-export const useTagsSortMode = () =>
-  useUxSettingsStore((state) => state.tagsSortMode);
-
-export const useGalleryMaxLanes = () =>
-  useUxSettingsStore((state) => state.galleryMaxLanes);
-
-export const useGalleryExpandImages = () =>
-  useUxSettingsStore((state) => state.galleryExpandImages);
-
-export const useGalleryShowScrollBadge = () =>
-  useUxSettingsStore((state) => state.galleryShowScrollBadge);
-
-export const usePagesMaxColumns = () =>
-  useUxSettingsStore((state) => state.pagesMaxColumns);
-
-export const usePagesShowScrollBadge = () =>
-  useUxSettingsStore((state) => state.pagesShowScrollBadge);
-
-export const useRecentFilesLimit = () =>
-  useUxSettingsStore((state) => state.recentFilesLimit);
-
-export const useRecentFilesDays = () =>
-  useUxSettingsStore((state) => state.recentFilesDays);
-
-export const useRandomInboxLimit = () =>
-  useUxSettingsStore((state) => state.randomInboxLimit);
-
-export const useFileViewerStartExpanded = () =>
-  useUxSettingsStore((state) => state.fileViewerStartExpanded);
-
-export const useImageBackground = () =>
-  useUxSettingsStore((state) => state.imageBackground);
-
-export const useUxSettingsActions = () =>
-  useUxSettingsStore((state) => state.actions);
+/**
+ * UX Settings store with auto-generated selectors.
+ *
+ * @example
+ * ```tsx
+ * // Use auto-generated selectors
+ * const tagsSortMode = useUxSettingsStore.use.tagsSortMode();
+ * const { setGalleryMaxLanes } = useUxSettingsStore.use.actions();
+ *
+ * // Or use direct selector
+ * const lanes = useUxSettingsStore((s) => s.galleryMaxLanes);
+ * ```
+ */
+export const useUxSettingsStore = createSelectors(useUxSettingsStoreBase);
 
 // Sync settings across tabs
 setupCrossTabSync(useUxSettingsStore);
+
+// ============================================================================
+// Legacy selector exports (for backward compatibility)
+// ============================================================================
+
+/** @deprecated Use `useUxSettingsStore.use.tagsSortMode()` */
+export const useTagsSortMode = () =>
+  useUxSettingsStore((state) => state.tagsSortMode);
+
+/** @deprecated Use `useUxSettingsStore.use.galleryMaxLanes()` */
+export const useGalleryMaxLanes = () =>
+  useUxSettingsStore((state) => state.galleryMaxLanes);
+
+/** @deprecated Use `useUxSettingsStore.use.galleryExpandImages()` */
+export const useGalleryExpandImages = () =>
+  useUxSettingsStore((state) => state.galleryExpandImages);
+
+/** @deprecated Use `useUxSettingsStore.use.galleryShowScrollBadge()` */
+export const useGalleryShowScrollBadge = () =>
+  useUxSettingsStore((state) => state.galleryShowScrollBadge);
+
+/** @deprecated Use `useUxSettingsStore.use.pagesMaxColumns()` */
+export const usePagesMaxColumns = () =>
+  useUxSettingsStore((state) => state.pagesMaxColumns);
+
+/** @deprecated Use `useUxSettingsStore.use.pagesShowScrollBadge()` */
+export const usePagesShowScrollBadge = () =>
+  useUxSettingsStore((state) => state.pagesShowScrollBadge);
+
+/** @deprecated Use `useUxSettingsStore.use.recentFilesLimit()` */
+export const useRecentFilesLimit = () =>
+  useUxSettingsStore((state) => state.recentFilesLimit);
+
+/** @deprecated Use `useUxSettingsStore.use.recentFilesDays()` */
+export const useRecentFilesDays = () =>
+  useUxSettingsStore((state) => state.recentFilesDays);
+
+/** @deprecated Use `useUxSettingsStore.use.randomInboxLimit()` */
+export const useRandomInboxLimit = () =>
+  useUxSettingsStore((state) => state.randomInboxLimit);
+
+/** @deprecated Use `useUxSettingsStore.use.fileViewerStartExpanded()` */
+export const useFileViewerStartExpanded = () =>
+  useUxSettingsStore((state) => state.fileViewerStartExpanded);
+
+/** @deprecated Use `useUxSettingsStore.use.imageBackground()` */
+export const useImageBackground = () =>
+  useUxSettingsStore((state) => state.imageBackground);
+
+/** @deprecated Use `useUxSettingsStore.use.actions()` */
+export const useUxSettingsActions = () =>
+  useUxSettingsStore((state) => state.actions);

@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { createSelectors } from "./create-selectors";
 import { setupCrossTabSync } from "./cross-tab-sync";
 
 // Match existing Theme type used by ThemeProvider for consistency.
@@ -19,7 +20,7 @@ type ThemeState = {
   };
 };
 
-export const useThemeStore = create<ThemeState>()(
+const useThemeStoreBase = create<ThemeState>()(
   persist(
     (set) => ({
       activeTheme: getWindowSystemTheme(),
@@ -55,11 +56,26 @@ export const useThemeStore = create<ThemeState>()(
   ),
 );
 
+/**
+ * Theme store with auto-generated selectors.
+ *
+ * @example
+ * ```tsx
+ * const activeTheme = useThemeStore.use.activeTheme();
+ * const actions = useThemeStore.use.actions();
+ * ```
+ */
+export const useThemeStore = createSelectors(useThemeStoreBase);
+
 export function getWindowSystemTheme(): ActiveTheme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
 }
+
+// ============================================================================
+// Snapshot getters (for use outside React)
+// ============================================================================
 
 export const getActiveThemeSnapshot = () =>
   useThemeStore.getState().activeTheme;
@@ -67,10 +83,21 @@ export const getThemePreferenceSnapshot = () =>
   useThemeStore.getState().themePreference;
 export const getThemeActionsSnapshot = () => useThemeStore.getState().actions;
 
+// ============================================================================
+// Legacy selector exports (for backward compatibility)
+// ============================================================================
+
+/** @deprecated Use `useThemeStore.use.activeTheme()` */
 export const useActiveTheme = () => useThemeStore((state) => state.activeTheme);
+
+/** @deprecated Use `useThemeStore.use.themePreference()` */
 export const useThemePreference = () =>
   useThemeStore((state) => state.themePreference);
+
+/** @deprecated Use `useThemeStore.use.actions()` */
 export const useThemeActions = () => useThemeStore((state) => state.actions);
+
+/** @deprecated Use `useThemeStore.use._hasHydrated()` */
 export const useThemeHydrated = () =>
   useThemeStore((state) => state._hasHydrated);
 
