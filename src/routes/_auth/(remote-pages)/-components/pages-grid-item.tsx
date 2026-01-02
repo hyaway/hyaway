@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { memo } from "react";
 import { Item, ItemContent, ItemTitle } from "@/components/ui-primitives/item";
 import { ThumbnailImage } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { useGetPageInfoQuery } from "@/integrations/hydrus-api/queries/manage-pages";
@@ -28,7 +29,7 @@ export interface PagesGridItemProps {
 /**
  * Pages grid item component that shows page name and thumbnail previews
  */
-export function PagesGridItem({
+export const PagesGridItem = memo(function PagesGridItem({
   pageKey,
   pageName,
   index,
@@ -132,7 +133,7 @@ export function PagesGridItem({
       </ItemTitle>
     </Item>
   );
-}
+});
 
 /**
  * Skeleton placeholder for PagesGridItem during loading state
