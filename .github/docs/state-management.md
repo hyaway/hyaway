@@ -6,13 +6,13 @@ Hyaway uses **Zustand** for client-side state management with auto-generated sel
 
 ## Store Files
 
-| Store         | File                                             | Purpose                  |
-| ------------- | ------------------------------------------------ | ------------------------ |
-| Theme         | `lib/theme-store.ts`                             | Dark/light mode          |
-| UX Settings   | `lib/settings-store.ts`                          | UI preferences           |
-| History       | `lib/watch-history-store.ts`                     | Watch history tracking   |
-| Sidebar       | `lib/sidebar-store.ts`                           | Sidebar open/close state |
-| Hydrus Config | `integrations/hydrus-api/hydrus-config-store.ts` | API connection           |
+| Store         | File                                             | Purpose                |
+| ------------- | ------------------------------------------------ | ---------------------- |
+| Theme         | `lib/theme-store.ts`                             | Dark/light mode        |
+| UX Settings   | `lib/settings-store.ts`                          | UI preferences         |
+| History       | `lib/watch-history-store.ts`                     | Watch history tracking |
+| Sidebar       | `lib/sidebar-store.ts`                           | Sidebar persistence    |
+| Hydrus Config | `integrations/hydrus-api/hydrus-config-store.ts` | API connection         |
 
 ## Usage Pattern
 
@@ -26,20 +26,17 @@ Use the shorthand export for cleaner syntax:
 import { useTheme } from "@/lib/theme-store";
 import { useSettings } from "@/lib/settings-store";
 import { useWatchHistory } from "@/lib/watch-history-store";
-import { useSidebar } from "@/lib/sidebar-store";
 
 function MyComponent() {
   // Access individual state values
   const activeTheme = useTheme.activeTheme();
   const galleryMaxLanes = useSettings.galleryMaxLanes();
   const entries = useWatchHistory.entries();
-  const leftOpen = useSidebar.leftSidebarOpen();
 
   // Access actions
   const { setThemePreference } = useTheme.actions();
   const { setGalleryMaxLanes } = useSettings.actions();
   const { addViewedFile } = useWatchHistory.actions();
-  const { toggleLeftSidebar } = useSidebar.actions();
 
   return <div>...</div>;
 }
@@ -69,7 +66,69 @@ Each store provides a shorthand export that aliases `.use`:
 | Theme       | `useThemeStore`        | `useTheme`        |
 | UX Settings | `useSettingsStore`     | `useSettings`     |
 | History     | `useWatchHistoryStore` | `useWatchHistory` |
-| Sidebar     | `useSidebarStore`      | `useSidebar`      |
+
+> **Note:** The sidebar store uses `useSidebarSide(side)` for bound access—see [Sidebar Store](#sidebar-store) below.
+
+## Sidebar Store
+
+The sidebar store manages open/closed state for left and right sidebars, with separate desktop and mobile states.
+
+### Basic Usage
+
+For most cases, use `useSidebarSide(side)` which returns bound state and actions:
+
+```tsx
+import { useSidebarSide } from "@/lib/sidebar-store";
+
+function MyComponent() {
+  const {
+    desktopOpen,
+    mobileOpen,
+    setDesktopOpen,
+    setMobileOpen,
+    toggleDesktop,
+    toggleMobile,
+  } = useSidebarSide("left");
+
+  return <button onClick={toggleDesktop}>Toggle</button>;
+}
+```
+
+### Direct Store Access
+
+For accessing specific state values or when side is dynamic:
+
+```tsx
+import { useSidebarStore } from "@/lib/sidebar-store";
+
+// Access individual state
+const leftOpen = useSidebarStore.use.leftDesktopOpen();
+const rightOpen = useSidebarStore.use.rightDesktopOpen();
+
+// Access actions (when side is dynamic or optional)
+const actions = useSidebarStore.use.actions();
+actions.toggleDesktop("left");
+```
+
+### State Shape
+
+| State              | Persisted | Purpose                      |
+| ------------------ | --------- | ---------------------------- |
+| `leftDesktopOpen`  | ✅        | Left sidebar desktop state   |
+| `rightDesktopOpen` | ✅        | Right sidebar desktop state  |
+| `leftMobileOpen`   | ❌        | Left sidebar mobile (sheet)  |
+| `rightMobileOpen`  | ❌        | Right sidebar mobile (sheet) |
+
+### Sync Behavior
+
+- **Desktop open** is independent—only opens desktop
+- **Desktop close** syncs both—closes desktop and mobile
+- **Mobile open/close** always syncs both—affects desktop and mobile
+
+This ensures:
+
+- Opening on mobile also opens desktop (so it's visible when resizing)
+- Closing from either mode fully dismisses the sidebar
 
 ## Store Structure
 

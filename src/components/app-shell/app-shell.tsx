@@ -9,11 +9,11 @@ import { FloatingHeader } from "./floating-header";
 import { FooterPortalProvider, FooterPortalSlot } from "./footer-portal";
 import { RightSidebarProvider } from "./right-sidebar-portal";
 import { RightSidebar } from "./right-sidebar";
-import { Sidebar, SidebarProvider } from "@/components/ui-primitives/sidebar";
+import { Sidebar, SidebarLayout } from "@/components/ui-primitives/sidebar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
+    <SidebarLayout>
       {/* Full-height left sidebar (uses fixed positioning internally) */}
       <Sidebar side="left" collapsible="icon">
         <AppSidebar />
@@ -42,6 +42,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Full-height right sidebar - fixed position */}
         <RightSidebar />
       </RightSidebarProvider>
-    </SidebarProvider>
+    </SidebarLayout>
   );
 }
