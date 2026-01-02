@@ -15,6 +15,8 @@ import {
 export interface MyRouterContext {
   queryClient: QueryClient;
   getTitle?: () => string;
+  /** If true, the back button uses browser history instead of parent route navigation */
+  useHistoryBack?: boolean;
 }
 
 function RootComponent() {

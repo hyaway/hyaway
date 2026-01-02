@@ -5,6 +5,7 @@ export const Route = createFileRoute("/(settings)/settings/client-api")({
   component: SettingsClientApiComponent,
   beforeLoad: () => ({
     getTitle: () => "Client API settings",
+    useHistoryBack: true,
   }),
 });
 

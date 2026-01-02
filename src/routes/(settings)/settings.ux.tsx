@@ -13,6 +13,7 @@ export const Route = createFileRoute("/(settings)/settings/ux")({
   component: SettingsUXComponent,
   beforeLoad: () => ({
     getTitle: () => "UX settings",
+    useHistoryBack: true,
   }),
 });
 
