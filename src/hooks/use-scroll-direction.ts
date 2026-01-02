@@ -9,7 +9,7 @@ export function dispatchScrollRestoration() {
 
 /**
  * Hook that tracks scroll direction and returns visibility state.
- * Useful for hiding/showing or fading UI elements based on scroll.
+ * Ignores scroll events triggered by window resize.
  *
  * @param threshold - Minimum scroll difference to trigger state change (reduces jitter)
  * @returns isVisible - true when scrolling up or at top, false when scrolling down
@@ -19,23 +19,26 @@ export function useScrollDirection(threshold = 10) {
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
   const skipNextScroll = useRef(false);
+  const ignoreUntil = useRef(0);
 
   useEffect(() => {
-    // Initialize with current scroll position
     lastScrollY.current = window.scrollY;
 
     const handleScrollRestoration = () => {
-      // Skip the next scroll event and keep header visible
       skipNextScroll.current = true;
       setIsVisible(true);
-      // Update lastScrollY to prevent hiding on next scroll
+      lastScrollY.current = window.scrollY;
+    };
+
+    // Ignore scroll events briefly after resize
+    const handleResize = () => {
+      ignoreUntil.current = Date.now() + 200;
       lastScrollY.current = window.scrollY;
     };
 
     const updateScrollDir = () => {
       const scrollY = window.scrollY;
 
-      // Skip if scroll restoration just happened
       if (skipNextScroll.current) {
         skipNextScroll.current = false;
         lastScrollY.current = scrollY;
@@ -43,13 +46,18 @@ export function useScrollDirection(threshold = 10) {
         return;
       }
 
-      // Ignore if only horizontal scroll occurred
+      // Ignore scroll events during resize cooldown
+      if (Date.now() < ignoreUntil.current) {
+        lastScrollY.current = scrollY;
+        ticking.current = false;
+        return;
+      }
+
       if (scrollY === lastScrollY.current) {
         ticking.current = false;
         return;
       }
 
-      // Always show header when at the top
       if (scrollY < threshold) {
         setIsVisible(true);
         lastScrollY.current = scrollY;
@@ -58,10 +66,8 @@ export function useScrollDirection(threshold = 10) {
       }
 
       const diff = scrollY - lastScrollY.current;
-
-      // Only update if scroll difference exceeds threshold (reduces jitter)
       if (Math.abs(diff) >= threshold) {
-        setIsVisible(diff < 0); // Scrolling up = visible
+        setIsVisible(diff < 0);
         lastScrollY.current = scrollY;
       }
 
@@ -76,10 +82,12 @@ export function useScrollDirection(threshold = 10) {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize);
     window.addEventListener(SCROLL_RESTORATION_EVENT, handleScrollRestoration);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
       window.removeEventListener(
         SCROLL_RESTORATION_EVENT,
         handleScrollRestoration,
