@@ -27,13 +27,33 @@ const closeBoth = (side: SidebarSide) =>
     ? { leftDesktopOpen: false, leftMobileOpen: false }
     : { rightDesktopOpen: false, rightMobileOpen: false };
 
-const openDesktop = (side: SidebarSide) =>
-  side === "left" ? { leftDesktopOpen: true } : { rightDesktopOpen: true };
+// When opening desktop, close both mobile if both desktops will be open
+const openDesktop = (side: SidebarSide, state: SidebarStoreState) => {
+  const otherDesktopOpen =
+    side === "left" ? state.rightDesktopOpen : state.leftDesktopOpen;
+  const closeMobile = otherDesktopOpen
+    ? { leftMobileOpen: false, rightMobileOpen: false }
+    : {};
+  return side === "left"
+    ? { leftDesktopOpen: true, ...closeMobile }
+    : { rightDesktopOpen: true, ...closeMobile };
+};
 
-const openBoth = (side: SidebarSide) =>
+// When opening mobile, close the other side's desktop sidebar
+const openMobile = (side: SidebarSide) =>
   side === "left"
-    ? { leftDesktopOpen: true, leftMobileOpen: true }
-    : { rightDesktopOpen: true, rightMobileOpen: true };
+    ? {
+        leftDesktopOpen: true,
+        leftMobileOpen: true,
+        rightDesktopOpen: false,
+        rightMobileOpen: false,
+      }
+    : {
+        rightDesktopOpen: true,
+        rightMobileOpen: true,
+        leftDesktopOpen: false,
+        leftMobileOpen: false,
+      };
 
 const useSidebarStoreBase = create<SidebarStoreState>()(
   persist(
@@ -45,21 +65,21 @@ const useSidebarStoreBase = create<SidebarStoreState>()(
       actions: {
         // Desktop: open independent, close syncs both
         setDesktopOpen: (side, open) =>
-          set(() => (open ? openDesktop(side) : closeBoth(side))),
+          set((state) => (open ? openDesktop(side, state) : closeBoth(side))),
         toggleDesktop: (side) =>
           set((state) => {
             const isOpen =
               side === "left" ? state.leftDesktopOpen : state.rightDesktopOpen;
-            return isOpen ? closeBoth(side) : openDesktop(side);
+            return isOpen ? closeBoth(side) : openDesktop(side, state);
           }),
         // Mobile: open/close always syncs both
         setMobileOpen: (side, open) =>
-          set(() => (open ? openBoth(side) : closeBoth(side))),
+          set(() => (open ? openMobile(side) : closeBoth(side))),
         toggleMobile: (side) =>
           set((state) => {
             const isOpen =
               side === "left" ? state.leftMobileOpen : state.rightMobileOpen;
-            return isOpen ? closeBoth(side) : openBoth(side);
+            return isOpen ? closeBoth(side) : openMobile(side);
           }),
       },
     }),
