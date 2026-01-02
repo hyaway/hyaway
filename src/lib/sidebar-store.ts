@@ -1,16 +1,15 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { createSelectors } from "./create-selectors";
-import { setupCrossTabSync } from "./cross-tab-sync";
+
+export type SidebarSide = "left" | "right";
 
 type SidebarStoreState = {
   leftSidebarOpen: boolean;
   rightSidebarOpen: boolean;
   actions: {
-    setLeftSidebarOpen: (open: boolean) => void;
-    setRightSidebarOpen: (open: boolean) => void;
-    toggleLeftSidebar: () => void;
-    toggleRightSidebar: () => void;
+    setSidebarOpen: (side: SidebarSide, open: boolean) => void;
+    toggleSidebar: (side: SidebarSide) => void;
   };
 };
 
@@ -18,16 +17,20 @@ const useSidebarStoreBase = create<SidebarStoreState>()(
   persist(
     (set) => ({
       leftSidebarOpen: true,
-      rightSidebarOpen: false,
+      rightSidebarOpen: true,
       actions: {
-        setLeftSidebarOpen: (leftSidebarOpen: boolean) =>
-          set({ leftSidebarOpen }),
-        setRightSidebarOpen: (rightSidebarOpen: boolean) =>
-          set({ rightSidebarOpen }),
-        toggleLeftSidebar: () =>
-          set((state) => ({ leftSidebarOpen: !state.leftSidebarOpen })),
-        toggleRightSidebar: () =>
-          set((state) => ({ rightSidebarOpen: !state.rightSidebarOpen })),
+        setSidebarOpen: (side, open) =>
+          set(
+            side === "left"
+              ? { leftSidebarOpen: open }
+              : { rightSidebarOpen: open },
+          ),
+        toggleSidebar: (side) =>
+          set((state) =>
+            side === "left"
+              ? { leftSidebarOpen: !state.leftSidebarOpen }
+              : { rightSidebarOpen: !state.rightSidebarOpen },
+          ),
       },
     }),
     {
@@ -41,23 +44,14 @@ const useSidebarStoreBase = create<SidebarStoreState>()(
 /**
  * Sidebar store with auto-generated selectors.
  *
+ * Stores persisted open/closed state for left and right sidebars.
+ * Used internally by the Sidebar component.
+ *
  * @example
  * ```tsx
  * const leftOpen = useSidebarStore.use.leftSidebarOpen();
- * const actions = useSidebarStore.use.actions();
+ * const { toggleSidebar } = useSidebarStore.use.actions();
+ * toggleSidebar('left');
  * ```
  */
 export const useSidebarStore = createSelectors(useSidebarStoreBase);
-
-/**
- * Shorthand for `useSidebarStore.use`.
- * @example
- * ```tsx
- * const leftOpen = useSidebar.leftSidebarOpen();
- * const { toggleLeftSidebar } = useSidebar.actions();
- * ```
- */
-export const useSidebar = useSidebarStore.use;
-
-// Sync sidebar state across tabs
-setupCrossTabSync(useSidebarStore);
