@@ -15,7 +15,9 @@ type UxSettingsState = {
   tagsSortMode: TagsSortMode;
   gridMaxLanes: number;
   gridExpandImages: boolean;
+  gridShowScrollBadge: boolean;
   pagesMaxColumns: number;
+  pagesShowScrollBadge: boolean;
   recentFilesLimit: number;
   recentFilesDays: number;
   randomInboxLimit: number;
@@ -25,7 +27,9 @@ type UxSettingsState = {
     setTagsSortMode: (mode: TagsSortMode) => void;
     setGridMaxLanes: (lanes: number) => void;
     setGridExpandImages: (expand: boolean) => void;
+    setGridShowScrollBadge: (show: boolean) => void;
     setPagesMaxColumns: (columns: number) => void;
+    setPagesShowScrollBadge: (show: boolean) => void;
     setRecentFilesLimit: (limit: number) => void;
     setRecentFilesDays: (days: number) => void;
     setRandomInboxLimit: (limit: number) => void;
@@ -40,7 +44,9 @@ export const useUxSettingsStore = create<UxSettingsState>()(
       tagsSortMode: "count",
       gridMaxLanes: MAX_GRID_LANES,
       gridExpandImages: true,
+      gridShowScrollBadge: true,
       pagesMaxColumns: MAX_PAGES_COLUMNS,
+      pagesShowScrollBadge: true,
       recentFilesLimit: 100,
       recentFilesDays: 3,
       randomInboxLimit: 100,
@@ -51,8 +57,12 @@ export const useUxSettingsStore = create<UxSettingsState>()(
         setGridMaxLanes: (gridMaxLanes: number) => set({ gridMaxLanes }),
         setGridExpandImages: (gridExpandImages: boolean) =>
           set({ gridExpandImages }),
+        setGridShowScrollBadge: (gridShowScrollBadge: boolean) =>
+          set({ gridShowScrollBadge }),
         setPagesMaxColumns: (pagesMaxColumns: number) =>
           set({ pagesMaxColumns }),
+        setPagesShowScrollBadge: (pagesShowScrollBadge: boolean) =>
+          set({ pagesShowScrollBadge }),
         setRecentFilesLimit: (recentFilesLimit: number) =>
           set({ recentFilesLimit }),
         setRecentFilesDays: (recentFilesDays: number) =>
@@ -82,8 +92,14 @@ export const useGridMaxLanes = () =>
 export const useGridExpandImages = () =>
   useUxSettingsStore((state) => state.gridExpandImages);
 
+export const useGridShowScrollBadge = () =>
+  useUxSettingsStore((state) => state.gridShowScrollBadge);
+
 export const usePagesMaxColumns = () =>
   useUxSettingsStore((state) => state.pagesMaxColumns);
+
+export const usePagesShowScrollBadge = () =>
+  useUxSettingsStore((state) => state.pagesShowScrollBadge);
 
 export const useRecentFilesLimit = () =>
   useUxSettingsStore((state) => state.recentFilesLimit);

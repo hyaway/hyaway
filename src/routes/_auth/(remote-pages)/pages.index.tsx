@@ -21,9 +21,13 @@ import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
+import { ScrollPositionBadge } from "@/components/scroll-position-badge";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
-import { usePagesMaxColumns } from "@/lib/ux-settings-store";
+import {
+  usePagesMaxColumns,
+  usePagesShowScrollBadge,
+} from "@/lib/ux-settings-store";
 
 export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
   component: PagesIndex,
@@ -98,6 +102,8 @@ function PagesGrid({
   containerRef: React.RefObject<HTMLDivElement | null>;
   lanes: number;
 }) {
+  const showScrollBadge = usePagesShowScrollBadge();
+
   const rowVirtualizer = useWindowVirtualizer({
     count: pages.length,
     estimateSize: () => PAGE_CARD_HEIGHT,
@@ -108,6 +114,7 @@ function PagesGrid({
   });
 
   const virtualItems = rowVirtualizer.getVirtualItems();
+  const lastItemIndex = virtualItems.at(-1)?.index;
 
   const { setLinkRef, handleKeyDown, handleItemFocus, getTabIndex } =
     useMasonryNavigation({
@@ -123,7 +130,7 @@ function PagesGrid({
   );
 
   return (
-    <div className="w-full">
+    <div className="@container w-full">
       <ul
         role="grid"
         onKeyDown={handleKeyDown}
@@ -157,6 +164,13 @@ function PagesGrid({
             );
           })}
       </ul>
+      <ScrollPositionBadge
+        current={(lastItemIndex ?? 0) + 1}
+        loaded={pages.length}
+        total={pages.length}
+        isScrolling={rowVirtualizer.isScrolling}
+        show={showScrollBadge}
+      />
     </div>
   );
 }

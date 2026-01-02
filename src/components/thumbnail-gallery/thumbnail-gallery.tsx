@@ -7,16 +7,19 @@ import {
 import { ThumbnailGallerySkeleton } from "./thumbnail-gallery-skeleton";
 import type { FileLinkBuilder } from "./thumbnail-gallery-item";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import { ScrollPositionBadge } from "@/components/scroll-position-badge";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { PageError } from "@/components/page-shell/page-error";
-import { Badge } from "@/components/ui-primitives/badge";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useResponsiveGrid } from "@/hooks/use-responsive-grid";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
-import { cn } from "@/lib/utils";
-import { useGridExpandImages, useGridMaxLanes } from "@/lib/ux-settings-store";
+import {
+  useGridExpandImages,
+  useGridMaxLanes,
+  useGridShowScrollBadge,
+} from "@/lib/ux-settings-store";
 
 export interface ThumbnailGalleryProps {
   fileIds: Array<number>;
@@ -153,6 +156,7 @@ export function PureThumbnailGallery({
 
   const maxLanes = useGridMaxLanes();
   const expandImages = useGridExpandImages();
+  const showScrollBadge = useGridShowScrollBadge();
 
   const { setLinkRef, handleKeyDown, handleItemFocus, getTabIndex } =
     useMasonryNavigation({
@@ -205,20 +209,13 @@ export function PureThumbnailGallery({
               );
             })}
         </ul>
-        <div className="pointer-events-none sticky bottom-14 z-50 mt-4 flex justify-end @xl:bottom-2">
-          <Badge
-            className={cn(
-              "pointer-events-auto transition-opacity",
-              rowVirtualizer.isScrolling
-                ? "opacity-90 delay-0 duration-100"
-                : "opacity-50 delay-100 duration-500",
-            )}
-            variant="secondary"
-            size="xs"
-          >
-            {(lastItemIndex ?? 0) + 1}/{deferredItems.length} ({totalItems})
-          </Badge>
-        </div>
+        <ScrollPositionBadge
+          current={(lastItemIndex ?? 0) + 1}
+          loaded={deferredItems.length}
+          total={totalItems}
+          isScrolling={rowVirtualizer.isScrolling}
+          show={showScrollBadge}
+        />
       </div>
 
       <TagsSidebar items={deferredItems} />

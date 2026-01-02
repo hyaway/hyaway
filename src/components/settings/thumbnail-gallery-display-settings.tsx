@@ -3,6 +3,7 @@ import {
   MAX_GRID_LANES,
   useGridExpandImages,
   useGridMaxLanes,
+  useGridShowScrollBadge,
   useUxSettingsActions,
 } from "@/lib/ux-settings-store";
 
@@ -18,7 +19,9 @@ export function ThumbnailGalleryDisplaySettings({
 }: ThumbnailGalleryDisplaySettingsProps) {
   const gridMaxLanes = useGridMaxLanes();
   const gridExpandImages = useGridExpandImages();
-  const { setGridMaxLanes, setGridExpandImages } = useUxSettingsActions();
+  const gridShowScrollBadge = useGridShowScrollBadge();
+  const { setGridMaxLanes, setGridExpandImages, setGridShowScrollBadge } =
+    useUxSettingsActions();
 
   return (
     <SettingsGroup>
@@ -36,6 +39,12 @@ export function ThumbnailGalleryDisplaySettings({
         label="Expand images to fill remaining space at the end"
         checked={gridExpandImages}
         onCheckedChange={setGridExpandImages}
+      />
+      <SwitchField
+        id={`${idPrefix}show-scroll-badge-switch`}
+        label="Show scroll position badge"
+        checked={gridShowScrollBadge}
+        onCheckedChange={setGridShowScrollBadge}
       />
     </SettingsGroup>
   );
