@@ -54,7 +54,6 @@ export interface ThumbnailGalleryItemProps extends React.HTMLAttributes<HTMLLIEl
   width: number;
   height: number;
   scrollMargin: number;
-  isScrolling?: boolean;
   tabIndex?: number;
   /** Stable callback to register link refs - receives (element, index) */
   setLinkRef?: (el: HTMLAnchorElement | null, index: number) => void;
@@ -75,7 +74,6 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
   width,
   height,
   scrollMargin,
-  isScrolling,
   tabIndex = 0,
   setLinkRef,
   onItemFocus,
@@ -162,7 +160,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         "active:z-30 active:[content-visibility:visible]",
         "has-focus-visible:z-20 has-focus-visible:[content-visibility:visible]",
         width < height ? "flex-col" : "flex-row",
-        !isScrolling && "transition-transform duration-350 ease-out",
+        "transition-transform duration-350 ease-out in-data-[scrolling=true]:transition-none",
         menuOpen && "z-30 [content-visibility:visible]",
         className,
       )}

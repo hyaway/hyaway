@@ -177,6 +177,7 @@ export function PureThumbnailGallery({
           role="grid"
           aria-label={ariaLabel}
           onKeyDown={handleKeyDown}
+          data-scrolling={rowVirtualizer.isScrolling}
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
           }}
@@ -197,7 +198,6 @@ export function PureThumbnailGallery({
                   width={width}
                   height={itemHeight}
                   scrollMargin={rowVirtualizer.options.scrollMargin}
-                  isScrolling={rowVirtualizer.isScrolling}
                   tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
                   setLinkRef={setLinkRef}
                   onItemFocus={handleItemFocus}
