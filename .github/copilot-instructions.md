@@ -89,7 +89,7 @@ import { FeatureCard } from "./-components/feature-card";
 | Store         | Purpose         | Location                                         |
 | ------------- | --------------- | ------------------------------------------------ |
 | Theme         | Dark/light mode | `lib/theme-store.ts`                             |
-| UX Settings   | UI preferences  | `lib/ux-settings-store.ts`                       |
+| UX Settings   | UI preferences  | `lib/settings-store.ts`                          |
 | Watch History | View tracking   | `lib/watch-history-store.ts`                     |
 | Sidebar       | Sidebar state   | `lib/sidebar-store.ts`                           |
 | Hydrus Config | API connection  | `integrations/hydrus-api/hydrus-config-store.ts` |

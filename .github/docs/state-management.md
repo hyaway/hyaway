@@ -9,7 +9,7 @@ Hyaway uses **Zustand** for client-side state management with explicit selector 
 | Store         | File                                             | Purpose                |
 | ------------- | ------------------------------------------------ | ---------------------- |
 | Theme         | `lib/theme-store.ts`                             | Dark/light mode        |
-| UX Settings   | `lib/ux-settings-store.ts`                       | UI preferences         |
+| UX Settings   | `lib/settings-store.ts`                          | UI preferences         |
 | History       | `lib/watch-history-store.ts`                     | Watch history tracking |
 | Sidebar       | `lib/sidebar-store.ts`                           | Sidebar persistence    |
 | Hydrus Config | `integrations/hydrus-api/hydrus-config-store.ts` | API connection         |
@@ -67,7 +67,7 @@ const theme = getActiveThemeSnapshot();
 | `useThemeHydrated`   | `boolean`                       |
 | `useThemeActions`    | `{ setThemePreference, ... }`   |
 
-### UX Settings Store (`lib/ux-settings-store.ts`)
+### UX Settings Store (`lib/settings-store.ts`)
 
 | Hook                         | Returns                       |
 | ---------------------------- | ----------------------------- |
@@ -220,7 +220,7 @@ type FeatureState = {
 ### Step 2: Create Store
 
 ```tsx
-const useFeatureStoreBase = create<FeatureState>()(
+const useFeatureStore = create<FeatureState>()(
   persist(
     (set) => ({
       enabled: true,
@@ -238,21 +238,18 @@ const useFeatureStoreBase = create<FeatureState>()(
 );
 ```
 
-### Step 3: Add Selectors and Exports
+### Step 3: Add Selector Hook Exports
 
-````tsx
-export const useFeatureStore = createSelectors(useFeatureStoreBase);
+```tsx
+// Explicit selector hooks for each piece of state
+export const useFeatureEnabled = () =>
+  useFeatureStore((state) => state.enabled);
 
-/**
- * Shorthand for `useFeatureStore.use`.
- * @example
- * ```tsx
- * const enabled = useFeature.enabled();
- * const { setLimit } = useFeature.actions();
- * ```
- */
-export const useFeature = useFeatureStore.use;
-````
+export const useFeatureLimit = () => useFeatureStore((state) => state.limit);
+
+export const useFeatureActions = () =>
+  useFeatureStore((state) => state.actions);
+```
 
 ### Step 4: Enable Cross-Tab Sync (if needed)
 
@@ -265,14 +262,14 @@ setupCrossTabSync(useFeatureStore);
 
 ### Actions Namespace
 
-All mutations are grouped under an `actions` object:
+All mutations are grouped under an `actions` object and accessed via an actions hook:
 
 ```tsx
-// ✅ Correct
-const { setEnabled, setLimit } = useFeature.actions();
+// ✅ Correct - use the actions hook
+const { setEnabled, setLimit } = useFeatureActions();
 
-// ❌ Don't put setters at top level
-const setEnabled = useFeature.setEnabled(); // Won't work
+// ❌ Don't destructure from store directly
+const { setEnabled } = useFeatureStore(); // Actions nested in state
 ```
 
 ### Partialize Actions
@@ -297,21 +294,3 @@ setupCrossTabSync(useMyStore);
 ```
 
 This uses `BroadcastChannel` to sync state changes.
-
-## Auto-Generated Selectors
-
-The `createSelectors` utility (from `lib/create-selectors.ts`) adds a `.use` property with hooks for each state key:
-
-```tsx
-const store = createSelectors(useStoreBase);
-
-// These are equivalent:
-const value = store.use.someValue();
-const value = store((s) => s.someValue);
-```
-
-Benefits:
-
-- **Less boilerplate** - No manual selector exports
-- **Type-safe** - Full TypeScript inference
-- **Consistent API** - Same pattern across all stores
