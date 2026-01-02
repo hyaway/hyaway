@@ -7,7 +7,7 @@ export const PAGE_CARD_GAP = 16; // gap-4
 
 /**
  * Hook to calculate the number of lanes for a pages grid item grid based on container width.
- * Simplified version of useResponsiveGrid for fixed-size pages grid items.
+ * Simplified version of useResponsiveLanes for fixed-size pages grid items.
  */
 export function usePageGridLanes(
   containerRef: RefObject<HTMLElement | null>,

@@ -1,22 +1,31 @@
 import { startTransition, useLayoutEffect, useState } from "react";
-import { useGridExpandImages, useGridMaxLanes } from "@/lib/ux-settings-store";
+import {
+  useGalleryExpandImages,
+  useGalleryMaxLanes,
+} from "@/lib/ux-settings-store";
 
-interface GridState {
+interface ResponsiveLanesState {
   width: number;
   lanes: number;
 }
 
+interface UseResponsiveLanesOptions {
+  containerRef: React.RefObject<HTMLElement | null>;
+  defaultWidth: number;
+  itemCount: number;
+  maxLanes: number;
+  expandImages: boolean;
+}
+
 /**
- * Hook to calculate responsive grid dimensions based on container width.
+ * Generic hook to calculate responsive lane dimensions based on container width.
  * Returns the item width and number of lanes.
  */
-export function useResponsiveGrid(
-  containerRef: React.RefObject<HTMLElement | null>,
-  defaultWidth: number,
-  itemCount: number,
-): GridState {
-  const maxLanes = useGridMaxLanes();
-  const expandImages = useGridExpandImages();
+export function useResponsiveLanes(
+  options: UseResponsiveLanesOptions,
+): ResponsiveLanesState {
+  const { containerRef, defaultWidth, itemCount, maxLanes, expandImages } =
+    options;
 
   const [gridState, setGridState] = useState({
     width: defaultWidth,
@@ -58,4 +67,24 @@ export function useResponsiveGrid(
     itemCount < clampedLanes ? Math.max(itemCount, 2) : clampedLanes;
 
   return { width, lanes };
+}
+
+/**
+ * Gallery-specific hook that uses gallery settings for responsive lanes.
+ */
+export function useGalleryResponsiveLanes(
+  containerRef: React.RefObject<HTMLElement | null>,
+  defaultWidth: number,
+  itemCount: number,
+): ResponsiveLanesState {
+  const maxLanes = useGalleryMaxLanes();
+  const expandImages = useGalleryExpandImages();
+
+  return useResponsiveLanes({
+    containerRef,
+    defaultWidth,
+    itemCount,
+    maxLanes,
+    expandImages,
+  });
 }

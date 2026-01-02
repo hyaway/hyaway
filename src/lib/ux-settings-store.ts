@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { setupCrossTabSync } from "./cross-tab-sync";
 
-export const MAX_GRID_LANES = 30;
+export const MAX_GALLERY_LANES = 30;
 export const MAX_PAGES_COLUMNS = 30;
 export const MAX_RECENT_FILES_LIMIT = 10000;
 export const MAX_RECENT_FILES_DAYS = 30;
@@ -13,9 +13,9 @@ export type ImageBackground = "solid" | "checkerboard";
 
 type UxSettingsState = {
   tagsSortMode: TagsSortMode;
-  gridMaxLanes: number;
-  gridExpandImages: boolean;
-  gridShowScrollBadge: boolean;
+  galleryMaxLanes: number;
+  galleryExpandImages: boolean;
+  galleryShowScrollBadge: boolean;
   pagesMaxColumns: number;
   pagesShowScrollBadge: boolean;
   recentFilesLimit: number;
@@ -25,9 +25,9 @@ type UxSettingsState = {
   imageBackground: ImageBackground;
   actions: {
     setTagsSortMode: (mode: TagsSortMode) => void;
-    setGridMaxLanes: (lanes: number) => void;
-    setGridExpandImages: (expand: boolean) => void;
-    setGridShowScrollBadge: (show: boolean) => void;
+    setGalleryMaxLanes: (lanes: number) => void;
+    setGalleryExpandImages: (expand: boolean) => void;
+    setGalleryShowScrollBadge: (show: boolean) => void;
     setPagesMaxColumns: (columns: number) => void;
     setPagesShowScrollBadge: (show: boolean) => void;
     setRecentFilesLimit: (limit: number) => void;
@@ -42,9 +42,9 @@ export const useUxSettingsStore = create<UxSettingsState>()(
   persist(
     (set) => ({
       tagsSortMode: "count",
-      gridMaxLanes: MAX_GRID_LANES,
-      gridExpandImages: true,
-      gridShowScrollBadge: true,
+      galleryMaxLanes: MAX_GALLERY_LANES,
+      galleryExpandImages: true,
+      galleryShowScrollBadge: true,
       pagesMaxColumns: MAX_PAGES_COLUMNS,
       pagesShowScrollBadge: true,
       recentFilesLimit: 100,
@@ -54,11 +54,12 @@ export const useUxSettingsStore = create<UxSettingsState>()(
       imageBackground: "checkerboard",
       actions: {
         setTagsSortMode: (tagsSortMode: TagsSortMode) => set({ tagsSortMode }),
-        setGridMaxLanes: (gridMaxLanes: number) => set({ gridMaxLanes }),
-        setGridExpandImages: (gridExpandImages: boolean) =>
-          set({ gridExpandImages }),
-        setGridShowScrollBadge: (gridShowScrollBadge: boolean) =>
-          set({ gridShowScrollBadge }),
+        setGalleryMaxLanes: (galleryMaxLanes: number) =>
+          set({ galleryMaxLanes }),
+        setGalleryExpandImages: (galleryExpandImages: boolean) =>
+          set({ galleryExpandImages }),
+        setGalleryShowScrollBadge: (galleryShowScrollBadge: boolean) =>
+          set({ galleryShowScrollBadge }),
         setPagesMaxColumns: (pagesMaxColumns: number) =>
           set({ pagesMaxColumns }),
         setPagesShowScrollBadge: (pagesShowScrollBadge: boolean) =>
@@ -86,14 +87,14 @@ export const useUxSettingsStore = create<UxSettingsState>()(
 export const useTagsSortMode = () =>
   useUxSettingsStore((state) => state.tagsSortMode);
 
-export const useGridMaxLanes = () =>
-  useUxSettingsStore((state) => state.gridMaxLanes);
+export const useGalleryMaxLanes = () =>
+  useUxSettingsStore((state) => state.galleryMaxLanes);
 
-export const useGridExpandImages = () =>
-  useUxSettingsStore((state) => state.gridExpandImages);
+export const useGalleryExpandImages = () =>
+  useUxSettingsStore((state) => state.galleryExpandImages);
 
-export const useGridShowScrollBadge = () =>
-  useUxSettingsStore((state) => state.gridShowScrollBadge);
+export const useGalleryShowScrollBadge = () =>
+  useUxSettingsStore((state) => state.galleryShowScrollBadge);
 
 export const usePagesMaxColumns = () =>
   useUxSettingsStore((state) => state.pagesMaxColumns);

@@ -13,12 +13,12 @@ import { PageError } from "@/components/page-shell/page-error";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
-import { useResponsiveGrid } from "@/hooks/use-responsive-grid";
+import { useGalleryResponsiveLanes } from "@/hooks/use-responsive-lanes";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import {
-  useGridExpandImages,
-  useGridMaxLanes,
-  useGridShowScrollBadge,
+  useGalleryExpandImages,
+  useGalleryMaxLanes,
+  useGalleryShowScrollBadge,
 } from "@/lib/ux-settings-store";
 
 export interface ThumbnailGalleryProps {
@@ -93,7 +93,7 @@ export function PureThumbnailGallery({
   const deferredItems = useDeferredValue(items);
 
   const parentRef = React.useRef<HTMLDivElement>(null);
-  const { width, lanes } = useResponsiveGrid(
+  const { width, lanes } = useGalleryResponsiveLanes(
     parentRef,
     defaultDimensions.width,
     deferredItems.length,
@@ -154,9 +154,9 @@ export function PureThumbnailGallery({
     rowVirtualizer.measure();
   }, [deferredItems, width, lanes, rowVirtualizer]);
 
-  const maxLanes = useGridMaxLanes();
-  const expandImages = useGridExpandImages();
-  const showScrollBadge = useGridShowScrollBadge();
+  const maxLanes = useGalleryMaxLanes();
+  const expandImages = useGalleryExpandImages();
+  const showScrollBadge = useGalleryShowScrollBadge();
 
   const { setLinkRef, handleKeyDown, handleItemFocus, getTabIndex } =
     useMasonryNavigation({

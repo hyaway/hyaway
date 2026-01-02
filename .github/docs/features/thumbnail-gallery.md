@@ -56,12 +56,12 @@ Loading placeholder using CSS columns masonry.
 
 ## Hooks
 
-### `useResponsiveGrid`
+### `useGalleryResponsiveLanes`
 
-Calculates grid dimensions based on container width.
+Calculates grid dimensions based on container width using gallery settings.
 
 ```ts
-const { width, lanes } = useResponsiveGrid(
+const { width, lanes } = useGalleryResponsiveLanes(
   containerRef,
   defaultWidth,
   itemCount,
@@ -75,8 +75,8 @@ const { width, lanes } = useResponsiveGrid(
 
 **Respects settings:**
 
-- `gridMaxLanes` - Maximum columns allowed
-- `gridExpandImages` - Whether to expand images beyond default width
+- `galleryMaxLanes` - Maximum columns allowed
+- `galleryExpandImages` - Whether to expand images beyond default width
 
 ### `useMasonryNavigation`
 
@@ -110,7 +110,7 @@ fileIds (prop)
 useInfiniteGetFilesMetadata() → paginated FileMetadata[]
     │
     ▼
-useResponsiveGrid() → { width, lanes }
+useGalleryResponsiveLanes() → { width, lanes }
     │
     ▼
 useWindowVirtualizer() → virtual items
@@ -126,11 +126,12 @@ ThumbnailGalleryItem × N (only visible items)
 
 Stored in `ux-settings-store.ts`:
 
-| Setting            | Type                         | Description                                      |
-| ------------------ | ---------------------------- | ------------------------------------------------ |
-| `gridMaxLanes`     | number                       | Maximum columns (1-8)                            |
-| `gridExpandImages` | boolean                      | Expand images when fewer lanes than space allows |
-| `imageBackground`  | `"checkerboard"` \| `"none"` | Background for transparent images                |
+| Setting                  | Type                         | Description                                      |
+| ------------------------ | ---------------------------- | ------------------------------------------------ |
+| `galleryMaxLanes`        | number                       | Maximum columns (1-8)                            |
+| `galleryExpandImages`    | boolean                      | Expand images when fewer lanes than space allows |
+| `galleryShowScrollBadge` | boolean                      | Show scroll position badge                       |
+| `imageBackground`        | `"checkerboard"` \| `"none"` | Background for transparent images                |
 
 See [Settings Architecture](../settings-architecture.md) for the settings UI pattern.
 
@@ -150,6 +151,6 @@ See [Settings Architecture](../settings-architecture.md) for the settings UI pat
 | `thumbnail-gallery-item.tsx`                     | Individual item with hover/context menu |
 | `thumbnail-gallery-skeleton.tsx`                 | Loading state                           |
 | `thumbnail-gallery-display-settings-popover.tsx` | Inline settings                         |
-| `use-responsive-grid.ts`                         | Grid dimension calculation              |
+| `use-responsive-lanes.ts`                        | Lane dimension calculation              |
 | `use-masonry-navigation.ts`                      | Keyboard navigation                     |
 | `use-scroll-restoration.ts`                      | Position persistence                    |

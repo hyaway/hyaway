@@ -1,5 +1,5 @@
 ---
-applyTo: "**/components/thumbnail-gallery/**,**/hooks/use-responsive-grid.ts,**/hooks/use-masonry-navigation.ts,**/hooks/use-scroll-restoration.ts"
+applyTo: "**/components/thumbnail-gallery/**,**/hooks/use-responsive-lanes.ts,**/hooks/use-masonry-navigation.ts,**/hooks/use-scroll-restoration.ts"
 ---
 
 # Thumbnail Gallery Development
