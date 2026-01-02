@@ -120,3 +120,7 @@ export function useSidebarSide(side: SidebarSide) {
     toggleMobile: () => actions.toggleMobile(side),
   };
 }
+
+export function useSidebarStoreActions() {
+  return useSidebarStore((state) => state.actions);
+}

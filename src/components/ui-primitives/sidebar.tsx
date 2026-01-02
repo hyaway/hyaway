@@ -27,7 +27,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui-primitives/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSidebarSide, useSidebarStore } from "@/lib/sidebar-store";
+import {
+  useSidebarSide,
+  useSidebarStore,
+  useSidebarStoreActions,
+} from "@/lib/sidebar-store";
 
 // ============================================================================
 // Context
@@ -345,7 +349,7 @@ function SidebarTrigger({
   side?: SidebarSide;
 }) {
   const context = useSidebarOptional();
-  const storeActions = useSidebarStore.use.actions();
+  const storeActions = useSidebarStoreActions();
   const isMobile = useIsMobile();
 
   const toggleSidebar = React.useCallback(() => {
