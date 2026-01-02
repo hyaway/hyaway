@@ -29,6 +29,9 @@
 /* Short viewport (limited height) - combine with other variants like short:sm: or short:@xl: */
 @custom-variant short (@media (max-height: 500px));
 
+/* Pointer device with hover capability (mouse/trackpad, not touch) */
+@custom-variant pointer-hover (@media (hover: hover) and (pointer: fine));
+
 :root {
   --background: oklch(0.9383 0.0042 236.4993);
   --foreground: oklch(0.3211 0 0);

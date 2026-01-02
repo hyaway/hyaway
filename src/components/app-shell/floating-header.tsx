@@ -22,8 +22,8 @@ export function FloatingHeader({ children, className }: FloatingHeaderProps) {
     <header
       className={cn(
         "bg-background/95 supports-backdrop-filter:bg-background/75 short:h-(--header-height-short) sticky top-0 z-40 flex h-(--header-height) shrink-0 flex-col backdrop-blur-sm transition-all duration-200 ease-out",
-        // Extended area below header for hover detection - always interactive
-        "after:pointer-events-auto after:absolute after:inset-x-0 after:top-full after:content-['']",
+        // Extended area below header for hover detection - only for pointer devices
+        "pointer-hover:after:pointer-events-auto after:absolute after:inset-x-0 after:top-full after:content-['']",
         visibilityClasses,
         className,
       )}
