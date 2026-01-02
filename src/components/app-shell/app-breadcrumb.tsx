@@ -56,6 +56,7 @@ export function AppBreadcrumb() {
                 aria-label={`Go to ${parentCrumb.title}`}
                 className="md:hidden"
                 render={<Link to={parentCrumb.path} />}
+                nativeButton={false}
               >
                 <IconArrowLeft className="size-5" />
               </Button>
