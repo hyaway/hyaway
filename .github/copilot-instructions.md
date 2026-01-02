@@ -86,26 +86,11 @@ import { FeatureCard } from "./-components/feature-card";
 
 ### State Management
 
-Hyaway uses Zustand stores with auto-generated selectors. See [state-management.md](docs/state-management.md) for details.
-
-| Store         | Shorthand              | Location                                         |
-| ------------- | ---------------------- | ------------------------------------------------ |
-| Theme         | `useTheme`             | `lib/theme-store.ts`                             |
-| UX Settings   | `useSettings`          | `lib/settings-store.ts`                          |
-| History       | `useWatchHistory`      | `lib/watch-history-store.ts`                     |
-| Sidebar       | `useSidebarSide(side)` | `lib/sidebar-store.ts`                           |
-| Hydrus Config | -                      | `integrations/hydrus-api/hydrus-config-store.ts` |
-
-```tsx
-// Use shorthand hooks for cleaner syntax
-import { useTheme } from "@/lib/theme-store";
-import { useSettings } from "@/lib/settings-store";
-import { useSidebarSide } from "@/lib/sidebar-store";
-
-const activeTheme = useTheme.activeTheme();
-const { setGalleryMaxLanes } = useSettings.actions();
-const { desktopOpen, toggleDesktop } = useSidebarSide("left");
-```
+| Store         | Purpose        | Location                     |
+| ------------- | -------------- | ---------------------------- |
+| UX Settings   | UI preferences | `lib/ux-settings-store.ts`   |
+| Hydrus Config | API connection | `lib/hydrus-config-store.ts` |
+| History       | Watch history  | `lib/history-store.ts`       |
 
 ### Tailwind Custom Variants
 

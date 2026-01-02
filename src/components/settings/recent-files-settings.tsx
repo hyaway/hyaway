@@ -2,8 +2,10 @@ import { SettingsGroup, SliderField } from "./setting-fields";
 import {
   MAX_RECENT_FILES_DAYS,
   MAX_RECENT_FILES_LIMIT,
-  useSettings,
-} from "@/lib/settings-store";
+  useRecentFilesDays,
+  useRecentFilesLimit,
+  useSettingsActions,
+} from "@/lib/ux-settings-store";
 
 export const RECENT_FILES_SETTINGS_TITLE = "Recent files";
 
@@ -14,9 +16,9 @@ export interface RecentFilesSettingsProps {
 export function RecentFilesSettings({
   idPrefix = "",
 }: RecentFilesSettingsProps) {
-  const recentFilesLimit = useSettings.recentFilesLimit();
-  const recentFilesDays = useSettings.recentFilesDays();
-  const { setRecentFilesLimit, setRecentFilesDays } = useSettings.actions();
+  const recentFilesLimit = useRecentFilesLimit();
+  const recentFilesDays = useRecentFilesDays();
+  const { setRecentFilesLimit, setRecentFilesDays } = useSettingsActions();
 
   return (
     <SettingsGroup>

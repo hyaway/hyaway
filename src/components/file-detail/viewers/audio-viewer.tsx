@@ -7,7 +7,7 @@ import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
 import { viewerFixedHeight } from "./style-constants";
 import type { AudioMimeType } from "@vidstack/react";
-import { useTheme } from "@/lib/theme-store";
+import { useActiveTheme } from "@/lib/theme-store";
 import { cn } from "@/lib/utils";
 
 interface AudioViewerProps {
@@ -25,7 +25,7 @@ export function AudioViewer({
   onLoad,
   onError,
 }: AudioViewerProps) {
-  const activeTheme = useTheme.activeTheme();
+  const activeTheme = useActiveTheme();
 
   return (
     <div className={cn("flex items-center justify-center", viewerFixedHeight)}>

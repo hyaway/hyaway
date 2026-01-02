@@ -1,10 +1,14 @@
 import { SettingsGroup, SwitchField } from "./setting-fields";
-import type { ImageBackground } from "@/lib/settings-store";
+import type { ImageBackground } from "@/lib/ux-settings-store";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
-import { useSettings } from "@/lib/settings-store";
+import {
+  useFileViewerStartExpanded,
+  useImageBackground,
+  useSettingsActions,
+} from "@/lib/ux-settings-store";
 import { Label } from "@/components/ui-primitives/label";
 
 export const FILE_VIEWER_SETTINGS_TITLE = "Media viewer";
@@ -14,10 +18,10 @@ export interface FileViewerSettingsProps {
 }
 
 export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
-  const fileViewerStartExpanded = useSettings.fileViewerStartExpanded();
-  const imageBackground = useSettings.imageBackground();
+  const fileViewerStartExpanded = useFileViewerStartExpanded();
+  const imageBackground = useImageBackground();
   const { setFileViewerStartExpanded, setImageBackground } =
-    useSettings.actions();
+    useSettingsActions();
 
   return (
     <SettingsGroup>

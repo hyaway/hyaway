@@ -136,19 +136,19 @@ const useWatchHistoryStore = create<WatchHistoryState>()(
 setupCrossTabSync(useWatchHistoryStore);
 
 // Selector hooks for ergonomic usage
-export const useHistoryEntries = () =>
+export const useWatchHistoryEntries = () =>
   useWatchHistoryStore((state) => state.entries);
 
-export const useHistoryFileIds = () => {
+export const useWatchHistoryFileIds = () => {
   const entries = useWatchHistoryStore((state) => state.entries);
   return useMemo(() => entries.map((e) => e.fileId), [entries]);
 };
 
-export const useHistoryEnabled = () =>
+export const useWatchHistoryEnabled = () =>
   useWatchHistoryStore((state) => state.enabled);
 
-export const useHistoryLimit = () =>
+export const useWatchHistoryLimit = () =>
   useWatchHistoryStore((state) => state.limit);
 
-export const useHistoryActions = () =>
+export const useWatchHistoryActions = () =>
   useWatchHistoryStore((state) => state.actions);

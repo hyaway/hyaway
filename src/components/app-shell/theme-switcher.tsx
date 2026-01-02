@@ -11,7 +11,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui-primitives/sidebar";
-import { getWindowSystemTheme, useTheme } from "@/lib/theme-store";
+import {
+  getWindowSystemTheme,
+  useThemeActions,
+  useThemePreference,
+} from "@/lib/theme-store";
 import { cn } from "@/lib/utils";
 
 function getNextTheme(currentPreference: Theme): Theme {
@@ -29,8 +33,8 @@ function getNextTheme(currentPreference: Theme): Theme {
 }
 
 export function ThemeSwitcher(props: ComponentProps<typeof Button>) {
-  const themePreference = useTheme.themePreference();
-  const { setThemePreference } = useTheme.actions();
+  const themePreference = useThemePreference();
+  const { setThemePreference } = useThemeActions();
   return (
     <Button
       variant={"ghost"}
@@ -48,8 +52,8 @@ export function ThemeSwitcher(props: ComponentProps<typeof Button>) {
 }
 
 export function SidebarThemeSwitcher() {
-  const themePreference = useTheme.themePreference();
-  const { setThemePreference } = useTheme.actions();
+  const themePreference = useThemePreference();
+  const { setThemePreference } = useThemeActions();
 
   return (
     <SidebarMenuItem>

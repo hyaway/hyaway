@@ -17,7 +17,10 @@ import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { LOADING_ACTIONS, useFileActions } from "@/hooks/use-file-actions";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
-import { useWatchHistory } from "@/lib/watch-history-store";
+import {
+  useWatchHistoryActions,
+  useWatchHistoryEnabled,
+} from "@/lib/watch-history-store";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
 
 export interface FileDetailProps {
@@ -94,8 +97,8 @@ function FileDetailContent({
   prependActions?: Array<FloatingFooterAction>;
   trackHistory: boolean;
 }) {
-  const { addViewedFile } = useWatchHistory.actions();
-  const historyEnabled = useWatchHistory.enabled();
+  const { addViewedFile } = useWatchHistoryActions();
+  const historyEnabled = useWatchHistoryEnabled();
 
   // Track file view when component mounts with valid data
   // Respects both the page-level trackHistory prop and global enabled setting

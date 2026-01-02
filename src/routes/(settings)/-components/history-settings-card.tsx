@@ -1,7 +1,7 @@
 import { IconTrashX } from "@tabler/icons-react";
 import {
-  WATCH_HISTORY_SETTINGS_TITLE,
   HistorySettings,
+  WATCH_HISTORY_SETTINGS_TITLE,
 } from "@/components/settings/history-settings";
 import {
   Card,
@@ -10,12 +10,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui-primitives/card";
-import { useWatchHistory } from "@/lib/watch-history-store";
+import {
+  useWatchHistoryActions,
+  useWatchHistoryEntries,
+} from "@/lib/watch-history-store";
 import { Button } from "@/components/ui-primitives/button";
 
 export function HistorySettingsCard() {
-  const entries = useWatchHistory.entries();
-  const { clearHistory } = useWatchHistory.actions();
+  const entries = useWatchHistoryEntries();
+  const { clearHistory } = useWatchHistoryActions();
 
   return (
     <Card>

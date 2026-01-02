@@ -11,7 +11,7 @@ export const MAX_RANDOM_INBOX_LIMIT = 1000;
 export type TagsSortMode = "count" | "namespace";
 export type ImageBackground = "solid" | "checkerboard";
 
-type UxSettingsState = {
+type SettingsState = {
   tagsSortMode: TagsSortMode;
   galleryMaxLanes: number;
   galleryExpandImages: boolean;
@@ -38,7 +38,7 @@ type UxSettingsState = {
   };
 };
 
-const useSettingsStore = create<UxSettingsState>()(
+const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       tagsSortMode: "count",
@@ -77,7 +77,7 @@ const useSettingsStore = create<UxSettingsState>()(
       },
     }),
     {
-      name: "settings",
+      name: "ux-settings",
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
     },

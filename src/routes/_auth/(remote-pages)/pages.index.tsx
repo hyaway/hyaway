@@ -24,7 +24,10 @@ import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ScrollPositionBadge } from "@/components/scroll-position-badge";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
-import { useSettings } from "@/lib/settings-store";
+import {
+  usePagesMaxColumns,
+  usePagesShowScrollBadge,
+} from "@/lib/ux-settings-store";
 
 export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
   component: PagesIndex,
@@ -42,7 +45,7 @@ function PagesIndex() {
     error,
   } = useGetMediaPagesQuery();
   const queryClient = useQueryClient();
-  const pagesMaxColumns = useSettings.pagesMaxColumns();
+  const pagesMaxColumns = usePagesMaxColumns();
   const containerRef = useRef<HTMLDivElement>(null);
   const lanes = usePageGridLanes(
     containerRef,
@@ -99,7 +102,7 @@ function PagesGrid({
   containerRef: React.RefObject<HTMLDivElement | null>;
   lanes: number;
 }) {
-  const showScrollBadge = useSettings.pagesShowScrollBadge();
+  const showScrollBadge = usePagesShowScrollBadge();
 
   const rowVirtualizer = useWindowVirtualizer({
     count: pages.length,

@@ -10,7 +10,8 @@ import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-galle
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import { Button } from "@/components/ui-primitives/button";
 import {
-  useWatchHistory,
+  useWatchHistoryActions,
+  useWatchHistoryEnabled,
   useWatchHistoryFileIds,
 } from "@/lib/watch-history-store";
 
@@ -20,8 +21,8 @@ export const Route = createFileRoute("/_auth/(galleries)/history/")({
 
 function RouteComponent() {
   const fileIds = useWatchHistoryFileIds();
-  const enabled = useWatchHistory.enabled();
-  const { clearHistory, setEnabled } = useWatchHistory.actions();
+  const enabled = useWatchHistoryEnabled();
+  const { clearHistory, setEnabled } = useWatchHistoryActions();
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = useCallback(

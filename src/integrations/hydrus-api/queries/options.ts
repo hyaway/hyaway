@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getClientOptions } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
-import { useTheme } from "@/lib/theme-store";
+import { useActiveTheme } from "@/lib/theme-store";
 import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
 
 export const useGetClientOptionsQuery = () => {
@@ -59,7 +59,7 @@ export const useThumbnailDimensions = () => {
  */
 export const useNamespaceColors = (): Record<string, string> => {
   const { data } = useGetClientOptionsQuery();
-  const theme = useTheme.activeTheme();
+  const theme = useActiveTheme();
 
   return useMemo(() => {
     const namespaceColours = data?.old_options?.namespace_colours;
