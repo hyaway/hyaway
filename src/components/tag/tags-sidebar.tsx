@@ -9,7 +9,6 @@ import {
   SidebarGroup,
   SidebarHeader,
   SidebarInput,
-  useSidebarOptional,
 } from "@/components/ui-primitives/sidebar";
 import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 import { Heading } from "@/components/ui-primitives/heading";
@@ -130,19 +129,6 @@ export const TagsSidebar = memo(function TagsSidebar({
     gap: 6,
     getScrollElement: () => parentRef.current,
   });
-
-  // Get sidebar state for remeasuring virtualizer when sidebar opens/closes
-  // Use optional context (for when inside Sidebar) with store fallback (for portaled content)
-  const context = useSidebarOptional();
-
-  // Force virtualizer to re-measure after portal mounts and container has dimensions
-  // Use rAF to wait for browser to complete layout calculation
-  React.useEffect(() => {
-    const rafId = requestAnimationFrame(() => {
-      rowVirtualizer.measure();
-    });
-    return () => cancelAnimationFrame(rafId);
-  }, [rowVirtualizer, context?.open, context?.openMobile, context?.isMobile]);
 
   // Cache virtual items
   const virtualItems = rowVirtualizer.getVirtualItems();
