@@ -21,7 +21,7 @@ export function RightSidebar({
   return (
     <Sidebar
       side="right"
-      collapsible="offExamples"
+      collapsible="offcanvas"
       className={cn(className)}
       {...props}
     >
