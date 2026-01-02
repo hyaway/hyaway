@@ -203,7 +203,7 @@ interface ThumbnailGalleryItemContentProps {
   item: FileMetadata;
 }
 
-const ThumbnailGalleryItemContent = memo(function ThumbnailGalleryItemContent({
+function ThumbnailGalleryItemContent({
   item,
 }: ThumbnailGalleryItemContentProps) {
   const fileSize = formatBytes(item.size);
@@ -265,7 +265,7 @@ const ThumbnailGalleryItemContent = memo(function ThumbnailGalleryItemContent({
       </div>
     </div>
   );
-});
+}
 
 // --- Context Menu Actions ---
 
@@ -282,43 +282,41 @@ interface ThumbnailGalleryItemContextMenuProps {
   >;
 }
 
-const ThumbnailGalleryItemContextMenu = memo(
-  function ThumbnailGalleryItemContextMenu({
-    item,
-  }: ThumbnailGalleryItemContextMenuProps) {
-    const actionGroups = useFileActions(item, {
-      includeOpen: true,
-      includeExternal: true,
-    });
+function ThumbnailGalleryItemContextMenu({
+  item,
+}: ThumbnailGalleryItemContextMenuProps) {
+  const actionGroups = useFileActions(item, {
+    includeOpen: true,
+    includeExternal: true,
+  });
 
-    return (
-      <ContextMenuContent
-        className={
-          "bg-popover/95 supports-backdrop-filter:bg-popover/75 backdrop-blur-sm"
-        }
-      >
-        {actionGroups.map((group, groupIndex) => (
-          <div key={group.id}>
-            {groupIndex > 0 && <ContextMenuSeparator />}
-            {group.actions.map((action) => (
-              <ContextMenuItem
-                key={action.id}
-                onClick={action.onClick}
-                variant={action.variant}
-              >
-                <action.icon />
-                {action.label}
-                {action.external && (
-                  <IconExternalLink className="ml-auto opacity-50" />
-                )}
-              </ContextMenuItem>
-            ))}
-          </div>
-        ))}
-      </ContextMenuContent>
-    );
-  },
-);
+  return (
+    <ContextMenuContent
+      className={
+        "bg-popover/95 supports-backdrop-filter:bg-popover/75 backdrop-blur-sm"
+      }
+    >
+      {actionGroups.map((group, groupIndex) => (
+        <div key={group.id}>
+          {groupIndex > 0 && <ContextMenuSeparator />}
+          {group.actions.map((action) => (
+            <ContextMenuItem
+              key={action.id}
+              onClick={action.onClick}
+              variant={action.variant}
+            >
+              <action.icon />
+              {action.label}
+              {action.external && (
+                <IconExternalLink className="ml-auto opacity-50" />
+              )}
+            </ContextMenuItem>
+          ))}
+        </div>
+      ))}
+    </ContextMenuContent>
+  );
+}
 
 // --- Thumbnail Image ---
 
