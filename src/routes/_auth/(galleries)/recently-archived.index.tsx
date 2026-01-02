@@ -42,7 +42,7 @@ function RouteComponent() {
     />
   );
 
-  if (!isLoading) {
+  if (isLoading) {
     return (
       <>
         <PageLoading title="Recently archived" />
