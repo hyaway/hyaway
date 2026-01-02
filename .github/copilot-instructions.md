@@ -7,6 +7,7 @@ Hyaway is a React + TypeScript frontend application for browsing Hydrus Network 
 - **React 19** with TypeScript
 - **TanStack Router** for file-based routing
 - **TanStack Query** for data fetching
+- **Zustand** for client-side state management
 - **Tailwind CSS v4** for styling
 - **Base UI** primitives via shadcn/ui
 - **Vite** as the build tool
