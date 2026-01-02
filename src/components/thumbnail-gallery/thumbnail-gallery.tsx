@@ -15,10 +15,8 @@ import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/option
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGalleryResponsiveLanes } from "@/hooks/use-responsive-lanes";
-import { useSidebarStore } from "@/lib/sidebar-store";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { useSettings } from "@/lib/settings-store";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface ThumbnailGalleryProps {
   fileIds: Array<number>;
