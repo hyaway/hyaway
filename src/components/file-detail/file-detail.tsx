@@ -121,7 +121,7 @@ function FileDetailContent({
 
   return (
     <>
-      <div className="flex min-w-0 flex-1 flex-col gap-1 pb-12 sm:gap-2 sm:pb-16">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 pb-12 sm:pb-16">
         <FileViewer data={data} />
         <FilePageHeader fileId={fileId} />
         <Separator className={"mt-4"} />
