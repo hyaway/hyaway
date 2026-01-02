@@ -41,7 +41,7 @@ export function FooterPortalSlot({ className }: { className?: string }) {
     <div
       ref={context.setContainer}
       data-slot="footer-portal-slot"
-      className={className}
+      className="flex h-full items-center"
     />
   );
 }

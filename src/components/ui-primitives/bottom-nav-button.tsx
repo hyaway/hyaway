@@ -46,9 +46,9 @@ export const BottomNavButton = forwardRef<
       size="xl"
       onClick={onClick}
       className={cn(
-        "h-auto flex-col items-center gap-0.5 border-none px-3 py-1",
-        "@xl:flex-row @xl:gap-1.5 @xl:px-4 @xl:py-2",
-        "short:gap-0 short:px-3 short:py-1",
+        "h-full flex-col items-center justify-center gap-0.5 border-none px-3",
+        "@xl:flex-row @xl:gap-1.5 @xl:px-4",
+        "short:gap-0 short:px-3",
         "short:@xl:flex-row short:@xl:gap-1.5 short:@xl:px-4",
         "transition-[gap,padding] duration-200",
         variant === "destructive" && "text-destructive hover:text-destructive",

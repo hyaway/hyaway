@@ -62,7 +62,12 @@ export function PageFloatingFooter({
 
   return (
     <FooterPortal>
-      <div className={cn("justify-center gap-1", className)}>
+      <div
+        className={cn(
+          "flex h-full items-center justify-center gap-1",
+          className,
+        )}
+      >
         {/* Left content (e.g., refetch button) */}
         {leftContent}
         {/* Visible actions */}

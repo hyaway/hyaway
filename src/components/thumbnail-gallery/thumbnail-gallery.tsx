@@ -205,10 +205,10 @@ export function PureThumbnailGallery({
               );
             })}
         </ul>
-        <div className="sticky bottom-2 z-50 mt-4 flex justify-end">
+        <div className="pointer-events-none sticky bottom-2 z-50 mt-4 flex justify-end">
           <Badge
             className={cn(
-              "transition-opacity",
+              "pointer-events-auto transition-opacity",
               rowVirtualizer.isScrolling
                 ? "opacity-90 delay-0 duration-100"
                 : "opacity-50 delay-100 duration-500",
