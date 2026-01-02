@@ -12,7 +12,6 @@ const ReactCompilerConfig = {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    tailwindcss(),
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
@@ -24,6 +23,7 @@ export default defineConfig({
         plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
       },
     }),
+    tailwindcss(),
   ],
   resolve: {
     alias: {
