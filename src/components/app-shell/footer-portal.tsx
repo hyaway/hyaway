@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
+import { cn } from "@/lib/utils";
 
 type FooterPortalContextValue = {
   container: HTMLElement | null;
@@ -41,7 +42,7 @@ export function FooterPortalSlot({ className }: { className?: string }) {
     <div
       ref={context.setContainer}
       data-slot="footer-portal-slot"
-      className="flex h-full items-center"
+      className={cn("flex h-full items-center", className)}
     />
   );
 }
