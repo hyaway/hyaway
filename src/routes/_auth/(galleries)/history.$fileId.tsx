@@ -3,7 +3,7 @@ import { useCallback } from "react";
 
 import { FileDetail } from "@/components/file-detail/file-detail";
 import { useFileContextNavigation } from "@/hooks/use-file-context-navigation";
-import { useHistoryFileIds } from "@/lib/history-store";
+import { useWatchHistoryFileIds } from "@/lib/watch-history-store";
 
 export const Route = createFileRoute("/_auth/(galleries)/history/$fileId")({
   component: RouteComponent,
@@ -17,7 +17,7 @@ function RouteComponent() {
   const fileIdNum = Number(fileId);
 
   // Load the context (list of file IDs in history)
-  const fileIds = useHistoryFileIds();
+  const fileIds = useWatchHistoryFileIds();
 
   const buildParams = useCallback(
     (fid: number) => ({ fileId: String(fid) }),

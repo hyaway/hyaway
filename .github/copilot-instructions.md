@@ -89,7 +89,7 @@ import { FeatureCard } from "./-components/feature-card";
 | ------------- | -------------- | ---------------------------- |
 | UX Settings   | UI preferences | `lib/settings-store.ts`      |
 | Hydrus Config | API connection | `lib/hydrus-config-store.ts` |
-| History       | Watch history  | `lib/history-store.ts`       |
+| Watch History | Watch history  | `lib/watch-history-store.ts` |
 
 ### Tailwind Custom Variants
 

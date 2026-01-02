@@ -148,7 +148,7 @@ Stored in `settings-store.ts`:
 When `trackHistory={true}` and history is enabled globally:
 
 - File ID added to history on mount
-- Stored in `history-store.ts`
+- Stored in `watch-history-store.ts`
 - Displayed on `/history` page
 
 ## Related Files

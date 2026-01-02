@@ -4,17 +4,17 @@ import { useShallow } from "zustand/react/shallow";
 import { createSelectors } from "./create-selectors";
 import { setupCrossTabSync } from "./cross-tab-sync";
 
-export const MAX_HISTORY_LIMIT = 1000;
-export const DEFAULT_HISTORY_LIMIT = 100;
+export const MAX_WATCH_HISTORY_LIMIT = 1000;
+export const DEFAULT_WATCH_HISTORY_LIMIT = 100;
 
-interface HistoryEntry {
+interface WatchHistoryEntry {
   fileId: number;
   viewedAt: number; // timestamp
 }
 
-type HistoryState = {
+type WatchHistoryState = {
   /** Queue of viewed file IDs (most recent first) */
-  entries: Array<HistoryEntry>;
+  entries: Array<WatchHistoryEntry>;
   /** Whether the history feature is enabled */
   enabled: boolean;
   /** Maximum number of entries to keep */
@@ -36,14 +36,14 @@ type HistoryState = {
 };
 
 /**
- * Merge function for history entries.
+ * Merge function for watch history entries.
  * Combines entries from both states, keeping the most recent viewedAt per fileId.
  * Respects clearedAt timestamp - entries older than the most recent clear are ignored.
  */
-function mergeHistory(
-  persisted: Partial<Omit<HistoryState, "actions">>,
-  current: HistoryState,
-): HistoryState {
+function mergeWatchHistory(
+  persisted: Partial<Omit<WatchHistoryState, "actions">>,
+  current: WatchHistoryState,
+): WatchHistoryState {
   const persistedEntries = persisted.entries ?? [];
   const currentEntries = current.entries;
 
@@ -52,7 +52,7 @@ function mergeHistory(
 
   // Merge entries, filtering out cleared entries
   // and keeping the most recent viewedAt per fileId
-  const merged = new Map<number, HistoryEntry>();
+  const merged = new Map<number, WatchHistoryEntry>();
   for (const entry of [...currentEntries, ...persistedEntries]) {
     // Skip entries that were viewed before the last clear
     if (entry.viewedAt <= clearedAt) continue;
@@ -78,12 +78,12 @@ function mergeHistory(
   };
 }
 
-const useHistoryStoreBase = create<HistoryState>()(
+const useWatchHistoryStoreBase = create<WatchHistoryState>()(
   persist(
     (set, get) => ({
       entries: [],
       enabled: true,
-      limit: DEFAULT_HISTORY_LIMIT,
+      limit: DEFAULT_WATCH_HISTORY_LIMIT,
       clearedAt: 0,
       actions: {
         addViewedFile: (fileId: number) => {
@@ -125,8 +125,8 @@ const useHistoryStoreBase = create<HistoryState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
       merge: (persisted, current) =>
-        mergeHistory(
-          persisted as Partial<Omit<HistoryState, "actions">>,
+        mergeWatchHistory(
+          persisted as Partial<Omit<WatchHistoryState, "actions">>,
           current,
         ),
     },
@@ -134,40 +134,42 @@ const useHistoryStoreBase = create<HistoryState>()(
 );
 
 /**
- * History store with auto-generated selectors.
+ * Watch history store with auto-generated selectors.
  *
  * @example
  * ```tsx
  * // Use auto-generated selectors
- * const entries = useHistoryStore.use.entries();
- * const actions = useHistoryStore.use.actions();
+ * const entries = useWatchHistoryStore.use.entries();
+ * const actions = useWatchHistoryStore.use.actions();
  *
  * // Or use direct selector
- * const enabled = useHistoryStore((s) => s.enabled);
+ * const enabled = useWatchHistoryStore((s) => s.enabled);
  * ```
  */
-export const useHistoryStore = createSelectors(useHistoryStoreBase);
+export const useWatchHistoryStore = createSelectors(useWatchHistoryStoreBase);
 
 /**
- * Shorthand for `useHistoryStore.use`.
+ * Shorthand for `useWatchHistoryStore.use`.
  * @example
  * ```tsx
- * const entries = useHistory.entries();
- * const { addViewedFile } = useHistory.actions();
+ * const entries = useWatchHistory.entries();
+ * const { addViewedFile } = useWatchHistory.actions();
  * ```
  */
-export const useHistory = useHistoryStore.use;
+export const useWatchHistory = useWatchHistoryStore.use;
 
 // Cross-tab sync: rehydrate when other tabs update localStorage
-setupCrossTabSync(useHistoryStore);
+setupCrossTabSync(useWatchHistoryStore);
 
 // ============================================================================
 // Derived selectors (useShallow for array equality)
 // ============================================================================
 
 /**
- * Returns just the file IDs from history entries.
+ * Returns just the file IDs from watch history entries.
  * Uses useShallow to prevent re-renders when the array contents haven't changed.
  */
-export const useHistoryFileIds = () =>
-  useHistoryStore(useShallow((state) => state.entries.map((e) => e.fileId)));
+export const useWatchHistoryFileIds = () =>
+  useWatchHistoryStore(
+    useShallow((state) => state.entries.map((e) => e.fileId)),
+  );

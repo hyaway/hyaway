@@ -10,12 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui-primitives/card";
-import { useHistory } from "@/lib/history-store";
+import { useWatchHistory } from "@/lib/watch-history-store";
 import { Button } from "@/components/ui-primitives/button";
 
 export function HistorySettingsCard() {
-  const entries = useHistory.entries();
-  const { clearHistory } = useHistory.actions();
+  const entries = useWatchHistory.entries();
+  const { clearHistory } = useWatchHistory.actions();
 
   return (
     <Card>
