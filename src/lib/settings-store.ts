@@ -1,21 +1,12 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { createSelectors } from "./create-selectors";
 import { setupCrossTabSync } from "./cross-tab-sync";
-
-// ============================================================================
-// Constants
-// ============================================================================
 
 export const MAX_GALLERY_LANES = 30;
 export const MAX_PAGES_COLUMNS = 30;
 export const MAX_RECENT_FILES_LIMIT = 10000;
 export const MAX_RECENT_FILES_DAYS = 30;
 export const MAX_RANDOM_INBOX_LIMIT = 1000;
-
-// ============================================================================
-// Types
-// ============================================================================
 
 export type TagsSortMode = "count" | "namespace";
 export type ImageBackground = "solid" | "checkerboard";
@@ -47,7 +38,7 @@ type UxSettingsState = {
   };
 };
 
-const useSettingsStoreBase = create<UxSettingsState>()(
+const useSettingsStore = create<UxSettingsState>()(
   persist(
     (set) => ({
       tagsSortMode: "count",
@@ -62,21 +53,27 @@ const useSettingsStoreBase = create<UxSettingsState>()(
       fileViewerStartExpanded: false,
       imageBackground: "checkerboard",
       actions: {
-        setTagsSortMode: (tagsSortMode) => set({ tagsSortMode }),
-        setGalleryMaxLanes: (galleryMaxLanes) => set({ galleryMaxLanes }),
-        setGalleryExpandImages: (galleryExpandImages) =>
+        setTagsSortMode: (tagsSortMode: TagsSortMode) => set({ tagsSortMode }),
+        setGalleryMaxLanes: (galleryMaxLanes: number) =>
+          set({ galleryMaxLanes }),
+        setGalleryExpandImages: (galleryExpandImages: boolean) =>
           set({ galleryExpandImages }),
-        setGalleryShowScrollBadge: (galleryShowScrollBadge) =>
+        setGalleryShowScrollBadge: (galleryShowScrollBadge: boolean) =>
           set({ galleryShowScrollBadge }),
-        setPagesMaxColumns: (pagesMaxColumns) => set({ pagesMaxColumns }),
-        setPagesShowScrollBadge: (pagesShowScrollBadge) =>
+        setPagesMaxColumns: (pagesMaxColumns: number) =>
+          set({ pagesMaxColumns }),
+        setPagesShowScrollBadge: (pagesShowScrollBadge: boolean) =>
           set({ pagesShowScrollBadge }),
-        setRecentFilesLimit: (recentFilesLimit) => set({ recentFilesLimit }),
-        setRecentFilesDays: (recentFilesDays) => set({ recentFilesDays }),
-        setRandomInboxLimit: (randomInboxLimit) => set({ randomInboxLimit }),
-        setFileViewerStartExpanded: (fileViewerStartExpanded) =>
+        setRecentFilesLimit: (recentFilesLimit: number) =>
+          set({ recentFilesLimit }),
+        setRecentFilesDays: (recentFilesDays: number) =>
+          set({ recentFilesDays }),
+        setRandomInboxLimit: (randomInboxLimit: number) =>
+          set({ randomInboxLimit }),
+        setFileViewerStartExpanded: (fileViewerStartExpanded: boolean) =>
           set({ fileViewerStartExpanded }),
-        setImageBackground: (imageBackground) => set({ imageBackground }),
+        setImageBackground: (imageBackground: ImageBackground) =>
+          set({ imageBackground }),
       },
     }),
     {
@@ -87,30 +84,41 @@ const useSettingsStoreBase = create<UxSettingsState>()(
   ),
 );
 
-/**
- * UX Settings store with auto-generated selectors.
- *
- * @example
- * ```tsx
- * // Use auto-generated selectors
- * const tagsSortMode = useSettingsStore.use.tagsSortMode();
- * const { setGalleryMaxLanes } = useSettingsStore.use.actions();
- *
- * // Or use direct selector
- * const lanes = useSettingsStore((s) => s.galleryMaxLanes);
- * ```
- */
-export const useSettingsStore = createSelectors(useSettingsStoreBase);
+export const useTagsSortMode = () =>
+  useSettingsStore((state) => state.tagsSortMode);
 
-/**
- * Shorthand for `useSettingsStore.use`.
- * @example
- * ```tsx
- * const tagsSortMode = useSettings.tagsSortMode();
- * const { setGalleryMaxLanes } = useSettings.actions();
- * ```
- */
-export const useSettings = useSettingsStore.use;
+export const useGalleryMaxLanes = () =>
+  useSettingsStore((state) => state.galleryMaxLanes);
+
+export const useGalleryExpandImages = () =>
+  useSettingsStore((state) => state.galleryExpandImages);
+
+export const useGalleryShowScrollBadge = () =>
+  useSettingsStore((state) => state.galleryShowScrollBadge);
+
+export const usePagesMaxColumns = () =>
+  useSettingsStore((state) => state.pagesMaxColumns);
+
+export const usePagesShowScrollBadge = () =>
+  useSettingsStore((state) => state.pagesShowScrollBadge);
+
+export const useRecentFilesLimit = () =>
+  useSettingsStore((state) => state.recentFilesLimit);
+
+export const useRecentFilesDays = () =>
+  useSettingsStore((state) => state.recentFilesDays);
+
+export const useRandomInboxLimit = () =>
+  useSettingsStore((state) => state.randomInboxLimit);
+
+export const useFileViewerStartExpanded = () =>
+  useSettingsStore((state) => state.fileViewerStartExpanded);
+
+export const useImageBackground = () =>
+  useSettingsStore((state) => state.imageBackground);
+
+export const useUxSettingsActions = () =>
+  useSettingsStore((state) => state.actions);
 
 // Sync settings across tabs
 setupCrossTabSync(useSettingsStore);

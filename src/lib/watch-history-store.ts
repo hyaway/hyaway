@@ -1,7 +1,6 @@
+import { useMemo } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { useShallow } from "zustand/react/shallow";
-import { createSelectors } from "./create-selectors";
 import { setupCrossTabSync } from "./cross-tab-sync";
 
 export const MAX_WATCH_HISTORY_LIMIT = 1000;
@@ -78,7 +77,7 @@ function mergeWatchHistory(
   };
 }
 
-const useWatchHistoryStoreBase = create<WatchHistoryState>()(
+const useWatchHistoryStore = create<WatchHistoryState>()(
   persist(
     (set, get) => ({
       entries: [],
@@ -133,43 +132,23 @@ const useWatchHistoryStoreBase = create<WatchHistoryState>()(
   ),
 );
 
-/**
- * Watch history store with auto-generated selectors.
- *
- * @example
- * ```tsx
- * // Use auto-generated selectors
- * const entries = useWatchHistoryStore.use.entries();
- * const actions = useWatchHistoryStore.use.actions();
- *
- * // Or use direct selector
- * const enabled = useWatchHistoryStore((s) => s.enabled);
- * ```
- */
-export const useWatchHistoryStore = createSelectors(useWatchHistoryStoreBase);
-
-/**
- * Shorthand for `useWatchHistoryStore.use`.
- * @example
- * ```tsx
- * const entries = useWatchHistory.entries();
- * const { addViewedFile } = useWatchHistory.actions();
- * ```
- */
-export const useWatchHistory = useWatchHistoryStore.use;
-
 // Cross-tab sync: rehydrate when other tabs update localStorage
 setupCrossTabSync(useWatchHistoryStore);
 
-// ============================================================================
-// Derived selectors (useShallow for array equality)
-// ============================================================================
+// Selector hooks for ergonomic usage
+export const useHistoryEntries = () =>
+  useWatchHistoryStore((state) => state.entries);
 
-/**
- * Returns just the file IDs from watch history entries.
- * Uses useShallow to prevent re-renders when the array contents haven't changed.
- */
-export const useWatchHistoryFileIds = () =>
-  useWatchHistoryStore(
-    useShallow((state) => state.entries.map((e) => e.fileId)),
-  );
+export const useHistoryFileIds = () => {
+  const entries = useWatchHistoryStore((state) => state.entries);
+  return useMemo(() => entries.map((e) => e.fileId), [entries]);
+};
+
+export const useHistoryEnabled = () =>
+  useWatchHistoryStore((state) => state.enabled);
+
+export const useHistoryLimit = () =>
+  useWatchHistoryStore((state) => state.limit);
+
+export const useHistoryActions = () =>
+  useWatchHistoryStore((state) => state.actions);
