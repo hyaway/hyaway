@@ -9,7 +9,7 @@ import {
   useRandomInboxLimit,
   useRecentFilesDays,
   useRecentFilesLimit,
-} from "@/lib/ux-settings-store";
+} from "@/lib/settings-store";
 
 export const useRecentlyArchivedFilesQuery = () => {
   const recentFilesLimit = useRecentFilesLimit();

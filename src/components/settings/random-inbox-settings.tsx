@@ -3,7 +3,7 @@ import {
   MAX_RANDOM_INBOX_LIMIT,
   useRandomInboxLimit,
   useSettingsActions,
-} from "@/lib/ux-settings-store";
+} from "@/lib/settings-store";
 
 export const RANDOM_INBOX_SETTINGS_TITLE = "Random inbox";
 

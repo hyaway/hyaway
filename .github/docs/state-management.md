@@ -2,54 +2,53 @@
 
 > **Status**: Active pattern used throughout the codebase
 
-Hyaway uses **Zustand** for client-side state management with auto-generated selectors for ergonomic access.
+Hyaway uses **Zustand** for client-side state management with explicit selector hooks for ergonomic access.
 
 ## Store Files
 
 | Store         | File                                             | Purpose                |
 | ------------- | ------------------------------------------------ | ---------------------- |
 | Theme         | `lib/theme-store.ts`                             | Dark/light mode        |
-| UX Settings   | `lib/settings-store.ts`                          | UI preferences         |
+| UX Settings   | `lib/ux-settings-store.ts`                       | UI preferences         |
 | History       | `lib/watch-history-store.ts`                     | Watch history tracking |
 | Sidebar       | `lib/sidebar-store.ts`                           | Sidebar persistence    |
 | Hydrus Config | `integrations/hydrus-api/hydrus-config-store.ts` | API connection         |
 
 ## Usage Pattern
 
-Each store exports two ways to access state:
-
-### 1. Shorthand Hook (Recommended)
-
-Use the shorthand export for cleaner syntax:
+Each store exports individual selector hooks for each piece of state:
 
 ```tsx
-import { useTheme } from "@/lib/theme-store";
-import { useSettings } from "@/lib/settings-store";
-import { useWatchHistory } from "@/lib/watch-history-store";
+import { useActiveTheme, useThemeActions } from "@/lib/theme-store";
+import { useGalleryMaxLanes, useSettingsActions } from "@/lib/settings-store";
+import {
+  useWatchHistoryEntries,
+  useWatchHistoryActions,
+} from "@/lib/watch-history-store";
 
 function MyComponent() {
-  // Access individual state values
-  const activeTheme = useTheme.activeTheme();
-  const galleryMaxLanes = useSettings.galleryMaxLanes();
-  const entries = useWatchHistory.entries();
+  // Access individual state values via dedicated hooks
+  const activeTheme = useActiveTheme();
+  const galleryMaxLanes = useGalleryMaxLanes();
+  const entries = useWatchHistoryEntries();
 
-  // Access actions
-  const { setThemePreference } = useTheme.actions();
-  const { setGalleryMaxLanes } = useSettings.actions();
-  const { addViewedFile } = useWatchHistory.actions();
+  // Access actions via actions hook
+  const { setThemePreference } = useThemeActions();
+  const { setGalleryMaxLanes } = useSettingsActions();
+  const { addViewedFile } = useWatchHistoryActions();
 
   return <div>...</div>;
 }
 ```
 
-### 2. Full Store Access
+### Direct Store Access
 
-For advanced use cases (subscriptions, non-React contexts), use the full store:
+For advanced use cases (subscriptions, non-React contexts), use the store directly:
 
 ```tsx
 import { useThemeStore } from "@/lib/theme-store";
 
-// Direct selector (equivalent to shorthand)
+// Direct selector
 const activeTheme = useThemeStore((s) => s.activeTheme);
 
 // Snapshot getters (outside React)
@@ -57,15 +56,43 @@ import { getActiveThemeSnapshot } from "@/lib/theme-store";
 const theme = getActiveThemeSnapshot();
 ```
 
-## Shorthand Exports
+## Available Hooks
 
-Each store provides a shorthand export that aliases `.use`:
+### Theme Store (`lib/theme-store.ts`)
 
-| Store       | Full Store             | Shorthand         |
-| ----------- | ---------------------- | ----------------- |
-| Theme       | `useThemeStore`        | `useTheme`        |
-| UX Settings | `useSettingsStore`     | `useSettings`     |
-| History     | `useWatchHistoryStore` | `useWatchHistory` |
+| Hook                 | Returns                         |
+| -------------------- | ------------------------------- |
+| `useActiveTheme`     | `"dark" \| "light"`             |
+| `useThemePreference` | `"dark" \| "light" \| "system"` |
+| `useThemeHydrated`   | `boolean`                       |
+| `useThemeActions`    | `{ setThemePreference, ... }`   |
+
+### UX Settings Store (`lib/ux-settings-store.ts`)
+
+| Hook                         | Returns                       |
+| ---------------------------- | ----------------------------- |
+| `useTagsSortMode`            | `"count" \| "namespace"`      |
+| `useGalleryMaxLanes`         | `number`                      |
+| `useGalleryExpandImages`     | `boolean`                     |
+| `useGalleryShowScrollBadge`  | `boolean`                     |
+| `usePagesMaxColumns`         | `number`                      |
+| `usePagesShowScrollBadge`    | `boolean`                     |
+| `useRecentFilesLimit`        | `number`                      |
+| `useRecentFilesDays`         | `number`                      |
+| `useRandomInboxLimit`        | `number`                      |
+| `useFileViewerStartExpanded` | `boolean`                     |
+| `useImageBackground`         | `"solid" \| "checkerboard"`   |
+| `useSettingsActions`         | `{ setGalleryMaxLanes, ... }` |
+
+### Watch History Store (`lib/watch-history-store.ts`)
+
+| Hook                     | Returns                                |
+| ------------------------ | -------------------------------------- |
+| `useWatchHistoryEntries` | `Array<{ fileId, viewedAt }>`          |
+| `useWatchHistoryFileIds` | `Array<number>` (memoized)             |
+| `useWatchHistoryEnabled` | `boolean`                              |
+| `useWatchHistoryLimit`   | `number`                               |
+| `useWatchHistoryActions` | `{ addViewedFile, clearHistory, ... }` |
 
 > **Note:** The sidebar store uses `useSidebarSide(side)` for bound access—see [Sidebar Store](#sidebar-store) below.
 
@@ -101,12 +128,13 @@ For accessing specific state values or when side is dynamic:
 ```tsx
 import { useSidebarStore } from "@/lib/sidebar-store";
 
-// Access individual state
-const leftOpen = useSidebarStore.use.leftDesktopOpen();
-const rightOpen = useSidebarStore.use.rightDesktopOpen();
+// Access individual state with direct selector
+const leftOpen = useSidebarStore((state) => state.leftDesktopOpen);
+const rightOpen = useSidebarStore((state) => state.rightDesktopOpen);
 
-// Access actions (when side is dynamic or optional)
-const actions = useSidebarStore.use.actions();
+// Access actions
+import { useSidebarStoreActions } from "@/lib/sidebar-store";
+const actions = useSidebarStoreActions();
 actions.toggleDesktop("left");
 ```
 
@@ -137,7 +165,6 @@ All stores follow a consistent pattern:
 ```tsx
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { createSelectors } from "./create-selectors";
 import { setupCrossTabSync } from "./cross-tab-sync";
 
 type MyState = {
@@ -149,7 +176,7 @@ type MyState = {
   };
 };
 
-const useMyStoreBase = create<MyState>()(
+const useMyStore = create<MyState>()(
   persist(
     (set) => ({
       someValue: "default",
@@ -166,11 +193,10 @@ const useMyStoreBase = create<MyState>()(
   ),
 );
 
-// Full store with auto-generated selectors
-export const useMyStore = createSelectors(useMyStoreBase);
-
-// Shorthand for .use
-export const useMy = useMyStore.use;
+// Explicit selector hooks
+export const useSomeValue = () => useMyStore((state) => state.someValue);
+export const useAnotherValue = () => useMyStore((state) => state.anotherValue);
+export const useMyActions = () => useMyStore((state) => state.actions);
 
 // Cross-tab sync
 setupCrossTabSync(useMyStore);

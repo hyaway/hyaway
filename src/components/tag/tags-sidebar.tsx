@@ -7,8 +7,8 @@ import React, {
   useState,
 } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import type { TagsSortMode } from "@/lib/ux-settings-store";
-import { useTagsSortMode, useSettingsActions } from "@/lib/ux-settings-store";
+import type { TagsSortMode } from "@/lib/settings-store";
+import { useSettingsActions, useTagsSortMode } from "@/lib/settings-store";
 import {
   SidebarContent,
   SidebarFooter,

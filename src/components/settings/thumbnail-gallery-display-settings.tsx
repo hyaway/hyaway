@@ -5,7 +5,7 @@ import {
   useGalleryMaxLanes,
   useGalleryShowScrollBadge,
   useSettingsActions,
-} from "@/lib/ux-settings-store";
+} from "@/lib/settings-store";
 
 export const THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE =
   "Thumbnail gallery display";

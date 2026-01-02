@@ -20,7 +20,7 @@ import {
   useGalleryExpandImages,
   useGalleryMaxLanes,
   useGalleryShowScrollBadge,
-} from "@/lib/ux-settings-store";
+} from "@/lib/settings-store";
 
 export interface ThumbnailGalleryProps {
   fileIds: Array<number>;

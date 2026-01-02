@@ -86,11 +86,25 @@ import { FeatureCard } from "./-components/feature-card";
 
 ### State Management
 
-| Store         | Purpose        | Location                     |
-| ------------- | -------------- | ---------------------------- |
-| UX Settings   | UI preferences | `lib/ux-settings-store.ts`   |
-| Hydrus Config | API connection | `lib/hydrus-config-store.ts` |
-| History       | Watch history  | `lib/history-store.ts`       |
+| Store         | Purpose         | Location                                         |
+| ------------- | --------------- | ------------------------------------------------ |
+| Theme         | Dark/light mode | `lib/theme-store.ts`                             |
+| UX Settings   | UI preferences  | `lib/ux-settings-store.ts`                       |
+| Watch History | View tracking   | `lib/watch-history-store.ts`                     |
+| Sidebar       | Sidebar state   | `lib/sidebar-store.ts`                           |
+| Hydrus Config | API connection  | `integrations/hydrus-api/hydrus-config-store.ts` |
+
+Each store exports explicit selector hooks:
+
+```tsx
+import { useActiveTheme, useThemeActions } from "@/lib/theme-store";
+import { useGalleryMaxLanes, useSettingsActions } from "@/lib/settings-store";
+import { useSidebarSide } from "@/lib/sidebar-store";
+
+const activeTheme = useActiveTheme();
+const { setGalleryMaxLanes } = useSettingsActions();
+const { desktopOpen, toggleDesktop } = useSidebarSide("left");
+```
 
 ### Tailwind Custom Variants
 

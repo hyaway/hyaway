@@ -1,7 +1,9 @@
 import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
 import {
   MAX_WATCH_HISTORY_LIMIT,
-  useWatchHistory,
+  useWatchHistoryActions,
+  useWatchHistoryEnabled,
+  useWatchHistoryLimit,
 } from "@/lib/watch-history-store";
 
 export const WATCH_HISTORY_SETTINGS_TITLE = "Watch history";
@@ -11,9 +13,9 @@ export interface HistorySettingsProps {
 }
 
 export function HistorySettings({ idPrefix = "" }: HistorySettingsProps) {
-  const enabled = useWatchHistory.enabled();
-  const limit = useWatchHistory.limit();
-  const { setEnabled, setLimit } = useWatchHistory.actions();
+  const enabled = useWatchHistoryEnabled();
+  const limit = useWatchHistoryLimit();
+  const { setEnabled, setLimit } = useWatchHistoryActions();
 
   return (
     <SettingsGroup>

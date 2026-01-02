@@ -1,4 +1,4 @@
-import type { TagsSortMode } from "@/lib/ux-settings-store";
+import type { TagsSortMode } from "@/lib/settings-store";
 import {
   Card,
   CardContent,
@@ -11,7 +11,7 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { Label } from "@/components/ui-primitives/label";
-import { useTagsSortMode, useSettingsActions } from "@/lib/ux-settings-store";
+import { useSettingsActions, useTagsSortMode } from "@/lib/settings-store";
 
 export function TagsSortCard() {
   const tagsSortMode = useTagsSortMode();

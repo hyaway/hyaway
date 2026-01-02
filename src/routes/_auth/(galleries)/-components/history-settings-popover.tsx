@@ -1,7 +1,7 @@
 import { ThumbnailGalleryDisplaySettingsContent } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
 import {
-  WATCH_HISTORY_SETTINGS_TITLE,
   HistorySettings,
+  WATCH_HISTORY_SETTINGS_TITLE,
 } from "@/components/settings/history-settings";
 import {
   SettingsHeader,

@@ -27,11 +27,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui-primitives/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  useSidebarSide,
-  useSidebarStore,
-  useSidebarStoreActions,
-} from "@/lib/sidebar-store";
+import { useSidebarSide, useSidebarStoreActions } from "@/lib/sidebar-store";
 
 // ============================================================================
 // Context

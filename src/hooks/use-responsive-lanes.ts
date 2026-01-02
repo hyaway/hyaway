@@ -2,7 +2,7 @@ import { startTransition, useLayoutEffect, useState } from "react";
 import {
   useGalleryExpandImages,
   useGalleryMaxLanes,
-} from "@/lib/ux-settings-store";
+} from "@/lib/settings-store";
 
 interface ResponsiveLanesState {
   width: number;
