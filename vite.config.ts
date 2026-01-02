@@ -5,6 +5,10 @@ import tailwindcss from "@tailwindcss/vite";
 
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
+const ReactCompilerConfig = {
+  target: "19", // React 19
+};
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -15,7 +19,11 @@ export default defineConfig({
       quoteStyle: "double",
       semicolons: true,
     }),
-    viteReact(),
+    viteReact({
+      babel: {
+        plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
+      },
+    }),
   ],
   resolve: {
     alias: {
