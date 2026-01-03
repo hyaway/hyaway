@@ -81,11 +81,13 @@ export function SettingsPopover({
         <PopoverContent
           anchor={anchorEl}
           align="end"
-          className="w-80"
+          className="w-90 p-0"
           side="top"
           sideOffset={8}
         >
-          {children}
+          <ScrollArea viewportClassName="max-h-[calc(95svh-var(--footer-height)-1.5rem)]">
+            <div className="p-5">{children}</div>
+          </ScrollArea>
         </PopoverContent>
       </Popover>
     </>
