@@ -27,7 +27,7 @@ export function RandomInboxSettings({
     <SettingsGroup>
       <SliderField
         id={`${idPrefix}random-inbox-limit-slider`}
-        label="Limit returned files to"
+        label="Max files"
         value={randomInboxLimit}
         min={min}
         max={MAX_RANDOM_INBOX_LIMIT}

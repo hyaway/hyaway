@@ -28,7 +28,7 @@ export function HistorySettings({ idPrefix = "" }: HistorySettingsProps) {
       />
       <SliderField
         id={`${idPrefix}history-limit-slider`}
-        label="Maximum entries to keep"
+        label="Max entries"
         value={limit}
         min={10}
         max={MAX_WATCH_HISTORY_LIMIT}

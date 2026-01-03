@@ -24,7 +24,7 @@ export function RecentFilesSettings({
     <SettingsGroup>
       <SliderField
         id={`${idPrefix}recent-files-limit-slider`}
-        label="Limit returned files to"
+        label="Max files"
         value={recentFilesLimit}
         min={100}
         max={MAX_RECENT_FILES_LIMIT}
@@ -34,12 +34,13 @@ export function RecentFilesSettings({
       />
       <SliderField
         id={`${idPrefix}recent-files-days-slider`}
-        label="Days to consider recent"
+        label="Timeframe"
         value={recentFilesDays}
         min={1}
         max={MAX_RECENT_FILES_DAYS}
         step={1}
         onValueChange={setRecentFilesDays}
+        formatValue={(v) => (v === 1 ? "Last 24 hours" : `Last ${v} days`)}
         commitOnRelease
       />
     </SettingsGroup>

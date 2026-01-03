@@ -27,7 +27,7 @@ export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
     <SettingsGroup>
       <SwitchField
         id={`${idPrefix}file-viewer-start-expanded-switch`}
-        label="Start images expanded"
+        label="Open images expanded"
         checked={fileViewerStartExpanded}
         onCheckedChange={setFileViewerStartExpanded}
       />

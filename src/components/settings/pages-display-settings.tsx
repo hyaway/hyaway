@@ -23,7 +23,7 @@ export function PagesDisplaySettings({
     <SettingsGroup>
       <SliderField
         id={`${idPrefix}pages-columns-slider`}
-        label="Maximum columns"
+        label="Max columns"
         value={pagesMaxColumns}
         min={3}
         max={MAX_PAGES_COLUMNS}
@@ -32,7 +32,7 @@ export function PagesDisplaySettings({
       />
       <SwitchField
         id={`${idPrefix}show-scroll-badge-switch`}
-        label="Show scroll position badge"
+        label="Show scroll position"
         checked={pagesShowScrollBadge}
         onCheckedChange={setPagesShowScrollBadge}
       />
