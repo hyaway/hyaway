@@ -12,7 +12,7 @@ import {
   useWatchHistoryActions,
   useWatchHistoryEnabled,
   useWatchHistoryFileIds,
-} from "@/lib/watch-history-store";
+} from "@/lib/stores/watch-history-store";
 
 export const Route = createFileRoute("/_auth/(galleries)/history/")({
   component: RouteComponent,

@@ -7,7 +7,7 @@ import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
 import { viewerFixedHeight } from "./style-constants";
 import type { AudioMimeType } from "@vidstack/react";
-import { useActiveTheme } from "@/lib/theme-store";
+import { useActiveTheme } from "@/lib/stores/theme-store";
 import { cn } from "@/lib/utils";
 
 interface AudioViewerProps {

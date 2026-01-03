@@ -8,15 +8,15 @@ Hyaway uses **Zustand** for client-side state management with explicit selector 
 
 | Store         | File                                             | Purpose                |
 | ------------- | ------------------------------------------------ | ---------------------- |
-| Theme         | `lib/theme-store.ts`                             | Dark/light mode        |
+| Theme         | `lib/stores/theme-store.ts`                      | Dark/light mode        |
 | Gallery       | `lib/stores/gallery-settings-store.ts`           | Gallery preferences    |
 | File Viewer   | `lib/stores/file-viewer-settings-store.ts`       | Viewer preferences     |
 | Pages         | `lib/stores/pages-settings-store.ts`             | Pages layout           |
 | Recent Files  | `lib/stores/recent-files-settings-store.ts`      | Recent files settings  |
 | Random Inbox  | `lib/stores/random-inbox-settings-store.ts`      | Random inbox settings  |
 | Tags          | `lib/stores/tags-settings-store.ts`              | Tag sorting mode       |
-| History       | `lib/watch-history-store.ts`                     | Watch history tracking |
-| Sidebar       | `lib/sidebar-store.ts`                           | Sidebar persistence    |
+| History       | `lib/stores/watch-history-store.ts`              | Watch history tracking |
+| Sidebar       | `lib/stores/sidebar-store.ts`                    | Sidebar persistence    |
 | Hydrus Config | `integrations/hydrus-api/hydrus-config-store.ts` | API connection         |
 
 ## Usage Pattern
@@ -24,7 +24,7 @@ Hyaway uses **Zustand** for client-side state management with explicit selector 
 Each store exports individual selector hooks for each piece of state:
 
 ```tsx
-import { useActiveTheme, useThemeActions } from "@/lib/theme-store";
+import { useActiveTheme, useThemeActions } from "@/lib/stores/theme-store";
 import {
   useGalleryMaxLanes,
   useGallerySettingsActions,
@@ -32,7 +32,7 @@ import {
 import {
   useWatchHistoryEntries,
   useWatchHistoryActions,
-} from "@/lib/watch-history-store";
+} from "@/lib/stores/watch-history-store";
 
 function MyComponent() {
   // Access individual state values via dedicated hooks
@@ -54,19 +54,19 @@ function MyComponent() {
 For advanced use cases (subscriptions, non-React contexts), use the store directly:
 
 ```tsx
-import { useThemeStore } from "@/lib/theme-store";
+import { useThemeStore } from "@/lib/stores/theme-store";
 
 // Direct selector
 const activeTheme = useThemeStore((s) => s.activeTheme);
 
 // Snapshot getters (outside React)
-import { getActiveThemeSnapshot } from "@/lib/theme-store";
+import { getActiveThemeSnapshot } from "@/lib/stores/theme-store";
 const theme = getActiveThemeSnapshot();
 ```
 
 ## Available Hooks
 
-### Theme Store (`lib/theme-store.ts`)
+### Theme Store (`lib/stores/theme-store.ts`)
 
 | Hook                 | Returns                         |
 | -------------------- | ------------------------------- |

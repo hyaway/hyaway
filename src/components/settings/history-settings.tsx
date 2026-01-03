@@ -4,7 +4,7 @@ import {
   useWatchHistoryActions,
   useWatchHistoryEnabled,
   useWatchHistoryLimit,
-} from "@/lib/watch-history-store";
+} from "@/lib/stores/watch-history-store";
 
 export const WATCH_HISTORY_SETTINGS_TITLE = "Watch history";
 

@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { setupCrossTabSync } from "./cross-tab-sync";
+import { setupCrossTabSync } from "../cross-tab-sync";
 
 // Match existing Theme type used by ThemeProvider for consistency.
 export type ActiveTheme = "dark" | "light";

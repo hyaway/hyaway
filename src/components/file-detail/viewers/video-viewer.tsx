@@ -7,7 +7,7 @@ import { viewerMaxHeight } from "./style-constants";
 import type { VideoMimeType } from "@vidstack/react";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
-import { useActiveTheme } from "@/lib/theme-store";
+import { useActiveTheme } from "@/lib/stores/theme-store";
 import { cn } from "@/lib/utils";
 
 interface VideoViewerProps {
