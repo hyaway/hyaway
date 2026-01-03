@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 type FooterPortalContextValue = {
   container: HTMLElement | null;
   setContainer: (container: HTMLElement | null) => void;
+  hasContent: boolean;
+  setHasContent: (hasContent: boolean) => void;
 };
 
 const FooterPortalContext =
@@ -18,15 +20,24 @@ export function FooterPortalProvider({
   children: React.ReactNode;
 }) {
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
+  const [hasContent, setHasContent] = React.useState(false);
 
-  // useMemo needed to avoid new object every render; setContainer is already stable
-  const value = React.useMemo(() => ({ container, setContainer }), [container]);
+  const value = React.useMemo(
+    () => ({ container, setContainer, hasContent, setHasContent }),
+    [container, hasContent],
+  );
 
   return (
     <FooterPortalContext.Provider value={value}>
       {children}
     </FooterPortalContext.Provider>
   );
+}
+
+/** Hook to check if the footer portal has content */
+export function useFooterHasContent() {
+  const context = React.useContext(FooterPortalContext);
+  return context?.hasContent ?? false;
 }
 
 export function FooterPortalSlot({ className }: { className?: string }) {
@@ -53,6 +64,12 @@ export function FooterPortal({ children }: { children: React.ReactNode }) {
   if (!context) {
     throw new Error("FooterPortal must be used within a FooterPortalProvider");
   }
+
+  // Track when content is mounted/unmounted
+  React.useEffect(() => {
+    context.setHasContent(true);
+    return () => context.setHasContent(false);
+  }, [context]);
 
   if (!context.container) {
     return null;

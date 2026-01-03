@@ -1,5 +1,7 @@
-import { cn } from "@/lib/utils";
+import { useFooterHasContent } from "./footer-portal";
+
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
+import { cn } from "@/lib/utils";
 
 interface FloatingFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -10,7 +12,13 @@ export function FloatingFooter({
   className,
   ...props
 }: FloatingFooterProps) {
+  const hasContent = useFooterHasContent();
   const isVisible = useScrollDirection(50);
+
+  // Don't render at all if there's no content
+  if (!hasContent) {
+    return null;
+  }
 
   const visibilityClasses = isVisible
     ? "translate-y-0 opacity-100 short:before:h-[calc(var(--footer-height-short)*0.75)] before:h-[calc(var(--footer-height)*0.75)] @lg:before:h-[calc(var(--footer-height-sm)*0.75)]"
