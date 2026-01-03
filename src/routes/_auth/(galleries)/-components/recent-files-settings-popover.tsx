@@ -13,14 +13,14 @@ import { Separator } from "@/components/ui-primitives/separator";
 export function RecentFilesSettingsPopover() {
   return (
     <SettingsPopover label="Settings">
-      <ThumbnailGalleryDisplaySettingsContent />
-
-      <Separator className="my-4" />
-
       <SettingsHeader>
         <SettingsTitle>{RECENT_FILES_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
       <RecentFilesSettings idPrefix="popover-" />
+
+      <Separator className="my-4" />
+
+      <ThumbnailGalleryDisplaySettingsContent />
     </SettingsPopover>
   );
 }

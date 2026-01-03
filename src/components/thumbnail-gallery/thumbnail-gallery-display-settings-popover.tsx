@@ -16,7 +16,10 @@ export function ThumbnailGalleryDisplaySettingsContent() {
           {THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE}
         </SettingsTitle>
       </SettingsHeader>
-      <ThumbnailGalleryDisplaySettings idPrefix="popover-" />
+      <ThumbnailGalleryDisplaySettings
+        idPrefix="popover-"
+        defaultOpen={false}
+      />
     </>
   );
 }

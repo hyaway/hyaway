@@ -35,11 +35,14 @@ export interface ThumbnailGalleryDisplaySettingsProps {
   idPrefix?: string;
   /** When true, allows multiple sections to be open at the same time */
   openMultiple?: boolean;
+  /** When false, all accordion sections start collapsed */
+  defaultOpen?: boolean;
 }
 
 export function ThumbnailGalleryDisplaySettings({
   idPrefix = "",
   openMultiple = false,
+  defaultOpen = true,
 }: ThumbnailGalleryDisplaySettingsProps) {
   const galleryMinLanes = useGalleryMinLanes();
   const galleryMaxLanes = useGalleryMaxLanes();
@@ -65,7 +68,7 @@ export function ThumbnailGalleryDisplaySettings({
   return (
     <Accordion
       multiple={openMultiple}
-      defaultValue={["layout"]}
+      defaultValue={defaultOpen ? ["layout"] : []}
       className="rounded-none border-0"
     >
       <AccordionSection value="layout" title="Layout">

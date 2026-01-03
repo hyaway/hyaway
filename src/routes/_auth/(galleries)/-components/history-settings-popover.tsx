@@ -13,14 +13,14 @@ import { Separator } from "@/components/ui-primitives/separator";
 export function HistorySettingsPopover() {
   return (
     <SettingsPopover label="Settings">
-      <ThumbnailGalleryDisplaySettingsContent />
-
-      <Separator className="my-4" />
-
       <SettingsHeader>
         <SettingsTitle>{WATCH_HISTORY_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
       <HistorySettings idPrefix="popover-" />
+
+      <Separator className="my-4" />
+
+      <ThumbnailGalleryDisplaySettingsContent />
     </SettingsPopover>
   );
 }
