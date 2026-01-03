@@ -29,8 +29,7 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 
-export const THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE =
-  "Thumbnail gallery display";
+export const THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE = "Thumbnail gallery";
 
 export interface ThumbnailGalleryDisplaySettingsProps {
   idPrefix?: string;
@@ -72,7 +71,7 @@ export function ThumbnailGalleryDisplaySettings({
       <AccordionSection value="layout" title="Layout">
         <RangeSliderField
           id={`${idPrefix}lanes-range-slider`}
-          label="Lane count range"
+          label="Columns"
           minValue={galleryMinLanes}
           maxValue={galleryMaxLanes}
           min={MIN_GALLERY_LANES}
@@ -82,13 +81,13 @@ export function ThumbnailGalleryDisplaySettings({
         />
         <SwitchField
           id={`${idPrefix}expand-images-switch`}
-          label="Grow thumbnails horizontally"
+          label="Stretch thumbnails to fill columns"
           checked={galleryExpandImages}
           onCheckedChange={setGalleryExpandImages}
         />
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <Label>Base thumbnail width</Label>
+            <Label>Thumbnail size</Label>
             <ToggleGroup
               value={[galleryBaseWidthMode]}
               onValueChange={(values) => {
@@ -100,14 +99,14 @@ export function ThumbnailGalleryDisplaySettings({
               variant="outline"
               size="sm"
             >
-              <ToggleGroupItem value="service">Service</ToggleGroupItem>
+              <ToggleGroupItem value="service">Hydrus</ToggleGroupItem>
               <ToggleGroupItem value="custom">Custom</ToggleGroupItem>
             </ToggleGroup>
           </div>
           {galleryBaseWidthMode === "custom" && (
             <SliderField
               id={`${idPrefix}custom-base-width-slider`}
-              label="Custom width"
+              label="Width"
               value={galleryCustomBaseWidth}
               min={MIN_GALLERY_BASE_WIDTH}
               max={MAX_GALLERY_BASE_WIDTH}
@@ -122,7 +121,7 @@ export function ThumbnailGalleryDisplaySettings({
       <AccordionSection value="spacing" title="Spacing">
         <SliderField
           id={`${idPrefix}horizontal-gap-slider`}
-          label="Horizontal gap"
+          label="Between columns"
           value={galleryHorizontalGap}
           min={0}
           max={MAX_GALLERY_GAP}
@@ -132,7 +131,7 @@ export function ThumbnailGalleryDisplaySettings({
         />
         <SliderField
           id={`${idPrefix}vertical-gap-slider`}
-          label="Vertical gap"
+          label="Between rows"
           value={galleryVerticalGap}
           min={0}
           max={MAX_GALLERY_GAP}
@@ -145,7 +144,7 @@ export function ThumbnailGalleryDisplaySettings({
       <AccordionSection value="animation" title="Animation">
         <SliderField
           id={`${idPrefix}reflow-duration-slider`}
-          label="Reflow duration"
+          label="Layout transition"
           value={galleryReflowDuration}
           min={0}
           max={MAX_GALLERY_REFLOW_DURATION}
@@ -155,10 +154,10 @@ export function ThumbnailGalleryDisplaySettings({
         />
       </AccordionSection>
 
-      <AccordionSection value="badge" title="Badge">
+      <AccordionSection value="indicators" title="Indicators">
         <SwitchField
           id={`${idPrefix}show-scroll-badge-switch`}
-          label="Show scroll position badge"
+          label="Show scroll position"
           checked={galleryShowScrollBadge}
           onCheckedChange={setGalleryShowScrollBadge}
         />
