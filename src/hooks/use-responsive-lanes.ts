@@ -40,7 +40,7 @@ export function useResponsiveLanes(
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       const calculatedLanes = Math.max(
-        2,
+        1,
         Math.floor(entry.contentRect.width / (defaultWidth + 4)),
       );
       const newLanes = Math.min(calculatedLanes, maxLanes);

@@ -32,14 +32,14 @@ export function ThumbnailGalleryDisplaySettings({
         id={`${idPrefix}max-lanes-slider`}
         label="Maximum lanes"
         value={galleryMaxLanes}
-        min={3}
+        min={1}
         max={MAX_GALLERY_LANES}
         step={1}
         onValueChange={setGalleryMaxLanes}
       />
       <SwitchField
         id={`${idPrefix}expand-images-switch`}
-        label="Expand images to fill remaining space at the end"
+        label="Grow thumbnails horizontally"
         checked={galleryExpandImages}
         onCheckedChange={setGalleryExpandImages}
       />
