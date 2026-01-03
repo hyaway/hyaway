@@ -17,7 +17,8 @@ import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGalleryResponsiveLanes } from "@/hooks/use-responsive-lanes";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import {
-  GALLERY_GAP_SIZE,
+  GALLERY_HORIZONTAL_GAP_SIZE,
+  GALLERY_VERTICAL_GAP_SIZE,
   useGalleryExpandImages,
   useGalleryMaxLanes,
   useGalleryShowScrollBadge,
@@ -120,7 +121,7 @@ export function PureThumbnailGallery({
       return getItemHeight(item);
     },
     overscan: 4,
-    gap: 8,
+    gap: GALLERY_VERTICAL_GAP_SIZE,
     lanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
   });
@@ -169,7 +170,7 @@ export function PureThumbnailGallery({
     });
 
   const maxWidth = !expandImages
-    ? maxLanes * (width + GALLERY_GAP_SIZE)
+    ? maxLanes * (width + GALLERY_HORIZONTAL_GAP_SIZE)
     : undefined;
 
   const visibleIndices = useMemo(

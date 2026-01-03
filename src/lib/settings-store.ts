@@ -4,7 +4,8 @@ import { setupCrossTabSync } from "./cross-tab-sync";
 
 export const MAX_GALLERY_LANES = 30;
 export const MIN_GALLERY_LANES = 1;
-export const GALLERY_GAP_SIZE = 4;
+export const GALLERY_HORIZONTAL_GAP_SIZE = 8;
+export const GALLERY_VERTICAL_GAP_SIZE = 8;
 export const GALLERY_DEFAULT_THUMBNAIL_WIDTH = 200;
 export const MAX_PAGES_COLUMNS = 30;
 export const MAX_RECENT_FILES_LIMIT = 10000;
