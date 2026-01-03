@@ -55,15 +55,24 @@ function AccordionTrigger({
   );
 }
 
+interface AccordionContentProps extends AccordionPrimitive.Panel.Props {
+  /** Classes applied to the outer panel for padding overrides */
+  panelClassName?: string;
+}
+
 function AccordionContent({
   className,
+  panelClassName,
   children,
   ...props
-}: AccordionPrimitive.Panel.Props) {
+}: AccordionContentProps) {
   return (
     <AccordionPrimitive.Panel
       data-slot="accordion-content"
-      className="data-open:animate-accordion-down data-closed:animate-accordion-up overflow-hidden px-4 text-sm"
+      className={cn(
+        "data-open:animate-accordion-down data-closed:animate-accordion-up overflow-hidden px-4 text-sm",
+        panelClassName,
+      )}
       {...props}
     >
       <div

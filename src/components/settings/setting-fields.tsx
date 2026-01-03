@@ -180,9 +180,9 @@ export function AccordionSection({
   children,
 }: AccordionSectionProps) {
   return (
-    <AccordionItem value={value}>
-      <AccordionTrigger className="py-2">{title}</AccordionTrigger>
-      <AccordionContent>
+    <AccordionItem value={value} className={"data-open:bg-transparent"}>
+      <AccordionTrigger className="px-0 py-2">{title}</AccordionTrigger>
+      <AccordionContent panelClassName="px-0">
         <div className="flex flex-col gap-4">{children}</div>
       </AccordionContent>
     </AccordionItem>
