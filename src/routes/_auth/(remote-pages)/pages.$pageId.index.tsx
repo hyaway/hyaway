@@ -83,13 +83,13 @@ function RouteComponent() {
   if (isError) {
     return (
       <>
-        <div className="pb-16">
+        <>
           <PageHeading title={`Page: ${pageId.slice(0, 8)}...`} />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching pages."
           />
-        </div>
+        </>
         <PageFloatingFooter
           leftContent={refetchButton}
           actions={overflowActions}
@@ -101,7 +101,7 @@ function RouteComponent() {
 
   return (
     <>
-      <div className="pb-16">
+      <>
         <PageHeading
           title={`Page: ${data?.page_info.name} (${data?.page_info.media.num_files ?? 0} files)`}
         />
@@ -113,7 +113,7 @@ function RouteComponent() {
         ) : (
           <p>This page has no media.</p>
         )}
-      </div>
+      </>
       <PageFloatingFooter
         leftContent={refetchButton}
         actions={overflowActions}

@@ -53,13 +53,13 @@ function RouteComponent() {
   if (isError) {
     return (
       <>
-        <div className="pb-16">
+        <>
           <PageHeading title="Recently archived" />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching recently archived files."
           />
-        </div>
+        </>
         <PageFloatingFooter
           leftContent={refetchButton}
           rightContent={<RecentFilesSettingsPopover />}
@@ -70,7 +70,7 @@ function RouteComponent() {
 
   return (
     <>
-      <div className="pb-16">
+      <>
         <PageHeading
           title={`Recently archived (${data?.file_ids?.length ?? 0} files)`}
         />
@@ -79,7 +79,7 @@ function RouteComponent() {
         ) : (
           <EmptyState message="No recently archived files found." />
         )}
-      </div>
+      </>
       <PageFloatingFooter
         leftContent={refetchButton}
         rightContent={<RecentFilesSettingsPopover />}

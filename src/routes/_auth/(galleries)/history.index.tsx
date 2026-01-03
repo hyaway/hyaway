@@ -54,7 +54,7 @@ function RouteComponent() {
 
   return (
     <>
-      <div className="pb-16">
+      <>
         <PageHeading
           title={`Watch history (${fileIds.length} ${fileIds.length === 1 ? "file" : "files"})`}
         />
@@ -63,7 +63,7 @@ function RouteComponent() {
         ) : (
           emptyContent
         )}
-      </div>
+      </>
       <PageFloatingFooter
         leftContent={clearButton}
         rightContent={<HistorySettingsPopover />}

@@ -59,13 +59,13 @@ function RouteComponent() {
   if (isError) {
     return (
       <>
-        <div className="pb-16">
+        <>
           <PageHeading title="Random inbox" />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching random inbox files."
           />
-        </div>
+        </>
         <PageFloatingFooter
           leftContent={shuffleButton}
           rightContent={<RandomInboxSettingsPopover />}
@@ -76,7 +76,7 @@ function RouteComponent() {
 
   return (
     <>
-      <div className="pb-16">
+      <>
         <PageHeading
           title={`Random inbox (${data?.file_ids?.length ?? 0} files)`}
         />
@@ -85,7 +85,7 @@ function RouteComponent() {
         ) : (
           <EmptyState message="No inbox files found." />
         )}
-      </div>
+      </>
       <PageFloatingFooter
         leftContent={shuffleButton}
         rightContent={<RandomInboxSettingsPopover />}

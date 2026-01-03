@@ -68,7 +68,7 @@ function PagesIndex() {
 
   return (
     <>
-      <div ref={containerRef} className="pb-16">
+      <div ref={containerRef}>
         <PageHeading title={title} />
 
         {isPending ? (
