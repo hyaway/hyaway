@@ -175,8 +175,8 @@ export function PureThumbnailGallery({
   );
 
   return (
-    <div className="flex w-full flex-row" style={{ maxWidth }}>
-      <div ref={parentRef} className="@container w-full">
+    <div className="w-full">
+      <div ref={parentRef} className="@container w-full" style={{ maxWidth }}>
         <ul
           role="grid"
           aria-label={ariaLabel}
@@ -210,14 +210,14 @@ export function PureThumbnailGallery({
               );
             })}
         </ul>
-        <ScrollPositionBadge
-          current={(lastItemIndex ?? 0) + 1}
-          loaded={deferredItems.length}
-          total={totalItems}
-          isScrolling={rowVirtualizer.isScrolling}
-          show={showScrollBadge}
-        />
       </div>
+      <ScrollPositionBadge
+        current={(lastItemIndex ?? 0) + 1}
+        loaded={deferredItems.length}
+        total={totalItems}
+        isScrolling={rowVirtualizer.isScrolling}
+        show={showScrollBadge}
+      />
       <RightSidebarPortal>
         <TagsSidebar items={deferredItems} />
       </RightSidebarPortal>

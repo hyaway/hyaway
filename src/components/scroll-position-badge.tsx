@@ -30,7 +30,7 @@ export function ScrollPositionBadge({
     loaded !== total ? `${loaded} (${total})` : String(total);
 
   return (
-    <div className="pointer-events-none sticky bottom-14 z-50 mt-4 flex justify-self-end @xl:bottom-2">
+    <div className="pointer-events-none sticky bottom-14 z-50 mt-4 flex justify-self-end">
       <Badge
         className={cn(
           "pointer-events-auto transition-opacity",
