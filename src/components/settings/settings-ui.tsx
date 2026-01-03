@@ -1,4 +1,6 @@
-import { IconRestore } from "@tabler/icons-react";
+import { IconCheck, IconRestore } from "@tabler/icons-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 import { Button } from "@/components/ui-primitives/button";
 import { cn } from "@/lib/utils";
 
@@ -37,15 +39,47 @@ export function SettingsResetButton({
   onReset,
   label = "Reset to defaults",
 }: SettingsResetButtonProps) {
+  const [showCheck, setShowCheck] = useState(false);
+
+  const handleClick = () => {
+    onReset();
+    setShowCheck(true);
+    setTimeout(() => setShowCheck(false), 2000);
+  };
+
   return (
     <Button
       variant="ghost"
-      size="icon-sm"
-      onClick={onReset}
+      size="icon-xs"
+      onClick={handleClick}
       aria-label={label}
       title={label}
+      className="relative"
     >
-      <IconRestore />
+      <AnimatePresence mode="wait">
+        {showCheck ? (
+          <motion.span
+            key="check"
+            initial={{ opacity: 1, scale: 1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <IconCheck className="text-success size-5" />
+          </motion.span>
+        ) : (
+          <motion.span
+            key="restore"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.1 }}
+          >
+            <IconRestore className="size-5" />
+          </motion.span>
+        )}
+      </AnimatePresence>
     </Button>
   );
 }
