@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { RightSidebarPortal } from "../app-shell/right-sidebar-portal";
 import { TagsSidebarSkeleton } from "@/components/tag/tags-sidebar-skeleton";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
-import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
+import { DEFAULT_THUMBNAIL_SIZE } from "@/lib/settings-store";
 
 /**
  * Skeleton component for the thumbnail gallery while loading.
@@ -14,14 +14,13 @@ export function ThumbnailGallerySkeleton({
 }: {
   itemCount?: number;
 }) {
-  const dimensions = useThumbnailDimensions() || { width: 200, height: 200 };
   // Generate random but stable heights for skeleton items
   const heights = useMemo(
     () =>
       Array.from({ length: itemCount }, (_, i) => {
         // Use index-based pseudo-random heights between 150-300px
         const seed = (i * 7 + 3) % 10;
-        return dimensions.height / 2 + seed * 15;
+        return DEFAULT_THUMBNAIL_SIZE / 2 + seed * 15;
       }),
     [itemCount],
   );
@@ -32,7 +31,7 @@ export function ThumbnailGallerySkeleton({
         className="w-full columns-(--thumbnail-width) gap-2"
         style={
           {
-            "--thumbnail-width": `${dimensions.width}px`,
+            "--thumbnail-width": `${DEFAULT_THUMBNAIL_SIZE}px`,
           } as React.CSSProperties
         }
       >

@@ -7,7 +7,7 @@ export const MIN_GALLERY_LANES = 1;
 export const DEFAULT_GALLERY_HORIZONTAL_GAP = 8;
 export const DEFAULT_GALLERY_VERTICAL_GAP = 8;
 export const MAX_GALLERY_GAP = 32;
-export const DEFAULT_SERVICE_THUMBNAIL_SIZE = 200;
+export const DEFAULT_THUMBNAIL_SIZE = 200;
 export const MIN_GALLERY_BASE_WIDTH = 100;
 export const MAX_GALLERY_BASE_WIDTH = 500;
 export const DEFAULT_GALLERY_REFLOW_DURATION = 350;
@@ -68,7 +68,7 @@ const useSettingsStore = create<UxSettingsState>()(
       galleryExpandImages: true,
       galleryShowScrollBadge: true,
       galleryBaseWidthMode: "service" as GalleryBaseWidthMode,
-      galleryCustomBaseWidth: DEFAULT_SERVICE_THUMBNAIL_SIZE,
+      galleryCustomBaseWidth: DEFAULT_THUMBNAIL_SIZE,
       galleryHorizontalGap: DEFAULT_GALLERY_HORIZONTAL_GAP,
       galleryVerticalGap: DEFAULT_GALLERY_VERTICAL_GAP,
       galleryReflowDuration: DEFAULT_GALLERY_REFLOW_DURATION,

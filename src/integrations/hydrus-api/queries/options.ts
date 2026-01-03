@@ -5,7 +5,7 @@ import { useIsApiConfigured } from "../hydrus-config-store";
 import { useActiveTheme } from "@/lib/theme-store";
 import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
 import {
-  DEFAULT_SERVICE_THUMBNAIL_SIZE,
+  DEFAULT_THUMBNAIL_SIZE,
   MAX_GALLERY_BASE_WIDTH,
   MIN_GALLERY_BASE_WIDTH,
 } from "@/lib/settings-store";
@@ -40,8 +40,8 @@ export const useThumbnailDimensions = () => {
       data.old_options.thumbnail_dimensions[1] <= 0
     ) {
       return {
-        width: DEFAULT_SERVICE_THUMBNAIL_SIZE,
-        height: DEFAULT_SERVICE_THUMBNAIL_SIZE,
+        width: DEFAULT_THUMBNAIL_SIZE,
+        height: DEFAULT_THUMBNAIL_SIZE,
       };
     }
 
