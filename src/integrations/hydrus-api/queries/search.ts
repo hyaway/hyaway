@@ -5,11 +5,11 @@ import { useIsApiConfigured } from "../hydrus-config-store";
 import { HydrusFileSortType, ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
 import type { HydrusTagSearch, SearchFilesOptions } from "../models";
-import { useRandomInboxLimit } from "@/lib/stores/random-inbox-settings-store";
+import { useRandomInboxLimit } from "@/stores/random-inbox-settings-store";
 import {
   useRecentFilesDays,
   useRecentFilesLimit,
-} from "@/lib/stores/recent-files-settings-store";
+} from "@/stores/recent-files-settings-store";
 
 export const useRecentlyArchivedFilesQuery = () => {
   const recentFilesLimit = useRecentFilesLimit();

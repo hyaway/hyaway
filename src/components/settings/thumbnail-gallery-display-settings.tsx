@@ -22,7 +22,7 @@ import {
   useGallerySettingsActions,
   useGalleryShowScrollBadge,
   useGalleryVerticalGap,
-} from "@/lib/stores/gallery-settings-store";
+} from "@/stores/gallery-settings-store";
 import { Accordion } from "@/components/ui-primitives/accordion";
 import { Label } from "@/components/ui-primitives/label";
 import {

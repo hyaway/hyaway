@@ -3,7 +3,7 @@ import {
   IconMoonFilled,
   IconSun,
 } from "@tabler/icons-react";
-import type { Theme } from "@/lib/stores/theme-store";
+import type { Theme } from "@/stores/theme-store";
 import type { ComponentProps } from "react";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";
 import { Button } from "@/components/ui-primitives/button";
@@ -15,7 +15,7 @@ import {
   getWindowSystemTheme,
   useThemeActions,
   useThemePreference,
-} from "@/lib/stores/theme-store";
+} from "@/stores/theme-store";
 import { cn } from "@/lib/utils";
 
 function getNextTheme(currentPreference: Theme): Theme {

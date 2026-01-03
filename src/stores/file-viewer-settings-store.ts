@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { setupCrossTabSync } from "../cross-tab-sync";
+import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 export type ImageBackground = "solid" | "checkerboard";
 

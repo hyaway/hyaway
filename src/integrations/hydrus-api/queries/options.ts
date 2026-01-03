@@ -2,13 +2,13 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getClientOptions } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
-import { useActiveTheme } from "@/lib/stores/theme-store";
+import { useActiveTheme } from "@/stores/theme-store";
 import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
 import {
   DEFAULT_THUMBNAIL_SIZE,
   MAX_GALLERY_BASE_WIDTH,
   MIN_GALLERY_BASE_WIDTH,
-} from "@/lib/stores/gallery-settings-store";
+} from "@/stores/gallery-settings-store";
 
 export const useGetClientOptionsQuery = () => {
   const isConfigured = useIsApiConfigured();

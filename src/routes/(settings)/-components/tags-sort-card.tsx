@@ -1,4 +1,4 @@
-import type { TagsSortMode } from "@/lib/stores/tags-settings-store";
+import type { TagsSortMode } from "@/stores/tags-settings-store";
 import {
   Card,
   CardContent,
@@ -14,7 +14,7 @@ import { Label } from "@/components/ui-primitives/label";
 import {
   useTagsSettingsActions,
   useTagsSortMode,
-} from "@/lib/stores/tags-settings-store";
+} from "@/stores/tags-settings-store";
 
 export function TagsSortCard() {
   const tagsSortMode = useTagsSortMode();

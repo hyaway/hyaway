@@ -8,15 +8,15 @@ Hyaway uses **Zustand** for client-side state management with explicit selector 
 
 | Store         | File                                             | Purpose                |
 | ------------- | ------------------------------------------------ | ---------------------- |
-| Theme         | `lib/stores/theme-store.ts`                      | Dark/light mode        |
-| Gallery       | `lib/stores/gallery-settings-store.ts`           | Gallery preferences    |
-| File Viewer   | `lib/stores/file-viewer-settings-store.ts`       | Viewer preferences     |
-| Pages         | `lib/stores/pages-settings-store.ts`             | Pages layout           |
-| Recent Files  | `lib/stores/recent-files-settings-store.ts`      | Recent files settings  |
-| Random Inbox  | `lib/stores/random-inbox-settings-store.ts`      | Random inbox settings  |
-| Tags          | `lib/stores/tags-settings-store.ts`              | Tag sorting mode       |
-| History       | `lib/stores/watch-history-store.ts`              | Watch history tracking |
-| Sidebar       | `lib/stores/sidebar-store.ts`                    | Sidebar persistence    |
+| Theme         | `stores/theme-store.ts`                          | Dark/light mode        |
+| Gallery       | `stores/gallery-settings-store.ts`               | Gallery preferences    |
+| File Viewer   | `stores/file-viewer-settings-store.ts`           | Viewer preferences     |
+| Pages         | `stores/pages-settings-store.ts`                 | Pages layout           |
+| Recent Files  | `stores/recent-files-settings-store.ts`          | Recent files settings  |
+| Random Inbox  | `stores/random-inbox-settings-store.ts`          | Random inbox settings  |
+| Tags          | `stores/tags-settings-store.ts`                  | Tag sorting mode       |
+| History       | `stores/watch-history-store.ts`                  | Watch history tracking |
+| Sidebar       | `stores/sidebar-store.ts`                        | Sidebar persistence    |
 | Hydrus Config | `integrations/hydrus-api/hydrus-config-store.ts` | API connection         |
 
 ## Usage Pattern
@@ -24,15 +24,15 @@ Hyaway uses **Zustand** for client-side state management with explicit selector 
 Each store exports individual selector hooks for each piece of state:
 
 ```tsx
-import { useActiveTheme, useThemeActions } from "@/lib/stores/theme-store";
+import { useActiveTheme, useThemeActions } from "@/stores/theme-store";
 import {
   useGalleryMaxLanes,
   useGallerySettingsActions,
-} from "@/lib/stores/gallery-settings-store";
+} from "@/stores/gallery-settings-store";
 import {
   useWatchHistoryEntries,
   useWatchHistoryActions,
-} from "@/lib/stores/watch-history-store";
+} from "@/stores/watch-history-store";
 
 function MyComponent() {
   // Access individual state values via dedicated hooks
@@ -54,19 +54,19 @@ function MyComponent() {
 For advanced use cases (subscriptions, non-React contexts), use the store directly:
 
 ```tsx
-import { useThemeStore } from "@/lib/stores/theme-store";
+import { useThemeStore } from "@/stores/theme-store";
 
 // Direct selector
 const activeTheme = useThemeStore((s) => s.activeTheme);
 
 // Snapshot getters (outside React)
-import { getActiveThemeSnapshot } from "@/lib/stores/theme-store";
+import { getActiveThemeSnapshot } from "@/stores/theme-store";
 const theme = getActiveThemeSnapshot();
 ```
 
 ## Available Hooks
 
-### Theme Store (`lib/stores/theme-store.ts`)
+### Theme Store (`stores/theme-store.ts`)
 
 | Hook                 | Returns                         |
 | -------------------- | ------------------------------- |

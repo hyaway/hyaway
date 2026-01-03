@@ -1,5 +1,5 @@
 import { SettingsGroup, SwitchField } from "./setting-fields";
-import type { ImageBackground } from "@/lib/stores/file-viewer-settings-store";
+import type { ImageBackground } from "@/stores/file-viewer-settings-store";
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -8,7 +8,7 @@ import {
   useFileViewerSettingsActions,
   useFileViewerStartExpanded,
   useImageBackground,
-} from "@/lib/stores/file-viewer-settings-store";
+} from "@/stores/file-viewer-settings-store";
 import { Label } from "@/components/ui-primitives/label";
 
 export const FILE_VIEWER_SETTINGS_TITLE = "Media viewer";

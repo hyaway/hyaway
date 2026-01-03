@@ -10,7 +10,7 @@ import {
   useApplyTheme,
   useSystemThemeListener,
   useThemeHydrated,
-} from "@/lib/stores/theme-store";
+} from "@/stores/theme-store";
 
 export interface MyRouterContext {
   queryClient: QueryClient;

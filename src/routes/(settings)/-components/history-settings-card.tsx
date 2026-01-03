@@ -13,7 +13,7 @@ import {
 import {
   useWatchHistoryActions,
   useWatchHistoryEntries,
-} from "@/lib/stores/watch-history-store";
+} from "@/stores/watch-history-store";
 import { Button } from "@/components/ui-primitives/button";
 
 export function HistorySettingsCard() {

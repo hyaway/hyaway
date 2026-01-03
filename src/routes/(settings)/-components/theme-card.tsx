@@ -1,4 +1,4 @@
-import type { Theme } from "@/lib/stores/theme-store";
+import type { Theme } from "@/stores/theme-store";
 import {
   Card,
   CardContent,
@@ -11,7 +11,7 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { Label } from "@/components/ui-primitives/label";
-import { useThemeActions, useThemePreference } from "@/lib/stores/theme-store";
+import { useThemeActions, useThemePreference } from "@/stores/theme-store";
 
 export function ThemeCard() {
   const themePreference = useThemePreference();

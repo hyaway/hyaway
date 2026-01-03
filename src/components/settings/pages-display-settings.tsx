@@ -4,7 +4,7 @@ import {
   usePagesMaxColumns,
   usePagesSettingsActions,
   usePagesShowScrollBadge,
-} from "@/lib/stores/pages-settings-store";
+} from "@/stores/pages-settings-store";
 
 export const PAGES_DISPLAY_SETTINGS_TITLE = "Pages display";
 

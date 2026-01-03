@@ -72,7 +72,7 @@ Create `src/components/settings/{feature}-settings.tsx`:
 import {
   useSomeSetting,
   useFeatureSettingsActions,
-} from "@/lib/stores/feature-settings-store";
+} from "@/stores/feature-settings-store";
 import { SettingsGroup, SwitchField, SliderField } from "./setting-fields";
 
 export const FEATURE_SETTINGS_TITLE = "Feature Name";

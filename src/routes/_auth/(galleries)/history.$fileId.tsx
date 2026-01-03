@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { FileDetail } from "@/components/file-detail/file-detail";
 import { useFileContextNavigation } from "@/hooks/use-file-context-navigation";
-import { useWatchHistoryFileIds } from "@/lib/stores/watch-history-store";
+import { useWatchHistoryFileIds } from "@/stores/watch-history-store";
 
 export const Route = createFileRoute("/_auth/(galleries)/history/$fileId")({
   component: RouteComponent,

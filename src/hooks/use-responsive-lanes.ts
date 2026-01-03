@@ -4,7 +4,7 @@ import {
   useGalleryHorizontalGap,
   useGalleryMaxLanes,
   useGalleryMinLanes,
-} from "@/lib/stores/gallery-settings-store";
+} from "@/stores/gallery-settings-store";
 
 interface ResponsiveLanesState {
   /** Calculated item width in pixels */

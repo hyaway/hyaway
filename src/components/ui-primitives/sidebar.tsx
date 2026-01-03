@@ -13,7 +13,7 @@ import {
 import { createLink } from "@tanstack/react-router";
 import type { LinkComponent } from "@tanstack/react-router";
 import type { VariantProps } from "class-variance-authority";
-import type { SidebarSide } from "@/lib/stores/sidebar-store";
+import type { SidebarSide } from "@/stores/sidebar-store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui-primitives/button";
 import { Input } from "@/components/ui-primitives/input";
@@ -32,10 +32,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui-primitives/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  useSidebarSide,
-  useSidebarStoreActions,
-} from "@/lib/stores/sidebar-store";
+import { useSidebarSide, useSidebarStoreActions } from "@/stores/sidebar-store";
 
 // ============================================================================
 // Context

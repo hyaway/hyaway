@@ -114,26 +114,26 @@ When updating a component with a skeleton, **always update the skeleton to match
 
 | Store         | Purpose         | Location                                         |
 | ------------- | --------------- | ------------------------------------------------ |
-| Theme         | Dark/light mode | `lib/stores/theme-store.ts`                      |
-| Gallery       | Gallery prefs   | `lib/stores/gallery-settings-store.ts`           |
-| File Viewer   | Viewer prefs    | `lib/stores/file-viewer-settings-store.ts`       |
-| Pages         | Pages layout    | `lib/stores/pages-settings-store.ts`             |
-| Recent Files  | Recent settings | `lib/stores/recent-files-settings-store.ts`      |
-| Random Inbox  | Inbox settings  | `lib/stores/random-inbox-settings-store.ts`      |
-| Tags          | Tag sorting     | `lib/stores/tags-settings-store.ts`              |
-| Watch History | View tracking   | `lib/stores/watch-history-store.ts`              |
-| Sidebar       | Sidebar state   | `lib/stores/sidebar-store.ts`                    |
+| Theme         | Dark/light mode | `stores/theme-store.ts`                          |
+| Gallery       | Gallery prefs   | `stores/gallery-settings-store.ts`               |
+| File Viewer   | Viewer prefs    | `stores/file-viewer-settings-store.ts`           |
+| Pages         | Pages layout    | `stores/pages-settings-store.ts`                 |
+| Recent Files  | Recent settings | `stores/recent-files-settings-store.ts`          |
+| Random Inbox  | Inbox settings  | `stores/random-inbox-settings-store.ts`          |
+| Tags          | Tag sorting     | `stores/tags-settings-store.ts`                  |
+| Watch History | View tracking   | `stores/watch-history-store.ts`                  |
+| Sidebar       | Sidebar state   | `stores/sidebar-store.ts`                        |
 | Hydrus Config | API connection  | `integrations/hydrus-api/hydrus-config-store.ts` |
 
 Each store exports explicit selector hooks:
 
 ```tsx
-import { useActiveTheme, useThemeActions } from "@/lib/stores/theme-store";
+import { useActiveTheme, useThemeActions } from "@/stores/theme-store";
 import {
   useGalleryMaxLanes,
   useGallerySettingsActions,
-} from "@/lib/stores/gallery-settings-store";
-import { useSidebarSide } from "@/lib/stores/sidebar-store";
+} from "@/stores/gallery-settings-store";
+import { useSidebarSide } from "@/stores/sidebar-store";
 
 const activeTheme = useActiveTheme();
 const { setLanesRange } = useGallerySettingsActions();

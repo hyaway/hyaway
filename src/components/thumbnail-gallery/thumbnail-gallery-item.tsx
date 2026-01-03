@@ -26,8 +26,8 @@ import { useThumbnailUrl } from "@/hooks/use-url-with-api-key";
 import { formatBytes } from "@/lib/format-utils";
 import { cn } from "@/lib/utils";
 import { checkerboardBg } from "@/lib/style-constants";
-import { DEFAULT_GALLERY_REFLOW_DURATION } from "@/lib/stores/gallery-settings-store";
-import { useImageBackground } from "@/lib/stores/file-viewer-settings-store";
+import { DEFAULT_GALLERY_REFLOW_DURATION } from "@/stores/gallery-settings-store";
+import { useImageBackground } from "@/stores/file-viewer-settings-store";
 
 /** Height of the polaroid-style footer strip in pixels (h-6 = 24px) */
 export const ITEM_FOOTER_HEIGHT = 24;

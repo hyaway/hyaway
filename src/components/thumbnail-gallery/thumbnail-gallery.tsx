@@ -23,7 +23,7 @@ import {
   useGalleryReflowDuration,
   useGalleryShowScrollBadge,
   useGalleryVerticalGap,
-} from "@/lib/stores/gallery-settings-store";
+} from "@/stores/gallery-settings-store";
 
 export interface ThumbnailGalleryProps {
   fileIds: Array<number>;

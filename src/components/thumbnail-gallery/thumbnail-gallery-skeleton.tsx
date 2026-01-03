@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { RightSidebarPortal } from "../app-shell/right-sidebar-portal";
 import { TagsSidebarSkeleton } from "@/components/tag/tags-sidebar-skeleton";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
-import { DEFAULT_THUMBNAIL_SIZE } from "@/lib/stores/gallery-settings-store";
+import { DEFAULT_THUMBNAIL_SIZE } from "@/stores/gallery-settings-store";
 
 /**
  * Skeleton component for the thumbnail gallery while loading.

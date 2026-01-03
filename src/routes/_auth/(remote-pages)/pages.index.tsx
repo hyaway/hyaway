@@ -27,7 +27,7 @@ import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-
 import {
   usePagesMaxColumns,
   usePagesShowScrollBadge,
-} from "@/lib/stores/pages-settings-store";
+} from "@/stores/pages-settings-store";
 
 export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
   component: PagesIndex,

@@ -5,7 +5,7 @@ import {
   useRecentFilesDays,
   useRecentFilesLimit,
   useRecentFilesSettingsActions,
-} from "@/lib/stores/recent-files-settings-store";
+} from "@/stores/recent-files-settings-store";
 
 export const RECENT_FILES_SETTINGS_TITLE = "Recent files";
 

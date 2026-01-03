@@ -20,7 +20,7 @@ import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/mana
 import {
   useWatchHistoryActions,
   useWatchHistoryEnabled,
-} from "@/lib/stores/watch-history-store";
+} from "@/stores/watch-history-store";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
 
 export interface FileDetailProps {

@@ -1,11 +1,11 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import type { TagsSortMode } from "@/lib/stores/tags-settings-store";
+import type { TagsSortMode } from "@/stores/tags-settings-store";
 import {
   useTagsSettingsActions,
   useTagsSortMode,
-} from "@/lib/stores/tags-settings-store";
+} from "@/stores/tags-settings-store";
 import {
   SidebarContent,
   SidebarFooter,

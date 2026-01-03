@@ -5,7 +5,7 @@ import { checkerboardBg } from "@/lib/style-constants";
 import {
   useFileViewerStartExpanded,
   useImageBackground,
-} from "@/lib/stores/file-viewer-settings-store";
+} from "@/stores/file-viewer-settings-store";
 
 interface ImageViewerProps {
   fileUrl: string;
