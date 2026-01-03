@@ -1,5 +1,5 @@
 ---
-applyTo: "**/components/file-detail/**,**/routes/_auth/(file)/**"
+applyTo: "**/components/file-detail/**,**/routes/_auth/file.$fileId.tsx"
 ---
 
 # File Viewer Development

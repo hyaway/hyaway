@@ -1,5 +1,5 @@
 ---
-applyTo: "**tag**"
+applyTo: "**/components/tag/**,**/lib/tag-utils.ts"
 ---
 
 # Tags Development

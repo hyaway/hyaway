@@ -1,5 +1,5 @@
 ---
-applyTo: "**settings**"
+applyTo: "**/components/settings/**,**/routes/**/settings*.tsx"
 ---
 
 # Settings Development
