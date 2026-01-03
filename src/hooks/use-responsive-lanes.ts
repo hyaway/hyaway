@@ -1,4 +1,4 @@
-import { startTransition, useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import {
   useGalleryExpandImages,
   useGalleryHorizontalGap,
@@ -26,6 +26,17 @@ interface UseResponsiveLanesOptions {
  * Generic hook to calculate responsive lane dimensions based on container width.
  * Returns the item width and number of lanes.
  */
+function calculateLanes(
+  containerWidth: number,
+  defaultWidth: number,
+  horizontalGap: number,
+): number {
+  return Math.max(
+    1,
+    Math.floor(containerWidth / (defaultWidth + horizontalGap)),
+  );
+}
+
 export function useResponsiveLanes(
   options: UseResponsiveLanesOptions,
 ): ResponsiveLanesState {
@@ -50,20 +61,45 @@ export function useResponsiveLanes(
       return;
     }
 
+    // Synchronous measurement before paint to avoid layout shift
+    const initialWidth = containerRef.current.clientWidth;
+    if (initialWidth > 0) {
+      setGridState((prev) => {
+        if (prev.containerWidth !== 0) return prev; // Already measured
+        return {
+          width: defaultWidth,
+          desiredLanes: calculateLanes(
+            initialWidth,
+            defaultWidth,
+            horizontalGap,
+          ),
+          containerWidth: initialWidth,
+        };
+      });
+    }
+
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       const containerWidth = entry.contentRect.width;
-      const calculatedLanes = Math.max(
-        1,
-        Math.floor(containerWidth / (defaultWidth + horizontalGap)),
+      const calculatedLanes = calculateLanes(
+        containerWidth,
+        defaultWidth,
+        horizontalGap,
       );
 
-      startTransition(() => {
-        setGridState({
+      // Only update state if lanes or containerWidth actually changed
+      setGridState((prev) => {
+        if (
+          prev.desiredLanes === calculatedLanes &&
+          prev.containerWidth === containerWidth
+        ) {
+          return prev;
+        }
+        return {
           width: defaultWidth,
           desiredLanes: calculatedLanes,
           containerWidth,
-        });
+        };
       });
     });
 
@@ -74,6 +110,11 @@ export function useResponsiveLanes(
 
   const { desiredLanes, containerWidth } = gridState;
 
+  // Not measured yet - return lanes: 0 to signal caller should wait
+  if (containerWidth === 0) {
+    return { width: defaultWidth, lanes: 0, maxWidth: undefined };
+  }
+
   // Apply min/max lanes constraints
   const constrainedLanes = Math.max(minLanes, Math.min(desiredLanes, maxLanes));
 
@@ -81,9 +122,10 @@ export function useResponsiveLanes(
   const minLanesForced = desiredLanes < minLanes;
 
   // Calculate width based on whether we're expanding or minLanes forced expansion
+  // Round to prevent sub-pixel jitter during resize
   const newWidth =
     expandImages || minLanesForced
-      ? containerWidth / constrainedLanes - horizontalGap
+      ? Math.floor(containerWidth / constrainedLanes - horizontalGap)
       : defaultWidth - horizontalGap;
 
   // Clamp lanes based on item count
