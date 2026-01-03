@@ -7,8 +7,11 @@ import {
 } from "@/lib/settings-store";
 
 interface ResponsiveLanesState {
+  /** Calculated item width in pixels */
   width: number;
+  /** Number of lanes (columns). Returns 0 before initial measurement. */
   lanes: number;
+  /** Max grid width when not expanding images */
   maxWidth: number | undefined;
 }
 
@@ -23,8 +26,18 @@ interface UseResponsiveLanesOptions {
 }
 
 /**
- * Generic hook to calculate responsive lane dimensions based on container width.
- * Returns the item width and number of lanes.
+ * Calculate responsive lane dimensions based on container width.
+ *
+ * ## Layout Shift Prevention
+ * - Returns `lanes: 0` before initial measurement to signal loading state
+ * - Performs synchronous measurement in useLayoutEffect before first paint
+ * - Callers should show a skeleton/placeholder when `lanes === 0`
+ *
+ * ## Animation Stability
+ * - Only triggers state updates when lanes or containerWidth actually change
+ * - Width is floored to whole pixels to prevent sub-pixel jitter
+ * - Callers should key height caches on `lanes`, not `width`, to avoid
+ *   re-layout during continuous resize when expandImages is enabled
  */
 function calculateLanes(
   containerWidth: number,
