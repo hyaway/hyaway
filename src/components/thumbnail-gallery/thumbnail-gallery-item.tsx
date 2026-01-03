@@ -1,33 +1,21 @@
 import { memo, useMemo, useState } from "react";
-import {
-  IconBan,
-  IconExternalLink,
-  IconMailFilled,
-  IconMovie,
-  IconTrashFilled,
-  IconVolume,
-} from "@tabler/icons-react";
 import { Link, linkOptions } from "@tanstack/react-router";
+
+import { ThumbnailGalleryItemContent } from "./thumbnail-gallery-item-content";
+import { ThumbnailGalleryItemContextMenu } from "./thumbnail-gallery-item-context-menu";
 import type { LinkOptions } from "@tanstack/react-router";
-
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-
-import { BlurhashCanvas } from "@/components/blurhash-canvas";
-
 import {
   ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui-primitives/context-menu";
-import { useFileActions } from "@/hooks/use-file-actions";
-import { useThumbnailUrl } from "@/hooks/use-url-with-api-key";
-import { formatBytes } from "@/lib/format-utils";
 import { cn } from "@/lib/utils";
-import { checkerboardBg } from "@/lib/style-constants";
-import { DEFAULT_GALLERY_REFLOW_DURATION } from "@/stores/gallery-settings-store";
-import { useImageBackground } from "@/stores/file-viewer-settings-store";
+import {
+  DEFAULT_GALLERY_REFLOW_DURATION,
+  useGalleryEnableContextMenu,
+} from "@/stores/gallery-settings-store";
+
+export { ThumbnailImage, type ThumbnailImageProps } from "./thumbnail-image";
 
 /** Height of the polaroid-style footer strip in pixels (h-6 = 24px) */
 export const ITEM_FOOTER_HEIGHT = 24;
@@ -85,6 +73,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
   ...props
 }: ThumbnailGalleryItemProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const enableContextMenu = useGalleryEnableContextMenu();
   const fileLink = getFileLink(item.file_id);
 
   const isTopRow = virtualRow.index < lanes;
@@ -169,32 +158,30 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         reflowDuration > 0
           ? "transition-transform ease-out in-data-[scrolling=true]:transition-none"
           : "transition-none",
-        menuOpen && "z-30 [content-visibility:visible]",
+        enableContextMenu && menuOpen && "z-30 [content-visibility:visible]",
         className,
       )}
       {...props}
     >
-      <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
-        <ContextMenuTrigger>
-          <Link
-            ref={(el) => setLinkRef?.(el, virtualRow.index)}
-            to={fileLink.to}
-            params={fileLink.params}
-            className="absolute inset-0 z-10 outline-hidden"
-            tabIndex={tabIndex}
-            aria-label={`File ${item.file_id}, ${item.mime.split("/")[0]}`}
-            onFocus={() => onItemFocus?.(virtualRow.index)}
-          />
-        </ContextMenuTrigger>
-        <ThumbnailGalleryItemContextMenu item={item} />
-      </ContextMenu>
+      <ItemLink
+        fileLink={fileLink}
+        item={item}
+        virtualRowIndex={virtualRow.index}
+        tabIndex={tabIndex}
+        setLinkRef={setLinkRef}
+        onItemFocus={onItemFocus}
+        enableContextMenu={enableContextMenu}
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+      />
       <div
         className={cn(
           "pointer-events-none h-full w-full transition-[scale] duration-100 ease-in-out",
           "group-hover:scale-(--thumbnail-hover-scale) group-hover:shadow",
           "group-active:scale-(--thumbnail-hover-scale) group-active:shadow",
           "group-has-focus-visible:ring-3 group-has-focus-visible:ring-black group-has-focus-visible:ring-offset-3 group-has-focus-visible:ring-offset-white dark:group-has-focus-visible:ring-white dark:group-has-focus-visible:ring-offset-black",
-          menuOpen &&
+          enableContextMenu &&
+            menuOpen &&
             "ring-primary-foreground ring-offset-primary scale-(--thumbnail-hover-scale) ring-0 ring-offset-3",
           originClass,
         )}
@@ -205,178 +192,51 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
   );
 });
 
-// --- Item Content (badges + thumbnail) ---
+// --- Item Link (with optional context menu) ---
 
-interface ThumbnailGalleryItemContentProps {
+interface ItemLinkProps {
+  fileLink: LinkOptions;
   item: FileMetadata;
+  virtualRowIndex: number;
+  tabIndex: number;
+  setLinkRef?: (el: HTMLAnchorElement | null, index: number) => void;
+  onItemFocus?: (index: number) => void;
+  enableContextMenu: boolean;
+  menuOpen: boolean;
+  setMenuOpen: (open: boolean) => void;
 }
 
-function ThumbnailGalleryItemContent({
+function ItemLink({
+  fileLink,
   item,
-}: ThumbnailGalleryItemContentProps) {
-  const fileSize = formatBytes(item.size);
-  const isPermanentlyDeleted = item.is_deleted && !item.is_trashed;
-
-  return (
-    <div
-      className={cn(
-        "bg-muted text-muted-foreground @container relative flex h-full w-full flex-col overflow-hidden rounded-sm shadow-sm",
-        "pointer-events-none",
-      )}
-    >
-      <div className="relative min-h-0 flex-1 overflow-hidden">
-        {isPermanentlyDeleted && item.blurhash ? (
-          <BlurhashCanvas
-            blurhash={item.blurhash}
-            width={32}
-            height={32}
-            className="h-full w-full"
-            aria-label={`Blurhash for file ${item.file_id}`}
-          />
-        ) : (
-          <ThumbnailImage
-            fileId={item.file_id}
-            width={item.thumbnail_width}
-            height={item.thumbnail_height}
-          />
-        )}
-      </div>
-      <div className="bg-muted text-muted-foreground flex h-6 shrink-0 items-center gap-0.5 px-0.5 text-[8px] @[150px]:gap-1 @[150px]:px-1 @[150px]:text-xs">
-        {item.mime.startsWith("video/") && (
-          <IconMovie
-            className="size-2 @[60px]:size-3 @[150px]:size-4"
-            aria-label="Video"
-          />
-        )}
-        {item.has_audio && (
-          <IconVolume
-            className="size-2 @[60px]:size-3 @[150px]:size-4"
-            aria-label="Has audio"
-          />
-        )}
-        {fileSize && (
-          <span
-            className="hidden @[100px]:inline"
-            aria-label={`File size: ${fileSize}`}
-          >
-            {fileSize}
-          </span>
-        )}
-        <span className="flex-1" />
-        {item.is_inbox && (
-          <IconMailFilled
-            className="text-foreground size-2 @[60px]:size-3 @[150px]:size-4"
-            aria-label="In inbox"
-          />
-        )}
-        {item.is_trashed && (
-          <IconTrashFilled
-            className="text-destructive size-2 @[60px]:size-3 @[150px]:size-4"
-            aria-label="Trashed"
-          />
-        )}
-        {item.is_deleted && !item.is_trashed && (
-          <IconBan
-            className="text-destructive size-3 @[150px]:size-4"
-            aria-label="Permanently deleted"
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-// --- Context Menu Actions ---
-
-interface ThumbnailGalleryItemContextMenuProps {
-  item: Pick<
-    FileMetadata,
-    | "file_id"
-    | "is_inbox"
-    | "is_trashed"
-    | "is_deleted"
-    | "ext"
-    | "filetype_human"
-    | "mime"
-  >;
-}
-
-function ThumbnailGalleryItemContextMenu({
-  item,
-}: ThumbnailGalleryItemContextMenuProps) {
-  const actionGroups = useFileActions(item, {
-    includeOpen: true,
-    includeExternal: true,
-  });
-
-  return (
-    <ContextMenuContent
-      className={
-        "bg-popover/95 supports-backdrop-filter:bg-popover/75 backdrop-blur-sm"
-      }
-    >
-      {actionGroups.map((group, groupIndex) => (
-        <div key={group.id}>
-          {groupIndex > 0 && <ContextMenuSeparator />}
-          {group.actions.map((action) => (
-            <ContextMenuItem
-              key={action.id}
-              onClick={action.onClick}
-              variant={action.variant}
-            >
-              <action.icon />
-              {action.label}
-              {action.external && (
-                <IconExternalLink className="ml-auto opacity-50" />
-              )}
-            </ContextMenuItem>
-          ))}
-        </div>
-      ))}
-    </ContextMenuContent>
-  );
-}
-
-// --- Thumbnail Image ---
-
-export interface ThumbnailProps extends React.HTMLAttributes<HTMLDivElement> {
-  fileId: number;
-  innerClassName?: string;
-  width?: number;
-  height?: number;
-}
-
-export function ThumbnailImage({
-  fileId,
-  className,
-  width,
-  height,
-}: ThumbnailProps) {
-  const [loaded, setLoaded] = useState(false);
-  const { url, onLoad, onError } = useThumbnailUrl(fileId);
-  const imageBackground = useImageBackground();
-
-  const handleLoad = (_e: React.SyntheticEvent<HTMLImageElement>) => {
-    setLoaded(true);
-    onLoad();
-  };
-
-  return (
-    <img
-      src={url}
-      alt={`Thumbnail for file ID ${fileId}`}
-      className={cn(
-        "h-full w-full object-cover",
-        loaded && imageBackground === "checkerboard"
-          ? checkerboardBg
-          : "bg-muted",
-        className,
-      )}
-      loading="lazy"
-      onLoad={handleLoad}
-      onError={onError}
-      width={width}
-      height={height}
+  virtualRowIndex,
+  tabIndex,
+  setLinkRef,
+  onItemFocus,
+  enableContextMenu,
+  menuOpen,
+  setMenuOpen,
+}: ItemLinkProps) {
+  const linkElement = (
+    <Link
+      ref={(el) => setLinkRef?.(el, virtualRowIndex)}
+      to={fileLink.to}
+      params={fileLink.params}
+      className="absolute inset-0 z-10 outline-hidden"
+      tabIndex={tabIndex}
+      aria-label={`File ${item.file_id}, ${item.mime.split("/")[0]}`}
+      onFocus={() => onItemFocus?.(virtualRowIndex)}
     />
+  );
+
+  if (!enableContextMenu) {
+    return linkElement;
+  }
+
+  return (
+    <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      <ContextMenuTrigger>{linkElement}</ContextMenuTrigger>
+      <ThumbnailGalleryItemContextMenu item={item} />
+    </ContextMenu>
   );
 }

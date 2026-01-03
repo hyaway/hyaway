@@ -20,6 +20,7 @@ type GallerySettingsState = {
   maxLanes: number;
   expandImages: boolean;
   showScrollBadge: boolean;
+  enableContextMenu: boolean;
   baseWidthMode: GalleryBaseWidthMode;
   customBaseWidth: number;
   horizontalGap: number;
@@ -29,6 +30,7 @@ type GallerySettingsState = {
     setLanesRange: (min: number, max: number) => void;
     setExpandImages: (expand: boolean) => void;
     setShowScrollBadge: (show: boolean) => void;
+    setEnableContextMenu: (show: boolean) => void;
     setBaseWidthMode: (mode: GalleryBaseWidthMode) => void;
     setCustomBaseWidth: (width: number) => void;
     setHorizontalGap: (gap: number) => void;
@@ -45,6 +47,7 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
       maxLanes: MAX_GALLERY_LANES,
       expandImages: true,
       showScrollBadge: true,
+      enableContextMenu: true,
       baseWidthMode: "service" as GalleryBaseWidthMode,
       customBaseWidth: DEFAULT_THUMBNAIL_SIZE,
       horizontalGap: DEFAULT_GALLERY_HORIZONTAL_GAP,
@@ -56,6 +59,8 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
         setExpandImages: (expandImages: boolean) => set({ expandImages }),
         setShowScrollBadge: (showScrollBadge: boolean) =>
           set({ showScrollBadge }),
+        setEnableContextMenu: (enableContextMenu: boolean) =>
+          set({ enableContextMenu }),
         setBaseWidthMode: (baseWidthMode: GalleryBaseWidthMode) =>
           set({ baseWidthMode }),
         setCustomBaseWidth: (customBaseWidth: number) =>
@@ -85,6 +90,9 @@ export const useGalleryExpandImages = () =>
 
 export const useGalleryShowScrollBadge = () =>
   useGallerySettingsStore((state) => state.showScrollBadge);
+
+export const useGalleryEnableContextMenu = () =>
+  useGallerySettingsStore((state) => state.enableContextMenu);
 
 export const useGalleryBaseWidthMode = () =>
   useGallerySettingsStore((state) => state.baseWidthMode);

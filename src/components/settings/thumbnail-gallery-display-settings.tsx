@@ -14,6 +14,7 @@ import {
   MIN_GALLERY_LANES,
   useGalleryBaseWidthMode,
   useGalleryCustomBaseWidth,
+  useGalleryEnableContextMenu,
   useGalleryExpandImages,
   useGalleryHorizontalGap,
   useGalleryMaxLanes,
@@ -63,6 +64,7 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryMaxLanes = useGalleryMaxLanes();
   const galleryExpandImages = useGalleryExpandImages();
   const galleryShowScrollBadge = useGalleryShowScrollBadge();
+  const galleryEnableContextMenu = useGalleryEnableContextMenu();
   const galleryBaseWidthMode = useGalleryBaseWidthMode();
   const galleryCustomBaseWidth = useGalleryCustomBaseWidth();
   const galleryHorizontalGap = useGalleryHorizontalGap();
@@ -78,6 +80,7 @@ export function ThumbnailGalleryDisplaySettings({
     setLanesRange,
     setExpandImages,
     setShowScrollBadge,
+    setEnableContextMenu,
     setBaseWidthMode,
     setCustomBaseWidth,
     setHorizontalGap,
@@ -179,12 +182,18 @@ export function ThumbnailGalleryDisplaySettings({
         />
       </AccordionSection>
 
-      <AccordionSection value="indicators" title="Indicators">
+      <AccordionSection value="extras" title="Extras">
         <SwitchField
           id={`${idPrefix}show-scroll-badge-switch`}
           label="Show scroll position"
           checked={galleryShowScrollBadge}
           onCheckedChange={setShowScrollBadge}
+        />
+        <SwitchField
+          id={`${idPrefix}show-context-menu-switch`}
+          label="Show context menu on right-click"
+          checked={galleryEnableContextMenu}
+          onCheckedChange={setEnableContextMenu}
         />
       </AccordionSection>
     </Accordion>
