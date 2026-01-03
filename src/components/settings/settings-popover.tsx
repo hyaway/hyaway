@@ -1,7 +1,11 @@
 import { useRef, useState } from "react";
 import { IconAdjustmentsHorizontal } from "@tabler/icons-react";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
-import { Popover, PopoverContent } from "@/components/ui-primitives/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui-primitives/popover";
 import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 
 interface SettingsPopoverProps {
@@ -19,7 +23,6 @@ export function SettingsPopover({
   children,
 }: SettingsPopoverProps) {
   const [open, setOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   // Track when popover was last closed to prevent immediate reopen
   const lastClosedRef = useRef(0);
 
@@ -30,33 +33,30 @@ export function SettingsPopover({
     setOpen(nextOpen);
   };
 
-  // Always render the button with a ref for anchoring
-  const button = (
-    <BottomNavButton
-      ref={setAnchorEl}
-      label={label}
-      icon={<IconAdjustmentsHorizontal className="size-6" />}
-      className={className}
-      onClick={() => {
-        // If popover was just closed (within 100ms), don't reopen
-        // This handles the case where clicking the button triggers both
-        // the outside-click close and the button click
-        if (Date.now() - lastClosedRef.current < 100) {
-          return;
-        }
-        setOpen(!open);
-      }}
-    />
-  );
-
   return (
     <>
-      {button}
       <Popover open={open} onOpenChange={handleOpenChange}>
+        <PopoverTrigger
+          render={
+            <BottomNavButton
+              label={label}
+              icon={<IconAdjustmentsHorizontal className="size-6" />}
+              className={className}
+              onClick={() => {
+                // If popover was just closed (within 100ms), don't reopen
+                // This handles the case where clicking the button triggers both
+                // the outside-click close and the button click
+                if (Date.now() - lastClosedRef.current < 100) {
+                  return;
+                }
+                setOpen(!open);
+              }}
+            />
+          }
+        />
         <PopoverContent
-          anchor={anchorEl}
           align="end"
-          className="w-svw p-0 sm:w-90"
+          className="w-90 max-w-[90svw] p-0"
           side="top"
           sideOffset={8}
         >
