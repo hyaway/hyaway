@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from "react";
 import {
   AccordionSection,
   RangeSliderField,
@@ -29,6 +30,19 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 
+function subscribeToWindowSize(callback: () => void) {
+  window.addEventListener("resize", callback);
+  return () => window.removeEventListener("resize", callback);
+}
+
+function getWindowWidth() {
+  return window.innerWidth;
+}
+
+function useWindowWidth() {
+  return useSyncExternalStore(subscribeToWindowSize, getWindowWidth);
+}
+
 export const THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE = "Thumbnail gallery";
 
 export interface ThumbnailGalleryDisplaySettingsProps {
@@ -44,6 +58,7 @@ export function ThumbnailGalleryDisplaySettings({
   openMultiple = false,
   defaultOpen = true,
 }: ThumbnailGalleryDisplaySettingsProps) {
+  const windowWidth = useWindowWidth();
   const galleryMinLanes = useGalleryMinLanes();
   const galleryMaxLanes = useGalleryMaxLanes();
   const galleryExpandImages = useGalleryExpandImages();
@@ -53,6 +68,11 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryHorizontalGap = useGalleryHorizontalGap();
   const galleryVerticalGap = useGalleryVerticalGap();
   const galleryReflowDuration = useGalleryReflowDuration();
+
+  // Check if min lanes would overflow the window width
+  const minLayoutWidth =
+    galleryMinLanes * (galleryCustomBaseWidth + galleryHorizontalGap);
+  const isColumnsDestructive = minLayoutWidth > windowWidth;
 
   const {
     setGalleryLanesRange,
@@ -74,15 +94,16 @@ export function ThumbnailGalleryDisplaySettings({
       <AccordionSection value="layout" title="Layout">
         <RangeSliderField
           id={`${idPrefix}lanes-range-slider`}
-          label="Columns"
+          label={`Columns ${isColumnsDestructive ? "(will shrink)" : ""}`}
           minValue={galleryMinLanes}
           maxValue={galleryMaxLanes}
           min={MIN_GALLERY_LANES}
           max={MAX_GALLERY_LANES}
           step={1}
           onValueChange={setGalleryLanesRange}
-          destructiveThreshold={(MIN_GALLERY_LANES + MAX_GALLERY_LANES) / 2}
+          isDestructive={isColumnsDestructive}
         />
+
         <SwitchField
           id={`${idPrefix}expand-images-switch`}
           label="Stretch thumbnails to fill columns"

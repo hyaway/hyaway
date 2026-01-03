@@ -90,8 +90,8 @@ interface RangeSliderFieldProps {
   onValueChange?: (minValue: number, maxValue: number) => void;
   /** Custom formatter for the displayed values */
   formatValue?: (minValue: number, maxValue: number) => string;
-  /** Threshold above which minValue triggers destructive styling. Defaults to no destructive styling. */
-  destructiveThreshold?: number;
+  /** When true, applies destructive styling to the slider track */
+  isDestructive?: boolean;
 }
 
 export function RangeSliderField({
@@ -104,14 +104,11 @@ export function RangeSliderField({
   step,
   onValueChange,
   formatValue,
-  destructiveThreshold,
+  isDestructive = false,
 }: RangeSliderFieldProps) {
   const formattedValue = formatValue
     ? formatValue(minValue, maxValue)
     : `${minValue} - ${maxValue}`;
-
-  const isDestructive =
-    destructiveThreshold !== undefined && minValue > destructiveThreshold;
 
   return (
     <div className="flex flex-col gap-3">
