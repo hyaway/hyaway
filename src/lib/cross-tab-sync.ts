@@ -33,7 +33,7 @@ interface PersistApi {
  *   persist(
  *     (set) => ({ ... }),
  *     {
- *       name: "my-store",
+ *       name: "hyaway-my-store",
  *       // Optional: custom merge for complex state
  *       merge: (persisted, current) => deepMerge(current, persisted),
  *     },

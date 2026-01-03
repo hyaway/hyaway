@@ -20,7 +20,7 @@ const useTagsSettingsStore = create<TagsSettingsState>()(
       },
     }),
     {
-      name: "tags-settings",
+      name: "hyaway-tags-settings",
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
     },

@@ -25,7 +25,7 @@ const usePagesSettingsStore = create<PagesSettingsState>()(
       },
     }),
     {
-      name: "pages-settings",
+      name: "hyaway-pages-settings",
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
     },

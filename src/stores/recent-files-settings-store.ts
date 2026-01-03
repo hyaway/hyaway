@@ -25,7 +25,7 @@ const useRecentFilesSettingsStore = create<RecentFilesSettingsState>()(
       },
     }),
     {
-      name: "recent-files-settings",
+      name: "hyaway-recent-files-settings",
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
     },

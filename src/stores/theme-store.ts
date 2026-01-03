@@ -45,7 +45,7 @@ export const useThemeStore = create<ThemeState>()(
       },
     }),
     {
-      name: "theme-storage", // localStorage key
+      name: "hyaway-theme-storage",
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, _hasHydrated, ...rest }) => rest,
       onRehydrateStorage: () => (state) => {

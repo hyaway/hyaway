@@ -83,7 +83,7 @@ const useSidebarStore = create<SidebarStoreState>()(
       },
     }),
     {
-      name: "sidebar-state",
+      name: "hyaway-sidebar-state",
       storage: createJSONStorage(() => localStorage),
       // Only persist desktop state, not mobile or actions
       partialize: ({ actions, leftMobileOpen, rightMobileOpen, ...rest }) =>

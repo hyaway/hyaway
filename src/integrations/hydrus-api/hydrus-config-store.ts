@@ -97,7 +97,7 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
 
 export const useAuthStore = create<AuthState>()(
   persist(authSlice, {
-    name: "hydrus-api-token-storage",
+    name: "hyaway-hydrus-api-token-storage",
     storage: createJSONStorage(() => localStorage),
     partialize: (state) => ({
       api_access_key: state.api_access_key,

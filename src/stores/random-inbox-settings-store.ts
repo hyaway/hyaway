@@ -20,7 +20,7 @@ const useRandomInboxSettingsStore = create<RandomInboxSettingsState>()(
       },
     }),
     {
-      name: "random-inbox-settings",
+      name: "hyaway-random-inbox-settings",
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
     },

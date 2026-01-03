@@ -25,7 +25,7 @@ const useFileViewerSettingsStore = create<FileViewerSettingsState>()(
       },
     }),
     {
-      name: "file-viewer-settings",
+      name: "hyaway-file-viewer-settings",
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
     },

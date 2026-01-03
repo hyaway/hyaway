@@ -120,7 +120,7 @@ const useWatchHistoryStore = create<WatchHistoryState>()(
       },
     }),
     {
-      name: "history",
+      name: "hyaway-history",
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
       merge: (persisted, current) =>

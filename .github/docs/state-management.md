@@ -168,7 +168,21 @@ This ensures:
 
 ## Store Structure
 
-All stores follow a consistent pattern:
+All stores follow a consistent pattern.
+
+### localStorage Key Convention
+
+All persist keys **must** use the `hyaway-` prefix to avoid conflicts with other projects running on the same localhost origin:
+
+```
+hyaway-{store-name}
+```
+
+Examples: `hyaway-theme-storage`, `hyaway-gallery-settings`, `hyaway-history`
+
+This prevents collisions when developing multiple apps on `localhost:3000` or similar ports.
+
+### Basic Pattern
 
 ```tsx
 import { create } from "zustand";
@@ -195,7 +209,7 @@ const useMyStore = create<MyState>()(
       },
     }),
     {
-      name: "my-store", // localStorage key
+      name: "hyaway-my-store", // localStorage key - always use hyaway- prefix
       partialize: ({ actions, ...rest }) => rest, // Don't persist actions
     },
   ),
@@ -239,7 +253,7 @@ const useFeatureStore = create<FeatureState>()(
       },
     }),
     {
-      name: "feature-storage",
+      name: "hyaway-feature-storage",
       partialize: ({ actions, ...rest }) => rest,
     },
   ),

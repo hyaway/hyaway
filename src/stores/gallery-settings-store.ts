@@ -65,7 +65,7 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
       },
     }),
     {
-      name: "gallery-settings",
+      name: "hyaway-gallery-settings",
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
     },
