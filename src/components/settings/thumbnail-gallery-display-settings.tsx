@@ -81,6 +81,7 @@ export function ThumbnailGalleryDisplaySettings({
           max={MAX_GALLERY_LANES}
           step={1}
           onValueChange={setGalleryLanesRange}
+          destructiveThreshold={(MIN_GALLERY_LANES + MAX_GALLERY_LANES) / 2}
         />
         <SwitchField
           id={`${idPrefix}expand-images-switch`}

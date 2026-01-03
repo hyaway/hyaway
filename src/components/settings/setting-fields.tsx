@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IconChevronLeftPipe, IconChevronRightPipe } from "@tabler/icons-react";
 import {
   AccordionContent,
   AccordionItem,
@@ -89,6 +90,8 @@ interface RangeSliderFieldProps {
   onValueChange?: (minValue: number, maxValue: number) => void;
   /** Custom formatter for the displayed values */
   formatValue?: (minValue: number, maxValue: number) => string;
+  /** Threshold above which minValue triggers destructive styling. Defaults to no destructive styling. */
+  destructiveThreshold?: number;
 }
 
 export function RangeSliderField({
@@ -101,10 +104,14 @@ export function RangeSliderField({
   step,
   onValueChange,
   formatValue,
+  destructiveThreshold,
 }: RangeSliderFieldProps) {
   const formattedValue = formatValue
     ? formatValue(minValue, maxValue)
     : `${minValue} - ${maxValue}`;
+
+  const isDestructive =
+    destructiveThreshold !== undefined && minValue > destructiveThreshold;
 
   return (
     <div className="flex flex-col gap-3">
@@ -125,7 +132,15 @@ export function RangeSliderField({
         min={min}
         max={max}
         step={step}
-        minStepsBetweenValues={1}
+        minStepsBetweenValues={0}
+        variant={isDestructive ? "destructive" : "default"}
+        renderThumb={(index) =>
+          index === 0 ? (
+            <IconChevronLeftPipe className="text-primary size-4" />
+          ) : (
+            <IconChevronRightPipe className="text-primary size-4" />
+          )
+        }
       />
     </div>
   );

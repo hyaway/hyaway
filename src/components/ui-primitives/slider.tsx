@@ -9,8 +9,15 @@ function Slider({
   value,
   min = 0,
   max = 100,
+  renderThumb,
+  variant = "default",
   ...props
-}: SliderPrimitive.Root.Props) {
+}: SliderPrimitive.Root.Props & {
+  /** Custom render function for thumb content. Receives the thumb index. */
+  renderThumb?: (index: number) => React.ReactNode;
+  /** Visual variant for the slider */
+  variant?: "default" | "destructive";
+}) {
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
@@ -44,15 +51,23 @@ function Slider({
         >
           <SliderPrimitive.Indicator
             data-slot="slider-range"
-            className="bg-primary select-none data-horizontal:h-full data-vertical:w-full"
+            className={cn(
+              "transition-colors select-none data-horizontal:h-full data-vertical:w-full",
+              variant === "destructive" ? "bg-destructive" : "bg-primary",
+            )}
           />
         </SliderPrimitive.Track>
         {Array.from({ length: _values.length }, (_, index) => (
           <SliderPrimitive.Thumb
             data-slot="slider-thumb"
             key={index}
-            className="border-primary ring-ring/50 block size-5 shrink-0 rounded-4xl border bg-white shadow-sm transition-colors select-none hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
-          />
+            className={cn(
+              "border-primary ring-ring/50 block size-5 shrink-0 rounded-4xl border bg-white shadow-sm transition-colors select-none hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50",
+              renderThumb && "flex items-center justify-center",
+            )}
+          >
+            {renderThumb?.(index)}
+          </SliderPrimitive.Thumb>
         ))}
       </SliderPrimitive.Control>
     </SliderPrimitive.Root>
