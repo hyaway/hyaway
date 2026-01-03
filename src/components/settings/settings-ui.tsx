@@ -1,3 +1,5 @@
+import { IconRestore } from "@tabler/icons-react";
+import { Button } from "@/components/ui-primitives/button";
 import { cn } from "@/lib/utils";
 
 export function SettingsHeader({
@@ -23,5 +25,27 @@ export function SettingsTitle({
       className={cn("text-base font-medium", className)}
       {...props}
     />
+  );
+}
+
+interface SettingsResetButtonProps {
+  onReset: () => void;
+  label?: string;
+}
+
+export function SettingsResetButton({
+  onReset,
+  label = "Reset to defaults",
+}: SettingsResetButtonProps) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      onClick={onReset}
+      aria-label={label}
+      title={label}
+    >
+      <IconRestore />
+    </Button>
   );
 }

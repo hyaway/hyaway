@@ -34,12 +34,13 @@ type GallerySettingsState = {
     setHorizontalGap: (gap: number) => void;
     setVerticalGap: (gap: number) => void;
     setReflowDuration: (duration: number) => void;
+    reset: () => void;
   };
 };
 
 const useGallerySettingsStore = create<GallerySettingsState>()(
   persist(
-    (set) => ({
+    (set, _get, store) => ({
       minLanes: MIN_GALLERY_LANES,
       maxLanes: MAX_GALLERY_LANES,
       expandImages: true,
@@ -62,6 +63,7 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
         setHorizontalGap: (horizontalGap: number) => set({ horizontalGap }),
         setVerticalGap: (verticalGap: number) => set({ verticalGap }),
         setReflowDuration: (reflowDuration: number) => set({ reflowDuration }),
+        reset: () => set(store.getInitialState()),
       },
     }),
     {

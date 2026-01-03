@@ -8,15 +8,17 @@ type TagsSettingsState = {
   sortMode: TagsSortMode;
   actions: {
     setSortMode: (mode: TagsSortMode) => void;
+    reset: () => void;
   };
 };
 
 const useTagsSettingsStore = create<TagsSettingsState>()(
   persist(
-    (set) => ({
+    (set, _get, store) => ({
       sortMode: "count",
       actions: {
         setSortMode: (sortMode: TagsSortMode) => set({ sortMode }),
+        reset: () => set(store.getInitialState()),
       },
     }),
     {

@@ -8,15 +8,17 @@ type RandomInboxSettingsState = {
   limit: number;
   actions: {
     setLimit: (limit: number) => void;
+    reset: () => void;
   };
 };
 
 const useRandomInboxSettingsStore = create<RandomInboxSettingsState>()(
   persist(
-    (set) => ({
+    (set, _get, store) => ({
       limit: 100,
       actions: {
         setLimit: (limit: number) => set({ limit }),
+        reset: () => set(store.getInitialState()),
       },
     }),
     {

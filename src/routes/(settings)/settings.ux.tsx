@@ -7,6 +7,7 @@ import { RecentFilesSettingsCard } from "./-components/recent-files-settings-car
 import { HistorySettingsCard } from "./-components/history-settings-card";
 import { TagsSortCard } from "./-components/tags-sort-card";
 import { ThemeCard } from "./-components/theme-card";
+import { ResetAllUxSettingsCard } from "./-components/reset-all-ux-settings-card";
 import { Heading } from "@/components/ui-primitives/heading";
 
 export const Route = createFileRoute("/(settings)/settings/ux")({
@@ -31,6 +32,7 @@ function SettingsUXComponent() {
       <RecentFilesSettingsCard />
       <HistorySettingsCard />
       <RandomInboxSettingsCard />
+      <ResetAllUxSettingsCard />
     </div>
   );
 }

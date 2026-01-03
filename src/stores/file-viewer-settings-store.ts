@@ -10,18 +10,20 @@ type FileViewerSettingsState = {
   actions: {
     setStartExpanded: (expanded: boolean) => void;
     setImageBackground: (bg: ImageBackground) => void;
+    reset: () => void;
   };
 };
 
 const useFileViewerSettingsStore = create<FileViewerSettingsState>()(
   persist(
-    (set) => ({
+    (set, _get, store) => ({
       startExpanded: false,
       imageBackground: "checkerboard",
       actions: {
         setStartExpanded: (startExpanded: boolean) => set({ startExpanded }),
         setImageBackground: (imageBackground: ImageBackground) =>
           set({ imageBackground }),
+        reset: () => set(store.getInitialState()),
       },
     }),
     {

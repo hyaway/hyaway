@@ -3,6 +3,7 @@ import {
   HistorySettings,
   WATCH_HISTORY_SETTINGS_TITLE,
 } from "@/components/settings/history-settings";
+import { SettingsResetButton } from "@/components/settings/settings-ui";
 import {
   Card,
   CardContent,
@@ -18,12 +19,15 @@ import { Button } from "@/components/ui-primitives/button";
 
 export function HistorySettingsCard() {
   const entries = useWatchHistoryEntries();
-  const { clearHistory } = useWatchHistoryActions();
+  const { clearHistory, reset } = useWatchHistoryActions();
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{WATCH_HISTORY_SETTINGS_TITLE}</CardTitle>
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle>{WATCH_HISTORY_SETTINGS_TITLE}</CardTitle>
+          <SettingsResetButton onReset={reset} />
+        </div>
         <CardDescription>
           Configure how viewed files are tracked. Files you open are remembered
           for quick access later.

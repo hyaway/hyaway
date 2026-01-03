@@ -1,8 +1,8 @@
-import { SETTINGS_ACTION, SETTINGS_RESET_CONFIG_ACTION } from "./constants";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui-primitives/card";
@@ -14,19 +14,21 @@ export function ResetCard({ resetKey }: { resetKey: () => void }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>(Optional) Reset all Hydrus API settings</CardTitle>
+        <CardTitle>Reset all API settings</CardTitle>
+        <CardDescription>
+          Clear your API endpoint and access key configuration. You will need to
+          reconfigure your connection to Hydrus.
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <Button
-          type="button"
-          name={SETTINGS_ACTION}
-          value={SETTINGS_RESET_CONFIG_ACTION}
+          variant="destructive"
           onClick={() => {
             reset();
             resetKey();
           }}
         >
-          Reset all Hydrus API settings
+          Reset API settings
         </Button>
       </CardContent>
     </Card>

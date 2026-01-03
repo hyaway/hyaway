@@ -1,4 +1,5 @@
 import type { TagsSortMode } from "@/stores/tags-settings-store";
+import { SettingsResetButton } from "@/components/settings/settings-ui";
 import {
   Card,
   CardContent,
@@ -18,12 +19,15 @@ import {
 
 export function TagsSortCard() {
   const tagsSortMode = useTagsSortMode();
-  const { setSortMode } = useTagsSettingsActions();
+  const { setSortMode, reset } = useTagsSettingsActions();
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tags sidebar</CardTitle>
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle>Tags sidebar</CardTitle>
+          <SettingsResetButton onReset={reset} />
+        </div>
         <CardDescription>
           Configure how tags are sorted in the sidebar.
         </CardDescription>

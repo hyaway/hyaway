@@ -10,18 +10,20 @@ type PagesSettingsState = {
   actions: {
     setMaxColumns: (columns: number) => void;
     setShowScrollBadge: (show: boolean) => void;
+    reset: () => void;
   };
 };
 
 const usePagesSettingsStore = create<PagesSettingsState>()(
   persist(
-    (set) => ({
+    (set, _get, store) => ({
       maxColumns: MAX_PAGES_COLUMNS,
       showScrollBadge: true,
       actions: {
         setMaxColumns: (maxColumns: number) => set({ maxColumns }),
         setShowScrollBadge: (showScrollBadge: boolean) =>
           set({ showScrollBadge }),
+        reset: () => set(store.getInitialState()),
       },
     }),
     {

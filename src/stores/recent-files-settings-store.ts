@@ -11,17 +11,19 @@ type RecentFilesSettingsState = {
   actions: {
     setLimit: (limit: number) => void;
     setDays: (days: number) => void;
+    reset: () => void;
   };
 };
 
 const useRecentFilesSettingsStore = create<RecentFilesSettingsState>()(
   persist(
-    (set) => ({
+    (set, _get, store) => ({
       limit: 100,
       days: 3,
       actions: {
         setLimit: (limit: number) => set({ limit }),
         setDays: (days: number) => set({ days }),
+        reset: () => set(store.getInitialState()),
       },
     }),
     {

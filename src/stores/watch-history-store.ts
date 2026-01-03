@@ -31,6 +31,8 @@ type WatchHistoryState = {
     setEnabled: (enabled: boolean) => void;
     /** Set the maximum number of entries to keep */
     setLimit: (limit: number) => void;
+    /** Reset settings (not entries) to defaults */
+    reset: () => void;
   };
 };
 
@@ -79,7 +81,7 @@ function mergeWatchHistory(
 
 const useWatchHistoryStore = create<WatchHistoryState>()(
   persist(
-    (set, get) => ({
+    (set, get, store) => ({
       entries: [],
       enabled: true,
       limit: DEFAULT_WATCH_HISTORY_LIMIT,
@@ -116,6 +118,12 @@ const useWatchHistoryStore = create<WatchHistoryState>()(
           } else {
             set({ limit });
           }
+        },
+        reset: () => {
+          // Reset settings only, preserve entries
+          const { entries, clearedAt } = get();
+          const initial = store.getInitialState();
+          set({ ...initial, entries, clearedAt });
         },
       },
     }),
