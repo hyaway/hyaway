@@ -69,7 +69,10 @@ Popovers live near their usage:
 Create `src/components/settings/{feature}-settings.tsx`:
 
 ```tsx
-import { useSomeSetting, useSettingsActions } from "@/lib/settings-store";
+import {
+  useSomeSetting,
+  useFeatureSettingsActions,
+} from "@/lib/stores/feature-settings-store";
 import { SettingsGroup, SwitchField, SliderField } from "./setting-fields";
 
 export const FEATURE_SETTINGS_TITLE = "Feature Name";
@@ -80,7 +83,7 @@ export interface FeatureSettingsProps {
 
 export function FeatureSettings({ idPrefix = "" }: FeatureSettingsProps) {
   const someSetting = useSomeSetting();
-  const { setSomeSetting } = useSettingsActions();
+  const { setSomeSetting } = useFeatureSettingsActions();
 
   return (
     <SettingsGroup>

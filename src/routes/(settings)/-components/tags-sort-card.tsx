@@ -1,4 +1,4 @@
-import type { TagsSortMode } from "@/lib/settings-store";
+import type { TagsSortMode } from "@/lib/stores/tags-settings-store";
 import {
   Card,
   CardContent,
@@ -11,11 +11,14 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { Label } from "@/components/ui-primitives/label";
-import { useSettingsActions, useTagsSortMode } from "@/lib/settings-store";
+import {
+  useTagsSettingsActions,
+  useTagsSortMode,
+} from "@/lib/stores/tags-settings-store";
 
 export function TagsSortCard() {
   const tagsSortMode = useTagsSortMode();
-  const { setTagsSortMode } = useSettingsActions();
+  const { setSortMode } = useTagsSettingsActions();
 
   return (
     <Card>
@@ -34,7 +37,7 @@ export function TagsSortCard() {
             onValueChange={(value) => {
               const newValue = value[0] as TagsSortMode | undefined;
               if (newValue) {
-                setTagsSortMode(newValue);
+                setSortMode(newValue);
               }
             }}
             variant="outline"

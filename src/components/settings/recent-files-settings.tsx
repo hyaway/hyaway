@@ -4,8 +4,8 @@ import {
   MAX_RECENT_FILES_LIMIT,
   useRecentFilesDays,
   useRecentFilesLimit,
-  useSettingsActions,
-} from "@/lib/settings-store";
+  useRecentFilesSettingsActions,
+} from "@/lib/stores/recent-files-settings-store";
 
 export const RECENT_FILES_SETTINGS_TITLE = "Recent files";
 
@@ -18,7 +18,7 @@ export function RecentFilesSettings({
 }: RecentFilesSettingsProps) {
   const recentFilesLimit = useRecentFilesLimit();
   const recentFilesDays = useRecentFilesDays();
-  const { setRecentFilesLimit, setRecentFilesDays } = useSettingsActions();
+  const { setLimit, setDays } = useRecentFilesSettingsActions();
 
   return (
     <SettingsGroup>
@@ -29,7 +29,7 @@ export function RecentFilesSettings({
         min={100}
         max={MAX_RECENT_FILES_LIMIT}
         step={100}
-        onValueChange={setRecentFilesLimit}
+        onValueChange={setLimit}
         commitOnRelease
       />
       <SliderField
@@ -39,7 +39,7 @@ export function RecentFilesSettings({
         min={1}
         max={MAX_RECENT_FILES_DAYS}
         step={1}
-        onValueChange={setRecentFilesDays}
+        onValueChange={setDays}
         formatValue={(v) => (v === 1 ? "Last 24 hours" : `Last ${v} days`)}
         commitOnRelease
       />

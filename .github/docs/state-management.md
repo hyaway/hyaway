@@ -9,7 +9,12 @@ Hyaway uses **Zustand** for client-side state management with explicit selector 
 | Store         | File                                             | Purpose                |
 | ------------- | ------------------------------------------------ | ---------------------- |
 | Theme         | `lib/theme-store.ts`                             | Dark/light mode        |
-| UX Settings   | `lib/settings-store.ts`                          | UI preferences         |
+| Gallery       | `lib/stores/gallery-settings-store.ts`           | Gallery preferences    |
+| File Viewer   | `lib/stores/file-viewer-settings-store.ts`       | Viewer preferences     |
+| Pages         | `lib/stores/pages-settings-store.ts`             | Pages layout           |
+| Recent Files  | `lib/stores/recent-files-settings-store.ts`      | Recent files settings  |
+| Random Inbox  | `lib/stores/random-inbox-settings-store.ts`      | Random inbox settings  |
+| Tags          | `lib/stores/tags-settings-store.ts`              | Tag sorting mode       |
 | History       | `lib/watch-history-store.ts`                     | Watch history tracking |
 | Sidebar       | `lib/sidebar-store.ts`                           | Sidebar persistence    |
 | Hydrus Config | `integrations/hydrus-api/hydrus-config-store.ts` | API connection         |
@@ -20,7 +25,10 @@ Each store exports individual selector hooks for each piece of state:
 
 ```tsx
 import { useActiveTheme, useThemeActions } from "@/lib/theme-store";
-import { useGalleryMaxLanes, useSettingsActions } from "@/lib/settings-store";
+import {
+  useGalleryMaxLanes,
+  useGallerySettingsActions,
+} from "@/lib/stores/gallery-settings-store";
 import {
   useWatchHistoryEntries,
   useWatchHistoryActions,
@@ -34,7 +42,7 @@ function MyComponent() {
 
   // Access actions via actions hook
   const { setThemePreference } = useThemeActions();
-  const { setGalleryMaxLanes } = useSettingsActions();
+  const { setLanesRange } = useGallerySettingsActions();
   const { addViewedFile } = useWatchHistoryActions();
 
   return <div>...</div>;

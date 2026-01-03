@@ -1,14 +1,14 @@
 import { SettingsGroup, SwitchField } from "./setting-fields";
-import type { ImageBackground } from "@/lib/settings-store";
+import type { ImageBackground } from "@/lib/stores/file-viewer-settings-store";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import {
+  useFileViewerSettingsActions,
   useFileViewerStartExpanded,
   useImageBackground,
-  useSettingsActions,
-} from "@/lib/settings-store";
+} from "@/lib/stores/file-viewer-settings-store";
 import { Label } from "@/components/ui-primitives/label";
 
 export const FILE_VIEWER_SETTINGS_TITLE = "Media viewer";
@@ -20,8 +20,8 @@ export interface FileViewerSettingsProps {
 export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
   const fileViewerStartExpanded = useFileViewerStartExpanded();
   const imageBackground = useImageBackground();
-  const { setFileViewerStartExpanded, setImageBackground } =
-    useSettingsActions();
+  const { setStartExpanded, setImageBackground } =
+    useFileViewerSettingsActions();
 
   return (
     <SettingsGroup>
@@ -29,7 +29,7 @@ export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
         id={`${idPrefix}file-viewer-start-expanded-switch`}
         label="Open images expanded"
         checked={fileViewerStartExpanded}
-        onCheckedChange={setFileViewerStartExpanded}
+        onCheckedChange={setStartExpanded}
       />
       <div className="flex flex-col gap-3">
         <Label>Image background</Label>

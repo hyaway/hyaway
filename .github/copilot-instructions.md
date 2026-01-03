@@ -115,7 +115,12 @@ When updating a component with a skeleton, **always update the skeleton to match
 | Store         | Purpose         | Location                                         |
 | ------------- | --------------- | ------------------------------------------------ |
 | Theme         | Dark/light mode | `lib/theme-store.ts`                             |
-| UX Settings   | UI preferences  | `lib/settings-store.ts`                          |
+| Gallery       | Gallery prefs   | `lib/stores/gallery-settings-store.ts`           |
+| File Viewer   | Viewer prefs    | `lib/stores/file-viewer-settings-store.ts`       |
+| Pages         | Pages layout    | `lib/stores/pages-settings-store.ts`             |
+| Recent Files  | Recent settings | `lib/stores/recent-files-settings-store.ts`      |
+| Random Inbox  | Inbox settings  | `lib/stores/random-inbox-settings-store.ts`      |
+| Tags          | Tag sorting     | `lib/stores/tags-settings-store.ts`              |
 | Watch History | View tracking   | `lib/watch-history-store.ts`                     |
 | Sidebar       | Sidebar state   | `lib/sidebar-store.ts`                           |
 | Hydrus Config | API connection  | `integrations/hydrus-api/hydrus-config-store.ts` |
@@ -124,11 +129,14 @@ Each store exports explicit selector hooks:
 
 ```tsx
 import { useActiveTheme, useThemeActions } from "@/lib/theme-store";
-import { useGalleryMaxLanes, useSettingsActions } from "@/lib/settings-store";
+import {
+  useGalleryMaxLanes,
+  useGallerySettingsActions,
+} from "@/lib/stores/gallery-settings-store";
 import { useSidebarSide } from "@/lib/sidebar-store";
 
 const activeTheme = useActiveTheme();
-const { setGalleryMaxLanes } = useSettingsActions();
+const { setLanesRange } = useGallerySettingsActions();
 const { desktopOpen, toggleDesktop } = useSidebarSide("left");
 ```
 

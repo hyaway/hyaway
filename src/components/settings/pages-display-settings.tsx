@@ -2,9 +2,9 @@ import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
 import {
   MAX_PAGES_COLUMNS,
   usePagesMaxColumns,
+  usePagesSettingsActions,
   usePagesShowScrollBadge,
-  useSettingsActions,
-} from "@/lib/settings-store";
+} from "@/lib/stores/pages-settings-store";
 
 export const PAGES_DISPLAY_SETTINGS_TITLE = "Pages display";
 
@@ -17,7 +17,7 @@ export function PagesDisplaySettings({
 }: PagesDisplaySettingsProps) {
   const pagesMaxColumns = usePagesMaxColumns();
   const pagesShowScrollBadge = usePagesShowScrollBadge();
-  const { setPagesMaxColumns, setPagesShowScrollBadge } = useSettingsActions();
+  const { setMaxColumns, setShowScrollBadge } = usePagesSettingsActions();
 
   return (
     <SettingsGroup>
@@ -28,13 +28,13 @@ export function PagesDisplaySettings({
         min={3}
         max={MAX_PAGES_COLUMNS}
         step={1}
-        onValueChange={setPagesMaxColumns}
+        onValueChange={setMaxColumns}
       />
       <SwitchField
         id={`${idPrefix}show-scroll-badge-switch`}
         label="Show scroll position"
         checked={pagesShowScrollBadge}
-        onCheckedChange={setPagesShowScrollBadge}
+        onCheckedChange={setShowScrollBadge}
       />
     </SettingsGroup>
   );

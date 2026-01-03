@@ -1,8 +1,11 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import type { TagsSortMode } from "@/lib/settings-store";
-import { useSettingsActions, useTagsSortMode } from "@/lib/settings-store";
+import type { TagsSortMode } from "@/lib/stores/tags-settings-store";
+import {
+  useTagsSettingsActions,
+  useTagsSortMode,
+} from "@/lib/stores/tags-settings-store";
 import {
   SidebarContent,
   SidebarFooter,
@@ -35,7 +38,7 @@ export const TagsSidebar = memo(function TagsSidebar({
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
   const [search, setSearch] = useState("");
   const sortMode = useTagsSortMode();
-  const { setTagsSortMode } = useSettingsActions();
+  const { setSortMode } = useTagsSettingsActions();
 
   // Defer heavy computation so UI stays responsive
   const deferredItems = useDeferredValue(items);
@@ -149,7 +152,7 @@ export const TagsSidebar = memo(function TagsSidebar({
           value={[sortMode]}
           onValueChange={(value) => {
             const newValue = value[0] as TagsSortMode | undefined;
-            if (newValue) setTagsSortMode(newValue);
+            if (newValue) setSortMode(newValue);
           }}
           variant="outline"
           size="sm"

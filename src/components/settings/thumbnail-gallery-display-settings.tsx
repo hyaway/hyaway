@@ -19,10 +19,10 @@ import {
   useGalleryMaxLanes,
   useGalleryMinLanes,
   useGalleryReflowDuration,
+  useGallerySettingsActions,
   useGalleryShowScrollBadge,
   useGalleryVerticalGap,
-  useSettingsActions,
-} from "@/lib/settings-store";
+} from "@/lib/stores/gallery-settings-store";
 import { Accordion } from "@/components/ui-primitives/accordion";
 import { Label } from "@/components/ui-primitives/label";
 import {
@@ -75,15 +75,15 @@ export function ThumbnailGalleryDisplaySettings({
   const isColumnsDestructive = minLayoutWidth > windowWidth;
 
   const {
-    setGalleryLanesRange,
-    setGalleryExpandImages,
-    setGalleryShowScrollBadge,
-    setGalleryBaseWidthMode,
-    setGalleryCustomBaseWidth,
-    setGalleryHorizontalGap,
-    setGalleryVerticalGap,
-    setGalleryReflowDuration,
-  } = useSettingsActions();
+    setLanesRange,
+    setExpandImages,
+    setShowScrollBadge,
+    setBaseWidthMode,
+    setCustomBaseWidth,
+    setHorizontalGap,
+    setVerticalGap,
+    setReflowDuration,
+  } = useGallerySettingsActions();
 
   return (
     <Accordion
@@ -100,7 +100,7 @@ export function ThumbnailGalleryDisplaySettings({
           min={MIN_GALLERY_LANES}
           max={MAX_GALLERY_LANES}
           step={1}
-          onValueChange={setGalleryLanesRange}
+          onValueChange={setLanesRange}
           isDestructive={isColumnsDestructive}
         />
 
@@ -108,7 +108,7 @@ export function ThumbnailGalleryDisplaySettings({
           id={`${idPrefix}expand-images-switch`}
           label="Stretch thumbnails to fill columns"
           checked={galleryExpandImages}
-          onCheckedChange={setGalleryExpandImages}
+          onCheckedChange={setExpandImages}
         />
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
@@ -118,7 +118,7 @@ export function ThumbnailGalleryDisplaySettings({
               onValueChange={(values) => {
                 const value = values[0];
                 if (value === "service" || value === "custom") {
-                  setGalleryBaseWidthMode(value);
+                  setBaseWidthMode(value);
                 }
               }}
               variant="outline"
@@ -136,7 +136,7 @@ export function ThumbnailGalleryDisplaySettings({
               min={MIN_GALLERY_BASE_WIDTH}
               max={MAX_GALLERY_BASE_WIDTH}
               step={10}
-              onValueChange={setGalleryCustomBaseWidth}
+              onValueChange={setCustomBaseWidth}
               formatValue={(v) => `${v}px`}
             />
           )}
@@ -151,7 +151,7 @@ export function ThumbnailGalleryDisplaySettings({
           min={0}
           max={MAX_GALLERY_GAP}
           step={1}
-          onValueChange={setGalleryHorizontalGap}
+          onValueChange={setHorizontalGap}
           formatValue={(v) => `${v}px`}
         />
         <SliderField
@@ -161,7 +161,7 @@ export function ThumbnailGalleryDisplaySettings({
           min={0}
           max={MAX_GALLERY_GAP}
           step={1}
-          onValueChange={setGalleryVerticalGap}
+          onValueChange={setVerticalGap}
           formatValue={(v) => `${v}px`}
         />
       </AccordionSection>
@@ -174,7 +174,7 @@ export function ThumbnailGalleryDisplaySettings({
           min={0}
           max={MAX_GALLERY_REFLOW_DURATION}
           step={50}
-          onValueChange={setGalleryReflowDuration}
+          onValueChange={setReflowDuration}
           formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
         />
       </AccordionSection>
@@ -184,7 +184,7 @@ export function ThumbnailGalleryDisplaySettings({
           id={`${idPrefix}show-scroll-badge-switch`}
           label="Show scroll position"
           checked={galleryShowScrollBadge}
-          onCheckedChange={setGalleryShowScrollBadge}
+          onCheckedChange={setShowScrollBadge}
         />
       </AccordionSection>
     </Accordion>

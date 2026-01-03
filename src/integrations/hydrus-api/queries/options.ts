@@ -8,7 +8,7 @@ import {
   DEFAULT_THUMBNAIL_SIZE,
   MAX_GALLERY_BASE_WIDTH,
   MIN_GALLERY_BASE_WIDTH,
-} from "@/lib/settings-store";
+} from "@/lib/stores/gallery-settings-store";
 
 export const useGetClientOptionsQuery = () => {
   const isConfigured = useIsApiConfigured();
