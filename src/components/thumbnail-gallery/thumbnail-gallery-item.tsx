@@ -220,7 +220,7 @@ function ThumbnailGalleryItemContent({
   return (
     <div
       className={cn(
-        "bg-muted text-muted-foreground relative flex h-full w-full flex-col overflow-hidden rounded-sm shadow-sm",
+        "bg-muted text-muted-foreground @container relative flex h-full w-full flex-col overflow-hidden rounded-sm shadow-sm",
         "pointer-events-none",
       )}
     >
@@ -241,32 +241,43 @@ function ThumbnailGalleryItemContent({
           />
         )}
       </div>
-      <div className="bg-muted text-muted-foreground flex h-6 shrink-0 items-center gap-1.5 px-1.5 text-xs">
+      <div className="bg-muted text-muted-foreground flex h-6 shrink-0 items-center gap-0.5 px-0.5 text-[8px] @[150px]:gap-1 @[150px]:px-1 @[150px]:text-xs">
         {item.mime.startsWith("video/") && (
-          <IconMovie className="size-4" aria-label="Video" />
+          <IconMovie
+            className="size-2 @[60px]:size-3 @[150px]:size-4"
+            aria-label="Video"
+          />
         )}
         {item.has_audio && (
-          <IconVolume className="size-4" aria-label="Has audio" />
+          <IconVolume
+            className="size-2 @[60px]:size-3 @[150px]:size-4"
+            aria-label="Has audio"
+          />
         )}
         {fileSize && (
-          <span aria-label={`File size: ${fileSize}`}>{fileSize}</span>
+          <span
+            className="hidden @[100px]:inline"
+            aria-label={`File size: ${fileSize}`}
+          >
+            {fileSize}
+          </span>
         )}
         <span className="flex-1" />
         {item.is_inbox && (
           <IconMailFilled
-            className="text-foreground size-4"
+            className="text-foreground size-2 @[60px]:size-3 @[150px]:size-4"
             aria-label="In inbox"
           />
         )}
         {item.is_trashed && (
           <IconTrashFilled
-            className="text-destructive size-4"
+            className="text-destructive size-2 @[60px]:size-3 @[150px]:size-4"
             aria-label="Trashed"
           />
         )}
         {item.is_deleted && !item.is_trashed && (
           <IconBan
-            className="text-destructive size-4"
+            className="text-destructive size-3 @[150px]:size-4"
             aria-label="Permanently deleted"
           />
         )}
