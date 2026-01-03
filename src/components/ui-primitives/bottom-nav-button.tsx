@@ -64,7 +64,7 @@ export const BottomNavButton = forwardRef<
           {icon}
         </span>
       )}
-      <span className="short:sr-only short:@xl:not-sr-only text-xs @xl:text-sm">
+      <span className="short:sr-only short:@xl:not-sr-only text-xs max-[250px]:sr-only @xl:text-sm">
         {label}
       </span>
     </Button>
