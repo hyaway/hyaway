@@ -1,5 +1,6 @@
 import { startTransition, useLayoutEffect, useState } from "react";
 import {
+  GALLERY_GAP_SIZE,
   useGalleryExpandImages,
   useGalleryMaxLanes,
 } from "@/lib/settings-store";
@@ -41,12 +42,12 @@ export function useResponsiveLanes(
       const entry = entries[0];
       const calculatedLanes = Math.max(
         1,
-        Math.floor(entry.contentRect.width / (defaultWidth + 4)),
+        Math.floor(entry.contentRect.width / (defaultWidth + GALLERY_GAP_SIZE)),
       );
       const newLanes = Math.min(calculatedLanes, maxLanes);
       const newWidth = expandImages
-        ? entry.contentRect.width / newLanes - 4
-        : defaultWidth - 4;
+        ? entry.contentRect.width / newLanes - GALLERY_GAP_SIZE
+        : defaultWidth - GALLERY_GAP_SIZE;
 
       startTransition(() => {
         setGridState({ width: newWidth, desiredLanes: calculatedLanes });
