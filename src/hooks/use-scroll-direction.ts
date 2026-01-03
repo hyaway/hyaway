@@ -65,6 +65,17 @@ export function useScrollDirection(threshold = 10) {
         return;
       }
 
+      // Show when at bottom of page (with small tolerance for overscroll)
+      const maxScroll =
+        document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollY >= maxScroll - 70 - threshold) {
+        console.log("at bottom");
+        setIsVisible(true);
+        lastScrollY.current = scrollY;
+        ticking.current = false;
+        return;
+      }
+
       const diff = scrollY - lastScrollY.current;
       if (Math.abs(diff) >= threshold) {
         setIsVisible(diff < 0);
