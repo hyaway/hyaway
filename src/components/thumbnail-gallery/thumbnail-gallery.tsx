@@ -175,42 +175,41 @@ export function PureThumbnailGallery({
   );
 
   return (
-    <div className="w-full">
-      <div ref={parentRef} className="@container w-full" style={{ maxWidth }}>
-        <ul
-          role="grid"
-          aria-label={ariaLabel}
-          onKeyDown={handleKeyDown}
-          data-scrolling={rowVirtualizer.isScrolling}
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-          }}
-          className="relative w-full"
-        >
-          {!!lanes &&
-            virtualItems.map((virtualRow) => {
-              const item = deferredItems[virtualRow.index];
-              const itemHeight = getItemHeight(item);
+    <div className="w-full" ref={parentRef}>
+      <ul
+        role="grid"
+        aria-label={ariaLabel}
+        onKeyDown={handleKeyDown}
+        data-scrolling={rowVirtualizer.isScrolling}
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+          maxWidth,
+        }}
+        className="@container relative w-full"
+      >
+        {!!lanes &&
+          virtualItems.map((virtualRow) => {
+            const item = deferredItems[virtualRow.index];
+            const itemHeight = getItemHeight(item);
 
-              return (
-                <ThumbnailGalleryItem
-                  key={virtualRow.index}
-                  virtualRow={virtualRow}
-                  lanes={lanes}
-                  totalItemsCount={deferredItems.length}
-                  item={item}
-                  width={width}
-                  height={itemHeight}
-                  scrollMargin={rowVirtualizer.options.scrollMargin}
-                  tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
-                  setLinkRef={setLinkRef}
-                  onItemFocus={handleItemFocus}
-                  getFileLink={getFileLink}
-                />
-              );
-            })}
-        </ul>
-      </div>
+            return (
+              <ThumbnailGalleryItem
+                key={virtualRow.index}
+                virtualRow={virtualRow}
+                lanes={lanes}
+                totalItemsCount={deferredItems.length}
+                item={item}
+                width={width}
+                height={itemHeight}
+                scrollMargin={rowVirtualizer.options.scrollMargin}
+                tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
+                setLinkRef={setLinkRef}
+                onItemFocus={handleItemFocus}
+                getFileLink={getFileLink}
+              />
+            );
+          })}
+      </ul>
       <ScrollPositionBadge
         current={(lastItemIndex ?? 0) + 1}
         loaded={deferredItems.length}

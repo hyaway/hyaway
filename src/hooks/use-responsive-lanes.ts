@@ -44,12 +44,9 @@ export function useResponsiveLanes(
         Math.floor(entry.contentRect.width / (defaultWidth + 4)),
       );
       const newLanes = Math.min(calculatedLanes, maxLanes);
-      const newWidth =
-        calculatedLanes > maxLanes && expandImages
-          ? entry.contentRect.width / newLanes - 4
-          : calculatedLanes < 3
-            ? entry.contentRect.width / newLanes - 8
-            : defaultWidth;
+      const newWidth = expandImages
+        ? entry.contentRect.width / newLanes - 4
+        : defaultWidth - 4;
 
       startTransition(() => {
         setGridState({ width: newWidth, desiredLanes: calculatedLanes });
