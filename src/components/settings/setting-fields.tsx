@@ -73,6 +73,59 @@ export function SliderField({
   );
 }
 
+interface RangeSliderFieldProps {
+  id: string;
+  label: string;
+  minValue: number;
+  maxValue: number;
+  min: number;
+  max: number;
+  step: number;
+  onValueChange?: (minValue: number, maxValue: number) => void;
+  /** Custom formatter for the displayed values */
+  formatValue?: (minValue: number, maxValue: number) => string;
+}
+
+export function RangeSliderField({
+  id,
+  label,
+  minValue,
+  maxValue,
+  min,
+  max,
+  step,
+  onValueChange,
+  formatValue,
+}: RangeSliderFieldProps) {
+  const formattedValue = formatValue
+    ? formatValue(minValue, maxValue)
+    : `${minValue} - ${maxValue}`;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <Label htmlFor={id}>{label}</Label>
+        <span className="text-muted-foreground text-base tabular-nums">
+          {formattedValue}
+        </span>
+      </div>
+      <Slider
+        id={id}
+        value={[minValue, maxValue]}
+        onValueChange={(v) => {
+          if (Array.isArray(v) && v.length === 2) {
+            onValueChange?.(v[0], v[1]);
+          }
+        }}
+        min={min}
+        max={max}
+        step={step}
+        minStepsBetweenValues={1}
+      />
+    </div>
+  );
+}
+
 interface SwitchFieldProps {
   id: string;
   label: string;

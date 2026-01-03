@@ -26,7 +26,10 @@ import { useThumbnailUrl } from "@/hooks/use-url-with-api-key";
 import { formatBytes } from "@/lib/format-utils";
 import { cn } from "@/lib/utils";
 import { checkerboardBg } from "@/lib/style-constants";
-import { useImageBackground } from "@/lib/settings-store";
+import {
+  DEFAULT_GALLERY_REFLOW_DURATION,
+  useImageBackground,
+} from "@/lib/settings-store";
 
 /** Height of the polaroid-style footer strip in pixels (h-6 = 24px) */
 export const ITEM_FOOTER_HEIGHT = 24;
@@ -63,6 +66,8 @@ export interface ThumbnailGalleryItemProps extends React.HTMLAttributes<HTMLLIEl
   getFileLink?: FileLinkBuilder;
   /** Accessible label for the item link */
   "aria-label"?: string;
+  /** Duration of the reflow animation in milliseconds (0 = disabled) */
+  reflowDuration?: number;
 }
 
 export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
@@ -78,6 +83,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
   setLinkRef,
   onItemFocus,
   getFileLink = defaultFileLinkBuilder,
+  reflowDuration = DEFAULT_GALLERY_REFLOW_DURATION,
   ...props
 }: ThumbnailGalleryItemProps) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -153,6 +159,8 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         [`--thumbnail-hover-scale`]: `${scale}`,
         [`--thumbnail-hover-reverse-scale`]: `${1 / scale}`,
         [`--badge-offset-scaled`]: `calc(0.25rem / ${scale})`,
+        transitionDuration:
+          reflowDuration > 0 ? `${reflowDuration}ms` : undefined,
       }}
       className={cn(
         "group absolute top-0 left-0 z-0 flex h-full w-full justify-center overflow-visible [content-visibility:auto]",
@@ -160,7 +168,9 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         "active:z-30 active:[content-visibility:visible]",
         "has-focus-visible:z-20 has-focus-visible:[content-visibility:visible]",
         width < height ? "flex-col" : "flex-row",
-        "transition-transform duration-350 ease-out in-data-[scrolling=true]:transition-none",
+        reflowDuration > 0
+          ? "transition-transform ease-out in-data-[scrolling=true]:transition-none"
+          : "transition-none",
         menuOpen && "z-30 [content-visibility:visible]",
         className,
       )}

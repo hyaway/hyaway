@@ -1,11 +1,32 @@
-import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
 import {
+  RangeSliderField,
+  SettingsGroup,
+  SliderField,
+  SwitchField,
+} from "./setting-fields";
+import {
+  MAX_GALLERY_BASE_WIDTH,
+  MAX_GALLERY_GAP,
   MAX_GALLERY_LANES,
+  MAX_GALLERY_REFLOW_DURATION,
+  MIN_GALLERY_BASE_WIDTH,
+  MIN_GALLERY_LANES,
+  useGalleryBaseWidthMode,
+  useGalleryCustomBaseWidth,
   useGalleryExpandImages,
+  useGalleryHorizontalGap,
   useGalleryMaxLanes,
+  useGalleryMinLanes,
+  useGalleryReflowDuration,
   useGalleryShowScrollBadge,
+  useGalleryVerticalGap,
   useSettingsActions,
 } from "@/lib/settings-store";
+import { Label } from "@/components/ui-primitives/label";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui-primitives/toggle-group";
 
 export const THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE =
   "Thumbnail gallery display";
@@ -17,31 +38,105 @@ export interface ThumbnailGalleryDisplaySettingsProps {
 export function ThumbnailGalleryDisplaySettings({
   idPrefix = "",
 }: ThumbnailGalleryDisplaySettingsProps) {
+  const galleryMinLanes = useGalleryMinLanes();
   const galleryMaxLanes = useGalleryMaxLanes();
   const galleryExpandImages = useGalleryExpandImages();
   const galleryShowScrollBadge = useGalleryShowScrollBadge();
+  const galleryBaseWidthMode = useGalleryBaseWidthMode();
+  const galleryCustomBaseWidth = useGalleryCustomBaseWidth();
+  const galleryHorizontalGap = useGalleryHorizontalGap();
+  const galleryVerticalGap = useGalleryVerticalGap();
+  const galleryReflowDuration = useGalleryReflowDuration();
+
   const {
-    setGalleryMaxLanes,
+    setGalleryLanesRange,
     setGalleryExpandImages,
     setGalleryShowScrollBadge,
+    setGalleryBaseWidthMode,
+    setGalleryCustomBaseWidth,
+    setGalleryHorizontalGap,
+    setGalleryVerticalGap,
+    setGalleryReflowDuration,
   } = useSettingsActions();
 
   return (
     <SettingsGroup>
-      <SliderField
-        id={`${idPrefix}max-lanes-slider`}
-        label="Maximum lanes"
-        value={galleryMaxLanes}
-        min={1}
+      <RangeSliderField
+        id={`${idPrefix}lanes-range-slider`}
+        label="Lane count range"
+        minValue={galleryMinLanes}
+        maxValue={galleryMaxLanes}
+        min={MIN_GALLERY_LANES}
         max={MAX_GALLERY_LANES}
         step={1}
-        onValueChange={setGalleryMaxLanes}
+        onValueChange={setGalleryLanesRange}
       />
       <SwitchField
         id={`${idPrefix}expand-images-switch`}
         label="Grow thumbnails horizontally"
         checked={galleryExpandImages}
         onCheckedChange={setGalleryExpandImages}
+      />
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <Label>Base thumbnail width</Label>
+          <ToggleGroup
+            value={[galleryBaseWidthMode]}
+            onValueChange={(values) => {
+              const value = values[0];
+              if (value === "service" || value === "custom") {
+                setGalleryBaseWidthMode(value);
+              }
+            }}
+            variant="outline"
+            size="sm"
+          >
+            <ToggleGroupItem value="service">Service</ToggleGroupItem>
+            <ToggleGroupItem value="custom">Custom</ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        {galleryBaseWidthMode === "custom" && (
+          <SliderField
+            id={`${idPrefix}custom-base-width-slider`}
+            label="Custom width"
+            value={galleryCustomBaseWidth}
+            min={MIN_GALLERY_BASE_WIDTH}
+            max={MAX_GALLERY_BASE_WIDTH}
+            step={10}
+            onValueChange={setGalleryCustomBaseWidth}
+            formatValue={(v) => `${v}px`}
+          />
+        )}
+      </div>
+      <SliderField
+        id={`${idPrefix}horizontal-gap-slider`}
+        label="Horizontal gap"
+        value={galleryHorizontalGap}
+        min={0}
+        max={MAX_GALLERY_GAP}
+        step={1}
+        onValueChange={setGalleryHorizontalGap}
+        formatValue={(v) => `${v}px`}
+      />
+      <SliderField
+        id={`${idPrefix}vertical-gap-slider`}
+        label="Vertical gap"
+        value={galleryVerticalGap}
+        min={0}
+        max={MAX_GALLERY_GAP}
+        step={1}
+        onValueChange={setGalleryVerticalGap}
+        formatValue={(v) => `${v}px`}
+      />
+      <SliderField
+        id={`${idPrefix}reflow-duration-slider`}
+        label="Reflow animation duration"
+        value={galleryReflowDuration}
+        min={0}
+        max={MAX_GALLERY_REFLOW_DURATION}
+        step={50}
+        onValueChange={setGalleryReflowDuration}
+        formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
       />
       <SwitchField
         id={`${idPrefix}show-scroll-badge-switch`}

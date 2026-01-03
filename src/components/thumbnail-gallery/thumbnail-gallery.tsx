@@ -17,11 +17,12 @@ import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGalleryResponsiveLanes } from "@/hooks/use-responsive-lanes";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import {
-  GALLERY_HORIZONTAL_GAP_SIZE,
-  GALLERY_VERTICAL_GAP_SIZE,
-  useGalleryExpandImages,
-  useGalleryMaxLanes,
+  useGalleryBaseWidthMode,
+  useGalleryCustomBaseWidth,
+  useGalleryHorizontalGap,
+  useGalleryReflowDuration,
   useGalleryShowScrollBadge,
+  useGalleryVerticalGap,
 } from "@/lib/settings-store";
 
 export interface ThumbnailGalleryProps {
@@ -95,11 +96,28 @@ export function PureThumbnailGallery({
   // Defer items so old grid stays visible while new items load
   const deferredItems = useDeferredValue(items);
 
+  // Get layout settings - defer expensive ones for responsive slider UX
+  const baseWidthMode = useGalleryBaseWidthMode();
+  const customBaseWidth = useGalleryCustomBaseWidth();
+  const verticalGap = useGalleryVerticalGap();
+  const horizontalGap = useGalleryHorizontalGap();
+  const reflowDuration = useGalleryReflowDuration();
+
+  // Determine base width based on mode
+  const baseWidth =
+    baseWidthMode === "custom" ? customBaseWidth : defaultDimensions.width;
+
+  // Defer layout-affecting values so sliders stay responsive
+  const deferredBaseWidth = useDeferredValue(baseWidth);
+  const deferredVerticalGap = useDeferredValue(verticalGap);
+  const deferredHorizontalGap = useDeferredValue(horizontalGap);
+
   const parentRef = React.useRef<HTMLDivElement>(null);
-  const { width, lanes } = useGalleryResponsiveLanes(
+  const { width, lanes, maxWidth } = useGalleryResponsiveLanes(
     parentRef,
-    defaultDimensions.width,
+    deferredBaseWidth,
     deferredItems.length,
+    { horizontalGap: deferredHorizontalGap },
   );
 
   // Cache heights - invalidates when width changes
@@ -121,7 +139,7 @@ export function PureThumbnailGallery({
       return getItemHeight(item);
     },
     overscan: 4,
-    gap: GALLERY_VERTICAL_GAP_SIZE,
+    gap: deferredVerticalGap,
     lanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
   });
@@ -155,10 +173,8 @@ export function PureThumbnailGallery({
   // Re-measure when items or dimensions change
   useEffect(() => {
     rowVirtualizer.measure();
-  }, [deferredItems, width, lanes, rowVirtualizer]);
+  }, [deferredItems, width, lanes, deferredVerticalGap, rowVirtualizer]);
 
-  const maxLanes = useGalleryMaxLanes();
-  const expandImages = useGalleryExpandImages();
   const showScrollBadge = useGalleryShowScrollBadge();
 
   const { setLinkRef, handleKeyDown, handleItemFocus, getTabIndex } =
@@ -168,10 +184,6 @@ export function PureThumbnailGallery({
       getVirtualItems: rowVirtualizer.getVirtualItems.bind(rowVirtualizer),
       scrollToIndex: rowVirtualizer.scrollToIndex.bind(rowVirtualizer),
     });
-
-  const maxWidth = !expandImages
-    ? maxLanes * (width + GALLERY_HORIZONTAL_GAP_SIZE)
-    : undefined;
 
   const visibleIndices = useMemo(
     () => virtualItems.map((v) => v.index),
@@ -210,6 +222,7 @@ export function PureThumbnailGallery({
                 setLinkRef={setLinkRef}
                 onItemFocus={handleItemFocus}
                 getFileLink={getFileLink}
+                reflowDuration={reflowDuration}
               />
             );
           })}

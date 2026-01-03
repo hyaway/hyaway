@@ -4,6 +4,11 @@ import { getClientOptions } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
 import { useActiveTheme } from "@/lib/theme-store";
 import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
+import {
+  DEFAULT_SERVICE_THUMBNAIL_SIZE,
+  MAX_GALLERY_BASE_WIDTH,
+  MIN_GALLERY_BASE_WIDTH,
+} from "@/lib/settings-store";
 
 export const useGetClientOptionsQuery = () => {
   const isConfigured = useIsApiConfigured();
@@ -34,19 +39,31 @@ export const useThumbnailDimensions = () => {
       data.old_options.thumbnail_dimensions[0] <= 0 ||
       data.old_options.thumbnail_dimensions[1] <= 0
     ) {
-      return { width: 200, height: 200 };
+      return {
+        width: DEFAULT_SERVICE_THUMBNAIL_SIZE,
+        height: DEFAULT_SERVICE_THUMBNAIL_SIZE,
+      };
     }
 
     const width = data.old_options.thumbnail_dimensions[0];
     const height = data.old_options.thumbnail_dimensions[1];
 
-    if (width > 500) {
-      const scaleFactor = width / 500;
+    if (width > MAX_GALLERY_BASE_WIDTH) {
+      const scaleFactor = width / MAX_GALLERY_BASE_WIDTH;
       return {
         width: Math.floor(width / scaleFactor),
         height: Math.floor(height / scaleFactor),
       };
     }
+
+    if (width < MIN_GALLERY_BASE_WIDTH) {
+      const scaleFactor = MIN_GALLERY_BASE_WIDTH / width;
+      return {
+        width: Math.floor(width * scaleFactor),
+        height: Math.floor(height * scaleFactor),
+      };
+    }
+
     return { width, height };
   }, [data, isFetched]);
 };

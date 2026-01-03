@@ -1,21 +1,25 @@
 import { startTransition, useLayoutEffect, useState } from "react";
 import {
-  GALLERY_HORIZONTAL_GAP_SIZE,
   useGalleryExpandImages,
+  useGalleryHorizontalGap,
   useGalleryMaxLanes,
+  useGalleryMinLanes,
 } from "@/lib/settings-store";
 
 interface ResponsiveLanesState {
   width: number;
   lanes: number;
+  maxWidth: number | undefined;
 }
 
 interface UseResponsiveLanesOptions {
   containerRef: React.RefObject<HTMLElement | null>;
   defaultWidth: number;
   itemCount: number;
+  minLanes: number;
   maxLanes: number;
   expandImages: boolean;
+  horizontalGap: number;
 }
 
 /**
@@ -25,12 +29,20 @@ interface UseResponsiveLanesOptions {
 export function useResponsiveLanes(
   options: UseResponsiveLanesOptions,
 ): ResponsiveLanesState {
-  const { containerRef, defaultWidth, itemCount, maxLanes, expandImages } =
-    options;
+  const {
+    containerRef,
+    defaultWidth,
+    itemCount,
+    minLanes,
+    maxLanes,
+    expandImages,
+    horizontalGap,
+  } = options;
 
   const [gridState, setGridState] = useState({
     width: defaultWidth,
     desiredLanes: 0,
+    containerWidth: 0,
   });
 
   useLayoutEffect(() => {
@@ -40,52 +52,76 @@ export function useResponsiveLanes(
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
+      const containerWidth = entry.contentRect.width;
       const calculatedLanes = Math.max(
         1,
-        Math.floor(
-          entry.contentRect.width /
-            (defaultWidth + GALLERY_HORIZONTAL_GAP_SIZE),
-        ),
+        Math.floor(containerWidth / (defaultWidth + horizontalGap)),
       );
-      const newLanes = Math.min(calculatedLanes, maxLanes);
-      const newWidth = expandImages
-        ? entry.contentRect.width / newLanes - GALLERY_HORIZONTAL_GAP_SIZE
-        : defaultWidth - GALLERY_HORIZONTAL_GAP_SIZE;
 
       startTransition(() => {
-        setGridState({ width: newWidth, desiredLanes: calculatedLanes });
+        setGridState({
+          width: defaultWidth,
+          desiredLanes: calculatedLanes,
+          containerWidth,
+        });
       });
     });
 
     observer.observe(containerRef.current);
 
     return () => observer.disconnect();
-  }, [defaultWidth, containerRef, maxLanes, expandImages]);
+  }, [defaultWidth, containerRef, horizontalGap]);
 
-  const { width, desiredLanes } = gridState;
-  const clampedLanes = Math.min(desiredLanes, maxLanes);
+  const { desiredLanes, containerWidth } = gridState;
+
+  // Apply min/max lanes constraints
+  const constrainedLanes = Math.max(minLanes, Math.min(desiredLanes, maxLanes));
+
+  // Check if minLanes forced more lanes than would naturally fit
+  const minLanesForced = desiredLanes < minLanes;
+
+  // Calculate width based on whether we're expanding or minLanes forced expansion
+  const newWidth =
+    expandImages || minLanesForced
+      ? containerWidth / constrainedLanes - horizontalGap
+      : defaultWidth - horizontalGap;
+
+  // Clamp lanes based on item count
   const lanes =
-    itemCount < clampedLanes ? Math.max(itemCount, 2) : clampedLanes;
+    itemCount < constrainedLanes ? Math.max(itemCount, 2) : constrainedLanes;
 
-  return { width, lanes };
+  const finalWidth = newWidth > 0 ? newWidth : defaultWidth;
+
+  // maxWidth constrains the grid when not expanding images
+  const maxWidth = !expandImages
+    ? maxLanes * (finalWidth + horizontalGap)
+    : undefined;
+
+  return { width: finalWidth, lanes, maxWidth };
 }
 
 /**
  * Gallery-specific hook that uses gallery settings for responsive lanes.
+ * Accepts optional overrides for values that should be deferred.
  */
 export function useGalleryResponsiveLanes(
   containerRef: React.RefObject<HTMLElement | null>,
   defaultWidth: number,
   itemCount: number,
+  overrides?: { horizontalGap?: number },
 ): ResponsiveLanesState {
+  const minLanes = useGalleryMinLanes();
   const maxLanes = useGalleryMaxLanes();
   const expandImages = useGalleryExpandImages();
+  const storeHorizontalGap = useGalleryHorizontalGap();
 
   return useResponsiveLanes({
     containerRef,
     defaultWidth,
     itemCount,
+    minLanes,
     maxLanes,
     expandImages,
+    horizontalGap: overrides?.horizontalGap ?? storeHorizontalGap,
   });
 }
