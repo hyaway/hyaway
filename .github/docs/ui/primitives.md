@@ -14,13 +14,15 @@ Base UI components following [shadcn/ui](https://ui.shadcn.com/) patterns. These
 
 ### Layout & Structure
 
-| Component   | File              | Description                              |
-| ----------- | ----------------- | ---------------------------------------- |
-| Card        | `card.tsx`        | Container with header, content, footer   |
-| Collapsible | `collapsible.tsx` | Expandable content section               |
-| Separator   | `separator.tsx`   | Visual divider                           |
-| Sidebar     | `sidebar.tsx`     | App sidebar with header, content, footer |
-| ScrollArea  | `scroll-area.tsx` | Custom scrollbar container               |
+| Component   | File              | Description                                        |
+| ----------- | ----------------- | -------------------------------------------------- |
+| Card        | `card.tsx`        | Container with header, content, footer             |
+| Collapsible | `collapsible.tsx` | Expandable content section                         |
+| Separator   | `separator.tsx`   | Visual divider                                     |
+| Sidebar     | `sidebar.tsx`     | App sidebar (modified for dual left/right support) |
+| ScrollArea  | `scroll-area.tsx` | Custom scrollbar container                         |
+
+> **Note:** The Sidebar component is **modified from shadcn's default** to support both left and right collapsible sidebars simultaneously. State is per-side via `useSidebarSide(side)` from `lib/sidebar-store.ts`. See [State Management](../state-management.md#sidebar-store) for details.
 
 ### Forms & Inputs
 

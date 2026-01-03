@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Hydrus API integration connects to a local [Hydrus Network](https://hydrusnetwork.github.io/hydrus/) client. It uses Axios for HTTP requests with automatic session key management and error recovery.
+The Hydrus API integration connects to a local [Hydrus Network](https://hydrusnetwork.github.io/hydrus/) client. It uses Axios for HTTP requests with automatic session key management and error recovery. All API responses are validated with **Zod schemas** defined in `models.ts`.
 
 **For official Hydrus API documentation**, see the [Hydrus Client API docs](https://hydrusnetwork.github.io/hydrus/developer_api.html).
 

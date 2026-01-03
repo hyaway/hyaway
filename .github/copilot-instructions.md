@@ -8,9 +8,23 @@ Hyaway is a React + TypeScript frontend application for browsing Hydrus Network 
 - **TanStack Router** for file-based routing
 - **TanStack Query** for data fetching
 - **Zustand** for client-side state management
+- **Zod** for schema validation (API responses, forms)
 - **Tailwind CSS v4** for styling
 - **Base UI** primitives via shadcn/ui
 - **Vite** as the build tool
+
+## Developer Workflows
+
+```bash
+pnpm dev          # Start dev server on port 3000
+pnpm build        # Production build (vite build && tsc)
+pnpm test         # Run Vitest tests
+pnpm check        # Format + lint fix
+pnpm typecheck    # TypeScript check only
+pnpm storybook    # Component playground on port 6006
+```
+
+**Adding UI primitives:** Use `npx shadcn@latest add <component>` - components install to `ui-primitives/`.
 
 ## Documentation
 
@@ -69,6 +83,18 @@ import { Button } from "@/components/ui-primitives/button";
 import { FeatureCard } from "./-components/feature-card";
 ```
 
+### Component Placement
+
+```
+Is it a basic UI element (button, input, card)?     → ui-primitives/
+Is it used in the app shell (header, sidebar)?      → app-shell/
+Is it a page layout primitive (heading, loading)?   → page-shell/
+Is it specific to a feature (gallery, tags)?        → feature folder
+Is it only used by one route?                       → routes/{group}/-components/
+```
+
+When updating a component with a skeleton, **always update the skeleton to match** (same structure, spacing, heights).
+
 ### Naming Conventions
 
 | Type       | Convention           | Example                      |
@@ -77,7 +103,7 @@ import { FeatureCard } from "./-components/feature-card";
 | Components | PascalCase           | `ThumbnailGalleryItem`       |
 | Constants  | SCREAMING_SNAKE_CASE | `GALLERY_SETTINGS_TITLE`     |
 
-### Key Patterns
+### Routing Patterns
 
 - **Pathless groups `()`** - Organize routes without affecting URLs
 - **`-` prefix** - Co-locate route-specific files (ignored by router)
@@ -109,10 +135,94 @@ const { desktopOpen, toggleDesktop } = useSidebarSide("left");
 ### Tailwind Custom Variants
 
 - **`short:`** - Limited vertical space (max-height: 500px)
+- **`pointer-hover:`** - Mouse/trackpad devices (not touch)
 - Combine with breakpoints: `short:sm:`, `short:md:`, etc.
 - Combine with container queries: `short:@sm:`, `short:@xl:`, etc.
 
 See `src/styles.css` for full documentation.
+
+## Key Patterns
+
+### Hydrus API Integration
+
+All API calls flow through `integrations/hydrus-api/`:
+
+```
+api-client.ts          # Raw API functions with Zod validation
+├── clients/           # Axios instances (base, access-key, session-key)
+├── models.ts          # Types + Zod schemas for API responses
+└── queries/           # TanStack Query hooks (search.ts, services.ts, etc.)
+```
+
+**Zod validation** - All API responses are validated with Zod schemas defined in `models.ts`. When adding new endpoints, define both the schema and TypeScript type:
+
+```tsx
+// models.ts
+export const MyResponseSchema = z.object({ ... });
+export type MyResponse = z.infer<typeof MyResponseSchema>;
+
+// api-client.ts
+export async function myApiCall(): Promise<MyResponse> {
+  const response = await sessionKeyClient.get("/endpoint");
+  return MyResponseSchema.parse(response.data);
+}
+```
+
+**Query hooks pattern** - Each query checks `useIsApiConfigured()` before fetching:
+
+```tsx
+// integrations/hydrus-api/queries/search.ts
+export const useRecentlyArchivedFilesQuery = () => {
+  const isConfigured = useIsApiConfigured();
+  return useQuery({
+    queryKey: ["searchFiles", "recentlyArchived", tags, options],
+    queryFn: () => searchFiles({ tags, ...options }),
+    enabled: isConfigured && tags.length > 0,
+  });
+};
+```
+
+**Client types**: `baseClient` (no auth), `accessKeyClient` (permanent key), `sessionKeyClient` (temporary, auto-refreshed on 419 errors).
+
+### Authentication Flow
+
+The `_auth.tsx` layout route wraps all protected routes. It:
+
+1. Verifies persistent + session access keys via `useVerifyPersistentAccessQuery`
+2. Shows loading/error states during verification
+3. Redirects to `/settings/client-api` if not authenticated
+
+### Settings Pattern
+
+Settings use **shared controls + thin wrappers**:
+
+```tsx
+// components/settings/{feature}-settings.tsx - Shared component
+export const THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE =
+  "Thumbnail gallery display";
+export function ThumbnailGalleryDisplaySettings({ idPrefix = "" }) {
+  const value = useGalleryMaxLanes();
+  const { setGalleryMaxLanes } = useSettingsActions();
+  return (
+    <SliderField
+      id={`${idPrefix}slider`}
+      value={value}
+      onValueChange={setGalleryMaxLanes}
+    />
+  );
+}
+
+// Then wrap in Card (settings page) or SettingsPopover (inline) with the same component
+```
+
+### Sidebar Architecture
+
+The sidebar component (`ui-primitives/sidebar.tsx`) is **modified from shadcn's default** to support both left and right collapsible sidebars simultaneously. Key differences:
+
+- State is managed per-side via `useSidebarSide(side)` from `lib/sidebar-store.ts`
+- Each `<Sidebar side="left|right">` manages its own context independently
+- `<SidebarTrigger side="left|right">` works both inside and outside sidebar context
+- `<SidebarLayout>` is a simple wrapper with no global state
 
 ## Maintaining Documentation
 
