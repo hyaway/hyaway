@@ -20,7 +20,7 @@ export function ThumbnailGalleryDisplaySettingsCard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ThumbnailGalleryDisplaySettings />
+        <ThumbnailGalleryDisplaySettings openMultiple />
       </CardContent>
     </Card>
   );

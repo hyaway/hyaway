@@ -1,4 +1,9 @@
 import { useState } from "react";
+import {
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui-primitives/accordion";
 import { Label } from "@/components/ui-primitives/label";
 import { Slider } from "@/components/ui-primitives/slider";
 import { Switch } from "@/components/ui-primitives/switch";
@@ -160,4 +165,26 @@ interface SettingsGroupProps {
 
 export function SettingsGroup({ children }: SettingsGroupProps) {
   return <div className="flex flex-col gap-6">{children}</div>;
+}
+
+interface AccordionSectionProps {
+  /** Unique value used by Accordion to track open state */
+  value: string;
+  title: string;
+  children: React.ReactNode;
+}
+
+export function AccordionSection({
+  value,
+  title,
+  children,
+}: AccordionSectionProps) {
+  return (
+    <AccordionItem value={value}>
+      <AccordionTrigger className="py-2">{title}</AccordionTrigger>
+      <AccordionContent>
+        <div className="flex flex-col gap-4">{children}</div>
+      </AccordionContent>
+    </AccordionItem>
+  );
 }
