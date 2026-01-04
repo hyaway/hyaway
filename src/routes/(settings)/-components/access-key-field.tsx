@@ -4,6 +4,7 @@ import {
   IconAlertCircle,
   IconCircleCheck,
   IconInfoCircle,
+  IconShieldOff,
 } from "@tabler/icons-react";
 import z from "zod";
 import { useEffect } from "react";
@@ -12,6 +13,8 @@ import {
   useApiVersionQuery,
   useVerifyPersistentAccessQuery,
 } from "@/integrations/hydrus-api/queries/access";
+import { getMissingPermissions } from "@/integrations/hydrus-api/permissions";
+import { MissingPermissionsList } from "@/components/page-shell/missing-permissions-list";
 import { SecretInput } from "@/components/ui-primitives/input";
 import {
   Field,
@@ -136,11 +139,19 @@ export function AccessKeyField() {
           </Alert>
         ) : (
           <Alert>
-            <IconAlertCircle />
-            <AlertTitle>Insufficient permissions</AlertTitle>
-            <AlertDescription>
-              Insufficient permissions for <b>{data.raw.name ?? "API"}</b>
-              access key on <b>{apiEndpoint}</b>
+            <IconShieldOff />
+            <AlertTitle>Missing permissions</AlertTitle>
+            <AlertDescription className="flex flex-col gap-2">
+              <span>
+                Your access key <b>{data.raw.name ?? "API"}</b> on{" "}
+                <b>{apiEndpoint}</b> is missing required permissions. Update
+                your API key in Hydrus to include these permissions (or permit
+                everything):
+              </span>
+              <MissingPermissionsList
+                missingPermissions={getMissingPermissions(data.raw)}
+                variant="warning"
+              />
             </AlertDescription>
           </Alert>
         )

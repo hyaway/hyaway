@@ -1,11 +1,21 @@
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
-import { IconAlertTriangle, IconLock, IconRefresh } from "@tabler/icons-react";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
+import {
+  IconAlertTriangle,
+  IconLock,
+  IconRefresh,
+  IconShieldOff,
+} from "@tabler/icons-react";
+
+import type { Permission } from "@/integrations/hydrus-api/models";
+import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
+import { getMissingPermissions } from "@/integrations/hydrus-api/permissions";
 import {
   useApiVersionQuery,
   useVerifyPersistentAccessQuery,
   useVerifySessionAccessQuery,
 } from "@/integrations/hydrus-api/queries/access";
-import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
+import { AuthStatusScreen } from "@/components/page-shell/auth-status-screen";
+import { MissingPermissionsList } from "@/components/page-shell/missing-permissions-list";
 import { Button, LinkButton } from "@/components/ui-primitives/button";
 import { Spinner } from "@/components/ui-primitives/spinner";
 
@@ -19,9 +29,9 @@ function AuthPageLayout() {
   const persistentQuery = useVerifyPersistentAccessQuery();
   const sessionQuery = useVerifySessionAccessQuery();
 
-  // Not configured - show login prompt immediately
+  // Not configured - show setup prompt immediately
   if (!isConfigured) {
-    return <AuthLoginPrompt />;
+    return <AuthNotConfiguredPrompt />;
   }
 
   const isPending =
@@ -63,9 +73,12 @@ function AuthPageLayout() {
     );
   }
 
-  // Show login prompt if not authenticated
+  // Show missing permissions prompt if configured but lacking permissions
   if (!isAuthenticated) {
-    return <AuthLoginPrompt />;
+    const missingPermissions = getMissingPermissions(persistentQuery.data.raw);
+    return (
+      <AuthMissingPermissionsPrompt missingPermissions={missingPermissions} />
+    );
   }
 
   return <Outlet />;
@@ -111,19 +124,14 @@ function AuthErrorScreen({
   onRetry: () => void;
 }) {
   return (
-    <div className="flex min-h-[50vh] items-center justify-center p-4">
-      <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
-        <div className="bg-destructive/10 flex size-16 items-center justify-center rounded-full">
-          <IconAlertTriangle className="text-destructive size-8" />
-        </div>
-        <div className="flex flex-col gap-2">
-          <h2 className="text-foreground text-lg font-medium">
-            Connection failed
-          </h2>
-          <p className="text-muted-foreground text-sm text-balance">
-            {error?.message || "Could not verify access to the Hydrus client."}
-          </p>
-        </div>
+    <AuthStatusScreen
+      icon={<IconAlertTriangle className="text-destructive size-8" />}
+      variant="destructive"
+      title="Connection failed"
+      description={
+        error?.message || "Could not verify access to the Hydrus client."
+      }
+      actions={
         <div className="flex w-full gap-2">
           <Button variant="outline" onClick={onRetry} className="flex-1">
             <IconRefresh data-icon="inline-start" />
@@ -137,32 +145,46 @@ function AuthErrorScreen({
             Configure API
           </LinkButton>
         </div>
-      </div>
-    </div>
+      }
+    />
   );
 }
 
-function AuthLoginPrompt() {
+function AuthNotConfiguredPrompt() {
   return (
-    <div className="flex min-h-[50vh] items-center justify-center p-4">
-      <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
-        <div className="bg-muted flex size-16 items-center justify-center rounded-full">
-          <IconLock className="text-muted-foreground size-8" />
-        </div>
-        <div className="flex flex-col gap-2">
-          <h2 className="text-foreground text-lg font-medium">
-            Authentication required
-          </h2>
-          <p className="text-muted-foreground text-sm text-balance">
-            Connect to your Hydrus client to access this page. You'll need to
-            configure the API endpoint and access key.
-          </p>
-        </div>
+    <AuthStatusScreen
+      icon={<IconLock className="text-muted-foreground size-8" />}
+      variant="default"
+      title="Connect to Hydrus"
+      description="Configure the API endpoint and access key to connect to your Hydrus client."
+      actions={
         <LinkButton to="/settings/client-api" size="lg">
           <IconLock data-icon="inline-start" />
           Configure connection
         </LinkButton>
-      </div>
-    </div>
+      }
+    />
+  );
+}
+
+function AuthMissingPermissionsPrompt({
+  missingPermissions,
+}: {
+  missingPermissions: Array<Permission>;
+}) {
+  return (
+    <AuthStatusScreen
+      icon={<IconShieldOff className="text-warning size-8" />}
+      variant="warning"
+      title="Missing permissions"
+      description="Your access key is missing required permissions. Update your API key in Hydrus to include these permissions (or permit everything):"
+      actions={
+        <LinkButton to="/settings/client-api" size="lg">
+          Update API settings
+        </LinkButton>
+      }
+    >
+      <MissingPermissionsList missingPermissions={missingPermissions} />
+    </AuthStatusScreen>
   );
 }

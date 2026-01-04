@@ -5,7 +5,7 @@ import {
   verifyAccessKey,
 } from "../api-client";
 import { useApiEndpoint, useIsApiConfigured } from "../hydrus-config-store";
-import { Permission } from "../models";
+import { checkPermissions } from "../permissions";
 import type { AccessKeyType, VerifyAccessKeyResponse } from "../models";
 
 export const useApiVersionQuery = () => {
@@ -29,22 +29,6 @@ export const useRequestNewPermissionsMutation = () => {
     mutationKey: ["requestNewPermissions"],
   });
 };
-
-const requiredPermissions = [
-  Permission.IMPORT_AND_DELETE_FILES,
-  Permission.EDIT_FILE_TAGS,
-  Permission.SEARCH_FOR_AND_FETCH_FILES,
-  Permission.MANAGE_PAGES,
-] as const;
-
-function checkPermissions(permissionsData?: VerifyAccessKeyResponse) {
-  const hasRequiredPermissions =
-    !!permissionsData?.permits_everything ||
-    requiredPermissions.every((p) =>
-      permissionsData?.basic_permissions.includes(p),
-    );
-  return hasRequiredPermissions;
-}
 
 /**
  * Verify persistent access key validity.

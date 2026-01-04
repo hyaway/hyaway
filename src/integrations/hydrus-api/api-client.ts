@@ -33,8 +33,12 @@ import type {
 export { refreshSessionKey };
 
 // #region Static API Functions (no auth required)
+
 /**
- * Get API version from a Hydrus endpoint (no auth required)
+ * Get API version from a Hydrus endpoint.
+ *
+ * @permission None - This endpoint has no restricted access.
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#api_version
  */
 export async function getApiVersion() {
   const response = await baseClient.get(`/api_version`);
@@ -42,7 +46,11 @@ export async function getApiVersion() {
 }
 
 /**
- * Request new permissions from a Hydrus endpoint (no auth required)
+ * Request new permissions from a Hydrus endpoint.
+ * Requires the "review services" dialog to be open in Hydrus client.
+ *
+ * @permission None - This endpoint has no restricted access.
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#request_new_permissions
  */
 export async function requestNewPermissions(
   name: string,
@@ -55,11 +63,16 @@ export async function requestNewPermissions(
   });
   return RequestNewPermissionsResponseSchema.parse(response.data);
 }
+
 // #endregion Static API Functions
 
 // #region API Functions
+
 /**
- * Verify access key validity
+ * Verify access key validity and get its permissions.
+ *
+ * @permission None - Any access key can verify itself.
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#verify_access_key
  */
 export async function verifyAccessKey(
   keyType: AccessKeyType,
@@ -70,7 +83,10 @@ export async function verifyAccessKey(
 }
 
 /**
- * Get all services configured in Hydrus
+ * Get all services configured in Hydrus.
+ *
+ * @permission Requires at least one of: Import Files (0), Add Tags (2), Manage Pages (4), or Search Files (3).
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#get_services
  */
 export async function getServices(): Promise<GetServicesResponse> {
   const response = await sessionKeyClient.get("/get_services");
@@ -78,7 +94,10 @@ export async function getServices(): Promise<GetServicesResponse> {
 }
 
 /**
- * Search for files matching the given criteria
+ * Search for files matching the given criteria.
+ *
+ * @permission Requires: Search Files (3)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#get_files_search_files
  */
 export async function searchFiles(
   options: SearchFilesOptions,
@@ -94,7 +113,10 @@ export async function searchFiles(
 }
 
 /**
- * Get metadata for the specified file IDs
+ * Get metadata for the specified file IDs.
+ *
+ * @permission Requires: Search Files (3)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#get_files_file_metadata
  */
 export async function getFileMetadata(
   file_ids: Array<number>,
@@ -116,7 +138,10 @@ export async function getFileMetadata(
 }
 
 /**
- * Get all pages from the Hydrus client
+ * Get all pages from the Hydrus client.
+ *
+ * @permission Requires: Manage Pages (4)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#manage_pages_get_pages
  */
 export async function getPages(): Promise<GetPagesResponse> {
   const response = await sessionKeyClient.get("/manage_pages/get_pages");
@@ -124,7 +149,10 @@ export async function getPages(): Promise<GetPagesResponse> {
 }
 
 /**
- * Get info for a specific page
+ * Get info for a specific page.
+ *
+ * @permission Requires: Manage Pages (4)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#manage_pages_get_page_info
  */
 export async function getPageInfo(
   pageKey: string,
@@ -140,7 +168,10 @@ export async function getPageInfo(
 }
 
 /**
- * Refresh a page in the Hydrus client
+ * Refresh a page in the Hydrus client.
+ *
+ * @permission Requires: Manage Pages (4)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#manage_pages_refresh_page
  */
 export async function refreshPage(pageKey: string): Promise<void> {
   await sessionKeyClient.post("/manage_pages/refresh_page", {
@@ -149,7 +180,10 @@ export async function refreshPage(pageKey: string): Promise<void> {
 }
 
 /**
- * Focus a page in the Hydrus client
+ * Focus a page in the Hydrus client.
+ *
+ * @permission Requires: Manage Pages (4)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#manage_pages_focus_page
  */
 export async function focusPage(pageKey: string): Promise<void> {
   await sessionKeyClient.post("/manage_pages/focus_page", {
@@ -158,7 +192,10 @@ export async function focusPage(pageKey: string): Promise<void> {
 }
 
 /**
- * Get client options from Hydrus
+ * Get client options from Hydrus.
+ *
+ * @permission Requires: Manage Database (6)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#manage_database_get_client_options
  */
 export async function getClientOptions(): Promise<GetClientOptionsResponse> {
   const response = await sessionKeyClient.get(
@@ -185,14 +222,20 @@ export type UndeleteFilesOptions = FileIdentifiers & {
 };
 
 /**
- * Send files to the trash
+ * Send files to the trash.
+ *
+ * @permission Requires: Import Files (0)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_files_delete_files
  */
 export async function deleteFiles(options: DeleteFilesOptions): Promise<void> {
   await sessionKeyClient.post("/add_files/delete_files", options);
 }
 
 /**
- * Restore files from the trash
+ * Restore files from the trash.
+ *
+ * @permission Requires: Import Files (0)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_files_undelete_files
  */
 export async function undeleteFiles(
   options: UndeleteFilesOptions,
@@ -201,14 +244,20 @@ export async function undeleteFiles(
 }
 
 /**
- * Archive files (remove from inbox)
+ * Archive files (remove from inbox).
+ *
+ * @permission Requires: Import Files (0)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_files_archive_files
  */
 export async function archiveFiles(options: FileIdentifiers): Promise<void> {
   await sessionKeyClient.post("/add_files/archive_files", options);
 }
 
 /**
- * Unarchive files (put back in inbox)
+ * Unarchive files (put back in inbox).
+ *
+ * @permission Requires: Import Files (0)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_files_unarchive_files
  */
 export async function unarchiveFiles(options: FileIdentifiers): Promise<void> {
   await sessionKeyClient.post("/add_files/unarchive_files", options);
