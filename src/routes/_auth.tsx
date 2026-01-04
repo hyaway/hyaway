@@ -1,9 +1,11 @@
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { IconAlertTriangle, IconLock, IconRefresh } from "@tabler/icons-react";
 import {
+  useApiVersionQuery,
   useVerifyPersistentAccessQuery,
   useVerifySessionAccessQuery,
 } from "@/integrations/hydrus-api/queries/access";
+import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
 import { Button, LinkButton } from "@/components/ui-primitives/button";
 import { Spinner } from "@/components/ui-primitives/spinner";
 
@@ -12,34 +14,51 @@ export const Route = createFileRoute("/_auth")({
 });
 
 function AuthPageLayout() {
+  const isConfigured = useIsApiConfigured();
+  const versionQuery = useApiVersionQuery();
   const persistentQuery = useVerifyPersistentAccessQuery();
   const sessionQuery = useVerifySessionAccessQuery();
 
-  const isLoading = persistentQuery.isLoading || sessionQuery.isLoading;
+  // Not configured - show login prompt immediately
+  if (!isConfigured) {
+    return <AuthLoginPrompt />;
+  }
+
   const isPending =
+    versionQuery.isPending ||
     persistentQuery.isPending ||
-    sessionQuery.isPending ||
-    (persistentQuery.isFetching && !persistentQuery.data) ||
-    (sessionQuery.isFetching && !sessionQuery.data);
-  const hasError = persistentQuery.isError || sessionQuery.isError;
+    sessionQuery.isPending;
+  const hasError =
+    versionQuery.isError || persistentQuery.isError || sessionQuery.isError;
+  const hasData =
+    versionQuery.data && persistentQuery.data && sessionQuery.data;
   const isAuthenticated =
     persistentQuery.data?.hasRequiredPermissions &&
     sessionQuery.data?.hasRequiredPermissions;
 
-  // Show loading state with delayed fade-in to prevent flash
-  if (isLoading || isPending) {
-    return <AuthLoadingScreen />;
-  }
-
-  // Show error state
-  if (hasError) {
+  // Show error state first - but only if we don't have cached data
+  if (hasError && !hasData) {
     return (
       <AuthErrorScreen
-        error={persistentQuery.error || sessionQuery.error}
+        error={
+          versionQuery.error || persistentQuery.error || sessionQuery.error
+        }
         onRetry={() => {
+          versionQuery.refetch();
           persistentQuery.refetch();
           sessionQuery.refetch();
         }}
+      />
+    );
+  }
+
+  // Show loading state while waiting for data
+  if (isPending) {
+    return (
+      <AuthLoadingScreen
+        versionPending={versionQuery.isPending}
+        persistentPending={persistentQuery.isPending}
+        sessionPending={sessionQuery.isPending}
       />
     );
   }
@@ -52,7 +71,23 @@ function AuthPageLayout() {
   return <Outlet />;
 }
 
-function AuthLoadingScreen() {
+function AuthLoadingScreen({
+  versionPending,
+  persistentPending,
+  sessionPending,
+}: {
+  versionPending: boolean;
+  persistentPending: boolean;
+  sessionPending: boolean;
+}) {
+  const status = versionPending
+    ? "Verifying Hydrus endpoint..."
+    : persistentPending
+      ? "Verifying access key..."
+      : sessionPending
+        ? "Establishing session..."
+        : "Checking permissions with Hydrus";
+
   return (
     <div className="flex min-h-[50vh] items-center justify-center">
       <div className="flex flex-col items-center gap-4 text-center">
@@ -61,9 +96,7 @@ function AuthLoadingScreen() {
           <p className="text-foreground text-sm font-medium">
             Verifying access...
           </p>
-          <p className="text-muted-foreground text-xs">
-            Checking permissions with Hydrus
-          </p>
+          <p className="text-muted-foreground text-xs">{status}</p>
         </div>
       </div>
     </div>
@@ -129,15 +162,6 @@ function AuthLoginPrompt() {
           <IconLock data-icon="inline-start" />
           Configure connection
         </LinkButton>
-        <p className="text-muted-foreground text-xs">
-          Need help?{" "}
-          <Link
-            to="/settings/client-api"
-            className="text-primary hover:text-primary/80 underline underline-offset-2"
-          >
-            View setup instructions
-          </Link>
-        </p>
       </div>
     </div>
   );

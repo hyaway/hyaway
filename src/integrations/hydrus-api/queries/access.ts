@@ -16,6 +16,7 @@ export const useApiVersionQuery = () => {
       return getApiVersion();
     },
     enabled: !!apiEndpoint,
+    staleTime: Infinity,
     retry: false,
   });
 };

@@ -10,6 +10,7 @@ import { FooterPortalProvider, FooterPortalSlot } from "./footer-portal";
 import { RightSidebarProvider } from "./right-sidebar-portal";
 import { RightSidebar } from "./right-sidebar";
 import { Sidebar, SidebarLayout } from "@/components/ui-primitives/sidebar";
+import { Toaster } from "@/components/ui-primitives/sonner";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -42,6 +43,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Full-height right sidebar - fixed position */}
         <RightSidebar />
       </RightSidebarProvider>
+
+      {/* Global toast notifications */}
+      <Toaster />
     </SidebarLayout>
   );
 }
