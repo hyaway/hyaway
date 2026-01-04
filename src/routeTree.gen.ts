@@ -24,6 +24,7 @@ import { Route as AuthgalleriesMostViewedRouteImport } from "./routes/_auth/(gal
 import { Route as AuthgalleriesLongestViewedRouteImport } from "./routes/_auth/(galleries)/longest-viewed";
 import { Route as AuthgalleriesHistoryRouteImport } from "./routes/_auth/(galleries)/history";
 import { Route as settingsSettingsUxRouteImport } from "./routes/(settings)/settings.ux";
+import { Route as settingsSettingsDataRouteImport } from "./routes/(settings)/settings.data";
 import { Route as settingsSettingsClientApiRouteImport } from "./routes/(settings)/settings.client-api";
 import { Route as AuthremotePagesPagesIndexRouteImport } from "./routes/_auth/(remote-pages)/pages.index";
 import { Route as AuthgalleriesRemoteHistoryIndexRouteImport } from "./routes/_auth/(galleries)/remote-history.index";
@@ -124,6 +125,11 @@ const AuthgalleriesHistoryRoute = AuthgalleriesHistoryRouteImport.update({
 const settingsSettingsUxRoute = settingsSettingsUxRouteImport.update({
   id: "/ux",
   path: "/ux",
+  getParentRoute: () => settingsSettingsRoute,
+} as any);
+const settingsSettingsDataRoute = settingsSettingsDataRouteImport.update({
+  id: "/data",
+  path: "/data",
   getParentRoute: () => settingsSettingsRoute,
 } as any);
 const settingsSettingsClientApiRoute =
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/settings": typeof settingsSettingsRouteWithChildren;
   "/settings/client-api": typeof settingsSettingsClientApiRoute;
+  "/settings/data": typeof settingsSettingsDataRoute;
   "/settings/ux": typeof settingsSettingsUxRoute;
   "/history": typeof AuthgalleriesHistoryRouteWithChildren;
   "/longest-viewed": typeof AuthgalleriesLongestViewedRouteWithChildren;
@@ -293,6 +300,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/settings/client-api": typeof settingsSettingsClientApiRoute;
+  "/settings/data": typeof settingsSettingsDataRoute;
   "/settings/ux": typeof settingsSettingsUxRoute;
   "/file/$fileId": typeof AuthFileFileIdRoute;
   "/settings": typeof settingsSettingsIndexRoute;
@@ -322,6 +330,7 @@ export interface FileRoutesById {
   "/_auth": typeof AuthRouteWithChildren;
   "/(settings)/settings": typeof settingsSettingsRouteWithChildren;
   "/(settings)/settings/client-api": typeof settingsSettingsClientApiRoute;
+  "/(settings)/settings/data": typeof settingsSettingsDataRoute;
   "/(settings)/settings/ux": typeof settingsSettingsUxRoute;
   "/_auth/(galleries)/history": typeof AuthgalleriesHistoryRouteWithChildren;
   "/_auth/(galleries)/longest-viewed": typeof AuthgalleriesLongestViewedRouteWithChildren;
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | "/"
     | "/settings"
     | "/settings/client-api"
+    | "/settings/data"
     | "/settings/ux"
     | "/history"
     | "/longest-viewed"
@@ -397,6 +407,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | "/settings/client-api"
+    | "/settings/data"
     | "/settings/ux"
     | "/file/$fileId"
     | "/settings"
@@ -425,6 +436,7 @@ export interface FileRouteTypes {
     | "/_auth"
     | "/(settings)/settings"
     | "/(settings)/settings/client-api"
+    | "/(settings)/settings/data"
     | "/(settings)/settings/ux"
     | "/_auth/(galleries)/history"
     | "/_auth/(galleries)/longest-viewed"
@@ -570,6 +582,13 @@ declare module "@tanstack/react-router" {
       path: "/ux";
       fullPath: "/settings/ux";
       preLoaderRoute: typeof settingsSettingsUxRouteImport;
+      parentRoute: typeof settingsSettingsRoute;
+    };
+    "/(settings)/settings/data": {
+      id: "/(settings)/settings/data";
+      path: "/data";
+      fullPath: "/settings/data";
+      preLoaderRoute: typeof settingsSettingsDataRouteImport;
       parentRoute: typeof settingsSettingsRoute;
     };
     "/(settings)/settings/client-api": {
@@ -918,12 +937,14 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
 
 interface settingsSettingsRouteChildren {
   settingsSettingsClientApiRoute: typeof settingsSettingsClientApiRoute;
+  settingsSettingsDataRoute: typeof settingsSettingsDataRoute;
   settingsSettingsUxRoute: typeof settingsSettingsUxRoute;
   settingsSettingsIndexRoute: typeof settingsSettingsIndexRoute;
 }
 
 const settingsSettingsRouteChildren: settingsSettingsRouteChildren = {
   settingsSettingsClientApiRoute: settingsSettingsClientApiRoute,
+  settingsSettingsDataRoute: settingsSettingsDataRoute,
   settingsSettingsUxRoute: settingsSettingsUxRoute,
   settingsSettingsIndexRoute: settingsSettingsIndexRoute,
 };

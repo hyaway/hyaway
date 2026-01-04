@@ -2,9 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FileViewerSettingsCard } from "./-components/file-viewer-settings-card";
 import { ThumbnailGalleryDisplaySettingsCard } from "./-components/thumbnail-gallery-display-settings-card";
 import { PagesDisplaySettingsCard } from "./-components/pages-display-settings-card";
-import { SearchLimitsSettingsCard } from "./-components/search-limits-settings-card";
-import { HistorySettingsCard } from "./-components/history-settings-card";
-import { TagsSortCard } from "./-components/tags-sort-card";
 import { ThemeCard } from "./-components/theme-card";
 import { ResetAllUxSettingsCard } from "./-components/reset-all-ux-settings-card";
 import { Heading } from "@/components/ui-primitives/heading";
@@ -24,12 +21,9 @@ function SettingsUXComponent() {
         UX Settings
       </Heading>
       <ThemeCard />
-      <FileViewerSettingsCard />
-      <ThumbnailGalleryDisplaySettingsCard />
-      <TagsSortCard />
       <PagesDisplaySettingsCard />
-      <SearchLimitsSettingsCard />
-      <HistorySettingsCard />
+      <ThumbnailGalleryDisplaySettingsCard />
+      <FileViewerSettingsCard />
       <ResetAllUxSettingsCard />
     </div>
   );

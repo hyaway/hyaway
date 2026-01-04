@@ -6,6 +6,7 @@ import {
   SwitchField,
 } from "./setting-fields";
 import type { ImageBackground } from "@/stores/file-viewer-settings-store";
+import type { TagsSortMode } from "@/stores/tags-settings-store";
 import {
   MAX_GALLERY_BASE_WIDTH,
   MAX_GALLERY_ENTRY_DURATION,
@@ -35,6 +36,10 @@ import {
   useFileViewerSettingsActions,
   useImageBackground,
 } from "@/stores/file-viewer-settings-store";
+import {
+  useTagsSettingsActions,
+  useTagsSortMode,
+} from "@/stores/tags-settings-store";
 import { Accordion } from "@/components/ui-primitives/accordion";
 import { Label } from "@/components/ui-primitives/label";
 import { Switch } from "@/components/ui-primitives/switch";
@@ -90,8 +95,10 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryImageBackground = useGalleryImageBackground();
   const galleryLinkImageBackground = useGalleryLinkImageBackground();
   const fileViewerImageBackground = useImageBackground();
+  const tagsSortMode = useTagsSortMode();
   const { setImageBackground: setFileViewerImageBackground } =
     useFileViewerSettingsActions();
+  const { setSortMode: setTagsSortMode } = useTagsSettingsActions();
 
   // Check if min lanes would overflow the window width
   const minLayoutWidth =
@@ -160,37 +167,12 @@ export function ThumbnailGalleryDisplaySettings({
           checked={galleryExpandImages}
           onCheckedChange={setExpandImages}
         />
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <Label>Thumbnail size</Label>
-            <ToggleGroup
-              value={[galleryBaseWidthMode]}
-              onValueChange={(values) => {
-                const value = values[0];
-                if (value === "service" || value === "custom") {
-                  setBaseWidthMode(value);
-                }
-              }}
-              variant="outline"
-              size="sm"
-            >
-              <ToggleGroupItem value="service">Hydrus</ToggleGroupItem>
-              <ToggleGroupItem value="custom">Custom</ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-          {galleryBaseWidthMode === "custom" && (
-            <SliderField
-              id={`${idPrefix}custom-base-width-slider`}
-              label="Width"
-              value={galleryCustomBaseWidth}
-              min={MIN_GALLERY_BASE_WIDTH}
-              max={MAX_GALLERY_BASE_WIDTH}
-              step={10}
-              onValueChange={setCustomBaseWidth}
-              formatValue={(v) => `${v}px`}
-            />
-          )}
-        </div>
+        <SwitchField
+          id={`${idPrefix}show-scroll-badge-switch`}
+          label="Show scroll position"
+          checked={galleryShowScrollBadge}
+          onCheckedChange={setShowScrollBadge}
+        />
       </AccordionSection>
 
       <AccordionSection value="spacing" title="Spacing">
@@ -249,20 +231,8 @@ export function ThumbnailGalleryDisplaySettings({
         />
       </AccordionSection>
 
-      <AccordionSection value="extras" title="Extras">
-        <SwitchField
-          id={`${idPrefix}show-scroll-badge-switch`}
-          label="Show scroll position"
-          checked={galleryShowScrollBadge}
-          onCheckedChange={setShowScrollBadge}
-        />
-        <SwitchField
-          id={`${idPrefix}show-context-menu-switch`}
-          label="Show context menu on right-click"
-          checked={galleryEnableContextMenu}
-          onCheckedChange={setEnableContextMenu}
-        />
-        <div className="flex flex-col gap-3">
+      <AccordionSection value="thumbnails" title="Thumbnails">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <Label>Image background</Label>
             {settingsPage && (
@@ -291,6 +261,63 @@ export function ThumbnailGalleryDisplaySettings({
             <ToggleGroupItem value="checkerboard" className="flex-1">
               Checkerboard
             </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <Label>Thumbnail size</Label>
+            <ToggleGroup
+              value={[galleryBaseWidthMode]}
+              onValueChange={(values) => {
+                const value = values[0];
+                if (value === "service" || value === "custom") {
+                  setBaseWidthMode(value);
+                }
+              }}
+              variant="outline"
+              size="sm"
+            >
+              <ToggleGroupItem value="service">Hydrus</ToggleGroupItem>
+              <ToggleGroupItem value="custom">Custom</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+          {galleryBaseWidthMode === "custom" && (
+            <SliderField
+              id={`${idPrefix}custom-base-width-slider`}
+              label="Width"
+              value={galleryCustomBaseWidth}
+              min={MIN_GALLERY_BASE_WIDTH}
+              max={MAX_GALLERY_BASE_WIDTH}
+              step={10}
+              onValueChange={setCustomBaseWidth}
+              formatValue={(v) => `${v}px`}
+            />
+          )}
+        </div>
+        <SwitchField
+          id={`${idPrefix}show-context-menu-switch`}
+          label="Show context menu on right-click"
+          checked={galleryEnableContextMenu}
+          onCheckedChange={setEnableContextMenu}
+        />
+      </AccordionSection>
+
+      <AccordionSection value="tags" title="Tags sidebar">
+        <div className="flex flex-col gap-3">
+          <Label htmlFor={`${idPrefix}tags-sort-toggle`}>Sort tags by</Label>
+          <ToggleGroup
+            id={`${idPrefix}tags-sort-toggle`}
+            value={[tagsSortMode]}
+            onValueChange={(value) => {
+              const newValue = value[0] as TagsSortMode | undefined;
+              if (newValue) {
+                setTagsSortMode(newValue);
+              }
+            }}
+            variant="outline"
+          >
+            <ToggleGroupItem value="count">Count</ToggleGroupItem>
+            <ToggleGroupItem value="namespace">Namespace</ToggleGroupItem>
           </ToggleGroup>
         </div>
       </AccordionSection>

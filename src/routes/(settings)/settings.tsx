@@ -1,5 +1,6 @@
 import { Outlet, createFileRoute, linkOptions } from "@tanstack/react-router";
 import {
+  IconDatabase,
   IconLayoutDashboard,
   IconLayoutDashboardFilled,
   IconLock,
@@ -52,6 +53,12 @@ const settingsItems = linkOptions([
     to: "/settings/ux",
     icon: IconLayoutDashboard,
     filledIcon: IconLayoutDashboardFilled,
+  },
+  {
+    name: "Data",
+    to: "/settings/data",
+    icon: IconDatabase,
+    filledIcon: IconDatabase,
   },
 ]);
 
