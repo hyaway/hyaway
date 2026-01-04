@@ -9,6 +9,7 @@ import {
 import { ThumbnailImage } from "./thumbnail-gallery-item-image";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
+import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { formatBytes } from "@/lib/format-utils";
 import { cn } from "@/lib/utils";
 
@@ -21,13 +22,23 @@ export function ThumbnailGalleryItemContent({
 }: ThumbnailGalleryItemContentProps) {
   const fileSize = formatBytes(item.size);
   const isPermanentlyDeleted = item.is_deleted && !item.is_trashed;
+  const averageColor = getAverageColorFromBlurhash(item.blurhash ?? undefined);
 
   return (
     <div
       className={cn(
-        "bg-muted text-muted-foreground @container relative flex h-full w-full flex-col overflow-hidden rounded-sm shadow-sm",
+        "text-muted-foreground @container relative flex h-full w-full flex-col overflow-hidden rounded-sm shadow-sm",
+        !averageColor && "bg-muted",
         "pointer-events-none",
       )}
+      style={
+        averageColor
+          ? ({
+              backgroundColor: averageColor,
+              "--average-color": averageColor,
+            } as React.CSSProperties)
+          : undefined
+      }
     >
       <div className="relative min-h-0 flex-1 overflow-hidden">
         {isPermanentlyDeleted && item.blurhash ? (
@@ -43,7 +54,6 @@ export function ThumbnailGalleryItemContent({
             fileId={item.file_id}
             width={item.thumbnail_width}
             height={item.thumbnail_height}
-            blurhash={item.blurhash ?? undefined}
           />
         )}
       </div>
