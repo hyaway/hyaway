@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
 import { cn } from "@/lib/utils";
+import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import {
   useFileViewerStartExpanded,
   useImageBackground,
@@ -9,6 +10,7 @@ import {
 interface ImageViewerProps {
   fileUrl: string;
   fileId: number;
+  blurhash?: string;
   onLoad: () => void;
   onError: () => void;
 }
@@ -16,6 +18,7 @@ interface ImageViewerProps {
 export function ImageViewer({
   fileUrl,
   fileId,
+  blurhash,
   onLoad,
   onError,
 }: ImageViewerProps) {
@@ -24,9 +27,27 @@ export function ImageViewer({
   const [loaded, setLoaded] = useState(false);
   const imageBackground = useImageBackground();
 
+  const averageColor = useMemo(
+    () => getAverageColorFromBlurhash(blurhash),
+    [blurhash],
+  );
+
   const handleLoad = () => {
     setLoaded(true);
     onLoad();
+  };
+
+  // Determine background style based on setting
+  const getBackgroundClass = () => {
+    if (!loaded) return "bg-background";
+    switch (imageBackground) {
+      case "checkerboard":
+        return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
+      case "average":
+        return ""; // Handled via inline style
+      default:
+        return "bg-background";
+    }
   };
 
   return (
@@ -42,11 +63,14 @@ export function ImageViewer({
         loading="eager"
         className={cn(
           "max-h-full max-w-full object-contain",
-          loaded && imageBackground === "checkerboard"
-            ? "bg-(image:--checkerboard-bg) bg-size-[20px_20px]"
-            : "bg-background",
+          getBackgroundClass(),
           isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
         )}
+        style={
+          loaded && imageBackground === "average" && averageColor
+            ? { backgroundColor: averageColor }
+            : undefined
+        }
         onLoad={handleLoad}
         onError={onError}
         onClick={() => {

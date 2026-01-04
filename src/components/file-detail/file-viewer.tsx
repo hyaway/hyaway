@@ -36,6 +36,7 @@ export function FileViewer({ data }: { data: FileMetadata }) {
       <ImageViewer
         fileUrl={fileUrl}
         fileId={data.file_id}
+        blurhash={data.blurhash ?? undefined}
         onLoad={onLoad}
         onError={onError}
       />
