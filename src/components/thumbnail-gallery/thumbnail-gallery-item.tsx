@@ -12,7 +12,10 @@ import {
 import { cn } from "@/lib/utils";
 import { useGalleryEnableContextMenu } from "@/stores/gallery-settings-store";
 
-export { ThumbnailImage, type ThumbnailImageProps } from "./thumbnail-image";
+export {
+  ThumbnailImage,
+  type ThumbnailImageProps,
+} from "./thumbnail-gallery-item-image";
 
 /** Height of the polaroid-style footer strip in pixels (h-6 = 24px) */
 export const ITEM_FOOTER_HEIGHT = 24;

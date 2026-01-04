@@ -6,7 +6,7 @@ import {
   IconVolume,
 } from "@tabler/icons-react";
 
-import { ThumbnailImage } from "./thumbnail-image";
+import { ThumbnailImage } from "./thumbnail-gallery-item-image";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { formatBytes } from "@/lib/format-utils";

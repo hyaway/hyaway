@@ -163,7 +163,7 @@ Children consume these via Tailwind classes:
 // In thumbnail-gallery-item.tsx
 className = "duration-(--gallery-hover-zoom-duration)";
 
-// In thumbnail-image.tsx
+// In thumbnail-gallery-item-image.tsx
 className = "duration-(--gallery-entry-duration)";
 ```
 
