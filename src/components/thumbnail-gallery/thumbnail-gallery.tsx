@@ -165,7 +165,7 @@ export function PureThumbnailGallery({
       const item = deferredItems[i];
       return getItemHeight(item);
     },
-    overscan: 4 * effectiveLanes,
+    overscan: 4 * (effectiveLanes || 1),
     gap: deferredVerticalGap,
     lanes: effectiveLanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
@@ -189,8 +189,9 @@ export function PureThumbnailGallery({
   }, [isFetchingNextPage]);
 
   // Infinite scroll - fetch next page when near the end
-  const FETCH_THRESHOLD = 6 * effectiveLanes; // Start fetching when within this many items of the end
+  // 50% from end
   useEffect(() => {
+    const FETCH_THRESHOLD = Math.min(deferredItems.length * 0.5, 256);
     if (lastItemIndex === undefined) return;
     if (fetchingRef.current) return;
 
