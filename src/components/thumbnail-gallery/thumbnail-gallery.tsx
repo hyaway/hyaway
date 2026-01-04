@@ -16,7 +16,10 @@ import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/option
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGalleryResponsiveLanes } from "@/hooks/use-responsive-lanes";
-import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
+import {
+  useElementScrollRestoration,
+  useScrollRestoration,
+} from "@/hooks/use-scroll-restoration";
 import {
   useGalleryBaseWidthMode,
   useGalleryCustomBaseWidth,
@@ -159,6 +162,12 @@ export function PureThumbnailGallery({
     return height;
   };
 
+  // Get scroll restoration data before creating virtualizer
+  const scrollEntry = useElementScrollRestoration({
+    getElement: () => window,
+  });
+  const initialOffset = scrollEntry?.scrollY;
+
   const rowVirtualizer = useWindowVirtualizer({
     count: deferredItems.length,
     estimateSize: (i) => {
@@ -169,10 +178,13 @@ export function PureThumbnailGallery({
     gap: deferredVerticalGap,
     lanes: effectiveLanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
+    initialOffset,
   });
 
   const totalSize = rowVirtualizer.getTotalSize();
-  useScrollRestoration(totalSize);
+
+  // Handle scroll restoration - scrolls window when totalSize is ready
+  useScrollRestoration(totalSize, initialOffset);
 
   // Cache virtual items to avoid calling getVirtualItems() multiple times
   const virtualItems = rowVirtualizer.getVirtualItems();
