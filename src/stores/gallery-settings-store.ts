@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import type { ImageBackground } from "./file-viewer-settings-store";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 export const MAX_GALLERY_LANES = 30;
@@ -32,6 +33,8 @@ type GallerySettingsState = {
   reflowDuration: number;
   entryDuration: number;
   hoverZoomDuration: number;
+  imageBackground: ImageBackground;
+  linkImageBackground: boolean;
   actions: {
     setLanesRange: (min: number, max: number) => void;
     setExpandImages: (expand: boolean) => void;
@@ -44,6 +47,8 @@ type GallerySettingsState = {
     setReflowDuration: (duration: number) => void;
     setEntryDuration: (duration: number) => void;
     setHoverZoomDuration: (duration: number) => void;
+    setImageBackground: (bg: ImageBackground) => void;
+    setLinkImageBackground: (link: boolean) => void;
     reset: () => void;
   };
 };
@@ -63,6 +68,8 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
       reflowDuration: DEFAULT_GALLERY_REFLOW_DURATION,
       entryDuration: DEFAULT_GALLERY_ENTRY_DURATION,
       hoverZoomDuration: DEFAULT_GALLERY_HOVER_ZOOM_DURATION,
+      imageBackground: "checkerboard" as ImageBackground,
+      linkImageBackground: true,
       actions: {
         setLanesRange: (minLanes: number, maxLanes: number) =>
           set({ minLanes, maxLanes }),
@@ -81,6 +88,10 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
         setEntryDuration: (entryDuration: number) => set({ entryDuration }),
         setHoverZoomDuration: (hoverZoomDuration: number) =>
           set({ hoverZoomDuration }),
+        setImageBackground: (imageBackground: ImageBackground) =>
+          set({ imageBackground }),
+        setLinkImageBackground: (linkImageBackground: boolean) =>
+          set({ linkImageBackground }),
         reset: () => set(store.getInitialState()),
       },
     }),
@@ -127,6 +138,12 @@ export const useGalleryEntryDuration = () =>
 
 export const useGalleryHoverZoomDuration = () =>
   useGallerySettingsStore((state) => state.hoverZoomDuration);
+
+export const useGalleryImageBackground = () =>
+  useGallerySettingsStore((state) => state.imageBackground);
+
+export const useGalleryLinkImageBackground = () =>
+  useGallerySettingsStore((state) => state.linkImageBackground);
 
 export const useGallerySettingsActions = () =>
   useGallerySettingsStore((state) => state.actions);

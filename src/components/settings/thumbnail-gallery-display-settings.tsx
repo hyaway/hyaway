@@ -5,6 +5,7 @@ import {
   SliderField,
   SwitchField,
 } from "./setting-fields";
+import type { ImageBackground } from "@/stores/file-viewer-settings-store";
 import {
   MAX_GALLERY_BASE_WIDTH,
   MAX_GALLERY_ENTRY_DURATION,
@@ -21,6 +22,8 @@ import {
   useGalleryExpandImages,
   useGalleryHorizontalGap,
   useGalleryHoverZoomDuration,
+  useGalleryImageBackground,
+  useGalleryLinkImageBackground,
   useGalleryMaxLanes,
   useGalleryMinLanes,
   useGalleryReflowDuration,
@@ -28,8 +31,13 @@ import {
   useGalleryShowScrollBadge,
   useGalleryVerticalGap,
 } from "@/stores/gallery-settings-store";
+import {
+  useFileViewerSettingsActions,
+  useImageBackground,
+} from "@/stores/file-viewer-settings-store";
 import { Accordion } from "@/components/ui-primitives/accordion";
 import { Label } from "@/components/ui-primitives/label";
+import { Switch } from "@/components/ui-primitives/switch";
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -56,12 +64,15 @@ export interface ThumbnailGalleryDisplaySettingsProps {
   openMultiple?: boolean;
   /** When false, all accordion sections start collapsed */
   defaultOpen?: boolean;
+  /** When true, styles the settings for use on a settings page */
+  settingsPage?: boolean;
 }
 
 export function ThumbnailGalleryDisplaySettings({
   idPrefix = "",
   openMultiple = false,
   defaultOpen = true,
+  settingsPage = false,
 }: ThumbnailGalleryDisplaySettingsProps) {
   const windowWidth = useWindowWidth();
   const galleryMinLanes = useGalleryMinLanes();
@@ -76,6 +87,11 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryReflowDuration = useGalleryReflowDuration();
   const galleryEntryDuration = useGalleryEntryDuration();
   const galleryHoverZoomDuration = useGalleryHoverZoomDuration();
+  const galleryImageBackground = useGalleryImageBackground();
+  const galleryLinkImageBackground = useGalleryLinkImageBackground();
+  const fileViewerImageBackground = useImageBackground();
+  const { setImageBackground: setFileViewerImageBackground } =
+    useFileViewerSettingsActions();
 
   // Check if min lanes would overflow the window width
   const minLayoutWidth =
@@ -94,7 +110,30 @@ export function ThumbnailGalleryDisplaySettings({
     setReflowDuration,
     setEntryDuration,
     setHoverZoomDuration,
+    setImageBackground: setGalleryImageBackground,
+    setLinkImageBackground,
   } = useGallerySettingsActions();
+
+  // When linked, changing gallery background also updates file viewer background
+  const handleImageBackgroundChange = (value: ImageBackground) => {
+    setGalleryImageBackground(value);
+    if (galleryLinkImageBackground) {
+      setFileViewerImageBackground(value);
+    }
+  };
+
+  // When enabling link, sync gallery background to file viewer
+  const handleLinkChange = (linked: boolean) => {
+    setLinkImageBackground(linked);
+    if (linked) {
+      setFileViewerImageBackground(galleryImageBackground);
+    }
+  };
+
+  // Determine which background to show (use file viewer's when linked)
+  const effectiveBackground = galleryLinkImageBackground
+    ? fileViewerImageBackground
+    : galleryImageBackground;
 
   return (
     <Accordion
@@ -194,7 +233,7 @@ export function ThumbnailGalleryDisplaySettings({
           value={galleryEntryDuration}
           min={0}
           max={MAX_GALLERY_ENTRY_DURATION}
-          step={25}
+          step={50}
           onValueChange={setEntryDuration}
           formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
         />
@@ -223,6 +262,37 @@ export function ThumbnailGalleryDisplaySettings({
           checked={galleryEnableContextMenu}
           onCheckedChange={setEnableContextMenu}
         />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <Label>Image background</Label>
+            {settingsPage && (
+              <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm">
+                <Switch
+                  checked={galleryLinkImageBackground}
+                  onCheckedChange={handleLinkChange}
+                />
+                Sync with viewer
+              </label>
+            )}
+          </div>
+          <ToggleGroup
+            value={[effectiveBackground]}
+            onValueChange={(value) => {
+              const newValue = value[0] as ImageBackground | undefined;
+              if (newValue) handleImageBackgroundChange(newValue);
+            }}
+            variant="outline"
+            size="sm"
+            className="w-full"
+          >
+            <ToggleGroupItem value="solid" className="flex-1">
+              Solid
+            </ToggleGroupItem>
+            <ToggleGroupItem value="checkerboard" className="flex-1">
+              Checkerboard
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </AccordionSection>
     </Accordion>
   );

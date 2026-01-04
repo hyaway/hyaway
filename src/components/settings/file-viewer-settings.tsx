@@ -9,6 +9,10 @@ import {
   useFileViewerStartExpanded,
   useImageBackground,
 } from "@/stores/file-viewer-settings-store";
+import {
+  useGalleryLinkImageBackground,
+  useGallerySettingsActions,
+} from "@/stores/gallery-settings-store";
 import { Label } from "@/components/ui-primitives/label";
 
 export const FILE_VIEWER_SETTINGS_TITLE = "Media viewer";
@@ -22,6 +26,18 @@ export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
   const imageBackground = useImageBackground();
   const { setStartExpanded, setImageBackground } =
     useFileViewerSettingsActions();
+
+  // Sync with gallery when linked
+  const linkImageBackground = useGalleryLinkImageBackground();
+  const { setImageBackground: setGalleryImageBackground } =
+    useGallerySettingsActions();
+
+  const handleImageBackgroundChange = (value: ImageBackground) => {
+    setImageBackground(value);
+    if (linkImageBackground) {
+      setGalleryImageBackground(value);
+    }
+  };
 
   return (
     <SettingsGroup>
@@ -37,7 +53,7 @@ export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
           value={[imageBackground]}
           onValueChange={(value) => {
             const newValue = value[0] as ImageBackground | undefined;
-            if (newValue) setImageBackground(newValue);
+            if (newValue) handleImageBackgroundChange(newValue);
           }}
           variant="outline"
           size="sm"

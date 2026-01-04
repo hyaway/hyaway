@@ -22,11 +22,13 @@ import {
   useGalleryEntryDuration,
   useGalleryHorizontalGap,
   useGalleryHoverZoomDuration,
+  useGalleryImageBackground,
+  useGalleryLinkImageBackground,
   useGalleryReflowDuration,
   useGalleryShowScrollBadge,
   useGalleryVerticalGap,
 } from "@/stores/gallery-settings-store";
-import { useImageBackground } from "@/stores/file-viewer-settings-store";
+import { useImageBackground as useFileViewerImageBackground } from "@/stores/file-viewer-settings-store";
 import { useSidebarIsTransitioning } from "@/stores/sidebar-store";
 
 export interface ThumbnailGalleryProps {
@@ -111,8 +113,13 @@ export function PureThumbnailGallery({
   const entryDuration = useGalleryEntryDuration();
   const hoverZoomDuration = useGalleryHoverZoomDuration();
 
-  // Image background setting - passed via data attribute to avoid child re-renders
-  const imageBackground = useImageBackground();
+  // Image background setting - use file viewer's when linked
+  const galleryImageBackground = useGalleryImageBackground();
+  const linkImageBackground = useGalleryLinkImageBackground();
+  const fileViewerImageBackground = useFileViewerImageBackground();
+  const imageBackground = linkImageBackground
+    ? fileViewerImageBackground
+    : galleryImageBackground;
 
   // Determine base width based on mode
   const baseWidth =
