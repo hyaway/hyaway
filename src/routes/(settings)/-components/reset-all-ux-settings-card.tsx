@@ -9,8 +9,7 @@ import {
 import { useFileViewerSettingsActions } from "@/stores/file-viewer-settings-store";
 import { useGallerySettingsActions } from "@/stores/gallery-settings-store";
 import { usePagesSettingsActions } from "@/stores/pages-settings-store";
-import { useRandomInboxSettingsActions } from "@/stores/random-inbox-settings-store";
-import { useRecentFilesSettingsActions } from "@/stores/recent-files-settings-store";
+import { useSearchLimitsActions } from "@/stores/search-limits-store";
 import { useTagsSettingsActions } from "@/stores/tags-settings-store";
 import { useWatchHistoryActions } from "@/stores/watch-history-store";
 
@@ -18,8 +17,7 @@ export function ResetAllUxSettingsCard() {
   const { reset: resetGallery } = useGallerySettingsActions();
   const { reset: resetFileViewer } = useFileViewerSettingsActions();
   const { reset: resetPages } = usePagesSettingsActions();
-  const { reset: resetRandomInbox } = useRandomInboxSettingsActions();
-  const { reset: resetRecentFiles } = useRecentFilesSettingsActions();
+  const { reset: resetSearchLimits } = useSearchLimitsActions();
   const { reset: resetTags } = useTagsSettingsActions();
   const { reset: resetWatchHistory } = useWatchHistoryActions();
 
@@ -27,8 +25,7 @@ export function ResetAllUxSettingsCard() {
     resetGallery();
     resetFileViewer();
     resetPages();
-    resetRandomInbox();
-    resetRecentFiles();
+    resetSearchLimits();
     resetTags();
     resetWatchHistory();
   };

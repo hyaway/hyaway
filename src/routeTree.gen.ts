@@ -15,24 +15,33 @@ import { Route as settingsSettingsRouteImport } from "./routes/(settings)/settin
 import { Route as settingsSettingsIndexRouteImport } from "./routes/(settings)/settings.index";
 import { Route as AuthFileFileIdRouteImport } from "./routes/_auth/file.$fileId";
 import { Route as AuthremotePagesPagesRouteImport } from "./routes/_auth/(remote-pages)/pages";
+import { Route as AuthgalleriesRemoteHistoryRouteImport } from "./routes/_auth/(galleries)/remote-history";
 import { Route as AuthgalleriesRecentlyTrashedRouteImport } from "./routes/_auth/(galleries)/recently-trashed";
 import { Route as AuthgalleriesRecentlyInboxedRouteImport } from "./routes/_auth/(galleries)/recently-inboxed";
 import { Route as AuthgalleriesRecentlyArchivedRouteImport } from "./routes/_auth/(galleries)/recently-archived";
 import { Route as AuthgalleriesRandomInboxRouteImport } from "./routes/_auth/(galleries)/random-inbox";
+import { Route as AuthgalleriesMostViewedRouteImport } from "./routes/_auth/(galleries)/most-viewed";
+import { Route as AuthgalleriesLongestViewedRouteImport } from "./routes/_auth/(galleries)/longest-viewed";
 import { Route as AuthgalleriesHistoryRouteImport } from "./routes/_auth/(galleries)/history";
 import { Route as settingsSettingsUxRouteImport } from "./routes/(settings)/settings.ux";
 import { Route as settingsSettingsClientApiRouteImport } from "./routes/(settings)/settings.client-api";
 import { Route as AuthremotePagesPagesIndexRouteImport } from "./routes/_auth/(remote-pages)/pages.index";
+import { Route as AuthgalleriesRemoteHistoryIndexRouteImport } from "./routes/_auth/(galleries)/remote-history.index";
 import { Route as AuthgalleriesRecentlyTrashedIndexRouteImport } from "./routes/_auth/(galleries)/recently-trashed.index";
 import { Route as AuthgalleriesRecentlyInboxedIndexRouteImport } from "./routes/_auth/(galleries)/recently-inboxed.index";
 import { Route as AuthgalleriesRecentlyArchivedIndexRouteImport } from "./routes/_auth/(galleries)/recently-archived.index";
 import { Route as AuthgalleriesRandomInboxIndexRouteImport } from "./routes/_auth/(galleries)/random-inbox.index";
+import { Route as AuthgalleriesMostViewedIndexRouteImport } from "./routes/_auth/(galleries)/most-viewed.index";
+import { Route as AuthgalleriesLongestViewedIndexRouteImport } from "./routes/_auth/(galleries)/longest-viewed.index";
 import { Route as AuthgalleriesHistoryIndexRouteImport } from "./routes/_auth/(galleries)/history.index";
 import { Route as AuthremotePagesPagesPageIdRouteImport } from "./routes/_auth/(remote-pages)/pages.$pageId";
+import { Route as AuthgalleriesRemoteHistoryFileIdRouteImport } from "./routes/_auth/(galleries)/remote-history.$fileId";
 import { Route as AuthgalleriesRecentlyTrashedFileIdRouteImport } from "./routes/_auth/(galleries)/recently-trashed.$fileId";
 import { Route as AuthgalleriesRecentlyInboxedFileIdRouteImport } from "./routes/_auth/(galleries)/recently-inboxed.$fileId";
 import { Route as AuthgalleriesRecentlyArchivedFileIdRouteImport } from "./routes/_auth/(galleries)/recently-archived.$fileId";
 import { Route as AuthgalleriesRandomInboxFileIdRouteImport } from "./routes/_auth/(galleries)/random-inbox.$fileId";
+import { Route as AuthgalleriesMostViewedFileIdRouteImport } from "./routes/_auth/(galleries)/most-viewed.$fileId";
+import { Route as AuthgalleriesLongestViewedFileIdRouteImport } from "./routes/_auth/(galleries)/longest-viewed.$fileId";
 import { Route as AuthgalleriesHistoryFileIdRouteImport } from "./routes/_auth/(galleries)/history.$fileId";
 import { Route as AuthremotePagesPagesPageIdIndexRouteImport } from "./routes/_auth/(remote-pages)/pages.$pageId.index";
 import { Route as AuthremotePagesPagesPageIdFileIdRouteImport } from "./routes/_auth/(remote-pages)/pages.$pageId.$fileId";
@@ -66,6 +75,12 @@ const AuthremotePagesPagesRoute = AuthremotePagesPagesRouteImport.update({
   path: "/pages",
   getParentRoute: () => AuthRoute,
 } as any);
+const AuthgalleriesRemoteHistoryRoute =
+  AuthgalleriesRemoteHistoryRouteImport.update({
+    id: "/(galleries)/remote-history",
+    path: "/remote-history",
+    getParentRoute: () => AuthRoute,
+  } as any);
 const AuthgalleriesRecentlyTrashedRoute =
   AuthgalleriesRecentlyTrashedRouteImport.update({
     id: "/(galleries)/recently-trashed",
@@ -90,6 +105,17 @@ const AuthgalleriesRandomInboxRoute =
     path: "/random-inbox",
     getParentRoute: () => AuthRoute,
   } as any);
+const AuthgalleriesMostViewedRoute = AuthgalleriesMostViewedRouteImport.update({
+  id: "/(galleries)/most-viewed",
+  path: "/most-viewed",
+  getParentRoute: () => AuthRoute,
+} as any);
+const AuthgalleriesLongestViewedRoute =
+  AuthgalleriesLongestViewedRouteImport.update({
+    id: "/(galleries)/longest-viewed",
+    path: "/longest-viewed",
+    getParentRoute: () => AuthRoute,
+  } as any);
 const AuthgalleriesHistoryRoute = AuthgalleriesHistoryRouteImport.update({
   id: "/(galleries)/history",
   path: "/history",
@@ -111,6 +137,12 @@ const AuthremotePagesPagesIndexRoute =
     id: "/",
     path: "/",
     getParentRoute: () => AuthremotePagesPagesRoute,
+  } as any);
+const AuthgalleriesRemoteHistoryIndexRoute =
+  AuthgalleriesRemoteHistoryIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthgalleriesRemoteHistoryRoute,
   } as any);
 const AuthgalleriesRecentlyTrashedIndexRoute =
   AuthgalleriesRecentlyTrashedIndexRouteImport.update({
@@ -136,6 +168,18 @@ const AuthgalleriesRandomInboxIndexRoute =
     path: "/",
     getParentRoute: () => AuthgalleriesRandomInboxRoute,
   } as any);
+const AuthgalleriesMostViewedIndexRoute =
+  AuthgalleriesMostViewedIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthgalleriesMostViewedRoute,
+  } as any);
+const AuthgalleriesLongestViewedIndexRoute =
+  AuthgalleriesLongestViewedIndexRouteImport.update({
+    id: "/",
+    path: "/",
+    getParentRoute: () => AuthgalleriesLongestViewedRoute,
+  } as any);
 const AuthgalleriesHistoryIndexRoute =
   AuthgalleriesHistoryIndexRouteImport.update({
     id: "/",
@@ -147,6 +191,12 @@ const AuthremotePagesPagesPageIdRoute =
     id: "/$pageId",
     path: "/$pageId",
     getParentRoute: () => AuthremotePagesPagesRoute,
+  } as any);
+const AuthgalleriesRemoteHistoryFileIdRoute =
+  AuthgalleriesRemoteHistoryFileIdRouteImport.update({
+    id: "/$fileId",
+    path: "/$fileId",
+    getParentRoute: () => AuthgalleriesRemoteHistoryRoute,
   } as any);
 const AuthgalleriesRecentlyTrashedFileIdRoute =
   AuthgalleriesRecentlyTrashedFileIdRouteImport.update({
@@ -171,6 +221,18 @@ const AuthgalleriesRandomInboxFileIdRoute =
     id: "/$fileId",
     path: "/$fileId",
     getParentRoute: () => AuthgalleriesRandomInboxRoute,
+  } as any);
+const AuthgalleriesMostViewedFileIdRoute =
+  AuthgalleriesMostViewedFileIdRouteImport.update({
+    id: "/$fileId",
+    path: "/$fileId",
+    getParentRoute: () => AuthgalleriesMostViewedRoute,
+  } as any);
+const AuthgalleriesLongestViewedFileIdRoute =
+  AuthgalleriesLongestViewedFileIdRouteImport.update({
+    id: "/$fileId",
+    path: "/$fileId",
+    getParentRoute: () => AuthgalleriesLongestViewedRoute,
   } as any);
 const AuthgalleriesHistoryFileIdRoute =
   AuthgalleriesHistoryFileIdRouteImport.update({
@@ -197,24 +259,33 @@ export interface FileRoutesByFullPath {
   "/settings/client-api": typeof settingsSettingsClientApiRoute;
   "/settings/ux": typeof settingsSettingsUxRoute;
   "/history": typeof AuthgalleriesHistoryRouteWithChildren;
+  "/longest-viewed": typeof AuthgalleriesLongestViewedRouteWithChildren;
+  "/most-viewed": typeof AuthgalleriesMostViewedRouteWithChildren;
   "/random-inbox": typeof AuthgalleriesRandomInboxRouteWithChildren;
   "/recently-archived": typeof AuthgalleriesRecentlyArchivedRouteWithChildren;
   "/recently-inboxed": typeof AuthgalleriesRecentlyInboxedRouteWithChildren;
   "/recently-trashed": typeof AuthgalleriesRecentlyTrashedRouteWithChildren;
+  "/remote-history": typeof AuthgalleriesRemoteHistoryRouteWithChildren;
   "/pages": typeof AuthremotePagesPagesRouteWithChildren;
   "/file/$fileId": typeof AuthFileFileIdRoute;
   "/settings/": typeof settingsSettingsIndexRoute;
   "/history/$fileId": typeof AuthgalleriesHistoryFileIdRoute;
+  "/longest-viewed/$fileId": typeof AuthgalleriesLongestViewedFileIdRoute;
+  "/most-viewed/$fileId": typeof AuthgalleriesMostViewedFileIdRoute;
   "/random-inbox/$fileId": typeof AuthgalleriesRandomInboxFileIdRoute;
   "/recently-archived/$fileId": typeof AuthgalleriesRecentlyArchivedFileIdRoute;
   "/recently-inboxed/$fileId": typeof AuthgalleriesRecentlyInboxedFileIdRoute;
   "/recently-trashed/$fileId": typeof AuthgalleriesRecentlyTrashedFileIdRoute;
+  "/remote-history/$fileId": typeof AuthgalleriesRemoteHistoryFileIdRoute;
   "/pages/$pageId": typeof AuthremotePagesPagesPageIdRouteWithChildren;
   "/history/": typeof AuthgalleriesHistoryIndexRoute;
+  "/longest-viewed/": typeof AuthgalleriesLongestViewedIndexRoute;
+  "/most-viewed/": typeof AuthgalleriesMostViewedIndexRoute;
   "/random-inbox/": typeof AuthgalleriesRandomInboxIndexRoute;
   "/recently-archived/": typeof AuthgalleriesRecentlyArchivedIndexRoute;
   "/recently-inboxed/": typeof AuthgalleriesRecentlyInboxedIndexRoute;
   "/recently-trashed/": typeof AuthgalleriesRecentlyTrashedIndexRoute;
+  "/remote-history/": typeof AuthgalleriesRemoteHistoryIndexRoute;
   "/pages/": typeof AuthremotePagesPagesIndexRoute;
   "/pages/$pageId/$fileId": typeof AuthremotePagesPagesPageIdFileIdRoute;
   "/pages/$pageId/": typeof AuthremotePagesPagesPageIdIndexRoute;
@@ -226,15 +297,21 @@ export interface FileRoutesByTo {
   "/file/$fileId": typeof AuthFileFileIdRoute;
   "/settings": typeof settingsSettingsIndexRoute;
   "/history/$fileId": typeof AuthgalleriesHistoryFileIdRoute;
+  "/longest-viewed/$fileId": typeof AuthgalleriesLongestViewedFileIdRoute;
+  "/most-viewed/$fileId": typeof AuthgalleriesMostViewedFileIdRoute;
   "/random-inbox/$fileId": typeof AuthgalleriesRandomInboxFileIdRoute;
   "/recently-archived/$fileId": typeof AuthgalleriesRecentlyArchivedFileIdRoute;
   "/recently-inboxed/$fileId": typeof AuthgalleriesRecentlyInboxedFileIdRoute;
   "/recently-trashed/$fileId": typeof AuthgalleriesRecentlyTrashedFileIdRoute;
+  "/remote-history/$fileId": typeof AuthgalleriesRemoteHistoryFileIdRoute;
   "/history": typeof AuthgalleriesHistoryIndexRoute;
+  "/longest-viewed": typeof AuthgalleriesLongestViewedIndexRoute;
+  "/most-viewed": typeof AuthgalleriesMostViewedIndexRoute;
   "/random-inbox": typeof AuthgalleriesRandomInboxIndexRoute;
   "/recently-archived": typeof AuthgalleriesRecentlyArchivedIndexRoute;
   "/recently-inboxed": typeof AuthgalleriesRecentlyInboxedIndexRoute;
   "/recently-trashed": typeof AuthgalleriesRecentlyTrashedIndexRoute;
+  "/remote-history": typeof AuthgalleriesRemoteHistoryIndexRoute;
   "/pages": typeof AuthremotePagesPagesIndexRoute;
   "/pages/$pageId/$fileId": typeof AuthremotePagesPagesPageIdFileIdRoute;
   "/pages/$pageId": typeof AuthremotePagesPagesPageIdIndexRoute;
@@ -247,24 +324,33 @@ export interface FileRoutesById {
   "/(settings)/settings/client-api": typeof settingsSettingsClientApiRoute;
   "/(settings)/settings/ux": typeof settingsSettingsUxRoute;
   "/_auth/(galleries)/history": typeof AuthgalleriesHistoryRouteWithChildren;
+  "/_auth/(galleries)/longest-viewed": typeof AuthgalleriesLongestViewedRouteWithChildren;
+  "/_auth/(galleries)/most-viewed": typeof AuthgalleriesMostViewedRouteWithChildren;
   "/_auth/(galleries)/random-inbox": typeof AuthgalleriesRandomInboxRouteWithChildren;
   "/_auth/(galleries)/recently-archived": typeof AuthgalleriesRecentlyArchivedRouteWithChildren;
   "/_auth/(galleries)/recently-inboxed": typeof AuthgalleriesRecentlyInboxedRouteWithChildren;
   "/_auth/(galleries)/recently-trashed": typeof AuthgalleriesRecentlyTrashedRouteWithChildren;
+  "/_auth/(galleries)/remote-history": typeof AuthgalleriesRemoteHistoryRouteWithChildren;
   "/_auth/(remote-pages)/pages": typeof AuthremotePagesPagesRouteWithChildren;
   "/_auth/file/$fileId": typeof AuthFileFileIdRoute;
   "/(settings)/settings/": typeof settingsSettingsIndexRoute;
   "/_auth/(galleries)/history/$fileId": typeof AuthgalleriesHistoryFileIdRoute;
+  "/_auth/(galleries)/longest-viewed/$fileId": typeof AuthgalleriesLongestViewedFileIdRoute;
+  "/_auth/(galleries)/most-viewed/$fileId": typeof AuthgalleriesMostViewedFileIdRoute;
   "/_auth/(galleries)/random-inbox/$fileId": typeof AuthgalleriesRandomInboxFileIdRoute;
   "/_auth/(galleries)/recently-archived/$fileId": typeof AuthgalleriesRecentlyArchivedFileIdRoute;
   "/_auth/(galleries)/recently-inboxed/$fileId": typeof AuthgalleriesRecentlyInboxedFileIdRoute;
   "/_auth/(galleries)/recently-trashed/$fileId": typeof AuthgalleriesRecentlyTrashedFileIdRoute;
+  "/_auth/(galleries)/remote-history/$fileId": typeof AuthgalleriesRemoteHistoryFileIdRoute;
   "/_auth/(remote-pages)/pages/$pageId": typeof AuthremotePagesPagesPageIdRouteWithChildren;
   "/_auth/(galleries)/history/": typeof AuthgalleriesHistoryIndexRoute;
+  "/_auth/(galleries)/longest-viewed/": typeof AuthgalleriesLongestViewedIndexRoute;
+  "/_auth/(galleries)/most-viewed/": typeof AuthgalleriesMostViewedIndexRoute;
   "/_auth/(galleries)/random-inbox/": typeof AuthgalleriesRandomInboxIndexRoute;
   "/_auth/(galleries)/recently-archived/": typeof AuthgalleriesRecentlyArchivedIndexRoute;
   "/_auth/(galleries)/recently-inboxed/": typeof AuthgalleriesRecentlyInboxedIndexRoute;
   "/_auth/(galleries)/recently-trashed/": typeof AuthgalleriesRecentlyTrashedIndexRoute;
+  "/_auth/(galleries)/remote-history/": typeof AuthgalleriesRemoteHistoryIndexRoute;
   "/_auth/(remote-pages)/pages/": typeof AuthremotePagesPagesIndexRoute;
   "/_auth/(remote-pages)/pages/$pageId/$fileId": typeof AuthremotePagesPagesPageIdFileIdRoute;
   "/_auth/(remote-pages)/pages/$pageId/": typeof AuthremotePagesPagesPageIdIndexRoute;
@@ -277,24 +363,33 @@ export interface FileRouteTypes {
     | "/settings/client-api"
     | "/settings/ux"
     | "/history"
+    | "/longest-viewed"
+    | "/most-viewed"
     | "/random-inbox"
     | "/recently-archived"
     | "/recently-inboxed"
     | "/recently-trashed"
+    | "/remote-history"
     | "/pages"
     | "/file/$fileId"
     | "/settings/"
     | "/history/$fileId"
+    | "/longest-viewed/$fileId"
+    | "/most-viewed/$fileId"
     | "/random-inbox/$fileId"
     | "/recently-archived/$fileId"
     | "/recently-inboxed/$fileId"
     | "/recently-trashed/$fileId"
+    | "/remote-history/$fileId"
     | "/pages/$pageId"
     | "/history/"
+    | "/longest-viewed/"
+    | "/most-viewed/"
     | "/random-inbox/"
     | "/recently-archived/"
     | "/recently-inboxed/"
     | "/recently-trashed/"
+    | "/remote-history/"
     | "/pages/"
     | "/pages/$pageId/$fileId"
     | "/pages/$pageId/";
@@ -306,15 +401,21 @@ export interface FileRouteTypes {
     | "/file/$fileId"
     | "/settings"
     | "/history/$fileId"
+    | "/longest-viewed/$fileId"
+    | "/most-viewed/$fileId"
     | "/random-inbox/$fileId"
     | "/recently-archived/$fileId"
     | "/recently-inboxed/$fileId"
     | "/recently-trashed/$fileId"
+    | "/remote-history/$fileId"
     | "/history"
+    | "/longest-viewed"
+    | "/most-viewed"
     | "/random-inbox"
     | "/recently-archived"
     | "/recently-inboxed"
     | "/recently-trashed"
+    | "/remote-history"
     | "/pages"
     | "/pages/$pageId/$fileId"
     | "/pages/$pageId";
@@ -326,24 +427,33 @@ export interface FileRouteTypes {
     | "/(settings)/settings/client-api"
     | "/(settings)/settings/ux"
     | "/_auth/(galleries)/history"
+    | "/_auth/(galleries)/longest-viewed"
+    | "/_auth/(galleries)/most-viewed"
     | "/_auth/(galleries)/random-inbox"
     | "/_auth/(galleries)/recently-archived"
     | "/_auth/(galleries)/recently-inboxed"
     | "/_auth/(galleries)/recently-trashed"
+    | "/_auth/(galleries)/remote-history"
     | "/_auth/(remote-pages)/pages"
     | "/_auth/file/$fileId"
     | "/(settings)/settings/"
     | "/_auth/(galleries)/history/$fileId"
+    | "/_auth/(galleries)/longest-viewed/$fileId"
+    | "/_auth/(galleries)/most-viewed/$fileId"
     | "/_auth/(galleries)/random-inbox/$fileId"
     | "/_auth/(galleries)/recently-archived/$fileId"
     | "/_auth/(galleries)/recently-inboxed/$fileId"
     | "/_auth/(galleries)/recently-trashed/$fileId"
+    | "/_auth/(galleries)/remote-history/$fileId"
     | "/_auth/(remote-pages)/pages/$pageId"
     | "/_auth/(galleries)/history/"
+    | "/_auth/(galleries)/longest-viewed/"
+    | "/_auth/(galleries)/most-viewed/"
     | "/_auth/(galleries)/random-inbox/"
     | "/_auth/(galleries)/recently-archived/"
     | "/_auth/(galleries)/recently-inboxed/"
     | "/_auth/(galleries)/recently-trashed/"
+    | "/_auth/(galleries)/remote-history/"
     | "/_auth/(remote-pages)/pages/"
     | "/_auth/(remote-pages)/pages/$pageId/$fileId"
     | "/_auth/(remote-pages)/pages/$pageId/";
@@ -399,6 +509,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthremotePagesPagesRouteImport;
       parentRoute: typeof AuthRoute;
     };
+    "/_auth/(galleries)/remote-history": {
+      id: "/_auth/(galleries)/remote-history";
+      path: "/remote-history";
+      fullPath: "/remote-history";
+      preLoaderRoute: typeof AuthgalleriesRemoteHistoryRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
     "/_auth/(galleries)/recently-trashed": {
       id: "/_auth/(galleries)/recently-trashed";
       path: "/recently-trashed";
@@ -425,6 +542,20 @@ declare module "@tanstack/react-router" {
       path: "/random-inbox";
       fullPath: "/random-inbox";
       preLoaderRoute: typeof AuthgalleriesRandomInboxRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
+    "/_auth/(galleries)/most-viewed": {
+      id: "/_auth/(galleries)/most-viewed";
+      path: "/most-viewed";
+      fullPath: "/most-viewed";
+      preLoaderRoute: typeof AuthgalleriesMostViewedRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
+    "/_auth/(galleries)/longest-viewed": {
+      id: "/_auth/(galleries)/longest-viewed";
+      path: "/longest-viewed";
+      fullPath: "/longest-viewed";
+      preLoaderRoute: typeof AuthgalleriesLongestViewedRouteImport;
       parentRoute: typeof AuthRoute;
     };
     "/_auth/(galleries)/history": {
@@ -455,6 +586,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthremotePagesPagesIndexRouteImport;
       parentRoute: typeof AuthremotePagesPagesRoute;
     };
+    "/_auth/(galleries)/remote-history/": {
+      id: "/_auth/(galleries)/remote-history/";
+      path: "/";
+      fullPath: "/remote-history/";
+      preLoaderRoute: typeof AuthgalleriesRemoteHistoryIndexRouteImport;
+      parentRoute: typeof AuthgalleriesRemoteHistoryRoute;
+    };
     "/_auth/(galleries)/recently-trashed/": {
       id: "/_auth/(galleries)/recently-trashed/";
       path: "/";
@@ -483,6 +621,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthgalleriesRandomInboxIndexRouteImport;
       parentRoute: typeof AuthgalleriesRandomInboxRoute;
     };
+    "/_auth/(galleries)/most-viewed/": {
+      id: "/_auth/(galleries)/most-viewed/";
+      path: "/";
+      fullPath: "/most-viewed/";
+      preLoaderRoute: typeof AuthgalleriesMostViewedIndexRouteImport;
+      parentRoute: typeof AuthgalleriesMostViewedRoute;
+    };
+    "/_auth/(galleries)/longest-viewed/": {
+      id: "/_auth/(galleries)/longest-viewed/";
+      path: "/";
+      fullPath: "/longest-viewed/";
+      preLoaderRoute: typeof AuthgalleriesLongestViewedIndexRouteImport;
+      parentRoute: typeof AuthgalleriesLongestViewedRoute;
+    };
     "/_auth/(galleries)/history/": {
       id: "/_auth/(galleries)/history/";
       path: "/";
@@ -496,6 +648,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/pages/$pageId";
       preLoaderRoute: typeof AuthremotePagesPagesPageIdRouteImport;
       parentRoute: typeof AuthremotePagesPagesRoute;
+    };
+    "/_auth/(galleries)/remote-history/$fileId": {
+      id: "/_auth/(galleries)/remote-history/$fileId";
+      path: "/$fileId";
+      fullPath: "/remote-history/$fileId";
+      preLoaderRoute: typeof AuthgalleriesRemoteHistoryFileIdRouteImport;
+      parentRoute: typeof AuthgalleriesRemoteHistoryRoute;
     };
     "/_auth/(galleries)/recently-trashed/$fileId": {
       id: "/_auth/(galleries)/recently-trashed/$fileId";
@@ -524,6 +683,20 @@ declare module "@tanstack/react-router" {
       fullPath: "/random-inbox/$fileId";
       preLoaderRoute: typeof AuthgalleriesRandomInboxFileIdRouteImport;
       parentRoute: typeof AuthgalleriesRandomInboxRoute;
+    };
+    "/_auth/(galleries)/most-viewed/$fileId": {
+      id: "/_auth/(galleries)/most-viewed/$fileId";
+      path: "/$fileId";
+      fullPath: "/most-viewed/$fileId";
+      preLoaderRoute: typeof AuthgalleriesMostViewedFileIdRouteImport;
+      parentRoute: typeof AuthgalleriesMostViewedRoute;
+    };
+    "/_auth/(galleries)/longest-viewed/$fileId": {
+      id: "/_auth/(galleries)/longest-viewed/$fileId";
+      path: "/$fileId";
+      fullPath: "/longest-viewed/$fileId";
+      preLoaderRoute: typeof AuthgalleriesLongestViewedFileIdRouteImport;
+      parentRoute: typeof AuthgalleriesLongestViewedRoute;
     };
     "/_auth/(galleries)/history/$fileId": {
       id: "/_auth/(galleries)/history/$fileId";
@@ -561,6 +734,39 @@ const AuthgalleriesHistoryRouteChildren: AuthgalleriesHistoryRouteChildren = {
 
 const AuthgalleriesHistoryRouteWithChildren =
   AuthgalleriesHistoryRoute._addFileChildren(AuthgalleriesHistoryRouteChildren);
+
+interface AuthgalleriesLongestViewedRouteChildren {
+  AuthgalleriesLongestViewedFileIdRoute: typeof AuthgalleriesLongestViewedFileIdRoute;
+  AuthgalleriesLongestViewedIndexRoute: typeof AuthgalleriesLongestViewedIndexRoute;
+}
+
+const AuthgalleriesLongestViewedRouteChildren: AuthgalleriesLongestViewedRouteChildren =
+  {
+    AuthgalleriesLongestViewedFileIdRoute:
+      AuthgalleriesLongestViewedFileIdRoute,
+    AuthgalleriesLongestViewedIndexRoute: AuthgalleriesLongestViewedIndexRoute,
+  };
+
+const AuthgalleriesLongestViewedRouteWithChildren =
+  AuthgalleriesLongestViewedRoute._addFileChildren(
+    AuthgalleriesLongestViewedRouteChildren,
+  );
+
+interface AuthgalleriesMostViewedRouteChildren {
+  AuthgalleriesMostViewedFileIdRoute: typeof AuthgalleriesMostViewedFileIdRoute;
+  AuthgalleriesMostViewedIndexRoute: typeof AuthgalleriesMostViewedIndexRoute;
+}
+
+const AuthgalleriesMostViewedRouteChildren: AuthgalleriesMostViewedRouteChildren =
+  {
+    AuthgalleriesMostViewedFileIdRoute: AuthgalleriesMostViewedFileIdRoute,
+    AuthgalleriesMostViewedIndexRoute: AuthgalleriesMostViewedIndexRoute,
+  };
+
+const AuthgalleriesMostViewedRouteWithChildren =
+  AuthgalleriesMostViewedRoute._addFileChildren(
+    AuthgalleriesMostViewedRouteChildren,
+  );
 
 interface AuthgalleriesRandomInboxRouteChildren {
   AuthgalleriesRandomInboxFileIdRoute: typeof AuthgalleriesRandomInboxFileIdRoute;
@@ -632,6 +838,23 @@ const AuthgalleriesRecentlyTrashedRouteWithChildren =
     AuthgalleriesRecentlyTrashedRouteChildren,
   );
 
+interface AuthgalleriesRemoteHistoryRouteChildren {
+  AuthgalleriesRemoteHistoryFileIdRoute: typeof AuthgalleriesRemoteHistoryFileIdRoute;
+  AuthgalleriesRemoteHistoryIndexRoute: typeof AuthgalleriesRemoteHistoryIndexRoute;
+}
+
+const AuthgalleriesRemoteHistoryRouteChildren: AuthgalleriesRemoteHistoryRouteChildren =
+  {
+    AuthgalleriesRemoteHistoryFileIdRoute:
+      AuthgalleriesRemoteHistoryFileIdRoute,
+    AuthgalleriesRemoteHistoryIndexRoute: AuthgalleriesRemoteHistoryIndexRoute,
+  };
+
+const AuthgalleriesRemoteHistoryRouteWithChildren =
+  AuthgalleriesRemoteHistoryRoute._addFileChildren(
+    AuthgalleriesRemoteHistoryRouteChildren,
+  );
+
 interface AuthremotePagesPagesPageIdRouteChildren {
   AuthremotePagesPagesPageIdFileIdRoute: typeof AuthremotePagesPagesPageIdFileIdRoute;
   AuthremotePagesPagesPageIdIndexRoute: typeof AuthremotePagesPagesPageIdIndexRoute;
@@ -664,16 +887,21 @@ const AuthremotePagesPagesRouteWithChildren =
 
 interface AuthRouteChildren {
   AuthgalleriesHistoryRoute: typeof AuthgalleriesHistoryRouteWithChildren;
+  AuthgalleriesLongestViewedRoute: typeof AuthgalleriesLongestViewedRouteWithChildren;
+  AuthgalleriesMostViewedRoute: typeof AuthgalleriesMostViewedRouteWithChildren;
   AuthgalleriesRandomInboxRoute: typeof AuthgalleriesRandomInboxRouteWithChildren;
   AuthgalleriesRecentlyArchivedRoute: typeof AuthgalleriesRecentlyArchivedRouteWithChildren;
   AuthgalleriesRecentlyInboxedRoute: typeof AuthgalleriesRecentlyInboxedRouteWithChildren;
   AuthgalleriesRecentlyTrashedRoute: typeof AuthgalleriesRecentlyTrashedRouteWithChildren;
+  AuthgalleriesRemoteHistoryRoute: typeof AuthgalleriesRemoteHistoryRouteWithChildren;
   AuthremotePagesPagesRoute: typeof AuthremotePagesPagesRouteWithChildren;
   AuthFileFileIdRoute: typeof AuthFileFileIdRoute;
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthgalleriesHistoryRoute: AuthgalleriesHistoryRouteWithChildren,
+  AuthgalleriesLongestViewedRoute: AuthgalleriesLongestViewedRouteWithChildren,
+  AuthgalleriesMostViewedRoute: AuthgalleriesMostViewedRouteWithChildren,
   AuthgalleriesRandomInboxRoute: AuthgalleriesRandomInboxRouteWithChildren,
   AuthgalleriesRecentlyArchivedRoute:
     AuthgalleriesRecentlyArchivedRouteWithChildren,
@@ -681,6 +909,7 @@ const AuthRouteChildren: AuthRouteChildren = {
     AuthgalleriesRecentlyInboxedRouteWithChildren,
   AuthgalleriesRecentlyTrashedRoute:
     AuthgalleriesRecentlyTrashedRouteWithChildren,
+  AuthgalleriesRemoteHistoryRoute: AuthgalleriesRemoteHistoryRouteWithChildren,
   AuthremotePagesPagesRoute: AuthremotePagesPagesRouteWithChildren,
   AuthFileFileIdRoute: AuthFileFileIdRoute,
 };

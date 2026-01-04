@@ -5,11 +5,14 @@ import { useIsApiConfigured } from "../hydrus-config-store";
 import { HydrusFileSortType, ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
 import type { HydrusTagSearch, SearchFilesOptions } from "../models";
-import { useRandomInboxLimit } from "@/stores/random-inbox-settings-store";
 import {
+  useRandomInboxLimit,
   useRecentFilesDays,
   useRecentFilesLimit,
-} from "@/stores/recent-files-settings-store";
+  useRemoteHistoryLimit,
+  useMostViewedLimit,
+  useLongestViewedLimit,
+} from "@/stores/search-limits-store";
 
 export const useRecentlyArchivedFilesQuery = () => {
   const recentFilesLimit = useRecentFilesLimit();
@@ -183,6 +186,78 @@ export const useInfiniteSearchFilesQuery = (
       return lastPage.offset + BATCH_SIZE;
     },
     initialPageParam: 0,
+    enabled: isConfigured && tags.length > 0,
+  });
+};
+
+export const useRemoteWatchHistoryQuery = () => {
+  const limit = useRemoteHistoryLimit();
+
+  const tags: HydrusTagSearch = [
+    `system:limit=${limit}`,
+    "system:last viewed time < 7 years 45 days 7 hours ago",
+  ];
+  const options: Omit<SearchFilesOptions, "tags"> = {
+    file_sort_type: HydrusFileSortType.LastViewedTime,
+    file_sort_asc: false,
+  };
+
+  const isConfigured = useIsApiConfigured();
+
+  return useQuery({
+    queryKey: ["searchFiles", "remoteWatchHistory", tags, options],
+    queryFn: async () => {
+      return searchFiles({
+        tags,
+        ...options,
+      });
+    },
+    enabled: isConfigured && tags.length > 0,
+  });
+};
+
+export const useMostViewedFilesQuery = () => {
+  const limit = useMostViewedLimit();
+
+  const tags: HydrusTagSearch = [`system:limit=${limit}`];
+  const options: Omit<SearchFilesOptions, "tags"> = {
+    file_sort_type: HydrusFileSortType.NumberOfMediaViews,
+    file_sort_asc: false,
+  };
+
+  const isConfigured = useIsApiConfigured();
+
+  return useQuery({
+    queryKey: ["searchFiles", "mostViewed", tags, options],
+    queryFn: async () => {
+      return searchFiles({
+        tags,
+        ...options,
+      });
+    },
+    enabled: isConfigured && tags.length > 0,
+  });
+};
+
+export const useLongestViewedFilesQuery = () => {
+  const limit = useLongestViewedLimit();
+
+  const tags: HydrusTagSearch = [`system:limit=${limit}`];
+  const options: Omit<SearchFilesOptions, "tags"> = {
+    file_sort_type: HydrusFileSortType.TotalMediaViewtime,
+    file_sort_asc: false,
+  };
+
+  const isConfigured = useIsApiConfigured();
+
+  return useQuery({
+    queryKey: ["searchFiles", "longestViewed", tags, options],
+    queryFn: async () => {
+      return searchFiles({
+        tags,
+        ...options,
+      });
+    },
     enabled: isConfigured && tags.length > 0,
   });
 };

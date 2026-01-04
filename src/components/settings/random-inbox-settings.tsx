@@ -1,9 +1,9 @@
 import { SettingsGroup, SliderField } from "./setting-fields";
 import {
-  MAX_RANDOM_INBOX_LIMIT,
+  MAX_SEARCH_LIMIT,
   useRandomInboxLimit,
-  useRandomInboxSettingsActions,
-} from "@/stores/random-inbox-settings-store";
+  useSearchLimitsActions,
+} from "@/stores/search-limits-store";
 
 export const RANDOM_INBOX_SETTINGS_TITLE = "Random inbox";
 
@@ -21,7 +21,7 @@ export function RandomInboxSettings({
   step = 100,
 }: RandomInboxSettingsProps) {
   const randomInboxLimit = useRandomInboxLimit();
-  const { setLimit } = useRandomInboxSettingsActions();
+  const { setRandomInboxLimit } = useSearchLimitsActions();
 
   return (
     <SettingsGroup>
@@ -30,9 +30,9 @@ export function RandomInboxSettings({
         label="Max files"
         value={randomInboxLimit}
         min={min}
-        max={MAX_RANDOM_INBOX_LIMIT}
+        max={MAX_SEARCH_LIMIT}
         step={step}
-        onValueChange={setLimit}
+        onValueChange={setRandomInboxLimit}
         commitOnRelease
       />
     </SettingsGroup>

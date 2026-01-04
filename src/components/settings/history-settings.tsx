@@ -27,7 +27,7 @@ export function HistorySettings({ idPrefix = "" }: HistorySettingsProps) {
   const isSyncDisabled = hydrusOptionsFetched && !hydrusStatsActive;
   const syncDescription = isSyncDisabled
     ? "Disabled: file viewing statistics are turned off in Hydrus"
-    : "Send views and view time to Hydrus file viewing statistics";
+    : "Send views and viewing time to Hydrus client file viewing statistics system";
 
   return (
     <SettingsGroup>
@@ -50,7 +50,7 @@ export function HistorySettings({ idPrefix = "" }: HistorySettingsProps) {
       />
       <SwitchField
         id={`${idPrefix}history-sync-hydrus-switch`}
-        label="Sync new views to Hydrus"
+        label="Send new views to Hydrus"
         description={syncDescription}
         checked={syncToHydrus && !isSyncDisabled}
         disabled={isSyncDisabled}

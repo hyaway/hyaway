@@ -7,6 +7,11 @@ import {
   IconArchiveFilled,
   IconArrowsShuffle,
   IconArrowsShuffle2,
+  IconCalendarStats,
+  IconChartArea,
+  IconChartAreaFilled,
+  IconClock,
+  IconClockFilled,
   IconEye,
   IconEyeFilled,
   IconLayoutGrid,
@@ -160,6 +165,50 @@ export function AppSidebar() {
                     filledIcon={IconArrowsShuffle2}
                   />
                   <span>Random inbox</span>
+                </TouchTarget>
+              </SidebarMenuLinkButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>View statistics</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuLinkButton
+                to="/remote-history"
+                className="cursor-pointer"
+              >
+                <TouchTarget>
+                  <SidebarIcon
+                    icon={IconCalendarStats}
+                    filledIcon={IconCalendarStats}
+                  />
+                  <span>Remote history</span>
+                </TouchTarget>
+              </SidebarMenuLinkButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuLinkButton
+                to="/most-viewed"
+                className="cursor-pointer"
+              >
+                <TouchTarget>
+                  <SidebarIcon
+                    icon={IconChartArea}
+                    filledIcon={IconChartAreaFilled}
+                  />
+                  <span>Most viewed</span>
+                </TouchTarget>
+              </SidebarMenuLinkButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuLinkButton
+                to="/longest-viewed"
+                className="cursor-pointer"
+              >
+                <TouchTarget>
+                  <SidebarIcon icon={IconClock} filledIcon={IconClockFilled} />
+                  <span>Longest viewed</span>
                 </TouchTarget>
               </SidebarMenuLinkButton>
             </SidebarMenuItem>
