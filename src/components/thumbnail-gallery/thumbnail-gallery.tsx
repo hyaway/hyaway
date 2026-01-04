@@ -19,7 +19,9 @@ import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import {
   useGalleryBaseWidthMode,
   useGalleryCustomBaseWidth,
+  useGalleryEntryDuration,
   useGalleryHorizontalGap,
+  useGalleryHoverZoomDuration,
   useGalleryReflowDuration,
   useGalleryShowScrollBadge,
   useGalleryVerticalGap,
@@ -102,7 +104,11 @@ export function PureThumbnailGallery({
   const customBaseWidth = useGalleryCustomBaseWidth();
   const verticalGap = useGalleryVerticalGap();
   const horizontalGap = useGalleryHorizontalGap();
+
+  // Animation durations - set as CSS variables at root to avoid child re-renders
   const reflowDuration = useGalleryReflowDuration();
+  const entryDuration = useGalleryEntryDuration();
+  const hoverZoomDuration = useGalleryHoverZoomDuration();
 
   // Determine base width based on mode
   const baseWidth =
@@ -214,8 +220,19 @@ export function PureThumbnailGallery({
     ? { width: `${lockedWidthRef.current}px` }
     : undefined;
 
+  // CSS custom properties for animation durations - avoids re-renders of all items
+  const galleryStyle = useMemo(
+    () => ({
+      ...containerStyle,
+      "--gallery-reflow-duration": `${reflowDuration}ms`,
+      "--gallery-entry-duration": `${entryDuration}ms`,
+      "--gallery-hover-zoom-duration": `${hoverZoomDuration}ms`,
+    }),
+    [containerStyle, reflowDuration, entryDuration, hoverZoomDuration],
+  ) as React.CSSProperties;
+
   return (
-    <div className="w-full" ref={parentRef} style={containerStyle}>
+    <div className="w-full" ref={parentRef} style={galleryStyle}>
       {isMeasuring ? (
         <ThumbnailGallerySkeleton />
       ) : (
@@ -248,7 +265,6 @@ export function PureThumbnailGallery({
                   setLinkRef={setLinkRef}
                   onItemFocus={handleItemFocus}
                   getFileLink={getFileLink}
-                  reflowDuration={reflowDuration}
                 />
               );
             })}

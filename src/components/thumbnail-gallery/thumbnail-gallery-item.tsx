@@ -10,11 +10,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui-primitives/context-menu";
 import { cn } from "@/lib/utils";
-import {
-  DEFAULT_GALLERY_REFLOW_DURATION,
-  useGalleryEnableContextMenu,
-  useGalleryHoverZoomDuration,
-} from "@/stores/gallery-settings-store";
+import { useGalleryEnableContextMenu } from "@/stores/gallery-settings-store";
 
 export { ThumbnailImage, type ThumbnailImageProps } from "./thumbnail-image";
 
@@ -53,8 +49,6 @@ export interface ThumbnailGalleryItemProps extends React.HTMLAttributes<HTMLLIEl
   getFileLink?: FileLinkBuilder;
   /** Accessible label for the item link */
   "aria-label"?: string;
-  /** Duration of the reflow animation in milliseconds (0 = disabled) */
-  reflowDuration?: number;
 }
 
 export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
@@ -70,12 +64,10 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
   setLinkRef,
   onItemFocus,
   getFileLink = defaultFileLinkBuilder,
-  reflowDuration = DEFAULT_GALLERY_REFLOW_DURATION,
   ...props
 }: ThumbnailGalleryItemProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const enableContextMenu = useGalleryEnableContextMenu();
-  const hoverZoomDuration = useGalleryHoverZoomDuration();
   const fileLink = getFileLink(item.file_id);
 
   // Track lane changes to scale animation duration by distance
@@ -83,20 +75,16 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
   const [laneDistance, setLaneDistance] = useState(0);
 
   useEffect(() => {
-    if (reflowDuration > 0 && prevLaneRef.current !== virtualRow.lane) {
+    if (prevLaneRef.current !== virtualRow.lane) {
       setLaneDistance(Math.abs(virtualRow.lane - prevLaneRef.current));
       prevLaneRef.current = virtualRow.lane;
     } else {
       prevLaneRef.current = virtualRow.lane;
     }
-  }, [virtualRow.lane, reflowDuration]);
+  }, [virtualRow.lane]);
 
-  // Scale duration: base duration for 1 lane, scales with sqrt for longer distances
-  // sqrt gives diminishing returns - 4 lanes = 2x duration, not 4x
-  const scaledDuration =
-    laneDistance > 0
-      ? Math.round(reflowDuration * Math.sqrt(laneDistance))
-      : reflowDuration;
+  // Scale multiplier: sqrt for diminishing returns - 4 lanes = 2x duration, not 4x
+  const durationMultiplier = laneDistance > 0 ? Math.sqrt(laneDistance) : 1;
 
   const isTopRow = virtualRow.index < lanes;
   const lastRowStart = totalItemsCount - 2 * lanes;
@@ -168,7 +156,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         [`--thumbnail-hover-scale`]: `${scale}`,
         [`--thumbnail-hover-reverse-scale`]: `${1 / scale}`,
         [`--badge-offset-scaled`]: `calc(0.25rem / ${scale})`,
-        transitionDuration: reflowDuration > 0 ? `${scaledDuration}ms` : 0,
+        [`--reflow-duration-multiplier`]: durationMultiplier,
       }}
       className={cn(
         "group absolute top-0 left-0 z-0 flex h-full w-full justify-center overflow-visible [content-visibility:auto]",
@@ -176,9 +164,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         "active:z-30 active:[content-visibility:visible]",
         "has-focus-visible:z-20 has-focus-visible:[content-visibility:visible]",
         width < height ? "flex-col" : "flex-row",
-        reflowDuration > 0
-          ? "transition-transform ease-[cubic-bezier(0.5,0,0.265,1.2)] in-data-[scrolling=true]:transition-none"
-          : "transition-none",
+        "transition-transform duration-[calc(var(--gallery-reflow-duration)*var(--reflow-duration-multiplier))] ease-[cubic-bezier(0.5,0,0.265,1.2)] in-data-[scrolling=true]:transition-none",
         enableContextMenu && menuOpen && "z-30 [content-visibility:visible]",
         className,
       )}
@@ -196,15 +182,9 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         setMenuOpen={setMenuOpen}
       />
       <div
-        style={
-          {
-            "--hover-scale-duration": `${hoverZoomDuration}ms`,
-          } as React.CSSProperties
-        }
         className={cn(
           "pointer-events-none h-full w-full origin-center",
-          hoverZoomDuration > 0 &&
-            "transition-[scale] duration-(--hover-scale-duration) ease-in-out",
+          "transition-[scale] duration-(--gallery-hover-zoom-duration) ease-in-out",
           "group-hover:scale-(--thumbnail-hover-scale) group-hover:shadow",
           "group-active:scale-(--thumbnail-hover-scale) group-active:shadow",
           "group-has-focus-visible:ring-3 group-has-focus-visible:ring-black group-has-focus-visible:ring-offset-3 group-has-focus-visible:ring-offset-white dark:group-has-focus-visible:ring-white dark:group-has-focus-visible:ring-offset-black",
