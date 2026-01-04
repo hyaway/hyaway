@@ -42,6 +42,7 @@ Detailed documentation lives in `.github/docs/`. Path-specific instructions in `
 | TanStack Query      | `docs/integrations/tanstack-query.md` | Query files                             |
 | UI primitives       | `docs/ui/primitives.md`               | `ui-primitives/` components             |
 | Responsive design   | `docs/ui/responsive-design.md`        | CSS and layout components               |
+| CSS patterns        | `docs/ui/css-patterns.md`             | Animations, CSS variables               |
 
 ## Quick Reference
 
@@ -245,6 +246,4 @@ When making significant changes, update the relevant documentation in `.github/d
 | New query pattern           | `docs/integrations/tanstack-query.md` - add example |
 | New UI primitive            | `docs/ui/primitives.md` - add to component list     |
 | New Tailwind variant        | `docs/ui/responsive-design.md` - document variant   |
-| New feature area            | Create new doc in `docs/features/`                  |
-
-**When to update:** After implementing a feature, pattern, or convention that others would need to understand or follow.
+| New CSS/animation pattern   | `docs/ui/css-patterns.md` - document pattern        |

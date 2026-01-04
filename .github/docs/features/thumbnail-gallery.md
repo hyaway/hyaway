@@ -142,15 +142,36 @@ See [Settings Architecture](../settings-architecture.md) for the settings UI pat
 - **Height caching** - Item heights cached, invalidated on width change
 - **Memoized items** - `ThumbnailGalleryItem` is wrapped in `memo()`
 - **Scroll restoration** - Uses `useScrollRestoration` hook
+- **CSS variables for animation settings** - Duration settings are read once at gallery root and passed to children via CSS custom properties, avoiding re-renders of all items when settings change
 
-## Related Files
+### CSS Variables
 
-| File                                             | Purpose                                 |
-| ------------------------------------------------ | --------------------------------------- |
-| `thumbnail-gallery.tsx`                          | Main component with virtualization      |
-| `thumbnail-gallery-item.tsx`                     | Individual item with hover/context menu |
-| `thumbnail-gallery-skeleton.tsx`                 | Loading state                           |
-| `thumbnail-gallery-display-settings-popover.tsx` | Inline settings                         |
-| `use-responsive-lanes.ts`                        | Lane dimension calculation              |
-| `use-masonry-navigation.ts`                      | Keyboard navigation                     |
-| `use-scroll-restoration.ts`                      | Position persistence                    |
+Animation durations are set as CSS custom properties at the gallery root to prevent child re-renders:
+
+```tsx
+// In thumbnail-gallery.tsx
+const galleryStyle = {
+  "--gallery-reflow-duration": `${reflowDuration}ms`,
+  "--gallery-entry-duration": `${entryDuration}ms`,
+  "--gallery-hover-zoom-duration": `${hoverZoomDuration}ms`,
+};
+```
+
+Children consume these via Tailwind classes:
+
+```tsx
+// In thumbnail-gallery-item.tsx
+className = "duration-(--gallery-hover-zoom-duration)";
+
+// In thumbnail-image.tsx
+className = "duration-(--gallery-entry-duration)";
+```
+
+See [CSS Patterns](../ui/css-patterns.md) for the full pattern documentation.
+| `thumbnail-gallery.tsx` | Main component with virtualization |
+| `thumbnail-gallery-item.tsx` | Individual item with hover/context menu |
+| `thumbnail-gallery-skeleton.tsx` | Loading state |
+| `thumbnail-gallery-display-settings-popover.tsx` | Inline settings |
+| `use-responsive-lanes.ts` | Lane dimension calculation |
+| `use-masonry-navigation.ts` | Keyboard navigation |
+| `use-scroll-restoration.ts` | Position persistence |
