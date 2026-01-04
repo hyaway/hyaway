@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getClientOptions } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
+import type { GetClientOptionsResponse } from "../models";
 import { useActiveTheme } from "@/stores/theme-store";
 import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
 import {
@@ -10,7 +11,9 @@ import {
   MIN_GALLERY_BASE_WIDTH,
 } from "@/stores/gallery-settings-store";
 
-export const useGetClientOptionsQuery = () => {
+export const useGetClientOptionsQuery = <T = GetClientOptionsResponse>(
+  select?: (data: GetClientOptionsResponse) => T,
+) => {
   const isConfigured = useIsApiConfigured();
 
   return useQuery({
@@ -20,24 +23,26 @@ export const useGetClientOptionsQuery = () => {
     },
     enabled: isConfigured,
     staleTime: Infinity, // Options don't change often
+    select,
   });
 };
 
 export const useThumbnailDimensions = () => {
-  const { data, isFetched } = useGetClientOptionsQuery();
+  const { data: thumbnail_dimensions, isFetched } = useGetClientOptionsQuery(
+    (response) => response.old_options?.thumbnail_dimensions,
+  );
 
   return useMemo(() => {
     // Return undefined if fetched but no data
-    if (isFetched && !data) {
+    if (isFetched && !thumbnail_dimensions) {
       return undefined;
     }
 
     if (
-      !data ||
-      !data.old_options?.thumbnail_dimensions ||
-      data.old_options.thumbnail_dimensions.length !== 2 ||
-      data.old_options.thumbnail_dimensions[0] <= 0 ||
-      data.old_options.thumbnail_dimensions[1] <= 0
+      !thumbnail_dimensions ||
+      thumbnail_dimensions.length !== 2 ||
+      thumbnail_dimensions[0] <= 0 ||
+      thumbnail_dimensions[1] <= 0
     ) {
       return {
         width: DEFAULT_THUMBNAIL_SIZE,
@@ -45,8 +50,8 @@ export const useThumbnailDimensions = () => {
       };
     }
 
-    const width = data.old_options.thumbnail_dimensions[0];
-    const height = data.old_options.thumbnail_dimensions[1];
+    const width = thumbnail_dimensions[0];
+    const height = thumbnail_dimensions[1];
 
     if (width > MAX_GALLERY_BASE_WIDTH) {
       const scaleFactor = width / MAX_GALLERY_BASE_WIDTH;
@@ -65,7 +70,7 @@ export const useThumbnailDimensions = () => {
     }
 
     return { width, height };
-  }, [data, isFetched]);
+  }, [thumbnail_dimensions, isFetched]);
 };
 
 /**
@@ -75,11 +80,12 @@ export const useThumbnailDimensions = () => {
  * Colors are automatically adjusted for accessible contrast based on the current theme.
  */
 export const useNamespaceColors = (): Record<string, string> => {
-  const { data } = useGetClientOptionsQuery();
+  const { data: namespaceColours } = useGetClientOptionsQuery(
+    (response) => response.old_options?.namespace_colours,
+  );
   const theme = useActiveTheme();
 
   return useMemo(() => {
-    const namespaceColours = data?.old_options?.namespace_colours;
     if (!namespaceColours) return {};
 
     const result: Record<string, string> = {};
@@ -88,7 +94,7 @@ export const useNamespaceColors = (): Record<string, string> => {
       result[namespace] = rgbToString(adjustedRgb);
     }
     return result;
-  }, [data, theme]);
+  }, [namespaceColours, theme]);
 };
 
 /**
@@ -115,20 +121,22 @@ const FILE_VIEWING_STATS_DEFAULTS = {
  * Returns whether the feature is enabled and the min/max time thresholds.
  */
 export const useFileViewingStatisticsOptions = () => {
-  const { data, isFetched, isLoading } = useGetClientOptionsQuery();
+  const {
+    data: options,
+    isFetched,
+    isLoading,
+  } = useGetClientOptionsQuery((response) => response.options);
 
   return useMemo(() => {
     const isActive =
-      data?.options?.booleans?.file_viewing_statistics_active ??
+      options?.booleans?.file_viewing_statistics_active ??
       FILE_VIEWING_STATS_DEFAULTS.active;
 
     // Get the raw values - could be number, null (disabled), or undefined (not set)
     const rawMinTimeMs =
-      data?.options?.noneable_integers
-        ?.file_viewing_statistics_media_min_time_ms;
+      options?.noneable_integers?.file_viewing_statistics_media_min_time_ms;
     const rawMaxTimeMs =
-      data?.options?.noneable_integers
-        ?.file_viewing_statistics_media_max_time_ms;
+      options?.noneable_integers?.file_viewing_statistics_media_max_time_ms;
 
     // Apply defaults only when undefined (not set), preserve null (means "disabled" for min, "no max" for max)
     // For simplicity, we treat null as "use default" since the Client API context makes sense with defaults
@@ -154,5 +162,5 @@ export const useFileViewingStatisticsOptions = () => {
       /** Whether options are currently loading */
       isLoading,
     };
-  }, [data, isFetched, isLoading]);
+  }, [options, isFetched, isLoading]);
 };
