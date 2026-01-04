@@ -16,7 +16,7 @@ export function FloatingHeader({ children, className }: FloatingHeaderProps) {
 
   const visibilityClasses = isVisible
     ? "translate-y-0 opacity-100 short:after:h-[calc(var(--header-height-short)*0.5)] after:h-[calc(var(--header-height)*0.5)]"
-    : "pointer-events-none -translate-y-full opacity-0 short:after:h-[calc(var(--header-height-short)*2)] after:h-[calc(var(--header-height)*2)] hover:pointer-events-auto hover:translate-y-0 hover:opacity-100";
+    : "pointer-events-none -translate-y-full opacity-0 short:after:h-[calc(var(--header-height-short))] after:h-[calc(var(--header-height))] hover:pointer-events-auto hover:translate-y-0 hover:opacity-100";
 
   return (
     <header
