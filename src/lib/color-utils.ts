@@ -261,3 +261,47 @@ export function adjustColorForTheme(rgb: RGB, theme: "light" | "dark"): RGB {
 export function rgbToString(rgb: RGB): string {
   return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
 }
+
+// Base83 character set used by blurhash
+const BASE83_CHARS =
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#$%*+,-.:;=?@[]^_{|}~";
+
+/**
+ * Decode a base83 string to an integer.
+ * Used for extracting the average color from a blurhash.
+ */
+function decode83(str: string): number {
+  let value = 0;
+  for (const char of str) {
+    const index = BASE83_CHARS.indexOf(char);
+    if (index === -1) return 0; // Invalid character
+    value = value * 83 + index;
+  }
+  return value;
+}
+
+/**
+ * Extract the average color from a blurhash string.
+ * Characters 2-6 (0-indexed) encode the average color in base83.
+ * @see https://github.com/woltapp/blurhash/blob/master/Algorithm.md
+ */
+export function getAverageColorFromBlurhash(
+  blurhash: string | undefined,
+): string | undefined {
+  if (!blurhash || blurhash.length < 6) return undefined;
+
+  try {
+    // Characters 2-6 represent the average color
+    const averageColorStr = blurhash.substring(2, 6);
+    const averageColorInt = decode83(averageColorStr);
+
+    // Extract RGB components (no alpha in blurhash)
+    const r = (averageColorInt >> 16) & 0xff;
+    const g = (averageColorInt >> 8) & 0xff;
+    const b = averageColorInt & 0xff;
+
+    return `rgb(${r}, ${g}, ${b})`;
+  } catch {
+    return undefined;
+  }
+}

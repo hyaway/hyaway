@@ -277,7 +277,7 @@ export function PureThumbnailGallery({
 
               return (
                 <ThumbnailGalleryItem
-                  key={virtualRow.index}
+                  key={item.file_id}
                   virtualRow={virtualRow}
                   lanes={effectiveLanes}
                   totalItemsCount={deferredItems.length}

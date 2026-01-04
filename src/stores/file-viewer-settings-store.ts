@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
-export type ImageBackground = "solid" | "checkerboard";
+export type ImageBackground = "solid" | "checkerboard" | "average";
 
 type FileViewerSettingsState = {
   startExpanded: boolean;

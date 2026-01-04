@@ -264,13 +264,13 @@ export function ThumbnailGalleryDisplaySettings({
             }}
             variant="outline"
             size="sm"
-            className="w-full"
+            spacing={1}
+            className="grid w-full grid-cols-2 gap-1"
           >
-            <ToggleGroupItem value="solid" className="flex-1">
-              Solid
-            </ToggleGroupItem>
-            <ToggleGroupItem value="checkerboard" className="flex-1">
-              Checkerboard
+            <ToggleGroupItem value="solid">Solid</ToggleGroupItem>
+            <ToggleGroupItem value="checkerboard">Checkerboard</ToggleGroupItem>
+            <ToggleGroupItem value="average" className="col-span-2">
+              Average from image
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

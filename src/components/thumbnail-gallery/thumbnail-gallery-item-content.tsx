@@ -43,6 +43,7 @@ export function ThumbnailGalleryItemContent({
             fileId={item.file_id}
             width={item.thumbnail_width}
             height={item.thumbnail_height}
+            blurhash={item.blurhash ?? undefined}
           />
         )}
       </div>
