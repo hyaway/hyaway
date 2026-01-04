@@ -2,8 +2,6 @@ import { useState } from "react";
 
 import { useThumbnailUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
-import { checkerboardBg } from "@/lib/style-constants";
-import { useImageBackground } from "@/stores/file-viewer-settings-store";
 
 export interface ThumbnailImageProps extends React.HTMLAttributes<HTMLImageElement> {
   fileId: number;
@@ -19,7 +17,6 @@ export function ThumbnailImage({
 }: ThumbnailImageProps) {
   const [loaded, setLoaded] = useState(false);
   const { url, onLoad, onError } = useThumbnailUrl(fileId);
-  const imageBackground = useImageBackground();
 
   const handleLoad = (_e: React.SyntheticEvent<HTMLImageElement>) => {
     setLoaded(true);
@@ -33,8 +30,10 @@ export function ThumbnailImage({
       className={cn(
         "h-full w-full object-cover starting:scale-98 starting:opacity-0",
         "transition-[opacity,scale] duration-(--gallery-entry-duration)",
-        loaded && imageBackground === "checkerboard"
-          ? checkerboardBg
+        // Use bg-muted by default, checkerboard applied via ancestor data-image-bg attribute
+        // See styles.css for the [data-image-bg=checkerboard] rule
+        loaded
+          ? "group-data-[image-bg=checkerboard]/gallery:bg-(image:--checkerboard-bg) group-data-[image-bg=checkerboard]/gallery:bg-size-[20px_20px]"
           : "bg-muted",
         className,
       )}

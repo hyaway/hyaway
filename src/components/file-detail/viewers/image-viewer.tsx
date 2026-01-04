@@ -44,7 +44,7 @@ export function ImageViewer({
         className={cn(
           "max-h-full max-w-full object-contain",
           loaded && imageBackground === "checkerboard"
-            ? checkerboardBg
+            ? "bg-(image:--checkerboard-bg) bg-size-[20px_20px]"
             : "bg-background",
           isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
         )}

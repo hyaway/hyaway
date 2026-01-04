@@ -26,6 +26,7 @@ import {
   useGalleryShowScrollBadge,
   useGalleryVerticalGap,
 } from "@/stores/gallery-settings-store";
+import { useImageBackground } from "@/stores/file-viewer-settings-store";
 import { useSidebarIsTransitioning } from "@/stores/sidebar-store";
 
 export interface ThumbnailGalleryProps {
@@ -109,6 +110,9 @@ export function PureThumbnailGallery({
   const reflowDuration = useGalleryReflowDuration();
   const entryDuration = useGalleryEntryDuration();
   const hoverZoomDuration = useGalleryHoverZoomDuration();
+
+  // Image background setting - passed via data attribute to avoid child re-renders
+  const imageBackground = useImageBackground();
 
   // Determine base width based on mode
   const baseWidth =
@@ -232,7 +236,12 @@ export function PureThumbnailGallery({
   ) as React.CSSProperties;
 
   return (
-    <div className="w-full" ref={parentRef} style={galleryStyle}>
+    <div
+      className="group/gallery w-full"
+      ref={parentRef}
+      style={galleryStyle}
+      data-image-bg={imageBackground}
+    >
       {isMeasuring ? (
         <ThumbnailGallerySkeleton />
       ) : (
