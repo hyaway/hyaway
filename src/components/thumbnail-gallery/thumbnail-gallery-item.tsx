@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import {
   DEFAULT_GALLERY_REFLOW_DURATION,
   useGalleryEnableContextMenu,
+  useGalleryHoverZoomDuration,
 } from "@/stores/gallery-settings-store";
 
 export { ThumbnailImage, type ThumbnailImageProps } from "./thumbnail-image";
@@ -74,6 +75,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
 }: ThumbnailGalleryItemProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const enableContextMenu = useGalleryEnableContextMenu();
+  const hoverZoomDuration = useGalleryHoverZoomDuration();
   const fileLink = getFileLink(item.file_id);
 
   const isTopRow = virtualRow.index < lanes;
@@ -175,8 +177,15 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         setMenuOpen={setMenuOpen}
       />
       <div
+        style={
+          {
+            "--hover-scale-duration": `${hoverZoomDuration}ms`,
+          } as React.CSSProperties
+        }
         className={cn(
-          "pointer-events-none h-full w-full transition-[scale] duration-100 ease-in-out",
+          "pointer-events-none h-full w-full origin-center",
+          hoverZoomDuration > 0 &&
+            "transition-[scale] duration-(--hover-scale-duration) ease-in-out",
           "group-hover:scale-(--thumbnail-hover-scale) group-hover:shadow",
           "group-active:scale-(--thumbnail-hover-scale) group-active:shadow",
           "group-has-focus-visible:ring-3 group-has-focus-visible:ring-black group-has-focus-visible:ring-offset-3 group-has-focus-visible:ring-offset-white dark:group-has-focus-visible:ring-white dark:group-has-focus-visible:ring-offset-black",
