@@ -7,7 +7,9 @@ import {
 } from "./setting-fields";
 import {
   MAX_GALLERY_BASE_WIDTH,
+  MAX_GALLERY_ENTRY_DURATION,
   MAX_GALLERY_GAP,
+  MAX_GALLERY_HOVER_SCALE_DURATION,
   MAX_GALLERY_LANES,
   MAX_GALLERY_REFLOW_DURATION,
   MIN_GALLERY_BASE_WIDTH,
@@ -15,8 +17,10 @@ import {
   useGalleryBaseWidthMode,
   useGalleryCustomBaseWidth,
   useGalleryEnableContextMenu,
+  useGalleryEntryDuration,
   useGalleryExpandImages,
   useGalleryHorizontalGap,
+  useGalleryHoverScaleDuration,
   useGalleryMaxLanes,
   useGalleryMinLanes,
   useGalleryReflowDuration,
@@ -70,6 +74,8 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryHorizontalGap = useGalleryHorizontalGap();
   const galleryVerticalGap = useGalleryVerticalGap();
   const galleryReflowDuration = useGalleryReflowDuration();
+  const galleryEntryDuration = useGalleryEntryDuration();
+  const galleryHoverScaleDuration = useGalleryHoverScaleDuration();
 
   // Check if min lanes would overflow the window width
   const minLayoutWidth =
@@ -86,6 +92,8 @@ export function ThumbnailGalleryDisplaySettings({
     setHorizontalGap,
     setVerticalGap,
     setReflowDuration,
+    setEntryDuration,
+    setHoverScaleDuration,
   } = useGallerySettingsActions();
 
   return (
@@ -178,6 +186,26 @@ export function ThumbnailGalleryDisplaySettings({
           max={MAX_GALLERY_REFLOW_DURATION}
           step={50}
           onValueChange={setReflowDuration}
+          formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
+        />
+        <SliderField
+          id={`${idPrefix}entry-duration-slider`}
+          label="Entry animation"
+          value={galleryEntryDuration}
+          min={0}
+          max={MAX_GALLERY_ENTRY_DURATION}
+          step={25}
+          onValueChange={setEntryDuration}
+          formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
+        />
+        <SliderField
+          id={`${idPrefix}hover-scale-duration-slider`}
+          label="Hover zoom"
+          value={galleryHoverScaleDuration}
+          min={0}
+          max={MAX_GALLERY_HOVER_SCALE_DURATION}
+          step={25}
+          onValueChange={setHoverScaleDuration}
           formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
         />
       </AccordionSection>

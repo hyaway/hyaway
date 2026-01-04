@@ -12,6 +12,10 @@ export const MIN_GALLERY_BASE_WIDTH = 100;
 export const MAX_GALLERY_BASE_WIDTH = 500;
 export const DEFAULT_GALLERY_REFLOW_DURATION = 350;
 export const MAX_GALLERY_REFLOW_DURATION = 1000;
+export const DEFAULT_GALLERY_ENTRY_DURATION = 350;
+export const MAX_GALLERY_ENTRY_DURATION = 1000;
+export const DEFAULT_GALLERY_HOVER_ZOOM_DURATION = 150;
+export const MAX_GALLERY_HOVER_SCALE_DURATION = 1000;
 
 export type GalleryBaseWidthMode = "service" | "custom";
 
@@ -26,6 +30,8 @@ type GallerySettingsState = {
   horizontalGap: number;
   verticalGap: number;
   reflowDuration: number;
+  entryDuration: number;
+  hoverZoomDuration: number;
   actions: {
     setLanesRange: (min: number, max: number) => void;
     setExpandImages: (expand: boolean) => void;
@@ -36,6 +42,8 @@ type GallerySettingsState = {
     setHorizontalGap: (gap: number) => void;
     setVerticalGap: (gap: number) => void;
     setReflowDuration: (duration: number) => void;
+    setEntryDuration: (duration: number) => void;
+    setHoverZoomDuration: (duration: number) => void;
     reset: () => void;
   };
 };
@@ -53,6 +61,8 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
       horizontalGap: DEFAULT_GALLERY_HORIZONTAL_GAP,
       verticalGap: DEFAULT_GALLERY_VERTICAL_GAP,
       reflowDuration: DEFAULT_GALLERY_REFLOW_DURATION,
+      entryDuration: DEFAULT_GALLERY_ENTRY_DURATION,
+      hoverZoomDuration: DEFAULT_GALLERY_HOVER_ZOOM_DURATION,
       actions: {
         setLanesRange: (minLanes: number, maxLanes: number) =>
           set({ minLanes, maxLanes }),
@@ -68,6 +78,9 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
         setHorizontalGap: (horizontalGap: number) => set({ horizontalGap }),
         setVerticalGap: (verticalGap: number) => set({ verticalGap }),
         setReflowDuration: (reflowDuration: number) => set({ reflowDuration }),
+        setEntryDuration: (entryDuration: number) => set({ entryDuration }),
+        setHoverZoomDuration: (hoverZoomDuration: number) =>
+          set({ hoverZoomDuration }),
         reset: () => set(store.getInitialState()),
       },
     }),
@@ -108,6 +121,12 @@ export const useGalleryVerticalGap = () =>
 
 export const useGalleryReflowDuration = () =>
   useGallerySettingsStore((state) => state.reflowDuration);
+
+export const useGalleryEntryDuration = () =>
+  useGallerySettingsStore((state) => state.entryDuration);
+
+export const useGalleryHoverZoomDuration = () =>
+  useGallerySettingsStore((state) => state.hoverZoomDuration);
 
 export const useGallerySettingsActions = () =>
   useGallerySettingsStore((state) => state.actions);
