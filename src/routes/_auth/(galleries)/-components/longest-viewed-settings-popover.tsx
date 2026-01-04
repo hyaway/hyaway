@@ -1,8 +1,5 @@
 import { ThumbnailGalleryDisplaySettingsContent } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
-import {
-  VIEW_STATISTICS_LIMIT_SETTINGS_TITLE,
-  ViewStatisticsLimitSettings,
-} from "@/components/settings/view-statistics-settings";
+import { ViewStatisticsLimitSettings } from "@/components/settings/view-statistics-settings";
 import {
   SettingsHeader,
   SettingsTitle,
@@ -14,7 +11,7 @@ export function LongestViewedSettingsPopover() {
   return (
     <SettingsPopover label="Settings">
       <SettingsHeader>
-        <SettingsTitle>{VIEW_STATISTICS_LIMIT_SETTINGS_TITLE}</SettingsTitle>
+        <SettingsTitle>Longest viewed</SettingsTitle>
       </SettingsHeader>
       <ViewStatisticsLimitSettings
         idPrefix="popover-"

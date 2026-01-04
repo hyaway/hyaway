@@ -7,8 +7,6 @@ import {
   useSearchLimitsActions,
 } from "@/stores/search-limits-store";
 
-export const VIEW_STATISTICS_LIMIT_SETTINGS_TITLE = "View statistics";
-
 export interface ViewStatisticsLimitSettingsProps {
   idPrefix?: string;
   /** Which limit to show: 'remoteHistory', 'mostViewed', or 'longestViewed' */
