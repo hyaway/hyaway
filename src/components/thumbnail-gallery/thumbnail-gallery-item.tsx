@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Link, linkOptions } from "@tanstack/react-router";
 
 import { ThumbnailGalleryItemContent } from "./thumbnail-gallery-item-content";
@@ -78,6 +78,26 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
   const hoverZoomDuration = useGalleryHoverZoomDuration();
   const fileLink = getFileLink(item.file_id);
 
+  // Track lane changes to scale animation duration by distance
+  const prevLaneRef = useRef(virtualRow.lane);
+  const [laneDistance, setLaneDistance] = useState(0);
+
+  useEffect(() => {
+    if (reflowDuration > 0 && prevLaneRef.current !== virtualRow.lane) {
+      setLaneDistance(Math.abs(virtualRow.lane - prevLaneRef.current));
+      prevLaneRef.current = virtualRow.lane;
+    } else {
+      prevLaneRef.current = virtualRow.lane;
+    }
+  }, [virtualRow.lane, reflowDuration]);
+
+  // Scale duration: base duration for 1 lane, scales with sqrt for longer distances
+  // sqrt gives diminishing returns - 4 lanes = 2x duration, not 4x
+  const scaledDuration =
+    laneDistance > 0
+      ? Math.round(reflowDuration * Math.sqrt(laneDistance))
+      : reflowDuration;
+
   const isTopRow = virtualRow.index < lanes;
   const lastRowStart = totalItemsCount - 2 * lanes;
   const isBottomRow = virtualRow.index >= lastRowStart;
@@ -148,8 +168,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         [`--thumbnail-hover-scale`]: `${scale}`,
         [`--thumbnail-hover-reverse-scale`]: `${1 / scale}`,
         [`--badge-offset-scaled`]: `calc(0.25rem / ${scale})`,
-        transitionDuration:
-          reflowDuration > 0 ? `${reflowDuration}ms` : undefined,
+        transitionDuration: reflowDuration > 0 ? `${scaledDuration}ms` : 0,
       }}
       className={cn(
         "group absolute top-0 left-0 z-0 flex h-full w-full justify-center overflow-visible [content-visibility:auto]",
@@ -158,7 +177,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         "has-focus-visible:z-20 has-focus-visible:[content-visibility:visible]",
         width < height ? "flex-col" : "flex-row",
         reflowDuration > 0
-          ? "transition-transform ease-out in-data-[scrolling=true]:transition-none"
+          ? "transition-transform ease-[cubic-bezier(0.5,0,0.265,1.2)] in-data-[scrolling=true]:transition-none"
           : "transition-none",
         enableContextMenu && menuOpen && "z-30 [content-visibility:visible]",
         className,
