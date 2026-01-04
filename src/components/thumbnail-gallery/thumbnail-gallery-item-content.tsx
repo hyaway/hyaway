@@ -28,13 +28,12 @@ export function ThumbnailGalleryItemContent({
     <div
       className={cn(
         "text-muted-foreground @container relative flex h-full w-full flex-col overflow-hidden rounded-sm shadow-sm",
-        !averageColor && "bg-muted",
+        averageColor ? `bg-(--average-color)/50` : "bg-muted",
         "pointer-events-none",
       )}
       style={
         averageColor
           ? ({
-              backgroundColor: averageColor,
               "--average-color": averageColor,
             } as React.CSSProperties)
           : undefined

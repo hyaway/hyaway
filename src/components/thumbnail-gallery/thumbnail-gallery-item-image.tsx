@@ -31,7 +31,7 @@ export function ThumbnailImage({
         "h-full w-full object-cover starting:scale-98 starting:opacity-0",
         "transition-[opacity,scale] duration-(--gallery-entry-duration)",
         // Before load: always use average color from parent's --average-color CSS variable
-        !loaded && "bg-(--average-color,var(--muted))",
+        !loaded && "bg-(--average-color,var(--muted))/50",
         // After load: apply background based on setting
         loaded && [
           "group-data-[image-bg=checkerboard]/gallery:bg-(image:--checkerboard-bg) group-data-[image-bg=checkerboard]/gallery:bg-size-[20px_20px]",
