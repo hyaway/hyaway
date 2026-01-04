@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
 import { cn } from "@/lib/utils";
-import { checkerboardBg } from "@/lib/style-constants";
 import {
   useFileViewerStartExpanded,
   useImageBackground,

@@ -11,6 +11,7 @@ import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { ScrollPositionBadge } from "@/components/scroll-position-badge";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { PageError } from "@/components/page-shell/page-error";
+import { Spinner } from "@/components/ui-primitives/spinner";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
@@ -177,24 +178,30 @@ export function PureThumbnailGallery({
   const virtualItems = rowVirtualizer.getVirtualItems();
   const lastItemIndex = virtualItems.at(-1)?.index;
 
+  // Guard against duplicate fetch calls before isFetchingNextPage updates
+  const fetchingRef = useRef(false);
+  useEffect(() => {
+    if (isFetchingNextPage) {
+      fetchingRef.current = true;
+    } else {
+      fetchingRef.current = false;
+    }
+  }, [isFetchingNextPage]);
+
   // Infinite scroll - fetch next page when near the end
   useEffect(() => {
     if (lastItemIndex === undefined) return;
+    if (fetchingRef.current) return;
 
     if (
       lastItemIndex >= deferredItems.length - 1 &&
       hasNextPage &&
       !isFetchingNextPage
     ) {
+      fetchingRef.current = true;
       fetchNextPage();
     }
-  }, [
-    hasNextPage,
-    fetchNextPage,
-    deferredItems.length,
-    isFetchingNextPage,
-    lastItemIndex,
-  ]);
+  }, [hasNextPage, fetchNextPage, deferredItems.length, lastItemIndex]);
 
   // Re-measure when items or dimensions change
   useEffect(() => {
@@ -292,6 +299,11 @@ export function PureThumbnailGallery({
             isScrolling={rowVirtualizer.isScrolling}
             show={showScrollBadge}
           />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Spinner className="text-muted-foreground size-5" />
+            </div>
+          )}
           <RightSidebarPortal>
             <TagsSidebar items={deferredItems} />
           </RightSidebarPortal>
