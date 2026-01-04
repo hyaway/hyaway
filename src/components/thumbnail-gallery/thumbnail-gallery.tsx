@@ -125,10 +125,11 @@ export function PureThumbnailGallery({
   const effectiveLanes = lanes || 1;
   const isMeasuring = lanes === 0;
 
-  // Cache heights - invalidates only when lanes change to avoid jitter during resize
+  // Cache heights - invalidates when lanes or width changes
+  // Both affect height calculation: lanes determines column count, width is used in aspect ratio calc
   const heightCache = useMemo(
     () => new Map<number, number>(),
-    [effectiveLanes],
+    [effectiveLanes, width],
   );
 
   const getItemHeight = (item: FileMetadata) => {
