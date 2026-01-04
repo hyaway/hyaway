@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
   useGalleryExpandImages,
   useGalleryHorizontalGap,
@@ -67,6 +67,9 @@ export function useResponsiveLanes(
     containerWidth: 0,
   });
 
+  // Debounce timeout ref for resize observer
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useLayoutEffect(() => {
     if (!containerRef.current) {
       return;
@@ -98,25 +101,39 @@ export function useResponsiveLanes(
         horizontalGap,
       );
 
-      // Only update state if lanes or containerWidth actually changed
-      setGridState((prev) => {
-        if (
-          prev.desiredLanes === calculatedLanes &&
-          prev.containerWidth === containerWidth
-        ) {
-          return prev;
-        }
-        return {
-          width: defaultWidth,
-          desiredLanes: calculatedLanes,
-          containerWidth,
-        };
-      });
+      // Clear any pending debounce
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+
+      // Debounce resize updates to reduce layout thrashing during drag resize
+      debounceRef.current = setTimeout(() => {
+        // Only update state if lanes or containerWidth actually changed
+        setGridState((prev) => {
+          if (
+            prev.desiredLanes === calculatedLanes &&
+            prev.containerWidth === containerWidth
+          ) {
+            return prev;
+          }
+          return {
+            width: defaultWidth,
+            desiredLanes: calculatedLanes,
+            containerWidth,
+          };
+        });
+        debounceRef.current = null;
+      }, 50);
     });
 
     observer.observe(containerRef.current);
 
-    return () => observer.disconnect();
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+      observer.disconnect();
+    };
   }, [defaultWidth, containerRef, horizontalGap]);
 
   const { desiredLanes, containerWidth } = gridState;
