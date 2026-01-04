@@ -197,7 +197,7 @@ interface SettingsGroupProps {
 }
 
 export function SettingsGroup({ children }: SettingsGroupProps) {
-  return <div className="flex flex-col gap-6">{children}</div>;
+  return <div className="flex flex-col gap-8">{children}</div>;
 }
 
 interface AccordionSectionProps {

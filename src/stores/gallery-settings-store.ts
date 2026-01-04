@@ -35,6 +35,7 @@ type GallerySettingsState = {
   hoverZoomDuration: number;
   imageBackground: ImageBackground;
   linkImageBackground: boolean;
+  lastOpenSection: string;
   actions: {
     setLanesRange: (min: number, max: number) => void;
     setExpandImages: (expand: boolean) => void;
@@ -49,6 +50,7 @@ type GallerySettingsState = {
     setHoverZoomDuration: (duration: number) => void;
     setImageBackground: (bg: ImageBackground) => void;
     setLinkImageBackground: (link: boolean) => void;
+    setLastOpenSection: (section: string) => void;
     reset: () => void;
   };
 };
@@ -70,6 +72,7 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
       hoverZoomDuration: DEFAULT_GALLERY_HOVER_ZOOM_DURATION,
       imageBackground: "checkerboard" as ImageBackground,
       linkImageBackground: true,
+      lastOpenSection: "layout",
       actions: {
         setLanesRange: (minLanes: number, maxLanes: number) =>
           set({ minLanes, maxLanes }),
@@ -92,6 +95,8 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
           set({ imageBackground }),
         setLinkImageBackground: (linkImageBackground: boolean) =>
           set({ linkImageBackground }),
+        setLastOpenSection: (lastOpenSection: string) =>
+          set({ lastOpenSection }),
         reset: () => set(store.getInitialState()),
       },
     }),
@@ -144,6 +149,9 @@ export const useGalleryImageBackground = () =>
 
 export const useGalleryLinkImageBackground = () =>
   useGallerySettingsStore((state) => state.linkImageBackground);
+
+export const useGalleryLastOpenSection = () =>
+  useGallerySettingsStore((state) => state.lastOpenSection);
 
 export const useGallerySettingsActions = () =>
   useGallerySettingsStore((state) => state.actions);

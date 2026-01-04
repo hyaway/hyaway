@@ -24,6 +24,7 @@ import {
   useGalleryHorizontalGap,
   useGalleryHoverZoomDuration,
   useGalleryImageBackground,
+  useGalleryLastOpenSection,
   useGalleryLinkImageBackground,
   useGalleryMaxLanes,
   useGalleryMinLanes,
@@ -94,6 +95,7 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryHoverZoomDuration = useGalleryHoverZoomDuration();
   const galleryImageBackground = useGalleryImageBackground();
   const galleryLinkImageBackground = useGalleryLinkImageBackground();
+  const galleryLastOpenSection = useGalleryLastOpenSection();
   const fileViewerImageBackground = useImageBackground();
   const tagsSortMode = useTagsSortMode();
   const { setImageBackground: setFileViewerImageBackground } =
@@ -119,6 +121,7 @@ export function ThumbnailGalleryDisplaySettings({
     setHoverZoomDuration,
     setImageBackground: setGalleryImageBackground,
     setLinkImageBackground,
+    setLastOpenSection,
   } = useGallerySettingsActions();
 
   // When linked, changing gallery background also updates file viewer background
@@ -142,10 +145,18 @@ export function ThumbnailGalleryDisplaySettings({
     ? fileViewerImageBackground
     : galleryImageBackground;
 
+  // Track which section was last opened (only when not on settings page with multiple open)
+  const handleAccordionChange = (value: Array<string>) => {
+    if (!openMultiple && value.length > 0) {
+      setLastOpenSection(value[0]);
+    }
+  };
+
   return (
     <Accordion
       multiple={openMultiple}
-      defaultValue={defaultOpen ? ["layout"] : []}
+      defaultValue={defaultOpen ? [galleryLastOpenSection] : []}
+      onValueChange={handleAccordionChange}
       className="rounded-none border-0"
     >
       <AccordionSection value="layout" title="Layout">

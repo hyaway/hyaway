@@ -47,7 +47,7 @@ export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
         checked={fileViewerStartExpanded}
         onCheckedChange={setStartExpanded}
       />
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         <Label>Image background</Label>
         <ToggleGroup
           value={[imageBackground]}
