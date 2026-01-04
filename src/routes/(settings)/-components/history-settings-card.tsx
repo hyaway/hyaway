@@ -37,7 +37,9 @@ export function HistorySettingsCard() {
         <HistorySettings />
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium">Clear history</span>
+            <span className="text-sm font-medium">
+              Clear local watch history
+            </span>
             <span className="text-muted-foreground text-xs">
               {entries.length} {entries.length === 1 ? "entry" : "entries"}{" "}
               saved

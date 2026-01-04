@@ -277,6 +277,27 @@ export const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
         .optional(),
     })
     .optional(),
+  options: z
+    .object({
+      booleans: z
+        .object({
+          file_viewing_statistics_active: z.boolean().optional(),
+        })
+        .optional(),
+      noneable_integers: z
+        .object({
+          file_viewing_statistics_media_min_time_ms: z
+            .number()
+            .nullable()
+            .optional(),
+          file_viewing_statistics_media_max_time_ms: z
+            .number()
+            .nullable()
+            .optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 });
 
 export type GetClientOptionsResponse = z.infer<

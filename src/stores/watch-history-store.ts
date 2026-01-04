@@ -18,6 +18,8 @@ type WatchHistoryState = {
   enabled: boolean;
   /** Maximum number of entries to keep */
   limit: number;
+  /** Whether to sync view time to Hydrus API */
+  syncToHydrus: boolean;
   /** Timestamp of last clear - entries older than this are ignored during merge */
   clearedAt: number;
   actions: {
@@ -31,6 +33,8 @@ type WatchHistoryState = {
     setEnabled: (enabled: boolean) => void;
     /** Set the maximum number of entries to keep */
     setLimit: (limit: number) => void;
+    /** Enable or disable syncing to Hydrus */
+    setSyncToHydrus: (syncToHydrus: boolean) => void;
     /** Reset settings (not entries) to defaults */
     reset: () => void;
   };
@@ -74,6 +78,7 @@ function mergeWatchHistory(
     ...current,
     entries: mergedEntries,
     enabled: persisted.enabled ?? current.enabled,
+    syncToHydrus: persisted.syncToHydrus ?? current.syncToHydrus,
     limit,
     clearedAt,
   };
@@ -85,6 +90,7 @@ const useWatchHistoryStore = create<WatchHistoryState>()(
       entries: [],
       enabled: true,
       limit: DEFAULT_WATCH_HISTORY_LIMIT,
+      syncToHydrus: true,
       clearedAt: 0,
       actions: {
         addViewedFile: (fileId: number) => {
@@ -118,6 +124,9 @@ const useWatchHistoryStore = create<WatchHistoryState>()(
           } else {
             set({ limit });
           }
+        },
+        setSyncToHydrus: (syncToHydrus: boolean) => {
+          set({ syncToHydrus });
         },
         reset: () => {
           // Reset settings only, preserve entries
@@ -157,6 +166,9 @@ export const useWatchHistoryEnabled = () =>
 
 export const useWatchHistoryLimit = () =>
   useWatchHistoryStore((state) => state.limit);
+
+export const useWatchHistorySyncToHydrus = () =>
+  useWatchHistoryStore((state) => state.syncToHydrus);
 
 export const useWatchHistoryActions = () =>
   useWatchHistoryStore((state) => state.actions);

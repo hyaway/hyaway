@@ -99,3 +99,60 @@ export const useNamespaceColor = (namespace: string): string | undefined => {
   const colors = useNamespaceColors();
   return colors[namespace];
 };
+
+/**
+ * Default values for file viewing statistics when not configured in Hydrus.
+ * These match Hydrus defaults.
+ */
+const FILE_VIEWING_STATS_DEFAULTS = {
+  active: false,
+  minTimeMs: 2_000, // 2 seconds
+  maxTimeMs: 600_000, // 10 minutes
+};
+
+/**
+ * Hook to get file viewing statistics options from Hydrus.
+ * Returns whether the feature is enabled and the min/max time thresholds.
+ */
+export const useFileViewingStatisticsOptions = () => {
+  const { data, isFetched, isLoading } = useGetClientOptionsQuery();
+
+  return useMemo(() => {
+    const isActive =
+      data?.options?.booleans?.file_viewing_statistics_active ??
+      FILE_VIEWING_STATS_DEFAULTS.active;
+
+    // Get the raw values - could be number, null (disabled), or undefined (not set)
+    const rawMinTimeMs =
+      data?.options?.noneable_integers
+        ?.file_viewing_statistics_media_min_time_ms;
+    const rawMaxTimeMs =
+      data?.options?.noneable_integers
+        ?.file_viewing_statistics_media_max_time_ms;
+
+    // Apply defaults only when undefined (not set), preserve null (means "disabled" for min, "no max" for max)
+    // For simplicity, we treat null as "use default" since the Client API context makes sense with defaults
+    const minTimeMs =
+      rawMinTimeMs === null || rawMinTimeMs === undefined
+        ? FILE_VIEWING_STATS_DEFAULTS.minTimeMs
+        : rawMinTimeMs;
+
+    const maxTimeMs =
+      rawMaxTimeMs === null || rawMaxTimeMs === undefined
+        ? FILE_VIEWING_STATS_DEFAULTS.maxTimeMs
+        : rawMaxTimeMs;
+
+    return {
+      /** Whether file viewing statistics is enabled in Hydrus */
+      isActive,
+      /** Minimum time in ms before a view counts */
+      minTimeMs,
+      /** Maximum time in ms to track */
+      maxTimeMs,
+      /** Whether options have been fetched */
+      isFetched,
+      /** Whether options are currently loading */
+      isLoading,
+    };
+  }, [data, isFetched, isLoading]);
+};

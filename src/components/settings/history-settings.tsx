@@ -4,7 +4,9 @@ import {
   useWatchHistoryActions,
   useWatchHistoryEnabled,
   useWatchHistoryLimit,
+  useWatchHistorySyncToHydrus,
 } from "@/stores/watch-history-store";
+import { useFileViewingStatisticsOptions } from "@/integrations/hydrus-api/queries/options";
 
 export const WATCH_HISTORY_SETTINGS_TITLE = "Watch history";
 
@@ -15,14 +17,24 @@ export interface HistorySettingsProps {
 export function HistorySettings({ idPrefix = "" }: HistorySettingsProps) {
   const enabled = useWatchHistoryEnabled();
   const limit = useWatchHistoryLimit();
-  const { setEnabled, setLimit } = useWatchHistoryActions();
+  const syncToHydrus = useWatchHistorySyncToHydrus();
+  const { setEnabled, setLimit, setSyncToHydrus } = useWatchHistoryActions();
+
+  const { isActive: hydrusStatsActive, isFetched: hydrusOptionsFetched } =
+    useFileViewingStatisticsOptions();
+
+  // Determine if sync to hydrus is disabled and why
+  const isSyncDisabled = hydrusOptionsFetched && !hydrusStatsActive;
+  const syncDescription = isSyncDisabled
+    ? "Disabled: file viewing statistics are turned off in Hydrus"
+    : "Send views and view time to Hydrus file viewing statistics";
 
   return (
     <SettingsGroup>
       <SwitchField
         id={`${idPrefix}history-enabled-switch`}
-        label="Record new views"
-        description="Existing history is kept when disabled"
+        label="Record new views in HyAway"
+        description="Current entries are kept when disabled"
         checked={enabled}
         onCheckedChange={setEnabled}
       />
@@ -35,6 +47,14 @@ export function HistorySettings({ idPrefix = "" }: HistorySettingsProps) {
         step={10}
         onValueChange={setLimit}
         commitOnRelease
+      />
+      <SwitchField
+        id={`${idPrefix}history-sync-hydrus-switch`}
+        label="Sync new views to Hydrus"
+        description={syncDescription}
+        checked={syncToHydrus && !isSyncDisabled}
+        disabled={isSyncDisabled}
+        onCheckedChange={setSyncToHydrus}
       />
     </SettingsGroup>
   );

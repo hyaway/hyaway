@@ -264,4 +264,47 @@ export async function unarchiveFiles(options: FileIdentifiers): Promise<void> {
 }
 
 // #endregion File Management
+
+// #region File Viewing Statistics
+
+/**
+ * Canvas types for file viewing statistics.
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#edit_times_increment_file_viewtime
+ */
+export enum CanvasType {
+  MEDIA_VIEWER = 0,
+  PREVIEW = 1,
+  MEDIA_VIEWER_DUPLICATES = 2,
+  MEDIA_VIEWER_ARCHIVE_DELETE = 3,
+  CLIENT_API = 4,
+  DIALOG = 5,
+}
+
+export interface IncrementFileViewtimeOptions {
+  /** File identifier (one of file_id, file_ids, hash, hashes) */
+  file_id: number;
+  /** The canvas type - always use CLIENT_API (4) for this app */
+  canvas_type: CanvasType;
+  /** Timestamp when the user started viewing the file (seconds, optional) */
+  timestamp?: number;
+  /** Number of views to add (default: 1) */
+  views?: number;
+  /** How long the user viewed the file for (seconds) */
+  viewtime: number;
+}
+
+/**
+ * Increment file view time in Hydrus file viewing statistics.
+ * This is a fire-and-forget operation - errors are silently ignored.
+ *
+ * @permission Requires: Edit Times (11)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#edit_times_increment_file_viewtime
+ */
+export async function incrementFileViewtime(
+  options: IncrementFileViewtimeOptions,
+): Promise<void> {
+  await sessionKeyClient.post("/edit_times/increment_file_viewtime", options);
+}
+
+// #endregion File Viewing Statistics
 // #endregion API Functions

@@ -26,7 +26,7 @@ import { FileDetail } from "@/components/file-detail/file-detail";
 <FileDetail
   fileId={12345}
   prependActions={navActions} // Optional prev/next buttons
-  trackHistory={true} // Whether to record in watch history
+  trackLocalWatchHistory={true} // Whether to record in watch history
 />;
 ```
 
@@ -145,7 +145,7 @@ Stored in `ux-settings-store.ts`:
 
 ## Watch History
 
-When `trackHistory={true}` and history is enabled globally:
+When `trackLocalWatchHistory={true}` and history is enabled globally:
 
 - File ID added to history on mount
 - Stored in `watch-history-store.ts`

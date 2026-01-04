@@ -38,7 +38,7 @@ function RouteComponent() {
     <FileDetail
       fileId={fileIdNum}
       prependActions={navActions}
-      trackHistory={false}
+      trackLocalWatchHistory={false}
     />
   );
 }

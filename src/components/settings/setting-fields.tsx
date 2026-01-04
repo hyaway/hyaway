@@ -8,6 +8,7 @@ import {
 import { Label } from "@/components/ui-primitives/label";
 import { Slider } from "@/components/ui-primitives/slider";
 import { Switch } from "@/components/ui-primitives/switch";
+import { cn } from "@/lib/utils";
 
 interface SliderFieldProps {
   id: string;
@@ -143,12 +144,11 @@ export function RangeSliderField({
   );
 }
 
-interface SwitchFieldProps {
-  id: string;
+interface SwitchFieldProps extends React.ComponentPropsWithoutRef<
+  typeof Switch
+> {
   label: string;
   description?: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
 }
 
 export function SwitchField({
@@ -156,17 +156,31 @@ export function SwitchField({
   label,
   description,
   checked,
+  disabled,
   onCheckedChange,
+  ...switchProps
 }: SwitchFieldProps) {
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex flex-col gap-0.5">
         <Label htmlFor={id}>{label}</Label>
         {description && (
-          <span className="text-muted-foreground text-xs">{description}</span>
+          <span
+            className={cn("text-muted-foreground text-xs", {
+              "text-destructive": disabled,
+            })}
+          >
+            {description}
+          </span>
         )}
       </div>
-      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+      <Switch
+        id={id}
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
+        {...switchProps}
+      />
     </div>
   );
 }

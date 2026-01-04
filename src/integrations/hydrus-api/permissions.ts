@@ -9,6 +9,7 @@ export const REQUIRED_PERMISSIONS = [
   Permission.SEARCH_FOR_AND_FETCH_FILES,
   Permission.MANAGE_PAGES,
   Permission.MANAGE_DATABASE,
+  Permission.EDIT_FILE_TIMES,
 ] as const;
 
 /**

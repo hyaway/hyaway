@@ -16,6 +16,7 @@ import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { LOADING_ACTIONS, useFileActions } from "@/hooks/use-file-actions";
+import { useRemoteFileViewTimeTracker } from "@/hooks/use-file-view-time-tracker";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import {
   useWatchHistoryActions,
@@ -28,13 +29,13 @@ export interface FileDetailProps {
   /** Additional actions to prepend (e.g., prev/next navigation) */
   prependActions?: Array<FloatingFooterAction>;
   /** Whether to track this file view in history (default: true) */
-  trackHistory?: boolean;
+  trackLocalWatchHistory?: boolean;
 }
 
 export function FileDetail({
   fileId,
   prependActions,
-  trackHistory = true,
+  trackLocalWatchHistory = true,
 }: FileDetailProps) {
   const { data, isLoading, isError, error } = useGetSingleFileMetadata(fileId);
 
@@ -81,7 +82,7 @@ export function FileDetail({
       data={data}
       fileId={fileId}
       prependActions={prependActions}
-      trackHistory={trackHistory}
+      trackLocalWatchHistory={trackLocalWatchHistory}
     />
   );
 }
@@ -90,23 +91,26 @@ function FileDetailContent({
   data,
   fileId,
   prependActions,
-  trackHistory,
+  trackLocalWatchHistory,
 }: {
   data: FileMetadata;
   fileId: number;
   prependActions?: Array<FloatingFooterAction>;
-  trackHistory: boolean;
+  trackLocalWatchHistory: boolean;
 }) {
   const { addViewedFile } = useWatchHistoryActions();
   const historyEnabled = useWatchHistoryEnabled();
 
   // Track file view when component mounts with valid data
-  // Respects both the page-level trackHistory prop and global enabled setting
+  // Respects both the page-level trackLocalWatchHistory prop and global enabled setting
   useEffect(() => {
-    if (trackHistory && historyEnabled) {
+    if (trackLocalWatchHistory && historyEnabled) {
       addViewedFile(fileId);
     }
-  }, [fileId, addViewedFile, trackHistory, historyEnabled]);
+  }, [fileId, addViewedFile, trackLocalWatchHistory, historyEnabled]);
+
+  // Track view time and sync to Hydrus (respects user settings internally)
+  useRemoteFileViewTimeTracker(fileId);
 
   const actionGroups = useFileActions(data, {
     includeExternal: true,

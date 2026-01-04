@@ -6,7 +6,11 @@ import {
 } from "../api-client";
 import { useApiEndpoint, useIsApiConfigured } from "../hydrus-config-store";
 import { checkPermissions } from "../permissions";
-import type { AccessKeyType, VerifyAccessKeyResponse } from "../models";
+import type {
+  AccessKeyType,
+  Permission,
+  VerifyAccessKeyResponse,
+} from "../models";
 
 export const useApiVersionQuery = () => {
   const apiEndpoint = useApiEndpoint();
@@ -90,6 +94,17 @@ export const useIsAuthenticated = (): boolean => {
     !!persistentData?.hasRequiredPermissions &&
     !!sessionData?.hasRequiredPermissions
   );
+};
+
+/**
+ * Check if the current access key has a specific permission.
+ * Returns true if permits_everything or if the permission is in basic_permissions.
+ */
+export const useHasPermission = (permission: Permission): boolean => {
+  const { data } = useVerifyPersistentAccessQuery();
+  if (!data?.raw) return false;
+  if (data.raw.permits_everything) return true;
+  return data.raw.basic_permissions.includes(permission);
 };
 
 /**
