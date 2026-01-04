@@ -4,6 +4,7 @@ import { useThumbnailUrl } from "@/hooks/use-url-with-api-key";
 import { cn } from "@/lib/utils";
 import { checkerboardBg } from "@/lib/style-constants";
 import { useImageBackground } from "@/stores/file-viewer-settings-store";
+import { useGalleryEntryDuration } from "@/stores/gallery-settings-store";
 
 export interface ThumbnailImageProps extends React.HTMLAttributes<HTMLImageElement> {
   fileId: number;
@@ -26,12 +27,18 @@ export function ThumbnailImage({
     onLoad();
   };
 
+  const entryDuration = useGalleryEntryDuration();
+
   return (
     <img
       src={url}
       alt={`Thumbnail for file ID ${fileId}`}
+      style={{
+        transitionDuration: `${entryDuration}ms`,
+      }}
       className={cn(
-        "h-full w-full object-cover",
+        "h-full w-full object-cover starting:scale-98 starting:opacity-0",
+        entryDuration > 0 && "transition-[opacity,scale]",
         loaded && imageBackground === "checkerboard"
           ? checkerboardBg
           : "bg-muted",
