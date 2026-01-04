@@ -3,6 +3,9 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 export type SidebarSide = "left" | "right";
 
+/** Duration of sidebar open/close animation in ms (matches CSS --sidebar-open-close-duration) */
+export const SIDEBAR_TRANSITION_DURATION = 200;
+
 type SidebarStoreState = {
   // Desktop state (persisted)
   leftDesktopOpen: boolean;
@@ -10,6 +13,8 @@ type SidebarStoreState = {
   // Mobile state (not persisted - sheets should start closed)
   leftMobileOpen: boolean;
   rightMobileOpen: boolean;
+  // Transition state (not persisted - tracks if sidebar is animating)
+  isTransitioning: boolean;
   actions: {
     setDesktopOpen: (side: SidebarSide, open: boolean) => void;
     toggleDesktop: (side: SidebarSide) => void;
@@ -25,6 +30,29 @@ const closeBoth = (side: SidebarSide) =>
   side === "left"
     ? { leftDesktopOpen: false, leftMobileOpen: false }
     : { rightDesktopOpen: false, rightMobileOpen: false };
+
+// Track pending transition timeout to avoid stale clears
+let transitionTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Start a sidebar transition. Sets isTransitioning to true and schedules
+ * it to be cleared after the animation completes.
+ */
+const startTransition = (
+  set: (fn: (state: SidebarStoreState) => Partial<SidebarStoreState>) => void,
+) => {
+  // Clear any pending timeout to extend the transition period
+  if (transitionTimeoutId) {
+    clearTimeout(transitionTimeoutId);
+  }
+
+  set(() => ({ isTransitioning: true }));
+
+  transitionTimeoutId = setTimeout(() => {
+    set(() => ({ isTransitioning: false }));
+    transitionTimeoutId = null;
+  }, SIDEBAR_TRANSITION_DURATION);
+};
 
 // When opening desktop, close both mobile if both desktops will be open
 const openDesktop = (side: SidebarSide, state: SidebarStoreState) => {
@@ -61,17 +89,23 @@ const useSidebarStore = create<SidebarStoreState>()(
       rightDesktopOpen: true,
       leftMobileOpen: false,
       rightMobileOpen: false,
+      isTransitioning: false,
       actions: {
         // Desktop: open independent, close syncs both
-        setDesktopOpen: (side, open) =>
-          set((state) => (open ? openDesktop(side, state) : closeBoth(side))),
-        toggleDesktop: (side) =>
+        // Triggers transition tracking for smooth resize handling
+        setDesktopOpen: (side, open) => {
+          startTransition(set);
+          set((state) => (open ? openDesktop(side, state) : closeBoth(side)));
+        },
+        toggleDesktop: (side) => {
+          startTransition(set);
           set((state) => {
             const isOpen =
               side === "left" ? state.leftDesktopOpen : state.rightDesktopOpen;
             return isOpen ? closeBoth(side) : openDesktop(side, state);
-          }),
-        // Mobile: open/close always syncs both
+          });
+        },
+        // Mobile: open/close always syncs both (no transition tracking - uses sheet overlay)
         setMobileOpen: (side, open) =>
           set(() => (open ? openMobile(side) : closeBoth(side))),
         toggleMobile: (side) =>
@@ -85,9 +119,14 @@ const useSidebarStore = create<SidebarStoreState>()(
     {
       name: "hyaway-sidebar-state",
       storage: createJSONStorage(() => localStorage),
-      // Only persist desktop state, not mobile or actions
-      partialize: ({ actions, leftMobileOpen, rightMobileOpen, ...rest }) =>
-        rest,
+      // Only persist desktop state, not mobile, transitioning, or actions
+      partialize: ({
+        actions,
+        leftMobileOpen,
+        rightMobileOpen,
+        isTransitioning,
+        ...rest
+      }) => rest,
     },
   ),
 );
@@ -123,4 +162,13 @@ export function useSidebarSide(side: SidebarSide) {
 
 export function useSidebarStoreActions() {
   return useSidebarStore((state) => state.actions);
+}
+
+/**
+ * Hook to check if any sidebar is currently transitioning (animating open/close).
+ * Useful for deferring expensive operations like layout recalculations until
+ * the sidebar animation completes.
+ */
+export function useSidebarIsTransitioning() {
+  return useSidebarStore((state) => state.isTransitioning);
 }

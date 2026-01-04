@@ -1,5 +1,5 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import React, { useDeferredValue, useEffect, useMemo } from "react";
+import React, { useDeferredValue, useEffect, useMemo, useRef } from "react";
 import { RightSidebarPortal } from "../app-shell/right-sidebar-portal";
 import {
   ITEM_FOOTER_HEIGHT,
@@ -24,6 +24,7 @@ import {
   useGalleryShowScrollBadge,
   useGalleryVerticalGap,
 } from "@/stores/gallery-settings-store";
+import { useSidebarIsTransitioning } from "@/stores/sidebar-store";
 
 export interface ThumbnailGalleryProps {
   fileIds: Array<number>;
@@ -113,7 +114,7 @@ export function PureThumbnailGallery({
   const deferredHorizontalGap = useDeferredValue(horizontalGap);
 
   const parentRef = React.useRef<HTMLDivElement>(null);
-  const { width, lanes, maxWidth } = useGalleryResponsiveLanes(
+  const { width, lanes } = useGalleryResponsiveLanes(
     parentRef,
     deferredBaseWidth,
     deferredItems.length,
@@ -197,8 +198,23 @@ export function PureThumbnailGallery({
     [virtualItems],
   );
 
+  // Lock width during sidebar transitions to prevent resize jitter
+  const isTransitioning = useSidebarIsTransitioning();
+  const lockedWidthRef = useRef<number | null>(null);
+
+  // Capture width when transition starts, clear when it ends
+  if (isTransitioning && lockedWidthRef.current === null && parentRef.current) {
+    lockedWidthRef.current = parentRef.current.clientWidth;
+  } else if (!isTransitioning) {
+    lockedWidthRef.current = null;
+  }
+
+  const containerStyle = lockedWidthRef.current
+    ? { width: `${lockedWidthRef.current}px` }
+    : undefined;
+
   return (
-    <div className="w-full" ref={parentRef}>
+    <div className="w-full" ref={parentRef} style={containerStyle}>
       {isMeasuring ? (
         <ThumbnailGallerySkeleton />
       ) : (
@@ -210,7 +226,6 @@ export function PureThumbnailGallery({
             data-scrolling={rowVirtualizer.isScrolling}
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
-              maxWidth,
             }}
             className="@container relative w-full"
           >

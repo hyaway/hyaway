@@ -29,7 +29,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {/* Content area - grows naturally, page scrolls */}
           <FooterPortalProvider>
-            <main className="short:pb-(--footer-height-short) flex-1 px-4 py-2 pb-(--footer-height) sm:px-6 lg:pb-(--footer-height-sm)">
+            <main
+              className={`short:pb-(--footer-height-short) mx-4 flex-1 overflow-x-clip py-2 pb-(--footer-height) sm:mx-6 lg:pb-(--footer-height-sm)`}
+            >
               {children}
             </main>
 

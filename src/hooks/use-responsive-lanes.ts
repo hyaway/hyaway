@@ -11,8 +11,6 @@ interface ResponsiveLanesState {
   width: number;
   /** Number of lanes (columns). Returns 0 before initial measurement. */
   lanes: number;
-  /** Max grid width when not expanding images */
-  maxWidth: number | undefined;
 }
 
 interface UseResponsiveLanesOptions {
@@ -125,7 +123,7 @@ export function useResponsiveLanes(
 
   // Not measured yet - return lanes: 0 to signal caller should wait
   if (containerWidth === 0) {
-    return { width: defaultWidth, lanes: 0, maxWidth: undefined };
+    return { width: defaultWidth, lanes: 0 };
   }
 
   // Apply min/max lanes constraints
@@ -147,12 +145,7 @@ export function useResponsiveLanes(
 
   const finalWidth = newWidth > 0 ? newWidth : defaultWidth;
 
-  // maxWidth constrains the grid when not expanding images
-  const maxWidth = !expandImages
-    ? maxLanes * (finalWidth + horizontalGap)
-    : undefined;
-
-  return { width: finalWidth, lanes, maxWidth };
+  return { width: finalWidth, lanes };
 }
 
 /**
