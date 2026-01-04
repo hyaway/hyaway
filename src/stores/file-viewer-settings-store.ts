@@ -18,7 +18,7 @@ const useFileViewerSettingsStore = create<FileViewerSettingsState>()(
   persist(
     (set, _get, store) => ({
       startExpanded: false,
-      imageBackground: "checkerboard",
+      imageBackground: "average",
       actions: {
         setStartExpanded: (startExpanded: boolean) => set({ startExpanded }),
         setImageBackground: (imageBackground: ImageBackground) =>
