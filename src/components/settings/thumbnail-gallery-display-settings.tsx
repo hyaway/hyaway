@@ -20,7 +20,7 @@ import {
   useGalleryEntryDuration,
   useGalleryExpandImages,
   useGalleryHorizontalGap,
-  useGalleryHoverScaleDuration,
+  useGalleryHoverZoomDuration,
   useGalleryMaxLanes,
   useGalleryMinLanes,
   useGalleryReflowDuration,
@@ -75,7 +75,7 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryVerticalGap = useGalleryVerticalGap();
   const galleryReflowDuration = useGalleryReflowDuration();
   const galleryEntryDuration = useGalleryEntryDuration();
-  const galleryHoverScaleDuration = useGalleryHoverScaleDuration();
+  const galleryHoverZoomDuration = useGalleryHoverZoomDuration();
 
   // Check if min lanes would overflow the window width
   const minLayoutWidth =
@@ -93,7 +93,7 @@ export function ThumbnailGalleryDisplaySettings({
     setVerticalGap,
     setReflowDuration,
     setEntryDuration,
-    setHoverScaleDuration,
+    setHoverZoomDuration,
   } = useGallerySettingsActions();
 
   return (
@@ -201,11 +201,11 @@ export function ThumbnailGalleryDisplaySettings({
         <SliderField
           id={`${idPrefix}hover-scale-duration-slider`}
           label="Hover zoom"
-          value={galleryHoverScaleDuration}
+          value={galleryHoverZoomDuration}
           min={0}
           max={MAX_GALLERY_HOVER_SCALE_DURATION}
           step={25}
-          onValueChange={setHoverScaleDuration}
+          onValueChange={setHoverZoomDuration}
           formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
         />
       </AccordionSection>
