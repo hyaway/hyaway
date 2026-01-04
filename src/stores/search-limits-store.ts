@@ -3,9 +3,11 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 export const MAX_SEARCH_LIMIT = 10000;
+export const MIN_SEARCH_LIMIT = 100;
 export const MAX_RECENT_FILES_DAYS = 30;
 
 type SearchLimitsState = {
+  allLimits: number;
   recentFilesLimit: number;
   recentFilesDays: number;
   randomInboxLimit: number;
@@ -27,15 +29,17 @@ type SearchLimitsState = {
 const useSearchLimitsStore = create<SearchLimitsState>()(
   persist(
     (set, _get, store) => ({
-      recentFilesLimit: 100,
+      allLimits: MIN_SEARCH_LIMIT,
+      recentFilesLimit: MIN_SEARCH_LIMIT,
       recentFilesDays: 3,
-      randomInboxLimit: 100,
-      remoteHistoryLimit: 100,
-      mostViewedLimit: 100,
-      longestViewedLimit: 100,
+      randomInboxLimit: MIN_SEARCH_LIMIT,
+      remoteHistoryLimit: MIN_SEARCH_LIMIT,
+      mostViewedLimit: MIN_SEARCH_LIMIT,
+      longestViewedLimit: MIN_SEARCH_LIMIT,
       actions: {
         setAllLimits: (limit: number) =>
           set({
+            allLimits: limit,
             recentFilesLimit: limit,
             randomInboxLimit: limit,
             remoteHistoryLimit: limit,
@@ -64,6 +68,10 @@ const useSearchLimitsStore = create<SearchLimitsState>()(
     },
   ),
 );
+
+// All limits
+export const useAllLimits = () =>
+  useSearchLimitsStore((state) => state.allLimits);
 
 // Recent files
 export const useRecentFilesLimit = () =>

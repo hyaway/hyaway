@@ -2,6 +2,8 @@ import { SettingsGroup, SliderField } from "./setting-fields";
 import {
   MAX_RECENT_FILES_DAYS,
   MAX_SEARCH_LIMIT,
+  MIN_SEARCH_LIMIT,
+  useAllLimits,
   useLongestViewedLimit,
   useMostViewedLimit,
   useRandomInboxLimit,
@@ -20,6 +22,7 @@ export interface SearchLimitsSettingsProps {
 export function SearchLimitsSettings({
   idPrefix = "",
 }: SearchLimitsSettingsProps) {
+  const allLimits = useAllLimits();
   const recentFilesLimit = useRecentFilesLimit();
   const recentFilesDays = useRecentFilesDays();
   const randomInboxLimit = useRandomInboxLimit();
@@ -37,96 +40,112 @@ export function SearchLimitsSettings({
     setLongestViewedLimit,
   } = useSearchLimitsActions();
 
-  // Calculate a representative "all" value (use max of all limits)
-  const allLimitsValue = Math.max(
-    recentFilesLimit,
-    randomInboxLimit,
-    remoteHistoryLimit,
-    mostViewedLimit,
-    longestViewedLimit,
-  );
+  // Check if all limits match the "all" value
+  const allMatch =
+    recentFilesLimit === allLimits &&
+    randomInboxLimit === allLimits &&
+    remoteHistoryLimit === allLimits &&
+    mostViewedLimit === allLimits &&
+    longestViewedLimit === allLimits;
+
+  // "all" slider is muted when any individual differs, individuals are muted when they all match
+  const allVariant = allMatch ? "default" : "muted";
+  const individualVariant = allMatch ? "muted" : "default";
 
   return (
     <SettingsGroup>
       <SliderField
         id={`${idPrefix}all-limits-slider`}
         label="Set all limits"
-        value={allLimitsValue}
-        min={100}
+        value={allLimits}
+        min={MIN_SEARCH_LIMIT}
         max={MAX_SEARCH_LIMIT}
         step={100}
         onValueChange={setAllLimits}
+        variant={allVariant}
         commitOnRelease
       />
 
-      <div className="border-border mt-2 border-t pt-4">
+      {/* Recent files group */}
+      <div className="border-border mt-2 flex flex-col gap-6 border-t pt-4">
+        <p className="text-muted-foreground text-sm">Recent files</p>
         <SliderField
           id={`${idPrefix}recent-files-limit-slider`}
-          label="Recent files"
+          label="Max files"
           value={recentFilesLimit}
-          min={100}
+          min={MIN_SEARCH_LIMIT}
           max={MAX_SEARCH_LIMIT}
           step={100}
           onValueChange={setRecentFilesLimit}
+          variant={individualVariant}
+          commitOnRelease
+        />
+        <SliderField
+          id={`${idPrefix}recent-files-days-slider`}
+          label="Timeframe"
+          value={recentFilesDays}
+          min={1}
+          max={MAX_RECENT_FILES_DAYS}
+          step={1}
+          onValueChange={setRecentFilesDays}
+          formatValue={(v) => (v === 1 ? "Last 24 hours" : `Last ${v} days`)}
           commitOnRelease
         />
       </div>
 
-      <SliderField
-        id={`${idPrefix}recent-files-days-slider`}
-        label="Recent files timeframe"
-        value={recentFilesDays}
-        min={1}
-        max={MAX_RECENT_FILES_DAYS}
-        step={1}
-        onValueChange={setRecentFilesDays}
-        formatValue={(v) => (v === 1 ? "Last 24 hours" : `Last ${v} days`)}
-        commitOnRelease
-      />
+      {/* Other group */}
+      <div className="border-border mt-2 flex flex-col gap-6 border-t pt-4">
+        <p className="text-muted-foreground text-sm">Other</p>
+        <SliderField
+          id={`${idPrefix}random-inbox-limit-slider`}
+          label="Random inbox"
+          value={randomInboxLimit}
+          min={MIN_SEARCH_LIMIT}
+          max={MAX_SEARCH_LIMIT}
+          step={100}
+          onValueChange={setRandomInboxLimit}
+          variant={individualVariant}
+          commitOnRelease
+        />
+      </div>
 
-      <SliderField
-        id={`${idPrefix}random-inbox-limit-slider`}
-        label="Random inbox"
-        value={randomInboxLimit}
-        min={100}
-        max={MAX_SEARCH_LIMIT}
-        step={100}
-        onValueChange={setRandomInboxLimit}
-        commitOnRelease
-      />
-
-      <SliderField
-        id={`${idPrefix}remote-history-limit-slider`}
-        label="Remote history"
-        value={remoteHistoryLimit}
-        min={100}
-        max={MAX_SEARCH_LIMIT}
-        step={100}
-        onValueChange={setRemoteHistoryLimit}
-        commitOnRelease
-      />
-
-      <SliderField
-        id={`${idPrefix}most-viewed-limit-slider`}
-        label="Most viewed"
-        value={mostViewedLimit}
-        min={100}
-        max={MAX_SEARCH_LIMIT}
-        step={100}
-        onValueChange={setMostViewedLimit}
-        commitOnRelease
-      />
-
-      <SliderField
-        id={`${idPrefix}longest-viewed-limit-slider`}
-        label="Longest viewed"
-        value={longestViewedLimit}
-        min={100}
-        max={MAX_SEARCH_LIMIT}
-        step={100}
-        onValueChange={setLongestViewedLimit}
-        commitOnRelease
-      />
+      {/* View statistics group */}
+      <div className="border-border mt-2 flex flex-col gap-6 border-t pt-4">
+        <p className="text-muted-foreground text-sm">View statistics</p>
+        <SliderField
+          id={`${idPrefix}remote-history-limit-slider`}
+          label="Remote history"
+          value={remoteHistoryLimit}
+          min={MIN_SEARCH_LIMIT}
+          max={MAX_SEARCH_LIMIT}
+          step={100}
+          onValueChange={setRemoteHistoryLimit}
+          variant={individualVariant}
+          commitOnRelease
+        />
+        <SliderField
+          id={`${idPrefix}most-viewed-limit-slider`}
+          label="Most viewed"
+          value={mostViewedLimit}
+          min={MIN_SEARCH_LIMIT}
+          max={MAX_SEARCH_LIMIT}
+          step={100}
+          onValueChange={setMostViewedLimit}
+          variant={individualVariant}
+          commitOnRelease
+        />
+        <SliderField
+          id={`${idPrefix}longest-viewed-limit-slider`}
+          label="Longest viewed"
+          value={longestViewedLimit}
+          min={MIN_SEARCH_LIMIT}
+          max={MAX_SEARCH_LIMIT}
+          step={100}
+          onValueChange={setLongestViewedLimit}
+          variant={individualVariant}
+          commitOnRelease
+        />
+      </div>
     </SettingsGroup>
   );
 }

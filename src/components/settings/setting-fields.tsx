@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { IconChevronLeftPipe, IconChevronRightPipe } from "@tabler/icons-react";
 import {
   AccordionContent,
@@ -22,6 +22,8 @@ interface SliderFieldProps {
   commitOnRelease?: boolean;
   /** Custom formatter for the displayed value */
   formatValue?: (value: number) => string;
+  /** Visual variant for the slider */
+  variant?: "default" | "destructive" | "muted";
 }
 
 export function SliderField({
@@ -34,12 +36,14 @@ export function SliderField({
   onValueChange,
   commitOnRelease = false,
   formatValue,
+  variant = "default",
 }: SliderFieldProps) {
   const [localValue, setLocalValue] = useState(value);
+  const isDragging = useRef(false);
   const displayValue = commitOnRelease ? localValue : value;
 
-  // Sync local value when external value changes
-  if (!commitOnRelease && localValue !== value) {
+  // Sync local value when external value changes (but not while dragging)
+  if (!isDragging.current && localValue !== value) {
     setLocalValue(value);
   }
 
@@ -61,6 +65,7 @@ export function SliderField({
         onValueChange={(v) => {
           const newValue = Array.isArray(v) ? v[0] : v;
           if (commitOnRelease) {
+            isDragging.current = true;
             setLocalValue(newValue);
           } else {
             onValueChange?.(newValue);
@@ -68,6 +73,7 @@ export function SliderField({
         }}
         onValueCommitted={(v) => {
           if (commitOnRelease) {
+            isDragging.current = false;
             const newValue = Array.isArray(v) ? v[0] : v;
             onValueChange?.(newValue);
           }
@@ -75,6 +81,7 @@ export function SliderField({
         min={min}
         max={max}
         step={step}
+        variant={variant}
       />
     </div>
   );

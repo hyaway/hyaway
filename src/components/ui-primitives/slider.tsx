@@ -16,7 +16,7 @@ function Slider({
   /** Custom render function for thumb content. Receives the thumb index. */
   renderThumb?: (index: number) => React.ReactNode;
   /** Visual variant for the slider */
-  variant?: "default" | "destructive";
+  variant?: "default" | "destructive" | "muted";
 }) {
   const _values = React.useMemo(
     () =>
@@ -53,7 +53,11 @@ function Slider({
             data-slot="slider-range"
             className={cn(
               "transition-colors select-none data-horizontal:h-full data-vertical:w-full",
-              variant === "destructive" ? "bg-destructive" : "bg-primary",
+              variant === "destructive"
+                ? "bg-destructive"
+                : variant === "muted"
+                  ? "bg-muted-foreground/80"
+                  : "bg-primary",
             )}
           />
         </SliderPrimitive.Track>
