@@ -10,7 +10,10 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui-primitives/context-menu";
 import { cn } from "@/lib/utils";
-import { useGalleryEnableContextMenu } from "@/stores/gallery-settings-store";
+import {
+  useGalleryEnableContextMenu,
+  useGalleryEnableHoverZoom,
+} from "@/stores/gallery-settings-store";
 
 export {
   ThumbnailImage,
@@ -71,6 +74,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
 }: ThumbnailGalleryItemProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const enableContextMenu = useGalleryEnableContextMenu();
+  const enableHoverZoom = useGalleryEnableHoverZoom();
   const fileLink = getFileLink(item.file_id);
 
   // Track lane changes to scale animation duration by distance
@@ -188,13 +192,19 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
         className={cn(
           "pointer-events-none h-full w-full origin-center",
           "transition-[scale] duration-(--gallery-hover-zoom-duration) ease-in-out",
-          "group-hover:scale-(--thumbnail-hover-scale) group-hover:shadow",
-          "group-active:scale-(--thumbnail-hover-scale) group-active:shadow",
+          enableHoverZoom &&
+            "group-hover:scale-(--thumbnail-hover-scale) group-hover:shadow",
+          enableHoverZoom &&
+            "group-active:scale-(--thumbnail-hover-scale) group-active:shadow",
           "group-has-focus-visible:ring-3 group-has-focus-visible:ring-black group-has-focus-visible:ring-offset-3 group-has-focus-visible:ring-offset-white dark:group-has-focus-visible:ring-white dark:group-has-focus-visible:ring-offset-black",
           enableContextMenu &&
             menuOpen &&
-            "ring-primary-foreground ring-offset-primary scale-(--thumbnail-hover-scale) ring-0 ring-offset-3",
-          originClass,
+            enableHoverZoom &&
+            "scale-(--thumbnail-hover-scale)",
+          enableContextMenu &&
+            menuOpen &&
+            "ring-primary-foreground ring-offset-primary ring-0 ring-offset-3",
+          enableHoverZoom && originClass,
         )}
       >
         <ThumbnailGalleryItemContent item={item} />

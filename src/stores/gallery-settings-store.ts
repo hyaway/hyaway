@@ -26,6 +26,7 @@ type GallerySettingsState = {
   expandImages: boolean;
   showScrollBadge: boolean;
   enableContextMenu: boolean;
+  enableHoverZoom: boolean;
   baseWidthMode: GalleryBaseWidthMode;
   customBaseWidth: number;
   horizontalGap: number;
@@ -41,6 +42,7 @@ type GallerySettingsState = {
     setExpandImages: (expand: boolean) => void;
     setShowScrollBadge: (show: boolean) => void;
     setEnableContextMenu: (show: boolean) => void;
+    setEnableHoverZoom: (enable: boolean) => void;
     setBaseWidthMode: (mode: GalleryBaseWidthMode) => void;
     setCustomBaseWidth: (width: number) => void;
     setHorizontalGap: (gap: number) => void;
@@ -63,6 +65,7 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
       expandImages: true,
       showScrollBadge: true,
       enableContextMenu: true,
+      enableHoverZoom: true,
       baseWidthMode: "service",
       customBaseWidth: DEFAULT_THUMBNAIL_SIZE,
       horizontalGap: DEFAULT_GALLERY_HORIZONTAL_GAP,
@@ -81,6 +84,8 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
           set({ showScrollBadge }),
         setEnableContextMenu: (enableContextMenu: boolean) =>
           set({ enableContextMenu }),
+        setEnableHoverZoom: (enableHoverZoom: boolean) =>
+          set({ enableHoverZoom }),
         setBaseWidthMode: (baseWidthMode: GalleryBaseWidthMode) =>
           set({ baseWidthMode }),
         setCustomBaseWidth: (customBaseWidth: number) =>
@@ -122,6 +127,9 @@ export const useGalleryShowScrollBadge = () =>
 
 export const useGalleryEnableContextMenu = () =>
   useGallerySettingsStore((state) => state.enableContextMenu);
+
+export const useGalleryEnableHoverZoom = () =>
+  useGallerySettingsStore((state) => state.enableHoverZoom);
 
 export const useGalleryBaseWidthMode = () =>
   useGallerySettingsStore((state) => state.baseWidthMode);

@@ -19,6 +19,7 @@ import {
   useGalleryBaseWidthMode,
   useGalleryCustomBaseWidth,
   useGalleryEnableContextMenu,
+  useGalleryEnableHoverZoom,
   useGalleryEntryDuration,
   useGalleryExpandImages,
   useGalleryHorizontalGap,
@@ -89,6 +90,7 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryExpandImages = useGalleryExpandImages();
   const galleryShowScrollBadge = useGalleryShowScrollBadge();
   const galleryEnableContextMenu = useGalleryEnableContextMenu();
+  const galleryEnableHoverZoom = useGalleryEnableHoverZoom();
   const galleryBaseWidthMode = useGalleryBaseWidthMode();
   const galleryCustomBaseWidth = useGalleryCustomBaseWidth();
   const galleryHorizontalGap = useGalleryHorizontalGap();
@@ -117,6 +119,7 @@ export function ThumbnailGalleryDisplaySettings({
     setExpandImages,
     setShowScrollBadge,
     setEnableContextMenu,
+    setEnableHoverZoom,
     setBaseWidthMode,
     setCustomBaseWidth,
     setHorizontalGap,
@@ -320,16 +323,24 @@ export function ThumbnailGalleryDisplaySettings({
           onValueChange={setEntryDuration}
           formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
         />
-        <SliderField
-          id={`${idPrefix}hover-scale-duration-slider`}
+        <SwitchField
+          id={`${idPrefix}enable-hover-zoom-switch`}
           label="Hover zoom"
-          value={galleryHoverZoomDuration}
-          min={0}
-          max={MAX_GALLERY_HOVER_SCALE_DURATION}
-          step={25}
-          onValueChange={setHoverZoomDuration}
-          formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
+          checked={galleryEnableHoverZoom}
+          onCheckedChange={setEnableHoverZoom}
         />
+        {galleryEnableHoverZoom && (
+          <SliderField
+            id={`${idPrefix}hover-scale-duration-slider`}
+            label="Hover zoom duration"
+            value={galleryHoverZoomDuration}
+            min={0}
+            max={MAX_GALLERY_HOVER_SCALE_DURATION}
+            step={25}
+            onValueChange={setHoverZoomDuration}
+            formatValue={(v) => (v === 0 ? "Instant" : `${v}ms`)}
+          />
+        )}
       </AccordionSection>
 
       <AccordionSection value="tags" title="Tags sidebar">
