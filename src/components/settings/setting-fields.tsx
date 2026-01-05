@@ -213,9 +213,14 @@ export function AccordionSection({
   children,
 }: AccordionSectionProps) {
   return (
-    <AccordionItem value={value} className={"data-open:bg-transparent"}>
+    <AccordionItem
+      value={value}
+      className={
+        "border-l-primary data-open:border-l-4 data-open:bg-transparent data-open:px-2"
+      }
+    >
       <AccordionTrigger className="px-0 py-3">{title}</AccordionTrigger>
-      <AccordionContent panelClassName="data-open:border-l-2 border-primary mb-2">
+      <AccordionContent>
         <div className="flex flex-col gap-5 py-2">{children}</div>
       </AccordionContent>
     </AccordionItem>
