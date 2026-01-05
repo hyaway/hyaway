@@ -151,10 +151,16 @@ export function useResponsiveLanes(
 
   // Calculate width based on whether we're expanding or minLanes forced expansion
   // Round to prevent sub-pixel jitter during resize
+  //
+  // Layout model: items are positioned using `(lane * 100 / lanes)cqw`, so each lane
+  // occupies containerWidth/lanes of horizontal space. The "gap" is the visual space
+  // between items within their slot, so:
+  // - Expanded: width = slotWidth - gap (items fill their slot minus gap)
+  // - Fixed: width = defaultWidth (items are their configured size, gap is implicit)
   const newWidth =
     expandImages || minLanesForced
       ? Math.floor(containerWidth / constrainedLanes - horizontalGap)
-      : defaultWidth - horizontalGap;
+      : defaultWidth;
 
   // Clamp lanes based on item count
   const lanes =
