@@ -141,7 +141,154 @@ return GetServicesResponseSchema.parse(response.data);
 | `clients/access-key-client.ts`  | Permanent key authentication                                     |
 | `clients/session-key-client.ts` | Session key auth + auto-refresh                                  |
 | `models.ts`                     | Zod schemas and TypeScript types                                 |
+| `permissions.ts`                | Permission constants and utilities                               |
 | `queries/*.ts`                  | TanStack Query hooks (see [TanStack Query](./tanstack-query.md)) |
+
+## Permissions System
+
+The app uses a permission-based feature gating system. Features degrade gracefully when permissions are missing.
+
+### Permission Requirements
+
+| Permission                   | Value | Required | Features Enabled                                    |
+| ---------------------------- | ----- | -------- | --------------------------------------------------- |
+| `SEARCH_FOR_AND_FETCH_FILES` | 3     | **Yes**  | Core functionality - file search, metadata, viewing |
+| `IMPORT_AND_DELETE_FILES`    | 1     | No       | Archive, unarchive, trash, restore files            |
+| `MANAGE_PAGES`               | 4     | No       | View/refresh/focus Hydrus pages                     |
+| `MANAGE_DATABASE`            | 6     | No       | Thumbnail dimensions, namespace colors              |
+| `EDIT_FILE_TIMES`            | 11    | No       | Sync view statistics to Hydrus                      |
+
+### Key Files
+
+| File                     | Purpose                                                          |
+| ------------------------ | ---------------------------------------------------------------- |
+| `permissions.ts`         | Constants (`ALL_PERMISSIONS`, `PERMISSION_LABELS`) and utilities |
+| `queries/permissions.ts` | `usePermissions()` hook for checking permissions                 |
+| `queries/access.ts`      | `useHasPermission()` hook for single permission checks           |
+
+### Checking Permissions
+
+Use `usePermissions()` for checking multiple permissions:
+
+```tsx
+import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import { Permission } from "@/integrations/hydrus-api/models";
+
+function MyComponent() {
+  const { hasPermission, isFetched, isPending } = usePermissions();
+
+  const canManageFiles = hasPermission(Permission.IMPORT_AND_DELETE_FILES);
+  const canManageDatabase = hasPermission(Permission.MANAGE_DATABASE);
+
+  if (!canManageFiles) {
+    return <p>File management disabled</p>;
+  }
+  // ...
+}
+```
+
+Use `useHasPermission()` for single permission checks (used in query hooks):
+
+```tsx
+import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
+import { Permission } from "@/integrations/hydrus-api/models";
+
+const canSearch = useHasPermission(Permission.SEARCH_FOR_AND_FETCH_FILES);
+```
+
+### Disabling Queries by Permission
+
+All search queries check for `SEARCH_FOR_AND_FETCH_FILES` permission:
+
+```tsx
+// queries/search.ts
+const useCanSearch = () =>
+  useHasPermission(Permission.SEARCH_FOR_AND_FETCH_FILES);
+
+export const useRecentlyArchivedFilesQuery = () => {
+  const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
+
+  return useQuery({
+    // ...
+    enabled: isConfigured && canSearch && tags.length > 0,
+  });
+};
+```
+
+Other queries follow similar patterns:
+
+- `useGetClientOptionsQuery` - requires `MANAGE_DATABASE`
+- `usePagesQuery` - requires `MANAGE_PAGES`
+- File mutations - require `IMPORT_AND_DELETE_FILES`
+
+### Permission-Gated Settings
+
+Some settings depend on permissions and show appropriate messaging:
+
+```tsx
+// Example: History sync requires both EDIT_FILE_TIMES and MANAGE_DATABASE
+const hasEditPermission = hasPermission(Permission.EDIT_FILE_TIMES);
+const hasDatabasePermission = hasPermission(Permission.MANAGE_DATABASE);
+const isSyncEnabled =
+  hasEditPermission &&
+  hasDatabasePermission &&
+  hydrusOptionsFetched &&
+  hydrusStatsActive;
+
+const syncDescription = !hasEditPermission
+  ? "Disabled: missing 'Edit file times' permission"
+  : !hasDatabasePermission
+    ? "Disabled: missing 'Manage database' permission"
+    : // ...
+```
+
+### Effective Values with Permission Fallbacks
+
+Some settings have "effective" hooks that apply permission-based fallbacks:
+
+```tsx
+// queries/options.ts
+export const useEffectiveGalleryBaseWidthMode = (): GalleryBaseWidthMode => {
+  const storedMode = useGalleryBaseWidthMode();
+  const hasPermission = useHasPermission(Permission.MANAGE_DATABASE);
+
+  // Fall back to "custom" when "service" selected but permission missing
+  if (storedMode === "service" && !hasPermission) {
+    return "custom";
+  }
+  return storedMode;
+};
+```
+
+### Requesting Permissions
+
+When requesting a new API key, users can choose between:
+
+- **All permissions** (`permits_everything: true`) - Full access
+- **Granular permissions** - Only the 5 permissions the app uses
+
+```tsx
+// api-client.ts
+export async function requestNewPermissions(
+  name: string,
+  permitsEverything: boolean,
+  basicPermissions?: Array<number>,
+): Promise<RequestNewPermissionsResponse> {
+  const params = permitsEverything
+    ? { name, permits_everything: true }
+    : { name, basic_permissions: JSON.stringify(basicPermissions) };
+  // ...
+}
+```
+
+### UI Components
+
+| Component              | Purpose                                                    |
+| ---------------------- | ---------------------------------------------------------- |
+| `PermissionsChecklist` | Shows permission status with checkmarks/X marks            |
+| `PagePermissionGate`   | Wraps pages to show missing permissions                    |
+| `SidebarNavLink`       | Shows muted (but clickable) links when permissions missing |
 
 ## Used Endpoints
 

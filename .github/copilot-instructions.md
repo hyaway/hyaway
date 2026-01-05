@@ -177,18 +177,34 @@ export async function myApiCall(): Promise<MyResponse> {
 }
 ```
 
-**Query hooks pattern** - Each query checks `useIsApiConfigured()` before fetching:
+**Query hooks pattern** - Each query checks `useIsApiConfigured()` and permissions before fetching:
 
 ```tsx
 // integrations/hydrus-api/queries/search.ts
+const useCanSearch = () =>
+  useHasPermission(Permission.SEARCH_FOR_AND_FETCH_FILES);
+
 export const useRecentlyArchivedFilesQuery = () => {
   const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
+
   return useQuery({
     queryKey: ["searchFiles", "recentlyArchived", tags, options],
     queryFn: () => searchFiles({ tags, ...options }),
-    enabled: isConfigured && tags.length > 0,
+    enabled: isConfigured && canSearch && tags.length > 0,
   });
 };
+```
+
+**Permission checking** - Use `usePermissions()` for multiple checks or `useHasPermission()` for single checks:
+
+```tsx
+// Multiple permissions
+const { hasPermission, isFetched } = usePermissions();
+const canManageFiles = hasPermission(Permission.IMPORT_AND_DELETE_FILES);
+
+// Single permission (in query hooks)
+const canSearch = useHasPermission(Permission.SEARCH_FOR_AND_FETCH_FILES);
 ```
 
 **Client types**: `baseClient` (no auth), `accessKeyClient` (permanent key), `sessionKeyClient` (temporary, auto-refreshed on 419 errors).
