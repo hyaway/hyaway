@@ -217,11 +217,11 @@ export function ImageViewer({
       // Allow panning until image edge reaches container edge (full image viewable)
       const maxX = Math.max(
         0,
-        (imgWidth - container.width) / 2 + container.width / 2,
+        (imgWidth - container.width) / 2 + container.width * 0.75,
       );
       const maxY = Math.max(
         0,
-        (imgHeight - container.height) / 2 + container.height / 2,
+        (imgHeight - container.height) / 2 + container.height * 0.75,
       );
 
       return {
@@ -370,7 +370,7 @@ export function ImageViewer({
           isPannable
             ? !isExpanded
               ? "max-h-full max-w-full object-contain select-none" // Pan fit mode
-              : "!max-h-none !max-w-none select-none" // Pan 1:1 mode: no constraints
+              : "max-h-none! max-w-none! select-none" // Pan 1:1 mode: no constraints
             : "max-h-full max-w-full object-contain", // Normal: fit container
         )}
         style={{
