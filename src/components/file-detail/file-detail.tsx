@@ -8,6 +8,7 @@ import { FilePageHeader } from "./file-page-header";
 import { FileStatusBadges } from "./file-status-badges";
 import { FileViewer } from "./file-viewer";
 import { FileViewerSettingsPopover } from "./file-viewer-settings-popover";
+import { ViewingStatisticsTable } from "./viewing-statistics-table";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
@@ -140,6 +141,11 @@ function FileDetailContent({
             <ContentDetailsTable data={data} />
             <FileInfoTable data={data} />
           </div>
+        </div>
+        <Separator className={"mt-2 mb-4"} />
+        <div className="@container space-y-4">
+          <Heading level={2}>Viewing statistics</Heading>
+          <ViewingStatisticsTable statistics={data.file_viewing_statistics} />
         </div>
         <Separator className={"mt-2 mb-4"} />
         <InlineTagsList data={data} />

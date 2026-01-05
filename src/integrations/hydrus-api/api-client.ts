@@ -19,6 +19,7 @@ import {
 
 import type {
   AccessKeyType,
+  CanvasType,
   GetClientOptionsResponse,
   GetFileMetadataResponse,
   GetPageInfoResponse,
@@ -134,6 +135,7 @@ export async function getFileMetadata(
       include_milliseconds: false,
       include_notes: false,
       include_services_object: false,
+      include_file_viewing_statistics: !only_return_basic_information,
     },
   });
   return GetFileMetadataResponseSchema.parse(response.data);
@@ -268,19 +270,6 @@ export async function unarchiveFiles(options: FileIdentifiers): Promise<void> {
 // #endregion File Management
 
 // #region File Viewing Statistics
-
-/**
- * Canvas types for file viewing statistics.
- * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#edit_times_increment_file_viewtime
- */
-export enum CanvasType {
-  MEDIA_VIEWER = 0,
-  PREVIEW = 1,
-  MEDIA_VIEWER_DUPLICATES = 2,
-  MEDIA_VIEWER_ARCHIVE_DELETE = 3,
-  CLIENT_API = 4,
-  DIALOG = 5,
-}
 
 export interface IncrementFileViewtimeOptions {
   /** File identifier (one of file_id, file_ids, hash, hashes) */

@@ -150,6 +150,29 @@ export enum TagStatus {
   PETITIONED = "3",
 }
 
+/**
+ * Canvas types for file viewing statistics.
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#edit_times_increment_file_viewtime
+ */
+export enum CanvasType {
+  MEDIA_VIEWER = 0,
+  PREVIEW = 1,
+  MEDIA_VIEWER_DUPLICATES = 2,
+  MEDIA_VIEWER_ARCHIVE_DELETE = 3,
+  CLIENT_API = 4,
+  DIALOG = 5,
+}
+
+export const FileViewingStatisticsSchema = z.object({
+  canvas_type: z.enum(CanvasType),
+  canvas_type_pretty: z.string(),
+  views: z.number(),
+  viewtime: z.number(),
+  last_viewed_timestamp: z.number().nullable(),
+});
+
+export type FileViewingStatistics = z.infer<typeof FileViewingStatisticsSchema>;
+
 export const FileMetadataSchema = z.object({
   blurhash: z.string().nullish(),
   duration: z.number().nullable(),
@@ -189,6 +212,7 @@ export const FileMetadataSchema = z.object({
       }),
     )
     .optional(),
+  file_viewing_statistics: z.array(FileViewingStatisticsSchema).optional(),
 });
 
 export type FileMetadata = z.infer<typeof FileMetadataSchema>;

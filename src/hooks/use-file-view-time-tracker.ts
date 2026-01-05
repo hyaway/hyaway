@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import axios from "axios";
-import {
-  CanvasType,
-  incrementFileViewtime,
-} from "@/integrations/hydrus-api/api-client";
-import { Permission } from "@/integrations/hydrus-api/models";
+import { incrementFileViewtime } from "@/integrations/hydrus-api/api-client";
+import { CanvasType, Permission } from "@/integrations/hydrus-api/models";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useFileViewingStatisticsOptions } from "@/integrations/hydrus-api/queries/options";
 import { useWatchHistorySyncToHydrus } from "@/stores/watch-history-store";
