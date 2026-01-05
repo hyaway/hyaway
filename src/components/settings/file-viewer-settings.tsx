@@ -7,6 +7,7 @@ import {
 import {
   useFileViewerSettingsActions,
   useFileViewerStartExpanded,
+  useFillCanvasBackground,
   useImageBackground,
 } from "@/stores/file-viewer-settings-store";
 import {
@@ -24,7 +25,8 @@ export interface FileViewerSettingsProps {
 export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
   const fileViewerStartExpanded = useFileViewerStartExpanded();
   const imageBackground = useImageBackground();
-  const { setStartExpanded, setImageBackground } =
+  const fillCanvasBackground = useFillCanvasBackground();
+  const { setStartExpanded, setImageBackground, setFillCanvasBackground } =
     useFileViewerSettingsActions();
 
   // Sync with gallery when linked
@@ -66,6 +68,12 @@ export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
             Average from image
           </ToggleGroupItem>
         </ToggleGroup>
+        <SwitchField
+          id={`${idPrefix}fill-canvas-background-switch`}
+          label="Fill canvas with background"
+          checked={fillCanvasBackground}
+          onCheckedChange={setFillCanvasBackground}
+        />
       </div>
     </SettingsGroup>
   );

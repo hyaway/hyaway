@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import {
   useFileViewerStartExpanded,
+  useFillCanvasBackground,
   useImageBackground,
 } from "@/stores/file-viewer-settings-store";
 import { Toggle } from "@/components/ui-primitives/toggle";
@@ -42,6 +43,7 @@ export function ImageViewer({
   const [loaded, setLoaded] = useState(false);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const imageBackground = useImageBackground();
+  const fillCanvasBackground = useFillCanvasBackground();
 
   // Framer Motion drag state
   const dragX = useMotionValue(0);
@@ -184,9 +186,11 @@ export function ImageViewer({
     }
   }, [isTheater]);
 
-  // Determine background style based on setting
+  // Determine background style based on setting (for the image element)
   const getBackgroundClass = () => {
     if (!loaded) return "bg-background";
+    // When fill canvas is enabled, image has transparent bg so container shows through
+    if (fillCanvasBackground) return "";
     switch (imageBackground) {
       case "checkerboard":
         return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
@@ -231,17 +235,58 @@ export function ImageViewer({
 
   // Get container classes based on view mode
   const getContainerClass = () => {
-    if (overlayMode === "theater") return "fixed inset-0 z-50 bg-black/95";
-    if (overlayMode === "fullscreen") return "h-screen w-screen bg-black";
+    // Skip default bg classes when fill canvas is active
+    const useFillBg = fillCanvasBackground && loaded;
+
+    if (overlayMode === "theater") {
+      return cn("fixed inset-0 z-50", !useFillBg && "bg-black/95");
+    }
+    if (overlayMode === "fullscreen") {
+      return cn("h-screen w-screen", !useFillBg && "bg-black");
+    }
     return isExpanded ? viewerMinHeight : viewerFixedHeight;
+  };
+
+  // Get container background class (for fill canvas option)
+  const getContainerBackgroundClass = () => {
+    if (!fillCanvasBackground || !loaded) return "";
+    switch (imageBackground) {
+      case "checkerboard":
+        return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
+      case "solid":
+        return "bg-background";
+      case "average":
+        return ""; // Handled via inline style
+      default:
+        return "";
+    }
+  };
+
+  // Get container background style (for fill canvas with average color)
+  const getContainerStyle = () => {
+    if (
+      fillCanvasBackground &&
+      imageBackground === "average" &&
+      averageColor &&
+      loaded
+    ) {
+      // In theater mode, add slight transparency to match the /95 aesthetic
+      if (isTheater) {
+        return { backgroundColor: averageColor + "f2" }; // f2 = ~95% opacity
+      }
+      return { backgroundColor: averageColor };
+    }
+    return {};
   };
 
   return (
     <div
       ref={containerRef}
+      style={getContainerStyle()}
       className={cn(
         "group relative flex items-center justify-center overflow-hidden",
         getContainerClass(),
+        getContainerBackgroundClass(),
       )}
     >
       <motion.img
@@ -272,7 +317,11 @@ export function ImageViewer({
         style={{
           x: dragX,
           y: dragY,
-          ...(loaded && imageBackground === "average" && averageColor
+          // Only apply average color to image when fill canvas is disabled
+          ...(loaded &&
+          imageBackground === "average" &&
+          averageColor &&
+          !fillCanvasBackground
             ? { backgroundColor: averageColor }
             : {}),
           // In 1:1 mode, set explicit dimensions to prevent any constraints
