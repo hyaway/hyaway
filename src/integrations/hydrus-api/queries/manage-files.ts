@@ -26,7 +26,7 @@ export const useGetSingleFileMetadata = (fileId: number) => {
   return useQuery({
     queryKey: ["getSingleFileMetadata", fileId],
     queryFn: async () => {
-      const response = await getFileMetadata([fileId], false);
+      const response = await getFileMetadata([fileId]);
       if (response.metadata.length === 0) {
         throw new Error("File not found.");
       }
@@ -39,7 +39,7 @@ export const useGetSingleFileMetadata = (fileId: number) => {
 
 export const useGetFilesMetadata = (
   file_ids: Array<number>,
-  only_return_basic_information = true,
+  only_return_basic_information = false,
 ) => {
   const isConfigured = useIsApiConfigured();
 
@@ -64,7 +64,7 @@ export const useGetFilesMetadata = (
 
 export const useInfiniteGetFilesMetadata = (
   file_ids: Array<number>,
-  only_return_basic_information = true,
+  only_return_basic_information = false,
 ) => {
   const isConfigured = useIsApiConfigured();
   const BATCH_SIZE = 128;

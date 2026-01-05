@@ -6,7 +6,7 @@ import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 export const MAX_WATCH_HISTORY_LIMIT = 1000;
 export const DEFAULT_WATCH_HISTORY_LIMIT = 100;
 
-interface WatchHistoryEntry {
+export interface WatchHistoryEntry {
   fileId: number;
   viewedAt: number; // timestamp
 }
@@ -157,7 +157,7 @@ export const useWatchHistoryEntries = () =>
   useWatchHistoryStore((state) => state.entries);
 
 export const useWatchHistoryFileIds = () => {
-  const entries = useWatchHistoryStore(useShallow((state) => state.entries));
+  const entries = useWatchHistoryEntries();
   return entries.map((e) => e.fileId);
 };
 

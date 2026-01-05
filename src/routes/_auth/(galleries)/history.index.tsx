@@ -5,12 +5,14 @@ import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-g
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeading } from "@/components/page-shell/page-heading";
+import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import { Button } from "@/components/ui-primitives/button";
 import {
   useWatchHistoryActions,
   useWatchHistoryEnabled,
+  useWatchHistoryEntries,
   useWatchHistoryFileIds,
 } from "@/stores/watch-history-store";
 
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/_auth/(galleries)/history/")({
 
 function RouteComponent() {
   const fileIds = useWatchHistoryFileIds();
+  const entries = useWatchHistoryEntries();
   const enabled = useWatchHistoryEnabled();
   const { clearHistory, setEnabled } = useWatchHistoryActions();
 
@@ -59,7 +62,12 @@ function RouteComponent() {
           title={`Watch history (${fileIds.length} ${fileIds.length === 1 ? "file" : "files"})`}
         />
         {fileIds.length > 0 ? (
-          <ThumbnailGallery fileIds={fileIds} getFileLink={getFileLink} />
+          <ThumbnailGalleryProvider
+            infoMode="lastViewedLocal"
+            localHistoryEntries={entries}
+          >
+            <ThumbnailGallery fileIds={fileIds} getFileLink={getFileLink} />
+          </ThumbnailGalleryProvider>
         ) : (
           emptyContent
         )}

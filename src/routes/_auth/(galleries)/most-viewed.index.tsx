@@ -8,6 +8,7 @@ import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
+import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { useMostViewedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 
@@ -77,7 +78,12 @@ function RouteComponent() {
           title={`Most viewed (${data?.file_ids?.length ?? 0} files)`}
         />
         {data?.file_ids && data.file_ids.length > 0 ? (
-          <ThumbnailGallery fileIds={data.file_ids} getFileLink={getFileLink} />
+          <ThumbnailGalleryProvider infoMode="views">
+            <ThumbnailGallery
+              fileIds={data.file_ids}
+              getFileLink={getFileLink}
+            />
+          </ThumbnailGalleryProvider>
         ) : (
           <EmptyState message="No files with view counts found." />
         )}

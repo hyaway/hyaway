@@ -81,3 +81,50 @@ export function formatHoursCompact(hours: number): string {
   }
   return `${daysFormatter.format(days)} ${hoursFormatter.format(remainingHours)}`;
 }
+
+/**
+ * Formats viewtime (in seconds) into a compact human-readable string.
+ * @param seconds - Number of seconds
+ * @returns Formatted string like "5m", "2h", "1d 12h"
+ */
+export function formatViewtimeCompact(seconds: number): string {
+  if (seconds < 60) {
+    return `${Math.floor(seconds)}s`;
+  }
+  if (seconds < 3600) {
+    return `${Math.floor(seconds / 60)}m`;
+  }
+  const hours = Math.floor(seconds / 3600);
+  return formatHoursCompact(hours);
+}
+
+const relativeTimeFormatter = new Intl.RelativeTimeFormat(undefined, {
+  numeric: "auto",
+  style: "narrow",
+});
+
+/**
+ * Formats a timestamp into a compact relative time string.
+ * @param timestamp - Unix timestamp in milliseconds
+ * @returns Formatted string like "2h ago", "3d ago", "1mo ago"
+ */
+export function formatRelativeTimeCompact(timestamp: number): string {
+  const now = Date.now();
+  const diffMs = timestamp - now;
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (Math.abs(diffMinutes) < 60) {
+    return relativeTimeFormatter.format(diffMinutes, "minute");
+  }
+  if (Math.abs(diffHours) < 24) {
+    return relativeTimeFormatter.format(diffHours, "hour");
+  }
+  if (Math.abs(diffDays) < 30) {
+    return relativeTimeFormatter.format(diffDays, "day");
+  }
+  const diffMonths = Math.floor(diffDays / 30);
+  return relativeTimeFormatter.format(diffMonths, "month");
+}

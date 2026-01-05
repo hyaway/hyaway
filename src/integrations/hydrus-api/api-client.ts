@@ -123,7 +123,7 @@ export async function searchFiles(
  */
 export async function getFileMetadata(
   file_ids: Array<number>,
-  only_return_basic_information = true,
+  only_return_basic_information = false,
 ): Promise<GetFileMetadataResponse> {
   const response = await sessionKeyClient.get("/get_files/file_metadata", {
     params: {
