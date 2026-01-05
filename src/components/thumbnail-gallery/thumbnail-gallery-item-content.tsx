@@ -92,7 +92,7 @@ export function ThumbnailGalleryItemContent({
         )}
         {item.is_deleted && !item.is_trashed && (
           <IconBan
-            className="text-destructive size-3 @[150px]:size-4"
+            className="text-destructive size-2 @[60px]:size-3 @[150px]:size-4"
             aria-label="Permanently deleted"
           />
         )}
