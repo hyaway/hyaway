@@ -41,6 +41,7 @@ export function ImageViewer({
   // Expanded state is independent of overlay modes
   const [isExpanded, setIsExpanded] = useState(startExpanded);
   const [loaded, setLoaded] = useState(false);
+  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const imageBackground = useImageBackground();
 
   // Pan state for fullscreen mode
@@ -66,6 +67,12 @@ export function ImageViewer({
 
   const handleLoad = () => {
     setLoaded(true);
+    if (imageRef.current) {
+      setNaturalSize({
+        width: imageRef.current.naturalWidth,
+        height: imageRef.current.naturalHeight,
+      });
+    }
     onLoad();
   };
 
@@ -363,7 +370,7 @@ export function ImageViewer({
           isPannable
             ? !isExpanded
               ? "max-h-full max-w-full object-contain select-none" // Pan fit mode
-              : "select-none" // Pan 1:1 mode: actual size
+              : "!max-h-none !max-w-none select-none" // Pan 1:1 mode: no constraints
             : "max-h-full max-w-full object-contain", // Normal: fit container
         )}
         style={{
@@ -372,6 +379,16 @@ export function ImageViewer({
             : {}),
           ...(isPannable
             ? { transform: `translate(${panOffset.x}px, ${panOffset.y}px)` }
+            : {}),
+          // In 1:1 mode, set explicit dimensions to prevent any constraints
+          ...(isPannable && isExpanded && naturalSize.width > 0
+            ? {
+                width: `${naturalSize.width}px`,
+                height: `${naturalSize.height}px`,
+                minWidth: `${naturalSize.width}px`,
+                minHeight: `${naturalSize.height}px`,
+                flexShrink: 0,
+              }
             : {}),
         }}
         onLoad={handleLoad}
