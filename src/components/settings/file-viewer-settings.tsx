@@ -9,6 +9,8 @@ import {
   useFileViewerStartExpanded,
   useFillCanvasBackground,
   useImageBackground,
+  useMediaAutoPlay,
+  useMediaStartMuted,
 } from "@/stores/file-viewer-settings-store";
 import {
   useGalleryLinkImageBackground,
@@ -26,8 +28,15 @@ export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
   const fileViewerStartExpanded = useFileViewerStartExpanded();
   const imageBackground = useImageBackground();
   const fillCanvasBackground = useFillCanvasBackground();
-  const { setStartExpanded, setImageBackground, setFillCanvasBackground } =
-    useFileViewerSettingsActions();
+  const mediaAutoPlay = useMediaAutoPlay();
+  const mediaStartMuted = useMediaStartMuted();
+  const {
+    setStartExpanded,
+    setImageBackground,
+    setFillCanvasBackground,
+    setMediaAutoPlay,
+    setMediaStartMuted,
+  } = useFileViewerSettingsActions();
 
   // Sync with gallery when linked
   const linkImageBackground = useGalleryLinkImageBackground();
@@ -73,6 +82,21 @@ export function FileViewerSettings({ idPrefix = "" }: FileViewerSettingsProps) {
           label="Fill canvas with background"
           checked={fillCanvasBackground}
           onCheckedChange={setFillCanvasBackground}
+        />
+      </div>
+      <div className="flex flex-col gap-4">
+        <Label>Video &amp; Audio</Label>
+        <SwitchField
+          id={`${idPrefix}media-autoplay-switch`}
+          label="Start automatically"
+          checked={mediaAutoPlay}
+          onCheckedChange={setMediaAutoPlay}
+        />
+        <SwitchField
+          id={`${idPrefix}media-start-muted-switch`}
+          label="Start muted"
+          checked={mediaStartMuted}
+          onCheckedChange={setMediaStartMuted}
         />
       </div>
     </SettingsGroup>

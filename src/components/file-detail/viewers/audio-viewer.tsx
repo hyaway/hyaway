@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import {
   DefaultAudioLayout,
@@ -9,6 +10,10 @@ import { viewerFixedHeight } from "./style-constants";
 import type { AudioMimeType } from "@vidstack/react";
 import { useActiveTheme } from "@/stores/theme-store";
 import { cn } from "@/lib/utils";
+import {
+  useMediaAutoPlay,
+  useMediaStartMuted,
+} from "@/stores/file-viewer-settings-store";
 
 interface AudioViewerProps {
   fileUrl: string;
@@ -27,6 +32,16 @@ export function AudioViewer({
 }: AudioViewerProps) {
   const activeTheme = useActiveTheme();
 
+  // Get settings from store - only use initial values on mount
+  const mediaAutoPlay = useMediaAutoPlay();
+  const mediaStartMuted = useMediaStartMuted();
+
+  // Capture initial values so settings changes don't affect mounted player
+  const [initialSettings] = useState(() => ({
+    autoPlay: mediaAutoPlay,
+    muted: mediaStartMuted,
+  }));
+
   return (
     <div className={cn("flex items-center justify-center", viewerFixedHeight)}>
       <MediaPlayer
@@ -41,6 +56,8 @@ export function AudioViewer({
             onError();
           }
         }}
+        autoPlay={initialSettings.autoPlay}
+        muted={initialSettings.muted}
       >
         <MediaProvider />
         <DefaultAudioLayout
