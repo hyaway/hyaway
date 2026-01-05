@@ -29,14 +29,20 @@ function NavIcon({
   filledIcon: FilledIcon,
   className,
 }: {
-  icon: ComponentType<{ className?: string }>;
-  filledIcon: ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string; stroke?: number }>;
+  filledIcon: ComponentType<{ className?: string; stroke?: number }>;
   className?: string;
 }) {
   return (
     <>
-      <Icon className={cn(className, "group-data-active:hidden")} />
-      <FilledIcon className={cn(className, "hidden group-data-active:block")} />
+      <Icon
+        className={cn(className, "group-data-active:hidden")}
+        stroke={Icon === FilledIcon ? 1.5 : undefined}
+      />
+      <FilledIcon
+        className={cn(className, "hidden group-data-active:block")}
+        stroke={Icon === FilledIcon ? 2.25 : undefined}
+      />
     </>
   );
 }

@@ -45,15 +45,19 @@ function SidebarIcon({
   filledIcon: FilledIcon,
   className,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
-  filledIcon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; stroke?: number }>;
+  filledIcon: React.ComponentType<{ className?: string; stroke?: number }>;
   className?: string;
 }) {
   return (
     <>
-      <Icon className={cn(className, "group-data-active/menu-button:hidden")} />
+      <Icon
+        className={cn(className, "group-data-active/menu-button:hidden")}
+        stroke={Icon === FilledIcon ? 1.5 : undefined}
+      />
       <FilledIcon
         className={cn(className, "hidden group-data-active/menu-button:block")}
+        stroke={Icon === FilledIcon ? 2.25 : undefined}
       />
     </>
   );
