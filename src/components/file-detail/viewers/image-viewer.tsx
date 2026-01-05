@@ -252,7 +252,9 @@ export function ImageViewer({
         draggable={false}
         drag={isPannable}
         dragConstraints={containerRef}
-        dragElastic={0.1}
+        dragElastic={0.5}
+        dragTransition={{ power: 0.3, timeConstant: 200 }}
+        whileDrag={{ scale: 0.98 }}
         dragMomentum={true}
         onDragStart={() => {
           setIsDragging(true);
