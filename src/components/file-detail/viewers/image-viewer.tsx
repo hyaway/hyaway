@@ -328,6 +328,7 @@ export function ImageViewer({
               <Toggle
                 variant="outline"
                 size="sm"
+                className="bg-card"
                 pressed={isExpanded}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -346,6 +347,7 @@ export function ImageViewer({
               <Toggle
                 variant="outline"
                 size="sm"
+                className="bg-card"
                 pressed={isTheater}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -373,6 +375,7 @@ export function ImageViewer({
               <Toggle
                 variant="outline"
                 size="sm"
+                className="bg-card"
                 pressed={isFullscreen}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -400,6 +403,7 @@ export function ImageViewer({
               <Toggle
                 variant="outline"
                 size="sm"
+                className="bg-card"
                 pressed={isExpanded}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -418,6 +422,7 @@ export function ImageViewer({
               <Toggle
                 variant="outline"
                 size="sm"
+                className="bg-card"
                 pressed={false}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -432,6 +437,7 @@ export function ImageViewer({
               <Toggle
                 variant="outline"
                 size="sm"
+                className="bg-card"
                 pressed={false}
                 onClick={(e) => {
                   e.stopPropagation();
