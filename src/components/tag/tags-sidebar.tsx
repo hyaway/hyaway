@@ -154,7 +154,7 @@ export const TagsSidebar = memo(function TagsSidebar({
             const newValue = value[0] as TagsSortMode | undefined;
             if (newValue) setSortMode(newValue);
           }}
-          variant="outline"
+          variant="outline-muted"
           size="sm"
           className="w-full"
         >
