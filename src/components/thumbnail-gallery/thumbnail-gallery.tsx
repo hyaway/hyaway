@@ -12,7 +12,10 @@ import { ScrollPositionBadge } from "@/components/scroll-position-badge";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { PageError } from "@/components/page-shell/page-error";
 import { Spinner } from "@/components/ui-primitives/spinner";
-import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
+import {
+  useEffectiveGalleryBaseWidthMode,
+  useThumbnailDimensions,
+} from "@/integrations/hydrus-api/queries/options";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGalleryResponsiveLanes } from "@/hooks/use-responsive-lanes";
@@ -21,7 +24,6 @@ import {
   useScrollRestoration,
 } from "@/hooks/use-scroll-restoration";
 import {
-  useGalleryBaseWidthMode,
   useGalleryCustomBaseWidth,
   useGalleryEntryDuration,
   useGalleryHorizontalGap,
@@ -107,7 +109,7 @@ export function PureThumbnailGallery({
   const deferredItems = useDeferredValue(items);
 
   // Get layout settings - defer expensive ones for responsive slider UX
-  const baseWidthMode = useGalleryBaseWidthMode();
+  const baseWidthMode = useEffectiveGalleryBaseWidthMode();
   const customBaseWidth = useGalleryCustomBaseWidth();
   const verticalGap = useGalleryVerticalGap();
   const horizontalGap = useGalleryHorizontalGap();

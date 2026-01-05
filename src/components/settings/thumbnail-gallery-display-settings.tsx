@@ -41,6 +41,8 @@ import {
   useTagsSettingsActions,
   useTagsSortMode,
 } from "@/stores/tags-settings-store";
+import { Permission } from "@/integrations/hydrus-api/models";
+import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import { Accordion } from "@/components/ui-primitives/accordion";
 import { Label } from "@/components/ui-primitives/label";
 import { Switch } from "@/components/ui-primitives/switch";
@@ -48,6 +50,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
+import { PERMISSION_LABELS } from "@/integrations/hydrus-api/permissions";
 
 function subscribeToWindowSize(callback: () => void) {
   window.addEventListener("resize", callback);
@@ -98,6 +101,8 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryLastOpenSection = useGalleryLastOpenSection();
   const fileViewerImageBackground = useImageBackground();
   const tagsSortMode = useTagsSortMode();
+  const { hasPermission } = usePermissions();
+  const canManageDatabase = hasPermission(Permission.MANAGE_DATABASE);
   const { setImageBackground: setFileViewerImageBackground } =
     useFileViewerSettingsActions();
   const { setSortMode: setTagsSortMode } = useTagsSettingsActions();
@@ -123,6 +128,11 @@ export function ThumbnailGalleryDisplaySettings({
     setLinkImageBackground,
     setLastOpenSection,
   } = useGallerySettingsActions();
+
+  // Switch to custom mode if Hydrus option is unavailable due to missing permission
+  if (!canManageDatabase && galleryBaseWidthMode === "service") {
+    setBaseWidthMode("custom");
+  }
 
   // When linked, changing gallery background also updates file viewer background
   const handleImageBackgroundChange = (value: ImageBackground) => {
@@ -288,10 +298,18 @@ export function ThumbnailGalleryDisplaySettings({
               variant="outline"
               size="sm"
             >
-              <ToggleGroupItem value="service">Hydrus</ToggleGroupItem>
+              <ToggleGroupItem value="service" disabled={!canManageDatabase}>
+                Hydrus
+              </ToggleGroupItem>
               <ToggleGroupItem value="custom">Custom</ToggleGroupItem>
             </ToggleGroup>
           </div>
+          {!canManageDatabase && (
+            <p className="text-destructive text-xs">
+              Hydrus option disabled: missing{" "}
+              <b>{PERMISSION_LABELS[Permission.MANAGE_DATABASE]}</b> permission
+            </p>
+          )}
           {galleryBaseWidthMode === "custom" && (
             <SliderField
               id={`${idPrefix}custom-base-width-slider`}

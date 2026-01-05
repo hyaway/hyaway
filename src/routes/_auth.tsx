@@ -1,21 +1,13 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
-import {
-  IconAlertTriangle,
-  IconLock,
-  IconRefresh,
-  IconShieldOff,
-} from "@tabler/icons-react";
+import { IconAlertTriangle, IconLock, IconRefresh } from "@tabler/icons-react";
 
-import type { Permission } from "@/integrations/hydrus-api/models";
 import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
-import { getMissingPermissions } from "@/integrations/hydrus-api/permissions";
 import {
   useApiVersionQuery,
   useVerifyPersistentAccessQuery,
   useVerifySessionAccessQuery,
 } from "@/integrations/hydrus-api/queries/access";
 import { AuthStatusScreen } from "@/components/page-shell/auth-status-screen";
-import { MissingPermissionsList } from "@/components/page-shell/missing-permissions-list";
 import { Button, LinkButton } from "@/components/ui-primitives/button";
 import { Spinner } from "@/components/ui-primitives/spinner";
 
@@ -23,6 +15,11 @@ export const Route = createFileRoute("/_auth")({
   component: AuthPageLayout,
 });
 
+/**
+ * Auth layout route - wraps all protected routes.
+ * Handles connection/loading/error states centrally.
+ * Individual pages handle their own permission checking via PagePermissionGate.
+ */
 function AuthPageLayout() {
   const isConfigured = useIsApiConfigured();
   const versionQuery = useApiVersionQuery();
@@ -42,9 +39,6 @@ function AuthPageLayout() {
     versionQuery.isError || persistentQuery.isError || sessionQuery.isError;
   const hasData =
     versionQuery.data && persistentQuery.data && sessionQuery.data;
-  const isAuthenticated =
-    persistentQuery.data?.hasRequiredPermissions &&
-    sessionQuery.data?.hasRequiredPermissions;
 
   // Show error state first - but only if we don't have cached data
   if (hasError && !hasData) {
@@ -73,14 +67,7 @@ function AuthPageLayout() {
     );
   }
 
-  // Show missing permissions prompt if configured but lacking permissions
-  if (!isAuthenticated) {
-    const missingPermissions = getMissingPermissions(persistentQuery.data.raw);
-    return (
-      <AuthMissingPermissionsPrompt missingPermissions={missingPermissions} />
-    );
-  }
-
+  // Permission checks are now handled per-page via PagePermissionGate
   return <Outlet />;
 }
 
@@ -164,27 +151,5 @@ function AuthNotConfiguredPrompt() {
         </LinkButton>
       }
     />
-  );
-}
-
-function AuthMissingPermissionsPrompt({
-  missingPermissions,
-}: {
-  missingPermissions: Array<Permission>;
-}) {
-  return (
-    <AuthStatusScreen
-      icon={<IconShieldOff className="text-warning size-8" />}
-      variant="warning"
-      title="Missing permissions"
-      description="Your access key is missing required permissions. Update your API key in Hydrus to include these permissions (or permit everything):"
-      actions={
-        <LinkButton to="/settings/client-api" size="lg">
-          Update API settings
-        </LinkButton>
-      }
-    >
-      <MissingPermissionsList missingPermissions={missingPermissions} />
-    </AuthStatusScreen>
   );
 }

@@ -15,6 +15,8 @@ export const Route = createFileRoute("/_auth/(galleries)/longest-viewed/")({
   component: RouteComponent,
 });
 
+const PAGE_TITLE = "Longest viewed";
+
 function RouteComponent() {
   const { data, isLoading, isFetching, isError, error } =
     useLongestViewedFilesQuery();
@@ -41,7 +43,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <>
-        <PageLoading title="Longest viewed" />
+        <PageLoading title={PAGE_TITLE} />
         <PageFloatingFooter
           leftContent={refetchButton}
           rightContent={<LongestViewedSettingsPopover />}
@@ -54,7 +56,7 @@ function RouteComponent() {
     return (
       <>
         <>
-          <PageHeading title="Longest viewed" />
+          <PageHeading title={PAGE_TITLE} />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching longest viewed files."

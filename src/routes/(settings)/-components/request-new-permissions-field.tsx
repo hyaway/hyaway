@@ -1,5 +1,10 @@
+import { useState } from "react";
 import { AxiosError } from "axios";
-import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
+import {
+  IconAlertCircle,
+  IconCircleCheck,
+  IconInfoCircle,
+} from "@tabler/icons-react";
 import { SETTINGS_ACTION, SETTINGS_REQUEST_API_KEY_ACTION } from "./constants";
 import {
   useApiVersionQuery,
@@ -12,12 +17,14 @@ import {
 } from "@/components/ui-primitives/alert";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import { Button } from "@/components/ui-primitives/button";
+import { SwitchField } from "@/components/settings/setting-fields";
 import {
   useApiEndpoint,
   useAuthActions,
 } from "@/integrations/hydrus-api/hydrus-config-store";
 
 export function RequestNewPermissionsField() {
+  const [permitsEverything, setPermitsEverything] = useState(true);
   const apiEndpoint = useApiEndpoint();
   const { setApiCredentials } = useAuthActions();
   const { mutate, isPending, isSuccess, isError, error } =
@@ -26,6 +33,33 @@ export function RequestNewPermissionsField() {
 
   return (
     <div className="flex flex-col gap-4">
+      {apiEndpoint ? (
+        <Alert>
+          <IconInfoCircle />
+          <AlertTitle>
+            Before requesting, open api permissions dialog in Hydrus:
+          </AlertTitle>
+          <AlertDescription>
+            <b>
+              services → review services → local → client api → add → from api
+              request
+            </b>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+      <SwitchField
+        id="permits-everything"
+        label="Request all permissions"
+        description={
+          permitsEverything
+            ? "Will request full access to all current and future API features"
+            : "Will request only the specific permissions this app uses"
+        }
+        checked={permitsEverything}
+        onCheckedChange={setPermitsEverything}
+        disabled={isPending}
+      />
+
       <Button
         type="button"
         size={"default"}
@@ -35,7 +69,7 @@ export function RequestNewPermissionsField() {
         value={SETTINGS_REQUEST_API_KEY_ACTION}
         onClick={() => {
           mutate(
-            { name: "hyaway-app" },
+            { name: "hyaway-app", permitsEverything },
             {
               onSuccess: ({ access_key }) => {
                 setApiCredentials(access_key, apiEndpoint);
@@ -52,15 +86,7 @@ export function RequestNewPermissionsField() {
               : "Request new API access key"}
         </span>
       </Button>
-      {apiEndpoint ? (
-        <p className="text-muted-foreground text-sm">
-          Before requesting open the permission registration dialog in Hydrus:{" "}
-          <b>
-            services → review services → local → client api → add → from api
-            request
-          </b>
-        </p>
-      ) : null}
+
       {!apiEndpoint ? null : isPending ? (
         <Alert>
           <Spinner />

@@ -26,6 +26,8 @@ import {
   useUnarchiveFilesMutation,
   useUndeleteFilesMutation,
 } from "@/integrations/hydrus-api/queries/manage-files";
+import { Permission } from "@/integrations/hydrus-api/models";
+import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 
 export interface FileAction {
   id: string;
@@ -37,6 +39,8 @@ export interface FileAction {
   download?: boolean;
   external?: boolean;
   isPending?: boolean;
+  /** If true, the action is disabled (e.g., due to missing permissions) */
+  disabled?: boolean;
   /** If true, this action will always be in the overflow menu */
   overflowOnly?: boolean;
 }
@@ -84,6 +88,8 @@ interface ManagementActionData {
 }
 
 function useManagementActions(data: ManagementActionData): Array<FileAction> {
+  const { hasPermission } = usePermissions();
+  const canManageFiles = hasPermission(Permission.IMPORT_AND_DELETE_FILES);
   const deleteFilesMutation = useDeleteFilesMutation();
   const undeleteFilesMutation = useUndeleteFilesMutation();
   const archiveFilesMutation = useArchiveFilesMutation();
@@ -96,6 +102,7 @@ function useManagementActions(data: ManagementActionData): Array<FileAction> {
         icon: IconTrashOff,
         onClick: () => undeleteFilesMutation.mutate({ file_id: data.file_id }),
         isPending: undeleteFilesMutation.isPending,
+        disabled: !canManageFiles,
       }
     : {
         id: "delete",
@@ -104,6 +111,7 @@ function useManagementActions(data: ManagementActionData): Array<FileAction> {
         onClick: () => deleteFilesMutation.mutate({ file_id: data.file_id }),
         variant: "destructive",
         isPending: deleteFilesMutation.isPending,
+        disabled: !canManageFiles,
       };
 
   const archiveAction: FileAction = data.is_inbox
@@ -113,6 +121,7 @@ function useManagementActions(data: ManagementActionData): Array<FileAction> {
         icon: IconArchive,
         onClick: () => archiveFilesMutation.mutate({ file_id: data.file_id }),
         isPending: archiveFilesMutation.isPending,
+        disabled: !canManageFiles,
       }
     : {
         id: "unarchive",
@@ -120,6 +129,7 @@ function useManagementActions(data: ManagementActionData): Array<FileAction> {
         icon: IconArchiveOff,
         onClick: () => unarchiveFilesMutation.mutate({ file_id: data.file_id }),
         isPending: unarchiveFilesMutation.isPending,
+        disabled: !canManageFiles,
       };
 
   return [trashAction, archiveAction];

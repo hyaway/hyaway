@@ -15,6 +15,8 @@ export const Route = createFileRoute("/_auth/(galleries)/recently-archived/")({
   component: RouteComponent,
 });
 
+const PAGE_TITLE = "Recently archived";
+
 function RouteComponent() {
   const { data, isLoading, isFetching, isError, error } =
     useRecentlyArchivedFilesQuery();
@@ -41,7 +43,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <>
-        <PageLoading title="Recently archived" />
+        <PageLoading title={PAGE_TITLE} />
         <PageFloatingFooter
           leftContent={refetchButton}
           rightContent={<RecentFilesSettingsPopover />}
@@ -54,7 +56,7 @@ function RouteComponent() {
     return (
       <>
         <>
-          <PageHeading title="Recently archived" />
+          <PageHeading title={PAGE_TITLE} />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching recently archived files."

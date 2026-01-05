@@ -15,6 +15,8 @@ export const Route = createFileRoute("/_auth/(galleries)/remote-history/")({
   component: RouteComponent,
 });
 
+const PAGE_TITLE = "Remote watch history";
+
 function RouteComponent() {
   const { data, isLoading, isFetching, isError, error } =
     useRemoteWatchHistoryQuery();
@@ -41,7 +43,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <>
-        <PageLoading title="Remote watch history" />
+        <PageLoading title={PAGE_TITLE} />
         <PageFloatingFooter
           leftContent={refetchButton}
           rightContent={<RemoteHistorySettingsPopover />}
@@ -54,7 +56,7 @@ function RouteComponent() {
     return (
       <>
         <>
-          <PageHeading title="Remote watch history" />
+          <PageHeading title={PAGE_TITLE} />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching remote watch history."

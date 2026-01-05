@@ -42,8 +42,9 @@ export function ThumbnailGalleryItemContextMenu({
           {group.actions.map((action) => (
             <ContextMenuItem
               key={action.id}
-              onClick={action.onClick}
+              onClick={action.disabled ? undefined : action.onClick}
               variant={action.variant}
+              disabled={action.disabled}
             >
               <action.icon />
               {action.label}

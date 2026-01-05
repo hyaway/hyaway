@@ -13,8 +13,7 @@ import {
   useApiVersionQuery,
   useVerifyPersistentAccessQuery,
 } from "@/integrations/hydrus-api/queries/access";
-import { getMissingPermissions } from "@/integrations/hydrus-api/permissions";
-import { MissingPermissionsList } from "@/components/page-shell/missing-permissions-list";
+import { PermissionsChecklist } from "@/components/page-shell/permissions-checklist";
 import { SecretInput } from "@/components/ui-primitives/input";
 import {
   Field,
@@ -132,26 +131,25 @@ export function AccessKeyField() {
           <Alert>
             <IconCircleCheck />
             <AlertTitle>API access key is valid!</AlertTitle>
-            <AlertDescription>
-              Connection to <b>{apiEndpoint}</b> with{" "}
-              <b>{data.raw.name ?? "API"}</b> access key successful
+            <AlertDescription className="flex flex-col gap-2">
+              <span>
+                Connection to <b>{apiEndpoint}</b> with{" "}
+                <b>{data.raw.name ?? "API"}</b> access key successful
+              </span>
+              <PermissionsChecklist permissionsData={data.raw} />
             </AlertDescription>
           </Alert>
         ) : (
           <Alert>
             <IconShieldOff />
-            <AlertTitle>Missing permissions</AlertTitle>
+            <AlertTitle>Missing required permission</AlertTitle>
             <AlertDescription className="flex flex-col gap-2">
               <span>
                 Your access key <b>{data.raw.name ?? "API"}</b> on{" "}
-                <b>{apiEndpoint}</b> is missing required permissions. Update
-                your API key in Hydrus to include these permissions (or permit
-                everything):
+                <b>{apiEndpoint}</b> is missing the required permission. Update
+                your API key in Hydrus to include it (or permit everything):
               </span>
-              <MissingPermissionsList
-                missingPermissions={getMissingPermissions(data.raw)}
-                variant="warning"
-              />
+              <PermissionsChecklist permissionsData={data.raw} />
             </AlertDescription>
           </Alert>
         )

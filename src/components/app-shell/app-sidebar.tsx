@@ -24,6 +24,9 @@ import {
   IconTrashFilled,
 } from "@tabler/icons-react";
 import { SidebarThemeSwitcher } from "./theme-switcher";
+import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import { PERMISSION_LABELS } from "@/integrations/hydrus-api/permissions";
+import { Permission } from "@/integrations/hydrus-api/models";
 import { Heading } from "@/components/ui-primitives/heading";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";
 import {
@@ -37,6 +40,11 @@ import {
   SidebarMenuLinkButton,
   SidebarRail,
 } from "@/components/ui-primitives/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui-primitives/tooltip";
 import { cn } from "@/lib/utils";
 
 /** Icon pair component that shows outline icon normally, filled when parent has data-active */
@@ -63,7 +71,57 @@ function SidebarIcon({
   );
 }
 
+/** Wrapper that computes muted variant based on permissions */
+interface SidebarNavLinkProps {
+  /** Permissions required to access this route - link is muted if any are missing */
+  requiredPermissions?: Array<Permission>;
+  /** Whether permissions have been fetched */
+  permissionsFetched: boolean;
+  /** Function to check if a permission is granted */
+  hasPermission: (permission: Permission) => boolean;
+  /** Render function that receives the computed variant */
+  children: (variant: "default" | "muted") => React.ReactElement;
+}
+
+function SidebarNavLink({
+  requiredPermissions = [],
+  permissionsFetched,
+  hasPermission,
+  children,
+}: SidebarNavLinkProps) {
+  const missingPermissions = requiredPermissions.filter(
+    (p) => !hasPermission(p),
+  );
+  const isMuted = permissionsFetched && missingPermissions.length > 0;
+  const variant = isMuted ? "muted" : "default";
+
+  const content = children(variant);
+
+  if (isMuted) {
+    const tooltipText = missingPermissions
+      .map((p) => PERMISSION_LABELS[p])
+      .join(", ");
+
+    return (
+      <Tooltip>
+        <TooltipTrigger render={content} />
+        <TooltipContent side="right">Missing: {tooltipText}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return content;
+}
+
 export function AppSidebar() {
+  const { hasPermission, isFetched } = usePermissions();
+
+  // Common props for all nav links
+  const navLinkProps = {
+    permissionsFetched: isFetched,
+    hasPermission,
+  };
+
   return (
     <>
       <SidebarHeader>
@@ -93,16 +151,26 @@ export function AppSidebar() {
           <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton to="/pages" className="cursor-pointer">
-                <TouchTarget>
-                  <SidebarIcon
-                    icon={IconLayoutGrid}
-                    filledIcon={IconLayoutGridFilled}
-                    className="size-8"
-                  />
-                  <span>Pages</span>
-                </TouchTarget>
-              </SidebarMenuLinkButton>
+              <SidebarNavLink
+                requiredPermissions={[
+                  Permission.SEARCH_FOR_AND_FETCH_FILES,
+                  Permission.MANAGE_PAGES,
+                ]}
+                {...navLinkProps}
+              >
+                {(variant) => (
+                  <SidebarMenuLinkButton to="/pages" variant={variant}>
+                    <TouchTarget>
+                      <SidebarIcon
+                        icon={IconLayoutGrid}
+                        filledIcon={IconLayoutGridFilled}
+                        className="size-8"
+                      />
+                      <span>Pages</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
@@ -110,40 +178,67 @@ export function AppSidebar() {
           <SidebarGroupLabel>Recent files</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton
-                to="/recently-inboxed"
-                className="cursor-pointer"
+              <SidebarNavLink
+                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
+                {...navLinkProps}
               >
-                <TouchTarget>
-                  <SidebarIcon icon={IconMail} filledIcon={IconMailFilled} />
-                  <span>Recently inboxed</span>
-                </TouchTarget>
-              </SidebarMenuLinkButton>
+                {(variant) => (
+                  <SidebarMenuLinkButton
+                    to="/recently-inboxed"
+                    variant={variant}
+                  >
+                    <TouchTarget>
+                      <SidebarIcon
+                        icon={IconMail}
+                        filledIcon={IconMailFilled}
+                      />
+                      <span>Recently inboxed</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton
-                to="/recently-archived"
-                className="cursor-pointer"
+              <SidebarNavLink
+                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
+                {...navLinkProps}
               >
-                <TouchTarget>
-                  <SidebarIcon
-                    icon={IconArchive}
-                    filledIcon={IconArchiveFilled}
-                  />
-                  <span>Recently archived</span>
-                </TouchTarget>
-              </SidebarMenuLinkButton>
+                {(variant) => (
+                  <SidebarMenuLinkButton
+                    to="/recently-archived"
+                    variant={variant}
+                  >
+                    <TouchTarget>
+                      <SidebarIcon
+                        icon={IconArchive}
+                        filledIcon={IconArchiveFilled}
+                      />
+                      <span>Recently archived</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton
-                to="/recently-trashed"
-                className="cursor-pointer"
+              <SidebarNavLink
+                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
+                {...navLinkProps}
               >
-                <TouchTarget>
-                  <SidebarIcon icon={IconTrash} filledIcon={IconTrashFilled} />
-                  <span>Recently trashed</span>
-                </TouchTarget>
-              </SidebarMenuLinkButton>
+                {(variant) => (
+                  <SidebarMenuLinkButton
+                    to="/recently-trashed"
+                    variant={variant}
+                  >
+                    <TouchTarget>
+                      <SidebarIcon
+                        icon={IconTrash}
+                        filledIcon={IconTrashFilled}
+                      />
+                      <span>Recently trashed</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
@@ -151,26 +246,37 @@ export function AppSidebar() {
           <SidebarGroupLabel>Other</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton to="/history" className="cursor-pointer">
-                <TouchTarget>
-                  <SidebarIcon icon={IconEye} filledIcon={IconEyeFilled} />
-                  <span>Watch history</span>
-                </TouchTarget>
-              </SidebarMenuLinkButton>
+              <SidebarNavLink
+                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
+                {...navLinkProps}
+              >
+                {(variant) => (
+                  <SidebarMenuLinkButton to="/history" variant={variant}>
+                    <TouchTarget>
+                      <SidebarIcon icon={IconEye} filledIcon={IconEyeFilled} />
+                      <span>Watch history</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton
-                to="/random-inbox"
-                className="cursor-pointer"
+              <SidebarNavLink
+                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
+                {...navLinkProps}
               >
-                <TouchTarget>
-                  <SidebarIcon
-                    icon={IconArrowsShuffle}
-                    filledIcon={IconArrowsShuffle2}
-                  />
-                  <span>Random inbox</span>
-                </TouchTarget>
-              </SidebarMenuLinkButton>
+                {(variant) => (
+                  <SidebarMenuLinkButton to="/random-inbox" variant={variant}>
+                    <TouchTarget>
+                      <SidebarIcon
+                        icon={IconArrowsShuffle}
+                        filledIcon={IconArrowsShuffle2}
+                      />
+                      <span>Random inbox</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
@@ -178,43 +284,58 @@ export function AppSidebar() {
           <SidebarGroupLabel>View statistics</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton
-                to="/remote-history"
-                className="cursor-pointer"
+              <SidebarNavLink
+                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
+                {...navLinkProps}
               >
-                <TouchTarget>
-                  <SidebarIcon
-                    icon={IconCalendarStats}
-                    filledIcon={IconCalendarStats}
-                  />
-                  <span>Remote history</span>
-                </TouchTarget>
-              </SidebarMenuLinkButton>
+                {(variant) => (
+                  <SidebarMenuLinkButton to="/remote-history" variant={variant}>
+                    <TouchTarget>
+                      <SidebarIcon
+                        icon={IconCalendarStats}
+                        filledIcon={IconCalendarStats}
+                      />
+                      <span>Remote history</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton
-                to="/most-viewed"
-                className="cursor-pointer"
+              <SidebarNavLink
+                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
+                {...navLinkProps}
               >
-                <TouchTarget>
-                  <SidebarIcon
-                    icon={IconChartArea}
-                    filledIcon={IconChartAreaFilled}
-                  />
-                  <span>Most viewed</span>
-                </TouchTarget>
-              </SidebarMenuLinkButton>
+                {(variant) => (
+                  <SidebarMenuLinkButton to="/most-viewed" variant={variant}>
+                    <TouchTarget>
+                      <SidebarIcon
+                        icon={IconChartArea}
+                        filledIcon={IconChartAreaFilled}
+                      />
+                      <span>Most viewed</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuLinkButton
-                to="/longest-viewed"
-                className="cursor-pointer"
+              <SidebarNavLink
+                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
+                {...navLinkProps}
               >
-                <TouchTarget>
-                  <SidebarIcon icon={IconClock} filledIcon={IconClockFilled} />
-                  <span>Longest viewed</span>
-                </TouchTarget>
-              </SidebarMenuLinkButton>
+                {(variant) => (
+                  <SidebarMenuLinkButton to="/longest-viewed" variant={variant}>
+                    <TouchTarget>
+                      <SidebarIcon
+                        icon={IconClock}
+                        filledIcon={IconClockFilled}
+                      />
+                      <span>Longest viewed</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>

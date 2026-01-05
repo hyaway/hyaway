@@ -2,17 +2,21 @@ import { useMemo } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { searchFiles } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
-import { HydrusFileSortType, ServiceType } from "../models";
+import { HydrusFileSortType, Permission, ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
+import { useHasPermission } from "./access";
 import type { HydrusTagSearch, SearchFilesOptions } from "../models";
 import {
+  useLongestViewedLimit,
+  useMostViewedLimit,
   useRandomInboxLimit,
   useRecentFilesDays,
   useRecentFilesLimit,
   useRemoteHistoryLimit,
-  useMostViewedLimit,
-  useLongestViewedLimit,
 } from "@/stores/search-limits-store";
+
+const useCanSearch = () =>
+  useHasPermission(Permission.SEARCH_FOR_AND_FETCH_FILES);
 
 export const useRecentlyArchivedFilesQuery = () => {
   const recentFilesLimit = useRecentFilesLimit();
@@ -29,6 +33,7 @@ export const useRecentlyArchivedFilesQuery = () => {
   };
 
   const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
 
   return useQuery({
     queryKey: ["searchFiles", "recentlyArchived", tags, options],
@@ -38,7 +43,7 @@ export const useRecentlyArchivedFilesQuery = () => {
         ...options,
       });
     },
-    enabled: isConfigured && tags.length > 0,
+    enabled: isConfigured && canSearch && tags.length > 0,
   });
 };
 
@@ -63,6 +68,7 @@ export const useRecentlyTrashedFilesQuery = () => {
   };
 
   const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
 
   return useQuery({
     queryKey: [
@@ -82,7 +88,7 @@ export const useRecentlyTrashedFilesQuery = () => {
         file_service_key: trashServiceKey,
       });
     },
-    enabled: isConfigured && tags.length > 0 && !!trashServiceKey,
+    enabled: isConfigured && canSearch && tags.length > 0 && !!trashServiceKey,
   });
 };
 
@@ -101,6 +107,7 @@ export const useRecentlyInboxedFilesQuery = () => {
   };
 
   const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
 
   return useQuery({
     queryKey: ["searchFiles", "recentlyInboxed", tags, options],
@@ -110,7 +117,7 @@ export const useRecentlyInboxedFilesQuery = () => {
         ...options,
       });
     },
-    enabled: isConfigured && tags.length > 0,
+    enabled: isConfigured && canSearch && tags.length > 0,
   });
 };
 
@@ -125,6 +132,7 @@ export const useRandomInboxFilesQuery = () => {
   };
 
   const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
 
   return useQuery({
     queryKey: ["searchFiles", "randomInbox", tags, options],
@@ -134,7 +142,7 @@ export const useRandomInboxFilesQuery = () => {
         ...options,
       });
     },
-    enabled: isConfigured && tags.length > 0,
+    enabled: isConfigured && canSearch && tags.length > 0,
     staleTime: Infinity,
   });
 };
@@ -144,13 +152,14 @@ export const useSearchFilesQuery = (
   options?: Omit<SearchFilesOptions, "tags">,
 ) => {
   const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
 
   return useQuery({
     queryKey: ["searchFiles", tags, options],
     queryFn: async () => {
       return searchFiles({ tags, ...options });
     },
-    enabled: isConfigured && tags.length > 0,
+    enabled: isConfigured && canSearch && tags.length > 0,
   });
 };
 
@@ -159,6 +168,7 @@ export const useInfiniteSearchFilesQuery = (
   options?: Omit<SearchFilesOptions, "tags">,
 ) => {
   const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
   const BATCH_SIZE = 256;
 
   return useInfiniteQuery({
@@ -186,7 +196,7 @@ export const useInfiniteSearchFilesQuery = (
       return lastPage.offset + BATCH_SIZE;
     },
     initialPageParam: 0,
-    enabled: isConfigured && tags.length > 0,
+    enabled: isConfigured && canSearch && tags.length > 0,
   });
 };
 
@@ -203,6 +213,7 @@ export const useRemoteWatchHistoryQuery = () => {
   };
 
   const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
 
   return useQuery({
     queryKey: ["searchFiles", "remoteWatchHistory", tags, options],
@@ -212,7 +223,7 @@ export const useRemoteWatchHistoryQuery = () => {
         ...options,
       });
     },
-    enabled: isConfigured && tags.length > 0,
+    enabled: isConfigured && canSearch && tags.length > 0,
   });
 };
 
@@ -226,6 +237,7 @@ export const useMostViewedFilesQuery = () => {
   };
 
   const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
 
   return useQuery({
     queryKey: ["searchFiles", "mostViewed", tags, options],
@@ -235,7 +247,7 @@ export const useMostViewedFilesQuery = () => {
         ...options,
       });
     },
-    enabled: isConfigured && tags.length > 0,
+    enabled: isConfigured && canSearch && tags.length > 0,
   });
 };
 
@@ -249,6 +261,7 @@ export const useLongestViewedFilesQuery = () => {
   };
 
   const isConfigured = useIsApiConfigured();
+  const canSearch = useCanSearch();
 
   return useQuery({
     queryKey: ["searchFiles", "longestViewed", tags, options],
@@ -258,6 +271,6 @@ export const useLongestViewedFilesQuery = () => {
         ...options,
       });
     },
-    enabled: isConfigured && tags.length > 0,
+    enabled: isConfigured && canSearch && tags.length > 0,
   });
 };

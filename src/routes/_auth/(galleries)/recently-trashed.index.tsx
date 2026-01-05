@@ -15,6 +15,8 @@ export const Route = createFileRoute("/_auth/(galleries)/recently-trashed/")({
   component: RouteComponent,
 });
 
+const PAGE_TITLE = "Recently trashed";
+
 function RouteComponent() {
   const { data, isLoading, isFetching, isError, error } =
     useRecentlyTrashedFilesQuery();
@@ -41,7 +43,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <>
-        <PageLoading title="Recently trashed" />
+        <PageLoading title={PAGE_TITLE} />
         <PageFloatingFooter
           leftContent={refetchButton}
           rightContent={<RecentFilesSettingsPopover />}
@@ -54,7 +56,7 @@ function RouteComponent() {
     return (
       <>
         <>
-          <PageHeading title="Recently trashed" />
+          <PageHeading title={PAGE_TITLE} />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching recently trashed files."

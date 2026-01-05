@@ -24,6 +24,7 @@ import type {
   GetPageInfoResponse,
   GetPagesResponse,
   GetServicesResponse,
+  Permission,
   RequestNewPermissionsResponse,
   SearchFilesOptions,
   SearchFilesResponse,
@@ -54,13 +55,14 @@ export async function getApiVersion() {
  */
 export async function requestNewPermissions(
   name: string,
+  permitsEverything: boolean,
+  basicPermissions?: ReadonlyArray<Permission>,
 ): Promise<RequestNewPermissionsResponse> {
-  const response = await baseClient.get(`/request_new_permissions`, {
-    params: {
-      name,
-      permits_everything: true,
-    },
-  });
+  const params = permitsEverything
+    ? { name, permits_everything: true }
+    : { name, basic_permissions: JSON.stringify(basicPermissions) };
+
+  const response = await baseClient.get(`/request_new_permissions`, { params });
   return RequestNewPermissionsResponseSchema.parse(response.data);
 }
 

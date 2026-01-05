@@ -15,6 +15,8 @@ export const Route = createFileRoute("/_auth/(galleries)/most-viewed/")({
   component: RouteComponent,
 });
 
+const PAGE_TITLE = "Most viewed";
+
 function RouteComponent() {
   const { data, isLoading, isFetching, isError, error } =
     useMostViewedFilesQuery();
@@ -41,7 +43,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <>
-        <PageLoading title="Most viewed" />
+        <PageLoading title={PAGE_TITLE} />
         <PageFloatingFooter
           leftContent={refetchButton}
           rightContent={<MostViewedSettingsPopover />}
@@ -54,7 +56,7 @@ function RouteComponent() {
     return (
       <>
         <>
-          <PageHeading title="Most viewed" />
+          <PageHeading title={PAGE_TITLE} />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching most viewed files."

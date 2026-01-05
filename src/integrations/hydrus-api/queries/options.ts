@@ -2,26 +2,31 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getClientOptions } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
+import { Permission } from "../models";
+import { useHasPermission } from "./access";
 import type { GetClientOptionsResponse } from "../models";
+import type { GalleryBaseWidthMode } from "@/stores/gallery-settings-store";
 import { useActiveTheme } from "@/stores/theme-store";
 import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
 import {
   DEFAULT_THUMBNAIL_SIZE,
   MAX_GALLERY_BASE_WIDTH,
   MIN_GALLERY_BASE_WIDTH,
+  useGalleryBaseWidthMode,
 } from "@/stores/gallery-settings-store";
 
 export const useGetClientOptionsQuery = <T = GetClientOptionsResponse>(
   select?: (data: GetClientOptionsResponse) => T,
 ) => {
   const isConfigured = useIsApiConfigured();
+  const hasPermission = useHasPermission(Permission.MANAGE_DATABASE);
 
   return useQuery({
     queryKey: ["getClientOptions"],
     queryFn: async () => {
       return getClientOptions();
     },
-    enabled: isConfigured,
+    enabled: isConfigured && hasPermission,
     staleTime: Infinity, // Options don't change often
     select,
   });
@@ -163,4 +168,18 @@ export const useFileViewingStatisticsOptions = () => {
       isLoading,
     };
   }, [options, isFetched, isLoading]);
+};
+
+/**
+ * Returns the effective gallery base width mode.
+ * Falls back to "custom" when "service" is selected but MANAGE_DATABASE permission is missing.
+ */
+export const useEffectiveGalleryBaseWidthMode = (): GalleryBaseWidthMode => {
+  const storedMode = useGalleryBaseWidthMode();
+  const hasPermission = useHasPermission(Permission.MANAGE_DATABASE);
+
+  if (storedMode === "service" && !hasPermission) {
+    return "custom";
+  }
+  return storedMode;
 };

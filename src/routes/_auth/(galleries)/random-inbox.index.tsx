@@ -16,6 +16,8 @@ export const Route = createFileRoute("/_auth/(galleries)/random-inbox/")({
   component: RouteComponent,
 });
 
+const PAGE_TITLE = "Random inbox";
+
 function RouteComponent() {
   const { data, isLoading, isError, error } = useRandomInboxFilesQuery();
   const queryClient = useQueryClient();
@@ -47,7 +49,7 @@ function RouteComponent() {
   if (isLoading) {
     return (
       <>
-        <PageLoading title="Random inbox" />
+        <PageLoading title={PAGE_TITLE} />
         <PageFloatingFooter
           leftContent={shuffleButton}
           rightContent={<RandomInboxSettingsPopover />}
@@ -60,7 +62,7 @@ function RouteComponent() {
     return (
       <>
         <>
-          <PageHeading title="Random inbox" />
+          <PageHeading title={PAGE_TITLE} />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching random inbox files."

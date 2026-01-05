@@ -5,7 +5,7 @@ import {
   verifyAccessKey,
 } from "../api-client";
 import { useApiEndpoint, useIsApiConfigured } from "../hydrus-config-store";
-import { checkPermissions } from "../permissions";
+import { ALL_PERMISSIONS, checkMinimumPermissions } from "../permissions";
 import type {
   AccessKeyType,
   Permission,
@@ -27,8 +27,14 @@ export const useApiVersionQuery = () => {
 
 export const useRequestNewPermissionsMutation = () => {
   return useMutation({
-    mutationFn: async ({ name }: { name: string }) => {
-      return requestNewPermissions(name);
+    mutationFn: async ({
+      name,
+      permitsEverything,
+    }: {
+      name: string;
+      permitsEverything: boolean;
+    }) => {
+      return requestNewPermissions(name, permitsEverything, ALL_PERMISSIONS);
     },
     mutationKey: ["requestNewPermissions"],
   });
@@ -48,7 +54,7 @@ export const useVerifyPersistentAccessQuery = () => {
     },
     select: (data: VerifyAccessKeyResponse) => ({
       raw: data,
-      hasRequiredPermissions: checkPermissions(data),
+      hasRequiredPermissions: checkMinimumPermissions(data),
     }),
     enabled: isConfigured && validEndpoint.isSuccess,
     // Persistent key rarely changes; keep effectively permanent
@@ -75,7 +81,7 @@ export const useVerifySessionAccessQuery = () => {
     },
     select: (data: VerifyAccessKeyResponse) => ({
       raw: data,
-      hasRequiredPermissions: checkPermissions(data),
+      hasRequiredPermissions: checkMinimumPermissions(data),
     }),
     enabled: isConfigured && validEndpoint.isSuccess,
     // Session key lasts up to a day or until remote client restarts.
@@ -120,7 +126,7 @@ export const useVerifyAccessMutation = () => {
       const response = await verifyAccessKey(keyType);
       return {
         raw: response,
-        hasRequiredPermissions: checkPermissions(response),
+        hasRequiredPermissions: checkMinimumPermissions(response),
       };
     },
     mutationKey: ["verifyAccess"],

@@ -7,6 +7,8 @@ import {
   useWatchHistorySyncToHydrus,
 } from "@/stores/watch-history-store";
 import { useFileViewingStatisticsOptions } from "@/integrations/hydrus-api/queries/options";
+import { Permission } from "@/integrations/hydrus-api/models";
+import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 
 export const WATCH_HISTORY_SETTINGS_TITLE = "Watch history";
 
@@ -20,14 +22,28 @@ export function HistorySettings({ idPrefix = "" }: HistorySettingsProps) {
   const syncToHydrus = useWatchHistorySyncToHydrus();
   const { setEnabled, setLimit, setSyncToHydrus } = useWatchHistoryActions();
 
+  const { hasPermission } = usePermissions();
   const { isActive: hydrusStatsActive, isFetched: hydrusOptionsFetched } =
     useFileViewingStatisticsOptions();
 
-  // Determine if sync to hydrus is disabled and why
-  const isSyncDisabled = hydrusOptionsFetched && !hydrusStatsActive;
-  const syncDescription = isSyncDisabled
-    ? "Disabled: file viewing statistics are turned off in Hydrus"
-    : "Send views and viewing time to Hydrus client file viewing statistics system";
+  // Sync requires both permissions + Hydrus stats enabled
+  const hasEditPermission = hasPermission(Permission.EDIT_FILE_TIMES);
+  const hasDatabasePermission = hasPermission(Permission.MANAGE_DATABASE);
+  const isSyncEnabled =
+    hasEditPermission &&
+    hasDatabasePermission &&
+    hydrusOptionsFetched &&
+    hydrusStatsActive;
+
+  const syncDescription = !hasEditPermission
+    ? "Disabled: missing 'Edit file times' permission"
+    : !hasDatabasePermission
+      ? "Disabled: missing 'Manage database' permission to check Hydrus settings"
+      : !hydrusOptionsFetched
+        ? "Checking Hydrus settings..."
+        : !hydrusStatsActive
+          ? "Disabled: file viewing statistics are turned off in Hydrus"
+          : "Send views and viewing time to Hydrus";
 
   return (
     <SettingsGroup>
@@ -52,8 +68,8 @@ export function HistorySettings({ idPrefix = "" }: HistorySettingsProps) {
         id={`${idPrefix}history-sync-hydrus-switch`}
         label="Send new views to Hydrus"
         description={syncDescription}
-        checked={syncToHydrus && !isSyncDisabled}
-        disabled={isSyncDisabled}
+        checked={syncToHydrus && isSyncEnabled}
+        disabled={!isSyncEnabled}
         onCheckedChange={setSyncToHydrus}
       />
     </SettingsGroup>

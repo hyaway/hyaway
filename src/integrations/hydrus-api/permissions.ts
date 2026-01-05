@@ -2,14 +2,29 @@ import { Permission } from "./models";
 import type { VerifyAccessKeyResponse } from "./models";
 
 /**
- * Permissions required for the app to function properly.
+ * Minimum permission required for the app to function at all.
+ * Only search/fetch is absolutely required - other features degrade gracefully.
  */
-export const REQUIRED_PERMISSIONS = [
+export const MINIMUM_REQUIRED_PERMISSIONS =
+  Permission.SEARCH_FOR_AND_FETCH_FILES;
+
+/**
+ * Permissions that enhance app functionality (not required but recommended).
+ * - IMPORT_AND_DELETE_FILES: Archive/trash file management
+ * - MANAGE_PAGES: View/manage Hydrus pages
+ * - MANAGE_DATABASE: Access thumbnail dimensions, namespace colors
+ * - EDIT_FILE_TIMES: Sync view statistics to Hydrus
+ */
+export const OPTIONAL_PERMISSIONS = [
   Permission.IMPORT_AND_DELETE_FILES,
-  Permission.SEARCH_FOR_AND_FETCH_FILES,
   Permission.MANAGE_PAGES,
   Permission.MANAGE_DATABASE,
   Permission.EDIT_FILE_TIMES,
+] as const;
+
+export const ALL_PERMISSIONS = [
+  MINIMUM_REQUIRED_PERMISSIONS,
+  ...OPTIONAL_PERMISSIONS,
 ] as const;
 
 /**
@@ -33,26 +48,53 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
 };
 
 /**
- * Check if the access key has all required permissions.
+ * Check if the access key has the minimum required permission (search/fetch).
+ * The app can work with reduced functionality if other permissions are missing.
  */
-export function checkPermissions(
+export function checkMinimumPermissions(
   permissionsData?: VerifyAccessKeyResponse,
 ): boolean {
   if (!permissionsData) return false;
   if (permissionsData.permits_everything) return true;
-  return REQUIRED_PERMISSIONS.every((p) =>
-    permissionsData.basic_permissions.includes(p),
+  return permissionsData.basic_permissions.includes(
+    MINIMUM_REQUIRED_PERMISSIONS,
+  );
+}
+
+/**
+ * @deprecated Use checkMinimumPermissions instead.
+ * Check if the access key has the minimum required permission.
+ */
+export function checkPermissions(
+  permissionsData?: VerifyAccessKeyResponse,
+): boolean {
+  return checkMinimumPermissions(permissionsData);
+}
+
+/**
+ * Get list of optional permissions that are missing from the access key response.
+ * These enhance functionality but aren't required.
+ */
+export function getMissingOptionalPermissions(
+  data?: VerifyAccessKeyResponse,
+): Array<Permission> {
+  if (!data || data.permits_everything) return [];
+  return OPTIONAL_PERMISSIONS.filter(
+    (p) => !data.basic_permissions.includes(p),
   );
 }
 
 /**
  * Get list of missing permissions from the access key response.
+ * Only returns the minimum required permission if missing.
  */
 export function getMissingPermissions(
   data?: VerifyAccessKeyResponse,
 ): Array<Permission> {
-  if (!data || data.permits_everything) return [];
-  return REQUIRED_PERMISSIONS.filter(
-    (p) => !data.basic_permissions.includes(p),
-  );
+  if (!data) return [MINIMUM_REQUIRED_PERMISSIONS];
+  if (data.permits_everything) return [];
+  if (!data.basic_permissions.includes(MINIMUM_REQUIRED_PERMISSIONS)) {
+    return [MINIMUM_REQUIRED_PERMISSIONS];
+  }
+  return [];
 }

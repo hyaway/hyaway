@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { focusPage, getPageInfo, getPages, refreshPage } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
-import { PageState } from "../models";
+import { PageState, Permission } from "../models";
+import { useHasPermission } from "./access";
 import type { Page } from "../models";
 
 /**
@@ -44,12 +45,14 @@ const areAllPagesStable = (page: Page): boolean => {
  */
 export const useGetPagesQuery = () => {
   const isConfigured = useIsApiConfigured();
+  const hasPermission = useHasPermission(Permission.MANAGE_PAGES);
+
   return useQuery({
     queryKey: ["getPages"],
     queryFn: async () => {
       return getPages();
     },
-    enabled: isConfigured,
+    enabled: isConfigured && hasPermission,
     staleTime: 5 * 60 * 1000, // Pages can change frequently, but don't need to refetch constantly
     refetchInterval: (query) => {
       // Stop refetching if there's no data or an error
@@ -92,13 +95,14 @@ export const useGetMediaPagesQuery = () => {
 
 export const useGetPageInfoQuery = (pageKey: string, simple = true) => {
   const isConfigured = useIsApiConfigured();
+  const hasPermission = useHasPermission(Permission.MANAGE_PAGES);
 
   return useQuery({
     queryKey: ["getPageInfo", pageKey, simple],
     queryFn: async () => {
       return getPageInfo(pageKey, simple);
     },
-    enabled: isConfigured && !!pageKey,
+    enabled: isConfigured && hasPermission && !!pageKey,
     staleTime: Infinity, // We want this to be not change while performing the archive/delete actions
     refetchInterval: (query) => {
       // Stop refetching if there's no data or an error
