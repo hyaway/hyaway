@@ -80,7 +80,7 @@ export interface ThumbnailGalleryDisplaySettingsProps {
 export function ThumbnailGalleryDisplaySettings({
   idPrefix = "",
   openMultiple = false,
-  defaultOpen = true,
+  defaultOpen = false,
   settingsPage = false,
 }: ThumbnailGalleryDisplaySettingsProps) {
   const windowWidth = useWindowWidth();
@@ -157,15 +157,17 @@ export function ThumbnailGalleryDisplaySettings({
 
   // Track which section was last opened (only when not on settings page with multiple open)
   const handleAccordionChange = (value: Array<string>) => {
-    if (!openMultiple && value.length > 0) {
-      setLastOpenSection(value[0]);
+    if (!openMultiple) {
+      setLastOpenSection(value.length > 0 ? value[0] : "");
     }
   };
 
   return (
     <Accordion
       multiple={openMultiple}
-      defaultValue={defaultOpen ? [galleryLastOpenSection] : []}
+      defaultValue={
+        defaultOpen && galleryLastOpenSection ? [galleryLastOpenSection] : []
+      }
       onValueChange={handleAccordionChange}
       className="rounded-none border-0"
     >
@@ -195,63 +197,6 @@ export function ThumbnailGalleryDisplaySettings({
           onCheckedChange={setShowScrollBadge}
         />
       </AccordionSection>
-
-      <AccordionSection value="spacing" title="Spacing">
-        <SliderField
-          id={`${idPrefix}horizontal-gap-slider`}
-          label="Between columns"
-          value={galleryHorizontalGap}
-          min={0}
-          max={MAX_GALLERY_GAP}
-          step={1}
-          onValueChange={setHorizontalGap}
-          formatValue={(v) => `${v}px`}
-        />
-        <SliderField
-          id={`${idPrefix}vertical-gap-slider`}
-          label="Between rows"
-          value={galleryVerticalGap}
-          min={0}
-          max={MAX_GALLERY_GAP}
-          step={1}
-          onValueChange={setVerticalGap}
-          formatValue={(v) => `${v}px`}
-        />
-      </AccordionSection>
-
-      <AccordionSection value="animation" title="Animation">
-        <SliderField
-          id={`${idPrefix}reflow-duration-slider`}
-          label="Layout transition"
-          value={galleryReflowDuration}
-          min={0}
-          max={MAX_GALLERY_REFLOW_DURATION}
-          step={50}
-          onValueChange={setReflowDuration}
-          formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
-        />
-        <SliderField
-          id={`${idPrefix}entry-duration-slider`}
-          label="Entry animation"
-          value={galleryEntryDuration}
-          min={0}
-          max={MAX_GALLERY_ENTRY_DURATION}
-          step={50}
-          onValueChange={setEntryDuration}
-          formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
-        />
-        <SliderField
-          id={`${idPrefix}hover-scale-duration-slider`}
-          label="Hover zoom"
-          value={galleryHoverZoomDuration}
-          min={0}
-          max={MAX_GALLERY_HOVER_SCALE_DURATION}
-          step={25}
-          onValueChange={setHoverZoomDuration}
-          formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
-        />
-      </AccordionSection>
-
       <AccordionSection value="thumbnails" title="Thumbnails">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -328,6 +273,62 @@ export function ThumbnailGalleryDisplaySettings({
           label="Show context menu on right-click"
           checked={galleryEnableContextMenu}
           onCheckedChange={setEnableContextMenu}
+        />
+      </AccordionSection>
+
+      <AccordionSection value="spacing" title="Spacing">
+        <SliderField
+          id={`${idPrefix}horizontal-gap-slider`}
+          label="Between columns"
+          value={galleryHorizontalGap}
+          min={0}
+          max={MAX_GALLERY_GAP}
+          step={1}
+          onValueChange={setHorizontalGap}
+          formatValue={(v) => `${v}px`}
+        />
+        <SliderField
+          id={`${idPrefix}vertical-gap-slider`}
+          label="Between rows"
+          value={galleryVerticalGap}
+          min={0}
+          max={MAX_GALLERY_GAP}
+          step={1}
+          onValueChange={setVerticalGap}
+          formatValue={(v) => `${v}px`}
+        />
+      </AccordionSection>
+
+      <AccordionSection value="animation" title="Animation">
+        <SliderField
+          id={`${idPrefix}reflow-duration-slider`}
+          label="Layout transition"
+          value={galleryReflowDuration}
+          min={0}
+          max={MAX_GALLERY_REFLOW_DURATION}
+          step={50}
+          onValueChange={setReflowDuration}
+          formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
+        />
+        <SliderField
+          id={`${idPrefix}entry-duration-slider`}
+          label="Entry animation"
+          value={galleryEntryDuration}
+          min={0}
+          max={MAX_GALLERY_ENTRY_DURATION}
+          step={50}
+          onValueChange={setEntryDuration}
+          formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
+        />
+        <SliderField
+          id={`${idPrefix}hover-scale-duration-slider`}
+          label="Hover zoom"
+          value={galleryHoverZoomDuration}
+          min={0}
+          max={MAX_GALLERY_HOVER_SCALE_DURATION}
+          step={25}
+          onValueChange={setHoverZoomDuration}
+          formatValue={(v) => (v === 0 ? "Off" : `${v}ms`)}
         />
       </AccordionSection>
 
