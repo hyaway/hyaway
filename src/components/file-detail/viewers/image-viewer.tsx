@@ -191,13 +191,21 @@ export function ImageViewer({
       if (!containerRef.current || !imageRef.current) return offset;
 
       const container = containerRef.current.getBoundingClientRect();
-      // In fit mode (not expanded), no panning needed
-      if (!isExpanded) {
-        return { x: 0, y: 0 };
-      }
+      const img = imageRef.current;
 
-      const imgWidth = imageRef.current.naturalWidth;
-      const imgHeight = imageRef.current.naturalHeight;
+      // Get actual displayed image dimensions
+      let imgWidth: number;
+      let imgHeight: number;
+
+      if (isExpanded) {
+        // 1:1 mode: use natural size
+        imgWidth = img.naturalWidth;
+        imgHeight = img.naturalHeight;
+      } else {
+        // Fit mode: use rendered size (object-contain scales proportionally)
+        imgWidth = img.clientWidth;
+        imgHeight = img.clientHeight;
+      }
 
       // Allow panning until image edge reaches container edge (full image viewable)
       const maxX = Math.max(
@@ -319,7 +327,6 @@ export function ImageViewer({
   // Get cursor based on mode
   const getCursor = () => {
     if (isPannable) {
-      if (!isExpanded) return "cursor-zoom-in";
       return isDragging ? "cursor-grabbing" : "cursor-grab";
     }
     return isExpanded ? "cursor-zoom-out" : "cursor-zoom-in";
