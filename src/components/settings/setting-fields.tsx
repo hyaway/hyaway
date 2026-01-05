@@ -216,7 +216,7 @@ export function AccordionSection({
     <AccordionItem
       value={value}
       className={
-        "border-s-primary data-open:ms-1 data-open:mt-2 data-open:border-s-4 data-open:bg-transparent data-open:ps-2"
+        "border-s-primary data-open:mt-2 data-open:border-s-4 data-open:bg-transparent data-open:ps-2"
       }
     >
       <AccordionTrigger className="px-0 py-3">{title}</AccordionTrigger>
