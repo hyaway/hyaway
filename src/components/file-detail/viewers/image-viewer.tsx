@@ -7,6 +7,7 @@ import {
   IconZoomIn,
   IconZoomOut,
 } from "@tabler/icons-react";
+import { motion, useMotionValue } from "motion/react";
 import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
 import { cn } from "@/lib/utils";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
@@ -15,8 +16,6 @@ import {
   useImageBackground,
 } from "@/stores/file-viewer-settings-store";
 import { Toggle } from "@/components/ui-primitives/toggle";
-
-const DRAG_THRESHOLD = 5; // pixels - movement beyond this counts as drag, not click
 
 interface ImageViewerProps {
   fileUrl: string;
@@ -44,11 +43,10 @@ export function ImageViewer({
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const imageBackground = useImageBackground();
 
-  // Pan state for fullscreen mode
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  // Framer Motion drag state
+  const dragX = useMotionValue(0);
+  const dragY = useMotionValue(0);
   const [isDragging, setIsDragging] = useState(false);
-  const dragStartPos = useRef({ x: 0, y: 0 });
-  const panStartOffset = useRef({ x: 0, y: 0 });
   const hasDragged = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -81,9 +79,10 @@ export function ImageViewer({
     if (containerRef.current) {
       containerRef.current.requestFullscreen();
       setOverlayMode("fullscreen");
-      setPanOffset({ x: 0, y: 0 });
+      dragX.set(0);
+      dragY.set(0);
     }
-  }, []);
+  }, [dragX, dragY]);
 
   // Exit fullscreen mode
   const exitFullscreen = useCallback(() => {
@@ -91,19 +90,22 @@ export function ImageViewer({
       document.exitFullscreen();
     }
     setOverlayMode(null);
-    setPanOffset({ x: 0, y: 0 });
-  }, []);
+    dragX.set(0);
+    dragY.set(0);
+  }, [dragX, dragY]);
 
   // Toggle theater mode (full browser viewport)
   const toggleTheater = useCallback(() => {
     if (isTheater) {
       setOverlayMode(null);
-      setPanOffset({ x: 0, y: 0 });
+      dragX.set(0);
+      dragY.set(0);
     } else {
       setOverlayMode("theater");
-      setPanOffset({ x: 0, y: 0 });
+      dragX.set(0);
+      dragY.set(0);
     }
-  }, [isTheater]);
+  }, [isTheater, dragX, dragY]);
 
   // Toggle zoom (collapsed/fit <-> expanded/1:1) - works across all modes
   const toggleZoom = useCallback(() => {
@@ -113,8 +115,9 @@ export function ImageViewer({
       }
       return !prev;
     });
-    setPanOffset({ x: 0, y: 0 });
-  }, [isPannable]);
+    dragX.set(0);
+    dragY.set(0);
+  }, [isPannable, dragX, dragY]);
 
   // Track if container is in viewport and if bottom is visible
   useEffect(() => {
@@ -149,25 +152,27 @@ export function ImageViewer({
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement && overlayMode === "fullscreen") {
         setOverlayMode(null);
-        setPanOffset({ x: 0, y: 0 });
+        dragX.set(0);
+        dragY.set(0);
       }
     };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, [overlayMode]);
+  }, [overlayMode, dragX, dragY]);
 
   // Escape key exits theater mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isTheater) {
         setOverlayMode(null);
-        setPanOffset({ x: 0, y: 0 });
+        dragX.set(0);
+        dragY.set(0);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isTheater]);
+  }, [isTheater, dragX, dragY]);
 
   // Disable body scroll in theater mode
   useEffect(() => {
@@ -192,122 +197,6 @@ export function ImageViewer({
     }
   };
 
-  // Clamp pan offset to keep image visible (edge-to-edge panning)
-  const clampPanOffset = useCallback(
-    (offset: { x: number; y: number }) => {
-      if (!containerRef.current || !imageRef.current) return offset;
-
-      const container = containerRef.current.getBoundingClientRect();
-      const img = imageRef.current;
-
-      // Get actual displayed image dimensions
-      let imgWidth: number;
-      let imgHeight: number;
-
-      if (isExpanded) {
-        // 1:1 mode: use natural size
-        imgWidth = img.naturalWidth;
-        imgHeight = img.naturalHeight;
-      } else {
-        // Fit mode: use rendered size (object-contain scales proportionally)
-        imgWidth = img.clientWidth;
-        imgHeight = img.clientHeight;
-      }
-
-      // Allow panning until image edge reaches container edge (full image viewable)
-      const maxX = Math.max(
-        0,
-        (imgWidth - container.width) / 2 + container.width * 0.75,
-      );
-      const maxY = Math.max(
-        0,
-        (imgHeight - container.height) / 2 + container.height * 0.75,
-      );
-
-      return {
-        x: Math.max(-maxX, Math.min(maxX, offset.x)),
-        y: Math.max(-maxY, Math.min(maxY, offset.y)),
-      };
-    },
-    [isExpanded],
-  );
-
-  // Handle drag start (mouse or touch)
-  const handleDragStart = useCallback(
-    (clientX: number, clientY: number) => {
-      if (!isPannable) return;
-      setIsDragging(true);
-      hasDragged.current = false;
-      dragStartPos.current = { x: clientX, y: clientY };
-      panStartOffset.current = { x: panOffset.x, y: panOffset.y };
-    },
-    [isPannable, panOffset],
-  );
-
-  // Handle drag move
-  const handleDragMove = useCallback(
-    (clientX: number, clientY: number) => {
-      if (!isDragging) return;
-
-      const deltaX = clientX - dragStartPos.current.x;
-      const deltaY = clientY - dragStartPos.current.y;
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-      // Only start actual panning if moved beyond threshold
-      if (distance > DRAG_THRESHOLD) {
-        hasDragged.current = true;
-        const newOffset = {
-          x: panStartOffset.current.x + deltaX,
-          y: panStartOffset.current.y + deltaY,
-        };
-        setPanOffset(clampPanOffset(newOffset));
-      }
-    },
-    [isDragging, clampPanOffset],
-  );
-
-  // Handle drag end
-  const handleDragEnd = useCallback(() => {
-    setIsDragging(false);
-    // Reset hasDragged after a short delay to allow click to be processed first
-    setTimeout(() => {
-      hasDragged.current = false;
-    }, 0);
-  }, []);
-
-  // Mouse event handlers for pan modes
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (isPannable) {
-      e.preventDefault();
-      handleDragStart(e.clientX, e.clientY);
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    handleDragMove(e.clientX, e.clientY);
-  };
-
-  const handleMouseUp = () => {
-    handleDragEnd();
-  };
-
-  // Touch event handlers for pan modes
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (isPannable && e.touches.length === 1) {
-      handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    handleDragEnd();
-  };
-
   // Click handler - toggle zoom, or double-click exits fullscreen/theater
   const handleClick = (e: React.MouseEvent) => {
     if (hasDragged.current) return;
@@ -323,7 +212,8 @@ export function ImageViewer({
           exitFullscreen();
         } else {
           setOverlayMode(null);
-          setPanOffset({ x: 0, y: 0 });
+          dragX.set(0);
+          dragY.set(0);
         }
       }
     } else {
@@ -353,32 +243,35 @@ export function ImageViewer({
         "group relative flex items-center justify-center overflow-hidden",
         getContainerClass(),
       )}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
-      <img
+      <motion.img
         ref={imageRef}
         src={fileUrl}
         alt={`File ${fileId}`}
         loading="eager"
         draggable={false}
-        className={cn(
-          getBackgroundClass(),
-          getCursor(),
-          isPannable
-            ? !isExpanded
-              ? "max-h-full max-w-full object-contain select-none" // Pan fit mode
-              : "max-h-none! max-w-none! select-none" // Pan 1:1 mode: no constraints
-            : "max-h-full max-w-full object-contain", // Normal: fit container
-        )}
+        drag={isPannable}
+        dragConstraints={containerRef}
+        dragElastic={0.1}
+        dragMomentum={true}
+        onDragStart={() => {
+          setIsDragging(true);
+          hasDragged.current = false;
+        }}
+        onDrag={() => {
+          hasDragged.current = true;
+        }}
+        onDragEnd={() => {
+          setIsDragging(false);
+          setTimeout(() => {
+            hasDragged.current = false;
+          }, 0);
+        }}
         style={{
+          x: dragX,
+          y: dragY,
           ...(loaded && imageBackground === "average" && averageColor
             ? { backgroundColor: averageColor }
-            : {}),
-          ...(isPannable
-            ? { transform: `translate(${panOffset.x}px, ${panOffset.y}px)` }
             : {}),
           // In 1:1 mode, set explicit dimensions to prevent any constraints
           ...(isPannable && isExpanded && naturalSize.width > 0
@@ -391,11 +284,18 @@ export function ImageViewer({
               }
             : {}),
         }}
+        className={cn(
+          getBackgroundClass(),
+          getCursor(),
+          isPannable
+            ? !isExpanded
+              ? "max-h-full max-w-full object-contain select-none" // Pan fit mode
+              : "max-h-none! max-w-none! select-none" // Pan 1:1 mode: no constraints
+            : "max-h-full max-w-full object-contain", // Normal: fit container
+        )}
         onLoad={handleLoad}
         onError={onError}
         onClick={handleClick}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
       />
 
       {/* Bottom sentinel for tracking when bottom of container is visible */}
