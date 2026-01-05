@@ -6,7 +6,7 @@ import {
 } from "@vidstack/react/player/layouts/default";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
-import { viewerMaxHeight } from "./style-constants";
+import { viewerFixedHeight, viewerMaxHeight } from "./style-constants";
 import type { VideoMimeType } from "@vidstack/react";
 import { useActiveTheme } from "@/stores/theme-store";
 import { cn } from "@/lib/utils";
@@ -43,32 +43,34 @@ export function VideoViewer({
   }));
 
   return (
-    <div className={cn(viewerMaxHeight, "flex flex-row justify-center")}>
-      <MediaPlayer
-        title={`File ${fileId}`}
-        src={{ src: fileUrl, type: mime as VideoMimeType }}
-        playsInline
-        crossOrigin={true}
-        onCanPlay={onLoad}
-        onError={(error) => {
-          // MEDIA_ERR_NETWORK (2) or MEDIA_ERR_SRC_NOT_SUPPORTED (4) could be 419
-          if (error.code === 2 || error.code === 4) {
-            onError();
-          }
-        }}
-        autoPlay={initialSettings.autoPlay}
-        muted={initialSettings.muted}
-      >
-        <MediaProvider
-          mediaProps={{
-            className: "h-full!",
+    <div className={cn("flex items-center justify-center", viewerFixedHeight)}>
+      <div className={cn(viewerMaxHeight, "flex flex-row justify-center")}>
+        <MediaPlayer
+          title={`File ${fileId}`}
+          src={{ src: fileUrl, type: mime as VideoMimeType }}
+          playsInline
+          crossOrigin={true}
+          onCanPlay={onLoad}
+          onError={(error) => {
+            // MEDIA_ERR_NETWORK (2) or MEDIA_ERR_SRC_NOT_SUPPORTED (4) could be 419
+            if (error.code === 2 || error.code === 4) {
+              onError();
+            }
           }}
-        />
-        <DefaultVideoLayout
-          icons={defaultLayoutIcons}
-          colorScheme={activeTheme}
-        />
-      </MediaPlayer>
+          autoPlay={initialSettings.autoPlay}
+          muted={initialSettings.muted}
+        >
+          <MediaProvider
+            mediaProps={{
+              className: "h-full!",
+            }}
+          />
+          <DefaultVideoLayout
+            icons={defaultLayoutIcons}
+            colorScheme={activeTheme}
+          />
+        </MediaPlayer>
+      </div>
     </div>
   );
 }
