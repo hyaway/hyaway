@@ -27,7 +27,7 @@ export function FileViewerSettingsCard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <FileViewerSettings />
+        <FileViewerSettings openMultiple />
       </CardContent>
     </Card>
   );

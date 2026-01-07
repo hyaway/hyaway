@@ -153,7 +153,7 @@ function FileDetailContent({
 
       <PageFloatingFooter
         actions={combinedActions}
-        rightContent={<FileViewerSettingsPopover />}
+        rightContent={<FileViewerSettingsPopover mimeType={data.mime} />}
       />
     </>
   );

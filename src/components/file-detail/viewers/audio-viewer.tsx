@@ -12,7 +12,7 @@ import { useActiveTheme } from "@/stores/theme-store";
 import { cn } from "@/lib/utils";
 import {
   useMediaAutoPlay,
-  useMediaStartMuted,
+  useMediaStartWithSound,
 } from "@/stores/file-viewer-settings-store";
 
 interface AudioViewerProps {
@@ -34,12 +34,12 @@ export function AudioViewer({
 
   // Get settings from store - only use initial values on mount
   const mediaAutoPlay = useMediaAutoPlay();
-  const mediaStartMuted = useMediaStartMuted();
+  const mediaStartWithSound = useMediaStartWithSound();
 
   // Capture initial values so settings changes don't affect mounted player
   const [initialSettings] = useState(() => ({
     autoPlay: mediaAutoPlay,
-    muted: mediaStartMuted,
+    muted: !mediaStartWithSound,
   }));
 
   return (
