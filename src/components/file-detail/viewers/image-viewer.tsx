@@ -113,11 +113,15 @@ export function ImageViewer({
     }
   }, [isTheater, dragX, dragY]);
 
-  // Cycle zoom: fit → 1x → 2x → fit, with optional click position for zoom-to-point
+  // Cycle zoom: fit → 1x → 2x → fit (pannable) or fit ↔ 1x (normal), with optional click position
   const toggleZoom = useCallback(
     (clickPos?: { x: number; y: number }) => {
       setZoomLevel((prev) => {
-        const cycle: Array<ZoomLevel> = ["fit", "1x", "2x"];
+        // In normal mode, only toggle between fit and 1x
+        // In pannable mode, cycle through all three
+        const cycle: Array<ZoomLevel> = isPannable
+          ? ["fit", "1x", "2x"]
+          : ["fit", "1x"];
         const currentIndex = cycle.indexOf(prev);
         const next = cycle[(currentIndex + 1) % cycle.length];
 
