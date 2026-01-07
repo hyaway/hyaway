@@ -156,9 +156,6 @@ export function ImageViewer({
           const maxPanX = Math.abs(nextWidth - container.width) / 2;
           const maxPanY = Math.abs(nextHeight - container.height) / 2;
 
-          let newPanX: number;
-          let newPanY: number;
-
           // For zoom transitions, keep the point under the cursor anchored.
           // We do this by mapping the click into the *current rendered image rect*,
           // then solving for the new pan so that the same natural point lands under
@@ -192,8 +189,8 @@ export function ImageViewer({
 
           // Keep that point under the cursor after zoom.
           // containerCenter + newPan + natural*nextZoom == clickPos
-          newPanX = clickOffsetX - naturalClickX * nextZoom;
-          newPanY = clickOffsetY - naturalClickY * nextZoom;
+          const newPanX = clickOffsetX - naturalClickX * nextZoom;
+          const newPanY = clickOffsetY - naturalClickY * nextZoom;
 
           // Clamp to bounds
           dragX.set(Math.max(-maxPanX, Math.min(maxPanX, newPanX)));
