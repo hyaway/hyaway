@@ -450,13 +450,13 @@ export function ImageViewer({
       {loaded && isInView && (
         <div
           className={cn(
-            "right-4 bottom-4 z-50 flex gap-1 opacity-50 transition-opacity hover:opacity-100",
+            "bottom-4 z-50 flex gap-1 opacity-50 transition-opacity hover:opacity-100",
             isPannable
-              ? "fixed"
+              ? "fixed right-4"
               : isBottomVisible
-                ? "absolute sm:right-6"
+                ? "short:bottom-8 absolute right-0"
                 : cn(
-                    "fixed sm:right-12",
+                    "fixed right-6",
                     "short:bottom-[calc(var(--footer-height-short)+1rem)] bottom-[calc(var(--footer-height)+1rem)] sm:bottom-[calc(var(--footer-height-sm)+1rem)]",
                   ),
           )}
