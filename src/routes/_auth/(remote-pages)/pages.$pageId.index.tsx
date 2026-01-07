@@ -10,11 +10,17 @@ import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryDisplaySettingsPopover } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
+import { PageState } from "@/integrations/hydrus-api/models";
 import {
   useFocusPageMutation,
   useGetPageInfoQuery,
   useRefreshPageMutation,
 } from "@/integrations/hydrus-api/queries/manage-pages";
+
+const PAGE_STATE_LABELS: Partial<Record<PageState, string>> = {
+  [PageState.INITIALIZING]: "Initializing",
+  [PageState.SEARCHING_LOADING]: "Searching",
+};
 
 export const Route = createFileRoute("/_auth/(remote-pages)/pages/$pageId/")({
   component: RouteComponent,
@@ -30,6 +36,15 @@ function RouteComponent() {
   const focusPageMutation = useFocusPageMutation();
   const queryClient = useQueryClient();
 
+  // Determine if page is in a loading/initializing state
+  const pageState = data?.page_info.page_state;
+  const isInitializing =
+    pageState === PageState.INITIALIZING ||
+    pageState === PageState.SEARCHING_LOADING;
+  const initializingLabel = pageState
+    ? PAGE_STATE_LABELS[pageState]
+    : undefined;
+
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
     linkOptions({
@@ -39,7 +54,8 @@ function RouteComponent() {
 
   const refetchButton = (
     <RefetchButton
-      isFetching={isFetching}
+      isFetching={isFetching || isInitializing}
+      label={initializingLabel}
       onRefetch={() =>
         queryClient.invalidateQueries({
           queryKey: ["getPageInfo", pageId],
@@ -67,10 +83,13 @@ function RouteComponent() {
     },
   ];
 
-  if (isLoading) {
+  if (isLoading || isInitializing) {
+    const title = data?.page_info.name
+      ? `Page: ${data.page_info.name}`
+      : `Page: ${pageId.slice(0, 8)}...`;
     return (
       <>
-        <PageLoading title={`Page: ${pageId.slice(0, 8)}...`} />
+        <PageLoading title={title} />
         <PageFloatingFooter
           leftContent={refetchButton}
           actions={overflowActions}

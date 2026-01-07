@@ -1,14 +1,21 @@
 import { IconCheck, IconRefresh } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { is } from "zod/v4/locales";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 
 interface RefetchButtonProps {
   onRefetch: () => void;
   isFetching: boolean;
+  /** Custom label to display (default: 'Refetch') */
+  label?: string;
 }
 
-export function RefetchButton({ onRefetch, isFetching }: RefetchButtonProps) {
+export function RefetchButton({
+  onRefetch,
+  isFetching,
+  label,
+}: RefetchButtonProps) {
   const [showCheck, setShowCheck] = useState(false);
   const [clickedRefetch, setClickedRefetch] = useState(false);
 
@@ -48,7 +55,7 @@ export function RefetchButton({ onRefetch, isFetching }: RefetchButtonProps) {
 
   return (
     <BottomNavButton
-      label="Refetch"
+      label={label || isFetching ? "Fetching" : "Refetch"}
       icon={icon}
       onClick={handleClick}
       isLoading={isFetching}
