@@ -143,12 +143,7 @@ export function ImageViewer({
           const clickOffsetY = clickPos.y - containerCenterY;
 
           // Get zoom multipliers
-          const prevZoom = prev === "fit" ? 0 : prev === "1x" ? 1 : 2;
           const nextZoom = next === "1x" ? 1 : 2;
-
-          // Current pan offset
-          const currentPanX = dragX.get();
-          const currentPanY = dragY.get();
 
           // Calculate new image dimensions at next zoom level
           const nextWidth = naturalSize.width * nextZoom;
@@ -161,25 +156,41 @@ export function ImageViewer({
           let newPanX: number;
           let newPanY: number;
 
-          if (prev === "fit") {
-            // Zooming from fit: calculate where clicked point is in the fit image
-            // and offset to center that point
-            const fitScale = Math.min(
-              container.width / naturalSize.width,
-              container.height / naturalSize.height,
-            );
-            const naturalClickX = clickOffsetX / fitScale;
-            const naturalClickY = clickOffsetY / fitScale;
-
-            // Pan to center the clicked point
-            newPanX = -naturalClickX * nextZoom;
-            newPanY = -naturalClickY * nextZoom;
-          } else {
-            // Zooming between 1x and 2x: scale the pan and offset
-            const scale = nextZoom / prevZoom;
-            newPanX = currentPanX * scale - clickOffsetX * (scale - 1);
-            newPanY = currentPanY * scale - clickOffsetY * (scale - 1);
+          // For zoom transitions, keep the point under the cursor anchored.
+          // We do this by mapping the click into the *current rendered image rect*,
+          // then solving for the new pan so that the same natural point lands under
+          // the same cursor position after changing zoom.
+          const imageRect = imageRef.current?.getBoundingClientRect();
+          if (!imageRect) {
+            dragX.set(0);
+            dragY.set(0);
+            return next;
           }
+
+          const imageLeftInContainer = imageRect.left - container.left;
+          const imageTopInContainer = imageRect.top - container.top;
+
+          // Click position within the current rendered image, clamped.
+          const localX = Math.max(
+            0,
+            Math.min(imageRect.width, clickPos.x - imageLeftInContainer),
+          );
+          const localY = Math.max(
+            0,
+            Math.min(imageRect.height, clickPos.y - imageTopInContainer),
+          );
+
+          const scaleX = imageRect.width / naturalSize.width;
+          const scaleY = imageRect.height / naturalSize.height;
+
+          // Natural-image coordinates relative to the image center.
+          const naturalClickX = (localX - imageRect.width / 2) / scaleX;
+          const naturalClickY = (localY - imageRect.height / 2) / scaleY;
+
+          // Keep that point under the cursor after zoom.
+          // containerCenter + newPan + natural*nextZoom == clickPos
+          newPanX = clickOffsetX - naturalClickX * nextZoom;
+          newPanY = clickOffsetY - naturalClickY * nextZoom;
 
           // Clamp to bounds
           dragX.set(Math.max(-maxPanX, Math.min(maxPanX, newPanX)));
