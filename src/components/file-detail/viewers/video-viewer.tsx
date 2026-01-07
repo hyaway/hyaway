@@ -224,7 +224,7 @@ export function VideoViewer({
         )}
       >
         <MediaPlayer
-          title={`File ${fileId}`}
+          title={`🎞️${fileId}`}
           src={{ src: fileUrl, type: mime as VideoMimeType }}
           playsInline
           crossOrigin={true}

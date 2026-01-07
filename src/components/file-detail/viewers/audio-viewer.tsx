@@ -45,7 +45,7 @@ export function AudioViewer({
   return (
     <div className={cn("flex items-center justify-center", viewerFixedHeight)}>
       <MediaPlayer
-        title={`File ${fileId}`}
+        title={`🎵${fileId}`}
         src={{ src: fileUrl, type: mime as AudioMimeType }}
         playsInline
         crossOrigin={true}
