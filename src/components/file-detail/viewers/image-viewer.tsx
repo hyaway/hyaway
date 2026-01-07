@@ -149,9 +149,12 @@ export function ImageViewer({
           const nextWidth = naturalSize.width * nextZoom;
           const nextHeight = naturalSize.height * nextZoom;
 
-          // Calculate bounds (how far the image can pan)
-          const maxPanX = Math.max(0, (nextWidth - container.width) / 2);
-          const maxPanY = Math.max(0, (nextHeight - container.height) / 2);
+          // Calculate bounds (how far the image can pan).
+          // When the zoomed image is smaller than the container (common in fullscreen),
+          // we still want to allow moving it within the available slack so the
+          // clicked point can stay under the cursor.
+          const maxPanX = Math.abs(nextWidth - container.width) / 2;
+          const maxPanY = Math.abs(nextHeight - container.height) / 2;
 
           let newPanX: number;
           let newPanY: number;
