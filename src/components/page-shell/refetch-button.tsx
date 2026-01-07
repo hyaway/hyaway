@@ -1,7 +1,6 @@
 import { IconCheck, IconRefresh } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { is } from "zod/v4/locales";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 
 interface RefetchButtonProps {

@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { useShallow } from "zustand/react/shallow";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 export const MAX_WATCH_HISTORY_LIMIT = 1000;
