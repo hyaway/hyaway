@@ -96,6 +96,8 @@ export function ImageViewer({
       document.exitFullscreen();
     }
     setOverlayMode(null);
+    dragX.stop();
+    dragY.stop();
     dragX.set(0);
     dragY.set(0);
   }, [dragX, dragY]);
@@ -104,6 +106,8 @@ export function ImageViewer({
   const toggleTheater = useCallback(() => {
     if (isTheater) {
       setOverlayMode(null);
+      dragX.stop();
+      dragY.stop();
       dragX.set(0);
       dragY.set(0);
     } else {
@@ -250,6 +254,8 @@ export function ImageViewer({
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement && overlayMode === "fullscreen") {
         setOverlayMode(null);
+        dragX.stop();
+        dragY.stop();
         dragX.set(0);
         dragY.set(0);
       }
@@ -264,6 +270,8 @@ export function ImageViewer({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isTheater) {
         setOverlayMode(null);
+        dragX.stop();
+        dragY.stop();
         dragX.set(0);
         dragY.set(0);
       }
@@ -318,6 +326,8 @@ export function ImageViewer({
           exitFullscreen();
         } else {
           setOverlayMode(null);
+          dragX.stop();
+          dragY.stop();
           dragX.set(0);
           dragY.set(0);
         }
