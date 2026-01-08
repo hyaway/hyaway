@@ -33,6 +33,7 @@ export const useGetSingleFileMetadata = (fileId: number) => {
       return response.metadata[0];
     },
     enabled: isConfigured && !!fileId,
+    gcTime: 10 * 1000,
   });
 };
 
