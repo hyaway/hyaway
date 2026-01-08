@@ -27,7 +27,6 @@ export const useGetClientOptionsQuery = <T = GetClientOptionsResponse>(
       return getClientOptions();
     },
     enabled: isConfigured && hasPermission,
-    staleTime: Infinity, // Options don't change often
     select,
   });
 };

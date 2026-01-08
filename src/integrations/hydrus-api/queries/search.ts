@@ -143,7 +143,6 @@ export const useRandomInboxFilesQuery = () => {
       });
     },
     enabled: isConfigured && canSearch && tags.length > 0,
-    staleTime: Infinity,
   });
 };
 

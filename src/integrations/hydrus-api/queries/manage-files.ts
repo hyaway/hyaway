@@ -33,7 +33,6 @@ export const useGetSingleFileMetadata = (fileId: number) => {
       return response.metadata[0];
     },
     enabled: isConfigured && !!fileId,
-    staleTime: Infinity,
   });
 };
 
@@ -58,7 +57,6 @@ export const useGetFilesMetadata = (
         height: meta.height,
       })),
     enabled: isConfigured && file_ids.length > 0,
-    staleTime: Infinity, // Should not change without user action
   });
 };
 
@@ -96,7 +94,6 @@ export const useInfiniteGetFilesMetadata = (
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: 0,
     enabled: isConfigured && file_ids.length > 0,
-    staleTime: Infinity,
   });
 };
 

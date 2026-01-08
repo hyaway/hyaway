@@ -53,7 +53,6 @@ export const useGetPagesQuery = () => {
       return getPages();
     },
     enabled: isConfigured && hasPermission,
-    staleTime: 5 * 60 * 1000, // Pages can change frequently, but don't need to refetch constantly
     refetchInterval: (query) => {
       // Stop refetching if there's no data or an error
       if (!query.state.data || query.state.error) {
@@ -103,7 +102,6 @@ export const useGetPageInfoQuery = (pageKey: string, simple = true) => {
       return getPageInfo(pageKey, simple);
     },
     enabled: isConfigured && hasPermission && !!pageKey,
-    staleTime: Infinity, // We want this to be not change while performing the archive/delete actions
     refetchInterval: (query) => {
       // Stop refetching if there's no data or an error
       if (!query.state.data || query.state.error) {

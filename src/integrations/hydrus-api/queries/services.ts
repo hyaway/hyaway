@@ -12,7 +12,6 @@ export const useGetServicesQuery = () => {
       return getServices();
     },
     enabled: isConfigured,
-    staleTime: Infinity, // Services don't change often
   });
 };
 

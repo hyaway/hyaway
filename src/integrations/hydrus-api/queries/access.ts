@@ -20,7 +20,6 @@ export const useApiVersionQuery = () => {
       return getApiVersion();
     },
     enabled: !!apiEndpoint,
-    staleTime: Infinity,
     retry: false,
   });
 };
@@ -57,8 +56,6 @@ export const useVerifyPersistentAccessQuery = () => {
       hasRequiredPermissions: checkMinimumPermissions(data),
     }),
     enabled: isConfigured && validEndpoint.isSuccess,
-    // Persistent key rarely changes; keep effectively permanent
-    staleTime: Infinity,
     refetchInterval: false,
     retry: false,
   });

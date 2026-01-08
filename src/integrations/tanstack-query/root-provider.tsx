@@ -23,7 +23,7 @@ function shouldRetryQuery(failureCount: number, error: Error): boolean {
 const queryClientSingleton = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,
+      staleTime: Infinity, // Data doesn't change without user interaction, we don't want to replace while actively looking at the page
       retry: shouldRetryQuery,
     },
   },
