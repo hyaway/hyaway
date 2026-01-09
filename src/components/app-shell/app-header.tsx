@@ -24,8 +24,6 @@ export function AppHeader() {
         className="my-auto mr-2 data-[orientation=vertical]:h-4"
       />
       <AppBreadcrumb />
-      {/* Spacer to push header actions to the right */}
-      <div className="flex-1" />
       {/* Header actions portal slot */}
       <HeaderActionsPortalSlot />
       {hasHeaderActions && (isMobile || hasRightSidebar) && (

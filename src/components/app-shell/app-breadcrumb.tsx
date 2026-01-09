@@ -60,60 +60,62 @@ export function AppBreadcrumb() {
     breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1] : null;
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        {/* Up button - goes to parent route or back in history */}
-        {(shouldUseHistoryBack || parentCrumb) && (
-          <>
-            <BreadcrumbItem>
-              {shouldUseHistoryBack ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Go back"
-                  className="md:hidden"
-                  onClick={() => router.history.back()}
-                >
-                  <IconArrowLeft className="size-5" />
-                </Button>
-              ) : (
-                parentCrumb && (
+    <div className="@container min-w-0 flex-1">
+      <Breadcrumb>
+        <BreadcrumbList className="@max-3xs:flex-nowrap">
+          {/* Up button - goes to parent route or back in history */}
+          {(shouldUseHistoryBack || parentCrumb) && (
+            <>
+              <BreadcrumbItem>
+                {shouldUseHistoryBack ? (
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label={`Go to ${parentCrumb.title}`}
-                    className="md:hidden"
-                    render={<Link to={parentCrumb.path} />}
-                    nativeButton={false}
+                    aria-label="Go back"
+                    className="@md:hidden"
+                    onClick={() => router.history.back()}
                   >
                     <IconArrowLeft className="size-5" />
                   </Button>
-                )
-              )}
+                ) : (
+                  parentCrumb && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Go to ${parentCrumb.title}`}
+                      className="@md:hidden"
+                      render={<Link to={parentCrumb.path} />}
+                      nativeButton={false}
+                    >
+                      <IconArrowLeft className="size-5" />
+                    </Button>
+                  )
+                )}
+              </BreadcrumbItem>
+            </>
+          )}
+          {/* Full breadcrumb trail - hidden on mobile */}
+          {breadcrumbs.slice(0, -1).map((crumb) => (
+            <Fragment key={crumb.path}>
+              <BreadcrumbItem>
+                <BreadcrumbLink
+                  render={<Link to={crumb.path} />}
+                  className="hidden @md:block"
+                >
+                  <TouchTarget>{crumb.title}</TouchTarget>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden @md:block" />
+            </Fragment>
+          ))}
+          {/* Current page */}
+          {currentCrumb && (
+            <BreadcrumbItem className="hidden @3xs:block">
+              <BreadcrumbPage>{currentCrumb.title}</BreadcrumbPage>
             </BreadcrumbItem>
-          </>
-        )}
-        {/* Full breadcrumb trail - hidden on mobile */}
-        {breadcrumbs.slice(0, -1).map((crumb) => (
-          <Fragment key={crumb.path}>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                render={<Link to={crumb.path} />}
-                className="hidden md:block"
-              >
-                <TouchTarget>{crumb.title}</TouchTarget>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="hidden md:block" />
-          </Fragment>
-        ))}
-        {/* Current page */}
-        {currentCrumb && (
-          <BreadcrumbItem>
-            <BreadcrumbPage>{currentCrumb.title}</BreadcrumbPage>
-          </BreadcrumbItem>
-        )}
-      </BreadcrumbList>
-    </Breadcrumb>
+          )}
+        </BreadcrumbList>
+      </Breadcrumb>
+    </div>
   );
 }
