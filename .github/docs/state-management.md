@@ -12,8 +12,7 @@ HyAway uses **Zustand** for client-side state management with explicit selector 
 | Gallery       | `stores/gallery-settings-store.ts`               | Gallery preferences    |
 | File Viewer   | `stores/file-viewer-settings-store.ts`           | Viewer preferences     |
 | Pages         | `stores/pages-settings-store.ts`                 | Pages layout           |
-| Recent Files  | `stores/recent-files-settings-store.ts`          | Recent files settings  |
-| Random Inbox  | `stores/random-inbox-settings-store.ts`          | Random inbox settings  |
+| Search Limits | `stores/search-limits-store.ts`                  | Query/gallery limits   |
 | Tags          | `stores/tags-settings-store.ts`                  | Tag sorting mode       |
 | History       | `stores/watch-history-store.ts`                  | Watch history tracking |
 | Sidebar       | `stores/sidebar-store.ts`                        | Sidebar persistence    |
@@ -75,24 +74,20 @@ const theme = getActiveThemeSnapshot();
 | `useThemeHydrated`   | `boolean`                       |
 | `useThemeActions`    | `{ setThemePreference, ... }`   |
 
-### UX Settings Store (`lib/settings-store.ts`)
+### Search Limits Store (`stores/search-limits-store.ts`)
 
-| Hook                         | Returns                       |
-| ---------------------------- | ----------------------------- |
-| `useTagsSortMode`            | `"count" \| "namespace"`      |
-| `useGalleryMaxLanes`         | `number`                      |
-| `useGalleryExpandImages`     | `boolean`                     |
-| `useGalleryShowScrollBadge`  | `boolean`                     |
-| `usePagesMaxColumns`         | `number`                      |
-| `usePagesShowScrollBadge`    | `boolean`                     |
-| `useRecentFilesLimit`        | `number`                      |
-| `useRecentFilesDays`         | `number`                      |
-| `useRandomInboxLimit`        | `number`                      |
-| `useFileViewerStartExpanded` | `boolean`                     |
-| `useImageBackground`         | `"solid" \| "checkerboard"`   |
-| `useSettingsActions`         | `{ setGalleryMaxLanes, ... }` |
+| Hook                     | Returns                 |
+| ------------------------ | ----------------------- |
+| `useAllLimits`           | `number`                |
+| `useRecentFilesLimit`    | `number`                |
+| `useRecentFilesDays`     | `number`                |
+| `useRandomInboxLimit`    | `number`                |
+| `useRemoteHistoryLimit`  | `number`                |
+| `useMostViewedLimit`     | `number`                |
+| `useLongestViewedLimit`  | `number`                |
+| `useSearchLimitsActions` | `{ setAllLimits, ... }` |
 
-### Watch History Store (`lib/watch-history-store.ts`)
+### Watch History Store (`stores/watch-history-store.ts`)
 
 | Hook                     | Returns                                |
 | ------------------------ | -------------------------------------- |
@@ -113,7 +108,7 @@ The sidebar store manages open/closed state for left and right sidebars, with se
 For most cases, use `useSidebarSide(side)` which returns bound state and actions:
 
 ```tsx
-import { useSidebarSide } from "@/lib/sidebar-store";
+import { useSidebarSide } from "@/stores/sidebar-store";
 
 function MyComponent() {
   const {
@@ -134,14 +129,14 @@ function MyComponent() {
 For accessing specific state values or when side is dynamic:
 
 ```tsx
-import { useSidebarStore } from "@/lib/sidebar-store";
+import { useSidebarStore } from "@/stores/sidebar-store";
 
 // Access individual state with direct selector
 const leftOpen = useSidebarStore((state) => state.leftDesktopOpen);
 const rightOpen = useSidebarStore((state) => state.rightDesktopOpen);
 
 // Access actions
-import { useSidebarStoreActions } from "@/lib/sidebar-store";
+import { useSidebarStoreActions } from "@/stores/sidebar-store";
 const actions = useSidebarStoreActions();
 actions.toggleDesktop("left");
 ```
@@ -186,8 +181,8 @@ This prevents collisions when developing multiple apps on `localhost:3000` or si
 
 ```tsx
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { setupCrossTabSync } from "./cross-tab-sync";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 type MyState = {
   someValue: string;
@@ -210,6 +205,7 @@ const useMyStore = create<MyState>()(
     }),
     {
       name: "hyaway-my-store", // localStorage key - always use hyaway- prefix
+      storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest, // Don't persist actions
     },
   ),
@@ -276,7 +272,7 @@ export const useFeatureActions = () =>
 ### Step 4: Enable Cross-Tab Sync (if needed)
 
 ```tsx
-import { setupCrossTabSync } from "./cross-tab-sync";
+import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 setupCrossTabSync(useFeatureStore);
 ```
 

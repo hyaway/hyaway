@@ -35,7 +35,8 @@ Settings follow a **shared controls + thin wrappers** pattern to eliminate dupli
 | Thumbnail gallery | `thumbnail-gallery-display-settings.tsx` | `THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE` |
 | Pages display     | `pages-display-settings.tsx`             | `PAGES_DISPLAY_SETTINGS_TITLE`             |
 | Media viewer      | `file-viewer-settings.tsx`               | `FILE_VIEWER_SETTINGS_TITLE`               |
-| Watch history     | `watch-history-settings.tsx`             | `WATCH_HISTORY_SETTINGS_TITLE`             |
+| Watch history     | `history-settings.tsx`                   | `WATCH_HISTORY_SETTINGS_TITLE`             |
+| Search limits     | `search-limits-settings.tsx`             | `SEARCH_LIMITS_SETTINGS_TITLE`             |
 | Random inbox      | `random-inbox-settings.tsx`              | `RANDOM_INBOX_SETTINGS_TITLE`              |
 | Recent files      | `recent-files-settings.tsx`              | `RECENT_FILES_SETTINGS_TITLE`              |
 

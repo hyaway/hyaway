@@ -41,7 +41,7 @@ import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-galle
 
 ### `ThumbnailGalleryItem`
 
-Individual itm component (memoized). Renders thumbnail, blurhash placeholder, status badges, and handles hover/focus states.
+Individual item component (memoized). Renders thumbnail, blurhash placeholder, status badges, and handles hover/focus states.
 
 **Features:**
 
@@ -75,8 +75,8 @@ const { width, lanes } = useGalleryResponsiveLanes(
 
 **Respects settings:**
 
-- `galleryMaxLanes` - Maximum columns allowed
-- `galleryExpandImages` - Whether to expand images beyond default width
+- `maxLanes` - Maximum columns allowed
+- `expandImages` - Whether to stretch thumbnails to fill columns
 
 ### `useMasonryNavigation`
 
@@ -124,14 +124,24 @@ ThumbnailGalleryItem × N (only visible items)
 
 ## Settings
 
-Stored in `ux-settings-store.ts`:
+Stored in `stores/gallery-settings-store.ts` (plus linked viewer background in `stores/file-viewer-settings-store.ts`):
 
-| Setting                  | Type                         | Description                                      |
-| ------------------------ | ---------------------------- | ------------------------------------------------ |
-| `galleryMaxLanes`        | number                       | Maximum columns (1-8)                            |
-| `galleryExpandImages`    | boolean                      | Expand images when fewer lanes than space allows |
-| `galleryShowScrollBadge` | boolean                      | Show scroll position badge                       |
-| `imageBackground`        | `"checkerboard"` \| `"none"` | Background for transparent images                |
+| Setting                 | Type                                         | Description                                     |
+| ----------------------- | -------------------------------------------- | ----------------------------------------------- |
+| `minLanes` / `maxLanes` | number                                       | Column range                                    |
+| `expandImages`          | boolean                                      | Stretch thumbnails to fill columns              |
+| `showScrollBadge`       | boolean                                      | Show scroll position badge                      |
+| `enableContextMenu`     | boolean                                      | Enable right-click context menu                 |
+| `enableHoverZoom`       | boolean                                      | Enable hover zoom                               |
+| `baseWidthMode`         | `"service"` \| `"custom"`                    | Use Hydrus thumbnail size or a custom size      |
+| `customBaseWidth`       | number                                       | Custom thumbnail base width in px               |
+| `horizontalGap`         | number                                       | Horizontal gap between items in px              |
+| `verticalGap`           | number                                       | Vertical gap between items in px                |
+| `reflowDuration`        | number                                       | Reflow animation duration (ms)                  |
+| `entryDuration`         | number                                       | Entry animation duration (ms)                   |
+| `hoverZoomDuration`     | number                                       | Hover zoom animation duration (ms)              |
+| `imageBackground`       | `"solid"` \| `"checkerboard"` \| `"average"` | Background for images                           |
+| `linkImageBackground`   | boolean                                      | When enabled, gallery background follows viewer |
 
 See [Settings Architecture](../settings-architecture.md) for the settings UI pattern.
 
@@ -168,10 +178,15 @@ className = "duration-(--gallery-entry-duration)";
 ```
 
 See [CSS Patterns](../ui/css-patterns.md) for the full pattern documentation.
-| `thumbnail-gallery.tsx` | Main component with virtualization |
-| `thumbnail-gallery-item.tsx` | Individual item with hover/context menu |
-| `thumbnail-gallery-skeleton.tsx` | Loading state |
-| `thumbnail-gallery-display-settings-popover.tsx` | Inline settings |
-| `use-responsive-lanes.ts` | Lane dimension calculation |
-| `use-masonry-navigation.ts` | Keyboard navigation |
-| `use-scroll-restoration.ts` | Position persistence |
+
+## Related Files
+
+| File                                                                              | Purpose                                 |
+| --------------------------------------------------------------------------------- | --------------------------------------- |
+| `src/components/thumbnail-gallery/thumbnail-gallery.tsx`                          | Main component with virtualization      |
+| `src/components/thumbnail-gallery/thumbnail-gallery-item.tsx`                     | Individual item with hover/context menu |
+| `src/components/thumbnail-gallery/thumbnail-gallery-skeleton.tsx`                 | Loading state                           |
+| `src/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover.tsx` | Inline settings                         |
+| `src/hooks/use-responsive-lanes.ts`                                               | Lane dimension calculation              |
+| `src/hooks/use-masonry-navigation.ts`                                             | Keyboard navigation                     |
+| `src/hooks/use-scroll-restoration.ts`                                             | Position persistence                    |

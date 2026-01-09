@@ -88,24 +88,35 @@ Check if another tab already refreshed
 
 ### HTTP Status Codes
 
-| Status | Meaning         | Handling                   |
-| ------ | --------------- | -------------------------- |
-| 419    | Session expired | Auto-refresh and retry     |
-| 4xx    | Client error    | No retry (non-recoverable) |
-| 5xx    | Server error    | Retry up to 3 times        |
+| Status | Meaning         | Handling                             |
+| ------ | --------------- | ------------------------------------ |
+| 419    | Session expired | Auto-refresh and retry               |
+| 4xx    | Client error    | No retry (non-recoverable)           |
+| 5xx    | Server error    | Retried by TanStack Query (up to 3x) |
 
 ### Request Interceptors
 
-All clients inject credentials from Zustand store:
+All clients inject the base URL from the auth store.
+
+**Caching note:** The base client disables browser caching (`Cache-Control: no-cache, no-store, must-revalidate`) because Hydrus has a short server-side cache and browser caching on top can produce confusingly stale data.
 
 ```ts
+// base-client.ts
 client.interceptors.request.use((config) => {
-  const { api_endpoint, api_access_key } = useAuthStore.getState();
+  const { api_endpoint } = useAuthStore.getState();
   config.baseURL = api_endpoint;
+  return config;
+});
+
+// access-key-client.ts
+client.interceptors.request.use((config) => {
+  const { api_access_key } = useAuthStore.getState();
   config.headers["Hydrus-Client-API-Access-Key"] = api_access_key;
   return config;
 });
 ```
+
+`sessionKeyClient` injects `Hydrus-Client-API-Session-Key` and automatically refreshes on 419 via Web Locks to de-dupe refreshes across concurrent requests and browser tabs.
 
 ### Response Validation
 
@@ -794,16 +805,16 @@ Used by `getClientOptions()` for namespace colors and thumbnail dimensions.
 
 ## File URL Generation
 
-Files and thumbnails are accessed via URL parameters:
+Files and thumbnails are accessed via URL parameters (Hydrus expects auth in a query parameter for these endpoints).
 
 ```typescript
-// File URL
-`${api_endpoint}/get_files/file?file_id=${fileId}&Hydrus-Client-API-Access-Key=${accessKey}`
+// File URL (auth can be access key or session key depending on settings)
+`${api_endpoint}/get_files/file?file_id=${fileId}&${headerName}=${authKey}`;
 // Thumbnail URL
-`${api_endpoint}/get_files/thumbnail?file_id=${fileId}&Hydrus-Client-API-Access-Key=${accessKey}`;
+`${api_endpoint}/get_files/thumbnail?file_id=${fileId}&${headerName}=${authKey}`;
 ```
 
-The `useUrlWithApiKey()` hook in `hooks/use-url-with-api-key.ts` constructs these URLs with proper authentication.
+The `useUrlWithApiKey()` / `useFullFileIdUrl()` / `useThumbnailUrl()` hooks in `hooks/use-url-with-api-key.ts` construct these URLs with proper authentication and session-key refresh behavior for media loads.
 
 ---
 

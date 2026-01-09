@@ -19,7 +19,7 @@ Located in `src/integrations/tanstack-query/root-provider.tsx`:
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30 * 1000, // 30 seconds
+      staleTime: Infinity, // Data doesn't change without user interaction
       retry: shouldRetryQuery,
     },
   },
@@ -28,7 +28,7 @@ const queryClient = new QueryClient({
 
 **Retry logic:**
 
-- 4xx errors → No retry (client errors are non-recoverable)
+- 4xx errors → No retry (client errors are non-recoverable; 419 is handled by the Axios interceptor)
 - 5xx errors → Retry up to 3 times
 - Network failures → Retry up to 3 times
 

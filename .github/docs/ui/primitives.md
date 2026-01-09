@@ -22,7 +22,7 @@ Base UI components following [shadcn/ui](https://ui.shadcn.com/) patterns. These
 | Sidebar     | `sidebar.tsx`     | App sidebar (modified for dual left/right support) |
 | ScrollArea  | `scroll-area.tsx` | Custom scrollbar container                         |
 
-> **Note:** The Sidebar component is **modified from shadcn's default** to support both left and right collapsible sidebars simultaneously. State is per-side via `useSidebarSide(side)` from `lib/sidebar-store.ts`. See [State Management](../state-management.md#sidebar-store) for details.
+> **Note:** The Sidebar component is **modified from shadcn's default** to support both left and right collapsible sidebars simultaneously. State is per-side via `useSidebarSide(side)` from `stores/sidebar-store.ts`. See [State Management](../state-management.md#sidebar-store) for details.
 
 ### Forms & Inputs
 

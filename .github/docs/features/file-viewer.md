@@ -4,7 +4,7 @@
 
 ## Overview
 
-The file viewer displays individual files with type-specific media players, metadata, tags, and file actions. It's used on `/file/$fileId` and contextual routes like `/inbox/$fileId`.
+The file viewer displays individual files with type-specific media players, metadata, tags, and file actions. It's used on `/file/$fileId` and contextual routes like `/random-inbox/$fileId`, `/history/$fileId`, and remote page routes.
 
 ## Key Features
 
@@ -136,19 +136,23 @@ useGetSingleFileMetadata() → FileMetadata
 
 ## Settings
 
-Stored in `ux-settings-store.ts`:
+Stored in `stores/file-viewer-settings-store.ts`:
 
-| Setting                   | Type                          | Description                       |
-| ------------------------- | ----------------------------- | --------------------------------- |
-| `fileViewerStartExpanded` | boolean                       | Images start in expanded mode     |
-| `imageBackground`         | `"solid"` \| `"checkerboard"` | Background for transparent images |
+| Setting                | Type                                         | Description                                   |
+| ---------------------- | -------------------------------------------- | --------------------------------------------- |
+| `startExpanded`        | boolean                                      | Images start in expanded mode                 |
+| `imageBackground`      | `"solid"` \| `"checkerboard"` \| `"average"` | Background for images (including transparent) |
+| `fillCanvasBackground` | boolean                                      | Fill canvas with background color             |
+| `videoStartExpanded`   | boolean                                      | Videos start expanded                         |
+| `mediaAutoPlay`        | boolean                                      | Video/audio start automatically               |
+| `mediaStartWithSound`  | boolean                                      | Video/audio start with sound                  |
 
 ## Watch History
 
 When `trackLocalWatchHistory={true}` and history is enabled globally:
 
 - File ID added to history on mount
-- Stored in `watch-history-store.ts`
+- Stored in `stores/watch-history-store.ts`
 - Displayed on `/history` page
 
 ## Related Files

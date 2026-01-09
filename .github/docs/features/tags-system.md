@@ -133,9 +133,9 @@ TagBadge renders with --badge-overlay CSS variable
 
 ## Settings
 
-Tag sort mode is stored in `ux-settings-store.ts`:
+Tag sort mode is stored in `stores/tags-settings-store.ts`:
 
-- `tagsSortMode`: `"count"` | `"namespace"`
+- `sortMode`: `"count"` | `"namespace"`
 
 ## Related Files
 

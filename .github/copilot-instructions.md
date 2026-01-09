@@ -24,7 +24,7 @@ pnpm typecheck    # TypeScript check only
 pnpm storybook    # Component playground on port 6006
 ```
 
-**Adding UI primitives:** Use `npx shadcn@latest add <component>` - components install to `ui-primitives/`.
+**Adding UI primitives:** Use `npx shadcn@latest add <component>` - components install to `src/components/ui-primitives/`.
 
 ## Documentation
 
@@ -119,8 +119,7 @@ When updating a component with a skeleton, **always update the skeleton to match
 | Gallery       | Gallery prefs   | `stores/gallery-settings-store.ts`               |
 | File Viewer   | Viewer prefs    | `stores/file-viewer-settings-store.ts`           |
 | Pages         | Pages layout    | `stores/pages-settings-store.ts`                 |
-| Recent Files  | Recent settings | `stores/recent-files-settings-store.ts`          |
-| Random Inbox  | Inbox settings  | `stores/random-inbox-settings-store.ts`          |
+| Search Limits | Query limits    | `stores/search-limits-store.ts`                  |
 | Tags          | Tag sorting     | `stores/tags-settings-store.ts`                  |
 | Watch History | View tracking   | `stores/watch-history-store.ts`                  |
 | Sidebar       | Sidebar state   | `stores/sidebar-store.ts`                        |
@@ -223,16 +222,18 @@ Settings use **shared controls + thin wrappers**:
 
 ```tsx
 // components/settings/{feature}-settings.tsx - Shared component
-export const THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE =
-  "Thumbnail gallery display";
-export function ThumbnailGalleryDisplaySettings({ idPrefix = "" }) {
-  const value = useGalleryMaxLanes();
-  const { setGalleryMaxLanes } = useSettingsActions();
+export const PAGES_DISPLAY_SETTINGS_TITLE = "Pages display";
+
+export function PagesDisplaySettings({ idPrefix = "" }) {
+  const pagesMaxColumns = usePagesMaxColumns();
+  const { setMaxColumns } = usePagesSettingsActions();
+
   return (
     <SliderField
-      id={`${idPrefix}slider`}
-      value={value}
-      onValueChange={setGalleryMaxLanes}
+      id={`${idPrefix}pages-columns-slider`}
+      label="Max columns"
+      value={pagesMaxColumns}
+      onValueChange={setMaxColumns}
     />
   );
 }
@@ -244,7 +245,7 @@ export function ThumbnailGalleryDisplaySettings({ idPrefix = "" }) {
 
 The sidebar component (`ui-primitives/sidebar.tsx`) is **modified from shadcn's default** to support both left and right collapsible sidebars simultaneously. Key differences:
 
-- State is managed per-side via `useSidebarSide(side)` from `lib/sidebar-store.ts`
+- State is managed per-side via `useSidebarSide(side)` from `stores/sidebar-store.ts`
 - Each `<Sidebar side="left|right">` manages its own context independently
 - `<SidebarTrigger side="left|right">` works both inside and outside sidebar context
 - `<SidebarLayout>` is a simple wrapper with no global state

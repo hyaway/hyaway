@@ -92,6 +92,33 @@ Use with `@` prefix (e.g., `@sm:`) or combined with short (`short:@sm:`):
 
 ## CSS Variables for Layout
 
-<!-- TODO: Document layout variables like --header-height, --sidebar-width, etc. -->
+The app shell exposes a small set of layout variables in `src/styles.css` so components can stay consistent across breakpoints and `short:` viewports.
 
-See `src/styles.css` for the full list of CSS custom properties.
+| Variable                 | Purpose                                      |
+| ------------------------ | -------------------------------------------- |
+| `--header-height`        | Default header height                        |
+| `--header-height-short`  | Compact header height for `short:` viewports |
+| `--footer-height`        | Default mobile footer height                 |
+| `--footer-height-sm`     | Tablet/desktop footer height (`sm:`)         |
+| `--footer-height-short`  | Compact footer height for `short:` viewports |
+| `--sidebar-width`        | Desktop expanded sidebar width               |
+| `--sidebar-width-mobile` | Mobile sidebar sheet width                   |
+| `--sidebar-width-icon`   | Collapsed icon-only sidebar width            |
+
+### Tailwind Usage
+
+Tailwind v4 supports referencing CSS variables via the parentheses syntax:
+
+```tsx
+// Header height adjusts for short viewports
+className = "h-(--header-height) short:h-(--header-height-short)";
+
+// Footer height adjusts for both width and short viewports
+className =
+  "h-(--footer-height) sm:h-(--footer-height-sm) short:h-(--footer-height-short)";
+
+// Sidebar width
+className = "w-(--sidebar-width)";
+```
+
+See `src/styles.css` for the authoritative definitions and additional variables (animation duration/easing).
