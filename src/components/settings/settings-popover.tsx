@@ -57,7 +57,7 @@ export function SettingsPopover({
         }
       />
       <PopoverContent
-        align="end"
+        align="center"
         className="w-90 max-w-[90svw] p-0"
         side="bottom"
         sideOffset={8}
