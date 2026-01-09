@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import {
   AccordionSection,
   RangeSliderField,
@@ -159,7 +159,12 @@ export function ThumbnailGalleryDisplaySettings({
     : galleryImageBackground;
 
   // Track which section was last opened (only when not on settings page with multiple open)
+  const [openSections, setOpenSections] = useState<Array<string>>(() =>
+    defaultOpen && galleryLastOpenSection ? [galleryLastOpenSection] : [],
+  );
+
   const handleAccordionChange = (value: Array<string>) => {
+    setOpenSections(value);
     if (!openMultiple) {
       setLastOpenSection(value.length > 0 ? value[0] : "");
     }
@@ -168,9 +173,7 @@ export function ThumbnailGalleryDisplaySettings({
   return (
     <Accordion
       multiple={openMultiple}
-      defaultValue={
-        defaultOpen && galleryLastOpenSection ? [galleryLastOpenSection] : []
-      }
+      value={openSections}
       onValueChange={handleAccordionChange}
       className="rounded-none border-0"
     >
