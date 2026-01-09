@@ -5,7 +5,6 @@ import {
   SettingsTitle,
 } from "@/components/settings/settings-ui";
 import { SettingsPopover } from "@/components/settings/settings-popover";
-import { Separator } from "@/components/ui-primitives/separator";
 
 export function RemoteHistorySettingsPopover() {
   return (
@@ -17,8 +16,6 @@ export function RemoteHistorySettingsPopover() {
         idPrefix="popover-"
         variant="remoteHistory"
       />
-
-      <Separator className="my-4" />
 
       <ThumbnailGalleryDisplaySettingsContent />
     </SettingsPopover>

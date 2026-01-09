@@ -4,6 +4,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui-primitives/button";
 import { cn } from "@/lib/utils";
 
+/**
+ * Container for a settings section header with title and optional actions.
+ * Use within SettingsSection or at the top of a popover.
+ * The first header in a popover will bleed to the edges with negative margins.
+ */
 export function SettingsHeader({
   className,
   ...props
@@ -11,7 +16,10 @@ export function SettingsHeader({
   return (
     <div
       data-slot="settings-header"
-      className={cn("flex flex-col gap-1 text-sm", className)}
+      className={cn(
+        "bg-muted/50 -mx-5 mb-4 flex items-center justify-between gap-2 border-y px-5 py-3",
+        className,
+      )}
       {...props}
     />
   );

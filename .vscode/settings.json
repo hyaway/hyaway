@@ -15,6 +15,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always" // Or "always"
   },
+  "tailwindCSS.classAttributes": ["class", "className", "viewportClassName"],
   "tailwindCSS.classFunctions": [
     "tv",
     "composeTailwindRenderProps",

@@ -5,7 +5,6 @@ import {
   SettingsTitle,
 } from "@/components/settings/settings-ui";
 import { SettingsPopover } from "@/components/settings/settings-popover";
-import { Separator } from "@/components/ui-primitives/separator";
 
 export function LongestViewedSettingsPopover() {
   return (
@@ -17,8 +16,6 @@ export function LongestViewedSettingsPopover() {
         idPrefix="popover-"
         variant="longestViewed"
       />
-
-      <Separator className="my-4" />
 
       <ThumbnailGalleryDisplaySettingsContent />
     </SettingsPopover>

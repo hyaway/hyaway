@@ -63,7 +63,7 @@ export function SettingsPopover({
         sideOffset={8}
       >
         <ScrollArea viewportClassName="max-h-[calc(95svh-var(--header-height)-1.5rem)]">
-          <div className="p-5">{children}</div>
+          <div className="space-y-6 px-5 pb-5">{children}</div>
         </ScrollArea>
       </PopoverContent>
     </Popover>

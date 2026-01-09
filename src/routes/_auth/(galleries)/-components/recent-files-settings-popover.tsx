@@ -8,7 +8,6 @@ import {
   SettingsTitle,
 } from "@/components/settings/settings-ui";
 import { SettingsPopover } from "@/components/settings/settings-popover";
-import { Separator } from "@/components/ui-primitives/separator";
 
 export function RecentFilesSettingsPopover() {
   return (
@@ -17,9 +16,6 @@ export function RecentFilesSettingsPopover() {
         <SettingsTitle>{RECENT_FILES_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
       <RecentFilesSettings idPrefix="popover-" />
-
-      <Separator className="my-4" />
-
       <ThumbnailGalleryDisplaySettingsContent />
     </SettingsPopover>
   );

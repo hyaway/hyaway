@@ -5,7 +5,6 @@ import {
   SettingsTitle,
 } from "@/components/settings/settings-ui";
 import { SettingsPopover } from "@/components/settings/settings-popover";
-import { Separator } from "@/components/ui-primitives/separator";
 
 export function MostViewedSettingsPopover() {
   return (
@@ -14,8 +13,6 @@ export function MostViewedSettingsPopover() {
         <SettingsTitle>Most viewed</SettingsTitle>
       </SettingsHeader>
       <ViewStatisticsLimitSettings idPrefix="popover-" variant="mostViewed" />
-
-      <Separator className="my-4" />
 
       <ThumbnailGalleryDisplaySettingsContent />
     </SettingsPopover>

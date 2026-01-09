@@ -11,7 +11,7 @@ import { SettingsPopover } from "@/components/settings/settings-popover";
 export function ThumbnailGalleryDisplaySettingsContent() {
   return (
     <>
-      <SettingsHeader>
+      <SettingsHeader className="mb-0">
         <SettingsTitle>
           {THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE}
         </SettingsTitle>

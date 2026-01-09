@@ -8,7 +8,6 @@ import {
   SettingsTitle,
 } from "@/components/settings/settings-ui";
 import { SettingsPopover } from "@/components/settings/settings-popover";
-import { Separator } from "@/components/ui-primitives/separator";
 
 export function RandomInboxSettingsPopover() {
   return (
@@ -17,8 +16,6 @@ export function RandomInboxSettingsPopover() {
         <SettingsTitle>{RANDOM_INBOX_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
       <RandomInboxSettings idPrefix="popover-" min={10} step={10} />
-
-      <Separator className="my-4" />
 
       <ThumbnailGalleryDisplaySettingsContent />
     </SettingsPopover>
