@@ -51,7 +51,7 @@ export function SettingsHeader({
     <div
       data-slot="settings-header"
       className={cn(
-        "bg-muted/50 -mx-5 mb-4 flex items-center justify-between gap-2 border-y px-5 py-3",
+        "border-primary mb-4 flex items-center justify-between gap-2 border-b-3 pt-3 pb-1",
         className,
       )}
       {...props}

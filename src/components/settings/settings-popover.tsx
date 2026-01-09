@@ -1,19 +1,21 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { IconAdjustmentsHorizontal } from "@tabler/icons-react";
 import { Button } from "@/components/ui-primitives/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui-primitives/popover";
 import { ScrollArea } from "@/components/ui-primitives/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui-primitives/sheet";
 
 interface SettingsPopoverProps {
   /** Screen reader label for the trigger button */
   label: string;
   /** Optional className for the trigger button */
   className?: string;
-  /** Content to render inside the popover */
+  /** Content to render inside the sheet */
   children: React.ReactNode;
 }
 
@@ -23,49 +25,29 @@ export function SettingsPopover({
   children,
 }: SettingsPopoverProps) {
   const [open, setOpen] = useState(false);
-  // Track when popover was last closed to prevent immediate reopen
-  const lastClosedRef = useRef(0);
-
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      lastClosedRef.current = Date.now();
-    }
-    setOpen(nextOpen);
-  };
 
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger
         render={
           <Button
             variant="ghost"
             size="icon-sm"
             className={className}
             aria-label={label}
-            onClick={() => {
-              // If popover was just closed (within 100ms), don't reopen
-              // This handles the case where clicking the button triggers both
-              // the outside-click close and the button click
-              if (Date.now() - lastClosedRef.current < 100) {
-                return;
-              }
-              setOpen(!open);
-            }}
           >
             <IconAdjustmentsHorizontal className="size-5" />
           </Button>
         }
       />
-      <PopoverContent
-        align="center"
-        className="w-90 max-w-[90svw] p-0"
-        side="bottom"
-        sideOffset={8}
-      >
-        <ScrollArea viewportClassName="max-h-[calc(95svh-var(--header-height)-1.5rem)]">
-          <div className="space-y-6 px-5 pb-5">{children}</div>
+      <SheetContent side="right" className="flex flex-col gap-0 p-0">
+        <SheetHeader>
+          <SheetTitle>{label}</SheetTitle>
+        </SheetHeader>
+        <ScrollArea className="h-full" viewportClassName="pe-3">
+          <div className="space-y-6 px-5 py-5">{children}</div>
         </ScrollArea>
-      </PopoverContent>
-    </Popover>
+      </SheetContent>
+    </Sheet>
   );
 }
