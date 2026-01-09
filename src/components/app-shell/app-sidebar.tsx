@@ -148,7 +148,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
+          <SidebarGroupLabel>Browse</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarNavLink
@@ -172,10 +172,28 @@ export function AppSidebar() {
                 )}
               </SidebarNavLink>
             </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarNavLink
+                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
+                {...navLinkProps}
+              >
+                {(variant) => (
+                  <SidebarMenuLinkButton to="/random-inbox" variant={variant}>
+                    <TouchTarget>
+                      <SidebarIcon
+                        icon={IconArrowsShuffle}
+                        filledIcon={IconArrowsShuffle2}
+                      />
+                      <span>Random inbox</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Recent files</SidebarGroupLabel>
+          <SidebarGroupLabel>Recent Activity</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarNavLink
@@ -242,8 +260,9 @@ export function AppSidebar() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
+
         <SidebarGroup>
-          <SidebarGroupLabel>Other</SidebarGroupLabel>
+          <SidebarGroupLabel>Statistics</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarNavLink
@@ -260,29 +279,6 @@ export function AppSidebar() {
                 )}
               </SidebarNavLink>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarNavLink
-                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
-                {...navLinkProps}
-              >
-                {(variant) => (
-                  <SidebarMenuLinkButton to="/random-inbox" variant={variant}>
-                    <TouchTarget>
-                      <SidebarIcon
-                        icon={IconArrowsShuffle}
-                        filledIcon={IconArrowsShuffle2}
-                      />
-                      <span>Random inbox</span>
-                    </TouchTarget>
-                  </SidebarMenuLinkButton>
-                )}
-              </SidebarNavLink>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>View statistics</SidebarGroupLabel>
-          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarNavLink
                 requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}

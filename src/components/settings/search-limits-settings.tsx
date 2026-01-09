@@ -67,9 +67,9 @@ export function SearchLimitsSettings({
         commitOnRelease
       />
 
-      {/* Recent files group */}
+      {/* Recent Activity group */}
       <div className="border-border mt-2 flex flex-col gap-6 border-t pt-4">
-        <SettingsSubheading>Recent files</SettingsSubheading>
+        <SettingsSubheading>Recent Activity</SettingsSubheading>
         <SliderField
           id={`${idPrefix}recent-files-limit-slider`}
           label="Max files"
@@ -94,9 +94,9 @@ export function SearchLimitsSettings({
         />
       </div>
 
-      {/* Other group */}
+      {/* Browse group */}
       <div className="border-border mt-2 flex flex-col gap-6 border-t pt-4">
-        <SettingsSubheading>Other</SettingsSubheading>
+        <SettingsSubheading>Browse</SettingsSubheading>
         <SliderField
           id={`${idPrefix}random-inbox-limit-slider`}
           label="Random inbox"
@@ -110,9 +110,9 @@ export function SearchLimitsSettings({
         />
       </div>
 
-      {/* View statistics group */}
+      {/* Statistics group */}
       <div className="border-border mt-2 flex flex-col gap-6 border-t pt-4">
-        <SettingsSubheading>View statistics</SettingsSubheading>
+        <SettingsSubheading>Statistics</SettingsSubheading>
         <SliderField
           id={`${idPrefix}remote-history-limit-slider`}
           label="Remote history"
