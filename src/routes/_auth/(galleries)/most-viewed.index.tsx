@@ -5,6 +5,7 @@ import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-g
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
+import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
@@ -45,10 +46,10 @@ function RouteComponent() {
     return (
       <>
         <PageLoading title={PAGE_TITLE} />
-        <PageFloatingFooter
-          leftContent={refetchButton}
-          rightContent={<MostViewedSettingsPopover />}
-        />
+        <PageHeaderActions>
+          <MostViewedSettingsPopover />
+        </PageHeaderActions>
+        <PageFloatingFooter leftContent={refetchButton} />
       </>
     );
   }
@@ -63,10 +64,10 @@ function RouteComponent() {
             fallbackMessage="An unknown error occurred while fetching most viewed files."
           />
         </>
-        <PageFloatingFooter
-          leftContent={refetchButton}
-          rightContent={<MostViewedSettingsPopover />}
-        />
+        <PageHeaderActions>
+          <MostViewedSettingsPopover />
+        </PageHeaderActions>
+        <PageFloatingFooter leftContent={refetchButton} />
       </>
     );
   }
@@ -88,10 +89,10 @@ function RouteComponent() {
           <EmptyState message="No files with view counts found." />
         )}
       </>
-      <PageFloatingFooter
-        leftContent={refetchButton}
-        rightContent={<MostViewedSettingsPopover />}
-      />
+      <PageHeaderActions>
+        <MostViewedSettingsPopover />
+      </PageHeaderActions>
+      <PageFloatingFooter leftContent={refetchButton} />
     </>
   );
 }

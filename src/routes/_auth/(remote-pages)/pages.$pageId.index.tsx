@@ -5,6 +5,7 @@ import type { FloatingFooterAction } from "@/components/page-shell/page-floating
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
+import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
@@ -90,10 +91,12 @@ function RouteComponent() {
     return (
       <>
         <PageLoading title={title} />
+        <PageHeaderActions>
+          <ThumbnailGalleryDisplaySettingsPopover />
+        </PageHeaderActions>
         <PageFloatingFooter
           leftContent={refetchButton}
           actions={overflowActions}
-          rightContent={<ThumbnailGalleryDisplaySettingsPopover />}
         />
       </>
     );
@@ -109,10 +112,12 @@ function RouteComponent() {
             fallbackMessage="An unknown error occurred while fetching pages."
           />
         </>
+        <PageHeaderActions>
+          <ThumbnailGalleryDisplaySettingsPopover />
+        </PageHeaderActions>
         <PageFloatingFooter
           leftContent={refetchButton}
           actions={overflowActions}
-          rightContent={<ThumbnailGalleryDisplaySettingsPopover />}
         />
       </>
     );
@@ -133,10 +138,12 @@ function RouteComponent() {
           <p>This page has no media.</p>
         )}
       </>
+      <PageHeaderActions>
+        <ThumbnailGalleryDisplaySettingsPopover />
+      </PageHeaderActions>
       <PageFloatingFooter
         leftContent={refetchButton}
         actions={overflowActions}
-        rightContent={<ThumbnailGalleryDisplaySettingsPopover />}
       />
     </>
   );

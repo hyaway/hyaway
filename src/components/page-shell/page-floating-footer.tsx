@@ -33,19 +33,16 @@ interface PageFloatingFooterProps {
   actions?: Array<FloatingFooterAction>;
   /** Content to display on the left (e.g., refetch button) */
   leftContent?: ReactNode;
-  /** Content to display on the right (e.g., settings popover) */
-  rightContent?: ReactNode;
   /** Optional className for the floating footer */
   className?: string;
 }
 
-/** Maximum visible action buttons (excluding overflow and settings) */
+/** Maximum visible action buttons (excluding overflow) */
 const MAX_VISIBLE_ACTIONS = 2;
 
 export function PageFloatingFooter({
   actions = [],
   leftContent,
-  rightContent,
   className,
 }: PageFloatingFooterProps) {
   // Separate actions into always-overflow and normal actions
@@ -113,9 +110,6 @@ export function PageFloatingFooter({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-
-        {/* Settings (popover or other content) */}
-        {rightContent}
       </div>
     </FooterPortal>
   );

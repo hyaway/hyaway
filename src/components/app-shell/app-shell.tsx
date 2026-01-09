@@ -7,6 +7,7 @@ import { AppSidebar } from "./app-sidebar";
 import { FloatingFooter } from "./floating-footer";
 import { FloatingHeader } from "./floating-header";
 import { FooterPortalProvider, FooterPortalSlot } from "./footer-portal";
+import { HeaderActionsPortalProvider } from "./header-actions-portal";
 import { RightSidebarProvider } from "./right-sidebar-portal";
 import { RightSidebar } from "./right-sidebar";
 import { Sidebar, SidebarLayout } from "@/components/ui-primitives/sidebar";
@@ -20,27 +21,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <AppSidebar />
       </Sidebar>
       <RightSidebarProvider>
-        {/* Center column: header + content + floating footer - uses page scroll */}
-        <div className="relative flex min-w-0 flex-1 flex-col">
-          {/* Floating header - sticky with hide on scroll */}
-          <FloatingHeader>
-            <AppHeader />
-          </FloatingHeader>
+        <HeaderActionsPortalProvider>
+          {/* Center column: header + content + floating footer - uses page scroll */}
+          <div className="relative flex min-w-0 flex-1 flex-col">
+            {/* Floating header - sticky with hide on scroll */}
+            <FloatingHeader>
+              <AppHeader />
+            </FloatingHeader>
 
-          {/* Content area - grows naturally, page scrolls */}
-          <FooterPortalProvider>
-            <main
-              className={`short:pb-(--footer-height-short) mx-4 flex-1 overflow-x-clip py-2 pb-(--footer-height) sm:mx-6 lg:pb-(--footer-height-sm)`}
-            >
-              {children}
-            </main>
+            {/* Content area - grows naturally, page scrolls */}
+            <FooterPortalProvider>
+              <main
+                className={`short:pb-(--footer-height-short) mx-4 flex-1 overflow-x-clip py-2 pb-(--footer-height) sm:mx-6 lg:pb-(--footer-height-sm)`}
+              >
+                {children}
+              </main>
 
-            {/* Floating footer - sticky at bottom of center column */}
-            <FloatingFooter className="justify-center">
-              <FooterPortalSlot />
-            </FloatingFooter>
-          </FooterPortalProvider>
-        </div>
+              {/* Floating footer - sticky at bottom of center column */}
+              <FloatingFooter className="justify-center">
+                <FooterPortalSlot />
+              </FloatingFooter>
+            </FooterPortalProvider>
+          </div>
+        </HeaderActionsPortalProvider>
 
         {/* Full-height right sidebar - fixed position */}
         <RightSidebar />

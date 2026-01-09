@@ -4,6 +4,7 @@ import { HistorySettingsPopover } from "./-components/history-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
+import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
@@ -72,10 +73,10 @@ function RouteComponent() {
           emptyContent
         )}
       </>
-      <PageFloatingFooter
-        leftContent={clearButton}
-        rightContent={<HistorySettingsPopover />}
-      />
+      <PageHeaderActions>
+        <HistorySettingsPopover />
+      </PageHeaderActions>
+      <PageFloatingFooter leftContent={clearButton} />
     </>
   );
 }

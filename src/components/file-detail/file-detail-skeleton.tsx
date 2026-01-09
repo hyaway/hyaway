@@ -6,6 +6,7 @@ import { MetadataListSkeleton } from "./metadata-list";
 
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
+import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { InlineTagsListSkeleton } from "@/components/tag/inline-tags-list";
@@ -42,9 +43,11 @@ export function FileDetailSkeleton({
         <Separator className="mt-2 mb-4" />
         <InlineTagsListSkeleton />
       </div>
+      <PageHeaderActions>
+        <FileViewerSettingsPopover />
+      </PageHeaderActions>
       <PageFloatingFooter
         actions={[...(prependActions ?? []), ...LOADING_ACTIONS]}
-        rightContent={<FileViewerSettingsPopover />}
       />
     </>
   );

@@ -1,6 +1,10 @@
 "use client";
 
 import { AppBreadcrumb } from "@/components/app-shell/app-breadcrumb";
+import {
+  HeaderActionsPortalSlot,
+  useHeaderActionsHasContent,
+} from "@/components/app-shell/header-actions-portal";
 import { useRightSidebarHasContent } from "@/components/app-shell/right-sidebar-portal";
 import { ThemeSwitcher } from "@/components/app-shell/theme-switcher";
 import { Separator } from "@/components/ui-primitives/separator";
@@ -9,6 +13,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export function AppHeader() {
   const hasRightSidebar = useRightSidebarHasContent();
+  const hasHeaderActions = useHeaderActionsHasContent();
   const isMobile = useIsMobile();
 
   return (
@@ -19,17 +24,25 @@ export function AppHeader() {
         className="my-auto mr-2 data-[orientation=vertical]:h-4"
       />
       <AppBreadcrumb />
-      {isMobile && <ThemeSwitcher size="icon-sm" className="ml-auto" />}
+      {/* Spacer to push header actions to the right */}
+      <div className="flex-1" />
+      {/* Header actions portal slot */}
+      <HeaderActionsPortalSlot />
+      {hasHeaderActions && (
+        <Separator
+          orientation="vertical"
+          className="my-auto data-[orientation=vertical]:h-4"
+        />
+      )}
+      {isMobile && <ThemeSwitcher size="icon-sm" />}
       {hasRightSidebar && (
         <>
-          <Separator
-            orientation="vertical"
-            className={
-              isMobile
-                ? "my-auto data-[orientation=vertical]:h-4"
-                : "my-auto ml-auto data-[orientation=vertical]:h-4"
-            }
-          />
+          {isMobile && (
+            <Separator
+              orientation="vertical"
+              className="my-auto data-[orientation=vertical]:h-4"
+            />
+          )}
           <SidebarTrigger side="right" className="-mr-1" />
         </>
       )}

@@ -19,6 +19,7 @@ import type { Page } from "@/integrations/hydrus-api/models";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
+import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ScrollPositionBadge } from "@/components/scroll-position-badge";
@@ -85,10 +86,10 @@ function PagesIndex() {
           <PagesGrid pages={pages} containerRef={containerRef} lanes={lanes} />
         )}
       </div>
-      <PageFloatingFooter
-        leftContent={refetchButton}
-        rightContent={<PagesDisplaySettingsPopover />}
-      />
+      <PageHeaderActions>
+        <PagesDisplaySettingsPopover />
+      </PageHeaderActions>
+      <PageFloatingFooter leftContent={refetchButton} />
     </>
   );
 }

@@ -6,6 +6,7 @@ import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-g
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
+import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
@@ -50,10 +51,10 @@ function RouteComponent() {
     return (
       <>
         <PageLoading title={PAGE_TITLE} />
-        <PageFloatingFooter
-          leftContent={shuffleButton}
-          rightContent={<RandomInboxSettingsPopover />}
-        />
+        <PageHeaderActions>
+          <RandomInboxSettingsPopover />
+        </PageHeaderActions>
+        <PageFloatingFooter leftContent={shuffleButton} />
       </>
     );
   }
@@ -68,10 +69,10 @@ function RouteComponent() {
             fallbackMessage="An unknown error occurred while fetching random inbox files."
           />
         </>
-        <PageFloatingFooter
-          leftContent={shuffleButton}
-          rightContent={<RandomInboxSettingsPopover />}
-        />
+        <PageHeaderActions>
+          <RandomInboxSettingsPopover />
+        </PageHeaderActions>
+        <PageFloatingFooter leftContent={shuffleButton} />
       </>
     );
   }
@@ -88,10 +89,10 @@ function RouteComponent() {
           <EmptyState message="No inbox files found." />
         )}
       </>
-      <PageFloatingFooter
-        leftContent={shuffleButton}
-        rightContent={<RandomInboxSettingsPopover />}
-      />
+      <PageHeaderActions>
+        <RandomInboxSettingsPopover />
+      </PageHeaderActions>
+      <PageFloatingFooter leftContent={shuffleButton} />
     </>
   );
 }
