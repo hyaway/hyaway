@@ -62,7 +62,7 @@ export function AppBreadcrumb() {
   return (
     <div className="@container min-w-0 flex-1">
       <Breadcrumb>
-        <BreadcrumbList className="@max-3xs:flex-nowrap">
+        <BreadcrumbList className="flex-nowrap truncate">
           {/* Up button - goes to parent route or back in history */}
           {(shouldUseHistoryBack || parentCrumb) && (
             <>
@@ -70,7 +70,7 @@ export function AppBreadcrumb() {
                 {shouldUseHistoryBack ? (
                   <Button
                     variant="ghost"
-                    size="icon"
+                    size="icon-sm"
                     aria-label="Go back"
                     className="@md:hidden"
                     onClick={() => router.history.back()}
@@ -81,7 +81,7 @@ export function AppBreadcrumb() {
                   parentCrumb && (
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="icon-sm"
                       aria-label={`Go to ${parentCrumb.title}`}
                       className="@md:hidden"
                       render={<Link to={parentCrumb.path} />}
@@ -110,7 +110,7 @@ export function AppBreadcrumb() {
           ))}
           {/* Current page */}
           {currentCrumb && (
-            <BreadcrumbItem className="max-w-1/2 truncate">
+            <BreadcrumbItem>
               <BreadcrumbPage>{currentCrumb.title}</BreadcrumbPage>
             </BreadcrumbItem>
           )}
