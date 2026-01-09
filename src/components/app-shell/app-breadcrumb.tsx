@@ -110,7 +110,7 @@ export function AppBreadcrumb() {
           ))}
           {/* Current page */}
           {currentCrumb && (
-            <BreadcrumbItem className="hidden @3xs:block">
+            <BreadcrumbItem className="max-w-1/2 truncate">
               <BreadcrumbPage>{currentCrumb.title}</BreadcrumbPage>
             </BreadcrumbItem>
           )}
