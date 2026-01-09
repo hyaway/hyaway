@@ -73,7 +73,7 @@ function SettingsComponent() {
     <div>
       <PageHeading title="Settings" />
       <NavigationMenu className="mb-8">
-        <NavigationMenuList>
+        <NavigationMenuList className={"flex-wrap"}>
           {settingsItems.map((item) => (
             <NavigationMenuItem key={item.to}>
               <RouterNavigationMenuLink to={item.to} className="group">
