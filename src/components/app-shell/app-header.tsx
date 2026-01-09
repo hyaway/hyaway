@@ -28,7 +28,7 @@ export function AppHeader() {
       <div className="flex-1" />
       {/* Header actions portal slot */}
       <HeaderActionsPortalSlot />
-      {hasHeaderActions && (
+      {hasHeaderActions && (isMobile || hasRightSidebar) && (
         <Separator
           orientation="vertical"
           className="my-auto data-[orientation=vertical]:h-4"
