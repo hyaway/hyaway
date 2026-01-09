@@ -14,7 +14,7 @@ import {
   PAGE_CARD_WIDTH,
   usePageGridLanes,
 } from "./-hooks/use-page-grid-lanes";
-import type { Page } from "@/integrations/hydrus-api/models";
+import type { MediaPage } from "@/integrations/hydrus-api/models";
 
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
@@ -99,7 +99,7 @@ function PagesGrid({
   containerRef,
   lanes,
 }: {
-  pages: Array<Page & { id: string }>;
+  pages: Array<MediaPage>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   lanes: number;
 }) {
@@ -157,6 +157,7 @@ function PagesGrid({
                 <PagesGridItem
                   pageKey={page.page_key}
                   pageName={page.name}
+                  pageSlug={page.slug}
                   index={virtualRow.index}
                   tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
                   setLinkRef={setLinkRef}

@@ -7,6 +7,7 @@ import { PageState } from "@/integrations/hydrus-api/models";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import { cn } from "@/lib/utils";
+import { usePagesUseFriendlyUrls } from "@/stores/pages-settings-store";
 
 const PAGE_STATE_LABELS: Partial<Record<PageState, string>> = {
   [PageState.INITIALIZING]: "Initializing…",
@@ -17,6 +18,8 @@ const PAGE_STATE_LABELS: Partial<Record<PageState, string>> = {
 export interface PagesGridItemProps {
   pageKey: string;
   pageName: string;
+  /** URL-friendly slug for the page link */
+  pageSlug: string;
   index: number;
   className?: string;
   tabIndex?: number;
@@ -32,6 +35,7 @@ export interface PagesGridItemProps {
 export const PagesGridItem = memo(function PagesGridItem({
   pageKey,
   pageName,
+  pageSlug,
   index,
   className,
   tabIndex = 0,
@@ -39,9 +43,13 @@ export const PagesGridItem = memo(function PagesGridItem({
   onItemFocus,
 }: PagesGridItemProps) {
   const { data, isLoading } = useGetPageInfoQuery(pageKey, true);
+  const useFriendlyUrls = usePagesUseFriendlyUrls();
 
   const pageState = data?.page_info.page_state;
   const pageStateLabel = pageState ? PAGE_STATE_LABELS[pageState] : undefined;
+
+  // Use slug if friendly URLs enabled, otherwise use full page_key
+  const linkPageId = useFriendlyUrls ? pageSlug : pageKey;
 
   const totalFiles = data?.page_info.media.num_files ?? 0;
   // Show all 4 thumbnails if 4 or fewer files, otherwise show 3 + count card
@@ -58,7 +66,7 @@ export const PagesGridItem = memo(function PagesGridItem({
         <Link
           ref={(el) => setLinkRef?.(el, index)}
           to="/pages/$pageId"
-          params={{ pageId: pageKey }}
+          params={{ pageId: linkPageId }}
           aria-label={`View page "${pageName}" with ${totalFiles} ${totalFiles === 1 ? "file" : "files"}`}
           tabIndex={tabIndex}
           onFocus={() => onItemFocus?.(index)}

@@ -2,9 +2,11 @@ import {
   PAGES_DISPLAY_SETTINGS_TITLE,
   PagesDisplaySettings,
 } from "@/components/settings/pages-display-settings";
+import { PagesUrlsSettings } from "@/components/settings/pages-urls-settings";
 import {
   SettingsCardTitle,
   SettingsResetButton,
+  SettingsSubheading,
 } from "@/components/settings/settings-ui";
 import {
   Card,
@@ -12,6 +14,7 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui-primitives/card";
+import { Separator } from "@/components/ui-primitives/separator";
 import { usePagesSettingsActions } from "@/stores/pages-settings-store";
 
 export function PagesDisplaySettingsCard() {
@@ -21,14 +24,19 @@ export function PagesDisplaySettingsCard() {
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
-          <SettingsCardTitle>{PAGES_DISPLAY_SETTINGS_TITLE}</SettingsCardTitle>
+          <SettingsCardTitle>Pages</SettingsCardTitle>
           <SettingsResetButton onReset={reset} />
         </div>
         <CardDescription>
-          Configure how pages grid items are displayed.
+          Configure pages grid display and URL format.
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <PagesUrlsSettings />
+        <Separator className="my-4" />
+        <SettingsSubheading className="mb-4">
+          {PAGES_DISPLAY_SETTINGS_TITLE}
+        </SettingsSubheading>
         <PagesDisplaySettings />
       </CardContent>
     </Card>

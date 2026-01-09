@@ -1,3 +1,33 @@
+import slugify from "slug";
+
+/** Length of truncated page_key suffix appended to slugs */
+const PAGE_KEY_SUFFIX_LENGTH = 8;
+
+/**
+ * Normalizes punctuation to dashes before slugifying.
+ * Converts common punctuation characters to dashes so they become
+ * word separators instead of being stripped entirely.
+ */
+function normalizePunctuation(text: string): string {
+  // Replace punctuation that should become word separators with dashes
+  // This includes: . , ; : ! ? ' " ( ) [ ] { } / \ | @ # $ % ^ & * + = < > ~
+  return text.replace(/[.,;:!?'"()[\]{}/\\|@#$%^&*+=<>~_]+/g, "-");
+}
+
+/**
+ * Creates a URL-friendly slug from a page name with truncated page_key suffix.
+ * The suffix ensures uniqueness when multiple pages have the same name.
+ * @param name - The page name to slugify
+ * @param pageKey - The page_key UUID to append as suffix
+ * @returns URL-safe slug like "my-search-abc12345"
+ */
+export function createPageSlug(name: string, pageKey: string): string {
+  const normalized = normalizePunctuation(name);
+  const nameSlug = slugify(normalized, { lower: true });
+  const keySuffix = pageKey.slice(0, PAGE_KEY_SUFFIX_LENGTH);
+  return nameSlug ? `${nameSlug}-${keySuffix}` : keySuffix;
+}
+
 /**
  * Formats a byte count into a human-readable string with appropriate units.
  * @param bytes - The number of bytes to format

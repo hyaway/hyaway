@@ -1,8 +1,10 @@
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconFocusCentered, IconRefreshDot } from "@tabler/icons-react";
+import { useResolvedPage } from "./-hooks/use-resolved-page";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
+import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
@@ -29,8 +31,50 @@ export const Route = createFileRoute("/_auth/(remote-pages)/pages/$pageId/")({
 
 function RouteComponent() {
   const { pageId } = Route.useParams();
+  const resolved = useResolvedPage({ pageId });
+
+  if (resolved.status === "loading") {
+    return (
+      <>
+        <PageLoading title={`Page: ${pageId.slice(0, 8)}...`} />
+        <PageHeaderActions>
+          <ThumbnailGalleryDisplaySettingsPopover />
+        </PageHeaderActions>
+      </>
+    );
+  }
+
+  if (resolved.status === "not-found") {
+    return (
+      <>
+        <PageHeading title="Page not found" />
+        <EmptyState
+          message={`No page found matching "${pageId}". The page may have been closed or Hydrus was restarted.`}
+        />
+      </>
+    );
+  }
+
+  return (
+    <PageContent
+      resolvedPageKey={resolved.page.page_key}
+      resolvedPageName={resolved.page.name}
+      resolvedPageSlug={resolved.page.slug}
+    />
+  );
+}
+
+function PageContent({
+  resolvedPageKey,
+  resolvedPageName,
+  resolvedPageSlug,
+}: {
+  resolvedPageKey: string;
+  resolvedPageName: string;
+  resolvedPageSlug: string;
+}) {
   const { data, isLoading, isFetching, isError, error } = useGetPageInfoQuery(
-    pageId,
+    resolvedPageKey,
     true,
   );
   const refreshPageMutation = useRefreshPageMutation();
@@ -46,11 +90,11 @@ function RouteComponent() {
     ? PAGE_STATE_LABELS[pageState]
     : undefined;
 
-  // Link builder for contextual navigation
+  // Link builder for contextual navigation - use slug for prettier URLs
   const getFileLink: FileLinkBuilder = (fileId) =>
     linkOptions({
       to: "/pages/$pageId/$fileId",
-      params: { pageId, fileId: String(fileId) },
+      params: { pageId: resolvedPageSlug, fileId: String(fileId) },
     });
 
   const refetchButton = (
@@ -59,7 +103,7 @@ function RouteComponent() {
       label={initializingLabel}
       onRefetch={() =>
         queryClient.invalidateQueries({
-          queryKey: ["getPageInfo", pageId],
+          queryKey: ["getPageInfo", resolvedPageKey],
         })
       }
     />
@@ -70,7 +114,7 @@ function RouteComponent() {
       id: "refresh-remote",
       label: "Refresh remote",
       icon: IconRefreshDot,
-      onClick: () => refreshPageMutation.mutate(pageId),
+      onClick: () => refreshPageMutation.mutate(resolvedPageKey),
       isPending: refreshPageMutation.isPending,
       overflowOnly: true,
     },
@@ -78,16 +122,14 @@ function RouteComponent() {
       id: "focus-remote",
       label: "Focus remote",
       icon: IconFocusCentered,
-      onClick: () => focusPageMutation.mutate(pageId),
+      onClick: () => focusPageMutation.mutate(resolvedPageKey),
       isPending: focusPageMutation.isPending,
       overflowOnly: true,
     },
   ];
 
   if (isLoading || isInitializing) {
-    const title = data?.page_info.name
-      ? `Page: ${data.page_info.name}`
-      : `Page: ${pageId.slice(0, 8)}...`;
+    const title = `Page: ${resolvedPageName}`;
     return (
       <>
         <PageLoading title={title} />
@@ -106,7 +148,7 @@ function RouteComponent() {
     return (
       <>
         <>
-          <PageHeading title={`Page: ${pageId.slice(0, 8)}...`} />
+          <PageHeading title={`Page: ${resolvedPageName}`} />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching pages."

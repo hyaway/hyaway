@@ -4,7 +4,10 @@ import { focusPage, getPageInfo, getPages, refreshPage } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
 import { PageState, Permission } from "../models";
 import { useHasPermission } from "./access";
-import type { Page } from "../models";
+
+import type { MediaPage, Page } from "../models";
+
+import { createPageSlug } from "@/lib/format-utils";
 
 /**
  * Iteratively flattens a page tree into an array of all pages
@@ -26,6 +29,21 @@ const flattenPages = (root: Page): Array<Page> => {
   }
   return result;
 };
+
+/**
+ * Flattens a page tree and transforms to MediaPage array with computed fields.
+ * Filters to only include media pages (pages that can hold files).
+ * Use this outside React components (e.g., in route loaders).
+ */
+export function flattenPagesToMedia(rootPage: Page): Array<MediaPage> {
+  return flattenPages(rootPage)
+    .filter((page) => page.is_media_page)
+    .map((page) => ({
+      ...page,
+      id: page.page_key,
+      slug: createPageSlug(page.name, page.page_key),
+    }));
+}
 
 /**
  * Check if all pages in the tree are in a stable state (ready or cancelled)
@@ -72,17 +90,14 @@ export const useGetPagesQuery = () => {
 
 /**
  * Query hook for getting only media pages (pages that can hold files)
+ * Adds computed `id` and `slug` fields to each page.
  */
 export const useGetMediaPagesQuery = () => {
   const { data, ...rest } = useGetPagesQuery();
 
   const mediaPages = useMemo(
-    () =>
-      data?.pages
-        ? flattenPages(data.pages)
-            .filter((page) => page.is_media_page)
-            .map((page) => ({ ...page, id: page.page_key }))
-        : [],
+    (): Array<MediaPage> =>
+      data?.pages ? flattenPagesToMedia(data.pages) : [],
     [data?.pages],
   );
 
@@ -91,6 +106,66 @@ export const useGetMediaPagesQuery = () => {
     data: mediaPages,
   };
 };
+
+/** Length of the slug suffix including the dash (e.g., "-abc12345" = 9 chars) */
+const SLUG_SUFFIX_LENGTH = 9; // 1 dash + 8 char ID
+
+/**
+ * Extracts the name-slug part from a full slug (without the ID suffix).
+ * E.g., "my-search-abc12345" → "my-search"
+ */
+function extractNameSlug(slug: string): string | null {
+  if (slug.length <= SLUG_SUFFIX_LENGTH) return null;
+  return slug.slice(0, -SLUG_SUFFIX_LENGTH);
+}
+
+export type PageResolution =
+  | { page: MediaPage; needsRedirect: false }
+  | { page: MediaPage; needsRedirect: true }
+  | null;
+
+/**
+ * Resolves a URL parameter to a page_key.
+ * Resolution order:
+ * 1. If param matches any existing page_key exactly, returns it (ID passthrough)
+ * 2. If param matches any slug exactly, returns that page
+ * 3. If param looks like a slug with ID suffix (e.g., "my-search-abc12345"),
+ *    finds first page whose name-slug matches exactly (fallback for when
+ *    Hydrus restarts and page_keys change). This won't match
+ *    "my-search-extended-xyz" when looking for "my-search-abc12345".
+ *    Returns needsRedirect: true so caller can redirect to correct URL.
+ * - Returns null if no match found
+ */
+export function resolvePageKeyFromParam(
+  param: string,
+  pages: Array<MediaPage>,
+): PageResolution {
+  // First check if param is an exact page_key match
+  const exactMatch = pages.find((page) => page.page_key === param);
+  if (exactMatch) {
+    return { page: exactMatch, needsRedirect: false };
+  }
+
+  // Otherwise try to match by slug
+  const slugMatch = pages.find((page) => page.slug === param);
+  if (slugMatch) {
+    return { page: slugMatch, needsRedirect: false };
+  }
+
+  // Fallback: try to match by name-slug (without the ID suffix)
+  // Slug format is "name-slug-abc12345" where suffix is 8-char ID
+  const paramNameSlug = extractNameSlug(param);
+  if (paramNameSlug) {
+    const nameSlugMatch = pages.find(
+      (page) => extractNameSlug(page.slug) === paramNameSlug,
+    );
+    if (nameSlugMatch) {
+      return { page: nameSlugMatch, needsRedirect: true };
+    }
+  }
+
+  return null;
+}
 
 export const useGetPageInfoQuery = (pageKey: string, simple = true) => {
   const isConfigured = useIsApiConfigured();

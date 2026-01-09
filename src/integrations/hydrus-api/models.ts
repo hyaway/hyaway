@@ -289,6 +289,18 @@ export const GetPageInfoResponseSchema = BaseResponseSchema.extend({
 
 export type GetPageInfoResponse = z.infer<typeof GetPageInfoResponseSchema>;
 
+/**
+ * Extended Page type used in the UI with computed fields.
+ * - `id`: Alias for `page_key` for convenience
+ * - `slug`: URL-friendly identifier (name + truncated page_key suffix)
+ */
+export type MediaPage = Page & {
+  /** Same as page_key */
+  id: string;
+  /** URL-friendly slug like "my-search-abc12345" */
+  slug: string;
+};
+
 // #endregion Pages
 
 // #region Database

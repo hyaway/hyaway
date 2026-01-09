@@ -7,9 +7,11 @@ export const MAX_PAGES_COLUMNS = 30;
 type PagesSettingsState = {
   maxColumns: number;
   showScrollBadge: boolean;
+  useFriendlyUrls: boolean;
   actions: {
     setMaxColumns: (columns: number) => void;
     setShowScrollBadge: (show: boolean) => void;
+    setUseFriendlyUrls: (use: boolean) => void;
     reset: () => void;
   };
 };
@@ -19,10 +21,13 @@ const usePagesSettingsStore = create<PagesSettingsState>()(
     (set, _get, store) => ({
       maxColumns: MAX_PAGES_COLUMNS,
       showScrollBadge: true,
+      useFriendlyUrls: true,
       actions: {
         setMaxColumns: (maxColumns: number) => set({ maxColumns }),
         setShowScrollBadge: (showScrollBadge: boolean) =>
           set({ showScrollBadge }),
+        setUseFriendlyUrls: (useFriendlyUrls: boolean) =>
+          set({ useFriendlyUrls }),
         reset: () => set(store.getInitialState()),
       },
     }),
@@ -39,6 +44,9 @@ export const usePagesMaxColumns = () =>
 
 export const usePagesShowScrollBadge = () =>
   usePagesSettingsStore((state) => state.showScrollBadge);
+
+export const usePagesUseFriendlyUrls = () =>
+  usePagesSettingsStore((state) => state.useFriendlyUrls);
 
 export const usePagesSettingsActions = () =>
   usePagesSettingsStore((state) => state.actions);
