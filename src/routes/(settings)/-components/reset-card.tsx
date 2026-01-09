@@ -1,10 +1,10 @@
+import { SettingsCardTitle } from "@/components/settings/settings-ui";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 import { useAuthActions } from "@/integrations/hydrus-api/hydrus-config-store";
 
@@ -14,7 +14,7 @@ export function ResetCard({ resetKey }: { resetKey: () => void }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Reset all API settings</CardTitle>
+        <SettingsCardTitle>Reset all API settings</SettingsCardTitle>
         <CardDescription>
           Clear your API endpoint and access key configuration. You will need to
           reconfigure your connection to Hydrus.

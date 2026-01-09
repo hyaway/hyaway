@@ -1,11 +1,11 @@
 import { AccessKeyField } from "./access-key-field";
 import { RequestNewPermissionsField } from "./request-new-permissions-field";
+import { SettingsCardTitle } from "@/components/settings/settings-ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 import { Separator } from "@/components/ui-primitives/separator";
 
@@ -13,7 +13,7 @@ export function AccessKeyCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>2. Set access key</CardTitle>
+        <SettingsCardTitle>2. Set access key</SettingsCardTitle>
         <CardDescription>
           Generate or enter an access key for your Hydrus client.
         </CardDescription>

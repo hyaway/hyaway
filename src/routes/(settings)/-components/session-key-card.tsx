@@ -17,12 +17,12 @@ import { Field, FieldLabel } from "@/components/ui-primitives/field";
 import { SecretInput } from "@/components/ui-primitives/input";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import { Button } from "@/components/ui-primitives/button";
+import { SettingsCardTitle } from "@/components/settings/settings-ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 import {
   useApiEndpoint,
@@ -48,7 +48,7 @@ export function SessionKeyCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>3. Get a session key</CardTitle>
+        <SettingsCardTitle>3. Get a session key</SettingsCardTitle>
         <CardDescription>
           Session key should refresh automatically, but you can do so here if
           needed.

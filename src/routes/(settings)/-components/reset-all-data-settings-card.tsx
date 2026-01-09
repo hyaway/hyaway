@@ -1,10 +1,10 @@
+import { SettingsCardTitle } from "@/components/settings/settings-ui";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 import { useSearchLimitsActions } from "@/stores/search-limits-store";
 import { useWatchHistoryActions } from "@/stores/watch-history-store";
@@ -21,7 +21,7 @@ export function ResetAllDataSettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Reset all data settings</CardTitle>
+        <SettingsCardTitle>Reset all data settings</SettingsCardTitle>
         <CardDescription>
           Reset all settings on this page to their default values. This does not
           clear your watch history entries.

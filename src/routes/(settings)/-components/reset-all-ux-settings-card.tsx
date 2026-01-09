@@ -1,10 +1,10 @@
+import { SettingsCardTitle } from "@/components/settings/settings-ui";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 import { useFileViewerSettingsActions } from "@/stores/file-viewer-settings-store";
 import { useGallerySettingsActions } from "@/stores/gallery-settings-store";
@@ -27,7 +27,7 @@ export function ResetAllUxSettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Reset all UX settings</CardTitle>
+        <SettingsCardTitle>Reset all UX settings</SettingsCardTitle>
         <CardDescription>
           Reset all settings on this page to their default values. This does not
           affect your theme preference.

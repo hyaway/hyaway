@@ -3,13 +3,15 @@ import {
   HistorySettings,
   WATCH_HISTORY_SETTINGS_TITLE,
 } from "@/components/settings/history-settings";
-import { SettingsResetButton } from "@/components/settings/settings-ui";
+import {
+  SettingsCardTitle,
+  SettingsResetButton,
+} from "@/components/settings/settings-ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 import {
   useWatchHistoryActions,
@@ -25,7 +27,7 @@ export function HistorySettingsCard() {
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
-          <CardTitle>{WATCH_HISTORY_SETTINGS_TITLE}</CardTitle>
+          <SettingsCardTitle>{WATCH_HISTORY_SETTINGS_TITLE}</SettingsCardTitle>
           <SettingsResetButton onReset={reset} />
         </div>
         <CardDescription>

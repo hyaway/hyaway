@@ -1,4 +1,5 @@
 import { SettingsGroup, SliderField } from "./setting-fields";
+import { SettingsSubheading } from "./settings-ui";
 import {
   MAX_RECENT_FILES_DAYS,
   MAX_SEARCH_LIMIT,
@@ -68,7 +69,7 @@ export function SearchLimitsSettings({
 
       {/* Recent files group */}
       <div className="border-border mt-2 flex flex-col gap-6 border-t pt-4">
-        <p className="text-muted-foreground text-sm">Recent files</p>
+        <SettingsSubheading>Recent files</SettingsSubheading>
         <SliderField
           id={`${idPrefix}recent-files-limit-slider`}
           label="Max files"
@@ -95,7 +96,7 @@ export function SearchLimitsSettings({
 
       {/* Other group */}
       <div className="border-border mt-2 flex flex-col gap-6 border-t pt-4">
-        <p className="text-muted-foreground text-sm">Other</p>
+        <SettingsSubheading>Other</SettingsSubheading>
         <SliderField
           id={`${idPrefix}random-inbox-limit-slider`}
           label="Random inbox"
@@ -111,7 +112,7 @@ export function SearchLimitsSettings({
 
       {/* View statistics group */}
       <div className="border-border mt-2 flex flex-col gap-6 border-t pt-4">
-        <p className="text-muted-foreground text-sm">View statistics</p>
+        <SettingsSubheading>View statistics</SettingsSubheading>
         <SliderField
           id={`${idPrefix}remote-history-limit-slider`}
           label="Remote history"

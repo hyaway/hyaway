@@ -2,13 +2,15 @@ import {
   SEARCH_LIMITS_SETTINGS_TITLE,
   SearchLimitsSettings,
 } from "@/components/settings/search-limits-settings";
-import { SettingsResetButton } from "@/components/settings/settings-ui";
+import {
+  SettingsCardTitle,
+  SettingsResetButton,
+} from "@/components/settings/settings-ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 import { useSearchLimitsActions } from "@/stores/search-limits-store";
 
@@ -19,7 +21,7 @@ export function SearchLimitsSettingsCard() {
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
-          <CardTitle>{SEARCH_LIMITS_SETTINGS_TITLE}</CardTitle>
+          <SettingsCardTitle>{SEARCH_LIMITS_SETTINGS_TITLE}</SettingsCardTitle>
           <SettingsResetButton onReset={reset} />
         </div>
         <CardDescription>

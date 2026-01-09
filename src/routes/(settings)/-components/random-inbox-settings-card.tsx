@@ -2,19 +2,19 @@ import {
   RANDOM_INBOX_SETTINGS_TITLE,
   RandomInboxSettings,
 } from "@/components/settings/random-inbox-settings";
+import { SettingsCardTitle } from "@/components/settings/settings-ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 
 export function RandomInboxSettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{RANDOM_INBOX_SETTINGS_TITLE}</CardTitle>
+        <SettingsCardTitle>{RANDOM_INBOX_SETTINGS_TITLE}</SettingsCardTitle>
         <CardDescription>
           Configure how many files are fetched for the random inbox view.
         </CardDescription>

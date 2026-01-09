@@ -18,12 +18,12 @@ import {
 } from "@/components/ui-primitives/alert";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import { Button } from "@/components/ui-primitives/button";
+import { SettingsCardTitle } from "@/components/settings/settings-ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 import {
   useApiEndpoint,
@@ -66,7 +66,7 @@ export function ApiEndpointCard() {
     >
       <Card>
         <CardHeader>
-          <CardTitle>1. Set API endpoint</CardTitle>
+          <SettingsCardTitle>1. Set API endpoint</SettingsCardTitle>
           <CardDescription>
             Where is your Hydrus client running?
           </CardDescription>

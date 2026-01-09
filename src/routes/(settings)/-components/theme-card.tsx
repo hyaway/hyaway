@@ -1,10 +1,10 @@
 import type { Theme } from "@/stores/theme-store";
+import { SettingsCardTitle } from "@/components/settings/settings-ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 import {
   ToggleGroup,
@@ -20,7 +20,7 @@ export function ThemeCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Theme</CardTitle>
+        <SettingsCardTitle>Theme</SettingsCardTitle>
         <CardDescription>
           Choose your preferred color scheme for the application.
         </CardDescription>

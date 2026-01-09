@@ -2,13 +2,15 @@ import {
   THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE,
   ThumbnailGalleryDisplaySettings,
 } from "@/components/settings/thumbnail-gallery-display-settings";
-import { SettingsResetButton } from "@/components/settings/settings-ui";
+import {
+  SettingsCardTitle,
+  SettingsResetButton,
+} from "@/components/settings/settings-ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui-primitives/card";
 import { useGallerySettingsActions } from "@/stores/gallery-settings-store";
 
@@ -19,7 +21,9 @@ export function ThumbnailGalleryDisplaySettingsCard() {
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
-          <CardTitle>{THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE}</CardTitle>
+          <SettingsCardTitle>
+            {THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE}
+          </SettingsCardTitle>
           <SettingsResetButton onReset={reset} />
         </div>
         <CardDescription>

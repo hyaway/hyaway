@@ -5,6 +5,40 @@ import { Button } from "@/components/ui-primitives/button";
 import { cn } from "@/lib/utils";
 
 /**
+ * A heading for settings cards. Renders as an h3 but styled to match CardTitle.
+ * Use this instead of CardTitle for proper heading hierarchy.
+ */
+export function SettingsCardTitle({
+  className,
+  ...props
+}: React.ComponentProps<"h3">) {
+  return (
+    <h3
+      data-slot="card-title"
+      className={cn("text-lg font-medium", className)}
+      {...props}
+    />
+  );
+}
+
+/**
+ * A subheading for grouping related settings within a card.
+ * Renders as an h4 with muted styling.
+ */
+export function SettingsSubheading({
+  className,
+  ...props
+}: React.ComponentProps<"h4">) {
+  return (
+    <h4
+      data-slot="settings-subheading"
+      className={cn("text-foreground text-sm font-medium", className)}
+      {...props}
+    />
+  );
+}
+
+/**
  * Container for a settings section header with title and optional actions.
  * Use within SettingsSection or at the top of a popover.
  * The first header in a popover will bleed to the edges with negative margins.
