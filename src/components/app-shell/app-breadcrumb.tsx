@@ -111,7 +111,13 @@ export function AppBreadcrumb() {
           {/* Current page */}
           {currentCrumb && (
             <BreadcrumbItem>
-              <BreadcrumbPage>{currentCrumb.title}</BreadcrumbPage>
+              <BreadcrumbPage>
+                {currentCrumb.title.length === 64
+                  ? currentCrumb.title.slice(0, 3) +
+                    "..." +
+                    currentCrumb.title.slice(-4)
+                  : currentCrumb.title}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           )}
         </BreadcrumbList>
