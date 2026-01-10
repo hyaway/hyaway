@@ -277,9 +277,7 @@ export function ReviewSwipeCard({
           }
         }}
         transition={
-          isExiting
-            ? { duration: 0.2 }
-            : { type: "spring", stiffness: 300, damping: 25 }
+          isExiting ? { duration: 0.2 } : { duration: 0.25, ease: "easeOut" }
         }
       >
         {/* Card content */}
