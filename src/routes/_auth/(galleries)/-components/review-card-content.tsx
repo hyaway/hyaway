@@ -68,6 +68,13 @@ export function ReviewCardContent({
     }
   }, [isTop, loaded, mediaAutoPlay]);
 
+  // Compute average color from blurhash for image backgrounds
+  // Must be before early returns to maintain hook order
+  const averageColor = useMemo(
+    () => getAverageColorFromBlurhash(metadata?.blurhash ?? undefined),
+    [metadata?.blurhash],
+  );
+
   if (isPending) {
     return (
       <div className="flex h-full w-full items-center justify-center">
@@ -87,12 +94,6 @@ export function ReviewCardContent({
   const isImage = metadata.mime.startsWith("image/");
   const isVideo = metadata.mime.startsWith("video/");
   const isAudio = metadata.mime.startsWith("audio/");
-
-  // Compute average color from blurhash for image backgrounds
-  const averageColor = useMemo(
-    () => getAverageColorFromBlurhash(metadata.blurhash ?? undefined),
-    [metadata.blurhash],
-  );
 
   const handleLoad = () => {
     setLoaded(true);
