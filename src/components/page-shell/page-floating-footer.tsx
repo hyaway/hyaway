@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { IconDots } from "@tabler/icons-react";
 
 import { FooterPortal } from "../app-shell/footer-portal";
@@ -45,6 +46,8 @@ export function PageFloatingFooter({
   leftContent,
   className,
 }: PageFloatingFooterProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   // Separate actions into always-overflow and normal actions
   const alwaysOverflowActions = actions.filter((a) => a.overflowOnly);
   const normalActions = actions.filter((a) => !a.overflowOnly);
@@ -64,6 +67,7 @@ export function PageFloatingFooter({
           "flex h-full items-center justify-center gap-1",
           className,
         )}
+        data-menu-open={menuOpen || undefined}
       >
         {/* Left content (e.g., refetch button) */}
         {leftContent}
@@ -74,7 +78,7 @@ export function PageFloatingFooter({
 
         {/* Overflow menu */}
         {hasOverflow && (
-          <DropdownMenu>
+          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger
               render={
                 <BottomNavButton

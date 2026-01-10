@@ -23,7 +23,12 @@ export function FooterPortalProvider({
   const [hasContent, setHasContent] = React.useState(false);
 
   const value = React.useMemo(
-    () => ({ container, setContainer, hasContent, setHasContent }),
+    () => ({
+      container,
+      setContainer,
+      hasContent,
+      setHasContent,
+    }),
     [container, hasContent],
   );
 

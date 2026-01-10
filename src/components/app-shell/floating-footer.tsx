@@ -34,6 +34,8 @@ export function FloatingFooter({
         // Hover/focus brings bar back
         "hover:pointer-events-auto hover:translate-y-0 hover:opacity-100",
         "focus-within:pointer-events-auto focus-within:translate-y-0 focus-within:opacity-100",
+        // Keep visible when overflow menu is open
+        "has-[[data-menu-open]]:pointer-events-auto has-[[data-menu-open]]:translate-y-0 has-[[data-menu-open]]:opacity-100",
         // Visibility transition (includes height for reflow animation)
         "transition-[translate,opacity,height] duration-200",
         visibilityClasses,
