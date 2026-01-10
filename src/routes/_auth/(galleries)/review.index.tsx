@@ -90,7 +90,7 @@ function ReviewPage() {
   // Calculate available height accounting for header, footer, and main padding
   // The deck will size itself based on viewport
   return (
-    <div className="flex flex-col">
+    <div className="flex h-full flex-col">
       <PageHeaderActions>
         <FileViewerSettingsPopover />
       </PageHeaderActions>
@@ -125,7 +125,7 @@ function ReviewPage() {
       </div>
 
       {/* Swipe deck - centered */}
-      <div className="flex flex-1 items-center justify-center px-4">
+      <div className="flex h-full flex-1 items-center justify-center px-4">
         <ReviewSwipeDeckVisual
           visibleFileIds={deckState.visibleFileIds}
           exitingCards={deckState.exitingCards}

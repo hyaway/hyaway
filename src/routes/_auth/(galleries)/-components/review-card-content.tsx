@@ -198,7 +198,7 @@ export function ReviewCardContent({
           ref={videoPlayerRef}
           title={`🎞️${fileId}`}
           className={cn(
-            "max-h-full max-w-full transition-opacity duration-200",
+            "h-full w-full transition-opacity duration-200",
             loaded ? "opacity-100" : "opacity-0",
           )}
           src={{ src: fileUrl, type: metadata.mime as VideoMimeType }}
@@ -212,7 +212,11 @@ export function ReviewCardContent({
           muted={!mediaStartWithSound}
           loop
         >
-          <MediaProvider />
+          <MediaProvider
+            mediaProps={{
+              className: cn("max-h-full! max-w-full! object-contain"),
+            }}
+          />
           <DefaultVideoLayout
             icons={defaultLayoutIcons}
             colorScheme={activeTheme}

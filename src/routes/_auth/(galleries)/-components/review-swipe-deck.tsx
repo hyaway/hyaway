@@ -272,7 +272,7 @@ export function ReviewSwipeDeckVisual({
   }
 
   return (
-    <div className="short:h-[min(calc(100dvh-11rem),400px)] relative h-[min(calc(100dvh-14rem),500px)] w-full max-w-lg">
+    <div className="relative h-full w-full">
       <AnimatePresence>
         {allVisibleFileIds.map((fileId, index) => {
           const exitDirection = exitingCards.get(fileId);
