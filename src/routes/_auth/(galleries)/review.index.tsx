@@ -48,7 +48,7 @@ function ReviewPage() {
       <div className="flex flex-col">
         <PageHeading title="Review Queue" />
         <PageHeaderActions>
-          <FileViewerSettingsPopover />
+          <FileViewerSettingsPopover hideExpandedSettings />
         </PageHeaderActions>
         <EmptyState
           message="No items in review queue. Add files from a page to start reviewing."
@@ -66,7 +66,7 @@ function ReviewPage() {
     return (
       <div className="flex min-h-[calc(100dvh-8rem)] flex-col items-center justify-center">
         <PageHeaderActions>
-          <FileViewerSettingsPopover />
+          <FileViewerSettingsPopover hideExpandedSettings />
         </PageHeaderActions>
         <ReviewCompletion
           stats={stats}
@@ -93,7 +93,7 @@ function ReviewPage() {
   return (
     <div className="flex h-full flex-col">
       <PageHeaderActions>
-        <FileViewerSettingsPopover />
+        <FileViewerSettingsPopover hideExpandedSettings />
       </PageHeaderActions>
 
       {/* Stats breakdown */}

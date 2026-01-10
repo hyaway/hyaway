@@ -30,6 +30,8 @@ export interface FileViewerSettingsProps {
   defaultOpen?: boolean;
   /** Mime type of the current file - determines which section opens by default */
   mimeType?: string;
+  /** Hide the "open expanded" settings for both images and videos */
+  hideExpandedSettings?: boolean;
 }
 
 /** Determine which section should open based on mime type */
@@ -47,6 +49,7 @@ export function FileViewerSettings({
   openMultiple = false,
   defaultOpen = false,
   mimeType,
+  hideExpandedSettings = false,
 }: FileViewerSettingsProps) {
   const fileViewerStartExpanded = useFileViewerStartExpanded();
   const imageBackground = useImageBackground();
@@ -82,12 +85,14 @@ export function FileViewerSettings({
       className="rounded-none border-0"
     >
       <AccordionSection value="image" title="Image">
-        <SwitchField
-          id={`${idPrefix}file-viewer-start-expanded-switch`}
-          label="Open images expanded"
-          checked={fileViewerStartExpanded}
-          onCheckedChange={setStartExpanded}
-        />
+        {!hideExpandedSettings && (
+          <SwitchField
+            id={`${idPrefix}file-viewer-start-expanded-switch`}
+            label="Open images expanded"
+            checked={fileViewerStartExpanded}
+            onCheckedChange={setStartExpanded}
+          />
+        )}
         <div className="flex flex-col gap-4">
           <Label>Background</Label>
           <ToggleGroup
@@ -117,12 +122,14 @@ export function FileViewerSettings({
       </AccordionSection>
 
       <AccordionSection value="video-audio" title="Video &amp; Audio">
-        <SwitchField
-          id={`${idPrefix}video-start-expanded-switch`}
-          label="Open videos expanded"
-          checked={videoStartExpanded}
-          onCheckedChange={setVideoStartExpanded}
-        />
+        {!hideExpandedSettings && (
+          <SwitchField
+            id={`${idPrefix}video-start-expanded-switch`}
+            label="Open videos expanded"
+            checked={videoStartExpanded}
+            onCheckedChange={setVideoStartExpanded}
+          />
+        )}
         <SwitchField
           id={`${idPrefix}media-autoplay-switch`}
           label="Start automatically"

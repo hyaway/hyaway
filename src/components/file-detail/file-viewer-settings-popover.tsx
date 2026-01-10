@@ -12,18 +12,26 @@ export interface FileViewerSettingsPopoverProps {
   className?: string;
   /** Mime type of the current file - determines which section opens by default */
   mimeType?: string;
+  /** Hide the "open expanded" settings for both images and videos */
+  hideExpandedSettings?: boolean;
 }
 
 export function FileViewerSettingsPopover({
   className,
   mimeType,
+  hideExpandedSettings,
 }: FileViewerSettingsPopoverProps = {}) {
   return (
     <SettingsPopover label="Settings" className={className}>
       <SettingsHeader>
         <SettingsTitle>{FILE_VIEWER_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
-      <FileViewerSettings idPrefix="popover-" defaultOpen mimeType={mimeType} />
+      <FileViewerSettings
+        idPrefix="popover-"
+        defaultOpen
+        mimeType={mimeType}
+        hideExpandedSettings={hideExpandedSettings}
+      />
     </SettingsPopover>
   );
 }
