@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { IconAlertCircle } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { ContentDetailsTable } from "./content-details-table";
 import { FileDetailSkeleton } from "./file-detail-skeleton";
@@ -104,6 +105,7 @@ function FileDetailContent({
   prependActions?: Array<FloatingFooterAction>;
   trackLocalWatchHistory: boolean;
 }) {
+  const queryClient = useQueryClient();
   const { addViewedFile } = useWatchHistoryActions();
   const historyEnabled = useWatchHistoryEnabled();
 
@@ -118,9 +120,16 @@ function FileDetailContent({
   // Track view time and sync to Hydrus (respects user settings internally)
   useRemoteFileViewTimeTracker(fileId);
 
+  const handleRefetch = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: ["getSingleFileMetadata", fileId],
+    });
+  }, [queryClient, fileId]);
+
   const actionGroups = useFileActions(data, {
     includeExternal: true,
     includeThumbnail: false,
+    onRefetch: handleRefetch,
   });
   const allActions = actionGroups.flatMap((g) => g.actions);
 

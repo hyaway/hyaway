@@ -6,6 +6,7 @@ import {
   IconMovie,
   IconMusic,
   IconPhoto,
+  IconRefresh,
   IconTrash,
   IconTrashOff,
 } from "@tabler/icons-react";
@@ -243,6 +244,10 @@ interface UseFileActionsOptions {
   includeExternal?: boolean;
   /** Include the thumbnail action (set to false on detail page where full image is shown) */
   includeThumbnail?: boolean;
+  /** Callback to refetch/refresh file data */
+  onRefetch?: () => void;
+  /** Whether refetch is in progress */
+  isRefetching?: boolean;
 }
 
 export function useFileActions(
@@ -262,6 +267,8 @@ export function useFileActions(
     includeOpen = false,
     includeExternal = true,
     includeThumbnail = true,
+    onRefetch,
+    isRefetching,
   } = options;
 
   const isPermanentlyDeleted = data.is_deleted && !data.is_trashed;
@@ -284,6 +291,23 @@ export function useFileActions(
     if (includeExternal) {
       groups.push({ id: "external", actions: externalActions });
     }
+  }
+
+  // Add refetch action if callback provided
+  if (onRefetch) {
+    groups.push({
+      id: "utility",
+      actions: [
+        {
+          id: "refetch",
+          label: "Refresh",
+          icon: IconRefresh,
+          onClick: onRefetch,
+          isPending: isRefetching,
+          overflowOnly: true,
+        },
+      ],
+    });
   }
 
   return groups;
