@@ -245,7 +245,7 @@ export function ReviewSwipeCard({
           // or standard interactive elements.
           if (
             target.closest(
-              "[data-media-controls], .vds-controls, .vds-slider, button, a, input, textarea, select, [role='slider']",
+              "[data-media-controls], .vds-slider, button, a, input, textarea, select, [role='slider']",
             )
           ) {
             return;

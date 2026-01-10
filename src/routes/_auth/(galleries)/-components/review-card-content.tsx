@@ -215,6 +215,8 @@ export function ReviewCardContent({
           <DefaultVideoLayout
             icons={defaultLayoutIcons}
             colorScheme={activeTheme}
+            noGestures // Disable gesture handling so our swipe works
+            noScrubGesture // Disable scrub gesture on timeline
           />
         </MediaPlayer>
       )}
