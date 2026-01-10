@@ -25,6 +25,7 @@ import {
   useReviewQueueIsEmpty,
   useReviewStats,
 } from "@/stores/review-queue-store";
+import { Progress } from "@/components/ui-primitives/progress";
 
 export const Route = createFileRoute("/_auth/(galleries)/review/")({
   component: ReviewPage,
@@ -95,14 +96,25 @@ function ReviewPage() {
         <FileViewerSettingsPopover />
       </PageHeaderActions>
 
-      {/* Progress indicator */}
-      <div className="text-muted-foreground flex items-center gap-2 px-4 py-1 text-xs tabular-nums">
-        <div className="bg-muted h-1 flex-1 overflow-hidden rounded-full">
-          <div
-            className="bg-primary h-full transition-all"
-            style={{ width: `${progress}%` }}
-          />
+      {/* Stats breakdown */}
+      {history.length > 0 && (
+        <div className="text-muted-foreground flex items-center justify-center gap-3 px-4 pb-1 text-sm tabular-nums">
+          {stats.archived > 0 && (
+            <span className="text-primary">{stats.archived} archived</span>
+          )}
+          {stats.trashed > 0 && (
+            <span className="text-destructive">{stats.trashed} trashed</span>
+          )}
+          {stats.skipped > 0 && (
+            <span className="text-muted-foreground">
+              {stats.skipped} skipped
+            </span>
+          )}
         </div>
+      )}
+      {/* Progress indicator */}
+      <div className="text-muted-foreground flex items-center gap-2 px-4 py-1 text-sm tabular-nums">
+        <Progress value={progress} className="flex-1" />
         <span className="shrink-0">
           {currentIndex + 1}/{count}
         </span>
