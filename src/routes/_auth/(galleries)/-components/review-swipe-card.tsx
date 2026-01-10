@@ -217,7 +217,7 @@ export function ReviewSwipeCard({
       <motion.div
         key={fileId}
         className={cn(
-          "bg-card border-border absolute inset-0 overflow-hidden rounded-lg border shadow-lg",
+          "bg-card border-border absolute inset-0 touch-none overflow-hidden rounded-lg border shadow-lg",
           isTop ? "cursor-grab active:cursor-grabbing" : "pointer-events-none",
         )}
         style={{
@@ -247,7 +247,9 @@ export function ReviewSwipeCard({
             return;
           }
 
-          dragControls.start(e);
+          // Ensure we capture the pointer for touch to work reliably
+          (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+          dragControls.start(e, { snapToCursor: false });
         }}
         initial={false}
         animate={
