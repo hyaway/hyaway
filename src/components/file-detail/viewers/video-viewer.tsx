@@ -10,15 +10,11 @@ import {
   DefaultVideoLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
-import {
-  IconArrowsMaximize,
-  IconArrowsMinimize,
-  IconZoomIn,
-  IconZoomOut,
-} from "@tabler/icons-react";
+import { IconArrowsMaximize, IconArrowsMinimize } from "@tabler/icons-react";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import { viewerFixedHeight, viewerMaxHeight } from "./style-constants";
+import { VidstackZoomButton } from "./vidstack-zoom-button";
 import type { VideoMimeType } from "@vidstack/react";
 import { useActiveTheme } from "@/stores/theme-store";
 import { cn } from "@/lib/utils";
@@ -34,36 +30,6 @@ interface VideoViewerProps {
   mime: string;
   onLoad: () => void;
   onError: () => void;
-}
-
-// Vidstack control button for zoom/fit toggle
-function ZoomButton({
-  zoomFill,
-  onToggle,
-}: {
-  zoomFill: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <Tooltip.Root>
-      <Tooltip.Trigger asChild>
-        <button
-          className="vds-button"
-          onClick={onToggle}
-          aria-label={zoomFill ? "Fit to container" : "Zoom to fill"}
-        >
-          {zoomFill ? (
-            <IconZoomOut className="size-[26px]" />
-          ) : (
-            <IconZoomIn className="size-[26px]" />
-          )}
-        </button>
-      </Tooltip.Trigger>
-      <Tooltip.Content className="vds-tooltip-content" placement="top">
-        {zoomFill ? "Fit" : "Zoom"}
-      </Tooltip.Content>
-    </Tooltip.Root>
-  );
 }
 
 // Vidstack control button for theater mode toggle
@@ -118,7 +84,7 @@ function VideoPlayerInner({
     () => ({
       beforeFullscreenButton: (
         <>
-          <ZoomButton zoomFill={zoomFill} onToggle={onZoomToggle} />
+          <VidstackZoomButton zoomFill={zoomFill} onToggle={onZoomToggle} />
           <TheaterButton
             isTheater={isTheater}
             onToggle={() => {

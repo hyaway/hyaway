@@ -14,6 +14,7 @@ import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
 import { FileStateBadge } from "@/components/file-detail/file-state-badge";
+import { VidstackZoomButton } from "@/components/file-detail/viewers/vidstack-zoom-button";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
@@ -24,6 +25,7 @@ import {
   useImageBackground,
   useMediaAutoPlay,
   useMediaStartWithSound,
+  useVideoStartExpanded,
 } from "@/stores/file-viewer-settings-store";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
@@ -49,6 +51,10 @@ export function ReviewCardContent({
   const fillCanvasBackground = useFillCanvasBackground();
   const mediaAutoPlay = useMediaAutoPlay();
   const mediaStartWithSound = useMediaStartWithSound();
+  const videoStartExpanded = useVideoStartExpanded();
+
+  // Zoom fill state for videos
+  const [zoomFill, setZoomFill] = useState(() => videoStartExpanded);
 
   // Player refs for controlling playback when becoming top card
   const videoPlayerRef = useRef<MediaPlayerInstance>(null);
@@ -214,7 +220,11 @@ export function ReviewCardContent({
         >
           <MediaProvider
             mediaProps={{
-              className: cn("max-h-full! max-w-full! object-contain"),
+              className: cn(
+                zoomFill
+                  ? "h-full! w-full! object-contain"
+                  : "max-h-full! max-w-full! object-contain",
+              ),
             }}
           />
           <DefaultVideoLayout
@@ -222,6 +232,14 @@ export function ReviewCardContent({
             colorScheme={activeTheme}
             noGestures // Disable gesture handling so our swipe works
             noScrubGesture // Disable scrub gesture on timeline
+            slots={{
+              beforeFullscreenButton: (
+                <VidstackZoomButton
+                  zoomFill={zoomFill}
+                  onToggle={() => setZoomFill((prev) => !prev)}
+                />
+              ),
+            }}
           />
         </MediaPlayer>
       )}
