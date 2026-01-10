@@ -44,13 +44,13 @@ export function useReviewActions({
     return [
       {
         id: "review-replace",
-        label: "Replace queue",
+        label: "New review",
         icon: IconCards,
         onClick: handleReview,
       },
       {
         id: "review-add",
-        label: "Add to queue",
+        label: "Add to review",
         icon: IconCards,
         onClick: handleAddToQueue,
       },
