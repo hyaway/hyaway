@@ -8,6 +8,8 @@ import {
   IconArrowsShuffle,
   IconArrowsShuffle2,
   IconCalendarStats,
+  IconCards,
+  IconCardsFilled,
   IconChartArea,
   IconChartAreaFilled,
   IconClock,
@@ -36,6 +38,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuItem,
   SidebarMenuLinkButton,
   SidebarRail,
@@ -45,6 +48,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui-primitives/tooltip";
+import { useReviewQueueRemaining } from "@/stores/review-queue-store";
 import { cn } from "@/lib/utils";
 
 /** Icon pair component that shows outline icon normally, filled when parent has data-active */
@@ -111,6 +115,38 @@ function SidebarNavLink({
   }
 
   return content;
+}
+
+/** Review queue nav item with badge showing remaining items */
+function ReviewQueueNavItem({
+  permissionsFetched,
+  hasPermission,
+}: Omit<SidebarNavLinkProps, "children" | "requiredPermissions">) {
+  const remaining = useReviewQueueRemaining();
+
+  return (
+    <SidebarMenuItem>
+      <SidebarNavLink
+        requiredPermissions={[Permission.IMPORT_AND_DELETE_FILES]}
+        permissionsFetched={permissionsFetched}
+        hasPermission={hasPermission}
+      >
+        {(variant) => (
+          <SidebarMenuLinkButton to="/review" variant={variant}>
+            <TouchTarget>
+              <SidebarIcon icon={IconCards} filledIcon={IconCardsFilled} />
+              <span>Review queue</span>
+            </TouchTarget>
+            {remaining > 0 && (
+              <SidebarMenuBadge className="bg-primary text-primary-foreground">
+                {remaining > 999 ? "999+" : remaining}
+              </SidebarMenuBadge>
+            )}
+          </SidebarMenuLinkButton>
+        )}
+      </SidebarNavLink>
+    </SidebarMenuItem>
+  );
 }
 
 export function AppSidebar() {
@@ -190,6 +226,7 @@ export function AppSidebar() {
                 )}
               </SidebarNavLink>
             </SidebarMenuItem>
+            <ReviewQueueNavItem {...navLinkProps} />
           </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup>

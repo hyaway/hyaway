@@ -13,6 +13,7 @@ import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryDisplaySettingsPopover } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
+import { useReviewActions } from "@/hooks/use-review-actions";
 import { PageState } from "@/integrations/hydrus-api/models";
 import {
   useFocusPageMutation,
@@ -80,6 +81,10 @@ function PageContent({
   const refreshPageMutation = useRefreshPageMutation();
   const focusPageMutation = useFocusPageMutation();
   const queryClient = useQueryClient();
+
+  // Get file IDs for review queue
+  const fileIds = data?.page_info.media?.hash_ids ?? [];
+  const reviewActions = useReviewActions({ fileIds });
 
   // Determine if page is in a loading/initializing state
   const pageState = data?.page_info.page_state;
@@ -185,7 +190,7 @@ function PageContent({
       </PageHeaderActions>
       <PageFloatingFooter
         leftContent={refetchButton}
-        actions={overflowActions}
+        actions={[...reviewActions, ...overflowActions]}
       />
     </>
   );
