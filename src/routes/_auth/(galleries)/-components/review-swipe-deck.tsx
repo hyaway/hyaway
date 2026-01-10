@@ -299,7 +299,7 @@ export function ReviewSwipeDeckVisual({
               onSwipe={handleSwipe}
               onExitComplete={() => handleExitComplete(fileId)}
             >
-              <ReviewCardContent fileId={fileId} />
+              <ReviewCardContent fileId={fileId} isTop={isTopCard} />
             </ReviewSwipeCard>
           );
         })}

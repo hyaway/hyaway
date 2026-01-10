@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import {
   DefaultAudioLayout,
   DefaultVideoLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
-import type { AudioMimeType, VideoMimeType } from "@vidstack/react";
+import type {
+  AudioMimeType,
+  MediaPlayerInstance,
+  VideoMimeType,
+} from "@vidstack/react";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
@@ -15,18 +19,54 @@ import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { useActiveTheme } from "@/stores/theme-store";
+import {
+  useFillCanvasBackground,
+  useImageBackground,
+  useMediaAutoPlay,
+  useMediaStartWithSound,
+} from "@/stores/file-viewer-settings-store";
+import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
 
 interface ReviewCardContentProps {
   fileId: number;
+  /** Whether this card is the top (active) card in the deck */
+  isTop?: boolean;
 }
 
-export function ReviewCardContent({ fileId }: ReviewCardContentProps) {
+export function ReviewCardContent({
+  fileId,
+  isTop = false,
+}: ReviewCardContentProps) {
   const { data: metadata, isPending } = useGetSingleFileMetadata(fileId);
   const { url: fileUrl, onLoad, onError } = useFullFileIdUrl(fileId);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const activeTheme = useActiveTheme();
+
+  // Settings
+  const imageBackground = useImageBackground();
+  const fillCanvasBackground = useFillCanvasBackground();
+  const mediaAutoPlay = useMediaAutoPlay();
+  const mediaStartWithSound = useMediaStartWithSound();
+
+  // Player refs for controlling playback when becoming top card
+  const videoPlayerRef = useRef<MediaPlayerInstance>(null);
+  const audioPlayerRef = useRef<MediaPlayerInstance>(null);
+
+  // Play/pause when becoming/leaving top card
+  useEffect(() => {
+    if (!mediaAutoPlay) return;
+
+    const player = videoPlayerRef.current ?? audioPlayerRef.current;
+    if (!player) return;
+
+    if (isTop && loaded) {
+      player.play();
+    } else {
+      player.pause();
+    }
+  }, [isTop, loaded, mediaAutoPlay]);
 
   if (isPending) {
     return (
@@ -48,6 +88,12 @@ export function ReviewCardContent({ fileId }: ReviewCardContentProps) {
   const isVideo = metadata.mime.startsWith("video/");
   const isAudio = metadata.mime.startsWith("audio/");
 
+  // Compute average color from blurhash for image backgrounds
+  const averageColor = useMemo(
+    () => getAverageColorFromBlurhash(metadata.blurhash ?? undefined),
+    [metadata.blurhash],
+  );
+
   const handleLoad = () => {
     setLoaded(true);
     onLoad();
@@ -58,9 +104,70 @@ export function ReviewCardContent({ fileId }: ReviewCardContentProps) {
     onError();
   };
 
+  // Compute background style for images (only when fillCanvasBackground is enabled)
+  const getContainerBackgroundClass = () => {
+    if (!isImage || !fillCanvasBackground || !loaded) return "";
+    switch (imageBackground) {
+      case "checkerboard":
+        return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
+      case "solid":
+        return "bg-muted";
+      case "average":
+        return ""; // Handled via inline style
+      default:
+        return "";
+    }
+  };
+
+  // Container background style (for fill canvas with average color)
+  const getContainerStyle = () => {
+    if (
+      isImage &&
+      fillCanvasBackground &&
+      imageBackground === "average" &&
+      averageColor &&
+      loaded
+    ) {
+      return { backgroundColor: averageColor };
+    }
+    return {};
+  };
+
+  // Image background (when not using fill canvas)
+  const getImageBackgroundClass = () => {
+    if (!loaded || fillCanvasBackground) return "";
+    switch (imageBackground) {
+      case "checkerboard":
+        return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
+      case "average":
+        return ""; // Handled via inline style
+      default:
+        return "bg-background";
+    }
+  };
+
+  // Image background style (for average color when not using fill canvas)
+  const getImageStyle = () => {
+    if (
+      loaded &&
+      imageBackground === "average" &&
+      averageColor &&
+      !fillCanvasBackground
+    ) {
+      return { backgroundColor: averageColor };
+    }
+    return {};
+  };
+
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
-      {/* Blurhash placeholder */}
+    <div
+      className={cn(
+        "relative flex h-full w-full items-center justify-center overflow-hidden",
+        getContainerBackgroundClass(),
+      )}
+      style={getContainerStyle()}
+    >
+      {/* Blurhash placeholder - only while loading */}
       {metadata.blurhash && !loaded && !error && (
         <BlurhashCanvas
           blurhash={metadata.blurhash}
@@ -75,9 +182,11 @@ export function ReviewCardContent({ fileId }: ReviewCardContentProps) {
           alt={`File ${fileId}`}
           onLoad={handleLoad}
           onError={handleError}
+          style={getImageStyle()}
           className={cn(
             "max-h-full max-w-full object-contain transition-opacity duration-200",
             loaded ? "opacity-100" : "opacity-0",
+            getImageBackgroundClass(),
           )}
           draggable={false}
         />
@@ -85,6 +194,7 @@ export function ReviewCardContent({ fileId }: ReviewCardContentProps) {
 
       {isVideo && (
         <MediaPlayer
+          ref={videoPlayerRef}
           title={`🎞️${fileId}`}
           className={cn(
             "max-h-full max-w-full transition-opacity duration-200",
@@ -98,6 +208,8 @@ export function ReviewCardContent({ fileId }: ReviewCardContentProps) {
             if (err.code === 2 || err.code === 4) handleError();
           }}
           draggable={false}
+          muted={!mediaStartWithSound}
+          loop
         >
           <MediaProvider />
           <DefaultVideoLayout
@@ -110,6 +222,7 @@ export function ReviewCardContent({ fileId }: ReviewCardContentProps) {
       {isAudio && (
         <div className="flex h-full w-full flex-col items-center justify-center gap-4 p-4">
           <MediaPlayer
+            ref={audioPlayerRef}
             title={`🎵${fileId}`}
             className="w-full"
             src={{ src: fileUrl, type: metadata.mime as AudioMimeType }}
@@ -120,6 +233,8 @@ export function ReviewCardContent({ fileId }: ReviewCardContentProps) {
               if (err.code === 2 || err.code === 4) handleError();
             }}
             draggable={false}
+            muted={!mediaStartWithSound}
+            loop
           >
             <MediaProvider />
             <DefaultAudioLayout

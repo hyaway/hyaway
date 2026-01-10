@@ -6,7 +6,9 @@ import {
   ReviewSwipeDeckVisual,
   useReviewSwipeDeck,
 } from "./-components/review-swipe-deck";
+import { FileViewerSettingsPopover } from "@/components/file-detail/file-viewer-settings-popover";
 import { EmptyState } from "@/components/page-shell/empty-state";
+import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { Button, LinkButton } from "@/components/ui-primitives/button";
 import {
@@ -44,6 +46,9 @@ function ReviewPage() {
     return (
       <div className="flex flex-col">
         <PageHeading title="Review Queue" />
+        <PageHeaderActions>
+          <FileViewerSettingsPopover />
+        </PageHeaderActions>
         <EmptyState
           message="No items in review queue. Add files from a page to start reviewing."
           action={
@@ -59,6 +64,9 @@ function ReviewPage() {
   if (isComplete) {
     return (
       <div className="flex min-h-[calc(100dvh-8rem)] flex-col items-center justify-center">
+        <PageHeaderActions>
+          <FileViewerSettingsPopover />
+        </PageHeaderActions>
         <ReviewCompletion
           stats={stats}
           onUndo={
@@ -83,6 +91,10 @@ function ReviewPage() {
   // The deck will size itself based on viewport
   return (
     <div className="flex flex-col">
+      <PageHeaderActions>
+        <FileViewerSettingsPopover />
+      </PageHeaderActions>
+
       {/* Progress indicator */}
       <div className="text-muted-foreground flex items-center gap-2 px-4 py-1 text-xs tabular-nums">
         <div className="bg-muted h-1 flex-1 overflow-hidden rounded-full">
