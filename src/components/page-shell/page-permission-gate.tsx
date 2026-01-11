@@ -50,7 +50,7 @@ export function PagePermissionGate({
         title="Missing permissions"
         description="Your access key is missing required permissions for this page. Update your API key in Hydrus to include these permissions (or permit everything):"
         actions={
-          <LinkButton to="/settings/client-api" size="lg">
+          <LinkButton to="/settings/connection" size="lg">
             Update API settings
           </LinkButton>
         }

@@ -11,7 +11,7 @@ import { useGallerySettingsActions } from "@/stores/gallery-settings-store";
 import { usePagesSettingsActions } from "@/stores/pages-settings-store";
 import { useTagsSettingsActions } from "@/stores/tags-settings-store";
 
-export function ResetAllUxSettingsCard() {
+export function ResetAllAppearanceSettingsCard() {
   const { reset: resetGallery } = useGallerySettingsActions();
   const { reset: resetFileViewer } = useFileViewerSettingsActions();
   const { reset: resetPages } = usePagesSettingsActions();
@@ -27,7 +27,7 @@ export function ResetAllUxSettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <SettingsCardTitle>Reset all UX settings</SettingsCardTitle>
+        <SettingsCardTitle>Reset all appearance settings</SettingsCardTitle>
         <CardDescription>
           Reset all settings on this page to their default values. This does not
           affect your theme preference.
@@ -35,7 +35,7 @@ export function ResetAllUxSettingsCard() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <Button variant="destructive" onClick={handleResetAll}>
-          Reset UX settings
+          Reset appearance settings
         </Button>
       </CardContent>
     </Card>

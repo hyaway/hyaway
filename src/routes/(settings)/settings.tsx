@@ -49,14 +49,14 @@ function NavIcon({
 
 const settingsItems = linkOptions([
   {
-    name: "Client API",
-    to: "/settings/client-api",
+    name: "Connection",
+    to: "/settings/connection",
     icon: IconLock,
     filledIcon: IconLockFilled,
   },
   {
-    name: "UX",
-    to: "/settings/ux",
+    name: "Appearance",
+    to: "/settings/appearance",
     icon: IconLayoutDashboard,
     filledIcon: IconLayoutDashboardFilled,
   },

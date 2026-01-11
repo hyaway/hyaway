@@ -6,15 +6,15 @@ import { SessionKeyCard } from "./-components/session-key-card";
 import { ResetCard } from "./-components/reset-card";
 import { Heading } from "@/components/ui-primitives/heading";
 
-export const Route = createFileRoute("/(settings)/settings/client-api")({
-  component: SettingsClientApiComponent,
+export const Route = createFileRoute("/(settings)/settings/connection")({
+  component: SettingsConnectionComponent,
   beforeLoad: () => ({
-    getTitle: () => "Client API settings",
+    getTitle: () => "Connection settings",
     useHistoryBack: true,
   }),
 });
 
-function SettingsClientApiComponent() {
+function SettingsConnectionComponent() {
   const [settingsKey, setSettingsKey] = useState(0);
 
   const resetKey = () => {
@@ -24,7 +24,7 @@ function SettingsClientApiComponent() {
   return (
     <div className="flex max-w-xl flex-col gap-4" key={settingsKey}>
       <Heading level={2} className="sr-only">
-        Client API
+        Connection
       </Heading>
       <ApiEndpointCard />
       <AccessKeyCard />

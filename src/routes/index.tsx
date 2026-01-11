@@ -50,8 +50,8 @@ interface NavItem {
     | "/most-viewed"
     | "/longest-viewed"
     | "/settings"
-    | "/settings/client-api"
-    | "/settings/ux"
+    | "/settings/connection"
+    | "/settings/appearance"
     | "/settings/data";
   icon: React.ComponentType<{ className?: string }>;
   requiredPermissions?: Array<Permission>;
@@ -162,7 +162,7 @@ const NAV_GROUPS: Array<NavGroup> = [
     items: [
       {
         title: "Settings",
-        description: "Configure  connection, appearance, and data preferences",
+        description: "Configure connection, appearance, and data preferences",
         to: "/settings",
         icon: IconSettings,
       },
@@ -214,7 +214,7 @@ function MarketingHeader() {
         </p>
       </div>
       <div className="flex flex-wrap gap-3">
-        <LinkButton to="/settings/client-api" size="lg">
+        <LinkButton to="/settings/connection" size="lg">
           Get started
         </LinkButton>
         <a

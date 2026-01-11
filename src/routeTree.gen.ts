@@ -24,9 +24,9 @@ import { Route as AuthgalleriesRandomInboxRouteImport } from "./routes/_auth/(ga
 import { Route as AuthgalleriesMostViewedRouteImport } from "./routes/_auth/(galleries)/most-viewed";
 import { Route as AuthgalleriesLongestViewedRouteImport } from "./routes/_auth/(galleries)/longest-viewed";
 import { Route as AuthgalleriesHistoryRouteImport } from "./routes/_auth/(galleries)/history";
-import { Route as settingsSettingsUxRouteImport } from "./routes/(settings)/settings.ux";
 import { Route as settingsSettingsDataRouteImport } from "./routes/(settings)/settings.data";
-import { Route as settingsSettingsClientApiRouteImport } from "./routes/(settings)/settings.client-api";
+import { Route as settingsSettingsConnectionRouteImport } from "./routes/(settings)/settings.connection";
+import { Route as settingsSettingsAppearanceRouteImport } from "./routes/(settings)/settings.appearance";
 import { Route as AuthreviewReviewIndexRouteImport } from "./routes/_auth/(review)/review.index";
 import { Route as AuthremotePagesPagesIndexRouteImport } from "./routes/_auth/(remote-pages)/pages.index";
 import { Route as AuthgalleriesRemoteHistoryIndexRouteImport } from "./routes/_auth/(galleries)/remote-history.index";
@@ -129,20 +129,21 @@ const AuthgalleriesHistoryRoute = AuthgalleriesHistoryRouteImport.update({
   path: "/history",
   getParentRoute: () => AuthRoute,
 } as any);
-const settingsSettingsUxRoute = settingsSettingsUxRouteImport.update({
-  id: "/ux",
-  path: "/ux",
-  getParentRoute: () => settingsSettingsRoute,
-} as any);
 const settingsSettingsDataRoute = settingsSettingsDataRouteImport.update({
   id: "/data",
   path: "/data",
   getParentRoute: () => settingsSettingsRoute,
 } as any);
-const settingsSettingsClientApiRoute =
-  settingsSettingsClientApiRouteImport.update({
-    id: "/client-api",
-    path: "/client-api",
+const settingsSettingsConnectionRoute =
+  settingsSettingsConnectionRouteImport.update({
+    id: "/connection",
+    path: "/connection",
+    getParentRoute: () => settingsSettingsRoute,
+  } as any);
+const settingsSettingsAppearanceRoute =
+  settingsSettingsAppearanceRouteImport.update({
+    id: "/appearance",
+    path: "/appearance",
     getParentRoute: () => settingsSettingsRoute,
   } as any);
 const AuthreviewReviewIndexRoute = AuthreviewReviewIndexRouteImport.update({
@@ -274,9 +275,9 @@ const AuthremotePagesPagesPageIdFileIdRoute =
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/settings": typeof settingsSettingsRouteWithChildren;
-  "/settings/client-api": typeof settingsSettingsClientApiRoute;
+  "/settings/appearance": typeof settingsSettingsAppearanceRoute;
+  "/settings/connection": typeof settingsSettingsConnectionRoute;
   "/settings/data": typeof settingsSettingsDataRoute;
-  "/settings/ux": typeof settingsSettingsUxRoute;
   "/history": typeof AuthgalleriesHistoryRouteWithChildren;
   "/longest-viewed": typeof AuthgalleriesLongestViewedRouteWithChildren;
   "/most-viewed": typeof AuthgalleriesMostViewedRouteWithChildren;
@@ -313,9 +314,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
-  "/settings/client-api": typeof settingsSettingsClientApiRoute;
+  "/settings/appearance": typeof settingsSettingsAppearanceRoute;
+  "/settings/connection": typeof settingsSettingsConnectionRoute;
   "/settings/data": typeof settingsSettingsDataRoute;
-  "/settings/ux": typeof settingsSettingsUxRoute;
   "/file/$fileId": typeof AuthFileFileIdRoute;
   "/settings": typeof settingsSettingsIndexRoute;
   "/history/$fileId": typeof AuthgalleriesHistoryFileIdRoute;
@@ -344,9 +345,9 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/_auth": typeof AuthRouteWithChildren;
   "/(settings)/settings": typeof settingsSettingsRouteWithChildren;
-  "/(settings)/settings/client-api": typeof settingsSettingsClientApiRoute;
+  "/(settings)/settings/appearance": typeof settingsSettingsAppearanceRoute;
+  "/(settings)/settings/connection": typeof settingsSettingsConnectionRoute;
   "/(settings)/settings/data": typeof settingsSettingsDataRoute;
-  "/(settings)/settings/ux": typeof settingsSettingsUxRoute;
   "/_auth/(galleries)/history": typeof AuthgalleriesHistoryRouteWithChildren;
   "/_auth/(galleries)/longest-viewed": typeof AuthgalleriesLongestViewedRouteWithChildren;
   "/_auth/(galleries)/most-viewed": typeof AuthgalleriesMostViewedRouteWithChildren;
@@ -386,9 +387,9 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/settings"
-    | "/settings/client-api"
+    | "/settings/appearance"
+    | "/settings/connection"
     | "/settings/data"
-    | "/settings/ux"
     | "/history"
     | "/longest-viewed"
     | "/most-viewed"
@@ -425,9 +426,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
-    | "/settings/client-api"
+    | "/settings/appearance"
+    | "/settings/connection"
     | "/settings/data"
-    | "/settings/ux"
     | "/file/$fileId"
     | "/settings"
     | "/history/$fileId"
@@ -455,9 +456,9 @@ export interface FileRouteTypes {
     | "/"
     | "/_auth"
     | "/(settings)/settings"
-    | "/(settings)/settings/client-api"
+    | "/(settings)/settings/appearance"
+    | "/(settings)/settings/connection"
     | "/(settings)/settings/data"
-    | "/(settings)/settings/ux"
     | "/_auth/(galleries)/history"
     | "/_auth/(galleries)/longest-viewed"
     | "/_auth/(galleries)/most-viewed"
@@ -606,13 +607,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthgalleriesHistoryRouteImport;
       parentRoute: typeof AuthRoute;
     };
-    "/(settings)/settings/ux": {
-      id: "/(settings)/settings/ux";
-      path: "/ux";
-      fullPath: "/settings/ux";
-      preLoaderRoute: typeof settingsSettingsUxRouteImport;
-      parentRoute: typeof settingsSettingsRoute;
-    };
     "/(settings)/settings/data": {
       id: "/(settings)/settings/data";
       path: "/data";
@@ -620,11 +614,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof settingsSettingsDataRouteImport;
       parentRoute: typeof settingsSettingsRoute;
     };
-    "/(settings)/settings/client-api": {
-      id: "/(settings)/settings/client-api";
-      path: "/client-api";
-      fullPath: "/settings/client-api";
-      preLoaderRoute: typeof settingsSettingsClientApiRouteImport;
+    "/(settings)/settings/connection": {
+      id: "/(settings)/settings/connection";
+      path: "/connection";
+      fullPath: "/settings/connection";
+      preLoaderRoute: typeof settingsSettingsConnectionRouteImport;
+      parentRoute: typeof settingsSettingsRoute;
+    };
+    "/(settings)/settings/appearance": {
+      id: "/(settings)/settings/appearance";
+      path: "/appearance";
+      fullPath: "/settings/appearance";
+      preLoaderRoute: typeof settingsSettingsAppearanceRouteImport;
       parentRoute: typeof settingsSettingsRoute;
     };
     "/_auth/(review)/review/": {
@@ -985,16 +986,16 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
 
 interface settingsSettingsRouteChildren {
-  settingsSettingsClientApiRoute: typeof settingsSettingsClientApiRoute;
+  settingsSettingsAppearanceRoute: typeof settingsSettingsAppearanceRoute;
+  settingsSettingsConnectionRoute: typeof settingsSettingsConnectionRoute;
   settingsSettingsDataRoute: typeof settingsSettingsDataRoute;
-  settingsSettingsUxRoute: typeof settingsSettingsUxRoute;
   settingsSettingsIndexRoute: typeof settingsSettingsIndexRoute;
 }
 
 const settingsSettingsRouteChildren: settingsSettingsRouteChildren = {
-  settingsSettingsClientApiRoute: settingsSettingsClientApiRoute,
+  settingsSettingsAppearanceRoute: settingsSettingsAppearanceRoute,
+  settingsSettingsConnectionRoute: settingsSettingsConnectionRoute,
   settingsSettingsDataRoute: settingsSettingsDataRoute,
-  settingsSettingsUxRoute: settingsSettingsUxRoute,
   settingsSettingsIndexRoute: settingsSettingsIndexRoute,
 };
 

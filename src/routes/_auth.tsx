@@ -125,11 +125,11 @@ function AuthErrorScreen({
             Retry
           </Button>
           <LinkButton
-            to="/settings/client-api"
+            to="/settings/connection"
             variant="default"
             className="flex-1"
           >
-            Configure API
+            Configure connection
           </LinkButton>
         </div>
       }
@@ -145,7 +145,7 @@ function AuthNotConfiguredPrompt() {
       title="Connect to Hydrus"
       description="Configure the API endpoint and access key to connect to your Hydrus client."
       actions={
-        <LinkButton to="/settings/client-api" size="lg">
+        <LinkButton to="/settings/connection" size="lg">
           <IconLock data-icon="inline-start" />
           Configure connection
         </LinkButton>
