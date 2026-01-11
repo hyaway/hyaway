@@ -229,7 +229,7 @@ function MarketingHeader() {
           Get started
         </LinkButton>
         <a
-          href="https://github.com/hyaway/hyaway/wiki"
+          href="https://github.com/hyaway/hyaway/blob/main/docs/SETUP.md"
           target="_blank"
           rel="noopener noreferrer"
           className="border-border bg-input/30 hover:bg-input/50 hover:text-foreground inline-flex h-12 items-center justify-center gap-2 rounded-4xl border px-5 text-sm font-medium transition-all"

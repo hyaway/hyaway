@@ -14,7 +14,9 @@ pnpm dev
 
 Then open `http://localhost:3000`.
 
-To connect to Hydrus, configure the endpoint + access key in the app under **Settings → Client API**.
+To connect to Hydrus, configure the endpoint + access key in the app under **Settings → Connection**.
+
+📖 **[Setup Guide](docs/SETUP.md)** — Detailed instructions for local, remote, and self-hosted setups.
 
 ## Common Commands
 
