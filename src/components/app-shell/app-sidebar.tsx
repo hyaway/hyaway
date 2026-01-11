@@ -177,7 +177,7 @@ export function AppSidebar() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <Heading className="truncate font-medium" level={2}>
-                    HyAway
+                    hyAway
                   </Heading>
                 </div>
               </TouchTarget>

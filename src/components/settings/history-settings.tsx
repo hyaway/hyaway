@@ -49,7 +49,7 @@ export function HistorySettings({ idPrefix = "" }: HistorySettingsProps) {
     <SettingsGroup>
       <SwitchField
         id={`${idPrefix}history-enabled-switch`}
-        label="Record new views in HyAway"
+        label="Record new views in hyAway"
         description="Current entries are kept when disabled"
         checked={enabled}
         onCheckedChange={setEnabled}

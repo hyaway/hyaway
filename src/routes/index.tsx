@@ -335,7 +335,7 @@ function AboutSection() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <Heading level={2} className="text-base font-medium">
-            About HyAway
+            About hyAway
           </Heading>
           <p className="text-muted-foreground text-sm">
             A web client for{" "}

@@ -2,7 +2,7 @@
 
 > **Status**: Active pattern used throughout the codebase
 
-HyAway uses **Zustand** for client-side state management with explicit selector hooks for ergonomic access.
+hyAway uses **Zustand** for client-side state management with explicit selector hooks for ergonomic access.
 
 ## Store Files
 

@@ -1,4 +1,4 @@
-HyAway is a React + TypeScript web UI for browsing files from a Hydrus Network client via the Hydrus Client API.
+hyAway is a web UI for browsing files from a Hydrus Network client via the Hydrus Client API.
 
 ## Requirements
 

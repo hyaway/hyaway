@@ -1,8 +1,8 @@
-# HyAway Project Instructions
+# hyAway Project Instructions
 
 ## Project Overview
 
-HyAway is a React + TypeScript frontend application for browsing Hydrus Network files. It uses:
+hyAway is a React + TypeScript frontend application for browsing Hydrus Network files. It uses:
 
 - **React 19** with TypeScript
 - **TanStack Router** for file-based routing

@@ -1,6 +1,6 @@
-# HyAway Documentation
+# hyAway Documentation
 
-This folder contains detailed documentation for specific features and patterns used in the HyAway project. These docs serve as both developer reference and AI assistant context.
+This folder contains detailed documentation for specific features and patterns used in the hyAway project. These docs serve as both developer reference and AI assistant context.
 
 ## Documentation Index
 
