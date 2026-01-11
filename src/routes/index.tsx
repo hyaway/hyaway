@@ -3,6 +3,7 @@ import {
   IconArchive,
   IconArrowsShuffle,
   IconBrandGithub,
+  IconBrandX,
   IconCalendarStats,
   IconCards,
   IconChartArea,
@@ -365,6 +366,20 @@ function AboutSection() {
           >
             <IconBrandGithub className="size-4" />
             GitHub
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={
+              <a
+                href="https://x.com/hyAway_dev"
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            }
+          >
+            <IconBrandX className="size-4" />
           </Button>
         </div>
       </div>
