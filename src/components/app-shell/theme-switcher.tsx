@@ -38,15 +38,12 @@ export function ThemeSwitcher(props: ComponentProps<typeof Button>) {
   return (
     <Button
       variant={"ghost"}
-      size={"icon-xl"}
+      size={"icon-sm"}
       aria-label="Switch theme"
       {...props}
       onClick={() => setThemePreference(getNextTheme(themePreference))}
     >
-      <ThemeIcon
-        themePreference={themePreference}
-        className="h-[1.2rem] w-[1.2rem]"
-      />
+      <ThemeIcon themePreference={themePreference} />
     </Button>
   );
 }
@@ -84,7 +81,7 @@ function ThemeIcon({
     >
       <IconSun
         className={cn(
-          "size-4 rotate-0 transition-all dark:scale-0 dark:-rotate-90",
+          "rotate-0 transition-all dark:scale-0 dark:-rotate-90",
           themePreference === "system"
             ? "-translate-y-0.5 scale-30"
             : "scale-100",
@@ -92,7 +89,7 @@ function ThemeIcon({
       />
       <IconMoonFilled
         className={cn(
-          "absolute size-4 scale-0 rotate-90 transition-all dark:rotate-0",
+          "absolute scale-0 rotate-90 transition-all dark:rotate-0",
           themePreference === "system"
             ? "-translate-y-0.5 dark:scale-30"
             : "dark:scale-100",
@@ -100,7 +97,7 @@ function ThemeIcon({
       />
       <IconDeviceDesktop
         className={cn(
-          "absolute size-4 transition-all",
+          "absolute transition-all",
           themePreference === "system" ? "scale-100" : "scale-0",
         )}
       />

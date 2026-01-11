@@ -75,7 +75,7 @@ export function AppBreadcrumb() {
                     className="@md:hidden"
                     onClick={() => router.history.back()}
                   >
-                    <IconArrowLeft className="size-5" />
+                    <IconArrowLeft />
                   </Button>
                 ) : (
                   parentCrumb && (
@@ -87,7 +87,7 @@ export function AppBreadcrumb() {
                       render={<Link to={parentCrumb.path} />}
                       nativeButton={false}
                     >
-                      <IconArrowLeft className="size-5" />
+                      <IconArrowLeft />
                     </Button>
                   )
                 )}

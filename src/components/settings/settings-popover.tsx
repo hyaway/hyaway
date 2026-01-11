@@ -36,7 +36,7 @@ export function SettingsPopover({
             className={className}
             aria-label={label}
           >
-            <IconAdjustmentsHorizontal className="size-5" />
+            <IconAdjustmentsHorizontal />
           </Button>
         }
       />
