@@ -27,7 +27,7 @@ import {
 } from "@/stores/review-queue-store";
 import { Progress } from "@/components/ui-primitives/progress";
 
-export const Route = createFileRoute("/_auth/(galleries)/review/")({
+export const Route = createFileRoute("/_auth/(review)/review/")({
   component: ReviewPage,
 });
 
