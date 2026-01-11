@@ -15,7 +15,7 @@ import {
   IconSettings,
   IconTrash,
 } from "@tabler/icons-react";
-import { Heading } from "@/components/ui-primitives/heading";
+import { Heading, Subheading } from "@/components/ui-primitives/heading";
 import { Button, LinkButton } from "@/components/ui-primitives/button";
 import { Separator } from "@/components/ui-primitives/separator";
 import {
@@ -206,12 +206,23 @@ function MarketingHeader() {
       </div>
       <div className="flex flex-col gap-3">
         <Heading level={1} className="text-3xl font-bold sm:text-4xl">
-          Browse your <span className="text-primary">Hydrus network</span>{" "}
-          gallery from anywhere
+          hyAway
         </Heading>
-        <p className="text-muted-foreground max-w-2xl text-lg">
-          A web client for Hydrus Network.
-        </p>
+        <Subheading
+          level={2}
+          className="text-muted-foreground text-lg sm:text-xl"
+        >
+          Browse your{" "}
+          <a
+            href="https://hydrusnetwork.github.io/hydrus/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            Hydrus Network
+          </a>{" "}
+          gallery from anywhere
+        </Subheading>
       </div>
       <div className="flex flex-wrap gap-3">
         <LinkButton to="/settings/connection" size="lg">
