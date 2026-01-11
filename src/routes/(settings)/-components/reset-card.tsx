@@ -14,10 +14,10 @@ export function ResetCard({ resetKey }: { resetKey: () => void }) {
   return (
     <Card>
       <CardHeader>
-        <SettingsCardTitle>Reset all API settings</SettingsCardTitle>
+        <SettingsCardTitle>Reset all connection settings</SettingsCardTitle>
         <CardDescription>
-          Clear your API endpoint and access key configuration. You will need to
-          reconfigure your connection to Hydrus.
+          Clears your API endpoint and access key. You will need to reconfigure
+          your connection to Hydrus.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
