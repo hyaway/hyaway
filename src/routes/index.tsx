@@ -15,7 +15,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { Heading } from "@/components/ui-primitives/heading";
-import { LinkButton } from "@/components/ui-primitives/button";
+import { Button, LinkButton } from "@/components/ui-primitives/button";
 import { Separator } from "@/components/ui-primitives/separator";
 import {
   Tooltip,
@@ -287,7 +287,7 @@ function ShortcutCard({
     <Link
       to={item.to}
       className={cn(
-        "border-border hover:border-ring/50 hover:bg-accent flex items-start gap-4 rounded-2xl border p-4 transition-colors",
+        "border-border hover:border-ring/50 hover:bg-accent/50 flex items-start gap-4 rounded-2xl border p-4 transition-colors",
         isMuted && "opacity-50",
       )}
     >
@@ -351,15 +351,21 @@ function AboutSection() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <a
-            href="https://github.com/hyaway/hyaway"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="border-border bg-input/30 hover:bg-input/50 hover:text-foreground inline-flex h-9 items-center justify-center gap-1.5 rounded-4xl border px-3 text-sm font-medium transition-all"
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={
+              <a
+                href="https://github.com/hyaway/hyaway"
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            }
           >
             <IconBrandGithub className="size-4" />
             GitHub
-          </a>
+          </Button>
         </div>
       </div>
     </footer>

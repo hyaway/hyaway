@@ -49,9 +49,9 @@ function TheaterButton({
           aria-label={isTheater ? "Exit theater mode" : "Theater mode"}
         >
           {isTheater ? (
-            <IconArrowsMinimize className="size-[26px]" />
+            <IconArrowsMinimize className="size-6.5" />
           ) : (
-            <IconArrowsMaximize className="size-[26px]" />
+            <IconArrowsMaximize className="size-6.5" />
           )}
         </button>
       </Tooltip.Trigger>
