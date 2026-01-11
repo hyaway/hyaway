@@ -123,7 +123,7 @@ const useReviewQueueStore = create<ReviewQueueState>()(
     {
       name: "review-queue-storage",
       storage: createJSONStorage(() => localStorage),
-      // Persist queue state
+      // Persist both fileIds and currentIndex for truncation on reload
       partialize: (state) => ({
         fileIds: state.fileIds,
         currentIndex: state.currentIndex,
