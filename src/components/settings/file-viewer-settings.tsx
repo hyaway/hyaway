@@ -26,8 +26,8 @@ export interface FileViewerSettingsProps {
   idPrefix?: string;
   /** When true, allows multiple sections to be open at the same time */
   openMultiple?: boolean;
-  /** When false, all accordion sections start collapsed */
-  defaultOpen?: boolean;
+  /** Which sections to open by default: 'none', 'default' (based on mime), or 'all' */
+  defaultSections?: "none" | "default" | "all";
   /** Mime type of the current file - determines which section opens by default */
   mimeType?: string;
   /** Hide the "open expanded" settings for both images and videos */
@@ -47,7 +47,7 @@ function getDefaultSection(mimeType?: string): string {
 export function FileViewerSettings({
   idPrefix = "",
   openMultiple = false,
-  defaultOpen = false,
+  defaultSections = "none",
   mimeType,
   hideExpandedSettings = false,
 }: FileViewerSettingsProps) {
@@ -78,10 +78,17 @@ export function FileViewerSettings({
     }
   };
 
+  // Determine which sections to open by default
+  const getDefaultSections = () => {
+    if (defaultSections === "all") return ["image", "video-audio"];
+    if (defaultSections === "default") return [getDefaultSection(mimeType)];
+    return [];
+  };
+
   return (
     <Accordion
       multiple={openMultiple}
-      defaultValue={defaultOpen ? [getDefaultSection(mimeType)] : []}
+      defaultValue={getDefaultSections()}
       className="rounded-none border-0"
     >
       <AccordionSection value="image" title="Image">

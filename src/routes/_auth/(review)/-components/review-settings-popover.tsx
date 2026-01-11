@@ -1,0 +1,37 @@
+import {
+  FILE_VIEWER_SETTINGS_TITLE,
+  FileViewerSettings,
+} from "@/components/settings/file-viewer-settings";
+import {
+  REVIEW_QUEUE_SETTINGS_TITLE,
+  ReviewQueueSettings,
+} from "@/components/settings/review-queue-settings";
+import { SettingsPopover } from "@/components/settings/settings-popover";
+import {
+  SettingsHeader,
+  SettingsTitle,
+} from "@/components/settings/settings-ui";
+import { Separator } from "@/components/ui-primitives/separator";
+
+export function ReviewSettingsPopover() {
+  return (
+    <SettingsPopover label="Settings">
+      <SettingsHeader>
+        <SettingsTitle>{REVIEW_QUEUE_SETTINGS_TITLE}</SettingsTitle>
+      </SettingsHeader>
+      <ReviewQueueSettings />
+
+      <Separator className="my-2" />
+
+      <SettingsHeader>
+        <SettingsTitle>{FILE_VIEWER_SETTINGS_TITLE}</SettingsTitle>
+      </SettingsHeader>
+      <FileViewerSettings
+        idPrefix="popover-"
+        openMultiple
+        defaultSections="all"
+        hideExpandedSettings
+      />
+    </SettingsPopover>
+  );
+}

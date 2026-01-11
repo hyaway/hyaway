@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SearchLimitsSettingsCard } from "./-components/search-limits-settings-card";
 import { HistorySettingsCard } from "./-components/history-settings-card";
+import { ReviewQueueSettingsCard } from "./-components/review-queue-settings-card";
 import { ResetAllDataSettingsCard } from "./-components/reset-all-data-settings-card";
 import { Heading } from "@/components/ui-primitives/heading";
 
@@ -18,6 +19,7 @@ function SettingsDataComponent() {
       <Heading level={2} className="sr-only">
         Data Settings
       </Heading>
+      <ReviewQueueSettingsCard />
       <SearchLimitsSettingsCard />
       <HistorySettingsCard />
       <ResetAllDataSettingsCard />

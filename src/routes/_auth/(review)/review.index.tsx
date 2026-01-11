@@ -2,11 +2,11 @@ import { IconPlayerStopFilled } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ReviewCompletion } from "./-components/review-completion";
 import { ReviewFooter } from "./-components/review-footer";
+import { ReviewSettingsPopover } from "./-components/review-settings-popover";
 import {
   ReviewSwipeDeckVisual,
   useReviewSwipeDeck,
 } from "./-components/review-swipe-deck";
-import { FileViewerSettingsPopover } from "@/components/file-detail/file-viewer-settings-popover";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
@@ -48,7 +48,7 @@ function ReviewPage() {
       <div className="flex flex-col">
         <PageHeading title="Review Queue" />
         <PageHeaderActions>
-          <FileViewerSettingsPopover hideExpandedSettings />
+          <ReviewSettingsPopover />
         </PageHeaderActions>
         <EmptyState
           message="No items in review queue. Add files from a page to start reviewing."
@@ -66,7 +66,7 @@ function ReviewPage() {
     return (
       <div className="flex min-h-[calc(100dvh-8rem)] flex-col items-center justify-center">
         <PageHeaderActions>
-          <FileViewerSettingsPopover hideExpandedSettings />
+          <ReviewSettingsPopover />
         </PageHeaderActions>
         <ReviewCompletion stats={stats} />
         <ReviewFooter
@@ -85,7 +85,7 @@ function ReviewPage() {
   return (
     <div className="flex h-full flex-col">
       <PageHeaderActions>
-        <FileViewerSettingsPopover hideExpandedSettings />
+        <ReviewSettingsPopover />
       </PageHeaderActions>
 
       {/* Stats breakdown */}

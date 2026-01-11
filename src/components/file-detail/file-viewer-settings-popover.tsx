@@ -28,7 +28,7 @@ export function FileViewerSettingsPopover({
       </SettingsHeader>
       <FileViewerSettings
         idPrefix="popover-"
-        defaultOpen
+        defaultSections="default"
         mimeType={mimeType}
         hideExpandedSettings={hideExpandedSettings}
       />
