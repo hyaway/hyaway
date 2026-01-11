@@ -102,6 +102,11 @@ function ReviewPage() {
               {stats.skipped} skipped
             </span>
           )}
+          {stats.unchanged > 0 && (
+            <span className="text-muted-foreground">
+              {stats.unchanged} unchanged
+            </span>
+          )}
         </div>
       )}
       {/* Progress indicator */}

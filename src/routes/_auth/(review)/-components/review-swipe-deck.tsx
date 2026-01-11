@@ -31,6 +31,17 @@ const STACK_SIZE = 3;
 /** Number of next cards to prefetch metadata for */
 const PREFETCH_COUNT = 3;
 
+/** Check if an action didn't change the file state (e.g., archiving already archived) */
+function wasActionUnchanged(
+  action: ReviewAction,
+  previousState: PreviousFileState,
+): boolean {
+  return (
+    (action === "archive" && previousState === "archived") ||
+    (action === "trash" && previousState === "trashed")
+  );
+}
+
 export interface UseReviewSwipeDeckOptions {
   /** Callback when an action is performed */
   onAction?: (action: ReviewAction, fileId: number) => void;
@@ -95,15 +106,17 @@ export function useReviewSwipeDeck({
 
     const lastEntry = undo();
     if (lastEntry) {
-      // Reverse the action
-      if (lastEntry.action === "archive") {
-        // Was archived, need to unarchive (put back in inbox)
-        unarchiveMutation.mutate({ file_ids: [lastEntry.fileId] });
-      } else if (lastEntry.action === "trash") {
-        // Was trashed, need to undelete
-        undeleteMutation.mutate({ file_ids: [lastEntry.fileId] });
+      // Only reverse the action if it actually changed the state
+      if (!wasActionUnchanged(lastEntry.action, lastEntry.previousState)) {
+        if (lastEntry.action === "archive") {
+          // Was archived, need to unarchive (put back in inbox)
+          unarchiveMutation.mutate({ file_ids: [lastEntry.fileId] });
+        } else if (lastEntry.action === "trash") {
+          // Was trashed, need to undelete
+          undeleteMutation.mutate({ file_ids: [lastEntry.fileId] });
+        }
+        // Skip doesn't need reversal
       }
-      // Skip doesn't need reversal
     }
   }, [history.length, undo, unarchiveMutation, undeleteMutation]);
 
@@ -126,52 +139,29 @@ export function useReviewSwipeDeck({
 
       // Get state synchronously before any updates
       const previousState = getPreviousState();
-      const isAlreadyArchived =
-        currentMetadata &&
-        !currentMetadata.is_inbox &&
-        !currentMetadata.is_trashed;
-      const isAlreadyTrashed = currentMetadata?.is_trashed;
+      const isUnchanged = wasActionUnchanged(action, previousState);
 
-      // Process the action immediately - the card stays visible because it's in exitingCards
-      if (action === "archive" && isAlreadyArchived) {
-        // Already archived, treat as skip
-        const entry: ReviewHistoryEntry = {
-          fileId: currentFileId,
-          action: "skip",
-          previousState,
-        };
-        recordAction(entry);
-        onAction?.("skip", currentFileId);
-      } else if (action === "trash" && isAlreadyTrashed) {
-        // Already trashed, treat as skip
-        const entry: ReviewHistoryEntry = {
-          fileId: currentFileId,
-          action: "skip",
-          previousState,
-        };
-        recordAction(entry);
-        onAction?.("skip", currentFileId);
-      } else {
-        // Perform the actual action
+      // Only call mutation if the action will actually change the state
+      if (!isUnchanged) {
         if (action === "archive") {
           archiveMutation.mutate({ file_ids: [currentFileId] });
         } else if (action === "trash") {
           trashMutation.mutate({ file_ids: [currentFileId] });
         }
         // Skip doesn't need a mutation
-
-        const entry: ReviewHistoryEntry = {
-          fileId: currentFileId,
-          action,
-          previousState,
-        };
-        recordAction(entry);
-        onAction?.(action, currentFileId);
       }
+
+      // Record the action in history (always record, even if unchanged)
+      const entry: ReviewHistoryEntry = {
+        fileId: currentFileId,
+        action,
+        previousState,
+      };
+      recordAction(entry);
+      onAction?.(action, currentFileId);
     },
     [
       currentFileId,
-      currentMetadata,
       getPreviousState,
       recordAction,
       archiveMutation,

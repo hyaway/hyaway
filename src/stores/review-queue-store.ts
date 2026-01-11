@@ -22,6 +22,8 @@ export interface ReviewStats {
   archived: number;
   trashed: number;
   skipped: number;
+  /** Actions that didn't change the file state (e.g., trashing an already trashed item) */
+  unchanged: number;
 }
 
 type ReviewQueueState = {
@@ -190,9 +192,21 @@ export const useReviewQueueIsEmpty = () =>
 export const useReviewStats = (): ReviewStats =>
   useReviewQueueStore(
     useShallow((state) => {
-      const stats: ReviewStats = { archived: 0, trashed: 0, skipped: 0 };
+      const stats: ReviewStats = {
+        archived: 0,
+        trashed: 0,
+        skipped: 0,
+        unchanged: 0,
+      };
       for (const entry of state.history) {
-        if (entry.action === "archive") {
+        // Check if action didn't change the state
+        const wasUnchanged =
+          (entry.action === "archive" && entry.previousState === "archived") ||
+          (entry.action === "trash" && entry.previousState === "trashed");
+
+        if (wasUnchanged) {
+          stats.unchanged++;
+        } else if (entry.action === "archive") {
           stats.archived++;
         } else if (entry.action === "trash") {
           stats.trashed++;

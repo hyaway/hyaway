@@ -2,6 +2,7 @@ import {
   IconArchive,
   IconArrowUp,
   IconCheck,
+  IconEqual,
   IconTrash,
 } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
@@ -22,7 +23,8 @@ interface ReviewCompletionProps {
 export function ReviewCompletion({ stats }: ReviewCompletionProps) {
   const { clearQueue } = useReviewQueueActions();
   const navigate = useNavigate();
-  const total = stats.archived + stats.trashed + stats.skipped;
+  const total =
+    stats.archived + stats.trashed + stats.skipped + stats.unchanged;
 
   const handleClearAndBrowse = () => {
     clearQueue();
@@ -50,7 +52,7 @@ export function ReviewCompletion({ stats }: ReviewCompletionProps) {
           <CardTitle className="text-base">Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-4 gap-4 text-center">
             <div className="flex flex-col items-center gap-1">
               <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-full">
                 <IconArchive className="size-5" />
@@ -77,6 +79,15 @@ export function ReviewCompletion({ stats }: ReviewCompletionProps) {
                 {stats.skipped}
               </span>
               <span className="text-muted-foreground text-xs">Skipped</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="bg-muted text-muted-foreground flex size-10 items-center justify-center rounded-full">
+                <IconEqual className="size-5" />
+              </div>
+              <span className="text-2xl font-semibold tabular-nums">
+                {stats.unchanged}
+              </span>
+              <span className="text-muted-foreground text-xs">Unchanged</span>
             </div>
           </div>
         </CardContent>
