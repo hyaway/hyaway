@@ -1,224 +1,367 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { Heading } from "@/components/ui-primitives/heading";
-import { Button } from "@/components/ui-primitives/button";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-} from "@/components/ui-primitives/card";
+  IconArchive,
+  IconArrowsShuffle,
+  IconBrandGithub,
+  IconCalendarStats,
+  IconCards,
+  IconChartArea,
+  IconClock,
+  IconExternalLink,
+  IconEye,
+  IconLayoutGrid,
+  IconMail,
+  IconSettings,
+  IconTrash,
+} from "@tabler/icons-react";
+import { Heading } from "@/components/ui-primitives/heading";
+import { LinkButton } from "@/components/ui-primitives/button";
+import { Separator } from "@/components/ui-primitives/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui-primitives/tooltip";
 import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
+import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import { Permission } from "@/integrations/hydrus-api/models";
+import { PERMISSION_LABELS } from "@/integrations/hydrus-api/permissions";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
+// Navigation item definition
+interface NavItem {
+  title: string;
+  description: string;
+  to:
+    | "/"
+    | "/pages"
+    | "/random-inbox"
+    | "/review"
+    | "/recently-inboxed"
+    | "/recently-archived"
+    | "/recently-trashed"
+    | "/history"
+    | "/remote-history"
+    | "/most-viewed"
+    | "/longest-viewed"
+    | "/settings"
+    | "/settings/client-api"
+    | "/settings/ux"
+    | "/settings/data";
+  icon: React.ComponentType<{ className?: string }>;
+  requiredPermissions?: Array<Permission>;
+}
+
+interface NavGroup {
+  title: string;
+  items: Array<NavItem>;
+}
+
+const NAV_GROUPS: Array<NavGroup> = [
+  {
+    title: "Browse",
+    items: [
+      {
+        title: "Pages",
+        description:
+          "Browse your Hydrus client's active page tabs and their contents",
+        to: "/pages",
+        icon: IconLayoutGrid,
+        requiredPermissions: [
+          Permission.SEARCH_FOR_AND_FETCH_FILES,
+          Permission.MANAGE_PAGES,
+        ],
+      },
+      {
+        title: "Random inbox",
+        description:
+          "Shuffle through random files from your inbox for discovery",
+        to: "/random-inbox",
+        icon: IconArrowsShuffle,
+        requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
+      },
+      {
+        title: "Review queue",
+        description:
+          "Archive or trash files with swipe gestures or keyboard shortcuts",
+        to: "/review",
+        icon: IconCards,
+        requiredPermissions: [
+          Permission.SEARCH_FOR_AND_FETCH_FILES,
+          Permission.IMPORT_AND_DELETE_FILES,
+        ],
+      },
+    ],
+  },
+  {
+    title: "Recent Activity",
+    items: [
+      {
+        title: "Recently inboxed",
+        description: "View files recently added to your inbox",
+        to: "/recently-inboxed",
+        icon: IconMail,
+        requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
+      },
+      {
+        title: "Recently archived",
+        description: "View files you've recently archived",
+        to: "/recently-archived",
+        icon: IconArchive,
+        requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
+      },
+      {
+        title: "Recently trashed",
+        description: "View files you've recently sent to trash",
+        to: "/recently-trashed",
+        icon: IconTrash,
+        requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
+      },
+    ],
+  },
+  {
+    title: "Statistics",
+    items: [
+      {
+        title: "Watch history",
+        description: "Files you viewed in this browser, stored locally",
+        to: "/history",
+        icon: IconEye,
+        requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
+      },
+      {
+        title: "Remote history",
+        description: "Files you viewed from Hydrus client",
+        to: "/remote-history",
+        icon: IconCalendarStats,
+        requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
+      },
+      {
+        title: "Most viewed",
+        description: "Files ranked by total view count",
+        to: "/most-viewed",
+        icon: IconChartArea,
+        requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
+      },
+      {
+        title: "Longest viewed",
+        description: "Files ranked by total watch time",
+        to: "/longest-viewed",
+        icon: IconClock,
+        requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
+      },
+    ],
+  },
+  {
+    title: "Configuration",
+    items: [
+      {
+        title: "Settings",
+        description: "Configure  connection, appearance, and data preferences",
+        to: "/settings",
+        icon: IconSettings,
+      },
+    ],
+  },
+];
+
 function LandingPage() {
   const isConfigured = useIsApiConfigured();
-  const router = useRouter();
-
-  const features: Array<{
-    title: string;
-    description: string;
-  }> = [
-    {
-      title: "Browse Anywhere",
-      description:
-        "Securely explore your Hydrus gallery from any device with a modern responsive UI.",
-    },
-    {
-      title: "Fast Tag Searching",
-      description:
-        "Query tags and relationships quickly using cached & batched Hydrus API calls.",
-    },
-    {
-      title: "Live Client Pages",
-      description:
-        "Peek into active client pages remotely and jump straight to what matters.",
-    },
-    {
-      title: "Inbox / Archive Views",
-      description:
-        "Jump to Recently Inboxed, Archived, or Deleted media in one click.",
-    },
-    {
-      title: "Adaptive Theming",
-      description:
-        "Switch between light & dark themes instantly; respects system preferences.",
-    },
-    {
-      title: "Local Keys Only",
-      description:
-        "Your access & session keys stay client-side (persisted with secure storage logic).",
-    },
-  ];
-
-  const primaryCta = isConfigured
-    ? {
-        label: "Go to Inbox",
-        to: "/recently-inboxed" as const,
-        intent: "primary" as const,
-      }
-    : {
-        label: "Configure Access",
-        to: "/settings" as const,
-        intent: "primary" as const,
-      };
-
-  const secondaryCta = isConfigured
-    ? { label: "Settings", to: "/settings" as const }
-    : { label: "See Features", to: "#features" as const };
 
   return (
-    <>
-      <Hero
-        primaryCta={primaryCta}
-        secondaryCta={secondaryCta}
-        onNavigate={(to) => router.navigate({ to })}
-      />
-      <Features id="features" features={features} />
-      <QuickStart
-        hasClient={isConfigured}
-        onNavigate={(to) => router.navigate({ to })}
-      />
-      <Footer />
-    </>
+    <div className="flex flex-col gap-12 pb-8">
+      {isConfigured ? <WelcomeHeader /> : <MarketingHeader />}
+      <ShortcutsGrid />
+      <AboutSection />
+    </div>
   );
 }
 
-interface NavigateProps {
-  onNavigate: (to: string) => void;
+function WelcomeHeader() {
+  return (
+    <header className="flex flex-col gap-2">
+      <Heading level={1} className="text-3xl font-bold">
+        Welcome back
+      </Heading>
+      <p className="text-muted-foreground text-lg">
+        What would you like to do?
+      </p>
+    </header>
+  );
 }
 
-function Hero({
-  primaryCta,
-  secondaryCta,
-  onNavigate,
-}: {
-  primaryCta: { label: string; to: string; intent: "primary" };
-  secondaryCta: { label: string; to: string };
-} & NavigateProps) {
+function MarketingHeader() {
   return (
-    <div className="relative flex flex-col gap-10 p-6 py-20 sm:py-28">
+    <header className="relative flex flex-col gap-6 rounded-xl border p-6 sm:p-8">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-xl"
       >
-        <div className="from-primary/25 via-primary/5 absolute inset-0 bg-linear-to-br to-transparent opacity-60 dark:opacity-40" />
-        <div className="absolute top-1/2 left-1/2 size-240 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,var(--color-primary)/25%,transparent_70%)] opacity-30 blur-3xl" />
+        <div className="from-primary/15 via-primary/5 absolute inset-0 bg-linear-to-br to-transparent" />
       </div>
-      <div className="bg-background/85 ring-border/40 max-w-3xl space-y-6 rounded-lg p-6 shadow-lg ring-1 backdrop-blur-sm">
-        <Heading level={1} className="text-4xl/10 font-bold sm:text-5xl/12">
-          Remote gateway to your Hydrus Network gallery
+      <div className="flex flex-col gap-3">
+        <Heading level={1} className="text-3xl font-bold sm:text-4xl">
+          Browse your <span className="text-primary">Hydrus network</span>{" "}
+          gallery from anywhere
         </Heading>
-        <p className="text-lg/8 sm:text-xl/9">
-          HyAway lets you securely manage, search, and explore your Hydrus
-          collection without being at your workstation. Optimized for speed,
-          clarity, and keyboard navigation.
+        <p className="text-muted-foreground max-w-2xl text-lg">
+          A web client for Hydrus Network.
         </p>
-        <div className="flex flex-wrap gap-4 pt-2">
-          <Button size="lg" onClick={() => onNavigate(primaryCta.to)}>
-            {primaryCta.label}
-          </Button>
-          <Button size="lg" onClick={() => onNavigate(secondaryCta.to)}>
-            {secondaryCta.label}
-          </Button>
-        </div>
       </div>
-    </div>
+      <div className="flex flex-wrap gap-3">
+        <LinkButton to="/settings/client-api" size="lg">
+          Get started
+        </LinkButton>
+        <a
+          href="https://github.com/hyaway/hyaway/wiki"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="border-border bg-input/30 hover:bg-input/50 hover:text-foreground inline-flex h-12 items-center justify-center gap-2 rounded-4xl border px-5 text-sm font-medium transition-all"
+        >
+          Setup guide
+          <IconExternalLink className="size-4" />
+        </a>
+      </div>
+    </header>
   );
 }
 
-function Features({
-  features,
-  id,
-}: {
-  features: Array<{ title: string; description: string }>;
-  id?: string;
-}) {
-  return (
-    <div id={id} className="flex flex-col gap-10 border-t pt-16 sm:pt-24">
-      <Heading level={2} className="text-3xl/10 font-semibold">
-        Why <span className="text-orange-400">hy</span>
-        <span className="text-yellow-400">AWAY</span>?
-      </Heading>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {features.map((f) => (
-          <Card key={f.title} className="h-full">
-            <CardHeader title={f.title} />
-            <CardContent>
-              <CardDescription>{f.description}</CardDescription>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
+function ShortcutsGrid() {
+  const { hasPermission, isFetched } = usePermissions();
+  const isConfigured = useIsApiConfigured();
 
-function QuickStart({
-  hasClient,
-  onNavigate,
-}: { hasClient: boolean } & NavigateProps) {
   return (
-    <div className="flex flex-col gap-8 pt-24">
-      <Heading level={2} className="text-3xl/9 font-semibold">
-        {hasClient ? "Next up" : "Get started in 3 steps"}
-      </Heading>
-      {hasClient ? (
-        <div className="flex flex-col gap-4">
-          <p>
-            You already have an active API client. Dive straight into your
-            inbox, or fine-tune tag search & layout preferences.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <Button onClick={() => onNavigate("/recently-inboxed")}>
-              Open Inbox
-            </Button>
-            <Button onClick={() => onNavigate("/settings/ux")}>
-              UX Settings
-            </Button>
+    <div className="flex flex-col gap-8">
+      {NAV_GROUPS.map((group) => (
+        <section key={group.title} className="flex flex-col gap-4">
+          <Heading level={2} className="text-xl font-semibold">
+            {group.title}
+          </Heading>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {group.items.map((item) => (
+              <ShortcutCard
+                key={item.to}
+                item={item}
+                isConfigured={isConfigured}
+                permissionsFetched={isFetched}
+                hasPermission={hasPermission}
+              />
+            ))}
           </div>
-        </div>
-      ) : (
-        <ol className="grid gap-6 sm:grid-cols-3">
-          <li className="flex flex-col gap-2">
-            <Heading level={3}>1. Generate Access Key</Heading>
-            <p>
-              In Hydrus: Services → Manage Services → Client API → Generate a
-              new access key.
-            </p>
-          </li>
-          <li className="flex flex-col gap-2">
-            <Heading level={3}>2. Enter Credentials</Heading>
-            <p>
-              Paste the access key & endpoint in Settings. HyAway stores them
-              locally only.
-            </p>
-          </li>
-          <li className="flex flex-col gap-2">
-            <Heading level={3}>3. Explore</Heading>
-            <p>
-              Start browsing pages, search tags, and manage inbox/archived items
-              remotely.
-            </p>
-          </li>
-        </ol>
-      )}
+        </section>
+      ))}
     </div>
   );
 }
 
-function Footer() {
+interface ShortcutCardProps {
+  item: NavItem;
+  isConfigured: boolean;
+  permissionsFetched: boolean;
+  hasPermission: (permission: Permission) => boolean;
+}
+
+function ShortcutCard({
+  item,
+  isConfigured,
+  permissionsFetched,
+  hasPermission,
+}: ShortcutCardProps) {
+  const Icon = item.icon;
+  const requiresPermissions = (item.requiredPermissions ?? []).length > 0;
+
+  // Check permissions
+  const missingPermissions = (item.requiredPermissions ?? []).filter(
+    (p) => !hasPermission(p),
+  );
+  // Items without required permissions (like Settings) are never muted
+  const isMuted =
+    requiresPermissions &&
+    (!isConfigured || (permissionsFetched && missingPermissions.length > 0));
+
+  const card = (
+    <Link
+      to={item.to}
+      className={cn(
+        "border-border hover:border-ring/50 hover:bg-accent flex items-start gap-4 rounded-2xl border p-4 transition-colors",
+        isMuted && "opacity-50",
+      )}
+    >
+      <div className="bg-primary flex size-12 shrink-0 items-center justify-center rounded-xl">
+        <Icon className="text-primary-foreground size-6" />
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium">{item.title}</span>
+        <p className="text-muted-foreground text-sm">{item.description}</p>
+      </div>
+    </Link>
+  );
+
+  // Show tooltip for unconfigured state (only for items that require permissions)
+  if (!isConfigured && requiresPermissions) {
+    return (
+      <Tooltip>
+        <TooltipTrigger className="text-left">{card}</TooltipTrigger>
+        <TooltipContent>Configure connection first</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  // Show tooltip for missing permissions (only if configured)
+  if (missingPermissions.length > 0) {
+    const tooltipText = missingPermissions
+      .map((p) => PERMISSION_LABELS[p])
+      .join(", ");
+
+    return (
+      <Tooltip>
+        <TooltipTrigger className="text-left">{card}</TooltipTrigger>
+        <TooltipContent>Missing: {tooltipText}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return card;
+}
+
+function AboutSection() {
   return (
-    <div className="mt-32 border-t pt-10 text-center">
-      <p className="text-sm/6">
-        Built with TanStack Router & Hydrus API. Privacy-first: keys never leave
-        your browser.
-      </p>
-      <p className="mt-2 text-xs/5 opacity-60">
-        © {new Date().getFullYear()} HyAway
-      </p>
-    </div>
+    <footer className="flex flex-col gap-4">
+      <Separator />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <Heading level={2} className="text-base font-medium">
+            About HyAway
+          </Heading>
+          <p className="text-muted-foreground text-sm">
+            A web client for{" "}
+            <a
+              href="https://hydrusnetwork.github.io/hydrus/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Hydrus Network
+            </a>
+            .
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <a
+            href="https://github.com/hyaway/hyaway"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border-border bg-input/30 hover:bg-input/50 hover:text-foreground inline-flex h-9 items-center justify-center gap-1.5 rounded-4xl border px-3 text-sm font-medium transition-all"
+          >
+            <IconBrandGithub className="size-4" />
+            GitHub
+          </a>
+        </div>
+      </div>
+    </footer>
   );
 }

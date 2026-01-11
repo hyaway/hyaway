@@ -127,7 +127,10 @@ function ReviewQueueNavItem({
   return (
     <SidebarMenuItem>
       <SidebarNavLink
-        requiredPermissions={[Permission.IMPORT_AND_DELETE_FILES]}
+        requiredPermissions={[
+          Permission.SEARCH_FOR_AND_FETCH_FILES,
+          Permission.IMPORT_AND_DELETE_FILES,
+        ]}
         permissionsFetched={permissionsFetched}
         hasPermission={hasPermission}
       >

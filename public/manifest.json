@@ -1,7 +1,7 @@
 {
   "short_name": "HyAway",
-  "name": "HyAway - Remote Hydrus Management",
-  "description": "Remotely manage, search, and browse your Hydrus gallery from any device.",
+  "name": "HyAway",
+  "description": "Remotely browse your Hydrus network gallery from any device.",
   "icons": [
     {
       "src": "favicon.svg",

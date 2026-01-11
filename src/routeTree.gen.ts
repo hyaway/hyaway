@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from "./routes/index";
 import { Route as settingsSettingsRouteImport } from "./routes/(settings)/settings";
 import { Route as settingsSettingsIndexRouteImport } from "./routes/(settings)/settings.index";
 import { Route as AuthFileFileIdRouteImport } from "./routes/_auth/file.$fileId";
+import { Route as AuthreviewReviewRouteImport } from "./routes/_auth/(review)/review";
 import { Route as AuthremotePagesPagesRouteImport } from "./routes/_auth/(remote-pages)/pages";
 import { Route as AuthgalleriesRemoteHistoryRouteImport } from "./routes/_auth/(galleries)/remote-history";
 import { Route as AuthgalleriesRecentlyTrashedRouteImport } from "./routes/_auth/(galleries)/recently-trashed";
@@ -70,6 +71,11 @@ const settingsSettingsIndexRoute = settingsSettingsIndexRouteImport.update({
 const AuthFileFileIdRoute = AuthFileFileIdRouteImport.update({
   id: "/file/$fileId",
   path: "/file/$fileId",
+  getParentRoute: () => AuthRoute,
+} as any);
+const AuthreviewReviewRoute = AuthreviewReviewRouteImport.update({
+  id: "/(review)/review",
+  path: "/review",
   getParentRoute: () => AuthRoute,
 } as any);
 const AuthremotePagesPagesRoute = AuthremotePagesPagesRouteImport.update({
@@ -140,9 +146,9 @@ const settingsSettingsClientApiRoute =
     getParentRoute: () => settingsSettingsRoute,
   } as any);
 const AuthreviewReviewIndexRoute = AuthreviewReviewIndexRouteImport.update({
-  id: "/(review)/review/",
-  path: "/review/",
-  getParentRoute: () => AuthRoute,
+  id: "/",
+  path: "/",
+  getParentRoute: () => AuthreviewReviewRoute,
 } as any);
 const AuthremotePagesPagesIndexRoute =
   AuthremotePagesPagesIndexRouteImport.update({
@@ -280,6 +286,7 @@ export interface FileRoutesByFullPath {
   "/recently-trashed": typeof AuthgalleriesRecentlyTrashedRouteWithChildren;
   "/remote-history": typeof AuthgalleriesRemoteHistoryRouteWithChildren;
   "/pages": typeof AuthremotePagesPagesRouteWithChildren;
+  "/review": typeof AuthreviewReviewRouteWithChildren;
   "/file/$fileId": typeof AuthFileFileIdRoute;
   "/settings/": typeof settingsSettingsIndexRoute;
   "/history/$fileId": typeof AuthgalleriesHistoryFileIdRoute;
@@ -300,7 +307,7 @@ export interface FileRoutesByFullPath {
   "/recently-trashed/": typeof AuthgalleriesRecentlyTrashedIndexRoute;
   "/remote-history/": typeof AuthgalleriesRemoteHistoryIndexRoute;
   "/pages/": typeof AuthremotePagesPagesIndexRoute;
-  "/review": typeof AuthreviewReviewIndexRoute;
+  "/review/": typeof AuthreviewReviewIndexRoute;
   "/pages/$pageId/$fileId": typeof AuthremotePagesPagesPageIdFileIdRoute;
   "/pages/$pageId/": typeof AuthremotePagesPagesPageIdIndexRoute;
 }
@@ -349,6 +356,7 @@ export interface FileRoutesById {
   "/_auth/(galleries)/recently-trashed": typeof AuthgalleriesRecentlyTrashedRouteWithChildren;
   "/_auth/(galleries)/remote-history": typeof AuthgalleriesRemoteHistoryRouteWithChildren;
   "/_auth/(remote-pages)/pages": typeof AuthremotePagesPagesRouteWithChildren;
+  "/_auth/(review)/review": typeof AuthreviewReviewRouteWithChildren;
   "/_auth/file/$fileId": typeof AuthFileFileIdRoute;
   "/(settings)/settings/": typeof settingsSettingsIndexRoute;
   "/_auth/(galleries)/history/$fileId": typeof AuthgalleriesHistoryFileIdRoute;
@@ -390,6 +398,7 @@ export interface FileRouteTypes {
     | "/recently-trashed"
     | "/remote-history"
     | "/pages"
+    | "/review"
     | "/file/$fileId"
     | "/settings/"
     | "/history/$fileId"
@@ -410,7 +419,7 @@ export interface FileRouteTypes {
     | "/recently-trashed/"
     | "/remote-history/"
     | "/pages/"
-    | "/review"
+    | "/review/"
     | "/pages/$pageId/$fileId"
     | "/pages/$pageId/";
   fileRoutesByTo: FileRoutesByTo;
@@ -458,6 +467,7 @@ export interface FileRouteTypes {
     | "/_auth/(galleries)/recently-trashed"
     | "/_auth/(galleries)/remote-history"
     | "/_auth/(remote-pages)/pages"
+    | "/_auth/(review)/review"
     | "/_auth/file/$fileId"
     | "/(settings)/settings/"
     | "/_auth/(galleries)/history/$fileId"
@@ -524,6 +534,13 @@ declare module "@tanstack/react-router" {
       path: "/file/$fileId";
       fullPath: "/file/$fileId";
       preLoaderRoute: typeof AuthFileFileIdRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
+    "/_auth/(review)/review": {
+      id: "/_auth/(review)/review";
+      path: "/review";
+      fullPath: "/review";
+      preLoaderRoute: typeof AuthreviewReviewRouteImport;
       parentRoute: typeof AuthRoute;
     };
     "/_auth/(remote-pages)/pages": {
@@ -612,10 +629,10 @@ declare module "@tanstack/react-router" {
     };
     "/_auth/(review)/review/": {
       id: "/_auth/(review)/review/";
-      path: "/review";
-      fullPath: "/review";
+      path: "/";
+      fullPath: "/review/";
       preLoaderRoute: typeof AuthreviewReviewIndexRouteImport;
-      parentRoute: typeof AuthRoute;
+      parentRoute: typeof AuthreviewReviewRoute;
     };
     "/_auth/(remote-pages)/pages/": {
       id: "/_auth/(remote-pages)/pages/";
@@ -923,6 +940,17 @@ const AuthremotePagesPagesRouteChildren: AuthremotePagesPagesRouteChildren = {
 const AuthremotePagesPagesRouteWithChildren =
   AuthremotePagesPagesRoute._addFileChildren(AuthremotePagesPagesRouteChildren);
 
+interface AuthreviewReviewRouteChildren {
+  AuthreviewReviewIndexRoute: typeof AuthreviewReviewIndexRoute;
+}
+
+const AuthreviewReviewRouteChildren: AuthreviewReviewRouteChildren = {
+  AuthreviewReviewIndexRoute: AuthreviewReviewIndexRoute,
+};
+
+const AuthreviewReviewRouteWithChildren =
+  AuthreviewReviewRoute._addFileChildren(AuthreviewReviewRouteChildren);
+
 interface AuthRouteChildren {
   AuthgalleriesHistoryRoute: typeof AuthgalleriesHistoryRouteWithChildren;
   AuthgalleriesLongestViewedRoute: typeof AuthgalleriesLongestViewedRouteWithChildren;
@@ -933,8 +961,8 @@ interface AuthRouteChildren {
   AuthgalleriesRecentlyTrashedRoute: typeof AuthgalleriesRecentlyTrashedRouteWithChildren;
   AuthgalleriesRemoteHistoryRoute: typeof AuthgalleriesRemoteHistoryRouteWithChildren;
   AuthremotePagesPagesRoute: typeof AuthremotePagesPagesRouteWithChildren;
+  AuthreviewReviewRoute: typeof AuthreviewReviewRouteWithChildren;
   AuthFileFileIdRoute: typeof AuthFileFileIdRoute;
-  AuthreviewReviewIndexRoute: typeof AuthreviewReviewIndexRoute;
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -950,8 +978,8 @@ const AuthRouteChildren: AuthRouteChildren = {
     AuthgalleriesRecentlyTrashedRouteWithChildren,
   AuthgalleriesRemoteHistoryRoute: AuthgalleriesRemoteHistoryRouteWithChildren,
   AuthremotePagesPagesRoute: AuthremotePagesPagesRouteWithChildren,
+  AuthreviewReviewRoute: AuthreviewReviewRouteWithChildren,
   AuthFileFileIdRoute: AuthFileFileIdRoute,
-  AuthreviewReviewIndexRoute: AuthreviewReviewIndexRoute,
 };
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
