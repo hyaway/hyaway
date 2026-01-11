@@ -219,7 +219,7 @@ function MarketingHeader() {
             rel="noopener noreferrer"
             className="text-primary hover:underline"
           >
-            Hydrus Network
+            hydrus network
           </a>{" "}
           gallery from anywhere
         </Subheading>
@@ -357,7 +357,7 @@ function AboutSection() {
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              Hydrus Network
+              hydrus network
             </a>
             .
           </p>

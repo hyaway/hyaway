@@ -1,7 +1,7 @@
 {
   "short_name": "hyAway",
   "name": "hyAway",
-  "description": "Remotely browse your Hydrus network gallery from any device.",
+  "description": "Remotely browse your hydrus network gallery from any device.",
   "icons": [
     {
       "src": "favicon.svg",

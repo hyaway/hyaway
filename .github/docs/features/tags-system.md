@@ -4,7 +4,7 @@
 
 ## Overview
 
-The tags system displays and manages Hydrus Network tags throughout the application. Tags support namespaces (e.g., `creator:artist_name`) and are color-coded based on Hydrus client configuration.
+The tags system displays and manages hydrus network tags throughout the application. Tags support namespaces (e.g., `creator:artist_name`) and are color-coded based on Hydrus client configuration.
 
 ## Key Concepts
 
