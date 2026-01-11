@@ -64,7 +64,7 @@ You should see a welcome page.
 On your home computer, open a terminal and run:
 
 ```bash
-tailscale serve 45869
+tailscale serve --https 45869 45869
 ```
 
 If this is your first time using Tailscale Serve, it will prompt you to enable HTTPS for your tailnet.
@@ -73,19 +73,19 @@ You'll see output like:
 
 ```
 Available within your tailnet:
-https://my-computer.tail1234.ts.net
+https://my-computer.tail1234.ts.net:45869
 
 |-- / proxy http://127.0.0.1:45869
 ```
 
 <!-- TODO: Screenshot of tailscale serve terminal output -->
 
-**Take note of your Tailscale URL** (e.g., `https://my-computer.tail1234.ts.net`) — you'll need it in the next step. You can also find this in the Tailscale app by clicking on your machine name to copy it.
+**Take note of your Tailscale URL** (e.g., `https://my-computer.tail1234.ts.net:45869`) — you'll need it in the next step. You can also find this in the Tailscale app by clicking on your machine name to copy it.
 
 > **Tip:** To keep Hydrus accessible without an open terminal, run in background mode:
 >
 > ```bash
-> tailscale serve --bg 45869
+> tailscale serve --bg --https 45869 45869
 > ```
 
 ---
@@ -100,7 +100,7 @@ https://my-computer.tail1234.ts.net
 
 1. Enter your Tailscale URL from Step 3:
    ```
-   https://my-computer.tail1234.ts.net
+   https://my-computer.tail1234.ts.net:45869
    ```
 2. Click **Check endpoint** to verify the connection
 3. You should see the Hydrus and API version numbers
