@@ -68,15 +68,7 @@ function ReviewPage() {
         <PageHeaderActions>
           <FileViewerSettingsPopover hideExpandedSettings />
         </PageHeaderActions>
-        <ReviewCompletion
-          stats={stats}
-          onUndo={
-            history.length > 0
-              ? () => deckState.performAction("undo")
-              : undefined
-          }
-          canUndo={history.length > 0}
-        />
+        <ReviewCompletion stats={stats} />
         <ReviewFooter
           onAction={deckState.performAction}
           undoCount={history.length}

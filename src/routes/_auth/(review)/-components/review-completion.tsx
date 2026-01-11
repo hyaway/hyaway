@@ -17,15 +17,9 @@ import {
 
 interface ReviewCompletionProps {
   stats: ReviewStats;
-  onUndo?: () => void;
-  canUndo: boolean;
 }
 
-export function ReviewCompletion({
-  stats,
-  onUndo,
-  canUndo,
-}: ReviewCompletionProps) {
+export function ReviewCompletion({ stats }: ReviewCompletionProps) {
   const { clearQueue } = useReviewQueueActions();
   const navigate = useNavigate();
   const total = stats.archived + stats.trashed + stats.skipped;
@@ -90,11 +84,6 @@ export function ReviewCompletion({
 
       {/* Actions */}
       <div className="flex w-full flex-col gap-2">
-        {canUndo && onUndo && (
-          <Button variant="outline" onClick={onUndo} className="w-full">
-            Undo last action
-          </Button>
-        )}
         <Button
           variant="outline"
           onClick={handleClearAndBrowse}
