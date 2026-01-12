@@ -50,33 +50,41 @@ function getZoneOpacity(
   const horizontalStart = HORIZONTAL_THRESHOLD * OVERLAY_START;
   const verticalStart = VERTICAL_THRESHOLD * VERTICAL_OVERLAY_START;
 
-  // Skip zone takes priority - hide horizontal overlays when in skip zone
+  // Determine which zone is currently "active" based on which threshold we're closer to
+  // Skip zone wins when: past skip threshold OR (approaching skip AND vertical > horizontal progress)
   const inSkipZone = yVal < -VERTICAL_THRESHOLD;
+  const skipProgress =
+    yVal >= -verticalStart
+      ? 0
+      : (-yVal - verticalStart) / (VERTICAL_THRESHOLD - verticalStart);
+
+  const horizontalProgress =
+    xVal >= -horizontalStart && xVal <= horizontalStart
+      ? 0
+      : xVal < 0
+        ? (-xVal - horizontalStart) / (HORIZONTAL_THRESHOLD - horizontalStart)
+        : (xVal - horizontalStart) / (HORIZONTAL_THRESHOLD - horizontalStart);
+
+  // Skip zone takes priority when past threshold or when skip progress > horizontal progress
+  const skipWins =
+    inSkipZone || (skipProgress > 0 && skipProgress >= horizontalProgress);
 
   switch (zone) {
     case "skip": {
+      if (!skipWins && horizontalProgress > 0) return 0;
       if (inSkipZone) return 1;
       if (yVal >= -verticalStart) return 0;
-      return Math.min(
-        1,
-        (-yVal - verticalStart) / (VERTICAL_THRESHOLD - verticalStart),
-      );
+      return Math.min(1, skipProgress);
     }
     case "trash": {
-      if (inSkipZone) return 0;
+      if (skipWins) return 0;
       if (xVal >= -horizontalStart) return 0;
-      return Math.min(
-        1,
-        (-xVal - horizontalStart) / (HORIZONTAL_THRESHOLD - horizontalStart),
-      );
+      return Math.min(1, horizontalProgress);
     }
     case "archive": {
-      if (inSkipZone) return 0;
+      if (skipWins) return 0;
       if (xVal <= horizontalStart) return 0;
-      return Math.min(
-        1,
-        (xVal - horizontalStart) / (HORIZONTAL_THRESHOLD - horizontalStart),
-      );
+      return Math.min(1, horizontalProgress);
     }
   }
 }
