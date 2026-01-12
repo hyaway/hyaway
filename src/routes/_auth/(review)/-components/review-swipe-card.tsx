@@ -11,17 +11,75 @@ import type { ReviewAction } from "@/stores/review-queue-store";
 import { cn } from "@/lib/utils";
 
 /** Threshold in pixels for horizontal swipe (archive/trash) */
-const HORIZONTAL_THRESHOLD = 100;
+const HORIZONTAL_THRESHOLD = 85;
 /** Threshold in pixels for vertical swipe (skip) - lower = easier to trigger */
 const VERTICAL_THRESHOLD = 80;
 /** Distance before overlay starts appearing (as fraction of threshold) */
 const OVERLAY_START = 0.4;
+/** Vertical overlay starts later and ramps faster (higher = later start) */
+const VERTICAL_OVERLAY_START = 0.6;
 /** Max rotation angle in degrees */
 const MAX_ROTATION = 12;
 /** Debug mode - shows colored zone overlays (set VITE_DEBUG_SWIPE_ZONES=true) */
 const DEBUG_ZONES = import.meta.env.VITE_DEBUG_SWIPE_ZONES === "true";
 
 export type SwipeDirection = "left" | "right" | "up" | "down" | null;
+
+/** Swipe zone detection result */
+type SwipeZone = "skip" | "trash" | "archive" | null;
+
+/**
+ * Determine which swipe zone we're in based on coordinates.
+ * Skip (up) takes priority, then horizontal actions apply.
+ */
+function getSwipeZone(xVal: number, yVal: number): SwipeZone {
+  // Skip takes priority when swiping up past threshold
+  if (yVal < -VERTICAL_THRESHOLD) return "skip";
+  // Horizontal zones
+  if (xVal < -HORIZONTAL_THRESHOLD) return "trash";
+  if (xVal > HORIZONTAL_THRESHOLD) return "archive";
+  return null;
+}
+
+/** Calculate overlay opacity for a zone based on progress toward threshold */
+function getZoneOpacity(
+  xVal: number,
+  yVal: number,
+  zone: "skip" | "trash" | "archive",
+): number {
+  const horizontalStart = HORIZONTAL_THRESHOLD * OVERLAY_START;
+  const verticalStart = VERTICAL_THRESHOLD * VERTICAL_OVERLAY_START;
+
+  // Skip zone takes priority - hide horizontal overlays when in skip zone
+  const inSkipZone = yVal < -VERTICAL_THRESHOLD;
+
+  switch (zone) {
+    case "skip": {
+      if (inSkipZone) return 1;
+      if (yVal >= -verticalStart) return 0;
+      return Math.min(
+        1,
+        (-yVal - verticalStart) / (VERTICAL_THRESHOLD - verticalStart),
+      );
+    }
+    case "trash": {
+      if (inSkipZone) return 0;
+      if (xVal >= -horizontalStart) return 0;
+      return Math.min(
+        1,
+        (-xVal - horizontalStart) / (HORIZONTAL_THRESHOLD - horizontalStart),
+      );
+    }
+    case "archive": {
+      if (inSkipZone) return 0;
+      if (xVal <= horizontalStart) return 0;
+      return Math.min(
+        1,
+        (xVal - horizontalStart) / (HORIZONTAL_THRESHOLD - horizontalStart),
+      );
+    }
+  }
+}
 
 export interface ReviewSwipeCardProps {
   /** The file ID being displayed */
@@ -94,50 +152,16 @@ export function ReviewSwipeCard({
     [-MAX_ROTATION, 0, MAX_ROTATION],
   );
 
-  // Calculate overlay start points (overlay appears later into the swipe)
-  const horizontalStart = HORIZONTAL_THRESHOLD * OVERLAY_START;
-  const verticalStart = VERTICAL_THRESHOLD * OVERLAY_START;
-
-  // Calculate opacity for intent overlays - starts later and requires dominant axis
-  // Skip takes priority when past threshold
-  const trashOpacity = useTransform(x, (xVal) => {
-    const yVal = y.get();
-    // Skip zone takes priority - don't show trash if in skip zone
-    if (yVal < -VERTICAL_THRESHOLD) return 0;
-    // Only show if horizontal movement is dominant
-    if (Math.abs(yVal) >= Math.abs(xVal)) return 0;
-    if (xVal >= -horizontalStart) return 0;
-    // Map from start point to threshold
-    return Math.min(
-      1,
-      (-xVal - horizontalStart) / (HORIZONTAL_THRESHOLD - horizontalStart),
-    );
-  });
-
-  const archiveOpacity = useTransform(x, (xVal) => {
-    const yVal = y.get();
-    // Skip zone takes priority - don't show archive if in skip zone
-    if (yVal < -VERTICAL_THRESHOLD) return 0;
-    if (Math.abs(yVal) >= Math.abs(xVal)) return 0;
-    if (xVal <= horizontalStart) return 0;
-    return Math.min(
-      1,
-      (xVal - horizontalStart) / (HORIZONTAL_THRESHOLD - horizontalStart),
-    );
-  });
-
-  const skipOpacity = useTransform(y, (yVal) => {
-    const xVal = x.get();
-    // Skip takes priority when past threshold, regardless of horizontal
-    if (yVal < -VERTICAL_THRESHOLD) return 1;
-    // Otherwise only show if vertical movement is dominant
-    if (Math.abs(xVal) > Math.abs(yVal)) return 0;
-    if (yVal >= -verticalStart) return 0;
-    return Math.min(
-      1,
-      (-yVal - verticalStart) / (VERTICAL_THRESHOLD - verticalStart),
-    );
-  });
+  // Calculate opacity for intent overlays using shared zone logic
+  const trashOpacity = useTransform(x, (xVal) =>
+    getZoneOpacity(xVal, y.get(), "trash"),
+  );
+  const archiveOpacity = useTransform(x, (xVal) =>
+    getZoneOpacity(xVal, y.get(), "archive"),
+  );
+  const skipOpacity = useTransform(y, (yVal) =>
+    getZoneOpacity(x.get(), yVal, "skip"),
+  );
 
   // Scale for stacked cards (cards behind are slightly smaller)
   const stackScale = 1 - stackIndex * 0.05;
@@ -148,21 +172,12 @@ export function ReviewSwipeCard({
     info: PanInfo,
   ) => {
     const { offset } = info;
-    let direction: SwipeDirection = null;
+    const zone = getSwipeZone(offset.x, offset.y);
 
-    // Skip takes priority - if we're past skip threshold, ignore horizontal
-    if (offset.y < -VERTICAL_THRESHOLD) {
-      direction = "up";
-    } else if (Math.abs(offset.x) > Math.abs(offset.y)) {
-      // Horizontal swipe (only if not in skip zone)
-      if (offset.x < -HORIZONTAL_THRESHOLD) {
-        direction = "left";
-      } else if (offset.x > HORIZONTAL_THRESHOLD) {
-        direction = "right";
-      }
-    }
-
-    if (direction) {
+    if (zone) {
+      // Map zone to direction
+      const direction: SwipeDirection =
+        zone === "skip" ? "up" : zone === "trash" ? "left" : "right";
       const action = getActionFromDirection(direction);
       if (action) {
         onSwipe(direction, action);
@@ -184,8 +199,11 @@ export function ReviewSwipeCard({
 
       {DEBUG_ZONES && isTop && (
         <div className="pointer-events-none absolute inset-0 z-50">
-          {/* Center crosshair */}
-          <div className="absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-yellow-500 bg-yellow-500/20" />
+          {/* Center crosshair - moves with card */}
+          <motion.div
+            className="absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-yellow-500 bg-yellow-500/20"
+            style={{ x, y }}
+          />
           {/* Trash threshold line (left of center) */}
           <div
             className="absolute top-0 bottom-0 w-0.5 bg-red-500"
