@@ -1,6 +1,7 @@
 import { URL, fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import viteReact from "@vitejs/plugin-react";
+import { devtools } from "@tanstack/devtools-vite";
 import tailwindcss from "@tailwindcss/vite";
 
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
@@ -12,6 +13,9 @@ const ReactCompilerConfig = {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    devtools({
+      removeDevtoolsOnBuild: true,
+    }),
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
