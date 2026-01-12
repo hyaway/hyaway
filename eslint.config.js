@@ -18,5 +18,5 @@ export default defineConfig(
       "react-compiler/react-compiler": "warn",
     },
   },
-  globalIgnores(["eslint.config.js", "prettier.config.js"]),
+  globalIgnores(["eslint.config.js", "prettier.config.js", "public/**/*.js"]),
 );
