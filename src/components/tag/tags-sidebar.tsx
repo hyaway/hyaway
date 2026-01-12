@@ -23,6 +23,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TagItem {
   tag: string;
@@ -35,6 +36,7 @@ export const TagsSidebar = memo(function TagsSidebar({
 }: {
   items: Array<FileMetadata>;
 }) {
+  const isMobile = useIsMobile();
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
   const [search, setSearch] = useState("");
   const sortMode = useTagsSortMode();
@@ -147,6 +149,7 @@ export const TagsSidebar = memo(function TagsSidebar({
           placeholder="Filter tags..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          tabIndex={isMobile ? -1 : undefined}
         />
         <ToggleGroup
           value={[sortMode]}
