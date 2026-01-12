@@ -40,12 +40,12 @@ export function SettingsPopover({
           </Button>
         }
       />
-      <SheetContent side="right" className="flex flex-col gap-0 p-0">
+      <SheetContent side="right" className="@container flex flex-col gap-0 p-0">
         <SheetHeader>
           <SheetTitle>{label}</SheetTitle>
         </SheetHeader>
         <ScrollArea className="h-full" viewportClassName="pe-3">
-          <div className="space-y-6 px-3 py-5 sm:px-4">{children}</div>
+          <div className="space-y-6 px-2 py-5 @sm:px-4">{children}</div>
         </ScrollArea>
       </SheetContent>
     </Sheet>
