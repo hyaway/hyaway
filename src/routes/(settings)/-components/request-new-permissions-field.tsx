@@ -25,6 +25,9 @@ import {
 
 function getDeviceInfo(): string {
   const ua = navigator.userAgent;
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+  const origin = isLocalhost ? "hyAway dev server" : window.location.origin;
 
   // Detect browser
   let browser = "Browser";
@@ -41,7 +44,7 @@ function getDeviceInfo(): string {
   else if (ua.includes("Android")) os = "Android";
   else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
 
-  return `${browser} on ${os}`;
+  return `${origin} (${browser} on ${os})`;
 }
 
 export function RequestNewPermissionsField() {
@@ -51,7 +54,7 @@ export function RequestNewPermissionsField() {
   const { mutate, isPending, isSuccess, isError, error } =
     useRequestNewPermissionsMutation();
   const apiVersionQuery = useApiVersionQuery();
-  const appName = useMemo(() => `hyaway (${getDeviceInfo()})`, []);
+  const appName = useMemo(() => getDeviceInfo(), []);
 
   return (
     <div className="flex flex-col gap-4">
