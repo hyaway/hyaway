@@ -18,8 +18,8 @@ const VERTICAL_THRESHOLD = 80;
 const OVERLAY_START = 0.4;
 /** Max rotation angle in degrees */
 const MAX_ROTATION = 12;
-/** Debug mode - shows colored zone overlays */
-const DEBUG_ZONES = false;
+/** Debug mode - shows colored zone overlays (set VITE_DEBUG_SWIPE_ZONES=true) */
+const DEBUG_ZONES = import.meta.env.VITE_DEBUG_SWIPE_ZONES === "true";
 
 export type SwipeDirection = "left" | "right" | "up" | "down" | null;
 
@@ -182,42 +182,39 @@ export function ReviewSwipeCard({
     <div ref={constraintsRef} className="absolute inset-0" style={{ zIndex }}>
       {/* Debug zone visualization - shows threshold lines from center */}
 
-      {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        DEBUG_ZONES && isTop && (
-          <div className="pointer-events-none absolute inset-0 z-50">
-            {/* Center crosshair */}
-            <div className="absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-yellow-500 bg-yellow-500/20" />
-            {/* Trash threshold line (left of center) */}
-            <div
-              className="absolute top-0 bottom-0 w-0.5 bg-red-500"
-              style={{ left: `calc(50% - ${HORIZONTAL_THRESHOLD}px)` }}
-            >
-              <span className="absolute top-4 left-2 text-xs font-bold whitespace-nowrap text-red-500">
-                ← TRASH
-              </span>
-            </div>
-            {/* Archive threshold line (right of center) */}
-            <div
-              className="absolute top-0 bottom-0 w-0.5 bg-green-500"
-              style={{ left: `calc(50% + ${HORIZONTAL_THRESHOLD}px)` }}
-            >
-              <span className="absolute top-4 right-2 text-xs font-bold whitespace-nowrap text-green-500">
-                ARCHIVE →
-              </span>
-            </div>
-            {/* Skip threshold line (above center) */}
-            <div
-              className="absolute right-0 left-0 h-0.5 bg-blue-500"
-              style={{ top: `calc(50% - ${VERTICAL_THRESHOLD}px)` }}
-            >
-              <span className="absolute bottom-2 left-4 text-xs font-bold whitespace-nowrap text-blue-500">
-                ↑ SKIP
-              </span>
-            </div>
+      {DEBUG_ZONES && isTop && (
+        <div className="pointer-events-none absolute inset-0 z-50">
+          {/* Center crosshair */}
+          <div className="absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-yellow-500 bg-yellow-500/20" />
+          {/* Trash threshold line (left of center) */}
+          <div
+            className="absolute top-0 bottom-0 w-0.5 bg-red-500"
+            style={{ left: `calc(50% - ${HORIZONTAL_THRESHOLD}px)` }}
+          >
+            <span className="absolute top-4 left-2 text-xs font-bold whitespace-nowrap text-red-500">
+              ← TRASH
+            </span>
           </div>
-        )
-      }
+          {/* Archive threshold line (right of center) */}
+          <div
+            className="absolute top-0 bottom-0 w-0.5 bg-green-500"
+            style={{ left: `calc(50% + ${HORIZONTAL_THRESHOLD}px)` }}
+          >
+            <span className="absolute top-4 right-2 text-xs font-bold whitespace-nowrap text-green-500">
+              ARCHIVE →
+            </span>
+          </div>
+          {/* Skip threshold line (above center) */}
+          <div
+            className="absolute right-0 left-0 h-0.5 bg-blue-500"
+            style={{ top: `calc(50% - ${VERTICAL_THRESHOLD}px)` }}
+          >
+            <span className="absolute bottom-2 left-4 text-xs font-bold whitespace-nowrap text-blue-500">
+              ↑ SKIP
+            </span>
+          </div>
+        </div>
+      )}
       <motion.div
         key={fileId}
         className={cn(
