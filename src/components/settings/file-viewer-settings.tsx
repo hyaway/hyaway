@@ -100,7 +100,7 @@ export function FileViewerSettings({
             onCheckedChange={setStartExpanded}
           />
         )}
-        <div className="flex flex-col gap-4">
+        <div className="@container/bg flex flex-col gap-4">
           <Label>Background</Label>
           <ToggleGroup
             value={[imageBackground]}
@@ -111,12 +111,17 @@ export function FileViewerSettings({
             variant="outline"
             size="sm"
             spacing={1}
-            className="grid w-full grid-cols-2 gap-1"
+            orientation="vertical"
+            className="w-full"
           >
             <ToggleGroupItem value="solid">Solid</ToggleGroupItem>
             <ToggleGroupItem value="checkerboard">Checkerboard</ToggleGroupItem>
-            <ToggleGroupItem value="average" className="col-span-2">
-              Average from image
+            <ToggleGroupItem value="average">
+              Average
+              <span className="sr-only @[12rem]/bg:not-sr-only">
+                {" "}
+                from image
+              </span>
             </ToggleGroupItem>
           </ToggleGroup>
           <SwitchField

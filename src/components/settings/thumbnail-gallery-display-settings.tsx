@@ -204,7 +204,7 @@ export function ThumbnailGalleryDisplaySettings({
         />
       </AccordionSection>
       <AccordionSection value="thumbnails" title="Thumbnails">
-        <div className="flex flex-col gap-4">
+        <div className="@container/bg flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <Label>Image background</Label>
             {settingsPage && (
@@ -226,17 +226,19 @@ export function ThumbnailGalleryDisplaySettings({
             variant="outline"
             size="sm"
             spacing={1}
-            className="grid w-full grid-cols-2 gap-1"
+            orientation="vertical"
+            className="w-full"
           >
             <ToggleGroupItem value="solid">Solid</ToggleGroupItem>
             <ToggleGroupItem value="checkerboard">Checkerboard</ToggleGroupItem>
-            <ToggleGroupItem value="average" className="col-span-2">
-              Average from image
+            <ToggleGroupItem value="average">
+              Average
+              <span className="hidden @[12rem]/bg:inline"> from image</span>
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3">
             <Label>Thumbnail size</Label>
             <ToggleGroup
               value={[galleryBaseWidthMode]}
