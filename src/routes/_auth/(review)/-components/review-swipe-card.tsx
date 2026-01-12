@@ -11,7 +11,7 @@ import type { ReviewAction } from "@/stores/review-queue-store";
 import { cn } from "@/lib/utils";
 
 /** Threshold in pixels for horizontal swipe (archive/trash) */
-const HORIZONTAL_THRESHOLD = 85;
+const HORIZONTAL_THRESHOLD = 90;
 /** Threshold in pixels for vertical swipe (skip) - lower = easier to trigger */
 const VERTICAL_THRESHOLD = 80;
 /** Distance before overlay starts appearing (as fraction of threshold) */
