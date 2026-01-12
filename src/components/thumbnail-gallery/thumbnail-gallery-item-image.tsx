@@ -41,6 +41,7 @@ export function ThumbnailImage({
         className,
       )}
       loading="lazy"
+      decoding="async"
       onLoad={handleLoad}
       onError={onError}
       width={width}

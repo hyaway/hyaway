@@ -176,7 +176,9 @@ export function PureThumbnailGallery({
       const item = deferredItems[i];
       return getItemHeight(item);
     },
-    overscan: 4 * (effectiveLanes || 1),
+    // Lower overscan to reduce concurrent thumbnail loads during fast scroll.
+    // 2 rows of buffer is enough for smooth UX without flooding the network.
+    overscan: 2 * (effectiveLanes || 1),
     gap: deferredVerticalGap,
     lanes: effectiveLanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
