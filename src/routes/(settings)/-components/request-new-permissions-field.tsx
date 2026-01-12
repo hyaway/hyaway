@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AxiosError } from "axios";
 import {
   IconAlertCircle,
@@ -23,6 +23,27 @@ import {
   useAuthActions,
 } from "@/integrations/hydrus-api/hydrus-config-store";
 
+function getDeviceInfo(): string {
+  const ua = navigator.userAgent;
+
+  // Detect browser
+  let browser = "Browser";
+  if (ua.includes("Firefox")) browser = "Firefox";
+  else if (ua.includes("Edg/")) browser = "Edge";
+  else if (ua.includes("Chrome")) browser = "Chrome";
+  else if (ua.includes("Safari")) browser = "Safari";
+
+  // Detect OS
+  let os = "Unknown";
+  if (ua.includes("Windows")) os = "Windows";
+  else if (ua.includes("Mac OS")) os = "macOS";
+  else if (ua.includes("Linux")) os = "Linux";
+  else if (ua.includes("Android")) os = "Android";
+  else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+
+  return `${browser} on ${os}`;
+}
+
 export function RequestNewPermissionsField() {
   const [permitsEverything, setPermitsEverything] = useState(true);
   const apiEndpoint = useApiEndpoint();
@@ -30,6 +51,7 @@ export function RequestNewPermissionsField() {
   const { mutate, isPending, isSuccess, isError, error } =
     useRequestNewPermissionsMutation();
   const apiVersionQuery = useApiVersionQuery();
+  const appName = useMemo(() => `hyaway (${getDeviceInfo()})`, []);
 
   return (
     <div className="flex flex-col gap-4">
@@ -69,7 +91,7 @@ export function RequestNewPermissionsField() {
         value={SETTINGS_REQUEST_API_KEY_ACTION}
         onClick={() => {
           mutate(
-            { name: "hyaway-app", permitsEverything },
+            { name: appName, permitsEverything },
             {
               onSuccess: ({ access_key }) => {
                 setApiCredentials(access_key, apiEndpoint);
