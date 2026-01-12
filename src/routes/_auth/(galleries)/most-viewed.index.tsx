@@ -79,7 +79,7 @@ function RouteComponent() {
           title={`Most viewed (${data?.file_ids?.length ?? 0} files)`}
         />
         {data?.file_ids && data.file_ids.length > 0 ? (
-          <ThumbnailGalleryProvider infoMode="views">
+          <ThumbnailGalleryProvider infoMode="views" fileIds={data.file_ids}>
             <ThumbnailGallery
               fileIds={data.file_ids}
               getFileLink={getFileLink}

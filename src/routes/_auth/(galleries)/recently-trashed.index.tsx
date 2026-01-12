@@ -11,6 +11,7 @@ import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { useRecentlyTrashedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
+import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 
 export const Route = createFileRoute("/_auth/(galleries)/recently-trashed/")({
   component: RouteComponent,
@@ -78,7 +79,12 @@ function RouteComponent() {
           title={`Recently trashed (${data?.file_ids?.length ?? 0} files)`}
         />
         {data?.file_ids && data.file_ids.length > 0 ? (
-          <ThumbnailGallery fileIds={data.file_ids} getFileLink={getFileLink} />
+          <ThumbnailGalleryProvider fileIds={data.file_ids}>
+            <ThumbnailGallery
+              fileIds={data.file_ids}
+              getFileLink={getFileLink}
+            />
+          </ThumbnailGalleryProvider>
         ) : (
           <EmptyState message="No recently trashed files found." />
         )}

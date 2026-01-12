@@ -10,6 +10,7 @@ import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
+import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { useRecentlyArchivedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 
 export const Route = createFileRoute("/_auth/(galleries)/recently-archived/")({
@@ -78,7 +79,12 @@ function RouteComponent() {
           title={`Recently archived (${data?.file_ids?.length ?? 0} files)`}
         />
         {data?.file_ids && data.file_ids.length > 0 ? (
-          <ThumbnailGallery fileIds={data.file_ids} getFileLink={getFileLink} />
+          <ThumbnailGalleryProvider fileIds={data.file_ids}>
+            <ThumbnailGallery
+              fileIds={data.file_ids}
+              getFileLink={getFileLink}
+            />
+          </ThumbnailGalleryProvider>
         ) : (
           <EmptyState message="No recently archived files found." />
         )}

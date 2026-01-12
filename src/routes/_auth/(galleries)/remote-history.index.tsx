@@ -79,7 +79,10 @@ function RouteComponent() {
           title={`Remote watch history (${data?.file_ids?.length ?? 0} files)`}
         />
         {data?.file_ids && data.file_ids.length > 0 ? (
-          <ThumbnailGalleryProvider infoMode="lastViewedRemote">
+          <ThumbnailGalleryProvider
+            infoMode="lastViewedRemote"
+            fileIds={data.file_ids}
+          >
             <ThumbnailGallery
               fileIds={data.file_ids}
               getFileLink={getFileLink}

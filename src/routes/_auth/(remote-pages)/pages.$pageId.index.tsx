@@ -12,6 +12,7 @@ import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
+import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGalleryDisplaySettingsPopover } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
 import { useReviewActions } from "@/hooks/use-review-actions";
 import { PageState } from "@/integrations/hydrus-api/models";
@@ -177,10 +178,12 @@ function PageContent({
           title={`Page: ${data?.page_info.name} (${data?.page_info.media.num_files ?? 0} files)`}
         />
         {data?.page_info.media ? (
-          <ThumbnailGallery
-            fileIds={data.page_info.media.hash_ids}
-            getFileLink={getFileLink}
-          />
+          <ThumbnailGalleryProvider fileIds={data.page_info.media.hash_ids}>
+            <ThumbnailGallery
+              fileIds={data.page_info.media.hash_ids}
+              getFileLink={getFileLink}
+            />
+          </ThumbnailGalleryProvider>
         ) : (
           <p>This page has no media.</p>
         )}

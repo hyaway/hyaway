@@ -66,6 +66,7 @@ function RouteComponent() {
           <ThumbnailGalleryProvider
             infoMode="lastViewedLocal"
             localHistoryEntries={entries}
+            fileIds={fileIds}
           >
             <ThumbnailGallery fileIds={fileIds} getFileLink={getFileLink} />
           </ThumbnailGalleryProvider>

@@ -10,6 +10,7 @@ import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
+import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import { useReviewActions } from "@/hooks/use-review-actions";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
@@ -89,7 +90,9 @@ function RouteComponent() {
           title={`Random inbox (${data?.file_ids?.length ?? 0} files)`}
         />
         {hasFiles ? (
-          <ThumbnailGallery fileIds={fileIds} getFileLink={getFileLink} />
+          <ThumbnailGalleryProvider fileIds={fileIds}>
+            <ThumbnailGallery fileIds={fileIds} getFileLink={getFileLink} />
+          </ThumbnailGalleryProvider>
         ) : (
           <EmptyState message="No inbox files found." />
         )}
