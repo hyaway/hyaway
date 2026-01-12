@@ -10,7 +10,6 @@ import {
   IconTrash,
   IconTrashOff,
 } from "@tabler/icons-react";
-import { useNavigate } from "@tanstack/react-router";
 
 import type { ComponentType, SVGProps } from "react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -54,19 +53,7 @@ export interface FileActionsGroup {
 // --- Navigation Actions ---
 
 function useNavigationActions(fileId: number): Array<FileAction> {
-  const navigate = useNavigate();
-
   return [
-    {
-      id: "open",
-      label: "Open",
-      icon: IconFileText,
-      onClick: () =>
-        navigate({
-          to: "/file/$fileId",
-          params: { fileId: String(fileId) },
-        }),
-    },
     {
       id: "open-details-new-tab",
       label: "Open in new tab",

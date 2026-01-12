@@ -21,6 +21,8 @@ interface ThumbnailGalleryContextValue {
   infoMode: ThumbnailInfoMode;
   /** Local watch history entries for looking up lastViewedLocal */
   localHistoryEntries?: Array<WatchHistoryEntry>;
+  /** All file IDs in the gallery (for review from here) */
+  fileIds?: Array<number>;
 }
 
 const ThumbnailGalleryContext = createContext<ThumbnailGalleryContextValue>({
@@ -33,16 +35,19 @@ export interface ThumbnailGalleryProviderProps {
   infoMode?: ThumbnailInfoMode;
   /** Local watch history entries for looking up lastViewedLocal */
   localHistoryEntries?: Array<WatchHistoryEntry>;
+  /** All file IDs in the gallery (for review from here) */
+  fileIds?: Array<number>;
 }
 
 export function ThumbnailGalleryProvider({
   children,
   infoMode = "filesize",
   localHistoryEntries,
+  fileIds,
 }: ThumbnailGalleryProviderProps) {
   const value = useMemo(
-    () => ({ infoMode, localHistoryEntries }),
-    [infoMode, localHistoryEntries],
+    () => ({ infoMode, localHistoryEntries, fileIds }),
+    [infoMode, localHistoryEntries, fileIds],
   );
 
   return (
