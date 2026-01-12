@@ -30,4 +30,14 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  build: {
+    assetsInlineLimit: (filePath) => {
+      // Never inline fonts as base64 to avoid CSP issues
+      if (filePath.endsWith(".woff2") || filePath.endsWith(".woff")) {
+        return false;
+      }
+      // Use default behavior for other assets
+      return undefined;
+    },
+  },
 });
