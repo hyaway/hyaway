@@ -33,7 +33,7 @@ Enable the Client API in your Hydrus client.
 
 > **Why?** When you use `tailscale serve`, Tailscale proxies to `http://127.0.0.1:45869`, so Hydrus still only receives local (same-machine) API requests. Enabling **support CORS headers** lets your browser call the API from a different origin (like `https://hyaway.com`).
 
-<!-- TODO: Screenshot of Hydrus manage services dialog with CORS enabled -->
+![Hydrus manage services dialog with CORS enabled](images/hydrus-cors-settings.png)
 
 ### Verify the API is Running
 
@@ -45,7 +45,7 @@ http://127.0.0.1:45869
 
 You should see a welcome page.
 
-<!-- TODO: Screenshot of Hydrus API welcome page -->
+![Hydrus API welcome page](images/hydrus-api-welcome.png)
 
 ---
 
@@ -55,7 +55,7 @@ You should see a welcome page.
 2. Install Tailscale on any devices you want to access Hydrus from (phone, laptop, etc.)
 3. Sign in with the same account on all devices
 
-<!-- TODO: Screenshot of Tailscale app showing connected devices -->
+![Tailscale app showing connected devices](images/tailscale-connected-devices.png)
 
 ---
 
@@ -73,12 +73,10 @@ You'll see output like:
 
 ```
 Available within your tailnet:
-https://my-computer.tail1234.ts.net:45869
+https://my-computer.tail1234.ts.net:45869/
 
 |-- / proxy http://127.0.0.1:45869
 ```
-
-<!-- TODO: Screenshot of tailscale serve terminal output -->
 
 **Take note of your Tailscale URL** (e.g., `https://my-computer.tail1234.ts.net:45869`) — you'll need it in the next step. You can also find this in the Tailscale app by clicking on your machine name to copy it.
 
@@ -105,7 +103,9 @@ https://my-computer.tail1234.ts.net:45869
 2. Click **Check endpoint** to verify the connection
 3. You should see the Hydrus and API version numbers
 
-<!-- TODO: Screenshot of API endpoint card with Tailscale URL -->
+> **Note:** you can also paste that tailscale URL in your browser and you should see the same welcome page as before
+
+![hyAway API endpoint settings](images/hyaway-api-endpoint.png)
 
 ### Get an Access Key
 
@@ -113,14 +113,14 @@ https://my-computer.tail1234.ts.net:45869
 
 1. In Hydrus, go to **services → review services → local → client api**
 2. Click **add → from api request**
+
+   ![Hydrus waiting for request dialog](images/hydrus-request-from-api.png)
+
 3. A dialog will appear waiting for the request
-
-<!-- TODO: Screenshot of Hydrus "waiting for request" dialog -->
-
 4. Back in hyaway.com, click **Request new API access key**
 5. Hydrus will show a permission approval dialog — review and click **Apply**
 
-<!-- TODO: Screenshot of Hydrus permission approval dialog -->
+   ![Hydrus permission approval dialog](images/hydrus-permission-approval.png)
 
 6. hyAway will show **New API access key saved** and store the key automatically
 7. Click **Check API connection** to verify the key works
@@ -144,9 +144,9 @@ Once configured, you'll see these success messages in each card:
 - **API access key is valid!**
 - **Session key is valid!**
 
-At this point, hyaway.com should be connected to your Hydrus client.
+![Hyaway access key valid card](images/hyaway-access-key-valid.png)
 
----
+At this point, hyaway.com should be connected to your Hydrus client and you can start browsing.
 
 ## Permissions Reference
 
