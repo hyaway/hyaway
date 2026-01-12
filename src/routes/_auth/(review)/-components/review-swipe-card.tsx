@@ -275,6 +275,7 @@ export function ReviewSwipeCard({
           }
 
           // Ensure we capture the pointer for touch to work reliably
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
           dragControls.start(e, { snapToCursor: false });
         }}
