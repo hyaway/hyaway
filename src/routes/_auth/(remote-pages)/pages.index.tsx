@@ -1,19 +1,15 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 
 import {
   PagesGridItem,
   PagesGridItemSkeleton,
 } from "./-components/pages-grid-item";
 import { PagesDisplaySettingsPopover } from "./-components/pages-display-settings-popover";
-import {
-  PAGE_CARD_GAP,
-  PAGE_CARD_HEIGHT,
-  PAGE_CARD_WIDTH,
-  usePageGridLanes,
-} from "./-hooks/use-page-grid-lanes";
+import { usePageGridLanes } from "./-hooks/use-page-grid-lanes";
+import type { PageGridLanesResult } from "./-hooks/use-page-grid-lanes";
 import type { MediaPage } from "@/integrations/hydrus-api/models";
 
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -26,8 +22,13 @@ import { ScrollPositionBadge } from "@/components/scroll-position-badge";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import {
-  usePagesMaxColumns,
+  usePagesCardWidth,
+  usePagesExpandCards,
+  usePagesHorizontalGap,
+  usePagesMaxLanes,
+  usePagesMinLanes,
   usePagesShowScrollBadge,
+  usePagesVerticalGap,
 } from "@/stores/pages-settings-store";
 
 export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
@@ -46,12 +47,19 @@ function PagesIndex() {
     error,
   } = useGetMediaPagesQuery();
   const queryClient = useQueryClient();
-  const pagesMaxColumns = usePagesMaxColumns();
+  const minLanes = usePagesMinLanes();
+  const maxLanes = usePagesMaxLanes();
+  const cardWidth = usePagesCardWidth();
+  const horizontalGap = usePagesHorizontalGap();
+  const verticalGap = usePagesVerticalGap();
+  const expandCards = usePagesExpandCards();
   const containerRef = useRef<HTMLDivElement>(null);
-  const lanes = usePageGridLanes(
+  const gridConfig = usePageGridLanes(
     containerRef,
-    pagesMaxColumns,
+    minLanes,
+    maxLanes,
     isPending ? 6 : pages.length,
+    { cardWidth, horizontalGap, verticalGap, expandCards },
   );
 
   const title = isPending ? "Pages" : `Pages (${pages.length} pages)`;
@@ -73,9 +81,17 @@ function PagesIndex() {
         <PageHeading title={title} />
 
         {isPending ? (
-          <div className="flex flex-wrap gap-4" aria-label="Loading pages">
+          <div
+            className="flex flex-wrap"
+            style={{ gap: `${verticalGap}px ${horizontalGap}px` }}
+            aria-label="Loading pages"
+          >
             {Array.from({ length: 6 }).map((_, i) => (
-              <PagesGridItemSkeleton key={`page-skeleton-${i}`} />
+              <PagesGridItemSkeleton
+                key={`page-skeleton-${i}`}
+                width={gridConfig.effectiveCardWidth}
+                height={gridConfig.effectiveCardHeight}
+              />
             ))}
           </div>
         ) : isError ? (
@@ -83,7 +99,11 @@ function PagesIndex() {
         ) : pages.length === 0 ? (
           <EmptyState message="No media pages found. Open some file search pages in Hydrus Client." />
         ) : (
-          <PagesGrid pages={pages} containerRef={containerRef} lanes={lanes} />
+          <PagesGrid
+            pages={pages}
+            containerRef={containerRef}
+            gridConfig={gridConfig}
+          />
         )}
       </div>
       <PageHeaderActions>
@@ -97,22 +117,34 @@ function PagesIndex() {
 function PagesGrid({
   pages,
   containerRef,
-  lanes,
+  gridConfig,
 }: {
   pages: Array<MediaPage>;
   containerRef: React.RefObject<HTMLDivElement | null>;
-  lanes: number;
+  gridConfig: PageGridLanesResult;
 }) {
   const showScrollBadge = usePagesShowScrollBadge();
+  const {
+    lanes,
+    effectiveCardWidth,
+    effectiveCardHeight,
+    horizontalGap,
+    verticalGap,
+  } = gridConfig;
 
   const rowVirtualizer = useWindowVirtualizer({
     count: pages.length,
-    estimateSize: () => PAGE_CARD_HEIGHT,
+    estimateSize: () => effectiveCardHeight,
     overscan: 4,
-    gap: PAGE_CARD_GAP,
+    gap: verticalGap,
     lanes,
     scrollMargin: containerRef.current?.offsetTop ?? 0,
   });
+
+  // Force remeasurement when card dimensions change
+  useLayoutEffect(() => {
+    rowVirtualizer.measure();
+  }, [effectiveCardHeight, verticalGap, lanes, rowVirtualizer]);
 
   const virtualItems = rowVirtualizer.getVirtualItems();
   const lastItemIndex = virtualItems.at(-1)?.index;
@@ -149,9 +181,9 @@ function PagesGrid({
                 key={page.page_key}
                 className="absolute top-0 left-0"
                 style={{
-                  width: `${PAGE_CARD_WIDTH}px`,
-                  height: `${PAGE_CARD_HEIGHT}px`,
-                  transform: `translate(${virtualRow.lane * (PAGE_CARD_WIDTH + PAGE_CARD_GAP)}px, ${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
+                  width: `${effectiveCardWidth}px`,
+                  height: `${effectiveCardHeight}px`,
+                  transform: `translate(${virtualRow.lane * (effectiveCardWidth + horizontalGap)}px, ${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
                 }}
               >
                 <PagesGridItem

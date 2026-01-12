@@ -24,7 +24,7 @@ export function PagesDisplaySettingsPopover() {
       <SettingsHeader>
         <SettingsTitle>{PAGES_DISPLAY_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
-      <PagesDisplaySettings idPrefix="popover-" />
+      <PagesDisplaySettings idPrefix="popover-" defaultOpen />
     </SettingsPopover>
   );
 }

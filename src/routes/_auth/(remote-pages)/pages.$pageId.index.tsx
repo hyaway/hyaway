@@ -84,7 +84,7 @@ function PageContent({
   const queryClient = useQueryClient();
 
   // Get file IDs for review queue
-  const fileIds = data?.page_info.media?.hash_ids ?? [];
+  const fileIds = data?.page_info.media.hash_ids ?? [];
   const reviewActions = useReviewActions({ fileIds });
 
   // Determine if page is in a loading/initializing state

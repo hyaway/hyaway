@@ -146,9 +146,24 @@ export const PagesGridItem = memo(function PagesGridItem({
 /**
  * Skeleton placeholder for PagesGridItem during loading state
  */
-export function PagesGridItemSkeleton({ className }: { className?: string }) {
+export function PagesGridItemSkeleton({
+  className,
+  width,
+  height,
+}: {
+  className?: string;
+  width?: number;
+  height?: number;
+}) {
   return (
-    <Item variant="muted" className={cn("block h-60 w-48", className)}>
+    <Item
+      variant="muted"
+      className={cn("block", className)}
+      style={{
+        width: width ? `${width}px` : "192px",
+        height: height ? `${height}px` : "240px",
+      }}
+    >
       <ItemContent className="mb-3.5">
         <div className="grid grid-cols-2 gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
