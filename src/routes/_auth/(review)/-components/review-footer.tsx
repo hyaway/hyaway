@@ -1,7 +1,7 @@
 import {
   IconArchive,
+  IconArrowBackUp,
   IconArrowUp,
-  IconHistory,
   IconTrash,
 } from "@tabler/icons-react";
 import type { ReviewAction } from "@/stores/review-queue-store";
@@ -25,15 +25,20 @@ export function ReviewFooter({
   undoCount,
   disabled,
 }: ReviewFooterProps) {
+  // Don't show footer when review is complete
+  if (disabled) {
+    return null;
+  }
+
   return (
     <FooterPortal>
       <div className="flex h-full items-center justify-center gap-1 px-2">
         {/* Undo button */}
         <ReviewActionButton
           label="Undo"
-          icon={<IconHistory className="size-6" />}
+          icon={<IconArrowBackUp className="size-6" />}
           onClick={() => onAction("undo")}
-          disabled={disabled || undoCount === 0}
+          disabled={undoCount === 0}
           kbd="↓"
           badge={undoCount > 0 ? undoCount : undefined}
         />
@@ -43,7 +48,6 @@ export function ReviewFooter({
           label="Trash"
           icon={<IconTrash className="size-6" />}
           onClick={() => onAction("trash")}
-          disabled={disabled}
           variant="destructive"
           kbd="←"
         />
@@ -53,7 +57,6 @@ export function ReviewFooter({
           label="Skip"
           icon={<IconArrowUp className="size-6" />}
           onClick={() => onAction("skip")}
-          disabled={disabled}
           kbd="↑"
         />
 
@@ -62,7 +65,6 @@ export function ReviewFooter({
           label="Archive"
           icon={<IconArchive className="size-6" />}
           onClick={() => onAction("archive")}
-          disabled={disabled}
           kbd="→"
         />
       </div>

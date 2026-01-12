@@ -100,7 +100,7 @@ export function ReviewCompletion({ stats }: ReviewCompletionProps) {
           onClick={handleClearAndBrowse}
           className="w-full"
         >
-          Clear queue & browse pages
+          Browse pages
         </Button>
       </div>
     </div>
