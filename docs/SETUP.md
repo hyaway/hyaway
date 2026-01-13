@@ -4,7 +4,7 @@ Connect [hyaway.com](https://hyaway.com) to your Hydrus Network client.
 
 ---
 
-## Choose Your Setup
+## Choose your setup
 
 | Setup                                                      | Best For                                                    | Difficulty       |
 | ---------------------------------------------------------- | ----------------------------------------------------------- | ---------------- |
@@ -15,7 +15,7 @@ Connect [hyaway.com](https://hyaway.com) to your Hydrus Network client.
 
 ---
 
-## Enable the Hydrus Client API
+## Enable the Hydrus client API
 
 This step is required for both setups.
 
@@ -32,7 +32,7 @@ The Client API lets external apps like hyAway communicate with Hydrus.
 
 ![Hydrus manage services dialog with CORS enabled](images/hydrus-cors-settings.png)
 
-### Verify the API is Running
+### Verify the API is running
 
 Open your browser and navigate to:
 
@@ -46,7 +46,7 @@ You should see a welcome page.
 
 ---
 
-## Setup A: Same Machine
+## Setup A: Same machine
 
 Use this setup if you're browsing hyaway.com on the **same computer** where Hydrus is running.
 
@@ -56,7 +56,7 @@ That's it! Skip to [Connect from hyaway.com](#connect-from-hyawaycom).
 
 ---
 
-## Setup B: Remote Access with Tailscale
+## Setup B: Remote access with Tailscale
 
 Use this setup to access Hydrus from your phone, laptop, or any other device.
 
@@ -125,7 +125,7 @@ To disable the proxy, run: tailscale serve --https=45869 off
 
 ---
 
-### Step 1: Set the API Endpoint
+### Step 1: Set the API endpoint
 
 Enter your endpoint URL:
 
@@ -142,11 +142,11 @@ Click **Check endpoint** to verify the connection. You should see the Hydrus and
 
 ---
 
-### Step 2: Get an Access Key
+### Step 2: Get an access key
 
 Choose one of these options:
 
-#### Option A: Request a New Key (Recommended)
+#### Option A: Request a new key (recommended)
 
 **In Hydrus:**
 
@@ -173,7 +173,7 @@ Choose one of these options:
 
 > **Note:** If you see a "Complete the Hydrus permissions flow" message after checking, make sure you clicked **Apply** in the Hydrus dialog, then click **Check API connection** again.
 
-#### Option B: Use an Existing Key
+#### Option B: Use an existing key
 
 1. In Hydrus, go to **services → review services**, then select **local → client api** in the left panel
 2. Click **add → manually**
@@ -184,7 +184,7 @@ Choose one of these options:
 
 ---
 
-### Step 3: Verify Connection
+### Step 3: Verify connection
 
 Once configured, you'll see these success messages in each card:
 
@@ -199,7 +199,7 @@ Once configured, you'll see these success messages in each card:
 At this point, hyaway.com should be connected to your Hydrus client and you can start browsing.
 e.g. [Pages](https://hyaway.com/pages)
 
-## Permissions Reference
+## Permissions reference
 
 hyAway requests these permissions from the Hydrus Client API:
 
@@ -261,7 +261,7 @@ Look for your machine name and domain, e.g., `my-computer.tail1234.ts.net`
 
 ---
 
-## Security Notes
+## Security notes
 
 ### Why Tailscale?
 
@@ -272,7 +272,7 @@ Tailscale creates an encrypted, private network between your devices. When you u
 - You don't need to open ports on your router or configure firewalls
 - Your Hydrus instance remains "local only" — Tailscale handles the secure tunneling
 
-### Access Keys vs Session Keys
+### Access keys vs session keys
 
 - **Access key**: long-lived secret (treat it like a password). In Hydrus terms, the access key _is the account_.
 - **Session key**: short-lived key derived from the access key. Session keys expire, and they also reset when the Hydrus client restarts.
@@ -304,7 +304,7 @@ tailscale serve --https=45869 off
 
 ---
 
-## Getting Help
+## Getting help
 
 - [hyAway GitHub Issues](https://github.com/hyaway/hyaway/issues)
 - [Hydrus Network Documentation](https://hydrusnetwork.github.io/hydrus/)
