@@ -37,6 +37,8 @@ type ReviewQueueState = {
   shortcutsEnabled: boolean;
   /** Enable swipe gestures for review actions */
   gesturesEnabled: boolean;
+  /** Track viewed files in watch history (local + remote sync) */
+  trackWatchHistory: boolean;
 
   actions: {
     /** Set the queue to a new list of file IDs (replaces existing, dedupes) */
@@ -59,6 +61,8 @@ type ReviewQueueState = {
     setShortcutsEnabled: (enabled: boolean) => void;
     /** Enable or disable swipe gestures */
     setGesturesEnabled: (enabled: boolean) => void;
+    /** Enable or disable watch history tracking */
+    setTrackWatchHistory: (enabled: boolean) => void;
   };
 };
 
@@ -70,6 +74,7 @@ const useReviewQueueStore = create<ReviewQueueState>()(
       history: [],
       shortcutsEnabled: true,
       gesturesEnabled: true,
+      trackWatchHistory: true,
 
       actions: {
         setQueue: (ids) => {
@@ -136,6 +141,10 @@ const useReviewQueueStore = create<ReviewQueueState>()(
         setGesturesEnabled: (gesturesEnabled: boolean) => {
           set({ gesturesEnabled });
         },
+
+        setTrackWatchHistory: (trackWatchHistory: boolean) => {
+          set({ trackWatchHistory });
+        },
       },
     }),
     {
@@ -147,6 +156,7 @@ const useReviewQueueStore = create<ReviewQueueState>()(
         currentIndex: state.currentIndex,
         shortcutsEnabled: state.shortcutsEnabled,
         gesturesEnabled: state.gesturesEnabled,
+        trackWatchHistory: state.trackWatchHistory,
       }),
       // On reload, truncate processed items and reset index
       merge: (persistedState, currentState) => {
@@ -164,6 +174,8 @@ const useReviewQueueStore = create<ReviewQueueState>()(
             persisted.shortcutsEnabled ?? currentState.shortcutsEnabled,
           gesturesEnabled:
             persisted.gesturesEnabled ?? currentState.gesturesEnabled,
+          trackWatchHistory:
+            persisted.trackWatchHistory ?? currentState.trackWatchHistory,
         };
       },
     },
@@ -264,6 +276,10 @@ export const useReviewShortcutsEnabled = () =>
 /** Get gestures enabled setting */
 export const useReviewGesturesEnabled = () =>
   useReviewQueueStore((state) => state.gesturesEnabled);
+
+/** Get track watch history setting */
+export const useReviewTrackWatchHistory = () =>
+  useReviewQueueStore((state) => state.trackWatchHistory);
 
 // #endregion
 

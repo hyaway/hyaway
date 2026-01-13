@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { IconAlertCircle } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -19,12 +19,11 @@ import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { Heading } from "@/components/ui-primitives/heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { LOADING_ACTIONS, useFileActions } from "@/hooks/use-file-actions";
-import { useRemoteFileViewTimeTracker } from "@/hooks/use-file-view-time-tracker";
-import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import {
-  useWatchHistoryActions,
-  useWatchHistoryEnabled,
-} from "@/stores/watch-history-store";
+  useLocalWatchHistoryTracker,
+  useRemoteFileViewTimeTracker,
+} from "@/hooks/use-watch-history-tracking";
+import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { InlineTagsList } from "@/components/tag/inline-tags-list";
 
 export interface FileDetailProps {
@@ -106,16 +105,10 @@ function FileDetailContent({
   trackLocalWatchHistory: boolean;
 }) {
   const queryClient = useQueryClient();
-  const { addViewedFile } = useWatchHistoryActions();
-  const historyEnabled = useWatchHistoryEnabled();
 
-  // Track file view when component mounts with valid data
+  // Track file view in local watch history when component mounts
   // Respects both the page-level trackLocalWatchHistory prop and global enabled setting
-  useEffect(() => {
-    if (trackLocalWatchHistory && historyEnabled) {
-      addViewedFile(fileId);
-    }
-  }, [fileId, addViewedFile, trackLocalWatchHistory, historyEnabled]);
+  useLocalWatchHistoryTracker(fileId, trackLocalWatchHistory);
 
   // Track view time and sync to Hydrus (respects user settings internally)
   useRemoteFileViewTimeTracker(fileId);

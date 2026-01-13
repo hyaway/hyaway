@@ -4,10 +4,39 @@ import { incrementFileViewtime } from "@/integrations/hydrus-api/api-client";
 import { CanvasType, Permission } from "@/integrations/hydrus-api/models";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useFileViewingStatisticsOptions } from "@/integrations/hydrus-api/queries/options";
-import { useWatchHistorySyncToHydrus } from "@/stores/watch-history-store";
+import {
+  useWatchHistoryActions,
+  useWatchHistoryEnabled,
+  useWatchHistorySyncToHydrus,
+} from "@/stores/watch-history-store";
 
 /** Multiplier for increasing interval between sends */
 const BACKOFF_MULTIPLIER = 1.5;
+
+/**
+ * Hook that tracks file views in local watch history.
+ *
+ * Behavior:
+ * - Adds the file to watch history when component mounts (if enabled)
+ * - Respects global watch history enabled setting
+ * - Only tracks valid file IDs (> 0)
+ *
+ * @param fileId - The file ID to track
+ * @param enabled - Whether tracking is enabled (default: true)
+ */
+export function useLocalWatchHistoryTracker(
+  fileId: number,
+  enabled: boolean = true,
+) {
+  const { addViewedFile } = useWatchHistoryActions();
+  const historyEnabled = useWatchHistoryEnabled();
+
+  useEffect(() => {
+    if (enabled && historyEnabled && fileId > 0) {
+      addViewedFile(fileId);
+    }
+  }, [fileId, addViewedFile, enabled, historyEnabled]);
+}
 
 /**
  * Hook that tracks file view time and sends it to Hydrus API.
@@ -22,8 +51,14 @@ const BACKOFF_MULTIPLIER = 1.5;
  * Requirements:
  * - User must enable "sync to hydrus" in watch history settings
  * - Hydrus must have file_viewing_statistics_active enabled
+ *
+ * @param fileId - The file ID to track
+ * @param enabled - Whether tracking is enabled (default: true)
  */
-export function useRemoteFileViewTimeTracker(fileId: number) {
+export function useRemoteFileViewTimeTracker(
+  fileId: number,
+  enabled: boolean = true,
+) {
   const syncToHydrus = useWatchHistorySyncToHydrus();
   const hasEditTimesPermission = useHasPermission(Permission.EDIT_FILE_TIMES);
   const { isActive, minTimeMs, maxTimeMs, isFetched } =
@@ -69,7 +104,7 @@ export function useRemoteFileViewTimeTracker(fileId: number) {
 
   // Check if tracking should be active
   const shouldTrack =
-    syncToHydrus && hasEditTimesPermission && isActive && isFetched;
+    enabled && syncToHydrus && hasEditTimesPermission && isActive && isFetched;
 
   useEffect(() => {
     if (!shouldTrack) {

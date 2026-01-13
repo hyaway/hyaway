@@ -6,6 +6,7 @@ import {
   useReviewQueueActions,
   useReviewQueueCount,
   useReviewShortcutsEnabled,
+  useReviewTrackWatchHistory,
 } from "@/stores/review-queue-store";
 
 export const REVIEW_QUEUE_SETTINGS_TITLE = "Review queue";
@@ -20,8 +21,13 @@ export function ReviewQueueSettings({
   const count = useReviewQueueCount();
   const shortcutsEnabled = useReviewShortcutsEnabled();
   const gesturesEnabled = useReviewGesturesEnabled();
-  const { clearQueue, setShortcutsEnabled, setGesturesEnabled } =
-    useReviewQueueActions();
+  const trackWatchHistory = useReviewTrackWatchHistory();
+  const {
+    clearQueue,
+    setShortcutsEnabled,
+    setGesturesEnabled,
+    setTrackWatchHistory,
+  } = useReviewQueueActions();
 
   return (
     <SettingsGroup>
@@ -38,6 +44,13 @@ export function ReviewQueueSettings({
         description="Swipe cards to archive, trash, or skip files"
         checked={gesturesEnabled}
         onCheckedChange={setGesturesEnabled}
+      />
+      <SwitchField
+        id={`${idPrefix}track-watch-history`}
+        label="Track watch history"
+        description="Track reviewed files using your watch history settings"
+        checked={trackWatchHistory}
+        onCheckedChange={setTrackWatchHistory}
       />
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1">

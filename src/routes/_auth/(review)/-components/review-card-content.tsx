@@ -17,9 +17,14 @@ import { FileStateBadge } from "@/components/file-detail/file-state-badge";
 import { VidstackZoomButton } from "@/components/file-detail/viewers/vidstack-zoom-button";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
+import {
+  useLocalWatchHistoryTracker,
+  useRemoteFileViewTimeTracker,
+} from "@/hooks/use-watch-history-tracking";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { useActiveTheme } from "@/stores/theme-store";
+import { useReviewTrackWatchHistory } from "@/stores/review-queue-store";
 import {
   useFillCanvasBackground,
   useImageBackground,
@@ -52,6 +57,14 @@ export function ReviewCardContent({
   const mediaAutoPlay = useMediaAutoPlay();
   const mediaStartWithSound = useMediaStartWithSound();
   const videoStartExpanded = useVideoStartExpanded();
+  const trackWatchHistory = useReviewTrackWatchHistory();
+
+  // Track file view in local watch history (only for top card with valid fileId)
+  const shouldTrack = isTop && trackWatchHistory && fileId > 0;
+  useLocalWatchHistoryTracker(fileId, shouldTrack);
+
+  // Track view time and sync to Hydrus (only for top card with valid fileId)
+  useRemoteFileViewTimeTracker(fileId, shouldTrack);
 
   // Zoom fill state for videos
   const [zoomFill, setZoomFill] = useState(() => videoStartExpanded);
