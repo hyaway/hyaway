@@ -42,8 +42,8 @@ export { refreshSessionKey };
  * @permission None - This endpoint has no restricted access.
  * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#api_version
  */
-export async function getApiVersion() {
-  const response = await baseClient.get(`/api_version`);
+export async function getApiVersion(signal?: AbortSignal) {
+  const response = await baseClient.get(`/api_version`, { signal });
   return BaseResponseSchema.parse(response.data);
 }
 

@@ -1,15 +1,11 @@
 import { AxiosError } from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
-import z from "zod";
 import { useEffect } from "react";
 import { SETTINGS_ENDPOINT_FIELD_NAME } from "./constants";
 import { useApiVersionQuery } from "@/integrations/hydrus-api/queries/access";
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-} from "@/components/ui-primitives/field";
+import { Field, FieldLabel } from "@/components/ui-primitives/field";
 import { Input } from "@/components/ui-primitives/input";
 import {
   Alert,
@@ -18,6 +14,7 @@ import {
 } from "@/components/ui-primitives/alert";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import { Button } from "@/components/ui-primitives/button";
+import { Toggle } from "@/components/ui-primitives/toggle";
 import { SettingsCardTitle } from "@/components/settings/settings-ui";
 import {
   Card,
@@ -30,31 +27,57 @@ import {
   useAuthActions,
 } from "@/integrations/hydrus-api/hydrus-config-store";
 
-const endpointSchema = z.url("Please enter a valid URL");
+type Protocol = "https://" | "http://";
 
-const formSchema = z.object({
-  [SETTINGS_ENDPOINT_FIELD_NAME]: endpointSchema,
-});
+/** Parse a URL into protocol and host parts */
+function parseEndpoint(url: string): { protocol: Protocol; host: string } {
+  const lower = url.toLowerCase();
+  if (lower.startsWith("https://")) {
+    return { protocol: "https://", host: url.slice(8) };
+  }
+  if (lower.startsWith("http://")) {
+    return { protocol: "http://", host: url.slice(7) };
+  }
+  // Default to http if no protocol (localhost is common default)
+  return { protocol: "http://", host: url };
+}
+
+/** Check if input contains a protocol prefix */
+function hasProtocolPrefix(value: string): boolean {
+  const lower = value.toLowerCase();
+  return lower.startsWith("https://") || lower.startsWith("http://");
+}
 
 export function ApiEndpointCard() {
   const apiEndpoint = useApiEndpoint();
   const { setApiCredentials } = useAuthActions();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useApiVersionQuery();
 
   const form = useForm({
-    defaultValues: {
-      [SETTINGS_ENDPOINT_FIELD_NAME]: apiEndpoint,
-    } satisfies z.input<typeof formSchema>,
+    defaultValues: parseEndpoint(apiEndpoint),
     onSubmit: ({ value }) => {
-      setApiCredentials(undefined, value[SETTINGS_ENDPOINT_FIELD_NAME]);
+      const url = `${value.protocol}${value.host}`;
+      setApiCredentials(undefined, url);
     },
   });
 
+  // Cancel pending query when form becomes dirty
   useEffect(() => {
-    form.reset();
-  }, [apiEndpoint]);
+    return form.store.subscribe(() => {
+      const isDirty = form.state.isDirty;
+      if (isDirty && isFetching) {
+        queryClient.cancelQueries({ queryKey: ["apiVersion"] });
+      }
+    });
+  }, [form, isFetching, queryClient]);
+
+  // Reset form when stored endpoint changes externally
+  useEffect(() => {
+    form.reset({ ...parseEndpoint(apiEndpoint) });
+  }, [apiEndpoint, form]);
 
   return (
     <form
@@ -72,40 +95,62 @@ export function ApiEndpointCard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <form.Field
-            name={SETTINGS_ENDPOINT_FIELD_NAME}
-            validators={{ onChange: endpointSchema }}
-          >
-            {(field) => (
-              <Field>
-                <FieldLabel>API endpoint</FieldLabel>
-                <Input
-                  name={field.name}
-                  id={field.name}
-                  value={field.state.value}
-                  placeholder="http://localhost:45869"
-                  required={true}
-                  type="url"
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                />
-                {!field.state.meta.isValid && field.state.meta.isTouched && (
-                  <FieldError errors={field.state.meta.errors} />
+          <Field>
+            <FieldLabel htmlFor={SETTINGS_ENDPOINT_FIELD_NAME}>
+              API endpoint
+            </FieldLabel>
+            <div className="flex items-center gap-2">
+              <form.Field name="protocol">
+                {(field) => (
+                  <Toggle
+                    size="sm"
+                    variant="outline"
+                    pressed={field.state.value === "https://"}
+                    onPressedChange={(pressed) =>
+                      field.handleChange(pressed ? "https://" : "http://")
+                    }
+                    aria-label="Use HTTPS"
+                    className="shrink-0 font-mono"
+                  >
+                    {field.state.value === "https://" ? "https://" : "http://"}
+                  </Toggle>
                 )}
-              </Field>
-            )}
-          </form.Field>
+              </form.Field>
+              <form.Field name="host">
+                {(field) => (
+                  <Input
+                    name={SETTINGS_ENDPOINT_FIELD_NAME}
+                    id={SETTINGS_ENDPOINT_FIELD_NAME}
+                    value={field.state.value}
+                    placeholder="localhost:45869"
+                    required={true}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Detect and strip protocol if user pastes/types full URL
+                      if (hasProtocolPrefix(value)) {
+                        const parsed = parseEndpoint(value);
+                        form.setFieldValue("protocol", parsed.protocol);
+                        field.handleChange(parsed.host);
+                      } else {
+                        field.handleChange(value);
+                      }
+                    }}
+                    onBlur={field.handleBlur}
+                    className="flex-1"
+                  />
+                )}
+              </form.Field>
+            </div>
+          </Field>
           <form.Subscribe
-            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            selector={(state) => [state.canSubmit, state.values.host] as const}
           >
-            {([canSubmit, isSubmitting]) => (
+            {([canSubmit, host]) => (
               <Button
                 type="submit"
-                disabled={isFetching || !canSubmit || isSubmitting}
+                disabled={isFetching || !canSubmit || !host.trim()}
               >
-                {isFetching || isSubmitting
-                  ? "Checking endpoint..."
-                  : "Check endpoint"}
+                {isFetching ? "Checking endpoint..." : "Check endpoint"}
               </Button>
             )}
           </form.Subscribe>
@@ -133,9 +178,13 @@ export function ApiEndpointCard() {
             <Alert variant="destructive">
               <IconAlertCircle />
               <AlertTitle>
-                {error instanceof Error
-                  ? error.message
-                  : "An unknown error occurred while checking endpoint."}
+                {error instanceof AxiosError && error.code === "ECONNABORTED"
+                  ? "Connection timed out"
+                  : error instanceof AxiosError && error.code === "ERR_CANCELED"
+                    ? "Request cancelled"
+                    : error instanceof Error
+                      ? error.message
+                      : "An unknown error occurred while checking endpoint."}
               </AlertTitle>
               <AlertDescription>
                 {error instanceof AxiosError && error.response?.data?.error && (
@@ -144,6 +193,16 @@ export function ApiEndpointCard() {
                     <br />
                   </>
                 )}
+                {error instanceof AxiosError &&
+                  error.code === "ECONNABORTED" && (
+                    <>
+                      <span>
+                        Could not reach the endpoint within 10 seconds. Check
+                        that Hydrus is running and the URL is correct.
+                      </span>
+                      <br />
+                    </>
+                  )}
                 API endpoint: <b>{apiEndpoint}</b>
               </AlertDescription>
             </Alert>

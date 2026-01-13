@@ -17,6 +17,8 @@ export function createBaseClient(config?: AxiosRequestConfig) {
       "Cache-Control": "no-cache, no-store, must-revalidate",
       Pragma: "no-cache",
     },
+    // 10s timeout to prevent indefinite blocking on unreachable endpoints
+    timeout: 10000,
     ...config,
   });
 

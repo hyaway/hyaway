@@ -16,8 +16,8 @@ export const useApiVersionQuery = () => {
   const apiEndpoint = useApiEndpoint();
   return useQuery({
     queryKey: ["apiVersion"],
-    queryFn: async () => {
-      return getApiVersion();
+    queryFn: async ({ signal }) => {
+      return getApiVersion(signal);
     },
     enabled: !!apiEndpoint,
     retry: false,

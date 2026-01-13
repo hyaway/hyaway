@@ -25,6 +25,7 @@ const queryClientSingleton = new QueryClient({
     queries: {
       staleTime: Infinity, // Data doesn't change without user interaction, we don't want to replace while actively looking at the page
       retry: shouldRetryQuery,
+      retryDelay: 1000, // Flat 1s delay instead of exponential backoff
     },
   },
 });
