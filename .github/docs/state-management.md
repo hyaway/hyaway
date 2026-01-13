@@ -6,19 +6,18 @@ hyAway uses **Zustand** for client-side state management with explicit selector 
 
 ## Store Files
 
-| Store           | File                                             | Purpose                |
-| --------------- | ------------------------------------------------ | ---------------------- |
-| Theme           | `stores/theme-store.ts`                          | Dark/light mode        |
-| Gallery         | `stores/gallery-settings-store.ts`               | Gallery preferences    |
-| File Viewer     | `stores/file-viewer-settings-store.ts`           | Viewer preferences     |
-| Pages           | `stores/pages-settings-store.ts`                 | Pages layout           |
-| Search Limits   | `stores/search-limits-store.ts`                  | Query/gallery limits   |
-| Tags            | `stores/tags-settings-store.ts`                  | Tag sorting mode       |
-| History         | `stores/watch-history-store.ts`                  | Watch history tracking |
-| Sidebar         | `stores/sidebar-store.ts`                        | Sidebar persistence    |
-| Review Queue    | `stores/review-queue-store.ts`                   | Review queue state     |
-| Review Settings | `stores/review-settings-store.ts`                | Review UI preferences  |
-| Hydrus Config   | `integrations/hydrus-api/hydrus-config-store.ts` | API connection         |
+| Store         | File                                             | Purpose                    |
+| ------------- | ------------------------------------------------ | -------------------------- |
+| Theme         | `stores/theme-store.ts`                          | Dark/light mode            |
+| Gallery       | `stores/gallery-settings-store.ts`               | Gallery preferences        |
+| File Viewer   | `stores/file-viewer-settings-store.ts`           | Viewer preferences         |
+| Pages         | `stores/pages-settings-store.ts`                 | Pages layout               |
+| Search Limits | `stores/search-limits-store.ts`                  | Query/gallery limits       |
+| Tags          | `stores/tags-settings-store.ts`                  | Tag sorting mode           |
+| History       | `stores/watch-history-store.ts`                  | Watch history tracking     |
+| Sidebar       | `stores/sidebar-store.ts`                        | Sidebar persistence        |
+| Review Queue  | `stores/review-queue-store.ts`                   | Review queue + UI settings |
+| Hydrus Config | `integrations/hydrus-api/hydrus-config-store.ts` | API connection             |
 
 ## Usage Pattern
 
@@ -99,13 +98,22 @@ const theme = getActiveThemeSnapshot();
 | `useWatchHistoryLimit`   | `number`                               |
 | `useWatchHistoryActions` | `{ addViewedFile, clearHistory, ... }` |
 
-### Review Settings Store (`stores/review-settings-store.ts`)
+### Review Queue Store (`stores/review-queue-store.ts`)
 
-| Hook                        | Returns                                              |
-| --------------------------- | ---------------------------------------------------- |
-| `useReviewShortcutsEnabled` | `boolean`                                            |
-| `useReviewGesturesEnabled`  | `boolean`                                            |
-| `useReviewSettingsActions`  | `{ setShortcutsEnabled, setGesturesEnabled, reset }` |
+| Hook                          | Returns                                              |
+| ----------------------------- | ---------------------------------------------------- |
+| `useReviewQueueFileIds`       | `Array<number>`                                      |
+| `useReviewQueueCurrentIndex`  | `number`                                             |
+| `useReviewQueueHistory`       | `Array<ReviewHistoryEntry>`                          |
+| `useReviewQueueCurrentFileId` | `number \| undefined`                                |
+| `useReviewQueueCount`         | `number`                                             |
+| `useReviewQueueRemaining`     | `number`                                             |
+| `useReviewQueueIsComplete`    | `boolean`                                            |
+| `useReviewQueueIsEmpty`       | `boolean`                                            |
+| `useReviewStats`              | `ReviewStats`                                        |
+| `useReviewShortcutsEnabled`   | `boolean`                                            |
+| `useReviewGesturesEnabled`    | `boolean`                                            |
+| `useReviewQueueActions`       | `{ setQueue, clearQueue, setShortcutsEnabled, ... }` |
 
 > **Note:** The sidebar store uses `useSidebarSide(side)` for bound access—see [Sidebar Store](#sidebar-store) below.
 

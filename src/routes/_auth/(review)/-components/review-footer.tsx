@@ -5,7 +5,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import type { ReviewAction } from "@/stores/review-queue-store";
-import { useReviewShortcutsEnabled } from "@/stores/review-settings-store";
+import { useReviewShortcutsEnabled } from "@/stores/review-queue-store";
 import { FooterPortal } from "@/components/app-shell/footer-portal";
 import { Badge } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";

@@ -33,6 +33,10 @@ type ReviewQueueState = {
   currentIndex: number;
   /** Action history for undo (not persisted) */
   history: Array<ReviewHistoryEntry>;
+  /** Enable keyboard shortcuts for review actions */
+  shortcutsEnabled: boolean;
+  /** Enable swipe gestures for review actions */
+  gesturesEnabled: boolean;
 
   actions: {
     /** Set the queue to a new list of file IDs (replaces existing, dedupes) */
@@ -51,6 +55,10 @@ type ReviewQueueState = {
     clearHistory: () => void;
     /** Skip to end - sets currentIndex to end of queue */
     skipToEnd: () => void;
+    /** Enable or disable keyboard shortcuts */
+    setShortcutsEnabled: (enabled: boolean) => void;
+    /** Enable or disable swipe gestures */
+    setGesturesEnabled: (enabled: boolean) => void;
   };
 };
 
@@ -60,6 +68,8 @@ const useReviewQueueStore = create<ReviewQueueState>()(
       fileIds: [],
       currentIndex: 0,
       history: [],
+      shortcutsEnabled: true,
+      gesturesEnabled: true,
 
       actions: {
         setQueue: (ids) => {
@@ -118,15 +128,25 @@ const useReviewQueueStore = create<ReviewQueueState>()(
           const { fileIds } = get();
           set({ currentIndex: fileIds.length });
         },
+
+        setShortcutsEnabled: (shortcutsEnabled: boolean) => {
+          set({ shortcutsEnabled });
+        },
+
+        setGesturesEnabled: (gesturesEnabled: boolean) => {
+          set({ gesturesEnabled });
+        },
       },
     }),
     {
       name: "hyaway-review-queue",
       storage: createJSONStorage(() => localStorage),
-      // Persist both fileIds and currentIndex for truncation on reload
+      // Persist queue state and settings
       partialize: (state) => ({
         fileIds: state.fileIds,
         currentIndex: state.currentIndex,
+        shortcutsEnabled: state.shortcutsEnabled,
+        gesturesEnabled: state.gesturesEnabled,
       }),
       // On reload, truncate processed items and reset index
       merge: (persistedState, currentState) => {
@@ -140,6 +160,10 @@ const useReviewQueueStore = create<ReviewQueueState>()(
           fileIds: remainingFileIds,
           currentIndex: 0, // Start fresh with truncated queue
           history: [], // Always start with empty history
+          shortcutsEnabled:
+            persisted.shortcutsEnabled ?? currentState.shortcutsEnabled,
+          gesturesEnabled:
+            persisted.gesturesEnabled ?? currentState.gesturesEnabled,
         };
       },
     },
@@ -232,6 +256,14 @@ export const useReviewQueueNextFileIds = (count: number) =>
 /** Get actions */
 export const useReviewQueueActions = () =>
   useReviewQueueStore((state) => state.actions);
+
+/** Get shortcuts enabled setting */
+export const useReviewShortcutsEnabled = () =>
+  useReviewQueueStore((state) => state.shortcutsEnabled);
+
+/** Get gestures enabled setting */
+export const useReviewGesturesEnabled = () =>
+  useReviewQueueStore((state) => state.gesturesEnabled);
 
 // #endregion
 

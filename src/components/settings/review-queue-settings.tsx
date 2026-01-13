@@ -2,14 +2,11 @@ import { IconTrashX } from "@tabler/icons-react";
 import { SettingsGroup, SwitchField } from "./setting-fields";
 import { Button } from "@/components/ui-primitives/button";
 import {
+  useReviewGesturesEnabled,
   useReviewQueueActions,
   useReviewQueueCount,
-} from "@/stores/review-queue-store";
-import {
-  useReviewGesturesEnabled,
-  useReviewSettingsActions,
   useReviewShortcutsEnabled,
-} from "@/stores/review-settings-store";
+} from "@/stores/review-queue-store";
 
 export const REVIEW_QUEUE_SETTINGS_TITLE = "Review queue";
 
@@ -21,11 +18,10 @@ export function ReviewQueueSettings({
   idPrefix = "",
 }: ReviewQueueSettingsProps) {
   const count = useReviewQueueCount();
-  const { clearQueue } = useReviewQueueActions();
   const shortcutsEnabled = useReviewShortcutsEnabled();
   const gesturesEnabled = useReviewGesturesEnabled();
-  const { setShortcutsEnabled, setGesturesEnabled } =
-    useReviewSettingsActions();
+  const { clearQueue, setShortcutsEnabled, setGesturesEnabled } =
+    useReviewQueueActions();
 
   return (
     <SettingsGroup>

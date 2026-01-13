@@ -10,17 +10,15 @@ import type {
   ReviewHistoryEntry,
 } from "@/stores/review-queue-store";
 import {
+  useReviewGesturesEnabled,
   useReviewQueueActions,
   useReviewQueueCurrentFileId,
   useReviewQueueCurrentIndex,
   useReviewQueueFileIds,
   useReviewQueueHistory,
   useReviewQueueNextFileIds,
-} from "@/stores/review-queue-store";
-import {
-  useReviewGesturesEnabled,
   useReviewShortcutsEnabled,
-} from "@/stores/review-settings-store";
+} from "@/stores/review-queue-store";
 import {
   useArchiveFilesMutation,
   useDeleteFilesMutation,
