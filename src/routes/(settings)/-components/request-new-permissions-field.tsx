@@ -36,13 +36,13 @@ function getDeviceInfo(): string {
   else if (ua.includes("Chrome")) browser = "Chrome";
   else if (ua.includes("Safari")) browser = "Safari";
 
-  // Detect OS
-  let os = "Unknown";
+  // Detect OS (check Android before Linux since Android UA contains "Linux")
+  let os = "Other";
   if (ua.includes("Windows")) os = "Windows";
   else if (ua.includes("Mac OS")) os = "macOS";
-  else if (ua.includes("Linux")) os = "Linux";
   else if (ua.includes("Android")) os = "Android";
   else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+  else if (ua.includes("Linux")) os = "Linux";
 
   return `${origin} (${browser} on ${os})`;
 }
