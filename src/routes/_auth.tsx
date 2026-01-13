@@ -145,10 +145,23 @@ function AuthNotConfiguredPrompt() {
       title="Connect to Hydrus"
       description="Configure the API endpoint and access key to connect to your Hydrus client."
       actions={
-        <LinkButton to="/settings/connection" size="lg">
-          <IconLock data-icon="inline-start" />
-          Configure connection
-        </LinkButton>
+        <div className="flex w-full flex-col items-center gap-3">
+          <LinkButton to="/settings/connection" size="lg">
+            <IconLock data-icon="inline-start" />
+            Configure connection
+          </LinkButton>
+          <span>
+            Need help?{" "}
+            <a
+              href="https://github.com/hyaway/hyaway/blob/main/docs/SETUP.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Read the setup guide
+            </a>
+          </span>
+        </div>
       }
     />
   );

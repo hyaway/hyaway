@@ -91,7 +91,10 @@ export function ApiEndpointCard() {
         <CardHeader>
           <SettingsCardTitle>1. Set API endpoint</SettingsCardTitle>
           <CardDescription>
-            Where is your Hydrus client running?
+            Use{" "}
+            <span className="text-foreground font-mono">127.0.0.1:45869</span>{" "}
+            if Hydrus is running on this device, or your remote URL if it is
+            running on another device.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
@@ -122,7 +125,7 @@ export function ApiEndpointCard() {
                     name={SETTINGS_ENDPOINT_FIELD_NAME}
                     id={SETTINGS_ENDPOINT_FIELD_NAME}
                     value={field.state.value}
-                    placeholder="localhost:45869"
+                    placeholder="127.0.0.1:45869"
                     required={true}
                     onChange={(e) => {
                       const value = e.target.value;

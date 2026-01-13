@@ -133,7 +133,7 @@ return GetServicesResponseSchema.parse(response.data);
 
 | Field                | Purpose                                            |
 | -------------------- | -------------------------------------------------- |
-| `api_endpoint`       | Hydrus client URL (e.g., `http://localhost:45869`) |
+| `api_endpoint`       | Hydrus client URL (e.g., `http://127.0.0.1:45869`) |
 | `api_access_key`     | Permanent API key from Hydrus                      |
 | `sessionKey`         | Temporary session key (auto-managed)               |
 | `authWithSessionKey` | Whether to prefer session key auth                 |

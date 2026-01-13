@@ -234,7 +234,7 @@ function MarketingHeader() {
           rel="noopener noreferrer"
           className="border-border bg-input/30 hover:bg-input/50 hover:text-foreground inline-flex h-12 items-center justify-center gap-2 rounded-4xl border px-5 text-sm font-medium transition-all"
         >
-          Setup guide
+          Need help?
           <IconExternalLink className="size-4" />
         </a>
       </div>

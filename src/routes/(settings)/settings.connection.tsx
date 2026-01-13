@@ -26,6 +26,19 @@ function SettingsConnectionComponent() {
       <Heading level={2} className="sr-only">
         Connection
       </Heading>
+      <p className="text-muted-foreground text-sm">
+        Connect to your Hydrus client's API.
+        <br /> Need help?{" "}
+        <a
+          href="https://github.com/hyaway/hyaway/blob/main/docs/SETUP.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:underline"
+        >
+          Read the setup guide
+        </a>
+        .
+      </p>
       <ApiEndpointCard />
       <AccessKeyCard />
       <SessionKeyCard />

@@ -15,7 +15,8 @@ export function AccessKeyCard() {
       <CardHeader>
         <SettingsCardTitle>2. Set access key</SettingsCardTitle>
         <CardDescription>
-          Generate or enter an access key for your Hydrus client.
+          Request a new key from Hydrus, or paste an existing 64-character
+          access key.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
