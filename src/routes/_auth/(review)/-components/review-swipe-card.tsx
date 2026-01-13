@@ -100,6 +100,8 @@ export interface ReviewSwipeCardProps {
   children: React.ReactNode;
   /** Exit direction for animation (triggers exit when set) */
   exitDirection?: SwipeDirection;
+  /** Whether swipe gestures are enabled */
+  gesturesEnabled?: boolean;
   /** Callback when swipe completes with a direction */
   onSwipe: (direction: SwipeDirection, action: ReviewAction) => void;
   /** Callback when exit animation completes */
@@ -144,6 +146,7 @@ export function ReviewSwipeCard({
   stackIndex,
   children,
   exitDirection,
+  gesturesEnabled = true,
   onSwipe,
   onExitComplete,
 }: ReviewSwipeCardProps) {
@@ -245,7 +248,9 @@ export function ReviewSwipeCard({
         key={fileId}
         className={cn(
           "bg-card border-border absolute inset-0 touch-none overflow-hidden rounded-lg border shadow-lg",
-          isTop ? "cursor-grab active:cursor-grabbing" : "pointer-events-none",
+          isTop && gesturesEnabled
+            ? "cursor-grab active:cursor-grabbing"
+            : "pointer-events-none",
         )}
         style={{
           x,
@@ -254,14 +259,14 @@ export function ReviewSwipeCard({
           scale: stackScale,
           translateY: stackY,
         }}
-        drag={isTop && !isExiting}
+        drag={isTop && !isExiting && gesturesEnabled}
         dragListener={false}
         dragControls={dragControls}
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
         dragElastic={0.9}
         onDragEnd={handleDragEnd}
         onPointerDown={(e) => {
-          if (!isTop || isExiting) return;
+          if (!isTop || isExiting || !gesturesEnabled) return;
 
           const target = e.target as HTMLElement;
           // Don't start swiping when interacting with media controls (Vidstack)

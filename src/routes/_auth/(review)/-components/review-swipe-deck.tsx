@@ -18,6 +18,10 @@ import {
   useReviewQueueNextFileIds,
 } from "@/stores/review-queue-store";
 import {
+  useReviewGesturesEnabled,
+  useReviewShortcutsEnabled,
+} from "@/stores/review-settings-store";
+import {
   useArchiveFilesMutation,
   useDeleteFilesMutation,
   useGetSingleFileMetadata,
@@ -171,7 +175,10 @@ export function useReviewSwipeDeck({
   );
 
   // Keyboard shortcuts
+  const shortcutsEnabled = useReviewShortcutsEnabled();
   useEffect(() => {
+    if (!shortcutsEnabled) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore if focused on input
       if (
@@ -211,10 +218,11 @@ export function useReviewSwipeDeck({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSwipe, performUndo]);
+  }, [shortcutsEnabled, handleSwipe, performUndo]);
 
   // Get visible cards for the stack (current + next few)
   const visibleFileIds = fileIds.slice(currentIndex, currentIndex + STACK_SIZE);
+  const gesturesEnabled = useReviewGesturesEnabled();
 
   // Handle programmatic actions from footer buttons
   const performAction = useCallback(
@@ -233,6 +241,7 @@ export function useReviewSwipeDeck({
   return {
     visibleFileIds,
     exitingCards,
+    gesturesEnabled,
     handleSwipe,
     handleExitComplete,
     performAction,
@@ -244,11 +253,13 @@ export function useReviewSwipeDeck({
 export function ReviewSwipeDeckVisual({
   visibleFileIds,
   exitingCards,
+  gesturesEnabled,
   handleSwipe,
   handleExitComplete,
 }: {
   visibleFileIds: Array<number>;
   exitingCards: Map<number, SwipeDirection>;
+  gesturesEnabled: boolean;
   handleSwipe: (direction: SwipeDirection, action: ReviewAction) => void;
   handleExitComplete: (fileId: number) => void;
 }) {
@@ -286,6 +297,7 @@ export function ReviewSwipeDeckVisual({
               isTop={isTopCard}
               stackIndex={nonExitingIndex}
               exitDirection={exitDirection}
+              gesturesEnabled={gesturesEnabled}
               onSwipe={handleSwipe}
               onExitComplete={() => handleExitComplete(fileId)}
             >

@@ -19,7 +19,7 @@ export function ReviewSettingsPopover() {
       <SettingsHeader>
         <SettingsTitle>{REVIEW_QUEUE_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
-      <ReviewQueueSettings />
+      <ReviewQueueSettings idPrefix="popover-" />
 
       <Separator className="my-2" />
 

@@ -5,6 +5,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import type { ReviewAction } from "@/stores/review-queue-store";
+import { useReviewShortcutsEnabled } from "@/stores/review-settings-store";
 import { FooterPortal } from "@/components/app-shell/footer-portal";
 import { Badge } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";
@@ -25,6 +26,8 @@ export function ReviewFooter({
   undoCount,
   disabled,
 }: ReviewFooterProps) {
+  const showShortcuts = useReviewShortcutsEnabled();
+
   // Don't show footer when review is complete
   if (disabled) {
     return null;
@@ -39,7 +42,7 @@ export function ReviewFooter({
           icon={<IconArrowBackUp className="size-6" />}
           onClick={() => onAction("undo")}
           disabled={undoCount === 0}
-          kbd="↓"
+          kbd={showShortcuts ? "↓" : undefined}
           badge={undoCount > 0 ? undoCount : undefined}
         />
 
@@ -49,7 +52,7 @@ export function ReviewFooter({
           icon={<IconTrash className="size-6" />}
           onClick={() => onAction("trash")}
           variant="destructive"
-          kbd="←"
+          kbd={showShortcuts ? "←" : undefined}
         />
 
         {/* Skip button */}
@@ -57,7 +60,7 @@ export function ReviewFooter({
           label="Skip"
           icon={<IconArrowUp className="size-6" />}
           onClick={() => onAction("skip")}
-          kbd="↑"
+          kbd={showShortcuts ? "↑" : undefined}
         />
 
         {/* Archive button */}
@@ -65,7 +68,7 @@ export function ReviewFooter({
           label="Archive"
           icon={<IconArchive className="size-6" />}
           onClick={() => onAction("archive")}
-          kbd="→"
+          kbd={showShortcuts ? "→" : undefined}
         />
       </div>
     </FooterPortal>
@@ -78,7 +81,7 @@ interface ReviewActionButtonProps {
   onClick: () => void;
   disabled?: boolean;
   variant?: "default" | "destructive";
-  kbd: string;
+  kbd?: string;
   badge?: number;
 }
 
@@ -119,7 +122,7 @@ function ReviewActionButton({
       </span>
       <span className="short:sr-only short:@xl:not-sr-only flex flex-col items-center gap-0.5 text-xs max-[250px]:sr-only @xl:flex-row @xl:gap-1.5 @xl:text-sm">
         {label}
-        <Kbd className="hidden @xl:inline-flex">{kbd}</Kbd>
+        {kbd && <Kbd className="hidden @xl:inline-flex">{kbd}</Kbd>}
       </span>
     </Button>
   );

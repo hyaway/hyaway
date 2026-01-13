@@ -6,17 +6,19 @@ hyAway uses **Zustand** for client-side state management with explicit selector 
 
 ## Store Files
 
-| Store         | File                                             | Purpose                |
-| ------------- | ------------------------------------------------ | ---------------------- |
-| Theme         | `stores/theme-store.ts`                          | Dark/light mode        |
-| Gallery       | `stores/gallery-settings-store.ts`               | Gallery preferences    |
-| File Viewer   | `stores/file-viewer-settings-store.ts`           | Viewer preferences     |
-| Pages         | `stores/pages-settings-store.ts`                 | Pages layout           |
-| Search Limits | `stores/search-limits-store.ts`                  | Query/gallery limits   |
-| Tags          | `stores/tags-settings-store.ts`                  | Tag sorting mode       |
-| History       | `stores/watch-history-store.ts`                  | Watch history tracking |
-| Sidebar       | `stores/sidebar-store.ts`                        | Sidebar persistence    |
-| Hydrus Config | `integrations/hydrus-api/hydrus-config-store.ts` | API connection         |
+| Store           | File                                             | Purpose                |
+| --------------- | ------------------------------------------------ | ---------------------- |
+| Theme           | `stores/theme-store.ts`                          | Dark/light mode        |
+| Gallery         | `stores/gallery-settings-store.ts`               | Gallery preferences    |
+| File Viewer     | `stores/file-viewer-settings-store.ts`           | Viewer preferences     |
+| Pages           | `stores/pages-settings-store.ts`                 | Pages layout           |
+| Search Limits   | `stores/search-limits-store.ts`                  | Query/gallery limits   |
+| Tags            | `stores/tags-settings-store.ts`                  | Tag sorting mode       |
+| History         | `stores/watch-history-store.ts`                  | Watch history tracking |
+| Sidebar         | `stores/sidebar-store.ts`                        | Sidebar persistence    |
+| Review Queue    | `stores/review-queue-store.ts`                   | Review queue state     |
+| Review Settings | `stores/review-settings-store.ts`                | Review UI preferences  |
+| Hydrus Config   | `integrations/hydrus-api/hydrus-config-store.ts` | API connection         |
 
 ## Usage Pattern
 
@@ -96,6 +98,14 @@ const theme = getActiveThemeSnapshot();
 | `useWatchHistoryEnabled` | `boolean`                              |
 | `useWatchHistoryLimit`   | `number`                               |
 | `useWatchHistoryActions` | `{ addViewedFile, clearHistory, ... }` |
+
+### Review Settings Store (`stores/review-settings-store.ts`)
+
+| Hook                        | Returns                                              |
+| --------------------------- | ---------------------------------------------------- |
+| `useReviewShortcutsEnabled` | `boolean`                                            |
+| `useReviewGesturesEnabled`  | `boolean`                                            |
+| `useReviewSettingsActions`  | `{ setShortcutsEnabled, setGesturesEnabled, reset }` |
 
 > **Note:** The sidebar store uses `useSidebarSide(side)` for bound access—see [Sidebar Store](#sidebar-store) below.
 
@@ -277,6 +287,34 @@ setupCrossTabSync(useFeatureStore);
 ```
 
 ## Key Conventions
+
+### Storage Key Naming
+
+All persisted stores use localStorage keys with the `hyaway-` prefix:
+
+| Pattern                     | Example                   | Use Case              |
+| --------------------------- | ------------------------- | --------------------- |
+| `hyaway-{feature}`          | `hyaway-history`          | General feature state |
+| `hyaway-{feature}-settings` | `hyaway-gallery-settings` | Settings/preferences  |
+| `hyaway-{feature}-state`    | `hyaway-sidebar-state`    | UI state              |
+
+**Rules:**
+
+- Always prefix with `hyaway-` to avoid conflicts with other apps
+- Use kebab-case for the feature name
+- Suffix `-settings` for preference stores, `-state` for UI state stores
+- Don't add redundant suffixes like `-storage`
+
+```tsx
+// ✅ Correct
+name: "hyaway-review-settings";
+name: "hyaway-gallery-settings";
+name: "hyaway-sidebar-state";
+
+// ❌ Incorrect
+name: "review-settings"; // Missing hyaway- prefix
+name: "hyaway-review-settings-storage"; // Redundant -storage suffix
+```
 
 ### Actions Namespace
 

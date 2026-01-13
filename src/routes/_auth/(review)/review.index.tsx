@@ -138,6 +138,7 @@ function ReviewPage() {
         <ReviewSwipeDeckVisual
           visibleFileIds={deckState.visibleFileIds}
           exitingCards={deckState.exitingCards}
+          gesturesEnabled={deckState.gesturesEnabled}
           handleSwipe={deckState.handleSwipe}
           handleExitComplete={deckState.handleExitComplete}
         />

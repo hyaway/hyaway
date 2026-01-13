@@ -121,7 +121,7 @@ const useReviewQueueStore = create<ReviewQueueState>()(
       },
     }),
     {
-      name: "review-queue-storage",
+      name: "hyaway-review-queue",
       storage: createJSONStorage(() => localStorage),
       // Persist both fileIds and currentIndex for truncation on reload
       partialize: (state) => ({
