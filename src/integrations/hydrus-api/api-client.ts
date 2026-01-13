@@ -79,9 +79,10 @@ export async function requestNewPermissions(
  */
 export async function verifyAccessKey(
   keyType: AccessKeyType,
+  signal?: AbortSignal,
 ): Promise<VerifyAccessKeyResponse> {
   const client = keyType === "persistent" ? accessKeyClient : sessionKeyClient;
-  const response = await client.get("/verify_access_key");
+  const response = await client.get("/verify_access_key", { signal });
   return VerifyAccessKeyResponseSchema.parse(response.data);
 }
 

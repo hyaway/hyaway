@@ -1,9 +1,9 @@
-import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
-import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
+import { IconCircleCheck } from "@tabler/icons-react";
 import { useEffect } from "react";
 import { SETTINGS_ENDPOINT_FIELD_NAME } from "./constants";
+import { ApiErrorAlert } from "./api-error-alert";
 import { useApiVersionQuery } from "@/integrations/hydrus-api/queries/access";
 import { Field, FieldLabel } from "@/components/ui-primitives/field";
 import { Input } from "@/components/ui-primitives/input";
@@ -175,37 +175,12 @@ export function ApiEndpointCard() {
               </AlertDescription>
             </Alert>
           ) : isError ? (
-            <Alert variant="destructive">
-              <IconAlertCircle />
-              <AlertTitle>
-                {error instanceof AxiosError && error.code === "ECONNABORTED"
-                  ? "Connection timed out"
-                  : error instanceof AxiosError && error.code === "ERR_CANCELED"
-                    ? "Request cancelled"
-                    : error instanceof Error
-                      ? error.message
-                      : "An unknown error occurred while checking endpoint."}
-              </AlertTitle>
-              <AlertDescription>
-                {error instanceof AxiosError && error.response?.data?.error && (
-                  <>
-                    <span>{error.response.data.error}</span>
-                    <br />
-                  </>
-                )}
-                {error instanceof AxiosError &&
-                  error.code === "ECONNABORTED" && (
-                    <>
-                      <span>
-                        Could not reach the endpoint within 10 seconds. Check
-                        that Hydrus is running and the URL is correct.
-                      </span>
-                      <br />
-                    </>
-                  )}
-                API endpoint: <b>{apiEndpoint}</b>
-              </AlertDescription>
-            </Alert>
+            <ApiErrorAlert
+              error={error}
+              fallbackMessage="An unknown error occurred while checking endpoint."
+            >
+              API endpoint: <b>{apiEndpoint}</b>
+            </ApiErrorAlert>
           ) : null}
         </CardContent>
       </Card>

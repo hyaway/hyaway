@@ -1,7 +1,6 @@
 import { AxiosError } from "axios";
 import { useForm } from "@tanstack/react-form";
 import {
-  IconAlertCircle,
   IconCircleCheck,
   IconInfoCircle,
   IconShieldOff,
@@ -9,6 +8,7 @@ import {
 import z from "zod";
 import { useEffect } from "react";
 import { SETTINGS_ACCESS_KEY_FIELD_NAME } from "./constants";
+import { ApiErrorAlert } from "./api-error-alert";
 import {
   useApiVersionQuery,
   useVerifyPersistentAccessQuery,
@@ -166,37 +166,30 @@ export function AccessKeyField() {
               </AlertDescription>
             </Alert>
           ) : null}
-          <Alert variant="destructive">
-            <IconAlertCircle />
-            <AlertTitle>
-              {error instanceof Error
-                ? error.message
-                : "An unknown error occurred while checking endpoint."}
-            </AlertTitle>
-            <AlertDescription>
-              {error instanceof AxiosError ? (
-                <>
-                  <span>{error.response?.data.error}</span>
-                  <br />
-                  <span>
-                    {error.response?.status === 403 &&
-                      "If you just requested a token, complete the permissions flow in Hydrus client then check API connection"}
-                  </span>
-                  <br />
-                </>
-              ) : null}
-              API Access key:{" "}
-              <b>
-                {apiAccessKey
-                  ? apiAccessKey.length <= 6
-                    ? apiAccessKey
-                    : `${apiAccessKey.slice(0, 2)}●●●●${apiAccessKey.slice(-4)}`
-                  : ""}
-              </b>
-              <br />
-              API endpoint: <b>{apiEndpoint}</b>
-            </AlertDescription>
-          </Alert>
+          <ApiErrorAlert
+            error={error}
+            fallbackMessage="An unknown error occurred while checking access key."
+          >
+            {error instanceof AxiosError && error.response?.status === 403 && (
+              <>
+                <span>
+                  If you just requested a token, complete the permissions flow
+                  in Hydrus client then check API connection
+                </span>
+                <br />
+              </>
+            )}
+            API Access key:{" "}
+            <b>
+              {apiAccessKey
+                ? apiAccessKey.length <= 6
+                  ? apiAccessKey
+                  : `${apiAccessKey.slice(0, 2)}●●●●${apiAccessKey.slice(-4)}`
+                : ""}
+            </b>
+            <br />
+            API endpoint: <b>{apiEndpoint}</b>
+          </ApiErrorAlert>
         </>
       ) : null}
     </form>

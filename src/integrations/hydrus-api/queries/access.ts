@@ -48,8 +48,8 @@ export const useVerifyPersistentAccessQuery = () => {
 
   return useQuery({
     queryKey: ["verifyAccess", "persistent"],
-    queryFn: async () => {
-      return verifyAccessKey("persistent");
+    queryFn: async ({ signal }) => {
+      return verifyAccessKey("persistent", signal);
     },
     select: (data: VerifyAccessKeyResponse) => ({
       raw: data,
@@ -71,10 +71,10 @@ export const useVerifySessionAccessQuery = () => {
 
   return useQuery({
     queryKey: ["verifyAccess", "session"],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       // verifyAccessKey("session") calls ensureSessionKey() internally,
       // which will fetch a session key if one doesn't exist
-      return verifyAccessKey("session");
+      return verifyAccessKey("session", signal);
     },
     select: (data: VerifyAccessKeyResponse) => ({
       raw: data,

@@ -1,9 +1,9 @@
-import { AxiosError } from "axios";
 import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
 import {
   SETTINGS_ACTION,
   SETTINGS_REQUEST_SESSION_KEY_ACTION,
 } from "./constants";
+import { ApiErrorAlert } from "./api-error-alert";
 import {
   useVerifyPersistentAccessQuery,
   useVerifySessionAccessQuery,
@@ -137,23 +137,12 @@ export function SessionKeyCard() {
             </Alert>
           )
         ) : isError ? (
-          <Alert variant="destructive">
-            <IconAlertCircle />
-            <AlertTitle>
-              {error instanceof Error
-                ? error.message
-                : "An unknown error occurred while checking endpoint."}
-            </AlertTitle>
-            <AlertDescription>
-              {error instanceof AxiosError && error.response?.data?.error ? (
-                <>
-                  <span>{error.response.data.error}</span>
-                  <br />
-                </>
-              ) : null}
-              API endpoint: <b>{apiEndpoint}</b>
-            </AlertDescription>
-          </Alert>
+          <ApiErrorAlert
+            error={error}
+            fallbackMessage="An unknown error occurred while checking session key."
+          >
+            API endpoint: <b>{apiEndpoint}</b>
+          </ApiErrorAlert>
         ) : null}
       </CardContent>
     </Card>
