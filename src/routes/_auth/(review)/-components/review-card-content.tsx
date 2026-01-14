@@ -14,7 +14,6 @@ import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
 import { FileStateBadge } from "@/components/file-detail/file-state-badge";
-import { VidstackZoomButton } from "@/components/file-detail/viewers/vidstack-zoom-button";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import {
@@ -30,7 +29,6 @@ import {
   useImageBackground,
   useMediaAutoPlay,
   useMediaStartWithSound,
-  useVideoStartExpanded,
 } from "@/stores/file-viewer-settings-store";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
@@ -56,7 +54,6 @@ export const ReviewCardContent = memo(function ReviewCardContent({
   const fillCanvasBackground = useFillCanvasBackground();
   const mediaAutoPlay = useMediaAutoPlay();
   const mediaStartWithSound = useMediaStartWithSound();
-  const videoStartExpanded = useVideoStartExpanded();
   const trackWatchHistory = useReviewTrackWatchHistory();
 
   // Track file view in local watch history (only for top card with valid fileId)
@@ -65,9 +62,6 @@ export const ReviewCardContent = memo(function ReviewCardContent({
 
   // Track view time and sync to Hydrus (only for top card with valid fileId)
   useRemoteFileViewTimeTracker(fileId, shouldTrack);
-
-  // Zoom fill state for videos
-  const [zoomFill, setZoomFill] = useState(() => videoStartExpanded);
 
   // Player refs for controlling playback when becoming top card
   const videoPlayerRef = useRef<MediaPlayerInstance>(null);
@@ -237,11 +231,7 @@ export const ReviewCardContent = memo(function ReviewCardContent({
         >
           <MediaProvider
             mediaProps={{
-              className: cn(
-                zoomFill
-                  ? "h-full! w-full! object-contain"
-                  : "max-h-full! max-w-full! object-contain",
-              ),
+              className: "h-full! w-full! object-contain",
             }}
           />
           <DefaultVideoLayout
@@ -249,14 +239,6 @@ export const ReviewCardContent = memo(function ReviewCardContent({
             colorScheme={activeTheme}
             noGestures // Disable gesture handling so our swipe works
             noScrubGesture // Disable scrub gesture on timeline
-            slots={{
-              beforeFullscreenButton: (
-                <VidstackZoomButton
-                  zoomFill={zoomFill}
-                  onToggle={() => setZoomFill((prev) => !prev)}
-                />
-              ),
-            }}
           />
         </MediaPlayer>
       )}
