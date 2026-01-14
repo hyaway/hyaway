@@ -187,8 +187,8 @@ export const ReviewCardContent = memo(function ReviewCardContent({
       )}
       style={getContainerStyle()}
     >
-      {/* Blurhash placeholder - only while loading */}
-      {metadata.blurhash && !loaded && !error && (
+      {/* Blurhash placeholder - only while loading (not for videos) */}
+      {metadata.blurhash && !isVideo && !loaded && !error && (
         <BlurhashCanvas
           blurhash={metadata.blurhash}
           className="absolute inset-0 h-full w-full"
@@ -216,7 +216,7 @@ export const ReviewCardContent = memo(function ReviewCardContent({
         />
       )}
 
-      {isVideo && (
+      {isVideo && isTop && (
         <MediaPlayer
           ref={videoPlayerRef}
           title={`🎞️${fileId}`}
@@ -261,7 +261,10 @@ export const ReviewCardContent = memo(function ReviewCardContent({
         </MediaPlayer>
       )}
 
-      {isAudio && (
+      {/* Non-top video cards show black placeholder */}
+      {isVideo && !isTop && <div className="h-full w-full bg-black" />}
+
+      {isAudio && isTop && (
         <div className="flex h-full w-full flex-col items-center justify-center gap-4 p-4">
           <MediaPlayer
             ref={audioPlayerRef}
@@ -284,6 +287,13 @@ export const ReviewCardContent = memo(function ReviewCardContent({
               colorScheme={activeTheme}
             />
           </MediaPlayer>
+        </div>
+      )}
+
+      {/* Non-top audio cards show fake player placeholder */}
+      {isAudio && !isTop && (
+        <div className="flex h-full w-full flex-col items-center justify-center p-4">
+          <div className="h-[60px] w-full rounded-[6px] bg-black" />
         </div>
       )}
 
