@@ -24,8 +24,6 @@ const SCALE_TOLERANCE = 0.03;
 const MAX_ZOOM = 4.0;
 // Scroll wheel zoom sensitivity
 const WHEEL_ZOOM_FACTOR = 0.001;
-// Pinch zoom sensitivity
-const PINCH_ZOOM_FACTOR = 0.01;
 
 interface ImageViewerProps {
   fileUrl: string;
@@ -418,10 +416,11 @@ export function ImageViewer({
       const { initialDistance, initialScale, centerX, centerY } =
         pinchStateRef.current;
 
-      const scaleDiff = (distance - initialDistance) * PINCH_ZOOM_FACTOR;
+      // Use multiplicative ratio for natural pinch feel (fingers 2x apart = 2x zoom)
+      const scaleRatio = distance / initialDistance;
       const newScale = Math.max(
         minZoom,
-        Math.min(MAX_ZOOM, initialScale + scaleDiff),
+        Math.min(MAX_ZOOM, initialScale * scaleRatio),
       );
 
       // Update pinch center for current touches
