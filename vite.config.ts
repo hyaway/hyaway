@@ -1,5 +1,5 @@
 import { URL, fileURLToPath } from "node:url";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import viteReact from "@vitejs/plugin-react";
 import { devtools } from "@tanstack/devtools-vite";
 import tailwindcss from "@tailwindcss/vite";
@@ -11,37 +11,49 @@ const ReactCompilerConfig = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    devtools({
-      removeDevtoolsOnBuild: true,
-    }),
-    tanstackRouter({
-      target: "react",
-      autoCodeSplitting: true,
-      quoteStyle: "double",
-      semicolons: true,
-    }),
-    viteReact({
-      babel: {
-        plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+
+  const allowedHosts: Array<string> = [];
+  if (env.VITE_ALLOWED_HOST) {
+    allowedHosts.push(env.VITE_ALLOWED_HOST);
+  }
+
+  return {
+    plugins: [
+      devtools({
+        removeDevtoolsOnBuild: true,
+      }),
+      tanstackRouter({
+        target: "react",
+        autoCodeSplitting: true,
+        quoteStyle: "double",
+        semicolons: true,
+      }),
+      viteReact({
+        babel: {
+          plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
+        },
+      }),
+      tailwindcss(),
+    ],
+    resolve: {
+      alias: {
+        "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
-    }),
-    tailwindcss(),
-  ],
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
-  },
-  build: {
-    assetsInlineLimit: (filePath) => {
-      // Never inline fonts as base64 to avoid CSP issues
-      if (filePath.endsWith(".woff2") || filePath.endsWith(".woff")) {
-        return false;
-      }
-      // Use default behavior for other assets
-      return undefined;
+    build: {
+      assetsInlineLimit: (filePath) => {
+        // Never inline fonts as base64 to avoid CSP issues
+        if (filePath.endsWith(".woff2") || filePath.endsWith(".woff")) {
+          return false;
+        }
+        // Use default behavior for other assets
+        return undefined;
+      },
     },
-  },
+    server: {
+      allowedHosts,
+    },
+  };
 });
