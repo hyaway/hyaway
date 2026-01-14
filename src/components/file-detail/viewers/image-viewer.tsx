@@ -18,8 +18,8 @@ import {
 } from "@/stores/file-viewer-settings-store";
 import { Toggle } from "@/components/ui-primitives/toggle";
 
-// Tolerance for matching fit/1x scale values (±3%)
-const SCALE_TOLERANCE = 0.03;
+// Tolerance for matching fit/1x scale values (±2%)
+const SCALE_TOLERANCE = 0.02;
 // Max zoom bound
 const MAX_ZOOM = 4.0;
 // Scroll wheel zoom: each 100 deltaY units = 10% zoom change
@@ -368,6 +368,7 @@ export function ImageViewer({
   // Wheel zoom handler for container (anchors to closest edge of image)
   const handleContainerWheel = useCallback(
     (e: React.WheelEvent) => {
+      // In non-pan mode, let scroll pass through to page
       if (!isPannable) return;
 
       e.preventDefault();
@@ -409,7 +410,9 @@ export function ImageViewer({
   // Touch handlers for pinch zoom
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
-      if (!isPannable || e.touches.length !== 2) return;
+      if (e.touches.length !== 2) return;
+
+      e.preventDefault();
 
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
@@ -424,6 +427,19 @@ export function ImageViewer({
       const centerX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
       const centerY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
 
+      // In non-pan mode, pinch gesture enters theater mode
+      if (!isPannable) {
+        // Initialize pinch state with fitScale (what theater mode will start at)
+        pinchStateRef.current = {
+          initialDistance: distance,
+          initialScale: fitScale,
+          centerX,
+          centerY,
+        };
+        toggleTheater();
+        return;
+      }
+
       pinchStateRef.current = {
         initialDistance: distance,
         initialScale: zoomScale,
@@ -431,7 +447,7 @@ export function ImageViewer({
         centerY,
       };
     },
-    [isPannable, zoomScale],
+    [isPannable, zoomScale, fitScale, toggleTheater],
   );
 
   const handleTouchMove = useCallback(
@@ -461,6 +477,24 @@ export function ImageViewer({
         Math.min(MAX_ZOOM, initialScale * scaleRatio),
       );
 
+      // If at minimum zoom and continuing to zoom out, exit pan mode
+      if (scaleRatio < 0.9 && zoomScale <= minZoom + SCALE_TOLERANCE) {
+        pinchStateRef.current = null;
+        if (isFullscreen) {
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          }
+          setOverlayMode(null);
+        } else if (isTheater) {
+          setOverlayMode(null);
+        }
+        dragX.stop();
+        dragY.stop();
+        dragX.set(0);
+        dragY.set(0);
+        return;
+      }
+
       // Update pinch center for current touches
       const newCenterX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
       const newCenterY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
@@ -474,7 +508,16 @@ export function ImageViewer({
         adjustZoom(delta, anchorX, anchorY);
       }
     },
-    [isPannable, minZoom, zoomScale, adjustZoom],
+    [
+      isPannable,
+      isFullscreen,
+      isTheater,
+      minZoom,
+      zoomScale,
+      dragX,
+      dragY,
+      adjustZoom,
+    ],
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -666,8 +709,10 @@ export function ImageViewer({
         getContainerClass(),
         getContainerBackgroundClass(),
         getCursor(),
-        // Disable browser touch gestures (zoom, scroll) in pan mode
-        isPannable && "touch-none",
+        // Disable browser pinch zoom so we can handle it ourselves
+        // In pan mode: touch-none (disable all gestures)
+        // In normal mode: touch-pan-y (allow vertical scroll, disable pinch zoom)
+        isPannable ? "touch-none" : "touch-pan-y",
       )}
       // Handle touch events on container to prevent browser zoom outside image
       onTouchStart={handleTouchStart}
