@@ -7,7 +7,7 @@ import {
   IconZoomIn,
   IconZoomOut,
 } from "@tabler/icons-react";
-import { motion, useMotionValue } from "motion/react";
+import { motion, useMotionValue, useTransform } from "motion/react";
 import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
 import { cn } from "@/lib/utils";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
@@ -17,6 +17,15 @@ import {
   useImageBackground,
 } from "@/stores/file-viewer-settings-store";
 import { Toggle } from "@/components/ui-primitives/toggle";
+
+// Tolerance for matching fit/1x scale values (±3%)
+const SCALE_TOLERANCE = 0.03;
+// Max zoom bound
+const MAX_ZOOM = 4.0;
+// Scroll wheel zoom sensitivity
+const WHEEL_ZOOM_FACTOR = 0.001;
+// Pinch zoom sensitivity
+const PINCH_ZOOM_FACTOR = 0.01;
 
 interface ImageViewerProps {
   fileUrl: string;
@@ -38,19 +47,34 @@ export function ImageViewer({
   const [overlayMode, setOverlayMode] = useState<
     "theater" | "fullscreen" | null
   >(null);
-  // Zoom level: fit, 1x (native), 2x
-  type ZoomLevel = "fit" | "1x" | "2x";
-  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>(
+
+  // Non-pan mode zoom: fit or 1x toggle (independent of pan mode)
+  type NormalZoomLevel = "fit" | "1x";
+  const [normalZoomLevel, setNormalZoomLevel] = useState<NormalZoomLevel>(
     startExpanded ? "1x" : "fit",
   );
+
+  // Pan mode: zoom can be "fit" (follows fitScale) or a specific numeric scale
+  // Using "fit" as a marker avoids sync issues when container resizes
+  const [zoomMode, setZoomMode] = useState<"fit" | number>("fit");
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+
+  // Track if user is actively zooming (for showing indicator)
+  const [isZooming, setIsZooming] = useState(false);
+  const zoomTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Track last tap target for alternating fit/1x
+  const lastTapTargetRef = useRef<"fit" | "1x">("fit");
+
   const [loaded, setLoaded] = useState(false);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const imageBackground = useImageBackground();
   const fillCanvasBackground = useFillCanvasBackground();
 
-  // Framer Motion drag state
+  // Framer Motion values for pan and zoom (using motion values ensures synchronous updates)
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
+  const scaleMotion = useMotionValue(1);
   const [isDragging, setIsDragging] = useState(false);
   const hasDragged = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -59,15 +83,68 @@ export function ImageViewer({
   const isFullscreen = overlayMode === "fullscreen";
   const isTheater = overlayMode === "theater";
   const isPannable = isFullscreen || isTheater;
-  const isExpanded = zoomLevel !== "fit"; // For backward compatibility
+  const isExpanded = normalZoomLevel !== "fit"; // For non-pan mode backward compatibility
   const [isBottomVisible, setIsBottomVisible] = useState(true);
   const [isInView, setIsInView] = useState(true);
   const bottomSentinelRef = useRef<HTMLDivElement>(null);
+
+  // Calculate fit scale (how much to scale image to fit container)
+  const fitScale = useMemo(() => {
+    if (
+      naturalSize.width === 0 ||
+      naturalSize.height === 0 ||
+      containerSize.width === 0 ||
+      containerSize.height === 0
+    ) {
+      return 1;
+    }
+    const scaleX = containerSize.width / naturalSize.width;
+    const scaleY = containerSize.height / naturalSize.height;
+    return Math.min(scaleX, scaleY, 1); // Don't scale up beyond 1x
+  }, [naturalSize, containerSize]);
+
+  // Actual zoom scale used for rendering (computed after fitScale)
+  const zoomScale = zoomMode === "fit" ? fitScale : zoomMode;
+
+  // Sync motion value with computed scale (for non-continuous updates like fit mode)
+  useEffect(() => {
+    scaleMotion.set(zoomScale);
+  }, [zoomScale, scaleMotion]);
+
+  // Derived motion values for image dimensions (update synchronously with scale)
+  const imageWidth = useTransform(scaleMotion, (s) => naturalSize.width * s);
+  const imageHeight = useTransform(scaleMotion, (s) => naturalSize.height * s);
+
+  // Min zoom is fit scale
+  const minZoom = fitScale;
+
+  // Check if current scale matches fit or 1x (within tolerance)
+  const isAtFit =
+    zoomMode === "fit" || Math.abs(zoomScale - fitScale) <= SCALE_TOLERANCE;
+  const isAt1x = Math.abs(zoomScale - 1.0) <= SCALE_TOLERANCE;
 
   const averageColor = useMemo(
     () => getAverageColorFromBlurhash(blurhash),
     [blurhash],
   );
+
+  // Track container size for fitScale calculation
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateSize = () => {
+      setContainerSize({
+        width: container.clientWidth,
+        height: container.clientHeight,
+      });
+    };
+
+    updateSize();
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, [isPannable]);
 
   const handleLoad = () => {
     setLoaded(true);
@@ -85,6 +162,11 @@ export function ImageViewer({
     if (containerRef.current) {
       containerRef.current.requestFullscreen();
       setOverlayMode("fullscreen");
+      // Reset to fit when entering pan mode
+      setZoomMode("fit");
+      lastTapTargetRef.current = "fit";
+      dragX.stop();
+      dragY.stop();
       dragX.set(0);
       dragY.set(0);
     }
@@ -112,114 +194,255 @@ export function ImageViewer({
       dragY.set(0);
     } else {
       setOverlayMode("theater");
+      // Reset to fit when entering pan mode
+      setZoomMode("fit");
+      lastTapTargetRef.current = "fit";
+      dragX.stop();
+      dragY.stop();
       dragX.set(0);
       dragY.set(0);
     }
   }, [isTheater, dragX, dragY]);
 
-  // Cycle zoom: fit → 1x → 2x → fit (pannable) or fit ↔ 1x (normal), with optional click position
-  const toggleZoom = useCallback(
-    (clickPos?: { x: number; y: number }) => {
-      setZoomLevel((prev) => {
-        // In normal mode, only toggle between fit and 1x
-        // In pannable mode, cycle through all three
-        const cycle: Array<ZoomLevel> = isPannable
-          ? ["fit", "1x", "2x"]
-          : ["fit", "1x"];
-        const currentIndex = cycle.indexOf(prev);
-        const next = cycle[(currentIndex + 1) % cycle.length];
+  // Toggle normal mode zoom (fit ↔ 1x)
+  const toggleNormalZoom = useCallback(() => {
+    setNormalZoomLevel((prev) => {
+      const next = prev === "fit" ? "1x" : "fit";
+      if (next === "fit") {
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
+      return next;
+    });
+  }, []);
 
-        if (next === "fit") {
-          // Reset pan when going back to fit
-          if (!isPannable) {
-            window.scrollTo({ top: 0, behavior: "auto" });
-          }
-          dragX.set(0);
-          dragY.set(0);
-        } else if (clickPos && containerRef.current && naturalSize.width > 0) {
-          // Zoom to clicked point
-          const container = containerRef.current.getBoundingClientRect();
-          const containerCenterX = container.width / 2;
-          const containerCenterY = container.height / 2;
+  // Toggle pan mode zoom (cycles fit → 1x → fit)
+  const togglePanZoom = useCallback(() => {
+    // Always alternate between fit and 1x
+    const targetMode: "fit" | number =
+      lastTapTargetRef.current === "fit" ? 1.0 : "fit";
+    const nextTarget = lastTapTargetRef.current === "fit" ? "1x" : "fit";
 
-          // Click offset from container center
-          const clickOffsetX = clickPos.x - containerCenterX;
-          const clickOffsetY = clickPos.y - containerCenterY;
+    setZoomMode(targetMode);
+    lastTapTargetRef.current = nextTarget;
+    dragX.set(0);
+    dragY.set(0);
+  }, [dragX, dragY]);
 
-          // Get zoom multipliers
-          const nextZoom = next === "1x" ? 1 : 2;
-
-          // Calculate new image dimensions at next zoom level
-          const nextWidth = naturalSize.width * nextZoom;
-          const nextHeight = naturalSize.height * nextZoom;
-
-          // Calculate bounds (how far the image can pan).
-          // When the zoomed image is smaller than the container (common in fullscreen),
-          // we still want to allow moving it within the available slack so the
-          // clicked point can stay under the cursor.
-          const maxPanX = Math.abs(nextWidth - container.width) / 2;
-          const maxPanY = Math.abs(nextHeight - container.height) / 2;
-
-          // For zoom transitions, keep the point under the cursor anchored.
-          // We do this by mapping the click into the *current rendered image rect*,
-          // then solving for the new pan so that the same natural point lands under
-          // the same cursor position after changing zoom.
-          const imageRect = imageRef.current?.getBoundingClientRect();
-          if (!imageRect) {
-            dragX.set(0);
-            dragY.set(0);
-            return next;
-          }
-
-          const imageLeftInContainer = imageRect.left - container.left;
-          const imageTopInContainer = imageRect.top - container.top;
-
-          // Click position within the current rendered image, clamped.
-          const localX = Math.max(
-            0,
-            Math.min(imageRect.width, clickPos.x - imageLeftInContainer),
-          );
-          const localY = Math.max(
-            0,
-            Math.min(imageRect.height, clickPos.y - imageTopInContainer),
-          );
-
-          const scaleX = imageRect.width / naturalSize.width;
-          const scaleY = imageRect.height / naturalSize.height;
-
-          // Natural-image coordinates relative to the image center.
-          const naturalClickX = (localX - imageRect.width / 2) / scaleX;
-          const naturalClickY = (localY - imageRect.height / 2) / scaleY;
-
-          // Keep that point under the cursor after zoom.
-          // containerCenter + newPan + natural*nextZoom == clickPos
-          const newPanX = clickOffsetX - naturalClickX * nextZoom;
-          const newPanY = clickOffsetY - naturalClickY * nextZoom;
-
-          // Clamp to bounds
-          dragX.set(Math.max(-maxPanX, Math.min(maxPanX, newPanX)));
-          dragY.set(Math.max(-maxPanY, Math.min(maxPanY, newPanY)));
-        } else {
-          // No click position, just reset
-          dragX.set(0);
-          dragY.set(0);
-        }
-
-        return next;
-      });
-    },
-    [isPannable, dragX, dragY, naturalSize],
-  );
-
-  // Set specific zoom level
-  const setZoom = useCallback(
-    (level: ZoomLevel) => {
-      setZoomLevel(level);
+  // Set specific zoom scale in pan mode
+  const setZoomToScale = useCallback(
+    (mode: "fit" | number, target: "fit" | "1x") => {
+      setZoomMode(mode);
+      lastTapTargetRef.current = target === "fit" ? "1x" : "fit"; // Next tap will go to opposite
       dragX.set(0);
       dragY.set(0);
     },
     [dragX, dragY],
   );
+
+  // Show zoom indicator briefly
+  const showZoomIndicator = useCallback(() => {
+    setIsZooming(true);
+    if (zoomTimeoutRef.current) {
+      clearTimeout(zoomTimeoutRef.current);
+    }
+    zoomTimeoutRef.current = setTimeout(() => {
+      setIsZooming(false);
+    }, 1000);
+  }, []);
+
+  // Adjust zoom with cursor/touch anchoring
+  const adjustZoom = useCallback(
+    (delta: number, anchorX: number, anchorY: number) => {
+      const container = containerRef.current;
+      if (!container || naturalSize.width === 0) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const currentScale = zoomScale;
+      let newScale = Math.max(
+        minZoom,
+        Math.min(MAX_ZOOM, currentScale + delta),
+      );
+
+      if (newScale === currentScale) return;
+
+      // If we hit the minimum zoom (only when zooming out), snap to fit mode
+      if (delta < 0 && newScale <= minZoom + SCALE_TOLERANCE) {
+        setZoomMode("fit");
+        dragX.set(0);
+        dragY.set(0);
+        showZoomIndicator();
+        return;
+      }
+
+      // Snap to 1x when crossing through it (not when leaving it)
+      const crossingToOneFromBelow =
+        delta > 0 && currentScale < 1.0 && newScale >= 1.0 - SCALE_TOLERANCE;
+      const crossingToOneFromAbove =
+        delta < 0 && currentScale > 1.0 && newScale <= 1.0 + SCALE_TOLERANCE;
+      if (crossingToOneFromBelow || crossingToOneFromAbove) {
+        newScale = 1.0;
+      }
+
+      // Get new image dimensions at new zoom level
+      const newWidth = naturalSize.width * newScale;
+      const newHeight = naturalSize.height * newScale;
+
+      // Calculate max pan bounds for new scale
+      const maxPanX = Math.max(0, (newWidth - containerRect.width) / 2);
+      const maxPanY = Math.max(0, (newHeight - containerRect.height) / 2);
+
+      let newDragX = 0;
+      let newDragY = 0;
+
+      // Only do anchor-based positioning if image is larger than container
+      // (i.e., there's actually room to pan)
+      if (maxPanX > 0 || maxPanY > 0) {
+        // Anchor point relative to container center
+        const anchorFromCenterX = anchorX - containerRect.width / 2;
+        const anchorFromCenterY = anchorY - containerRect.height / 2;
+
+        // Current position of anchor in image space
+        const currentDragX = dragX.get();
+        const currentDragY = dragY.get();
+
+        // Point in image at anchor (relative to image center)
+        const imagePointX = anchorFromCenterX - currentDragX;
+        const imagePointY = anchorFromCenterY - currentDragY;
+
+        // Scale factor
+        const scaleFactor = newScale / currentScale;
+
+        // New position of that point after scaling
+        const newImagePointX = imagePointX * scaleFactor;
+        const newImagePointY = imagePointY * scaleFactor;
+
+        // New drag position to keep anchor point stationary
+        newDragX = anchorFromCenterX - newImagePointX;
+        newDragY = anchorFromCenterY - newImagePointY;
+
+        // Clamp to bounds
+        newDragX = Math.max(-maxPanX, Math.min(maxPanX, newDragX));
+        newDragY = Math.max(-maxPanY, Math.min(maxPanY, newDragY));
+      }
+
+      // Update motion values synchronously (all in same frame)
+      scaleMotion.set(newScale);
+      dragX.set(newDragX);
+      dragY.set(newDragY);
+      // Update React state (for UI like button highlights)
+      setZoomMode(newScale);
+      showZoomIndicator();
+    },
+    [
+      zoomScale,
+      minZoom,
+      naturalSize,
+      dragX,
+      dragY,
+      scaleMotion,
+      showZoomIndicator,
+    ],
+  );
+
+  // Wheel zoom handler
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      if (!isPannable) return;
+
+      e.preventDefault();
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const delta = -e.deltaY * WHEEL_ZOOM_FACTOR * zoomScale;
+      const anchorX = e.clientX - rect.left;
+      const anchorY = e.clientY - rect.top;
+
+      adjustZoom(delta, anchorX, anchorY);
+    },
+    [isPannable, zoomScale, adjustZoom],
+  );
+
+  // Pinch zoom state
+  const pinchStateRef = useRef<{
+    initialDistance: number;
+    initialScale: number;
+    centerX: number;
+    centerY: number;
+  } | null>(null);
+
+  // Touch handlers for pinch zoom
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isPannable || e.touches.length !== 2) return;
+
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const distance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY,
+      );
+
+      const centerX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
+      const centerY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
+
+      pinchStateRef.current = {
+        initialDistance: distance,
+        initialScale: zoomScale,
+        centerX,
+        centerY,
+      };
+    },
+    [isPannable, zoomScale],
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isPannable || e.touches.length !== 2 || !pinchStateRef.current)
+        return;
+
+      e.preventDefault();
+
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const distance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY,
+      );
+
+      const { initialDistance, initialScale, centerX, centerY } =
+        pinchStateRef.current;
+
+      const scaleDiff = (distance - initialDistance) * PINCH_ZOOM_FACTOR;
+      const newScale = Math.max(
+        minZoom,
+        Math.min(MAX_ZOOM, initialScale + scaleDiff),
+      );
+
+      // Update pinch center for current touches
+      const newCenterX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
+      const newCenterY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
+
+      // Use average of initial and current center
+      const anchorX = (centerX + newCenterX) / 2;
+      const anchorY = (centerY + newCenterY) / 2;
+
+      const delta = newScale - zoomScale;
+      if (Math.abs(delta) > 0.001) {
+        adjustZoom(delta, anchorX, anchorY);
+      }
+    },
+    [isPannable, minZoom, zoomScale, adjustZoom],
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    pinchStateRef.current = null;
+  }, []);
 
   // Track if container is in viewport and if bottom is visible
   useEffect(() => {
@@ -309,16 +532,10 @@ export function ImageViewer({
   const handleClick = (e: React.MouseEvent) => {
     if (hasDragged.current) return;
 
-    // Get click position relative to container
-    const rect = containerRef.current?.getBoundingClientRect();
-    const clickPos = rect
-      ? { x: e.clientX - rect.left, y: e.clientY - rect.top }
-      : undefined;
-
     if (isPannable) {
-      // Single click: toggle zoom with zoom-to-point
+      // Single click: cycle between fit and 1x
       if (e.detail === 1) {
-        toggleZoom(clickPos);
+        togglePanZoom();
       }
       // Double-click: exit fullscreen/theater
       if (e.detail === 2) {
@@ -333,7 +550,7 @@ export function ImageViewer({
         }
       }
     } else {
-      toggleZoom();
+      toggleNormalZoom();
     }
   };
 
@@ -426,34 +643,44 @@ export function ImageViewer({
             hasDragged.current = false;
           }, 0);
         }}
-        style={{
-          x: dragX,
-          y: dragY,
-          // Only apply average color to image when fill canvas is disabled
-          ...(loaded &&
-          imageBackground === "average" &&
-          averageColor &&
-          !fillCanvasBackground
-            ? { backgroundColor: averageColor }
-            : {}),
-          // In zoomed modes, set explicit dimensions
-          ...(isPannable && zoomLevel !== "fit" && naturalSize.width > 0
-            ? {
-                width: `${naturalSize.width * (zoomLevel === "2x" ? 2 : 1)}px`,
-                height: `${naturalSize.height * (zoomLevel === "2x" ? 2 : 1)}px`,
-                minWidth: `${naturalSize.width * (zoomLevel === "2x" ? 2 : 1)}px`,
-                minHeight: `${naturalSize.height * (zoomLevel === "2x" ? 2 : 1)}px`,
-                flexShrink: 0,
-              }
-            : {}),
-        }}
+        onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={
+          {
+            x: isPannable ? dragX : 0,
+            y: isPannable ? dragY : 0,
+            // Only apply average color to image when fill canvas is disabled
+            ...(loaded &&
+            imageBackground === "average" &&
+            averageColor &&
+            !fillCanvasBackground
+              ? { backgroundColor: averageColor }
+              : {}),
+            // In pan mode, use motion values for synchronous updates
+            // In normal mode, explicitly unset to allow CSS to control sizing
+            ...(isPannable && naturalSize.width > 0
+              ? {
+                  width: imageWidth,
+                  height: imageHeight,
+                  minWidth: imageWidth,
+                  minHeight: imageHeight,
+                  flexShrink: 0,
+                }
+              : {
+                  width: "auto",
+                  height: "auto",
+                  minWidth: "auto",
+                  minHeight: "auto",
+                }),
+          } as React.CSSProperties
+        }
         className={cn(
           getBackgroundClass(),
           getCursor(),
           isPannable
-            ? !isExpanded
-              ? "max-h-full max-w-full object-contain select-none" // Pan fit mode
-              : "max-h-none! max-w-none! select-none" // Pan 1:1 mode: no constraints
+            ? "max-h-none! max-w-none! touch-none select-none" // Pan mode: no constraints, disable browser gestures
             : "max-h-full max-w-full object-contain", // Normal: fit container
         )}
         onLoad={handleLoad}
@@ -466,6 +693,15 @@ export function ImageViewer({
         ref={bottomSentinelRef}
         className="absolute right-0 bottom-0 h-px w-px"
       />
+
+      {/* Zoom level indicator - lower third, shows when actively zooming */}
+      {isPannable && isZooming && (
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center pb-[15vh]">
+          <div className="bg-card/90 text-foreground rounded-md px-3 py-2 text-sm font-medium tabular-nums shadow-lg">
+            {zoomScale.toFixed(2)}×
+          </div>
+        </div>
+      )}
 
       {/* Control buttons - fixed when scrolling, absolute when bottom visible */}
       {loaded && isInView && (
@@ -490,10 +726,10 @@ export function ImageViewer({
                 variant="outline"
                 size="sm"
                 className="bg-card"
-                pressed={zoomLevel === "fit"}
+                pressed={isAtFit}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setZoom("fit");
+                  setZoomToScale("fit", "fit");
                 }}
                 title="Fit to screen"
               >
@@ -505,32 +741,17 @@ export function ImageViewer({
                 variant="outline"
                 size="sm"
                 className="bg-card"
-                pressed={zoomLevel === "1x"}
+                pressed={isAt1x}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setZoom("1x");
+                  setZoomToScale(1.0, "1x");
                 }}
                 title="View 1:1"
               >
                 <span className="text-xs font-medium">1×</span>
               </Toggle>
 
-              {/* 3. 2x zoom */}
-              <Toggle
-                variant="outline"
-                size="sm"
-                className="bg-card"
-                pressed={zoomLevel === "2x"}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setZoom("2x");
-                }}
-                title="View 2×"
-              >
-                <span className="text-xs font-medium">2×</span>
-              </Toggle>
-
-              {/* 4. Theater toggle (on/off or switch from fullscreen) */}
+              {/* 3. Theater toggle (on/off or switch from fullscreen) */}
               <Toggle
                 variant="outline"
                 size="sm"
@@ -544,6 +765,13 @@ export function ImageViewer({
                       document.exitFullscreen();
                     }
                     setOverlayMode("theater");
+                    // Reset to fit when switching modes
+                    setZoomMode("fit");
+                    lastTapTargetRef.current = "fit";
+                    dragX.stop();
+                    dragY.stop();
+                    dragX.set(0);
+                    dragY.set(0);
                   } else {
                     // Toggle theater off
                     toggleTheater();
@@ -558,7 +786,7 @@ export function ImageViewer({
                 )}
               </Toggle>
 
-              {/* 3. Fullscreen toggle (on/off or switch from theater) */}
+              {/* 4. Fullscreen toggle (on/off or switch from theater) */}
               <Toggle
                 variant="outline"
                 size="sm"
@@ -569,6 +797,13 @@ export function ImageViewer({
                   if (isFullscreen) {
                     exitFullscreen();
                   } else {
+                    // Reset zoom and pan when switching modes
+                    setZoomMode("fit");
+                    lastTapTargetRef.current = "fit";
+                    dragX.stop();
+                    dragY.stop();
+                    dragX.set(0);
+                    dragY.set(0);
                     enterFullscreen();
                   }
                 }}
@@ -594,7 +829,7 @@ export function ImageViewer({
                 pressed={isExpanded}
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleZoom();
+                  toggleNormalZoom();
                 }}
                 title={isExpanded ? "Collapse" : "Expand"}
               >
