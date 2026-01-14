@@ -22,8 +22,8 @@ import { Toggle } from "@/components/ui-primitives/toggle";
 const SCALE_TOLERANCE = 0.03;
 // Max zoom bound
 const MAX_ZOOM = 4.0;
-// Scroll wheel zoom sensitivity
-const WHEEL_ZOOM_FACTOR = 0.001;
+// Scroll wheel zoom: each 100 deltaY units = 10% zoom change
+const WHEEL_ZOOM_STEP = 0.001;
 
 interface ImageViewerProps {
   fileUrl: string;
@@ -351,7 +351,10 @@ export function ImageViewer({
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
 
-      const delta = -e.deltaY * WHEEL_ZOOM_FACTOR * zoomScale;
+      // Multiplicative zoom: scroll applies percentage change
+      // e.g., deltaY=100 with step=0.001 → factor = 1.1 (10% zoom)
+      const factor = Math.pow(1.1, -e.deltaY * WHEEL_ZOOM_STEP * 10);
+      const delta = zoomScale * factor - zoomScale;
       const anchorX = e.clientX - rect.left;
       const anchorY = e.clientY - rect.top;
 
