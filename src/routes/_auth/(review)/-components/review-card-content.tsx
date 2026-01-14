@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import {
   DefaultAudioLayout,
@@ -41,7 +41,7 @@ interface ReviewCardContentProps {
   isTop?: boolean;
 }
 
-export function ReviewCardContent({
+export const ReviewCardContent = memo(function ReviewCardContent({
   fileId,
   isTop = false,
 }: ReviewCardContentProps) {
@@ -200,6 +200,10 @@ export function ReviewCardContent({
         <img
           src={fileUrl}
           alt={`File ${fileId}`}
+          decoding="async"
+          // Top card gets high priority; background cards get low priority
+          // Complements preloading: if preload didn't finish, top card wins the race
+          fetchPriority={isTop ? "high" : "low"}
           onLoad={handleLoad}
           onError={handleError}
           style={getImageStyle()}
@@ -302,4 +306,4 @@ export function ReviewCardContent({
       </div>
     </div>
   );
-}
+});
