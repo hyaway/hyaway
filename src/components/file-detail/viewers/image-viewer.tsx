@@ -342,21 +342,56 @@ export function ImageViewer({
     ],
   );
 
-  // Wheel zoom handler
-  const handleWheel = useCallback(
+  // Wheel zoom handler for image (anchors to cursor position)
+  const handleImageWheel = useCallback(
     (e: React.WheelEvent) => {
       if (!isPannable) return;
 
       e.preventDefault();
+      e.stopPropagation();
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
 
       // Multiplicative zoom: scroll applies percentage change
-      // e.g., deltaY=100 with step=0.001 → factor = 1.1 (10% zoom)
       const factor = Math.pow(1.1, -e.deltaY * WHEEL_ZOOM_STEP * 10);
       const delta = zoomScale * factor - zoomScale;
+
+      // Anchor to cursor position over image
       const anchorX = e.clientX - rect.left;
       const anchorY = e.clientY - rect.top;
+
+      adjustZoom(delta, anchorX, anchorY);
+    },
+    [isPannable, zoomScale, adjustZoom],
+  );
+
+  // Wheel zoom handler for container (anchors to closest edge of image)
+  const handleContainerWheel = useCallback(
+    (e: React.WheelEvent) => {
+      if (!isPannable) return;
+
+      e.preventDefault();
+      const containerRect = containerRef.current?.getBoundingClientRect();
+      const imageRect = imageRef.current?.getBoundingClientRect();
+      if (!containerRect || !imageRect) return;
+
+      // Multiplicative zoom: scroll applies percentage change
+      const factor = Math.pow(1.1, -e.deltaY * WHEEL_ZOOM_STEP * 10);
+      const delta = zoomScale * factor - zoomScale;
+
+      // Cursor position in container space
+      const cursorX = e.clientX - containerRect.left;
+      const cursorY = e.clientY - containerRect.top;
+
+      // Image bounds in container space
+      const imgLeft = imageRect.left - containerRect.left;
+      const imgRight = imageRect.right - containerRect.left;
+      const imgTop = imageRect.top - containerRect.top;
+      const imgBottom = imageRect.bottom - containerRect.top;
+
+      // Clamp cursor to closest point on image edge
+      const anchorX = Math.max(imgLeft, Math.min(imgRight, cursorX));
+      const anchorY = Math.max(imgTop, Math.min(imgBottom, cursorY));
 
       adjustZoom(delta, anchorX, anchorY);
     },
@@ -638,6 +673,8 @@ export function ImageViewer({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      // Handle scroll wheel zoom on container in pan mode
+      onWheel={handleContainerWheel}
       // Handle clicks on container in pan mode
       onClick={handleContainerClick}
     >
@@ -666,7 +703,7 @@ export function ImageViewer({
             hasDragged.current = false;
           }, 0);
         }}
-        onWheel={handleWheel}
+        onWheel={handleImageWheel}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
