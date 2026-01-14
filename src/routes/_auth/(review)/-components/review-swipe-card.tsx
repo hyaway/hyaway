@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { memo, useRef } from "react";
 import { IconArchive, IconArrowUp, IconTrash } from "@tabler/icons-react";
 import {
   motion,
@@ -140,7 +140,7 @@ function getExitCoords(direction: SwipeDirection) {
   }
 }
 
-export function ReviewSwipeCard({
+export const ReviewSwipeCard = memo(function ReviewSwipeCard({
   fileId,
   isTop,
   stackIndex,
@@ -205,7 +205,15 @@ export function ReviewSwipeCard({
   const zIndex = isExiting ? 20 : 10 - stackIndex;
 
   return (
-    <div ref={constraintsRef} className="absolute inset-0" style={{ zIndex }}>
+    <div
+      ref={constraintsRef}
+      className={cn(
+        "absolute inset-0",
+        // Exiting cards must not capture pointer events - let them pass through to the new top card
+        isExiting ? "pointer-events-none" : "pointer-events-auto",
+      )}
+      style={{ zIndex }}
+    >
       {/* Debug zone visualization - shows threshold lines from center */}
 
       {DEBUG_ZONES && isTop && (
@@ -269,11 +277,12 @@ export function ReviewSwipeCard({
           if (!isTop || isExiting || !gesturesEnabled) return;
 
           const target = e.target as HTMLElement;
-          // Don't start swiping when interacting with media controls (Vidstack)
-          // or standard interactive elements.
+          // Don't start swiping when interacting with actual media control elements.
+          // Be specific: exclude buttons, sliders, interactive elements - NOT entire overlays.
+          // .vds-controls is the actual controls bar, not the full player area.
           if (
             target.closest(
-              "[data-media-controls], .vds-slider, button, a, input, textarea, select, [role='slider']",
+              ".vds-controls, .vds-slider, .vds-button, .vds-menu, button, a, input, textarea, select, [role='slider'], [role='button']",
             )
           ) {
             return;
@@ -358,7 +367,7 @@ export function ReviewSwipeCard({
       </motion.div>
     </div>
   );
-}
+});
 
 /** Intent overlay component */
 function IntentOverlay({
