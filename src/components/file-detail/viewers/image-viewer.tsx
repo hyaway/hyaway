@@ -530,9 +530,11 @@ export function ImageViewer({
     }
   };
 
-  // Click handler - toggle zoom, or double-click exits fullscreen/theater
-  const handleClick = (e: React.MouseEvent) => {
+  // Click handler for container - toggle zoom (both pan and normal modes)
+  const handleContainerClick = (e: React.MouseEvent) => {
     if (hasDragged.current) return;
+    // Ignore clicks on control buttons
+    if ((e.target as HTMLElement).closest("button")) return;
 
     if (isPannable) {
       // Single click: cycle between fit and 1x
@@ -552,16 +554,26 @@ export function ImageViewer({
         }
       }
     } else {
+      // Normal mode: toggle expand
       toggleNormalZoom();
     }
   };
 
-  // Get cursor based on mode
+  // Get cursor based on mode (for container - zoom cursors only)
   const getCursor = () => {
+    if (isPannable) {
+      // In pan mode, container shows zoom cursor for tap behavior
+      return isAtFit ? "cursor-zoom-in" : "cursor-zoom-out";
+    }
+    return isExpanded ? "cursor-zoom-out" : "cursor-zoom-in";
+  };
+
+  // Get cursor for image (grab cursor in pan mode)
+  const getImageCursor = () => {
     if (isPannable) {
       return isDragging ? "cursor-grabbing" : "cursor-grab";
     }
-    return isExpanded ? "cursor-zoom-out" : "cursor-zoom-in";
+    return ""; // Inherit from container
   };
 
   // Get container classes based on view mode
@@ -618,7 +630,16 @@ export function ImageViewer({
         "group relative flex items-center justify-center overflow-hidden",
         getContainerClass(),
         getContainerBackgroundClass(),
+        getCursor(),
+        // Disable browser touch gestures (zoom, scroll) in pan mode
+        isPannable && "touch-none",
       )}
+      // Handle touch events on container to prevent browser zoom outside image
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      // Handle clicks on container in pan mode
+      onClick={handleContainerClick}
     >
       <motion.img
         ref={imageRef}
@@ -680,14 +701,13 @@ export function ImageViewer({
         }
         className={cn(
           getBackgroundClass(),
-          getCursor(),
+          getImageCursor(),
           isPannable
             ? "max-h-none! max-w-none! touch-none select-none" // Pan mode: no constraints, disable browser gestures
             : "max-h-full max-w-full object-contain", // Normal: fit container
         )}
         onLoad={handleLoad}
         onError={onError}
-        onClick={handleClick}
       />
 
       {/* Bottom sentinel for tracking when bottom of container is visible */}
