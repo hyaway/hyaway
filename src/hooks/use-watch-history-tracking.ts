@@ -191,7 +191,12 @@ export function useRemoteFileViewTimeTracker(
           totalSentViewtimeRef.current < maxTimeMs
         ) {
           const isFirstSend = lastSentTimeRef.current === 0;
-          sendViewtime(remainingTime, isFirstSend);
+          // Cap remaining time to not exceed maxTimeMs total
+          const cappedRemainingTime = Math.min(
+            remainingTime,
+            maxTimeMs - totalSentViewtimeRef.current,
+          );
+          sendViewtime(cappedRemainingTime, isFirstSend);
         }
       }
 
