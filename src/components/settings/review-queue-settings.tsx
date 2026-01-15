@@ -1,5 +1,6 @@
 import { IconTrashX } from "@tabler/icons-react";
 import { SettingsGroup, SwitchField } from "./setting-fields";
+import type { ReviewImageLoadMode } from "@/stores/review-queue-store";
 import { Button } from "@/components/ui-primitives/button";
 import { Label } from "@/components/ui-primitives/label";
 import {
@@ -13,7 +14,6 @@ import {
   useReviewQueueCount,
   useReviewShortcutsEnabled,
   useReviewTrackWatchHistory,
-  type ReviewImageLoadMode,
 } from "@/stores/review-queue-store";
 
 export const REVIEW_QUEUE_SETTINGS_TITLE = "Review queue";
@@ -65,7 +65,7 @@ export function ReviewQueueSettings({
         <div className="flex flex-col gap-0.5">
           <Label>Image loading</Label>
           <span className="text-muted-foreground text-xs">
-            Resized images load faster but may lose quality
+            Resized (when possible) images load faster but may lose quality
           </span>
         </div>
         <ToggleGroup
@@ -77,8 +77,8 @@ export function ReviewQueueSettings({
           variant="outline"
           size="sm"
         >
-          <ToggleGroupItem value="full">Original</ToggleGroupItem>
-          <ToggleGroupItem value="fit">Resized</ToggleGroupItem>
+          <ToggleGroupItem value="original">Original</ToggleGroupItem>
+          <ToggleGroupItem value="resized">Resized</ToggleGroupItem>
         </ToggleGroup>
       </div>
       <div className="flex items-center justify-between gap-4">

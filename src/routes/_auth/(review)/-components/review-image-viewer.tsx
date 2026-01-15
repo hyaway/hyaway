@@ -1,6 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { animate, motion, useMotionValue, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
+import { isImageProjectFile, isStaticImage } from "@/lib/mime-utils";
+import {
+  RenderFormat,
+  useFullFileIdUrl,
+  useRenderFileIdUrl,
+} from "@/hooks/use-url-with-api-key";
+import { useReviewImageLoadMode } from "@/stores/review-queue-store";
+import {
+  useFillCanvasBackground,
+  useImageBackground,
+} from "@/stores/file-viewer-settings-store";
+import { getAverageColorFromBlurhash } from "@/lib/color-utils";
+import { BlurhashCanvas } from "@/components/blurhash-canvas";
 
 // Tolerance for matching fit scale (±2%)
 const SCALE_TOLERANCE = 0.02;
@@ -10,27 +23,91 @@ const MAX_ZOOM = 4.0;
 const WHEEL_ZOOM_STEP = 0.001;
 
 interface ReviewImageViewerProps {
-  fileUrl: string;
   fileId: number;
+  mime: string;
+  width: number | null;
+  height: number | null;
+  blurhash: string | null;
   onLoad: () => void;
   onError: () => void;
   /** Whether this is the top (active) card */
   isTop?: boolean;
-  /** Image background style */
-  imageBackgroundClass?: string;
-  /** Image background inline style */
-  imageBackgroundStyle?: React.CSSProperties;
 }
 
 export function ReviewImageViewer({
-  fileUrl,
   fileId,
+  mime,
+  width: metadataWidth,
+  height: metadataHeight,
+  blurhash,
   onLoad,
   onError,
   isTop = false,
-  imageBackgroundClass = "",
-  imageBackgroundStyle = {},
 }: ReviewImageViewerProps) {
+  const imageLoadMode = useReviewImageLoadMode();
+  const imageBackground = useImageBackground();
+  const fillCanvasBackground = useFillCanvasBackground();
+
+  // Compute average color from blurhash for backgrounds
+  const averageColor = useMemo(
+    () => getAverageColorFromBlurhash(blurhash ?? undefined),
+    [blurhash],
+  );
+
+  // Calculate render dimensions for "fit" mode - preserve aspect ratio within screen bounds
+  const renderDimensions = useMemo(() => {
+    if (imageLoadMode !== "resized") return undefined;
+    if (!metadataWidth || !metadataHeight) return undefined;
+
+    const screenWidth = Math.round(
+      window.screen.width * window.devicePixelRatio,
+    );
+    const screenHeight = Math.round(
+      window.screen.height * window.devicePixelRatio,
+    );
+
+    // If image is smaller than screen, no need to resize
+    if (metadataWidth <= screenWidth && metadataHeight <= screenHeight) {
+      return undefined;
+    }
+
+    // Calculate scale factor to fit within screen while preserving aspect ratio
+    const scaleX = screenWidth / metadataWidth;
+    const scaleY = screenHeight / metadataHeight;
+    const scale = Math.min(scaleX, scaleY);
+
+    return {
+      width: Math.round(metadataWidth * scale),
+      height: Math.round(metadataHeight * scale),
+    };
+  }, [imageLoadMode, metadataWidth, metadataHeight]);
+
+  // Check if this mime type is a static image or image project file
+  const staticImage = isStaticImage(mime);
+  const imageProjectFile = isImageProjectFile(mime);
+
+  // Use appropriate URL based on image load mode
+  // Render endpoint only supports static images (not GIF/APNG/animated WEBP)
+  const fullUrl = useFullFileIdUrl(fileId);
+  const renderUrl = useRenderFileIdUrl(fileId, {
+    renderFormat: RenderFormat.WEBP,
+    renderQuality: 90,
+    ...renderDimensions,
+  });
+
+  // Select URL based on mode:
+  // - Image project files always use render (browsers can't display them)
+  // - Static images use render when "fit" mode enabled and image is larger than screen
+  const useRenderedImage =
+    imageProjectFile ||
+    (imageLoadMode === "resized" &&
+      staticImage &&
+      renderDimensions !== undefined);
+  const {
+    url: fileUrl,
+    onLoad: onUrlLoad,
+    onError: onUrlError,
+  } = useRenderedImage ? renderUrl : fullUrl;
   const [loaded, setLoaded] = useState(false);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -75,8 +152,8 @@ export function ReviewImageViewer({
   }, [zoomScale, scaleMotion]);
 
   // Derived motion values for image dimensions
-  const imageWidth = useTransform(scaleMotion, (s) => naturalSize.width * s);
-  const imageHeight = useTransform(scaleMotion, (s) => naturalSize.height * s);
+  const scaledWidth = useTransform(scaleMotion, (s) => naturalSize.width * s);
+  const scaledHeight = useTransform(scaleMotion, (s) => naturalSize.height * s);
 
   // Min zoom is fit scale
   const minZoom = fitScale;
@@ -96,11 +173,11 @@ export function ReviewImageViewer({
       return { left: 0, right: 0, top: 0, bottom: 0 };
     }
 
-    const scaledWidth = naturalSize.width * zoomScale;
-    const scaledHeight = naturalSize.height * zoomScale;
+    const imgWidth = naturalSize.width * zoomScale;
+    const imgHeight = naturalSize.height * zoomScale;
 
-    const maxPanX = Math.abs(scaledWidth - containerSize.width) / 2;
-    const maxPanY = Math.abs(scaledHeight - containerSize.height) / 2;
+    const maxPanX = Math.abs(imgWidth - containerSize.width) / 2;
+    const maxPanY = Math.abs(imgHeight - containerSize.height) / 2;
 
     return {
       left: -maxPanX,
@@ -147,7 +224,13 @@ export function ReviewImageViewer({
         height: imageRef.current.naturalHeight,
       });
     }
+    onUrlLoad();
     onLoad();
+  };
+
+  const handleError = () => {
+    onUrlError();
+    onError();
   };
 
   // Show zoom indicator briefly
@@ -440,20 +523,82 @@ export function ReviewImageViewer({
     return "";
   };
 
+  // Container background (when fillCanvasBackground is enabled)
+  const getContainerBackgroundClass = () => {
+    if (!fillCanvasBackground || !loaded) return "";
+    switch (imageBackground) {
+      case "checkerboard":
+        return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
+      case "solid":
+        return "bg-muted";
+      case "average":
+        return ""; // Handled via inline style
+      default:
+        return "";
+    }
+  };
+
+  const getContainerStyle = () => {
+    if (
+      fillCanvasBackground &&
+      imageBackground === "average" &&
+      averageColor &&
+      loaded
+    ) {
+      return { backgroundColor: averageColor };
+    }
+    return {};
+  };
+
+  // Image background (when not using fill canvas)
+  const getImageBackgroundClass = () => {
+    if (!loaded || fillCanvasBackground) return "";
+    switch (imageBackground) {
+      case "checkerboard":
+        return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
+      case "average":
+        return ""; // Handled via inline style
+      default:
+        return "bg-background";
+    }
+  };
+
+  const getImageStyle = () => {
+    if (
+      loaded &&
+      imageBackground === "average" &&
+      averageColor &&
+      !fillCanvasBackground
+    ) {
+      return { backgroundColor: averageColor };
+    }
+    return {};
+  };
+
   return (
     <div
       ref={containerRef}
       className={cn(
         "relative flex h-full w-full items-center justify-center overflow-hidden",
         isZoomed && "ring-destructive/60 ring-6 ring-inset",
+        getContainerBackgroundClass(),
         // Disable browser pinch zoom
         isTop ? "touch-pan-y" : "",
       )}
+      style={getContainerStyle()}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onWheel={handleContainerWheel}
     >
+      {/* Blurhash placeholder - only while loading */}
+      {blurhash && !loaded && (
+        <BlurhashCanvas
+          blurhash={blurhash}
+          className="absolute inset-0 h-full w-full"
+        />
+      )}
+
       <motion.img
         ref={imageRef}
         src={fileUrl}
@@ -484,18 +629,18 @@ export function ReviewImageViewer({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onLoad={handleLoad}
-        onError={onError}
+        onError={handleError}
         style={
           {
             x: isTop ? dragX : 0,
             y: isTop ? dragY : 0,
-            ...imageBackgroundStyle,
+            ...getImageStyle(),
             ...(isTop && naturalSize.width > 0
               ? {
-                  width: imageWidth,
-                  height: imageHeight,
-                  minWidth: imageWidth,
-                  minHeight: imageHeight,
+                  width: scaledWidth,
+                  height: scaledHeight,
+                  minWidth: scaledWidth,
+                  minHeight: scaledHeight,
                   flexShrink: 0,
                 }
               : {
@@ -509,7 +654,7 @@ export function ReviewImageViewer({
         className={cn(
           "transition-opacity duration-200",
           loaded ? "opacity-100" : "opacity-0",
-          imageBackgroundClass,
+          getImageBackgroundClass(),
           isTop && getCursor(),
           isTop && isZoomed
             ? "max-h-none! max-w-none! touch-none select-none"

@@ -7,7 +7,7 @@ import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 export type ReviewAction = "archive" | "trash" | "skip";
 
 /** How images are loaded in review mode */
-export type ReviewImageLoadMode = "full" | "fit";
+export type ReviewImageLoadMode = "original" | "resized";
 
 /** Previous state of a file before action, used for undo */
 export type PreviousFileState = "inbox" | "archived" | "trashed" | null;
@@ -42,7 +42,7 @@ type ReviewQueueState = {
   gesturesEnabled: boolean;
   /** Track viewed files in watch history (local + remote sync) */
   trackWatchHistory: boolean;
-  /** How to load images: 'full' for original, 'fit' for server-side resize */
+  /** How to load static images: 'original' for full size, 'resized' for server-side resize */
   imageLoadMode: ReviewImageLoadMode;
 
   actions: {
@@ -82,7 +82,7 @@ const useReviewQueueStore = create<ReviewQueueState>()(
       shortcutsEnabled: true,
       gesturesEnabled: true,
       trackWatchHistory: true,
-      imageLoadMode: "full",
+      imageLoadMode: "resized",
 
       actions: {
         setQueue: (ids) => {

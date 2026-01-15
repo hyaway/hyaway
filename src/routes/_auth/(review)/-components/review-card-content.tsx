@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import {
   DefaultAudioLayout,
@@ -14,6 +14,7 @@ import type {
   MediaPlayerInstance,
   VideoMimeType,
 } from "@vidstack/react";
+import { isImageProjectFile } from "@/lib/mime-utils";
 
 import { FileStateBadge } from "@/components/file-detail/file-state-badge";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
@@ -23,23 +24,13 @@ import {
   useRemoteFileViewTimeTracker,
 } from "@/hooks/use-watch-history-tracking";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
-import {
-  RenderFormat,
-  useFullFileIdUrl,
-  useRenderFileIdUrl,
-} from "@/hooks/use-url-with-api-key";
+import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { useActiveTheme } from "@/stores/theme-store";
+import { useReviewTrackWatchHistory } from "@/stores/review-queue-store";
 import {
-  useReviewImageLoadMode,
-  useReviewTrackWatchHistory,
-} from "@/stores/review-queue-store";
-import {
-  useFillCanvasBackground,
-  useImageBackground,
   useMediaAutoPlay,
   useMediaStartWithSound,
 } from "@/stores/file-viewer-settings-store";
-import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
 
 interface ReviewCardContentProps {
@@ -58,68 +49,18 @@ export const ReviewCardContent = memo(function ReviewCardContent({
   const activeTheme = useActiveTheme();
 
   // Settings
-  const imageBackground = useImageBackground();
-  const fillCanvasBackground = useFillCanvasBackground();
   const mediaAutoPlay = useMediaAutoPlay();
   const mediaStartWithSound = useMediaStartWithSound();
   const trackWatchHistory = useReviewTrackWatchHistory();
-  const imageLoadMode = useReviewImageLoadMode();
 
-  // Calculate render dimensions for "fit" mode - preserve aspect ratio within screen bounds
-  const renderDimensions = useMemo(() => {
-    if (imageLoadMode !== "fit") return undefined;
-    if (!metadata?.width || !metadata.height) return undefined;
+  // Media type detection
+  // Image project files (PSD, Krita) should be rendered as images via the render endpoint
+  const isImage =
+    (metadata?.mime.startsWith("image/") ?? false) ||
+    (metadata ? isImageProjectFile(metadata.mime) : false);
 
-    const screenWidth = Math.round(
-      window.screen.width * window.devicePixelRatio,
-    );
-    const screenHeight = Math.round(
-      window.screen.height * window.devicePixelRatio,
-    );
-    const imageWidth = metadata.width;
-    const imageHeight = metadata.height;
-
-    // If image is smaller than screen, no need to resize
-    if (imageWidth <= screenWidth && imageHeight <= screenHeight) {
-      return undefined;
-    }
-
-    // Calculate scale factor to fit within screen while preserving aspect ratio
-    const scaleX = screenWidth / imageWidth;
-    const scaleY = screenHeight / imageHeight;
-    const scale = Math.min(scaleX, scaleY);
-
-    return {
-      width: Math.round(imageWidth * scale),
-      height: Math.round(imageHeight * scale),
-    };
-  }, [imageLoadMode, metadata?.width, metadata?.height]);
-
-  // Determine if image is animated (GIF, APNG) - these are NOT supported by render endpoint
-  const isImage = metadata?.mime.startsWith("image/") ?? false;
-  const isAnimated =
-    metadata?.mime === "image/gif" || metadata?.mime === "image/apng";
-
-  // Use appropriate URL based on image load mode
-  // Render endpoint only supports still images (not GIF/APNG)
-  const fullUrl = useFullFileIdUrl(fileId);
-  const renderUrl = useRenderFileIdUrl(fileId, {
-    renderFormat: RenderFormat.WEBP,
-    renderQuality: 90,
-    ...renderDimensions,
-  });
-
-  // Select URL based on mode - only use render for still images larger than screen
-  const useRenderedImage =
-    imageLoadMode === "fit" &&
-    isImage &&
-    !isAnimated &&
-    renderDimensions !== undefined;
-  const {
-    url: fileUrl,
-    onLoad,
-    onError,
-  } = useRenderedImage ? renderUrl : fullUrl;
+  // URL for video/audio (images handle their own URLs internally)
+  const { url: mediaUrl, onLoad, onError } = useFullFileIdUrl(fileId);
 
   // Track file view in local watch history (only for top card with valid fileId)
   const shouldTrack = isTop && trackWatchHistory && fileId > 0;
@@ -145,13 +86,6 @@ export const ReviewCardContent = memo(function ReviewCardContent({
       player.pause();
     }
   }, [isTop, loaded, mediaAutoPlay]);
-
-  // Compute average color from blurhash for image backgrounds
-  // Must be before early returns to maintain hook order
-  const averageColor = useMemo(
-    () => getAverageColorFromBlurhash(metadata?.blurhash ?? undefined),
-    [metadata?.blurhash],
-  );
 
   if (isPending) {
     return (
@@ -182,71 +116,10 @@ export const ReviewCardContent = memo(function ReviewCardContent({
     onError();
   };
 
-  // Compute background style for images (only when fillCanvasBackground is enabled)
-  const getContainerBackgroundClass = () => {
-    if (!isImage || !fillCanvasBackground || !loaded) return "";
-    switch (imageBackground) {
-      case "checkerboard":
-        return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
-      case "solid":
-        return "bg-muted";
-      case "average":
-        return ""; // Handled via inline style
-      default:
-        return "";
-    }
-  };
-
-  // Container background style (for fill canvas with average color)
-  const getContainerStyle = () => {
-    if (
-      isImage &&
-      fillCanvasBackground &&
-      imageBackground === "average" &&
-      averageColor &&
-      loaded
-    ) {
-      return { backgroundColor: averageColor };
-    }
-    return {};
-  };
-
-  // Image background (when not using fill canvas)
-  const getImageBackgroundClass = () => {
-    if (!loaded || fillCanvasBackground) return "";
-    switch (imageBackground) {
-      case "checkerboard":
-        return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
-      case "average":
-        return ""; // Handled via inline style
-      default:
-        return "bg-background";
-    }
-  };
-
-  // Image background style (for average color when not using fill canvas)
-  const getImageStyle = () => {
-    if (
-      loaded &&
-      imageBackground === "average" &&
-      averageColor &&
-      !fillCanvasBackground
-    ) {
-      return { backgroundColor: averageColor };
-    }
-    return {};
-  };
-
   return (
-    <div
-      className={cn(
-        "relative flex h-full w-full items-center justify-center overflow-hidden",
-        getContainerBackgroundClass(),
-      )}
-      style={getContainerStyle()}
-    >
-      {/* Blurhash placeholder - only while loading (not for videos) */}
-      {metadata.blurhash && !isVideo && !loaded && !error && (
+    <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
+      {/* Blurhash placeholder for video - only while loading */}
+      {metadata.blurhash && isVideo && !loaded && !error && (
         <BlurhashCanvas
           blurhash={metadata.blurhash}
           className="absolute inset-0 h-full w-full"
@@ -256,13 +129,14 @@ export const ReviewCardContent = memo(function ReviewCardContent({
       {/* Media content */}
       {isImage && (
         <ReviewImageViewer
-          fileUrl={fileUrl}
           fileId={fileId}
+          mime={metadata.mime}
+          width={metadata.width}
+          height={metadata.height}
+          blurhash={metadata.blurhash ?? null}
           isTop={isTop}
           onLoad={handleLoad}
           onError={handleError}
-          imageBackgroundClass={getImageBackgroundClass()}
-          imageBackgroundStyle={getImageStyle()}
         />
       )}
 
@@ -274,7 +148,7 @@ export const ReviewCardContent = memo(function ReviewCardContent({
             "h-full w-full transition-opacity duration-200",
             loaded ? "opacity-100" : "opacity-0",
           )}
-          src={{ src: fileUrl, type: metadata.mime as VideoMimeType }}
+          src={{ src: mediaUrl, type: metadata.mime as VideoMimeType }}
           playsInline
           crossOrigin={true}
           onCanPlay={handleLoad}
@@ -308,7 +182,7 @@ export const ReviewCardContent = memo(function ReviewCardContent({
             ref={audioPlayerRef}
             title={`🎵${fileId}`}
             className="w-full"
-            src={{ src: fileUrl, type: metadata.mime as AudioMimeType }}
+            src={{ src: mediaUrl, type: metadata.mime as AudioMimeType }}
             playsInline
             crossOrigin={true}
             onCanPlay={handleLoad}
