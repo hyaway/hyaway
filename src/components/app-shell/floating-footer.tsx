@@ -27,8 +27,13 @@ export function FloatingFooter({
   return (
     <div
       className={cn(
-        "bg-background/95 supports-backdrop-filter:bg-background/75 short:px-2 @container sticky bottom-0 z-40 flex items-center justify-between border-t px-2 backdrop-blur-sm sm:px-4",
-        "short:h-(--footer-height-short) h-(--footer-height) @lg:h-(--footer-height-sm)",
+        "@container sticky bottom-0 z-40 flex items-center justify-between overflow-clip",
+        // Frosted background that extends below viewport to cover any gap (solid color, not frosted)
+        "bg-background/95 supports-backdrop-filter:bg-background/75 backdrop-blur-sm",
+        "after:bg-background/95 after:absolute after:inset-x-0 after:top-full after:h-8 after:content-['']",
+        // Top border (bg-border renders on top of backdrop-blur, unlike border-t)
+        "border-border border-t",
+        "short:h-(--footer-height-short) short:px-2 h-(--footer-height) px-2 sm:px-4 @lg:h-(--footer-height-sm)",
         // Extended area above bar for hover detection - only for pointer devices
         "pointer-hover:before:pointer-events-auto before:absolute before:inset-x-0 before:bottom-full before:content-['']",
         // Hover/focus brings bar back
