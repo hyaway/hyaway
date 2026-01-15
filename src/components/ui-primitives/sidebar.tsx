@@ -10,8 +10,8 @@ import {
   IconLayoutSidebarRight,
   IconLayoutSidebarRightFilled,
 } from "@tabler/icons-react";
-import { createLink } from "@tanstack/react-router";
-import type { LinkComponent } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import type { LinkProps } from "@tanstack/react-router";
 import type { VariantProps } from "class-variance-authority";
 import type { SidebarSide } from "@/stores/sidebar-store";
 import { cn } from "@/lib/utils";
@@ -685,21 +685,34 @@ function SidebarMenuButton({
   );
 }
 
-const CreatedSidebarMenuLinkButton = createLink(SidebarMenuButton);
-
-const SidebarMenuLinkButton: LinkComponent<typeof SidebarMenuButton> = (
-  props,
-) => {
+/**
+ * SidebarMenuLinkButton - Link-based menu item for proper link behavior.
+ * Uses TanStack Router's Link component directly, enabling native browser behaviors
+ * like middle-click and ctrl+click to open in new tabs.
+ */
+function SidebarMenuLinkButton({
+  variant = "default",
+  size = "default",
+  className,
+  children,
+  ...props
+}: Omit<LinkProps, "activeProps" | "className" | "children"> & {
+  className?: string;
+  children?: React.ReactNode;
+} & VariantProps<typeof sidebarMenuButtonVariants>) {
   return (
-    <CreatedSidebarMenuLinkButton
-      activeProps={{
-        isActive: true,
-        "data-active": true,
-      }}
+    <Link
+      data-slot="sidebar-menu-button"
+      data-sidebar="menu-button"
+      data-size={size}
+      className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+      activeProps={{ "data-active": true }}
       {...props}
-    />
+    >
+      {children}
+    </Link>
   );
-};
+}
 
 function SidebarMenuAction({
   className,
@@ -849,21 +862,36 @@ function SidebarMenuSubButton({
   });
 }
 
-const CreatedSidebarMenuSubLinkButton = createLink(SidebarMenuSubButton);
-
-const SidebarMenuSubLinkButton: LinkComponent<typeof SidebarMenuSubButton> = (
-  props,
-) => {
+/**
+ * SidebarMenuSubLinkButton - Link-based sub-menu item for proper link behavior.
+ * Uses TanStack Router's Link component directly.
+ */
+function SidebarMenuSubLinkButton({
+  size = "md",
+  className,
+  children,
+  ...props
+}: Omit<LinkProps, "activeProps" | "className" | "children"> & {
+  className?: string;
+  children?: React.ReactNode;
+  size?: "sm" | "md";
+}) {
   return (
-    <CreatedSidebarMenuSubLinkButton
-      activeProps={{
-        isActive: true,
-        "data-active": true,
-      }}
+    <Link
+      data-slot="sidebar-menu-sub-button"
+      data-sidebar="menu-sub-button"
+      data-size={size}
+      className={cn(
+        "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground flex h-9 min-w-0 -translate-x-px items-center gap-2.5 overflow-hidden rounded-md px-2.5 outline-hidden group-data-[collapsible=icon]:hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-sm data-[size=sm]:text-xs [&>span:last-child]:truncate [&>svg]:size-6 [&>svg]:shrink-0",
+        className,
+      )}
+      activeProps={{ "data-active": true }}
       {...props}
-    />
+    >
+      {children}
+    </Link>
   );
-};
+}
 
 export {
   Sidebar,
