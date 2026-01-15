@@ -134,7 +134,9 @@ function FileDetailContent({
   return (
     <>
       <div className="flex min-w-0 flex-1 flex-col gap-2 pb-12 sm:pb-16">
-        <FileViewer data={data} />
+        <div className="-mx-4 sm:-mx-6">
+          <FileViewer data={data} />
+        </div>
         <FilePageHeader fileId={fileId} />
         <Separator className={"mt-4"} />
         <div className="flex items-center justify-between gap-2">
