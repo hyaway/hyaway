@@ -74,10 +74,21 @@ export const useThemeActions = () => useThemeStore((state) => state.actions);
 export const useThemeHydrated = () =>
   useThemeStore((state) => state._hasHydrated);
 
+const THEME_COLORS = {
+  light: "#e9ebee", // oklch(0.9383 0.0042 236.4993)
+  dark: "#1c1c1c", // oklch(0.145 0 0)
+} as const;
+
 function applyTheme(theme: ActiveTheme) {
   const root = window.document.documentElement;
   root.classList.remove("light", "dark");
   root.classList.add(theme);
+
+  // Update theme-color meta tag for browser UI (address bar, etc.)
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute("content", THEME_COLORS[theme]);
+  }
 }
 
 export function useSystemThemeListener() {
