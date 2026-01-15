@@ -17,7 +17,6 @@ import type {
 import { isImageProjectFile } from "@/lib/mime-utils";
 
 import { FileStateBadge } from "@/components/file-detail/file-state-badge";
-import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import {
   useLocalWatchHistoryTracker,
@@ -117,15 +116,12 @@ export const ReviewCardContent = memo(function ReviewCardContent({
   };
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
-      {/* Blurhash placeholder for video - only while loading */}
-      {metadata.blurhash && isVideo && !loaded && !error && (
-        <BlurhashCanvas
-          blurhash={metadata.blurhash}
-          className="absolute inset-0 h-full w-full"
-        />
+    <div
+      className={cn(
+        "relative flex h-full w-full items-center justify-center overflow-hidden",
+        isVideo && "bg-[oklch(0.145_0_0)]",
       )}
-
+    >
       {/* Media content */}
       {isImage && (
         <ReviewImageViewer
@@ -173,9 +169,6 @@ export const ReviewCardContent = memo(function ReviewCardContent({
           />
         </MediaPlayer>
       )}
-
-      {/* Non-top video cards show black placeholder */}
-      {isVideo && !isTop && <div className="h-full w-full bg-black" />}
 
       {isAudio && isTop && (
         <div className="flex h-full w-full flex-col items-center justify-center gap-4 p-4">
