@@ -8,11 +8,13 @@ import {
   IconCards,
   IconChartArea,
   IconClock,
+  IconDatabase,
   IconExternalLink,
   IconEye,
+  IconLayoutDashboard,
   IconLayoutGrid,
+  IconLock,
   IconMail,
-  IconSettings,
   IconTrash,
 } from "@tabler/icons-react";
 import { Heading, Subheading } from "@/components/ui-primitives/heading";
@@ -158,13 +160,25 @@ const NAV_GROUPS: Array<NavGroup> = [
     ],
   },
   {
-    title: "Configuration",
+    title: "Settings",
     items: [
       {
-        title: "Settings",
-        description: "Configure connection, appearance, and data preferences",
-        to: "/settings",
-        icon: IconSettings,
+        title: "Connection",
+        description: "Configure your Hydrus API connection and access keys",
+        to: "/settings/connection",
+        icon: IconLock,
+      },
+      {
+        title: "Appearance",
+        description: "Customize theme, gallery layout, and display preferences",
+        to: "/settings/appearance",
+        icon: IconLayoutDashboard,
+      },
+      {
+        title: "Data",
+        description: "Manage local storage, cache, and watch history",
+        to: "/settings/data",
+        icon: IconDatabase,
       },
     ],
   },
