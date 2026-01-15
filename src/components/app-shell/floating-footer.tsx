@@ -27,11 +27,11 @@ export function FloatingFooter({
   return (
     <div
       className={cn(
-        "@container sticky bottom-0 z-40 flex items-center justify-between overflow-clip",
-        // Frosted background that extends below viewport to cover any gap (solid color, not frosted)
+        "@container sticky bottom-0 z-40 flex items-center justify-between",
+        // Frosted background + box-shadow extends below to cover any gap (shadows don't affect layout)
         "bg-background/95 supports-backdrop-filter:bg-background/75 backdrop-blur-sm",
-        "after:bg-background/95 after:absolute after:inset-x-0 after:top-full after:h-8 after:content-['']",
-        // Top border (bg-border renders on top of backdrop-blur, unlike border-t)
+        "shadow-[0_2rem_0_0_var(--background)]",
+        // Top border
         "border-border border-t",
         "short:h-(--footer-height-short) short:px-2 h-(--footer-height) px-2 sm:px-4 @lg:h-(--footer-height-sm)",
         // Extended area above bar for hover detection - only for pointer devices
