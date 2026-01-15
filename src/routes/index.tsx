@@ -50,27 +50,27 @@ interface FeatureItem {
 
 const FEATURES: Array<FeatureItem> = [
   {
-    title: "Review faster",
+    title: "Sort your library",
     description:
-      "Manage your inbox with swipe gestures or keyboard shortcuts. See your progress in the recently archived and trashed galleries.",
+      "Quickly sort through your inbox with simple swipes or hotkeys. Keep track of your progress with recently archived and trashed galleries.",
     icon: IconHandMove,
   },
   {
-    title: "Browse anywhere",
+    title: "Take it with you",
     description:
-      "Access your hydrus client's open pages even when you're away. Browse the same searches you have running at home.",
+      "Access your open Hydrus pages from anywhere. Browse your saved searches on the go, away from home.",
     icon: IconDevices,
   },
   {
-    title: "Preset galleries",
+    title: "Quick presets",
     description:
-      "Jump straight into random inbox, recently inboxed, most viewed, longest viewed, and more.",
+      "Go straight to your most viewed, longest viewed, or recently inboxed files without messing with complex filters.",
     icon: IconAlbum,
   },
   {
-    title: "Make it yours",
+    title: "Your style",
     description:
-      "Adjust layouts, thumbnail sizes, animations, and theme. Install as a PWA for quick access.",
+      "Tweak layouts, thumbnail sizes, and themes until it feels right. Works great as a PWA on your home screen.",
     icon: IconPalette,
   },
 ];
@@ -110,8 +110,7 @@ const NAV_GROUPS: Array<NavGroup> = [
     items: [
       {
         title: "Pages",
-        description:
-          "Browse your Hydrus client's active page tabs and their contents",
+        description: "See everything currently open in your Hydrus client",
         to: "/pages",
         icon: IconLayoutGrid,
         requiredPermissions: [
@@ -121,8 +120,7 @@ const NAV_GROUPS: Array<NavGroup> = [
       },
       {
         title: "Random inbox",
-        description:
-          "Shuffle through random files from your inbox for discovery",
+        description: "Find something new by shuffling through your inbox",
         to: "/random-inbox",
         icon: IconArrowsShuffle,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
@@ -130,7 +128,7 @@ const NAV_GROUPS: Array<NavGroup> = [
       {
         title: "Review queue",
         description:
-          "Archive or trash files with swipe gestures or keyboard shortcuts",
+          "Sort your inbox with quick gestures or keyboard shortcuts",
         to: "/review",
         icon: IconCards,
         requiredPermissions: [
@@ -145,21 +143,21 @@ const NAV_GROUPS: Array<NavGroup> = [
     items: [
       {
         title: "Recently inboxed",
-        description: "View files recently added to your inbox",
+        description: "Check out the latest additions to your library",
         to: "/recently-inboxed",
         icon: IconMail,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
       },
       {
         title: "Recently archived",
-        description: "View files you've recently archived",
+        description: "See what you've recently filed away",
         to: "/recently-archived",
         icon: IconArchive,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
       },
       {
         title: "Recently trashed",
-        description: "View files you've recently sent to trash",
+        description: "Take one last look at files you've trashed",
         to: "/recently-trashed",
         icon: IconTrash,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
@@ -171,28 +169,28 @@ const NAV_GROUPS: Array<NavGroup> = [
     items: [
       {
         title: "Watch history",
-        description: "Files you viewed in this browser, stored locally",
+        description: "See what you've been looking at in this browser",
         to: "/history",
         icon: IconEye,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
       },
       {
         title: "Remote history",
-        description: "Files you viewed from Hydrus client",
+        description: "Files you viewed recently in Hydrus client",
         to: "/remote-history",
         icon: IconCalendarStats,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
       },
       {
         title: "Most viewed",
-        description: "Files ranked by total view count",
+        description: "Your all-time favorites by view count",
         to: "/most-viewed",
         icon: IconChartArea,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
       },
       {
         title: "Longest viewed",
-        description: "Files ranked by total watch time",
+        description: "The files you've spent the most time with",
         to: "/longest-viewed",
         icon: IconClock,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
@@ -204,19 +202,19 @@ const NAV_GROUPS: Array<NavGroup> = [
     items: [
       {
         title: "Connection",
-        description: "Configure your Hydrus API connection and access keys",
+        description: "Connect hyAway to your Hydrus client",
         to: "/settings/connection",
         icon: IconLock,
       },
       {
         title: "Appearance",
-        description: "Customize theme, gallery layout, and display preferences",
+        description: "Make the app look and feel how you want",
         to: "/settings/appearance",
         icon: IconLayoutDashboard,
       },
       {
         title: "Data",
-        description: "Manage local storage, cache, and watch history",
+        description: "Control data loading and local storage",
         to: "/settings/data",
         icon: IconDatabase,
       },
@@ -276,7 +274,7 @@ function MarketingHeader() {
             >
               hydrus network
             </a>{" "}
-            library — away from home.
+            library while away.
           </Subheading>
         </div>
         <div className="flex flex-wrap gap-3">
