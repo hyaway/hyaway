@@ -86,18 +86,29 @@ export function ReviewImageViewer({
   const staticImage = isStaticImage(mime);
   const imageProjectFile = isImageProjectFile(mime);
 
+  // Determine render dimensions:
+  // - For "resized" mode: fit to screen
+  // - For "original" mode with project files: use full metadata dimensions
+  const projectFileFullDimensions =
+    imageProjectFile &&
+    imageLoadMode === "original" &&
+    metadataWidth &&
+    metadataHeight
+      ? { width: metadataWidth, height: metadataHeight }
+      : undefined;
+
   // Use appropriate URL based on image load mode
   // Render endpoint only supports static images (not GIF/APNG/animated WEBP)
   const fullUrl = useFullFileIdUrl(fileId);
   const renderUrl = useRenderFileIdUrl(fileId, {
     renderFormat: RenderFormat.WEBP,
     renderQuality: 90,
-    ...renderDimensions,
+    ...(renderDimensions ?? projectFileFullDimensions),
   });
 
   // Select URL based on mode:
   // - Image project files always use render (browsers can't display them)
-  // - Static images use render when "fit" mode enabled and image is larger than screen
+  // - Static images use render when "resized" mode enabled and image is larger than screen
   const useRenderedImage =
     imageProjectFile ||
     (imageLoadMode === "resized" &&

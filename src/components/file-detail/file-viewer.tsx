@@ -6,7 +6,12 @@ import { UnsupportedFileViewer } from "./viewers/unsupported-file-viewer";
 import { VideoViewer } from "./viewers/video-viewer";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
-import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
+import {
+  RenderFormat,
+  useFullFileIdUrl,
+  useRenderFileIdUrl,
+} from "@/hooks/use-url-with-api-key";
+import { isImageProjectFile } from "@/lib/mime-utils";
 import { cn } from "@/lib/utils";
 
 export function FileViewerSkeleton() {
@@ -18,7 +23,23 @@ export function FileViewerSkeleton() {
 }
 
 export function FileViewer({ data }: { data: FileMetadata }) {
-  const { url: fileUrl, onLoad, onError } = useFullFileIdUrl(data.file_id);
+  // Check if this is an image project file (PSD, Krita) that needs rendering
+  const projectFile = isImageProjectFile(data.mime);
+
+  // Full file URL for regular files
+  const fullUrl = useFullFileIdUrl(data.file_id);
+
+  // Render URL for image project files - use full metadata dimensions
+  const renderUrl = useRenderFileIdUrl(data.file_id, {
+    renderFormat: RenderFormat.WEBP,
+    renderQuality: 95,
+    // Use metadata dimensions for full-size render
+    width: data.width,
+    height: data.height,
+  });
+
+  // Use render URL for project files, full URL otherwise
+  const { url: fileUrl, onLoad, onError } = projectFile ? renderUrl : fullUrl;
 
   const isDeleted = data.is_deleted && !data.is_trashed;
 
@@ -27,7 +48,8 @@ export function FileViewer({ data }: { data: FileMetadata }) {
   }
 
   // Determine file type from MIME
-  const isImage = data.mime.startsWith("image/");
+  // Image project files (PSD, Krita) should be treated as images
+  const isImage = data.mime.startsWith("image/") || projectFile;
   const isVideo = data.mime.startsWith("video/");
   const isAudio = data.mime.startsWith("audio/");
 
