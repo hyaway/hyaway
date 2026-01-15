@@ -8,9 +8,11 @@ import {
   archiveFiles,
   deleteFiles,
   getFileMetadata,
+  setFileViewtime,
   unarchiveFiles,
   undeleteFiles,
 } from "../api-client";
+import { CanvasType } from "../models";
 import { useIsApiConfigured } from "../hydrus-config-store";
 
 import type {
@@ -290,3 +292,85 @@ export const useUnarchiveFilesMutation = () => {
 };
 
 // #endregion File Management Mutations
+
+// #region File Viewing Statistics Mutations
+
+interface ClearFileViewtimeParams {
+  fileId: number;
+  /** Current views count to preserve */
+  currentViews: number;
+}
+
+/**
+ * Mutation to clear file viewtime (set to 0) for the Client API canvas type
+ * Preserves the current views count
+ */
+export const useClearFileViewtimeMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ fileId, currentViews }: ClearFileViewtimeParams) =>
+      setFileViewtime({
+        file_id: fileId,
+        canvas_type: CanvasType.CLIENT_API,
+        views: currentViews,
+        viewtime: 0,
+      }),
+    onSuccess: (_data, { fileId }) => {
+      updateFileMetadataFlags(queryClient, [fileId], (meta) => ({
+        ...meta,
+        file_viewing_statistics: meta.file_viewing_statistics?.map((stat) =>
+          stat.canvas_type === CanvasType.CLIENT_API
+            ? { ...stat, viewtime: 0 }
+            : stat,
+        ),
+      }));
+      queryClient.invalidateQueries({
+        queryKey: ["searchFiles", "longestViewed"],
+        refetchType: "none",
+      });
+    },
+    mutationKey: ["clearFileViewtime"],
+  });
+};
+
+interface ClearFileViewsParams {
+  fileId: number;
+  /** Current viewtime to preserve */
+  currentViewtime: number;
+}
+
+/**
+ * Mutation to clear file views (set to 0) for the Client API canvas type
+ * Preserves the current viewtime
+ */
+export const useClearFileViewsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ fileId, currentViewtime }: ClearFileViewsParams) =>
+      setFileViewtime({
+        file_id: fileId,
+        canvas_type: CanvasType.CLIENT_API,
+        views: 0,
+        viewtime: currentViewtime,
+      }),
+    onSuccess: (_data, { fileId }) => {
+      updateFileMetadataFlags(queryClient, [fileId], (meta) => ({
+        ...meta,
+        file_viewing_statistics: meta.file_viewing_statistics?.map((stat) =>
+          stat.canvas_type === CanvasType.CLIENT_API
+            ? { ...stat, views: 0 }
+            : stat,
+        ),
+      }));
+      queryClient.invalidateQueries({
+        queryKey: ["searchFiles", "mostViewed"],
+        refetchType: "none",
+      });
+    },
+    mutationKey: ["clearFileViews"],
+  });
+};
+
+// #endregion File Viewing Statistics Mutations

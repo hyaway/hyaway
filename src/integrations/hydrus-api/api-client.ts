@@ -298,5 +298,31 @@ export async function incrementFileViewtime(
   await sessionKeyClient.post("/edit_times/increment_file_viewtime", options);
 }
 
+export interface SetFileViewtimeOptions {
+  /** File identifier */
+  file_id: number;
+  /** The canvas type to clear */
+  canvas_type: CanvasType;
+  /** Timestamp when the user last viewed the file (seconds, optional) */
+  timestamp?: number;
+  /** Total number of views to set */
+  views: number;
+  /** Total viewtime to set (seconds) */
+  viewtime: number;
+}
+
+/**
+ * Set fixed values in the file viewing statistics system.
+ * Used to reset/clear viewtime and views by setting them to 0.
+ *
+ * @permission Requires: Edit Times (11)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#edit_times_set_file_viewtime
+ */
+export async function setFileViewtime(
+  options: SetFileViewtimeOptions,
+): Promise<void> {
+  await sessionKeyClient.post("/edit_times/set_file_viewtime", options);
+}
+
 // #endregion File Viewing Statistics
 // #endregion API Functions
