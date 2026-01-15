@@ -12,6 +12,7 @@ import { RightSidebarProvider } from "./right-sidebar-portal";
 import { RightSidebar } from "./right-sidebar";
 import { Sidebar, SidebarLayout } from "@/components/ui-primitives/sidebar";
 import { Toaster } from "@/components/ui-primitives/sonner";
+import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -31,12 +32,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             {/* Content area - grows naturally, page scrolls */}
             <FooterPortalProvider>
-              <main
-                className={`short:pb-(--footer-height-short) mx-4 flex-1 overflow-x-clip py-2 pb-(--footer-height) sm:mx-6 lg:pb-(--footer-height-sm)`}
-              >
+              <main className={cn("flex-1 overflow-x-clip px-4 pb-4 sm:px-6")}>
                 {children}
               </main>
-
               {/* Floating footer - sticky at bottom of center column */}
               <FloatingFooter className="justify-center">
                 <FooterPortalSlot />
