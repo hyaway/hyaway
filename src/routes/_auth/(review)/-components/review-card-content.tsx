@@ -23,9 +23,16 @@ import {
   useRemoteFileViewTimeTracker,
 } from "@/hooks/use-watch-history-tracking";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
-import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
+import {
+  RenderFormat,
+  useFullFileIdUrl,
+  useRenderFileIdUrl,
+} from "@/hooks/use-url-with-api-key";
 import { useActiveTheme } from "@/stores/theme-store";
-import { useReviewTrackWatchHistory } from "@/stores/review-queue-store";
+import {
+  useReviewImageLoadMode,
+  useReviewTrackWatchHistory,
+} from "@/stores/review-queue-store";
 import {
   useFillCanvasBackground,
   useImageBackground,
@@ -46,7 +53,6 @@ export const ReviewCardContent = memo(function ReviewCardContent({
   isTop = false,
 }: ReviewCardContentProps) {
   const { data: metadata, isPending } = useGetSingleFileMetadata(fileId);
-  const { url: fileUrl, onLoad, onError } = useFullFileIdUrl(fileId);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const activeTheme = useActiveTheme();
@@ -57,6 +63,63 @@ export const ReviewCardContent = memo(function ReviewCardContent({
   const mediaAutoPlay = useMediaAutoPlay();
   const mediaStartWithSound = useMediaStartWithSound();
   const trackWatchHistory = useReviewTrackWatchHistory();
+  const imageLoadMode = useReviewImageLoadMode();
+
+  // Calculate render dimensions for "fit" mode - preserve aspect ratio within screen bounds
+  const renderDimensions = useMemo(() => {
+    if (imageLoadMode !== "fit") return undefined;
+    if (!metadata?.width || !metadata.height) return undefined;
+
+    const screenWidth = Math.round(
+      window.screen.width * window.devicePixelRatio,
+    );
+    const screenHeight = Math.round(
+      window.screen.height * window.devicePixelRatio,
+    );
+    const imageWidth = metadata.width;
+    const imageHeight = metadata.height;
+
+    // If image is smaller than screen, no need to resize
+    if (imageWidth <= screenWidth && imageHeight <= screenHeight) {
+      return undefined;
+    }
+
+    // Calculate scale factor to fit within screen while preserving aspect ratio
+    const scaleX = screenWidth / imageWidth;
+    const scaleY = screenHeight / imageHeight;
+    const scale = Math.min(scaleX, scaleY);
+
+    return {
+      width: Math.round(imageWidth * scale),
+      height: Math.round(imageHeight * scale),
+    };
+  }, [imageLoadMode, metadata?.width, metadata?.height]);
+
+  // Determine if image is animated (GIF, APNG) - these are NOT supported by render endpoint
+  const isImage = metadata?.mime.startsWith("image/") ?? false;
+  const isAnimated =
+    metadata?.mime === "image/gif" || metadata?.mime === "image/apng";
+
+  // Use appropriate URL based on image load mode
+  // Render endpoint only supports still images (not GIF/APNG)
+  const fullUrl = useFullFileIdUrl(fileId);
+  const renderUrl = useRenderFileIdUrl(fileId, {
+    renderFormat: RenderFormat.WEBP,
+    renderQuality: 90,
+    ...renderDimensions,
+  });
+
+  // Select URL based on mode - only use render for still images larger than screen
+  const useRenderedImage =
+    imageLoadMode === "fit" &&
+    isImage &&
+    !isAnimated &&
+    renderDimensions !== undefined;
+  const {
+    url: fileUrl,
+    onLoad,
+    onError,
+  } = useRenderedImage ? renderUrl : fullUrl;
 
   // Track file view in local watch history (only for top card with valid fileId)
   const shouldTrack = isTop && trackWatchHistory && fileId > 0;
@@ -106,7 +169,6 @@ export const ReviewCardContent = memo(function ReviewCardContent({
     );
   }
 
-  const isImage = metadata.mime.startsWith("image/");
   const isVideo = metadata.mime.startsWith("video/");
   const isAudio = metadata.mime.startsWith("audio/");
 

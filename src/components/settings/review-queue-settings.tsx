@@ -1,12 +1,19 @@
 import { IconTrashX } from "@tabler/icons-react";
 import { SettingsGroup, SwitchField } from "./setting-fields";
 import { Button } from "@/components/ui-primitives/button";
+import { Label } from "@/components/ui-primitives/label";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui-primitives/toggle-group";
 import {
   useReviewGesturesEnabled,
+  useReviewImageLoadMode,
   useReviewQueueActions,
   useReviewQueueCount,
   useReviewShortcutsEnabled,
   useReviewTrackWatchHistory,
+  type ReviewImageLoadMode,
 } from "@/stores/review-queue-store";
 
 export const REVIEW_QUEUE_SETTINGS_TITLE = "Review queue";
@@ -22,11 +29,13 @@ export function ReviewQueueSettings({
   const shortcutsEnabled = useReviewShortcutsEnabled();
   const gesturesEnabled = useReviewGesturesEnabled();
   const trackWatchHistory = useReviewTrackWatchHistory();
+  const imageLoadMode = useReviewImageLoadMode();
   const {
     clearQueue,
     setShortcutsEnabled,
     setGesturesEnabled,
     setTrackWatchHistory,
+    setImageLoadMode,
   } = useReviewQueueActions();
 
   return (
@@ -52,6 +61,26 @@ export function ReviewQueueSettings({
         checked={trackWatchHistory}
         onCheckedChange={setTrackWatchHistory}
       />
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-0.5">
+          <Label>Image loading</Label>
+          <span className="text-muted-foreground text-xs">
+            Resized images load faster but may lose quality
+          </span>
+        </div>
+        <ToggleGroup
+          value={[imageLoadMode]}
+          onValueChange={(value) => {
+            const newValue = value[0] as ReviewImageLoadMode | undefined;
+            if (newValue) setImageLoadMode(newValue);
+          }}
+          variant="outline"
+          size="sm"
+        >
+          <ToggleGroupItem value="full">Original</ToggleGroupItem>
+          <ToggleGroupItem value="fit">Resized</ToggleGroupItem>
+        </ToggleGroup>
+      </div>
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium">Clear queue</span>

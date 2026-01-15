@@ -6,6 +6,9 @@ import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 /** Types of actions that can be performed on a file during review */
 export type ReviewAction = "archive" | "trash" | "skip";
 
+/** How images are loaded in review mode */
+export type ReviewImageLoadMode = "full" | "fit";
+
 /** Previous state of a file before action, used for undo */
 export type PreviousFileState = "inbox" | "archived" | "trashed" | null;
 
@@ -39,6 +42,8 @@ type ReviewQueueState = {
   gesturesEnabled: boolean;
   /** Track viewed files in watch history (local + remote sync) */
   trackWatchHistory: boolean;
+  /** How to load images: 'full' for original, 'fit' for server-side resize */
+  imageLoadMode: ReviewImageLoadMode;
 
   actions: {
     /** Set the queue to a new list of file IDs (replaces existing, dedupes) */
@@ -63,6 +68,8 @@ type ReviewQueueState = {
     setGesturesEnabled: (enabled: boolean) => void;
     /** Enable or disable watch history tracking */
     setTrackWatchHistory: (enabled: boolean) => void;
+    /** Set image load mode */
+    setImageLoadMode: (mode: ReviewImageLoadMode) => void;
   };
 };
 
@@ -75,6 +82,7 @@ const useReviewQueueStore = create<ReviewQueueState>()(
       shortcutsEnabled: true,
       gesturesEnabled: true,
       trackWatchHistory: true,
+      imageLoadMode: "full",
 
       actions: {
         setQueue: (ids) => {
@@ -145,6 +153,9 @@ const useReviewQueueStore = create<ReviewQueueState>()(
         setTrackWatchHistory: (trackWatchHistory: boolean) => {
           set({ trackWatchHistory });
         },
+        setImageLoadMode: (imageLoadMode: ReviewImageLoadMode) => {
+          set({ imageLoadMode });
+        },
       },
     }),
     {
@@ -157,6 +168,7 @@ const useReviewQueueStore = create<ReviewQueueState>()(
         shortcutsEnabled: state.shortcutsEnabled,
         gesturesEnabled: state.gesturesEnabled,
         trackWatchHistory: state.trackWatchHistory,
+        imageLoadMode: state.imageLoadMode,
       }),
       // On reload, truncate processed items and reset index
       merge: (persistedState, currentState) => {
@@ -176,6 +188,7 @@ const useReviewQueueStore = create<ReviewQueueState>()(
             persisted.gesturesEnabled ?? currentState.gesturesEnabled,
           trackWatchHistory:
             persisted.trackWatchHistory ?? currentState.trackWatchHistory,
+          imageLoadMode: persisted.imageLoadMode ?? currentState.imageLoadMode,
         };
       },
     },
@@ -280,6 +293,10 @@ export const useReviewGesturesEnabled = () =>
 /** Get track watch history setting */
 export const useReviewTrackWatchHistory = () =>
   useReviewQueueStore((state) => state.trackWatchHistory);
+
+/** Get image load mode setting */
+export const useReviewImageLoadMode = () =>
+  useReviewQueueStore((state) => state.imageLoadMode);
 
 // #endregion
 

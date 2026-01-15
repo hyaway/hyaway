@@ -120,3 +120,108 @@ export const useDownloadFileIdUrl = (fileId: number) => {
   const { authKey, headerName } = useAuthForUrl();
   return `${apiEndpoint}/get_files/file?file_id=${fileId}&download=true&${headerName}=${authKey}`;
 };
+
+/**
+ * Render format enum for the /get_files/render endpoint.
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#get_files_render
+ */
+export const RenderFormat = {
+  /** JPEG format - quality sets JPEG quality 0-100 */
+  JPEG: 1,
+  /** PNG format - quality sets compression level 0-9 */
+  PNG: 2,
+  /** WEBP format - quality sets WEBP quality 1-100, over 100 for lossless */
+  WEBP: 33,
+  /** APNG format for ugoiras - quality has no effect */
+  APNG: 23,
+  /** Animated WEBP format for ugoiras - quality sets WEBP quality 1-100 */
+  ANIMATED_WEBP: 83,
+} as const;
+
+export type RenderFormat = (typeof RenderFormat)[keyof typeof RenderFormat];
+
+export interface RenderFileOptions {
+  /** Target render format */
+  renderFormat?: RenderFormat;
+  /** Quality or compression level (format-dependent) */
+  renderQuality?: number;
+  /** Target width (must provide both width and height) */
+  width?: number;
+  /** Target height (must provide both width and height) */
+  height?: number;
+  /** Trigger browser download dialog instead of inline display */
+  download?: boolean;
+}
+
+/**
+ * Hook to get a rendered image URL from Hydrus.
+ * Useful for rendering PSD files, applying color profile conversion,
+ * or resizing images server-side.
+ *
+ * @permission Requires: Search Files (3)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#get_files_render
+ */
+export const useRenderFileIdUrl = (
+  fileId: number,
+  options: RenderFileOptions = {},
+) => {
+  const apiEndpoint = useApiEndpoint();
+  const { renderFormat, renderQuality, width, height, download } = options;
+
+  // Build query params
+  const params = new URLSearchParams();
+  params.set("file_id", String(fileId));
+
+  if (renderFormat !== undefined) {
+    params.set("render_format", String(renderFormat));
+  }
+  if (renderQuality !== undefined) {
+    params.set("render_quality", String(renderQuality));
+  }
+  if (width !== undefined && height !== undefined) {
+    params.set("width", String(width));
+    params.set("height", String(height));
+  }
+  if (download) {
+    params.set("download", "true");
+  }
+
+  return useMediaUrlWithRetry(`${apiEndpoint}/get_files/render?${params}`);
+};
+
+/**
+ * Get a static rendered file URL (non-reactive, single use).
+ * Useful when you need the URL string directly without hooks.
+ *
+ * @permission Requires: Search Files (3)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#get_files_render
+ */
+export const getRenderFileIdUrl = (
+  apiEndpoint: string,
+  authKey: string,
+  headerName: string,
+  fileId: number,
+  options: RenderFileOptions = {},
+) => {
+  const { renderFormat, renderQuality, width, height, download } = options;
+
+  const params = new URLSearchParams();
+  params.set("file_id", String(fileId));
+  params.set(headerName, authKey);
+
+  if (renderFormat !== undefined) {
+    params.set("render_format", String(renderFormat));
+  }
+  if (renderQuality !== undefined) {
+    params.set("render_quality", String(renderQuality));
+  }
+  if (width !== undefined && height !== undefined) {
+    params.set("width", String(width));
+    params.set("height", String(height));
+  }
+  if (download) {
+    params.set("download", "true");
+  }
+
+  return `${apiEndpoint}/get_files/render?${params}`;
+};
