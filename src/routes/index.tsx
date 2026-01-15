@@ -64,7 +64,7 @@ const FEATURES: Array<FeatureItem> = [
   {
     title: "Preset galleries",
     description:
-      "Random inbox, recently inboxed, most viewed, longest viewed — jump straight into browsing without setting up searches.",
+      "Jump straight into random inbox, recently inboxed, most viewed, longest viewed, and more.",
     icon: IconAlbum,
   },
   {
