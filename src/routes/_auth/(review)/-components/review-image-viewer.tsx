@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion, useMotionValue, useTransform } from "motion/react";
+import { animate, motion, useMotionValue, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
 
 // Tolerance for matching fit scale (±2%)
@@ -85,6 +85,31 @@ export function ReviewImageViewer({
   const isAtFit =
     zoomMode === "fit" || Math.abs(zoomScale - fitScale) <= SCALE_TOLERANCE;
 
+  const dragConstraints = useMemo(() => {
+    if (
+      !isTop ||
+      naturalSize.width === 0 ||
+      naturalSize.height === 0 ||
+      containerSize.width === 0 ||
+      containerSize.height === 0
+    ) {
+      return { left: 0, right: 0, top: 0, bottom: 0 };
+    }
+
+    const scaledWidth = naturalSize.width * zoomScale;
+    const scaledHeight = naturalSize.height * zoomScale;
+
+    const maxPanX = Math.abs(scaledWidth - containerSize.width) / 2;
+    const maxPanY = Math.abs(scaledHeight - containerSize.height) / 2;
+
+    return {
+      left: -maxPanX,
+      right: maxPanX,
+      top: -maxPanY,
+      bottom: maxPanY,
+    };
+  }, [isTop, naturalSize, containerSize, zoomScale]);
+
   // Track container size
   useEffect(() => {
     const container = containerRef.current;
@@ -136,6 +161,21 @@ export function ReviewImageViewer({
     }, 1000);
   }, []);
 
+  const smoothCenterImage = useCallback(() => {
+    dragX.stop();
+    dragY.stop();
+    animate(dragX, 0, { type: "spring", stiffness: 100, damping: 30 });
+    animate(dragY, 0, { type: "spring", stiffness: 100, damping: 30 });
+    setIsDragging(false);
+  }, [dragX, dragY]);
+
+  // Keep image centered whenever we return to fit mode
+  useEffect(() => {
+    if (zoomMode === "fit") {
+      smoothCenterImage();
+    }
+  }, [zoomMode, smoothCenterImage]);
+
   // Adjust zoom with anchor point
   // skipDragUpdate: when true, only changes scale without moving the image (used during drag)
   const adjustZoom = useCallback(
@@ -177,11 +217,10 @@ export function ReviewImageViewer({
 
       // If we hit minimum zoom (zooming out), snap to fit mode
       if (delta < 0 && newScale <= minZoom + SCALE_TOLERANCE) {
+        scaleMotion.set(fitScale);
         setZoomMode("fit");
-        if (!skipDragUpdate) {
-          dragX.set(0);
-          dragY.set(0);
-        }
+        // Smoothly center the image when returning to fit mode
+        smoothCenterImage();
         showZoomIndicator();
         return;
       }
@@ -199,9 +238,6 @@ export function ReviewImageViewer({
       setZoomMode(newScale);
       showZoomIndicator();
 
-      // Skip drag position update when user is actively dragging
-      if (skipDragUpdate) return;
-
       // Get new image dimensions
       const newWidth = naturalSize.width * newScale;
       const newHeight = naturalSize.height * newScale;
@@ -213,6 +249,15 @@ export function ReviewImageViewer({
 
       let newDragX = 0;
       let newDragY = 0;
+
+      // If user is actively dragging, just clamp current drag to new bounds
+      if (skipDragUpdate) {
+        newDragX = Math.max(-maxPanX, Math.min(maxPanX, currentDragX));
+        newDragY = Math.max(-maxPanY, Math.min(maxPanY, currentDragY));
+        dragX.set(newDragX);
+        dragY.set(newDragY);
+        return;
+      }
 
       // Only do anchor-based positioning if there's room to pan
       if (maxPanX > 0 || maxPanY > 0) {
@@ -237,7 +282,16 @@ export function ReviewImageViewer({
       dragX.set(newDragX);
       dragY.set(newDragY);
     },
-    [minZoom, naturalSize, dragX, dragY, scaleMotion, showZoomIndicator],
+    [
+      minZoom,
+      fitScale,
+      naturalSize,
+      dragX,
+      dragY,
+      scaleMotion,
+      showZoomIndicator,
+      smoothCenterImage,
+    ],
   );
 
   // Wheel zoom handler for image (cursor anchor)
@@ -274,8 +328,9 @@ export function ReviewImageViewer({
       const imageRect = imageRef.current?.getBoundingClientRect();
       if (!containerRect || !imageRect) return;
 
+      const currentScale = scaleMotion.get();
       const factor = Math.pow(1.1, -e.deltaY * WHEEL_ZOOM_STEP * 10);
-      const delta = zoomScale * factor - zoomScale;
+      const delta = currentScale * factor - currentScale;
 
       const cursorX = e.clientX - containerRect.left;
       const cursorY = e.clientY - containerRect.top;
@@ -290,7 +345,7 @@ export function ReviewImageViewer({
 
       adjustZoom(delta, anchorX, anchorY);
     },
-    [isTop, zoomScale, adjustZoom],
+    [isTop, scaleMotion, adjustZoom],
   );
 
   // Pinch zoom state
@@ -390,6 +445,7 @@ export function ReviewImageViewer({
       ref={containerRef}
       className={cn(
         "relative flex h-full w-full items-center justify-center overflow-hidden",
+        isZoomed && "ring-destructive/60 ring-6 ring-inset",
         // Disable browser pinch zoom
         isTop ? "touch-pan-y" : "",
       )}
@@ -406,7 +462,7 @@ export function ReviewImageViewer({
         fetchPriority={isTop ? "high" : "low"}
         draggable={false}
         drag={isTop && isZoomed}
-        dragConstraints={containerRef}
+        dragConstraints={dragConstraints}
         dragElastic={0.3}
         dragTransition={{ power: 0.3, timeConstant: 200 }}
         dragMomentum={true}
