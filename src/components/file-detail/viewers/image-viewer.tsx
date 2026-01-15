@@ -249,13 +249,40 @@ export function ImageViewer({
   }, []);
 
   // Adjust zoom with cursor/touch anchoring
+  // skipDragUpdate: when true, only update scale without moving drag position (for scroll while dragging)
   const adjustZoom = useCallback(
-    (delta: number, anchorX: number, anchorY: number) => {
+    (
+      delta: number,
+      anchorX: number,
+      anchorY: number,
+      skipDragUpdate = false,
+    ) => {
       const container = containerRef.current;
       if (!container || naturalSize.width === 0) return;
 
       const containerRect = container.getBoundingClientRect();
-      const currentScale = zoomScale;
+      const currentScale = scaleMotion.get();
+
+      // Calculate current image bounds in container space
+      const currentWidth = naturalSize.width * currentScale;
+      const currentHeight = naturalSize.height * currentScale;
+      const currentDragX = dragX.get();
+      const currentDragY = dragY.get();
+
+      // Image center is at container center + drag offset
+      const imgCenterX = containerRect.width / 2 + currentDragX;
+      const imgCenterY = containerRect.height / 2 + currentDragY;
+
+      // Image bounds in container space
+      const imgLeft = imgCenterX - currentWidth / 2;
+      const imgRight = imgCenterX + currentWidth / 2;
+      const imgTop = imgCenterY - currentHeight / 2;
+      const imgBottom = imgCenterY + currentHeight / 2;
+
+      // Clamp anchor to image bounds (handles cursor outside image when zooming out)
+      const clampedAnchorX = Math.max(imgLeft, Math.min(imgRight, anchorX));
+      const clampedAnchorY = Math.max(imgTop, Math.min(imgBottom, anchorY));
+
       let newScale = Math.max(
         minZoom,
         Math.min(MAX_ZOOM, currentScale + delta),
@@ -265,10 +292,13 @@ export function ImageViewer({
 
       // If we hit the minimum zoom (only when zooming out), snap to fit mode
       if (delta < 0 && newScale <= minZoom + SCALE_TOLERANCE) {
+        scaleMotion.set(fitScale);
         setZoomMode("fit");
-        dragX.set(0);
-        dragY.set(0);
         showZoomIndicator();
+        if (!skipDragUpdate) {
+          dragX.set(0);
+          dragY.set(0);
+        }
         return;
       }
 
@@ -281,27 +311,32 @@ export function ImageViewer({
         newScale = 1.0;
       }
 
+      // Update scale and mode first
+      scaleMotion.set(newScale);
+      setZoomMode(newScale);
+      showZoomIndicator();
+
+      // Skip drag position updates if requested (e.g., scrolling while dragging)
+      if (skipDragUpdate) return;
+
       // Get new image dimensions at new zoom level
       const newWidth = naturalSize.width * newScale;
       const newHeight = naturalSize.height * newScale;
 
       // Calculate max pan bounds for new scale
-      const maxPanX = Math.max(0, (newWidth - containerRect.width) / 2);
-      const maxPanY = Math.max(0, (newHeight - containerRect.height) / 2);
+      // Use absolute difference so we can keep the anchor stable even when the image
+      // is smaller than the container (allowing centered-but-movable bounds).
+      const maxPanX = Math.abs(newWidth - containerRect.width) / 2;
+      const maxPanY = Math.abs(newHeight - containerRect.height) / 2;
 
       let newDragX = 0;
       let newDragY = 0;
 
-      // Only do anchor-based positioning if image is larger than container
-      // (i.e., there's actually room to pan)
+      // Only do anchor-based positioning if there's room to pan in any direction
       if (maxPanX > 0 || maxPanY > 0) {
-        // Anchor point relative to container center
-        const anchorFromCenterX = anchorX - containerRect.width / 2;
-        const anchorFromCenterY = anchorY - containerRect.height / 2;
-
-        // Current position of anchor in image space
-        const currentDragX = dragX.get();
-        const currentDragY = dragY.get();
+        // Anchor point relative to container center (use clamped values)
+        const anchorFromCenterX = clampedAnchorX - containerRect.width / 2;
+        const anchorFromCenterY = clampedAnchorY - containerRect.height / 2;
 
         // Point in image at anchor (relative to image center)
         const imagePointX = anchorFromCenterX - currentDragX;
@@ -323,17 +358,13 @@ export function ImageViewer({
         newDragY = Math.max(-maxPanY, Math.min(maxPanY, newDragY));
       }
 
-      // Update motion values synchronously (all in same frame)
-      scaleMotion.set(newScale);
+      // Update drag position
       dragX.set(newDragX);
       dragY.set(newDragY);
-      // Update React state (for UI like button highlights)
-      setZoomMode(newScale);
-      showZoomIndicator();
     },
     [
-      zoomScale,
       minZoom,
+      fitScale,
       naturalSize,
       dragX,
       dragY,
@@ -352,9 +383,12 @@ export function ImageViewer({
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
 
+      // Get current scale from motion value to avoid stale closure
+      const currentScale = scaleMotion.get();
+
       // Multiplicative zoom: scroll applies percentage change
       const factor = Math.pow(1.1, -e.deltaY * WHEEL_ZOOM_STEP * 10);
-      const delta = zoomScale * factor - zoomScale;
+      const delta = currentScale * factor - currentScale;
 
       // Anchor to cursor position over image
       const anchorX = e.clientX - rect.left;
@@ -362,7 +396,7 @@ export function ImageViewer({
 
       adjustZoom(delta, anchorX, anchorY);
     },
-    [isPannable, zoomScale, adjustZoom],
+    [isPannable, scaleMotion, adjustZoom],
   );
 
   // Wheel zoom handler for container (anchors to closest edge of image)
@@ -376,9 +410,12 @@ export function ImageViewer({
       const imageRect = imageRef.current?.getBoundingClientRect();
       if (!containerRect || !imageRect) return;
 
+      // Get current scale from motion value to avoid stale closure
+      const currentScale = scaleMotion.get();
+
       // Multiplicative zoom: scroll applies percentage change
       const factor = Math.pow(1.1, -e.deltaY * WHEEL_ZOOM_STEP * 10);
-      const delta = zoomScale * factor - zoomScale;
+      const delta = currentScale * factor - currentScale;
 
       // Cursor position in container space
       const cursorX = e.clientX - containerRect.left;
@@ -396,7 +433,7 @@ export function ImageViewer({
 
       adjustZoom(delta, anchorX, anchorY);
     },
-    [isPannable, zoomScale, adjustZoom],
+    [isPannable, scaleMotion, adjustZoom],
   );
 
   // Pinch zoom state
@@ -503,7 +540,9 @@ export function ImageViewer({
       const anchorX = (centerX + newCenterX) / 2;
       const anchorY = (centerY + newCenterY) / 2;
 
-      const delta = newScale - zoomScale;
+      // Get current scale from motion value to avoid stale closure
+      const currentZoomScale = scaleMotion.get();
+      const delta = newScale - currentZoomScale;
       if (Math.abs(delta) > 0.001) {
         adjustZoom(delta, anchorX, anchorY);
       }
@@ -513,7 +552,7 @@ export function ImageViewer({
       isFullscreen,
       isTheater,
       minZoom,
-      zoomScale,
+      scaleMotion,
       dragX,
       dragY,
       adjustZoom,

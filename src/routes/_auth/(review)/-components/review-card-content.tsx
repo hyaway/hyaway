@@ -5,14 +5,16 @@ import {
   DefaultVideoLayout,
   defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
+import "@vidstack/react/player/styles/default/theme.css";
+import "@vidstack/react/player/styles/default/layouts/video.css";
+import "@vidstack/react/player/styles/default/layouts/audio.css";
+import { ReviewImageViewer } from "./review-image-viewer";
 import type {
   AudioMimeType,
   MediaPlayerInstance,
   VideoMimeType,
 } from "@vidstack/react";
-import "@vidstack/react/player/styles/default/theme.css";
-import "@vidstack/react/player/styles/default/layouts/video.css";
-import "@vidstack/react/player/styles/default/layouts/audio.css";
+
 import { FileStateBadge } from "@/components/file-detail/file-state-badge";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
@@ -191,22 +193,14 @@ export const ReviewCardContent = memo(function ReviewCardContent({
 
       {/* Media content */}
       {isImage && (
-        <img
-          src={fileUrl}
-          alt={`File ${fileId}`}
-          decoding="async"
-          // Top card gets high priority; background cards get low priority
-          // Complements preloading: if preload didn't finish, top card wins the race
-          fetchPriority={isTop ? "high" : "low"}
+        <ReviewImageViewer
+          fileUrl={fileUrl}
+          fileId={fileId}
+          isTop={isTop}
           onLoad={handleLoad}
           onError={handleError}
-          style={getImageStyle()}
-          className={cn(
-            "max-h-full max-w-full object-contain transition-opacity duration-200",
-            loaded ? "opacity-100" : "opacity-0",
-            getImageBackgroundClass(),
-          )}
-          draggable={false}
+          imageBackgroundClass={getImageBackgroundClass()}
+          imageBackgroundStyle={getImageStyle()}
         />
       )}
 
