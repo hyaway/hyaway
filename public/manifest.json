@@ -1,16 +1,26 @@
 {
   "short_name": "hyAway",
   "name": "hyAway",
-  "description": "Remotely browse your hydrus network gallery from any device.",
+  "description": "Browse and review your hydrus network library, away from home.",
   "icons": [
     {
       "src": "favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
+    },
+    {
+      "src": "logo192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#1c1c1c",
+  "background_color": "#1c1c1c"
 }

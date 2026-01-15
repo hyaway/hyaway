@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
+  IconAlbum,
   IconArchive,
   IconArrowsShuffle,
   IconBrandGithub,
@@ -9,12 +10,17 @@ import {
   IconChartArea,
   IconClock,
   IconDatabase,
+  IconDevices,
   IconExternalLink,
   IconEye,
+  IconHandFinger,
+  IconHandMove,
   IconLayoutDashboard,
   IconLayoutGrid,
   IconLock,
   IconMail,
+  IconPalette,
+  IconSwipe,
   IconTrash,
 } from "@tabler/icons-react";
 import { Heading, Subheading } from "@/components/ui-primitives/heading";
@@ -34,6 +40,40 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
+
+// Feature item for marketing section
+interface FeatureItem {
+  title: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const FEATURES: Array<FeatureItem> = [
+  {
+    title: "Review faster",
+    description:
+      "Manage your inbox with swipe gestures or keyboard shortcuts. See your progress in the recently archived and trashed galleries.",
+    icon: IconHandMove,
+  },
+  {
+    title: "Browse anywhere",
+    description:
+      "Access your hydrus client's open pages even when you're away. Browse the same searches you have running at home.",
+    icon: IconDevices,
+  },
+  {
+    title: "Preset galleries",
+    description:
+      "Random inbox, recently inboxed, most viewed, longest viewed — jump straight into browsing without setting up searches.",
+    icon: IconAlbum,
+  },
+  {
+    title: "Make it yours",
+    description:
+      "Adjust layouts, thumbnail sizes, animations, and theme. Install as a PWA for quick access.",
+    icon: IconPalette,
+  },
+];
 
 // Navigation item definition
 interface NavItem {
@@ -211,48 +251,78 @@ function WelcomeHeader() {
 
 function MarketingHeader() {
   return (
-    <header className="relative flex flex-col gap-6 rounded-xl border p-6 sm:p-8">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-xl"
-      >
-        <div className="from-primary/15 via-primary/5 absolute inset-0 bg-linear-to-br to-transparent" />
-      </div>
-      <div className="flex flex-col gap-3">
-        <Heading level={1} className="text-3xl font-bold sm:text-4xl">
-          hyAway
-        </Heading>
-        <Subheading
-          level={2}
-          className="text-muted-foreground text-lg sm:text-xl"
+    <section className="flex flex-col gap-8">
+      <header className="relative flex flex-col gap-6 rounded-xl border p-6 sm:p-8">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-xl"
         >
-          Browse your{" "}
+          <div className="from-primary/15 via-primary/5 absolute inset-0 bg-linear-to-br to-transparent" />
+        </div>
+        <div className="flex flex-col gap-3">
+          <Heading level={1} className="text-3xl font-bold sm:text-4xl">
+            hyAway
+          </Heading>
+          <Subheading
+            level={2}
+            className="text-muted-foreground text-lg sm:text-xl"
+          >
+            Browse and review your{" "}
+            <a
+              href="https://hydrusnetwork.github.io/hydrus/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              hydrus network
+            </a>{" "}
+            library — away from home.
+          </Subheading>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <LinkButton to="/settings/connection" size="lg">
+            Get started
+          </LinkButton>
           <a
-            href="https://hydrusnetwork.github.io/hydrus/"
+            href="https://github.com/hyaway/hyaway/blob/main/docs/SETUP.md"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary hover:underline"
+            className="border-border bg-input/30 hover:bg-input/50 hover:text-foreground inline-flex h-12 items-center justify-center gap-2 rounded-4xl border px-5 text-sm font-medium transition-all"
           >
-            hydrus network
-          </a>{" "}
-          gallery from anywhere
-        </Subheading>
+            Need help?
+            <IconExternalLink className="size-4" />
+          </a>
+        </div>
+      </header>
+      <FeaturesGrid />
+    </section>
+  );
+}
+
+function FeaturesGrid() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {FEATURES.map((feature) => (
+        <FeatureCard key={feature.title} feature={feature} />
+      ))}
+    </div>
+  );
+}
+
+function FeatureCard({ feature }: { feature: FeatureItem }) {
+  const Icon = feature.icon;
+  return (
+    <article className="flex flex-col gap-2 p-3">
+      <div className="bg-primary flex size-8 shrink-0 items-center justify-center rounded-lg">
+        <Icon className="text-primary-foreground size-6" />
       </div>
-      <div className="flex flex-wrap gap-3">
-        <LinkButton to="/settings/connection" size="lg">
-          Get started
-        </LinkButton>
-        <a
-          href="https://github.com/hyaway/hyaway/blob/main/docs/SETUP.md"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="border-border bg-input/30 hover:bg-input/50 hover:text-foreground inline-flex h-12 items-center justify-center gap-2 rounded-4xl border px-5 text-sm font-medium transition-all"
-        >
-          Need help?
-          <IconExternalLink className="size-4" />
-        </a>
+      <div className="flex flex-col gap-1">
+        <Heading level={3} className="text-sm font-medium">
+          {feature.title}
+        </Heading>
+        <p className="text-muted-foreground text-sm">{feature.description}</p>
       </div>
-    </header>
+    </article>
   );
 }
 
@@ -364,7 +434,7 @@ function AboutSection() {
             About hyAway
           </Heading>
           <p className="text-muted-foreground text-sm">
-            A web client for{" "}
+            An open-source web client for{" "}
             <a
               href="https://hydrusnetwork.github.io/hydrus/"
               target="_blank"
