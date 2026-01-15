@@ -133,6 +133,7 @@ export const ReviewCardContent = memo(function ReviewCardContent({
           mime={metadata.mime}
           width={metadata.width}
           height={metadata.height}
+          numFrames={metadata.num_frames}
           blurhash={metadata.blurhash ?? null}
           isTop={isTop}
           onLoad={handleLoad}
@@ -205,7 +206,7 @@ export const ReviewCardContent = memo(function ReviewCardContent({
       {/* Non-top audio cards show fake player placeholder */}
       {isAudio && !isTop && (
         <div className="flex h-full w-full flex-col items-center justify-center p-4">
-          <div className="h-[60px] w-full rounded-[6px] bg-black" />
+          <div className="h-15 w-full rounded-[6px] bg-[rgb(250,250,250)] dark:bg-black" />
         </div>
       )}
 

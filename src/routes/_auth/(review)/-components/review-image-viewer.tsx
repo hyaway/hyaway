@@ -27,6 +27,7 @@ interface ReviewImageViewerProps {
   mime: string;
   width: number | null;
   height: number | null;
+  numFrames?: number | null;
   blurhash: string | null;
   onLoad: () => void;
   onError: () => void;
@@ -39,6 +40,7 @@ export function ReviewImageViewer({
   mime,
   width: metadataWidth,
   height: metadataHeight,
+  numFrames,
   blurhash,
   onLoad,
   onError,
@@ -85,6 +87,7 @@ export function ReviewImageViewer({
   // Check if this mime type is a static image or image project file
   const staticImage = isStaticImage(mime);
   const imageProjectFile = isImageProjectFile(mime);
+  const isAnimated = (numFrames ?? 0) > 1;
 
   // Determine render dimensions:
   // - For "resized" mode: fit to screen
@@ -113,6 +116,7 @@ export function ReviewImageViewer({
     imageProjectFile ||
     (imageLoadMode === "resized" &&
       staticImage &&
+      !isAnimated &&
       renderDimensions !== undefined);
   const {
     url: fileUrl,
