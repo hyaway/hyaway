@@ -278,6 +278,7 @@ export function ReviewImageViewer({
       anchorX: number,
       anchorY: number,
       skipDragUpdate = false,
+      allowSnapToOne = false,
     ) => {
       const container = containerRef.current;
       if (!container || naturalSize.width === 0) return;
@@ -319,13 +320,15 @@ export function ReviewImageViewer({
         return;
       }
 
-      // Snap to 1x when crossing through it
-      const crossingToOneFromBelow =
-        delta > 0 && currentScale < 1.0 && newScale >= 1.0 - SCALE_TOLERANCE;
-      const crossingToOneFromAbove =
-        delta < 0 && currentScale > 1.0 && newScale <= 1.0 + SCALE_TOLERANCE;
-      if (crossingToOneFromBelow || crossingToOneFromAbove) {
-        newScale = 1.0;
+      if (allowSnapToOne) {
+        // Snap to 1x when crossing through it
+        const crossingToOneFromBelow =
+          delta > 0 && currentScale < 1.0 && newScale >= 1.0 - SCALE_TOLERANCE;
+        const crossingToOneFromAbove =
+          delta < 0 && currentScale > 1.0 && newScale <= 1.0 + SCALE_TOLERANCE;
+        if (crossingToOneFromBelow || crossingToOneFromAbove) {
+          newScale = 1.0;
+        }
       }
 
       scaleMotion.set(newScale);
@@ -511,12 +514,14 @@ export function ReviewImageViewer({
       const anchorX = (centerX + newCenterX) / 2;
       const anchorY = (centerY + newCenterY) / 2;
 
-      const delta = newScale - zoomScale;
+      const currentScale = scaleMotion.get();
+      const delta = newScale - currentScale;
       if (Math.abs(delta) > 0.001) {
-        adjustZoom(delta, anchorX, anchorY);
+        // Gestures should not snap to 1x
+        adjustZoom(delta, anchorX, anchorY, false, false);
       }
     },
-    [isTop, minZoom, zoomScale, adjustZoom],
+    [isTop, minZoom, scaleMotion, adjustZoom],
   );
 
   const handleTouchEnd = useCallback(() => {

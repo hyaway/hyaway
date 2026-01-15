@@ -1,4 +1,4 @@
-import { memo, useRef } from "react";
+import { memo, useRef, useState } from "react";
 import { IconArchive, IconArrowUp, IconTrash } from "@tabler/icons-react";
 import {
   motion,
@@ -155,6 +155,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const constraintsRef = useRef<HTMLDivElement>(null);
+  const [isPinching, setIsPinching] = useState(false);
 
   // Calculate rotation based on horizontal drag
   const rotate = useTransform(
@@ -267,14 +268,37 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
           scale: stackScale,
           translateY: stackY,
         }}
-        drag={isTop && !isExiting && gesturesEnabled}
+        drag={isTop && !isExiting && gesturesEnabled && !isPinching}
         dragListener={false}
         dragControls={dragControls}
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
         dragElastic={0.9}
         onDragEnd={handleDragEnd}
+        onTouchStart={(e) => {
+          if (e.touches.length >= 2) {
+            setIsPinching(true);
+            x.stop();
+            y.stop();
+          }
+        }}
+        onTouchMove={(e) => {
+          if (e.touches.length >= 2 && !isPinching) {
+            setIsPinching(true);
+          }
+        }}
+        onTouchEnd={(e) => {
+          if (e.touches.length < 2 && isPinching) {
+            setIsPinching(false);
+          }
+        }}
+        onTouchCancel={() => {
+          if (isPinching) {
+            setIsPinching(false);
+          }
+        }}
         onPointerDown={(e) => {
           if (!isTop || isExiting || !gesturesEnabled) return;
+          if (isPinching) return;
 
           const target = e.target as HTMLElement;
           // Don't start swiping when interacting with actual media control elements.
