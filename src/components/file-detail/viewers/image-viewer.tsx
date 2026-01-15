@@ -18,8 +18,8 @@ import {
 } from "@/stores/file-viewer-settings-store";
 import { Toggle } from "@/components/ui-primitives/toggle";
 
-// Tolerance for matching fit/1x scale values (±2%)
-const SCALE_TOLERANCE = 0.02;
+// Tolerance for matching fit/1x scale values (±3%)
+const SCALE_TOLERANCE = 0.03;
 // Max zoom bound
 const MAX_ZOOM = 4.0;
 // Scroll wheel zoom: each 100 deltaY units = 10% zoom change
