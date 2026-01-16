@@ -29,7 +29,11 @@ function SecretInput(props: React.ComponentProps<"input">) {
   const toggleVisibility = () => setIsVisible((prevState) => !prevState);
   return (
     <InputGroup>
-      <InputGroupInput {...props} type={isVisible ? "text" : "password"} />
+      <InputGroupInput
+        autoComplete="off"
+        {...props}
+        type={isVisible ? "text" : "password"}
+      />
       <InputGroupAddon align="inline-end">
         <InputGroupButton
           aria-pressed={isVisible}
