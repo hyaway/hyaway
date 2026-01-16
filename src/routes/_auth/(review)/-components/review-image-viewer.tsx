@@ -58,7 +58,7 @@ export function ReviewImageViewer({
 
   // Calculate render dimensions for "fit" mode - preserve aspect ratio within screen bounds
   const renderDimensions = useMemo(() => {
-    if (imageLoadMode !== "resized") return undefined;
+    if (imageLoadMode !== "optimized") return undefined;
     if (!metadataWidth || !metadataHeight) return undefined;
 
     const screenWidth = Math.round(
@@ -90,7 +90,7 @@ export function ReviewImageViewer({
   const isAnimated = (numFrames ?? 0) > 1;
 
   // Determine render dimensions:
-  // - For "resized" mode: fit to screen
+  // - For "optimized" mode: fit to screen
   // - For "original" mode with project files: use full metadata dimensions
   const projectFileFullDimensions =
     imageProjectFile &&
@@ -111,10 +111,10 @@ export function ReviewImageViewer({
 
   // Select URL based on mode:
   // - Image project files always use render (browsers can't display them)
-  // - Static images use render when "resized" mode enabled and image is larger than screen
+  // - Static images use render when "optimized" mode enabled and image is larger than screen
   const useRenderedImage =
     imageProjectFile ||
-    (imageLoadMode === "resized" &&
+    (imageLoadMode === "optimized" &&
       staticImage &&
       !isAnimated &&
       renderDimensions !== undefined);

@@ -3,6 +3,10 @@ import {
   FileViewerSettings,
 } from "@/components/settings/file-viewer-settings";
 import {
+  REVIEW_CONTROLS_SETTINGS_TITLE,
+  ReviewControlsSettings,
+} from "@/components/settings/review-controls-settings";
+import {
   REVIEW_QUEUE_SETTINGS_TITLE,
   ReviewQueueSettings,
 } from "@/components/settings/review-queue-settings";
@@ -20,6 +24,13 @@ export function ReviewSettingsPopover() {
         <SettingsTitle>{REVIEW_QUEUE_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
       <ReviewQueueSettings idPrefix="popover-" />
+
+      <Separator className="my-2" />
+
+      <SettingsHeader>
+        <SettingsTitle>{REVIEW_CONTROLS_SETTINGS_TITLE}</SettingsTitle>
+      </SettingsHeader>
+      <ReviewControlsSettings idPrefix="popover-" />
 
       <Separator className="my-2" />
 

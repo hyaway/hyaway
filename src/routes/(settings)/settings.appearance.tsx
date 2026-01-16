@@ -3,6 +3,7 @@ import { FileViewerSettingsCard } from "./-components/file-viewer-settings-card"
 import { ThumbnailGalleryDisplaySettingsCard } from "./-components/thumbnail-gallery-display-settings-card";
 import { PagesDisplaySettingsCard } from "./-components/pages-display-settings-card";
 import { ThemeCard } from "./-components/theme-card";
+import { ReviewControlsSettingsCard } from "./-components/review-controls-settings-card";
 import { ResetAllAppearanceSettingsCard } from "./-components/reset-all-appearance-settings-card";
 import { Heading } from "@/components/ui-primitives/heading";
 
@@ -24,6 +25,7 @@ function SettingsAppearanceComponent() {
       <PagesDisplaySettingsCard />
       <ThumbnailGalleryDisplaySettingsCard />
       <FileViewerSettingsCard />
+      <ReviewControlsSettingsCard />
       <ResetAllAppearanceSettingsCard />
     </div>
   );

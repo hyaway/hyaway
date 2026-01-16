@@ -39,6 +39,7 @@ Settings follow a **shared controls + thin wrappers** pattern to eliminate dupli
 | Search limits     | `search-limits-settings.tsx`             | `SEARCH_LIMITS_SETTINGS_TITLE`             |
 | Random inbox      | `random-inbox-settings.tsx`              | `RANDOM_INBOX_SETTINGS_TITLE`              |
 | Recent files      | `recent-files-settings.tsx`              | `RECENT_FILES_SETTINGS_TITLE`              |
+| Review controls   | `review-controls-settings.tsx`           | `REVIEW_CONTROLS_SETTINGS_TITLE`           |
 | Review queue      | `review-queue-settings.tsx`              | `REVIEW_QUEUE_SETTINGS_TITLE`              |
 
 ## File Locations

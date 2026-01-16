@@ -7,7 +7,7 @@ import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 export type ReviewAction = "archive" | "trash" | "skip";
 
 /** How images are loaded in review mode */
-export type ReviewImageLoadMode = "original" | "resized";
+export type ReviewImageLoadMode = "original" | "optimized";
 
 /** Previous state of a file before action, used for undo */
 export type PreviousFileState = "inbox" | "archived" | "trashed" | null;
@@ -70,19 +70,23 @@ type ReviewQueueState = {
     setTrackWatchHistory: (enabled: boolean) => void;
     /** Set image load mode */
     setImageLoadMode: (mode: ReviewImageLoadMode) => void;
+    /** Reset controls settings (shortcuts, gestures) to defaults */
+    resetControlsSettings: () => void;
+    /** Reset data settings (trackWatchHistory, imageLoadMode) to defaults */
+    resetDataSettings: () => void;
   };
 };
 
 const useReviewQueueStore = create<ReviewQueueState>()(
   persist(
-    (set, get) => ({
+    (set, get, store) => ({
       fileIds: [],
       currentIndex: 0,
       history: [],
       shortcutsEnabled: true,
       gesturesEnabled: true,
       trackWatchHistory: true,
-      imageLoadMode: "resized",
+      imageLoadMode: "optimized",
 
       actions: {
         setQueue: (ids) => {
@@ -155,6 +159,22 @@ const useReviewQueueStore = create<ReviewQueueState>()(
         },
         setImageLoadMode: (imageLoadMode: ReviewImageLoadMode) => {
           set({ imageLoadMode });
+        },
+        /** Reset controls settings (shortcuts, gestures) to defaults */
+        resetControlsSettings: () => {
+          const initial = store.getInitialState();
+          set({
+            shortcutsEnabled: initial.shortcutsEnabled,
+            gesturesEnabled: initial.gesturesEnabled,
+          });
+        },
+        /** Reset data settings (trackWatchHistory, imageLoadMode) to defaults */
+        resetDataSettings: () => {
+          const initial = store.getInitialState();
+          set({
+            trackWatchHistory: initial.trackWatchHistory,
+            imageLoadMode: initial.imageLoadMode,
+          });
         },
       },
     }),

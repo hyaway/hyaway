@@ -8,11 +8,9 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import {
-  useReviewGesturesEnabled,
   useReviewImageLoadMode,
   useReviewQueueActions,
   useReviewQueueCount,
-  useReviewShortcutsEnabled,
   useReviewTrackWatchHistory,
 } from "@/stores/review-queue-store";
 
@@ -26,34 +24,13 @@ export function ReviewQueueSettings({
   idPrefix = "",
 }: ReviewQueueSettingsProps) {
   const count = useReviewQueueCount();
-  const shortcutsEnabled = useReviewShortcutsEnabled();
-  const gesturesEnabled = useReviewGesturesEnabled();
   const trackWatchHistory = useReviewTrackWatchHistory();
   const imageLoadMode = useReviewImageLoadMode();
-  const {
-    clearQueue,
-    setShortcutsEnabled,
-    setGesturesEnabled,
-    setTrackWatchHistory,
-    setImageLoadMode,
-  } = useReviewQueueActions();
+  const { clearQueue, setTrackWatchHistory, setImageLoadMode } =
+    useReviewQueueActions();
 
   return (
     <SettingsGroup>
-      <SwitchField
-        id={`${idPrefix}shortcuts-enabled`}
-        label="Keyboard shortcuts"
-        description="Use keyboard to archive, trash, or skip files"
-        checked={shortcutsEnabled}
-        onCheckedChange={setShortcutsEnabled}
-      />
-      <SwitchField
-        id={`${idPrefix}gestures-enabled`}
-        label="Swipe gestures"
-        description="Swipe cards to archive, trash, or skip files"
-        checked={gesturesEnabled}
-        onCheckedChange={setGesturesEnabled}
-      />
       <SwitchField
         id={`${idPrefix}track-watch-history`}
         label="Track watch history"
@@ -65,7 +42,7 @@ export function ReviewQueueSettings({
         <div className="flex flex-col gap-0.5">
           <Label>Image loading</Label>
           <span className="text-muted-foreground text-xs">
-            Resized (when possible) images load faster but may lose quality
+            Optimized images load faster but may lose quality
           </span>
         </div>
         <ToggleGroup
@@ -78,7 +55,7 @@ export function ReviewQueueSettings({
           size="sm"
         >
           <ToggleGroupItem value="original">Original</ToggleGroupItem>
-          <ToggleGroupItem value="resized">Resized</ToggleGroupItem>
+          <ToggleGroupItem value="optimized">Optimized</ToggleGroupItem>
         </ToggleGroup>
       </div>
       <div className="flex items-center justify-between gap-4">
