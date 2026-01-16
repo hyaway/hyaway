@@ -2,10 +2,36 @@ import * as React from "react";
 import { ContextMenu as ContextMenuPrimitive } from "@base-ui/react/context-menu";
 
 import { IconCheck, IconChevronRight } from "@tabler/icons-react";
+import { useGlobalTouchCount } from "@/lib/global-touch-count";
 import { cn } from "@/lib/utils";
 
-function ContextMenu({ ...props }: ContextMenuPrimitive.Root.Props) {
-  return <ContextMenuPrimitive.Root data-slot="context-menu" {...props} />;
+function ContextMenu({
+  onOpenChange,
+  ...props
+}: ContextMenuPrimitive.Root.Props) {
+  const getTouchCount = useGlobalTouchCount();
+
+  // Wrap onOpenChange to prevent opening during multi-touch (pinch zoom)
+  const handleOpenChange = React.useCallback<
+    NonNullable<ContextMenuPrimitive.Root.Props["onOpenChange"]>
+  >(
+    (open, eventDetails) => {
+      if (open && getTouchCount() > 1) {
+        eventDetails.cancel();
+        return;
+      }
+      onOpenChange?.(open, eventDetails);
+    },
+    [getTouchCount, onOpenChange],
+  );
+
+  return (
+    <ContextMenuPrimitive.Root
+      data-slot="context-menu"
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
+  );
 }
 
 function ContextMenuPortal({ ...props }: ContextMenuPrimitive.Portal.Props) {

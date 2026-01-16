@@ -6,6 +6,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import TanStackQueryDevtools from "@/integrations/tanstack-query/devtools";
 
 import { AppShell } from "@/components/app-shell/app-shell";
+import { GlobalTouchCountProvider } from "@/lib/global-touch-count";
 import {
   useApplyTheme,
   useSystemThemeListener,
@@ -30,7 +31,7 @@ function RootComponent() {
   }
 
   return (
-    <>
+    <GlobalTouchCountProvider>
       <AppShell>
         <Outlet />
       </AppShell>
@@ -46,7 +47,7 @@ function RootComponent() {
           TanStackQueryDevtools,
         ]}
       />
-    </>
+    </GlobalTouchCountProvider>
   );
 }
 
