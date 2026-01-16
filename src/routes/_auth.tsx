@@ -31,16 +31,21 @@ function AuthPageLayout() {
     return <AuthNotConfiguredPrompt />;
   }
 
-  const isPending =
-    versionQuery.isPending ||
-    persistentQuery.isPending ||
-    sessionQuery.isPending;
-  const hasError =
-    versionQuery.isError || persistentQuery.isError || sessionQuery.isError;
+  // Check if we have cached data (allows background refetches without showing loading)
   const hasData =
     versionQuery.data && persistentQuery.data && sessionQuery.data;
 
-  // Show error state first - but only if we don't have cached data
+  // Only show loading on initial load, not background refetches
+  const isInitialLoading =
+    (versionQuery.isPending ||
+      persistentQuery.isPending ||
+      sessionQuery.isPending) &&
+    !hasData;
+
+  const hasError =
+    versionQuery.isError || persistentQuery.isError || sessionQuery.isError;
+
+  // Show error state - but only if we don't have cached data
   if (hasError && !hasData) {
     return (
       <AuthErrorScreen
@@ -56,8 +61,8 @@ function AuthPageLayout() {
     );
   }
 
-  // Show loading state while waiting for data
-  if (isPending) {
+  // Show loading state only on initial load (no cached data yet)
+  if (isInitialLoading) {
     return (
       <AuthLoadingScreen
         versionPending={versionQuery.isPending}
@@ -89,7 +94,7 @@ function AuthLoadingScreen({
         : "Checking permissions with Hydrus";
 
   return (
-    <div className="flex min-h-[50vh] items-center justify-center">
+    <div className="animate-in fade-in fill-mode-backwards flex min-h-[50vh] items-center justify-center delay-500">
       <div className="flex flex-col items-center gap-4 text-center">
         <Spinner className="text-muted-foreground size-8" />
         <div className="flex flex-col gap-1">

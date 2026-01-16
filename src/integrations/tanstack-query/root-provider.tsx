@@ -20,10 +20,10 @@ function shouldRetryQuery(failureCount: number, error: Error): boolean {
   return failureCount < 3;
 }
 
-const queryClientSingleton = new QueryClient({
+const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: Infinity, // Data doesn't change without user interaction, we don't want to replace while actively looking at the page
+      staleTime: Infinity, // Data doesn't change without user interaction
       retry: shouldRetryQuery,
       retryDelay: 1000, // Flat 1s delay instead of exponential backoff
     },
@@ -32,18 +32,16 @@ const queryClientSingleton = new QueryClient({
 
 export function getContext() {
   return {
-    queryClient: queryClientSingleton,
+    queryClient,
   };
 }
 
 export function Provider({
   children,
-  queryClient,
+  queryClient: client,
 }: {
   children: React.ReactNode;
   queryClient: QueryClient;
 }) {
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
