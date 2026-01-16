@@ -8,5 +8,5 @@
     }
   </style>
   <rect class="stroke" x="0.5" y="0.5" width="31" height="31" stroke-width="3"/>
-  <text class="text" x="16" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="600" text-anchor="middle">hA</text>
+  <text class="text" x="16" y="26" font-family="'JetBrains Mono', monospace" font-size="20" font-weight="600" text-anchor="middle">hA</text>
 </svg>

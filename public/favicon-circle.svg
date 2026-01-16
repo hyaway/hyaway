@@ -8,5 +8,5 @@
     }
   </style>
   <circle class="stroke" cx="16" cy="16" r="14" stroke-width="3"/>
-  <text class="text" x="16" y="21" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" text-anchor="middle">hA</text>
+  <text class="text" x="16" y="21" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="600" text-anchor="middle">hA</text>
 </svg>
