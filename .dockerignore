@@ -1,0 +1,39 @@
+# Dependencies
+
+node_modules/
+
+# Build output
+
+dist/
+
+# Git
+
+.git/
+.gitignore
+
+# IDE
+
+.vscode/
+.idea/
+_.swp
+_.swo
+
+# Environment (use build args instead)
+
+.env.local
+.env.\*.local
+
+# Docs and config not needed in build
+
+README.md
+docs/
+.github/
+\*.md
+
+# Test and dev files
+
+coverage/
+_.test._
+_.spec._
+.storybook/
+storybook-static/

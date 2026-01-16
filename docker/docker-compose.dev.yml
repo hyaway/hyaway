@@ -1,0 +1,11 @@
+# Development compose - uses pre-built dist/ folder
+# Usage: pnpm build && docker compose -f docker/docker-compose.dev.yml up
+services:
+  hyaway:
+    image: nginx:alpine
+    volumes:
+      - ../dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "4929:80" # 4929 = hyaw on phone keypad
+    restart: unless-stopped

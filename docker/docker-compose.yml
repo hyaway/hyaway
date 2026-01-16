@@ -1,0 +1,71 @@
+services:
+  hyaway:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      # Set your public URL for working OG tags, canonical URLs, etc.
+      # Leave commented for private/localhost instances (app works fine without it)
+      # args:
+      #   VITE_APP_URL: https://your-domain.com
+    ports:
+      - "4929:80" # Access at http://localhost:4929 (4929 = hyaw on phone keypad)
+    restart: unless-stopped
+
+    # ─────────────────────────────────────────────────────────────
+    # Security hardening
+    # ─────────────────────────────────────────────────────────────
+
+    # Read-only filesystem - container cannot write anywhere
+    # Prevents attackers from dropping malware or modifying files
+    read_only: true
+
+    # RAM-based writable directories for nginx runtime needs
+    # Data is cleared on restart, no persistence for attackers
+    tmpfs:
+      - /var/cache/nginx # Nginx cache
+      - /var/run # PID files
+
+    # Drop all Linux capabilities, add back only what nginx needs
+    # Minimizes privilege escalation attack surface
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE # Bind to port 80
+      - CHOWN # Change file ownership at startup
+      - SETGID # Switch to nginx group
+      - SETUID # Switch to nginx user
+
+    # ─────────────────────────────────────────────────────────────
+    # Resource limits
+    # ─────────────────────────────────────────────────────────────
+
+    # Prevent resource exhaustion attacks and runaway processes
+    # Adjust based on your server - these are generous for a static site
+    deploy:
+      resources:
+        limits:
+          memory: 128M # Max memory
+          cpus: "0.5" # Max half a CPU core
+        reservations:
+          memory: 32M # Guaranteed memory
+
+    # ─────────────────────────────────────────────────────────────
+    # Logging
+    # ─────────────────────────────────────────────────────────────
+
+    # Log rotation - prevents disk fill from excessive logs
+    # Max 30MB total (3 files × 10MB each)
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # ─────────────────────────────────────────────────────────────
+    # Labels
+    # ─────────────────────────────────────────────────────────────
+
+    labels:
+      # Disable Watchtower auto-updates (if you use it for other containers)
+      # You control when to rebuild hyAway
+      - "com.centurylinklabs.watchtower.enable=false"
