@@ -5,11 +5,11 @@ import { Permission } from "@/integrations/hydrus-api/models";
 export const Route = createFileRoute("/_auth/(galleries)/remote-history")({
   component: RouteComponent,
   beforeLoad: () => ({
-    getTitle: () => "Remote watch history",
+    getTitle: () => "Remote history",
   }),
 });
 
-const PAGE_TITLE = "Remote watch history";
+const PAGE_TITLE = "Remote history";
 const PAGE_PERMISSIONS = [Permission.SEARCH_FOR_AND_FETCH_FILES];
 
 function RouteComponent() {

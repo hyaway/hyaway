@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_auth/(galleries)/remote-history/")({
   component: RouteComponent,
 });
 
-const PAGE_TITLE = "Remote watch history";
+const PAGE_TITLE = "Remote history";
 
 function RouteComponent() {
   const { data, isLoading, isFetching, isError, error } =

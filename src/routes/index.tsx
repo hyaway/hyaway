@@ -50,27 +50,26 @@ interface FeatureItem {
 
 const FEATURES: Array<FeatureItem> = [
   {
-    title: "Sort your library",
+    title: "Review your library",
     description:
-      "Quickly sort through your inbox with simple swipes or hotkeys. Keep track of your progress with recently archived and trashed galleries.",
+      "Process your inbox quickly with swipes or hotkeys. Instant commits with undo.",
     icon: IconHandMove,
   },
   {
-    title: "Take it with you",
+    title: "Browse remotely",
     description:
-      "Access your open Hydrus pages from anywhere. Browse your saved searches on the go, away from home.",
+      "Access your open Hydrus pages from any device. Works over LAN or internet.",
     icon: IconDevices,
   },
   {
-    title: "Quick presets",
+    title: "Shortcuts",
     description:
-      "Go straight to your most viewed, longest viewed, or recently inboxed files without messing with complex filters.",
+      "Quick access to your most viewed, longest viewed, and recently inboxed files.",
     icon: IconAlbum,
   },
   {
-    title: "Your style",
-    description:
-      "Tweak layouts, thumbnail sizes, and themes until it feels right. Works great as a PWA on your home screen.",
+    title: "Customize the UI",
+    description: "Configure layouts, thumbnail sizes, and themes.",
     icon: IconPalette,
   },
 ];
@@ -110,7 +109,7 @@ const NAV_GROUPS: Array<NavGroup> = [
     items: [
       {
         title: "Pages",
-        description: "See everything currently open in your Hydrus client",
+        description: "See media pages currently open in your Hydrus client",
         to: "/pages",
         icon: IconLayoutGrid,
         requiredPermissions: [
@@ -128,7 +127,7 @@ const NAV_GROUPS: Array<NavGroup> = [
       {
         title: "Review queue",
         description:
-          "Sort your inbox with quick gestures or keyboard shortcuts",
+          "Archive or trash files with quick gestures or keyboard shortcuts",
         to: "/review",
         icon: IconCards,
         requiredPermissions: [
@@ -143,14 +142,14 @@ const NAV_GROUPS: Array<NavGroup> = [
     items: [
       {
         title: "Recently inboxed",
-        description: "Check out the latest additions to your library",
+        description: "View the latest additions to your library",
         to: "/recently-inboxed",
         icon: IconMail,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
       },
       {
         title: "Recently archived",
-        description: "See what you've recently filed away",
+        description: "See what you've recently archived",
         to: "/recently-archived",
         icon: IconArchive,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
@@ -176,14 +175,14 @@ const NAV_GROUPS: Array<NavGroup> = [
       },
       {
         title: "Remote history",
-        description: "Files you viewed recently in Hydrus client",
+        description: "Files you viewed recently in your Hydrus client",
         to: "/remote-history",
         icon: IconCalendarStats,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
       },
       {
         title: "Most viewed",
-        description: "Your all-time favorites by view count",
+        description: "Your most frequently viewed files",
         to: "/most-viewed",
         icon: IconChartArea,
         requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
@@ -208,7 +207,7 @@ const NAV_GROUPS: Array<NavGroup> = [
       },
       {
         title: "Appearance",
-        description: "Make the app look and feel how you want",
+        description: "Configure themes, layouts, and display options",
         to: "/settings/appearance",
         icon: IconLayoutDashboard,
       },
@@ -274,7 +273,7 @@ function MarketingHeader() {
             >
               hydrus network
             </a>{" "}
-            library while away.
+            library while you're away.
           </Subheading>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -381,7 +380,7 @@ function ShortcutCard({
     <Link
       to={item.to}
       className={cn(
-        "border-border hover:border-ring/50 hover:bg-accent/50 flex items-start gap-4 rounded-2xl border p-4 transition-colors",
+        "border-border hover:border-ring/50 hover:bg-accent/50 flex h-full items-start gap-4 rounded-2xl border p-4 transition-colors",
         isMuted && "opacity-50",
       )}
     >
