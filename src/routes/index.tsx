@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   IconAlbum,
   IconArchive,
@@ -247,6 +248,14 @@ function WelcomeHeader() {
 }
 
 function MarketingHeader() {
+  const [showVideo, setShowVideo] = useState(false);
+
+  useEffect(() => {
+    // Defer video loading until after page is interactive
+    const id = requestIdleCallback(() => setShowVideo(true), { timeout: 2000 });
+    return () => cancelIdleCallback(id);
+  }, []);
+
   return (
     <section className="flex flex-col gap-8">
       <header className="relative flex flex-col gap-6 rounded-xl border p-6 sm:p-8">
@@ -254,15 +263,30 @@ function MarketingHeader() {
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-xl"
         >
-          <div className="from-primary/15 via-primary/5 absolute inset-0 bg-linear-to-br to-transparent" />
+          {showVideo && (
+            <video
+              src="/header.webm"
+              autoPlay
+              loop
+              muted
+              playsInline
+              disablePictureInPicture
+              disableRemotePlayback
+              className="animate-in fade-in absolute inset-0 size-full object-cover object-bottom duration-3000"
+            />
+          )}
+          <div className="from-background to-background/80 absolute inset-0 bg-linear-to-r" />
         </div>
         <div className="flex flex-col gap-3">
-          <Heading level={1} className="text-3xl font-bold sm:text-4xl">
+          <Heading
+            level={1}
+            className="bg-background w-fit px-2 text-3xl font-bold sm:text-4xl"
+          >
             hyAway
           </Heading>
           <Subheading
             level={2}
-            className="text-muted-foreground text-lg sm:text-xl"
+            className="text-muted-foreground bg-background w-fit px-2 text-lg sm:text-xl"
           >
             Browse and review your{" "}
             <a
