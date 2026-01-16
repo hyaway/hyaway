@@ -77,6 +77,7 @@ export function ImageViewer({
   const hasDragged = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const naturalSizeRef = useRef({ width: 0, height: 0 });
 
   const isFullscreen = overlayMode === "fullscreen";
   const isTheater = overlayMode === "theater";
@@ -147,10 +148,12 @@ export function ImageViewer({
   const handleLoad = () => {
     setLoaded(true);
     if (imageRef.current) {
-      setNaturalSize({
+      const size = {
         width: imageRef.current.naturalWidth,
         height: imageRef.current.naturalHeight,
-      });
+      };
+      setNaturalSize(size);
+      naturalSizeRef.current = size;
     }
     onLoad();
   };
@@ -442,6 +445,7 @@ export function ImageViewer({
     initialScale: number;
     centerX: number;
     centerY: number;
+    lastDistance: number;
   } | null>(null);
 
   // Touch handlers for pinch zoom
@@ -472,25 +476,29 @@ export function ImageViewer({
           initialScale: fitScale,
           centerX,
           centerY,
+          lastDistance: distance,
         };
         toggleTheater();
         return;
       }
 
+      const currentScale = scaleMotion.get();
+
+      // Use motion value directly to avoid stale React state
       pinchStateRef.current = {
         initialDistance: distance,
-        initialScale: zoomScale,
+        initialScale: currentScale,
         centerX,
         centerY,
+        lastDistance: distance,
       };
     },
-    [isPannable, zoomScale, fitScale, toggleTheater],
+    [isPannable, fitScale, minZoom, scaleMotion, toggleTheater],
   );
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
-      if (!isPannable || e.touches.length !== 2 || !pinchStateRef.current)
-        return;
+      if (e.touches.length !== 2 || !pinchStateRef.current) return;
 
       e.preventDefault();
 
@@ -507,16 +515,59 @@ export function ImageViewer({
       const { initialDistance, initialScale, centerX, centerY } =
         pinchStateRef.current;
 
+      // Compute minZoom fresh from current DOM dimensions (not stale closure)
+      const imgSize = naturalSizeRef.current;
+      const currentMinZoom =
+        imgSize.width > 0 && imgSize.height > 0
+          ? Math.min(
+              rect.width / imgSize.width,
+              rect.height / imgSize.height,
+              1,
+            )
+          : 1;
+
       // Use multiplicative ratio for natural pinch feel (fingers 2x apart = 2x zoom)
       const scaleRatio = distance / initialDistance;
+      const unclampedScale = initialScale * scaleRatio;
       const newScale = Math.max(
-        minZoom,
-        Math.min(MAX_ZOOM, initialScale * scaleRatio),
+        currentMinZoom,
+        Math.min(MAX_ZOOM, unclampedScale),
       );
 
-      // If at minimum zoom and continuing to zoom out, exit pan mode
-      if (scaleRatio < 0.9 && zoomScale <= minZoom + SCALE_TOLERANCE) {
-        pinchStateRef.current = null;
+      // Get current scale from motion value (not stale state) for accurate exit check
+      const currentScale = scaleMotion.get();
+
+      // Update pinch center for current touches
+      const newCenterX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
+      const newCenterY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
+
+      // Check if at minimum zoom and gesture direction with threshold to prevent flicker on re-entry
+      const atMinZoom = currentScale <= currentMinZoom + SCALE_TOLERANCE;
+      const distanceChange = distance - pinchStateRef.current.lastDistance;
+      const MODE_ENTER_THRESHOLD = 2; // pixels of finger movement needed to re-enter theater
+      const isZoomingOut = distanceChange < 0;
+      const isZoomingInSignificantly = distanceChange > MODE_ENTER_THRESHOLD;
+
+      // Always update lastDistance after checking thresholds
+      pinchStateRef.current.lastDistance = distance;
+
+      // In normal mode: if zooming in significantly, re-enter theater mode
+      if (!isPannable && isZoomingInSignificantly) {
+        setOverlayMode("theater");
+        // Reset pinch state for theater mode
+        pinchStateRef.current = {
+          initialDistance: distance,
+          initialScale: currentMinZoom,
+          centerX: newCenterX,
+          centerY: newCenterY,
+          lastDistance: distance,
+        };
+        return;
+      }
+
+      // If at minimum zoom and continuing to zoom out, exit pan mode (no threshold for responsive exit)
+      // Keep pinch state alive so gesture can continue and re-enter if zooming in
+      if (isPannable && atMinZoom && isZoomingOut) {
         if (isFullscreen) {
           if (document.fullscreenElement) {
             document.exitFullscreen();
@@ -529,20 +580,22 @@ export function ImageViewer({
         dragY.stop();
         dragX.set(0);
         dragY.set(0);
+        // Reset pinch state for normal mode - next zoom in can re-enter theater
+        pinchStateRef.current = {
+          initialDistance: distance,
+          initialScale: fitScale,
+          centerX: newCenterX,
+          centerY: newCenterY,
+          lastDistance: distance,
+        };
         return;
       }
-
-      // Update pinch center for current touches
-      const newCenterX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
-      const newCenterY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
 
       // Use average of initial and current center
       const anchorX = (centerX + newCenterX) / 2;
       const anchorY = (centerY + newCenterY) / 2;
 
-      // Get current scale from motion value to avoid stale closure
-      const currentZoomScale = scaleMotion.get();
-      const delta = newScale - currentZoomScale;
+      const delta = newScale - currentScale;
       if (Math.abs(delta) > 0.001) {
         adjustZoom(delta, anchorX, anchorY);
       }
@@ -551,7 +604,7 @@ export function ImageViewer({
       isPannable,
       isFullscreen,
       isTheater,
-      minZoom,
+      fitScale,
       scaleMotion,
       dragX,
       dragY,
