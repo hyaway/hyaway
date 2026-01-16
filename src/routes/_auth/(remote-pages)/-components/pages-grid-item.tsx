@@ -7,7 +7,11 @@ import { PageState } from "@/integrations/hydrus-api/models";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import { cn } from "@/lib/utils";
-import { usePagesUseFriendlyUrls } from "@/stores/pages-settings-store";
+import {
+  DEFAULT_PAGE_CARD_WIDTH,
+  PAGE_CARD_ASPECT_RATIO,
+  usePagesUseFriendlyUrls,
+} from "@/stores/pages-settings-store";
 
 const PAGE_STATE_LABELS: Partial<Record<PageState, string>> = {
   [PageState.INITIALIZING]: "Initializing…",
@@ -160,8 +164,10 @@ export function PagesGridItemSkeleton({
       variant="muted"
       className={cn("block", className)}
       style={{
-        width: width ? `${width}px` : "192px",
-        height: height ? `${height}px` : "240px",
+        width: width ? `${width}px` : `${DEFAULT_PAGE_CARD_WIDTH}px`,
+        height: height
+          ? `${height}px`
+          : `${DEFAULT_PAGE_CARD_WIDTH * PAGE_CARD_ASPECT_RATIO}px`,
       }}
     >
       <ItemContent className="mb-3.5">

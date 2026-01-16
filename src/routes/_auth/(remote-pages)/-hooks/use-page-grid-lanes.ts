@@ -4,6 +4,7 @@ import {
   DEFAULT_PAGE_CARD_HORIZONTAL_GAP,
   DEFAULT_PAGE_CARD_VERTICAL_GAP,
   DEFAULT_PAGE_CARD_WIDTH,
+  MIN_PAGE_CARD_WIDTH,
   PAGE_CARD_ASPECT_RATIO,
 } from "@/stores/pages-settings-store";
 
@@ -58,23 +59,42 @@ export function usePageGridLanes(
     const observer = new ResizeObserver((entries) => {
       const containerWidth = entries[0].contentRect.width;
 
-      // Calculate how many lanes fit
-      const calculatedLanes = Math.max(
-        minLanes,
-        Math.floor(
-          (containerWidth + horizontalGap) / (cardWidth + horizontalGap),
-        ),
+      // Calculate how many lanes can fit at the configured card width
+      const fittingLanes = Math.floor(
+        (containerWidth + horizontalGap) / (cardWidth + horizontalGap),
       );
-      const lanes = Math.min(calculatedLanes, maxLanes, maxItems);
 
-      // Calculate effective card width if expanding
+      // Calculate how many lanes can fit at minimum card width (absolute max)
+      const maxFittingLanes = Math.floor(
+        (containerWidth + horizontalGap) /
+          (MIN_PAGE_CARD_WIDTH + horizontalGap),
+      );
+
+      // Calculate final lanes - respect minLanes but don't exceed what can physically fit
+      const calculatedLanes = Math.max(minLanes, fittingLanes);
+      const lanes = Math.max(
+        1,
+        Math.min(calculatedLanes, maxLanes, maxItems, maxFittingLanes),
+      );
+
+      // Calculate effective card width
       let effectiveCardWidth = cardWidth;
-      if (expandCards && lanes > 0) {
-        // Calculate extra space to distribute
+      if (lanes > 0) {
         const usedWidth = lanes * cardWidth + (lanes - 1) * horizontalGap;
-        const extraSpace = containerWidth - usedWidth;
-        const extraPerCard = Math.floor(extraSpace / lanes);
-        effectiveCardWidth = cardWidth + extraPerCard;
+
+        if (expandCards) {
+          // Expand cards to fill available space
+          const extraSpace = containerWidth - usedWidth;
+          const extraPerCard = Math.floor(extraSpace / lanes);
+          effectiveCardWidth = cardWidth + extraPerCard;
+        } else if (usedWidth > containerWidth) {
+          // Shrink cards to fit when container is too small (but don't expand)
+          // Clamp to minimum card width
+          effectiveCardWidth = Math.max(
+            MIN_PAGE_CARD_WIDTH,
+            Math.floor((containerWidth - (lanes - 1) * horizontalGap) / lanes),
+          );
+        }
       }
 
       const effectiveCardHeight = Math.round(

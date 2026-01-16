@@ -6,14 +6,14 @@ export const MIN_PAGES_LANES = 1;
 export const MAX_PAGES_LANES = 30;
 
 // Page card sizing constants - maintains 5:4 aspect ratio
-export const DEFAULT_PAGE_CARD_WIDTH = 192; // 12rem
+export const DEFAULT_PAGE_CARD_WIDTH = 192;
 export const MIN_PAGE_CARD_WIDTH = 120;
 export const MAX_PAGE_CARD_WIDTH = 320;
 export const PAGE_CARD_ASPECT_RATIO = 1.25; // height = width * 1.25
 
 // Gap constants
-export const DEFAULT_PAGE_CARD_HORIZONTAL_GAP = 16;
-export const DEFAULT_PAGE_CARD_VERTICAL_GAP = 16;
+export const DEFAULT_PAGE_CARD_HORIZONTAL_GAP = 8;
+export const DEFAULT_PAGE_CARD_VERTICAL_GAP = 8;
 export const MAX_PAGE_CARD_GAP = 32;
 
 type PagesSettingsState = {
@@ -42,7 +42,7 @@ type PagesSettingsState = {
 const usePagesSettingsStore = create<PagesSettingsState>()(
   persist(
     (set, _get, store) => ({
-      minLanes: MIN_PAGES_LANES,
+      minLanes: MIN_PAGES_LANES + 1,
       maxLanes: MAX_PAGES_LANES,
       showScrollBadge: true,
       useFriendlyUrls: true,
