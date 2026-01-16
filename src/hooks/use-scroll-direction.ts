@@ -69,7 +69,6 @@ export function useScrollDirection(threshold = 10) {
       const maxScroll =
         document.documentElement.scrollHeight - window.innerHeight;
       if (scrollY >= maxScroll - 70 - threshold) {
-        console.log("at bottom");
         setIsVisible(true);
         lastScrollY.current = scrollY;
         ticking.current = false;
