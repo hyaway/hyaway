@@ -1,8 +1,37 @@
+# Default security headers for all routes
+
 /*
-  Referrer-Policy: no-referrer
-  X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=()
-  Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Resource-Policy: same-origin
-  Content-Security-Policy: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://static.cloudflareinsights.com; script-src-elem 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https: http:; media-src 'self' blob: https: http:; worker-src 'self'; connect-src 'self' https: http:
+Referrer-Policy: no-referrer
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 0
+X-Permitted-Cross-Domain-Policies: none
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=(), hid=(), midi=(), screen-wake-lock=(), xr-spatial-tracking=()
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Content-Security-Policy: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://static.cloudflareinsights.com; script-src-elem 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https: http:; media-src 'self' blob: https: http:; worker-src 'self'; connect-src 'self' https: http:
+
+# Prevent caching of HTML to avoid stale auth state
+/*.html
+  Cache-Control: no-cache
+
+# Allow cross-origin access for SEO and PWA assets
+
+/og-image.png
+Cross-Origin-Resource-Policy: cross-origin
+
+/logo192.png
+Cross-Origin-Resource-Policy: cross-origin
+
+/logo512.png
+Cross-Origin-Resource-Policy: cross-origin
+
+/favicon.svg
+Cross-Origin-Resource-Policy: cross-origin
+
+/favicon-circle.svg
+Cross-Origin-Resource-Policy: cross-origin
+
+/manifest.json
+Cross-Origin-Resource-Policy: cross-origin
