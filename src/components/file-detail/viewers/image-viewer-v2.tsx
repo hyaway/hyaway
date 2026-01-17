@@ -126,16 +126,6 @@ export function ImageViewerV2({
     setOverlayMode(null);
   }, []);
 
-  const toggleFullscreen = useCallback(() => {
-    if (isFullscreen) {
-      if (document.fullscreenElement) document.exitFullscreen();
-      setOverlayMode("theater");
-    } else {
-      containerRef.current?.requestFullscreen();
-      setOverlayMode("fullscreen");
-    }
-  }, [isFullscreen]);
-
   const toggleNormalZoom = useCallback(() => {
     setIsExpanded((prev) => {
       if (prev) window.scrollTo({ top: 0, behavior: "auto" });
@@ -213,7 +203,8 @@ export function ImageViewerV2({
       onLoad={handleLoad}
       onError={onError}
       onExitOverlay={exitOverlay}
-      onToggleFullscreen={toggleFullscreen}
+      onEnterTheater={enterTheater}
+      onEnterFullscreen={enterFullscreen}
     />
   );
 }
@@ -298,15 +289,18 @@ function useImageNaturalSize(src: string, enabled: boolean) {
 
 /** Controls toolbar for pan mode - must be inside TransformWrapper */
 function PanModeControls({
-  onExitOverlay,
-  onToggleFullscreen,
   isFullscreen,
+  onExitOverlay,
+  onEnterTheater,
+  onEnterFullscreen,
 }: {
-  onExitOverlay: () => void;
-  onToggleFullscreen: () => void;
   isFullscreen: boolean;
+  onExitOverlay: () => void;
+  onEnterTheater: () => void;
+  onEnterFullscreen: () => void;
 }) {
   const { zoomIn, zoomOut, resetTransform } = useControls();
+  const isTheater = !isFullscreen;
 
   return (
     <div className="bg-card/90 absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded-md border p-1 opacity-0 shadow-lg backdrop-blur-sm transition-opacity group-hover:opacity-100">
@@ -354,31 +348,35 @@ function PanModeControls({
       <Toggle
         variant="outline"
         size="sm"
-        pressed={false}
+        pressed={isTheater}
         onClick={(e) => {
           e.stopPropagation();
-          onToggleFullscreen();
+          if (isTheater) {
+            onExitOverlay();
+          } else {
+            onEnterTheater();
+          }
         }}
-        title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+        title="Theater mode"
       >
-        {isFullscreen ? (
-          <IconMinimize className="size-4" />
-        ) : (
-          <IconMaximize className="size-4" />
-        )}
+        <IconArrowsMaximize className="size-4" />
       </Toggle>
 
       <Toggle
         variant="outline"
         size="sm"
-        pressed={false}
+        pressed={isFullscreen}
         onClick={(e) => {
           e.stopPropagation();
-          onExitOverlay();
+          if (isFullscreen) {
+            onExitOverlay();
+          } else {
+            onEnterFullscreen();
+          }
         }}
-        title="Exit"
+        title="Fullscreen"
       >
-        <span className="text-xs font-medium">Exit</span>
+        <IconMaximize className="size-4" />
       </Toggle>
     </div>
   );
@@ -520,7 +518,8 @@ function PanModeViewer({
   onLoad,
   onError,
   onExitOverlay,
-  onToggleFullscreen,
+  onEnterTheater,
+  onEnterFullscreen,
 }: {
   fileUrl: string;
   fileId: number;
@@ -535,7 +534,8 @@ function PanModeViewer({
   onLoad: () => void;
   onError: () => void;
   onExitOverlay: () => void;
-  onToggleFullscreen: () => void;
+  onEnterTheater: () => void;
+  onEnterFullscreen: () => void;
 }) {
   return (
     <div
@@ -558,9 +558,10 @@ function PanModeViewer({
           doubleClick={{ disabled: false, mode: "reset" }}
         >
           <PanModeControls
-            onExitOverlay={onExitOverlay}
-            onToggleFullscreen={onToggleFullscreen}
             isFullscreen={isFullscreen}
+            onExitOverlay={onExitOverlay}
+            onEnterTheater={onEnterTheater}
+            onEnterFullscreen={onEnterFullscreen}
           />
 
           <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
