@@ -668,7 +668,6 @@ export function ReviewImageViewer({
       data-pan-mode={isZoomed || undefined}
       className={cn(
         "relative flex h-full w-full items-center justify-center overflow-hidden",
-        isZoomed && "ring-destructive/60 ring-6 ring-inset",
         getContainerBackgroundClass(),
         // Disable browser pinch zoom
         isTop ? "touch-pan-y" : "",
@@ -679,6 +678,11 @@ export function ReviewImageViewer({
       onTouchEnd={handleTouchEnd}
       onWheel={handleContainerWheel}
     >
+      {/* Zoomed mode border overlay - above image */}
+      {isZoomed && (
+        <div className="ring-destructive/60 pointer-events-none absolute inset-0 z-10 ring-6 ring-inset" />
+      )}
+
       {/* Blurhash placeholder - only while loading */}
       {blurhash && !loaded && (
         <BlurhashCanvas
