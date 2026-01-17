@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { IconPhoto, IconPhotoScan } from "@tabler/icons-react";
 import { animate, motion, useMotionValue, useTransform } from "motion/react";
+import type { ReviewImageLoadMode } from "@/stores/review-queue-store";
 import { cn } from "@/lib/utils";
 import { isImageProjectFile, isStaticImage } from "@/lib/mime-utils";
 import {
@@ -14,6 +16,7 @@ import {
 } from "@/stores/file-viewer-settings-store";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
+import { Toggle } from "@/components/ui-primitives/toggle";
 
 // Tolerance for matching fit scale (±2%)
 const SCALE_TOLERANCE = 0.02;
@@ -46,9 +49,44 @@ export function ReviewImageViewer({
   onError,
   isTop = false,
 }: ReviewImageViewerProps) {
-  const imageLoadMode = useReviewImageLoadMode();
+  const globalImageLoadMode = useReviewImageLoadMode();
   const imageBackground = useImageBackground();
   const fillCanvasBackground = useFillCanvasBackground();
+
+  // Check if this mime type is a static image or image project file
+  const staticImage = isStaticImage(mime);
+  const imageProjectFile = isImageProjectFile(mime);
+  const isAnimated = (numFrames ?? 0) > 1;
+
+  // Check if optimization is available for this image (static, not animated, larger than screen)
+  const canOptimize = useMemo(() => {
+    if (!staticImage || isAnimated || imageProjectFile) return false;
+    if (!metadataWidth || !metadataHeight) return false;
+
+    const screenWidth = Math.round(
+      window.screen.width * window.devicePixelRatio,
+    );
+    const screenHeight = Math.round(
+      window.screen.height * window.devicePixelRatio,
+    );
+
+    return metadataWidth > screenWidth || metadataHeight > screenHeight;
+  }, [
+    staticImage,
+    isAnimated,
+    imageProjectFile,
+    metadataWidth,
+    metadataHeight,
+  ]);
+
+  // Local state for load mode - initialized from global setting, can be toggled per-image
+  const [localLoadMode, setLocalLoadMode] =
+    useState<ReviewImageLoadMode>(globalImageLoadMode);
+
+  // Sync local state when global setting changes (but only on mount or when global changes)
+  useEffect(() => {
+    setLocalLoadMode(globalImageLoadMode);
+  }, [globalImageLoadMode]);
 
   // Compute average color from blurhash for backgrounds
   const averageColor = useMemo(
@@ -56,9 +94,9 @@ export function ReviewImageViewer({
     [blurhash],
   );
 
-  // Calculate render dimensions for "fit" mode - preserve aspect ratio within screen bounds
+  // Calculate render dimensions for "optimized" mode - preserve aspect ratio within screen bounds
   const renderDimensions = useMemo(() => {
-    if (imageLoadMode !== "optimized") return undefined;
+    if (localLoadMode !== "optimized") return undefined;
     if (!metadataWidth || !metadataHeight) return undefined;
 
     const screenWidth = Math.round(
@@ -82,19 +120,14 @@ export function ReviewImageViewer({
       width: Math.round(metadataWidth * scale),
       height: Math.round(metadataHeight * scale),
     };
-  }, [imageLoadMode, metadataWidth, metadataHeight]);
-
-  // Check if this mime type is a static image or image project file
-  const staticImage = isStaticImage(mime);
-  const imageProjectFile = isImageProjectFile(mime);
-  const isAnimated = (numFrames ?? 0) > 1;
+  }, [localLoadMode, metadataWidth, metadataHeight]);
 
   // Determine render dimensions:
   // - For "optimized" mode: fit to screen
   // - For "original" mode with project files: use full metadata dimensions
   const projectFileFullDimensions =
     imageProjectFile &&
-    imageLoadMode === "original" &&
+    localLoadMode === "original" &&
     metadataWidth &&
     metadataHeight
       ? { width: metadataWidth, height: metadataHeight }
@@ -114,7 +147,7 @@ export function ReviewImageViewer({
   // - Static images use render when "optimized" mode enabled and image is larger than screen
   const useRenderedImage =
     imageProjectFile ||
-    (imageLoadMode === "optimized" &&
+    (localLoadMode === "optimized" &&
       staticImage &&
       !isAnimated &&
       renderDimensions !== undefined);
@@ -688,6 +721,31 @@ export function ReviewImageViewer({
           <div className="bg-card/90 text-foreground rounded-md px-3 py-2 text-sm font-medium tabular-nums shadow-lg">
             {zoomScale.toFixed(2)}×
           </div>
+        </div>
+      )}
+
+      {/* Image load mode toggle - only show when optimization is available */}
+      {isTop && canOptimize && (
+        <div className="absolute bottom-2 left-2">
+          <Toggle
+            size="sm"
+            pressed={localLoadMode === "optimized"}
+            onPressedChange={(pressed) =>
+              setLocalLoadMode(pressed ? "optimized" : "original")
+            }
+            aria-label={
+              localLoadMode === "optimized"
+                ? "Using optimized image - click for original"
+                : "Using original image - click for optimized"
+            }
+            className="bg-card/80 hover:bg-card/90 data-[state=on]:bg-primary/80 data-[state=on]:text-primary-foreground shadow-sm backdrop-blur-sm"
+          >
+            {localLoadMode === "optimized" ? (
+              <IconPhotoScan className="size-4" />
+            ) : (
+              <IconPhoto className="size-4" />
+            )}
+          </Toggle>
         </div>
       )}
     </div>
