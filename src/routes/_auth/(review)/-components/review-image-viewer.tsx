@@ -164,6 +164,9 @@ export function ReviewImageViewer({
   const [isZooming, setIsZooming] = useState(false);
   const zoomTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
+  // Counter to trigger mode indicator animation (increments on each toggle)
+  const [modeToggleCount, setModeToggleCount] = useState(0);
+
   // Zoom state: "fit" follows fitScale, number is explicit scale
   const [zoomMode, setZoomMode] = useState<"fit" | number>("fit");
 
@@ -175,6 +178,14 @@ export function ReviewImageViewer({
   const hasDragged = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+
+  // Pending zoom state to restore after mode switch (optimized <-> original)
+  const pendingZoomRestoreRef = useRef<{
+    zoomMode: "fit" | number;
+    dragX: number;
+    dragY: number;
+    naturalWidth: number;
+  } | null>(null);
 
   // Calculate fit scale
   const fitScale = useMemo(() => {
@@ -267,10 +278,33 @@ export function ReviewImageViewer({
   const handleLoad = () => {
     setLoaded(true);
     if (imageRef.current) {
-      setNaturalSize({
-        width: imageRef.current.naturalWidth,
-        height: imageRef.current.naturalHeight,
-      });
+      const newWidth = imageRef.current.naturalWidth;
+      const newHeight = imageRef.current.naturalHeight;
+      setNaturalSize({ width: newWidth, height: newHeight });
+
+      // Restore zoom state after mode switch (optimized <-> original)
+      const pending = pendingZoomRestoreRef.current;
+      if (pending && pending.naturalWidth !== newWidth && newWidth > 0) {
+        const sizeRatio = pending.naturalWidth / newWidth;
+
+        if (pending.zoomMode === "fit") {
+          // Stay in fit mode
+          setZoomMode("fit");
+          dragX.set(0);
+          dragY.set(0);
+        } else {
+          // Adjust zoom to maintain same visual size
+          // If old image was 1000px at 2x zoom (2000px display)
+          // and new image is 4000px, we need 0.5x zoom (2000px display)
+          const newZoomScale = pending.zoomMode * sizeRatio;
+          setZoomMode(newZoomScale);
+          scaleMotion.set(newZoomScale);
+          // Pan stays the same since we maintain same visual size
+          dragX.set(pending.dragX);
+          dragY.set(pending.dragY);
+        }
+        pendingZoomRestoreRef.current = null;
+      }
     }
     onUrlLoad();
     onLoad();
@@ -725,27 +759,58 @@ export function ReviewImageViewer({
         </div>
       )}
 
+      {/* Image load mode indicator - shown briefly when toggled */}
+      {isTop && modeToggleCount > 0 && (
+        <div
+          key={modeToggleCount}
+          className="animate-out fade-out fill-mode-forwards pointer-events-none absolute inset-x-0 bottom-0 flex h-1/3 items-end justify-center pb-8 delay-700 duration-300"
+        >
+          <div className="bg-card/90 text-foreground rounded-md px-3 py-2 text-sm font-medium shadow-lg">
+            {localLoadMode === "original" ? "Original" : "Optimized"}
+          </div>
+        </div>
+      )}
+
       {/* Image load mode toggle - only show when optimization is available */}
       {isTop && canOptimize && (
         <div className="absolute bottom-2 left-2">
           <Toggle
             size="sm"
-            pressed={localLoadMode === "optimized"}
-            onPressedChange={(pressed) =>
-              setLocalLoadMode(pressed ? "optimized" : "original")
-            }
+            pressed={localLoadMode === "original"}
+            onPressedChange={(pressed) => {
+              // Capture current zoom state before switching modes
+              pendingZoomRestoreRef.current = {
+                zoomMode,
+                dragX: dragX.get(),
+                dragY: dragY.get(),
+                naturalWidth: naturalSize.width,
+              };
+              setLocalLoadMode(pressed ? "original" : "optimized");
+              // Increment to trigger mode indicator animation
+              setModeToggleCount((c) => c + 1);
+            }}
             aria-label={
-              localLoadMode === "optimized"
-                ? "Using optimized image - click for original"
-                : "Using original image - click for optimized"
+              localLoadMode === "original"
+                ? "Using original image - click for optimized"
+                : "Using optimized image - click for original"
             }
-            className="bg-card/80 hover:bg-card/90 data-[state=on]:bg-primary/80 data-[state=on]:text-primary-foreground shadow-sm backdrop-blur-sm"
+            variant="muted"
+            className={"bg-card"}
           >
-            {localLoadMode === "optimized" ? (
-              <IconPhotoScan className="size-4" />
-            ) : (
-              <IconPhoto className="size-4" />
-            )}
+            <span className="relative">
+              {localLoadMode === "original" ? (
+                <IconPhoto className="size-4" />
+              ) : (
+                <IconPhotoScan className="size-4" />
+              )}
+              {/* Indicator dot when switching to full size would provide more detail */}
+              {localLoadMode === "optimized" && zoomScale > 1 && (
+                <span className="absolute -top-0.5 -right-0.5 flex size-1.5">
+                  <span className="bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+                  <span className="bg-primary relative inline-flex size-1.5 rounded-full" />
+                </span>
+              )}
+            </span>
           </Toggle>
         </div>
       )}
