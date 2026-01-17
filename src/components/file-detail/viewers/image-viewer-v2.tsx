@@ -48,6 +48,10 @@ export function ImageViewerV2({
   const [isExpanded, setIsExpanded] = useState(startExpanded);
   const [loaded, setLoaded] = useState(false);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const [imageNaturalSize, setImageNaturalSize] = useState({
+    width: 0,
+    height: 0,
+  });
 
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
@@ -65,7 +69,6 @@ export function ImageViewerV2({
   );
 
   const containerSize = useContainerSize(container);
-  const imageNaturalSize = useImageNaturalSize(fileUrl, isPannable);
   const { style: backgroundStyle, className: backgroundClass } =
     useBackgroundStyles(loaded, averageColor);
 
@@ -95,6 +98,13 @@ export function ImageViewerV2({
   // Handlers
   const handleLoad = useCallback(() => {
     setLoaded(true);
+    const image = imageRef.current;
+    if (image) {
+      setImageNaturalSize({
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+      });
+    }
     onLoad();
   }, [onLoad]);
 
@@ -245,35 +255,21 @@ function useBackgroundStyles(
 function useContainerSize(container: HTMLElement | null) {
   const [size, setSize] = useState({ width: 0, height: 0 });
 
-  const handleResize = useCallback(() => {
-    if (container) {
-      const rect = container.getBoundingClientRect();
-      setSize({ width: rect.width, height: rect.height });
-    }
-  }, [container]);
-
   useEffect(() => {
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [handleResize]);
+    if (!container) return;
 
-  return size;
-}
-
-/** Hook to load image natural size */
-function useImageNaturalSize(src: string, enabled: boolean) {
-  const [size, setSize] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    if (!enabled) return;
-
-    const image = new Image();
-    image.onload = () => {
-      setSize({ width: image.naturalWidth, height: image.naturalHeight });
+    const updateSize = () => {
+      setSize({
+        width: container.clientWidth,
+        height: container.clientHeight,
+      });
     };
-    image.src = src;
-  }, [src, enabled]);
+
+    updateSize();
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, [container]);
 
   return size;
 }
@@ -389,23 +385,28 @@ function PanModeControls({
 /** Zoom level indicator - lower third, shows when scale changes */
 function ZoomBadge() {
   const [isVisible, setIsVisible] = useState(false);
-  const scaleRef = useRef<HTMLDivElement>(null);
-  const lastScaleRef = useRef(1);
+  const [scale, setScale] = useState<number | null>(null);
+  const lastScaleRef = useRef(Number.NaN);
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   useTransformEffect(({ state }) => {
-    // Only update when change is meaningful (at least 0.01)
-    if (Math.abs(state.scale - lastScaleRef.current) < 0.01) return;
+    const isFirstUpdate = Number.isNaN(lastScaleRef.current);
+    const hasMeaningfulChange =
+      Math.abs(state.scale - lastScaleRef.current) >= 0.01;
+    if (!isFirstUpdate && !hasMeaningfulChange) return;
     lastScaleRef.current = state.scale;
 
-    // Update text directly to avoid re-renders
-    if (scaleRef.current) {
-      scaleRef.current.textContent = `${state.scale.toFixed(2)}×`;
-    }
+    setScale(state.scale);
 
-    if (!isVisible) {
-      setIsVisible(true);
-    }
+    setIsVisible(true);
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -419,11 +420,8 @@ function ZoomBadge() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center pb-[15vh]">
-      <div
-        ref={scaleRef}
-        className="bg-card/90 text-foreground rounded-md px-3 py-2 text-sm font-medium tabular-nums shadow-lg"
-      >
-        1.00×
+      <div className="bg-card/90 text-foreground rounded-md px-3 py-2 text-sm font-medium tabular-nums shadow-lg">
+        {scale !== null ? `${scale.toFixed(2)}×` : ""}
       </div>
     </div>
   );
