@@ -467,10 +467,21 @@ export function ImageViewerV2({
 
   const enterTheater = useCallback(() => setOverlayMode("theater"), []);
 
+  // From normal mode, we first enter theater (which renders PanModeViewer),
+  // then request fullscreen on the next frame when that container is mounted
   const enterFullscreen = useCallback(() => {
-    containerRef.current?.requestFullscreen();
     setOverlayMode("fullscreen");
   }, []);
+
+  // Effect to handle fullscreen request when entering fullscreen mode
+  useEffect(() => {
+    if (overlayMode === "fullscreen" && !document.fullscreenElement) {
+      // Request fullscreen on next frame to ensure PanModeViewer is mounted
+      requestAnimationFrame(() => {
+        containerRef.current?.requestFullscreen();
+      });
+    }
+  }, [overlayMode]);
 
   const exitOverlay = useCallback(() => {
     if (document.fullscreenElement) document.exitFullscreen();
