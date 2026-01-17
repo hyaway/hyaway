@@ -160,6 +160,19 @@ export function ImageViewerV2({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isPannable, exitOverlay]);
 
+  useEffect(() => {
+    if (!isPannable) return;
+
+    const body = document.body;
+    const previousOverflow = body.style.overflow;
+    body.style.overflow = "hidden";
+    window.scrollTo({ top: 0, behavior: "instant" });
+
+    return () => {
+      body.style.overflow = previousOverflow;
+    };
+  }, [isPannable]);
+
   // Render
   if (!isPannable) {
     return (
@@ -313,7 +326,7 @@ function PanModeControls({
   const isAt1x = isNearScale(currentScale, 1);
 
   return (
-    <div className="bg-card/90 absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded-md border p-1 opacity-0 shadow-lg backdrop-blur-sm transition-opacity group-hover:opacity-100">
+    <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 absolute right-4 bottom-4 z-10 flex gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
       <Toggle
         variant="outline"
         size="sm"
@@ -436,7 +449,7 @@ function NormalModeControls({
   onEnterFullscreen: () => void;
 }) {
   return (
-    <div className="bg-card/90 absolute right-4 bottom-4 z-10 flex gap-1 rounded-md border p-1 opacity-0 shadow-lg backdrop-blur-sm transition-opacity group-hover:opacity-100">
+    <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 absolute right-4 bottom-4 z-10 flex gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
       <Toggle
         variant="outline"
         size="sm"
