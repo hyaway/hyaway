@@ -321,7 +321,7 @@ function PanModeControls({
   onEnterTheater: () => void;
   onEnterFullscreen: () => void;
 }) {
-  const { resetTransform, centerView } = useControls();
+  const { centerView, resetTransform } = useControls();
   const [currentScale, setCurrentScale] = useState(fitScale);
   const isTheater = !isFullscreen;
 
@@ -627,7 +627,9 @@ function PanModeViewer({
           minScale={minScale}
           maxScale={Math.max(1, fitScale) * 4}
           centerOnInit={true}
-          doubleClick={{ disabled: false, mode: "reset" }}
+          limitToBounds={true}
+          alignmentAnimation={{ sizeX: 1000, sizeY: 1000 }}
+          doubleClick={{ disabled: true }}
         >
           <ZoomBadge />
 
@@ -639,21 +641,73 @@ function PanModeViewer({
             onEnterFullscreen={onEnterFullscreen}
           />
 
-          <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
-            <img
-              ref={imageRef}
-              key={fileId}
-              src={fileUrl}
-              alt=""
-              className="max-h-none max-w-none"
-              onLoad={onLoad}
-              onError={onError}
-              draggable={false}
-            />
-          </TransformComponent>
+          <PanModeContent
+            fitScale={fitScale}
+            fileUrl={fileUrl}
+            fileId={fileId}
+            imageRef={imageRef}
+            onLoad={onLoad}
+            onError={onError}
+          />
         </TransformWrapper>
       )}
     </div>
+  );
+}
+
+function PanModeContent({
+  fitScale,
+  fileUrl,
+  fileId,
+  imageRef,
+  onLoad,
+  onError,
+}: {
+  fitScale: number;
+  fileUrl: string;
+  fileId: number;
+  imageRef: React.RefObject<HTMLImageElement | null>;
+  onLoad: () => void;
+  onError: () => void;
+}) {
+  const { centerView, resetTransform } = useControls();
+  const [currentScale, setCurrentScale] = useState(fitScale);
+
+  useTransformEffect(({ state }) => {
+    setCurrentScale(state.scale);
+  });
+
+  const handleDoubleClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+      const isZoomedIn = currentScale > fitScale * (1 + SCALE_TOLERANCE);
+
+      if (isZoomedIn) {
+        resetTransform();
+        return;
+      }
+
+      centerView(currentScale * 2, 300, "easeOut");
+    },
+    [centerView, currentScale, fitScale],
+  );
+
+  return (
+    <TransformComponent
+      wrapperStyle={{ width: "100%", height: "100%" }}
+      wrapperProps={{ onDoubleClick: handleDoubleClick }}
+    >
+      <img
+        ref={imageRef}
+        key={fileId}
+        src={fileUrl}
+        alt=""
+        className="max-h-none max-w-none"
+        onLoad={onLoad}
+        onError={onError}
+        draggable={false}
+      />
+    </TransformComponent>
   );
 }
 
