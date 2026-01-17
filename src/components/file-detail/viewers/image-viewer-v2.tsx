@@ -83,6 +83,7 @@ export function ImageViewerV2({
       return 0;
     }
     return Math.min(
+      1,
       containerSize.width / imageNaturalSize.width,
       containerSize.height / imageNaturalSize.height,
     );
