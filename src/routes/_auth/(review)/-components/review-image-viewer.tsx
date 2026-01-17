@@ -24,12 +24,15 @@ const SCALE_TOLERANCE = 0.02;
 const MAX_ZOOM = 4.0;
 // Scroll wheel zoom sensitivity
 const WHEEL_ZOOM_STEP = 0.001;
+// File size threshold for optimization (5MB)
+const FILE_SIZE_THRESHOLD = 5 * 1024 * 1024;
 
 interface ReviewImageViewerProps {
   fileId: number;
   mime: string;
   width: number | null;
   height: number | null;
+  size: number | null;
   numFrames?: number | null;
   blurhash: string | null;
   onLoad: () => void;
@@ -43,6 +46,7 @@ export function ReviewImageViewer({
   mime,
   width: metadataWidth,
   height: metadataHeight,
+  size: fileSize,
   numFrames,
   blurhash,
   onLoad,
@@ -58,26 +62,14 @@ export function ReviewImageViewer({
   const imageProjectFile = isImageProjectFile(mime);
   const isAnimated = (numFrames ?? 0) > 1;
 
-  // Check if optimization is available for this image (static, not animated, larger than screen)
+  // Check if optimization is available for this image (static, not animated, large file)
+  // Only use file size - dimension checks would flag tall comic strips unnecessarily
   const canOptimize = useMemo(() => {
     if (!staticImage || isAnimated || imageProjectFile) return false;
-    if (!metadataWidth || !metadataHeight) return false;
+    if (fileSize == null) return false;
 
-    const screenWidth = Math.round(
-      window.screen.width * window.devicePixelRatio,
-    );
-    const screenHeight = Math.round(
-      window.screen.height * window.devicePixelRatio,
-    );
-
-    return metadataWidth > screenWidth || metadataHeight > screenHeight;
-  }, [
-    staticImage,
-    isAnimated,
-    imageProjectFile,
-    metadataWidth,
-    metadataHeight,
-  ]);
+    return fileSize > FILE_SIZE_THRESHOLD;
+  }, [staticImage, isAnimated, imageProjectFile, fileSize]);
 
   // Local state for load mode - initialized from global setting, can be toggled per-image
   const [localLoadMode, setLocalLoadMode] =
@@ -144,10 +136,11 @@ export function ReviewImageViewer({
 
   // Select URL based on mode:
   // - Image project files always use render (browsers can't display them)
-  // - Static images use render when "optimized" mode enabled and image is larger than screen
+  // - Static images use render when "optimized" mode enabled AND optimization is available
   const useRenderedImage =
     imageProjectFile ||
-    (localLoadMode === "optimized" &&
+    (canOptimize &&
+      localLoadMode === "optimized" &&
       staticImage &&
       !isAnimated &&
       renderDimensions !== undefined);

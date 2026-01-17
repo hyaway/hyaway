@@ -129,6 +129,7 @@ export const ReviewCardContent = memo(function ReviewCardContent({
           mime={metadata.mime}
           width={metadata.width}
           height={metadata.height}
+          size={metadata.size}
           numFrames={metadata.num_frames}
           blurhash={metadata.blurhash ?? null}
           isTop={isTop}
