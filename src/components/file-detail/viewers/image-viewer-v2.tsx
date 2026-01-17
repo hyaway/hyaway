@@ -110,21 +110,10 @@ export function ImageViewerV2({
 
   const enterTheater = useCallback(() => setOverlayMode("theater"), []);
 
-  // From normal mode, we first enter theater (which renders PanModeViewer),
-  // then request fullscreen on the next frame when that container is mounted
+  // Enter fullscreen overlay mode
   const enterFullscreen = useCallback(() => {
     setOverlayMode("fullscreen");
   }, []);
-
-  // Effect to handle fullscreen request when entering fullscreen mode
-  useEffect(() => {
-    if (overlayMode === "fullscreen" && !document.fullscreenElement) {
-      // Request fullscreen on next frame to ensure PanModeViewer is mounted
-      requestAnimationFrame(() => {
-        containerRef.current?.requestFullscreen();
-      });
-    }
-  }, [overlayMode]);
 
   const exitOverlay = useCallback(() => {
     if (document.fullscreenElement) document.exitFullscreen();
@@ -137,6 +126,15 @@ export function ImageViewerV2({
       return !prev;
     });
   }, []);
+
+  // Combined ref callback for pan mode
+  const handleContainerRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      setContainer(el);
+      containerRef.current = el;
+    },
+    [setContainer],
+  );
 
   // Effects
   useEffect(() => {
@@ -166,7 +164,7 @@ export function ImageViewerV2({
     const body = document.body;
     const previousOverflow = body.style.overflow;
     body.style.overflow = "hidden";
-    window.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "auto" });
 
     return () => {
       body.style.overflow = previousOverflow;
@@ -174,6 +172,26 @@ export function ImageViewerV2({
   }, [isPannable]);
 
   // Render
+  if (overlayMode === "fullscreen") {
+    return (
+      <FullscreenModeViewer
+        fileUrl={fileUrl}
+        fileId={fileId}
+        fitScale={fitScale}
+        containerSize={containerSize}
+        onContainerRef={handleContainerRef}
+        imageRef={imageRef}
+        backgroundStyle={backgroundStyle}
+        backgroundClass={backgroundClass}
+        onLoad={handleLoad}
+        onError={onError}
+        onExitOverlay={exitOverlay}
+        onEnterTheater={enterTheater}
+        onEnterFullscreen={enterFullscreen}
+      />
+    );
+  }
+
   if (!isPannable) {
     return (
       <NormalModeViewer
@@ -196,15 +214,6 @@ export function ImageViewerV2({
       />
     );
   }
-
-  // Combined ref callback for pan mode
-  const handleContainerRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      setContainer(el);
-      containerRef.current = el;
-    },
-    [setContainer],
-  );
 
   return (
     <PanModeViewer
@@ -645,5 +654,94 @@ function PanModeViewer({
         </TransformWrapper>
       )}
     </div>
+  );
+}
+
+/** Fullscreen-only viewer - avoids theater flash on entry */
+function FullscreenModeViewer({
+  fileUrl,
+  fileId,
+  fitScale,
+  containerSize,
+  onContainerRef,
+  imageRef,
+  backgroundStyle,
+  backgroundClass,
+  onLoad,
+  onError,
+  onExitOverlay,
+  onEnterTheater,
+  onEnterFullscreen,
+}: {
+  fileUrl: string;
+  fileId: number;
+  fitScale: number;
+  containerSize: { width: number; height: number };
+  onContainerRef: (el: HTMLDivElement | null) => void;
+  imageRef: React.RefObject<HTMLImageElement | null>;
+  backgroundStyle: React.CSSProperties;
+  backgroundClass: string;
+  onLoad: () => void;
+  onError: () => void;
+  onExitOverlay: () => void;
+  onEnterTheater: () => void;
+  onEnterFullscreen: () => void;
+}) {
+  const [fullscreenTarget, setFullscreenTarget] =
+    useState<HTMLDivElement | null>(null);
+  const [isFullscreenActive, setIsFullscreenActive] = useState(false);
+
+  const handleFullscreenRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      setFullscreenTarget(el);
+      onContainerRef(el);
+    },
+    [onContainerRef],
+  );
+
+  useEffect(() => {
+    if (!fullscreenTarget) return;
+
+    let isMounted = true;
+    const handleChange = () => {
+      if (!isMounted) return;
+      setIsFullscreenActive(document.fullscreenElement === fullscreenTarget);
+    };
+
+    document.addEventListener("fullscreenchange", handleChange);
+    fullscreenTarget.requestFullscreen?.().catch(() => {
+      if (isMounted) setIsFullscreenActive(false);
+    });
+    handleChange();
+
+    return () => {
+      isMounted = false;
+      document.removeEventListener("fullscreenchange", handleChange);
+    };
+  }, [fullscreenTarget]);
+
+  const fullscreenClass = cn(
+    "fixed inset-0 z-50 bg-black transition-opacity",
+    isFullscreenActive ? "opacity-100" : "pointer-events-none opacity-0",
+  );
+
+  return (
+    <PanModeViewer
+      fileUrl={fileUrl}
+      fileId={fileId}
+      fitScale={fitScale}
+      containerSize={containerSize}
+      onContainerRef={handleFullscreenRef}
+      imageRef={imageRef}
+      backgroundStyle={backgroundStyle}
+      backgroundClass={backgroundClass}
+      containerClass={fullscreenClass}
+      isFullscreen={true}
+      onLoad={onLoad}
+      onError={onError}
+      onExitOverlay={onExitOverlay}
+      onEnterTheater={onEnterTheater}
+      onEnterFullscreen={onEnterFullscreen}
+    />
   );
 }
