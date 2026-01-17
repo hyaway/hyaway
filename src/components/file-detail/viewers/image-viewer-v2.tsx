@@ -356,6 +356,8 @@ function PanModeControls({
           if (isTheater) {
             onExitOverlay();
           } else {
+            // Switch from fullscreen to theater: exit fullscreen first
+            if (document.fullscreenElement) document.exitFullscreen();
             onEnterTheater();
           }
         }}
@@ -601,7 +603,7 @@ function PanModeViewer({
           initialScale={effectiveFitScale}
           minScale={effectiveFitScale}
           maxScale={Math.max(1, fitScale) * 4}
-          centerOnInit
+          centerOnInit={true}
           doubleClick={{ disabled: false, mode: "reset" }}
         >
           <ZoomBadge />
