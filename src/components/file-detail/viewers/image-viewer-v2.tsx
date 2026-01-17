@@ -12,7 +12,6 @@ import {
   useControls,
 } from "react-zoom-pan-pinch";
 import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
-import type { ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import { cn } from "@/lib/utils";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import {
@@ -138,11 +137,9 @@ export function ImageViewerV2({
   const [isExpanded, setIsExpanded] = useState(startExpanded);
 
   const [loaded, setLoaded] = useState(false);
-  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const transformRef = useRef<ReactZoomPanPinchRef>(null);
 
   const isFullscreen = overlayMode === "fullscreen";
   const isTheater = overlayMode === "theater";
@@ -155,12 +152,6 @@ export function ImageViewerV2({
 
   const handleLoad = () => {
     setLoaded(true);
-    if (imageRef.current) {
-      setNaturalSize({
-        width: imageRef.current.naturalWidth,
-        height: imageRef.current.naturalHeight,
-      });
-    }
     onLoad();
   };
 
@@ -353,12 +344,12 @@ export function ImageViewerV2({
       )}
     >
       <TransformWrapper
-        ref={transformRef}
         initialScale={1}
         minScale={0.1}
         maxScale={10}
         centerOnInit={true}
-        limitToBounds={false}
+        limitToBounds={true}
+        centerZoomedOut={true}
         panning={{ velocityDisabled: false }}
         doubleClick={{ disabled: false, mode: "reset" }}
       >
@@ -368,24 +359,12 @@ export function ImageViewerV2({
           isFullscreen={isFullscreen}
         />
 
-        <TransformComponent
-          wrapperStyle={{ width: "100%", height: "100%" }}
-          contentStyle={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
           <img
             ref={imageRef}
             key={fileId}
             src={fileUrl}
             alt=""
-            className="max-h-none max-w-none"
-            style={{
-              width: naturalSize.width || "auto",
-              height: naturalSize.height || "auto",
-            }}
             onLoad={handleLoad}
             onError={onError}
             draggable={false}
