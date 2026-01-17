@@ -1,6 +1,7 @@
 import { memo, useRef, useState } from "react";
 import { IconArchive, IconArrowUp, IconTrash } from "@tabler/icons-react";
 import {
+  animate,
   motion,
   useDragControls,
   useMotionValue,
@@ -156,6 +157,8 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
   const y = useMotionValue(0);
   const constraintsRef = useRef<HTMLDivElement>(null);
   const [isPinching, setIsPinching] = useState(false);
+  // Cooldown after pinch ends to prevent accidental swipe triggers
+  const pinchCooldownRef = useRef(false);
 
   // Calculate rotation based on horizontal drag
   const rotate = useTransform(
@@ -183,6 +186,11 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
     _event: MouseEvent | TouchEvent | PointerEvent,
     info: PanInfo,
   ) => {
+    // Ignore drag end if we just finished pinching
+    if (pinchCooldownRef.current) {
+      return;
+    }
+
     const { offset } = info;
     const zone = getSwipeZone(offset.x, offset.y);
 
@@ -277,6 +285,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
         onTouchStart={(e) => {
           if (e.touches.length >= 2) {
             setIsPinching(true);
+            pinchCooldownRef.current = true;
             x.stop();
             y.stop();
           }
@@ -284,16 +293,29 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
         onTouchMove={(e) => {
           if (e.touches.length >= 2 && !isPinching) {
             setIsPinching(true);
+            pinchCooldownRef.current = true;
           }
         }}
         onTouchEnd={(e) => {
           if (e.touches.length < 2 && isPinching) {
             setIsPinching(false);
+            // Reset position to prevent accidental swipe from pinch offset
+            animate(x, 0, { duration: 0.15 });
+            animate(y, 0, { duration: 0.15 });
+            // Brief cooldown before allowing new drag gestures
+            setTimeout(() => {
+              pinchCooldownRef.current = false;
+            }, 200);
           }
         }}
         onTouchCancel={() => {
           if (isPinching) {
             setIsPinching(false);
+            animate(x, 0, { duration: 0.15 });
+            animate(y, 0, { duration: 0.15 });
+            setTimeout(() => {
+              pinchCooldownRef.current = false;
+            }, 200);
           }
         }}
         onPointerDown={(e) => {
@@ -309,6 +331,11 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
               ".vds-controls, .vds-slider, .vds-button, .vds-menu, button, a, input, textarea, select, [role='slider'], [role='button']",
             )
           ) {
+            return;
+          }
+
+          // Don't start swiping when image viewer is in pan mode (zoomed in)
+          if (target.closest("[data-pan-mode]")) {
             return;
           }
 

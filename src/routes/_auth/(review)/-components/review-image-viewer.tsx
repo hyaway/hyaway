@@ -631,6 +631,7 @@ export function ReviewImageViewer({
   return (
     <div
       ref={containerRef}
+      data-pan-mode={isZoomed || undefined}
       className={cn(
         "relative flex h-full w-full items-center justify-center overflow-hidden",
         isZoomed && "ring-destructive/60 ring-6 ring-inset",
