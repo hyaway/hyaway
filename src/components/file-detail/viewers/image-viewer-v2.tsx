@@ -553,7 +553,7 @@ function PanModeViewer({
           // Fit if larger, original size if smaller (never scale up beyond 100%)
           initialScale={Math.min(1, fitScale)}
           minScale={Math.min(1, fitScale)}
-          maxScale={Math.max(1, fitScale) * 8}
+          maxScale={Math.max(1, fitScale) * 4}
           centerOnInit
           doubleClick={{ disabled: false, mode: "reset" }}
         >
