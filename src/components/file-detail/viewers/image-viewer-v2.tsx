@@ -1,15 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  IconArrowsMaximize,
-  IconMaximize,
-  IconMinimize,
-  IconZoomIn,
-  IconZoomOut,
-} from "@tabler/icons-react";
+import { IconArrowsMaximize, IconMaximize } from "@tabler/icons-react";
 import {
   TransformComponent,
   TransformWrapper,
   useControls,
+  useTransformEffect,
 } from "react-zoom-pan-pinch";
 import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
 import { cn } from "@/lib/utils";
@@ -287,60 +282,67 @@ function useImageNaturalSize(src: string, enabled: boolean) {
 // Subcomponents
 // ============================================================================
 
+// Tolerance for matching scale values (±3%)
+const SCALE_TOLERANCE = 0.03;
+
+function isNearScale(current: number, target: number): boolean {
+  return Math.abs(current - target) <= target * SCALE_TOLERANCE;
+}
+
 /** Controls toolbar for pan mode - must be inside TransformWrapper */
 function PanModeControls({
+  fitScale,
   isFullscreen,
   onExitOverlay,
   onEnterTheater,
   onEnterFullscreen,
 }: {
+  fitScale: number;
   isFullscreen: boolean;
   onExitOverlay: () => void;
   onEnterTheater: () => void;
   onEnterFullscreen: () => void;
 }) {
-  const { zoomIn, zoomOut, resetTransform } = useControls();
+  const { resetTransform, centerView } = useControls();
+  const [currentScale, setCurrentScale] = useState(fitScale);
   const isTheater = !isFullscreen;
+
+  // Track scale changes without causing parent re-renders
+  useTransformEffect(({ state }) => {
+    setCurrentScale(state.scale);
+  });
+
+  // Determine which zoom level we're at
+  const isAtFit = isNearScale(currentScale, fitScale);
+  const isAt1x = isNearScale(currentScale, 1);
 
   return (
     <div className="bg-card/90 absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded-md border p-1 opacity-0 shadow-lg backdrop-blur-sm transition-opacity group-hover:opacity-100">
       <Toggle
         variant="outline"
         size="sm"
-        pressed={false}
-        onClick={(e) => {
-          e.stopPropagation();
-          zoomOut();
-        }}
-        title="Zoom out"
-      >
-        <IconZoomOut className="size-4" />
-      </Toggle>
-
-      <Toggle
-        variant="outline"
-        size="sm"
-        pressed={false}
+        pressed={isAtFit}
         onClick={(e) => {
           e.stopPropagation();
           resetTransform();
         }}
-        title="Reset zoom"
+        title="Fit to screen"
       >
-        <span className="text-xs font-medium">Reset</span>
+        <span className="text-xs font-medium">Fit</span>
       </Toggle>
 
       <Toggle
         variant="outline"
         size="sm"
-        pressed={false}
+        pressed={isAt1x}
         onClick={(e) => {
           e.stopPropagation();
-          zoomIn();
+          // Scale 1 = natural size, centered
+          centerView(1, 300, "easeOut");
         }}
-        title="Zoom in"
+        title="Original size"
       >
-        <IconZoomIn className="size-4" />
+        <span className="text-xs font-medium">1×</span>
       </Toggle>
 
       <div className="bg-border mx-1 w-px" />
@@ -537,6 +539,8 @@ function PanModeViewer({
   onEnterTheater: () => void;
   onEnterFullscreen: () => void;
 }) {
+  const effectiveFitScale = Math.min(1, fitScale);
+
   return (
     <div
       ref={onContainerRef}
@@ -551,13 +555,14 @@ function PanModeViewer({
         <TransformWrapper
           key={`${containerSize.width}x${containerSize.height}`}
           // Fit if larger, original size if smaller (never scale up beyond 100%)
-          initialScale={Math.min(1, fitScale)}
-          minScale={Math.min(1, fitScale)}
+          initialScale={effectiveFitScale}
+          minScale={effectiveFitScale}
           maxScale={Math.max(1, fitScale) * 4}
           centerOnInit
           doubleClick={{ disabled: false, mode: "reset" }}
         >
           <PanModeControls
+            fitScale={effectiveFitScale}
             isFullscreen={isFullscreen}
             onExitOverlay={onExitOverlay}
             onEnterTheater={onEnterTheater}
