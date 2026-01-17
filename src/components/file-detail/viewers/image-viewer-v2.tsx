@@ -69,7 +69,7 @@ export function ImageViewerV2({
   );
 
   const containerSize = useContainerSize(container);
-  const { style: backgroundStyle, className: backgroundClass } =
+  const { containerStyle, containerClassName, imageStyle, imageClassName } =
     useBackgroundStyles(loaded, averageColor);
 
   // Calculate fit scale for pan mode
@@ -182,8 +182,10 @@ export function ImageViewerV2({
         containerSize={containerSize}
         onContainerRef={handleContainerRef}
         imageRef={imageRef}
-        backgroundStyle={backgroundStyle}
-        backgroundClass={backgroundClass}
+        imageStyle={imageStyle}
+        imageClassName={imageClassName}
+        backgroundStyle={containerStyle}
+        backgroundClass={containerClassName}
         onLoad={handleLoad}
         onError={onError}
         onExitOverlay={exitOverlay}
@@ -204,8 +206,10 @@ export function ImageViewerV2({
         isExpanded={isExpanded}
         containerRef={containerRef}
         imageRef={imageRef}
-        backgroundStyle={backgroundStyle}
-        backgroundClass={backgroundClass}
+        imageStyle={imageStyle}
+        imageClassName={imageClassName}
+        backgroundStyle={containerStyle}
+        backgroundClass={containerClassName}
         containerClass={containerClass}
         onToggleZoom={toggleNormalZoom}
         onLoad={handleLoad}
@@ -224,8 +228,10 @@ export function ImageViewerV2({
       containerSize={containerSize}
       onContainerRef={handleContainerRef}
       imageRef={imageRef}
-      backgroundStyle={backgroundStyle}
-      backgroundClass={backgroundClass}
+      imageStyle={imageStyle}
+      imageClassName={imageClassName}
+      backgroundStyle={containerStyle}
+      backgroundClass={containerClassName}
       containerClass={containerClass}
       isFullscreen={isFullscreen}
       onLoad={handleLoad}
@@ -249,19 +255,39 @@ function useBackgroundStyles(
   const imageBackground = useImageBackground();
   const fillCanvasBackground = useFillCanvasBackground();
 
-  const style = useMemo(() => {
-    if (fillCanvasBackground && loaded && averageColor) {
+  const containerStyle = useMemo(() => {
+    if (
+      fillCanvasBackground &&
+      loaded &&
+      imageBackground === "average" &&
+      averageColor
+    ) {
       return { backgroundColor: averageColor };
     }
     return {};
-  }, [fillCanvasBackground, loaded, averageColor]);
+  }, [fillCanvasBackground, loaded, imageBackground, averageColor]);
 
-  const className = useMemo(() => {
-    if (fillCanvasBackground && loaded) return "";
+  const containerClassName = useMemo(() => {
+    if (fillCanvasBackground && loaded) {
+      switch (imageBackground) {
+        case "checkerboard":
+          return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
+        case "solid":
+          return "bg-background";
+        case "average":
+          return "";
+        default:
+          return "bg-background";
+      }
+    }
+    return "";
+  }, [imageBackground, fillCanvasBackground, loaded]);
 
+  const imageClassName = useMemo(() => {
+    if (fillCanvasBackground || !loaded) return "";
     switch (imageBackground) {
       case "checkerboard":
-        return "bg-checkered";
+        return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
       case "solid":
         return "bg-background";
       case "average":
@@ -271,7 +297,19 @@ function useBackgroundStyles(
     }
   }, [imageBackground, fillCanvasBackground, loaded]);
 
-  return { style, className };
+  const imageStyle = useMemo(() => {
+    if (
+      loaded &&
+      !fillCanvasBackground &&
+      imageBackground === "average" &&
+      averageColor
+    ) {
+      return { backgroundColor: averageColor };
+    }
+    return {};
+  }, [loaded, fillCanvasBackground, imageBackground, averageColor]);
+
+  return { containerStyle, containerClassName, imageStyle, imageClassName };
 }
 
 /** Hook to track container size for responsive fit scale */
@@ -499,6 +537,8 @@ function NormalModeViewer({
   isExpanded,
   containerRef,
   imageRef,
+  imageStyle,
+  imageClassName,
   backgroundStyle,
   backgroundClass,
   containerClass,
@@ -516,6 +556,8 @@ function NormalModeViewer({
   isExpanded: boolean;
   containerRef: React.RefObject<HTMLDivElement | null>;
   imageRef: React.RefObject<HTMLImageElement | null>;
+  imageStyle: React.CSSProperties;
+  imageClassName: string;
   backgroundStyle: React.CSSProperties;
   backgroundClass: string;
   containerClass: string;
@@ -553,9 +595,11 @@ function NormalModeViewer({
         key={fileId}
         src={fileUrl}
         alt=""
+        style={imageStyle}
         className={cn(
           "transition-opacity duration-300",
           loaded ? "opacity-100" : "opacity-0",
+          imageClassName,
           isExpanded ? "max-w-full" : "max-h-full max-w-full object-contain",
         )}
         onLoad={onLoad}
@@ -579,6 +623,8 @@ function PanModeViewer({
   containerSize,
   onContainerRef,
   imageRef,
+  imageStyle,
+  imageClassName,
   backgroundStyle,
   backgroundClass,
   containerClass,
@@ -595,6 +641,8 @@ function PanModeViewer({
   containerSize: { width: number; height: number };
   onContainerRef: (el: HTMLDivElement | null) => void;
   imageRef: React.RefObject<HTMLImageElement | null>;
+  imageStyle: React.CSSProperties;
+  imageClassName: string;
   backgroundStyle: React.CSSProperties;
   backgroundClass: string;
   containerClass: string;
@@ -605,8 +653,8 @@ function PanModeViewer({
   onEnterTheater: () => void;
   onEnterFullscreen: () => void;
 }) {
-  // In theater/fullscreen, scale to fit the screen (even scaling up small images)
-  // minScale allows zooming out to 1x for small images that were scaled up
+  // In theater/fullscreen, scale to fit the screen without upscaling small images
+  // minScale allows zooming out to 1x when the fit scale is larger than 1
   const minScale = Math.min(1, fitScale);
 
   return (
@@ -621,7 +669,7 @@ function PanModeViewer({
     >
       {fitScale > 0 && (
         <TransformWrapper
-          key={`${containerSize.width}x${containerSize.height}`}
+          key={fileId}
           // Start at fit scale (fills the screen)
           initialScale={fitScale}
           // Allow zooming out to 1x for upscaled images, or to fit for large images
@@ -647,6 +695,8 @@ function PanModeViewer({
             fileUrl={fileUrl}
             fileId={fileId}
             imageRef={imageRef}
+            imageStyle={imageStyle}
+            imageClassName={imageClassName}
             onLoad={onLoad}
             onError={onError}
           />
@@ -661,6 +711,8 @@ function PanModeContent({
   fileUrl,
   fileId,
   imageRef,
+  imageStyle,
+  imageClassName,
   onLoad,
   onError,
 }: {
@@ -668,6 +720,8 @@ function PanModeContent({
   fileUrl: string;
   fileId: number;
   imageRef: React.RefObject<HTMLImageElement | null>;
+  imageStyle: React.CSSProperties;
+  imageClassName: string;
   onLoad: () => void;
   onError: () => void;
 }) {
@@ -703,7 +757,8 @@ function PanModeContent({
         key={fileId}
         src={fileUrl}
         alt=""
-        className="max-h-none max-w-none"
+        style={imageStyle}
+        className={cn("max-h-none max-w-none", imageClassName)}
         onLoad={onLoad}
         onError={onError}
         draggable={false}
@@ -720,6 +775,8 @@ function FullscreenModeViewer({
   containerSize,
   onContainerRef,
   imageRef,
+  imageStyle,
+  imageClassName,
   backgroundStyle,
   backgroundClass,
   onLoad,
@@ -734,6 +791,8 @@ function FullscreenModeViewer({
   containerSize: { width: number; height: number };
   onContainerRef: (el: HTMLDivElement | null) => void;
   imageRef: React.RefObject<HTMLImageElement | null>;
+  imageStyle: React.CSSProperties;
+  imageClassName: string;
   backgroundStyle: React.CSSProperties;
   backgroundClass: string;
   onLoad: () => void;
@@ -788,6 +847,8 @@ function FullscreenModeViewer({
       containerSize={containerSize}
       onContainerRef={handleFullscreenRef}
       imageRef={imageRef}
+      imageStyle={imageStyle}
+      imageClassName={imageClassName}
       backgroundStyle={backgroundStyle}
       backgroundClass={backgroundClass}
       containerClass={fullscreenClass}
