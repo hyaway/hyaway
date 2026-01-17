@@ -584,7 +584,9 @@ function PanModeViewer({
   onEnterTheater: () => void;
   onEnterFullscreen: () => void;
 }) {
-  const effectiveFitScale = Math.min(1, fitScale);
+  // In theater/fullscreen, scale to fit the screen (even scaling up small images)
+  // minScale allows zooming out to 1x for small images that were scaled up
+  const minScale = Math.min(1, fitScale);
 
   return (
     <div
@@ -599,9 +601,10 @@ function PanModeViewer({
       {fitScale > 0 && (
         <TransformWrapper
           key={`${containerSize.width}x${containerSize.height}`}
-          // Fit if larger, original size if smaller (never scale up beyond 100%)
-          initialScale={effectiveFitScale}
-          minScale={effectiveFitScale}
+          // Start at fit scale (fills the screen)
+          initialScale={fitScale}
+          // Allow zooming out to 1x for upscaled images, or to fit for large images
+          minScale={minScale}
           maxScale={Math.max(1, fitScale) * 4}
           centerOnInit={true}
           doubleClick={{ disabled: false, mode: "reset" }}
@@ -609,7 +612,7 @@ function PanModeViewer({
           <ZoomBadge />
 
           <PanModeControls
-            fitScale={effectiveFitScale}
+            fitScale={fitScale}
             isFullscreen={isFullscreen}
             onExitOverlay={onExitOverlay}
             onEnterTheater={onEnterTheater}
@@ -622,6 +625,7 @@ function PanModeViewer({
               key={fileId}
               src={fileUrl}
               alt=""
+              className="max-h-none max-w-none"
               onLoad={onLoad}
               onError={onError}
               draggable={false}
