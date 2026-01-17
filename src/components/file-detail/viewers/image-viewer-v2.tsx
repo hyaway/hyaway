@@ -69,25 +69,29 @@ export function ImageViewerV2({
   );
 
   const containerSize = useContainerSize(container);
+  const viewportSize = useViewportSize(isFullscreen);
+  const effectiveContainerSize = isFullscreen ? viewportSize : containerSize;
   const { containerStyle, containerClassName, imageStyle, imageClassName } =
     useBackgroundStyles(loaded, averageColor);
 
   // Calculate fit scale for pan mode
-  const fitScale = useMemo(() => {
+  const rawFitScale = useMemo(() => {
     if (
-      containerSize.width === 0 ||
-      containerSize.height === 0 ||
+      effectiveContainerSize.width === 0 ||
+      effectiveContainerSize.height === 0 ||
       imageNaturalSize.width === 0 ||
       imageNaturalSize.height === 0
     ) {
       return 0;
     }
     return Math.min(
-      1,
-      containerSize.width / imageNaturalSize.width,
-      containerSize.height / imageNaturalSize.height,
+      effectiveContainerSize.width / imageNaturalSize.width,
+      effectiveContainerSize.height / imageNaturalSize.height,
     );
-  }, [containerSize, imageNaturalSize]);
+  }, [effectiveContainerSize, imageNaturalSize]);
+
+  const fitScale = useMemo(() => Math.min(1, rawFitScale), [rawFitScale]);
+  const fullscreenFitScale = fitScale;
 
   // Container class based on mode
   const containerClass = useMemo(() => {
@@ -178,8 +182,8 @@ export function ImageViewerV2({
       <FullscreenModeViewer
         fileUrl={fileUrl}
         fileId={fileId}
-        fitScale={fitScale}
-        containerSize={containerSize}
+        fitScale={fullscreenFitScale}
+        containerSize={effectiveContainerSize}
         onContainerRef={handleContainerRef}
         imageRef={imageRef}
         imageStyle={imageStyle}
@@ -225,7 +229,7 @@ export function ImageViewerV2({
       fileUrl={fileUrl}
       fileId={fileId}
       fitScale={fitScale}
-      containerSize={containerSize}
+      containerSize={effectiveContainerSize}
       onContainerRef={handleContainerRef}
       imageRef={imageRef}
       imageStyle={imageStyle}
@@ -331,6 +335,30 @@ function useContainerSize(container: HTMLElement | null) {
     resizeObserver.observe(container);
     return () => resizeObserver.disconnect();
   }, [container]);
+
+  return size;
+}
+
+/** Hook to track viewport size (useful for fullscreen sizing) */
+function useViewportSize(enabled: boolean) {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const updateSize = () => {
+      setSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    document.addEventListener("fullscreenchange", updateSize);
+
+    return () => {
+      window.removeEventListener("resize", updateSize);
+      document.removeEventListener("fullscreenchange", updateSize);
+    };
+  }, [enabled]);
 
   return size;
 }
@@ -669,7 +697,7 @@ function PanModeViewer({
     >
       {fitScale > 0 && (
         <TransformWrapper
-          key={fileId}
+          key={`${fileId}-${isFullscreen ? "fullscreen" : "theater"}`}
           // Start at fit scale (fills the screen)
           initialScale={fitScale}
           // Allow zooming out to 1x for upscaled images, or to fit for large images
@@ -692,6 +720,7 @@ function PanModeViewer({
 
           <PanModeContent
             fitScale={fitScale}
+            resetToken={`${fileId}-${isFullscreen ? "fullscreen" : "theater"}`}
             fileUrl={fileUrl}
             fileId={fileId}
             imageRef={imageRef}
@@ -708,6 +737,7 @@ function PanModeViewer({
 
 function PanModeContent({
   fitScale,
+  resetToken,
   fileUrl,
   fileId,
   imageRef,
@@ -717,6 +747,7 @@ function PanModeContent({
   onError,
 }: {
   fitScale: number;
+  resetToken: string;
   fileUrl: string;
   fileId: number;
   imageRef: React.RefObject<HTMLImageElement | null>;
@@ -727,10 +758,22 @@ function PanModeContent({
 }) {
   const { centerView, resetTransform } = useControls();
   const [currentScale, setCurrentScale] = useState(fitScale);
+  const pendingResetRef = useRef<string | null>(null);
 
   useTransformEffect(({ state }) => {
     setCurrentScale(state.scale);
   });
+
+  useEffect(() => {
+    pendingResetRef.current = resetToken;
+  }, [resetToken]);
+
+  useEffect(() => {
+    if (pendingResetRef.current === resetToken && fitScale > 0) {
+      centerView(fitScale, 0, "easeOut");
+      pendingResetRef.current = null;
+    }
+  }, [centerView, fitScale, resetToken]);
 
   const handleDoubleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
