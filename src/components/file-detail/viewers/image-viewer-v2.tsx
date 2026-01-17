@@ -384,6 +384,49 @@ function PanModeControls({
   );
 }
 
+/** Zoom level indicator - lower third, shows when scale changes */
+function ZoomBadge() {
+  const [isVisible, setIsVisible] = useState(false);
+  const scaleRef = useRef<HTMLDivElement>(null);
+  const lastScaleRef = useRef(1);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useTransformEffect(({ state }) => {
+    // Only update when change is meaningful (at least 0.01)
+    if (Math.abs(state.scale - lastScaleRef.current) < 0.01) return;
+    lastScaleRef.current = state.scale;
+
+    // Update text directly to avoid re-renders
+    if (scaleRef.current) {
+      scaleRef.current.textContent = `${state.scale.toFixed(2)}×`;
+    }
+
+    if (!isVisible) {
+      setIsVisible(true);
+    }
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setIsVisible(false);
+    }, 1000);
+  });
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center pb-[15vh]">
+      <div
+        ref={scaleRef}
+        className="bg-card/90 text-foreground rounded-md px-3 py-2 text-sm font-medium tabular-nums shadow-lg"
+      >
+        1.00×
+      </div>
+    </div>
+  );
+}
+
 /** Controls toolbar for normal mode */
 function NormalModeControls({
   onEnterTheater,
@@ -561,6 +604,8 @@ function PanModeViewer({
           centerOnInit
           doubleClick={{ disabled: false, mode: "reset" }}
         >
+          <ZoomBadge />
+
           <PanModeControls
             fitScale={effectiveFitScale}
             isFullscreen={isFullscreen}
