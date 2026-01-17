@@ -41,12 +41,26 @@ export function ImageViewerV2({
   onLoad,
   onError,
 }: ImageViewerV2Props) {
+  const isDebugEnabled = import.meta.env.DEV;
+  const debugLog = useCallback(
+    (message: string, data?: Record<string, unknown>) => {
+      if (!isDebugEnabled) return;
+      console.info(
+        `[ImageViewerV2] ${message} ${JSON.stringify({
+          fileId,
+          ...data,
+        })}`,
+      );
+    },
+    [fileId, isDebugEnabled],
+  );
   const startExpanded = useFileViewerStartExpanded();
 
   // State
   const [overlayMode, setOverlayMode] = useState<OverlayMode>(null);
   const [isExpanded, setIsExpanded] = useState(startExpanded);
   const [loaded, setLoaded] = useState(false);
+  const [isFullscreenActive, setIsFullscreenActive] = useState(false);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [imageNaturalSize, setImageNaturalSize] = useState({
     width: 0,
@@ -92,6 +106,39 @@ export function ImageViewerV2({
 
   const fitScale = useMemo(() => Math.min(1, rawFitScale), [rawFitScale]);
   const fullscreenFitScale = fitScale;
+  const isFullscreenReady =
+    isFullscreen && isFullscreenActive && loaded && fullscreenFitScale > 0;
+  const showFullscreenFallback =
+    overlayMode === "fullscreen" && !isFullscreenReady;
+
+  useEffect(() => {
+    debugLog("state", {
+      overlayMode,
+      isFullscreen,
+      isTheater,
+      isExpanded,
+      loaded,
+    });
+  }, [debugLog, overlayMode, isFullscreen, isTheater, isExpanded, loaded]);
+
+  useEffect(() => {
+    debugLog("sizes", {
+      containerSize,
+      viewportSize,
+      effectiveContainerSize,
+      imageNaturalSize,
+      rawFitScale,
+      fitScale,
+    });
+  }, [
+    debugLog,
+    containerSize,
+    viewportSize,
+    effectiveContainerSize,
+    imageNaturalSize,
+    rawFitScale,
+    fitScale,
+  ]);
 
   // Container class based on mode
   const containerClass = useMemo(() => {
@@ -109,21 +156,32 @@ export function ImageViewerV2({
         width: image.naturalWidth,
         height: image.naturalHeight,
       });
+      debugLog("image load", {
+        naturalWidth: image.naturalWidth,
+        naturalHeight: image.naturalHeight,
+      });
     }
     onLoad();
-  }, [onLoad]);
+  }, [debugLog, onLoad]);
 
-  const enterTheater = useCallback(() => setOverlayMode("theater"), []);
+  const enterTheater = useCallback(() => {
+    debugLog("enter theater");
+    setOverlayMode("theater");
+  }, [debugLog]);
 
   // Enter fullscreen overlay mode
   const enterFullscreen = useCallback(() => {
+    debugLog("enter fullscreen");
     setOverlayMode("fullscreen");
-  }, []);
+  }, [debugLog]);
 
   const exitOverlay = useCallback(() => {
+    debugLog("exit overlay", {
+      fullscreenElement: Boolean(document.fullscreenElement),
+    });
     if (document.fullscreenElement) document.exitFullscreen();
     setOverlayMode(null);
-  }, []);
+  }, [debugLog]);
 
   const toggleNormalZoom = useCallback(() => {
     setIsExpanded((prev) => {
@@ -144,14 +202,17 @@ export function ImageViewerV2({
   // Effects
   useEffect(() => {
     const handleFullscreenChange = () => {
-      if (!document.fullscreenElement && isFullscreen) {
+      debugLog("fullscreenchange", {
+        fullscreenElement: Boolean(document.fullscreenElement),
+      });
+      if (!document.fullscreenElement && isFullscreen && isFullscreenActive) {
         setOverlayMode(null);
       }
     };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, [isFullscreen]);
+  }, [debugLog, isFullscreen, isFullscreenActive]);
 
   useEffect(() => {
     if (!isPannable) return;
@@ -179,23 +240,52 @@ export function ImageViewerV2({
   // Render
   if (overlayMode === "fullscreen") {
     return (
-      <FullscreenModeViewer
-        fileUrl={fileUrl}
-        fileId={fileId}
-        fitScale={fullscreenFitScale}
-        containerSize={effectiveContainerSize}
-        onContainerRef={handleContainerRef}
-        imageRef={imageRef}
-        imageStyle={imageStyle}
-        imageClassName={imageClassName}
-        backgroundStyle={containerStyle}
-        backgroundClass={containerClassName}
-        onLoad={handleLoad}
-        onError={onError}
-        onExitOverlay={exitOverlay}
-        onEnterTheater={enterTheater}
-        onEnterFullscreen={enterFullscreen}
-      />
+      <>
+        {showFullscreenFallback && (
+          <NormalModeViewer
+            fileUrl={fileUrl}
+            fileId={fileId}
+            blurhash={blurhash}
+            averageColor={averageColor}
+            loaded={loaded}
+            isExpanded={isExpanded}
+            containerRef={containerRef}
+            imageRef={imageRef}
+            imageStyle={imageStyle}
+            imageClassName={imageClassName}
+            backgroundStyle={containerStyle}
+            backgroundClass={containerClassName}
+            containerClass={containerClass}
+            onToggleZoom={toggleNormalZoom}
+            onLoad={handleLoad}
+            onError={onError}
+            onEnterTheater={enterTheater}
+            onEnterFullscreen={enterFullscreen}
+            showControls={false}
+            isInteractive={false}
+          />
+        )}
+        <FullscreenModeViewer
+          fileUrl={fileUrl}
+          fileId={fileId}
+          fitScale={fullscreenFitScale}
+          containerSize={effectiveContainerSize}
+          onContainerRef={handleContainerRef}
+          imageRef={imageRef}
+          imageStyle={imageStyle}
+          imageClassName={imageClassName}
+          loaded={loaded}
+          isReady={isFullscreenReady}
+          backgroundStyle={containerStyle}
+          backgroundClass={containerClassName}
+          onLoad={handleLoad}
+          onError={onError}
+          onExitOverlay={exitOverlay}
+          onEnterTheater={enterTheater}
+          onEnterFullscreen={enterFullscreen}
+          onFullscreenActiveChange={setIsFullscreenActive}
+        />
+      </>
     );
   }
 
@@ -389,17 +479,26 @@ function PanModeControls({
   onEnterFullscreen: () => void;
 }) {
   const { centerView, resetTransform } = useControls();
-  const [currentScale, setCurrentScale] = useState(fitScale);
+  const [isAtFit, setIsAtFit] = useState(true);
+  const [isAt1x, setIsAt1x] = useState(false);
+  const isAtFitRef = useRef(isAtFit);
+  const isAt1xRef = useRef(isAt1x);
   const isTheater = !isFullscreen;
 
   // Track scale changes without causing parent re-renders
   useTransformEffect(({ state }) => {
-    setCurrentScale(state.scale);
-  });
+    const nextAtFit = isNearScale(state.scale, fitScale);
+    const nextAt1x = isNearScale(state.scale, 1);
 
-  // Determine which zoom level we're at
-  const isAtFit = isNearScale(currentScale, fitScale);
-  const isAt1x = isNearScale(currentScale, 1);
+    if (nextAtFit !== isAtFitRef.current) {
+      isAtFitRef.current = nextAtFit;
+      setIsAtFit(nextAtFit);
+    }
+    if (nextAt1x !== isAt1xRef.current) {
+      isAt1xRef.current = nextAt1x;
+      setIsAt1x(nextAt1x);
+    }
+  });
 
   return (
     <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 absolute right-4 bottom-4 z-10 flex gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
@@ -575,6 +674,8 @@ function NormalModeViewer({
   onError,
   onEnterTheater,
   onEnterFullscreen,
+  showControls = true,
+  isInteractive = true,
 }: {
   fileUrl: string;
   fileId: number;
@@ -594,6 +695,8 @@ function NormalModeViewer({
   onError: () => void;
   onEnterTheater: () => void;
   onEnterFullscreen: () => void;
+  showControls?: boolean;
+  isInteractive?: boolean;
 }) {
   return (
     <div
@@ -604,8 +707,9 @@ function NormalModeViewer({
         containerClass,
         backgroundClass,
         isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
+        !isInteractive && "pointer-events-none",
       )}
-      onClick={onToggleZoom}
+      onClick={isInteractive ? onToggleZoom : undefined}
     >
       {/* Blurhash placeholder */}
       {!loaded && blurhash && (
@@ -635,10 +739,12 @@ function NormalModeViewer({
         draggable={false}
       />
 
-      <NormalModeControls
-        onEnterTheater={onEnterTheater}
-        onEnterFullscreen={onEnterFullscreen}
-      />
+      {showControls && (
+        <NormalModeControls
+          onEnterTheater={onEnterTheater}
+          onEnterFullscreen={onEnterFullscreen}
+        />
+      )}
     </div>
   );
 }
@@ -667,7 +773,7 @@ function PanModeViewer({
   fileId: number;
   fitScale: number;
   containerSize: { width: number; height: number };
-  onContainerRef: (el: HTMLDivElement | null) => void;
+  onContainerRef?: (el: HTMLDivElement | null) => void;
   imageRef: React.RefObject<HTMLImageElement | null>;
   imageStyle: React.CSSProperties;
   imageClassName: string;
@@ -757,37 +863,99 @@ function PanModeContent({
   onError: () => void;
 }) {
   const { centerView, resetTransform } = useControls();
-  const [currentScale, setCurrentScale] = useState(fitScale);
+  const currentScaleRef = useRef(fitScale);
   const pendingResetRef = useRef<string | null>(null);
+  const pendingResetFitScaleRef = useRef<number | null>(null);
+  const pendingResetAtRef = useRef<number | null>(null);
+  const previousFitScaleRef = useRef(fitScale);
+  const isDebugEnabled = import.meta.env.DEV;
+  const debugLog = useCallback(
+    (message: string, data?: Record<string, unknown>) => {
+      if (!isDebugEnabled) return;
+      console.info(
+        `[ImageViewerV2/PanMode] ${message} ${JSON.stringify({
+          fileId,
+          ...data,
+        })}`,
+      );
+    },
+    [fileId, isDebugEnabled],
+  );
 
   useTransformEffect(({ state }) => {
-    setCurrentScale(state.scale);
+    currentScaleRef.current = state.scale;
+    debugLog("transform", {
+      scale: state.scale,
+      positionX: state.positionX,
+      positionY: state.positionY,
+      fitScale,
+    });
   });
 
   useEffect(() => {
     pendingResetRef.current = resetToken;
+    pendingResetFitScaleRef.current = fitScale;
+    pendingResetAtRef.current = Date.now();
+    debugLog("reset requested", {
+      resetToken,
+      fitScale,
+    });
   }, [resetToken]);
 
   useEffect(() => {
-    if (pendingResetRef.current === resetToken && fitScale > 0) {
+    if (pendingResetRef.current !== resetToken || fitScale <= 0) return;
+
+    const pendingFitScale = pendingResetFitScaleRef.current;
+    const pendingAt = pendingResetAtRef.current;
+    const delayMs = pendingAt ? Date.now() - pendingAt : null;
+    const fitScaleChanged =
+      typeof pendingFitScale === "number" && pendingFitScale !== fitScale;
+    const timedOut = typeof delayMs === "number" && delayMs > 80;
+
+    if (fitScaleChanged || timedOut) {
+      debugLog("reset to fit", {
+        fitScale,
+        resetToken,
+        pendingFitScale,
+        delayMs,
+      });
       centerView(fitScale, 0, "easeOut");
       pendingResetRef.current = null;
+      pendingResetFitScaleRef.current = null;
+      pendingResetAtRef.current = null;
     }
-  }, [centerView, fitScale, resetToken]);
+  }, [centerView, debugLog, fitScale, resetToken]);
+
+  useEffect(() => {
+    const previousFitScale = previousFitScaleRef.current;
+    if (previousFitScale > 0 && fitScale > 0) {
+      const wasAtFit = isNearScale(currentScaleRef.current, previousFitScale);
+      if (wasAtFit && !isNearScale(previousFitScale, fitScale)) {
+        debugLog("fit scale changed", {
+          previousFitScale,
+          fitScale,
+          currentScale: currentScaleRef.current,
+        });
+        centerView(fitScale, 0, "easeOut");
+      }
+    }
+    previousFitScaleRef.current = fitScale;
+  }, [centerView, debugLog, fitScale]);
 
   const handleDoubleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       event.stopPropagation();
-      const isZoomedIn = currentScale > fitScale * (1 + SCALE_TOLERANCE);
+      const isZoomedIn =
+        currentScaleRef.current > fitScale * (1 + SCALE_TOLERANCE);
 
       if (isZoomedIn) {
         resetTransform();
         return;
       }
 
-      centerView(currentScale * 2, 300, "easeOut");
+      centerView(currentScaleRef.current * 2, 300, "easeOut");
     },
-    [centerView, currentScale, fitScale],
+    [centerView, fitScale, resetTransform],
   );
 
   return (
@@ -820,6 +988,8 @@ function FullscreenModeViewer({
   imageRef,
   imageStyle,
   imageClassName,
+  loaded,
+  isReady,
   backgroundStyle,
   backgroundClass,
   onLoad,
@@ -827,6 +997,7 @@ function FullscreenModeViewer({
   onExitOverlay,
   onEnterTheater,
   onEnterFullscreen,
+  onFullscreenActiveChange,
 }: {
   fileUrl: string;
   fileId: number;
@@ -836,6 +1007,8 @@ function FullscreenModeViewer({
   imageRef: React.RefObject<HTMLImageElement | null>;
   imageStyle: React.CSSProperties;
   imageClassName: string;
+  loaded: boolean;
+  isReady: boolean;
   backgroundStyle: React.CSSProperties;
   backgroundClass: string;
   onLoad: () => void;
@@ -843,6 +1016,7 @@ function FullscreenModeViewer({
   onExitOverlay: () => void;
   onEnterTheater: () => void;
   onEnterFullscreen: () => void;
+  onFullscreenActiveChange: (isActive: boolean) => void;
 }) {
   const [fullscreenTarget, setFullscreenTarget] =
     useState<HTMLDivElement | null>(null);
@@ -862,7 +1036,9 @@ function FullscreenModeViewer({
     let isMounted = true;
     const handleChange = () => {
       if (!isMounted) return;
-      setIsFullscreenActive(document.fullscreenElement === fullscreenTarget);
+      const active = document.fullscreenElement === fullscreenTarget;
+      setIsFullscreenActive(active);
+      onFullscreenActiveChange(active);
     };
 
     document.addEventListener("fullscreenchange", handleChange);
@@ -879,28 +1055,36 @@ function FullscreenModeViewer({
 
   const fullscreenClass = cn(
     "fixed inset-0 z-50 bg-black transition-opacity",
-    isFullscreenActive ? "opacity-100" : "pointer-events-none opacity-0",
+    isReady ? "opacity-100" : "pointer-events-none opacity-0",
   );
 
   return (
-    <PanModeViewer
-      fileUrl={fileUrl}
-      fileId={fileId}
-      fitScale={fitScale}
-      containerSize={containerSize}
-      onContainerRef={handleFullscreenRef}
-      imageRef={imageRef}
-      imageStyle={imageStyle}
-      imageClassName={imageClassName}
-      backgroundStyle={backgroundStyle}
-      backgroundClass={backgroundClass}
-      containerClass={fullscreenClass}
-      isFullscreen={true}
-      onLoad={onLoad}
-      onError={onError}
-      onExitOverlay={onExitOverlay}
-      onEnterTheater={onEnterTheater}
-      onEnterFullscreen={onEnterFullscreen}
-    />
+    <div
+      ref={handleFullscreenRef}
+      style={backgroundStyle}
+      className={cn(fullscreenClass, backgroundClass)}
+    >
+      {isReady && (
+        <PanModeViewer
+          fileUrl={fileUrl}
+          fileId={fileId}
+          fitScale={fitScale}
+          containerSize={containerSize}
+          onContainerRef={undefined}
+          imageRef={imageRef}
+          imageStyle={imageStyle}
+          imageClassName={imageClassName}
+          backgroundStyle={{}}
+          backgroundClass=""
+          containerClass="h-full w-full"
+          isFullscreen={true}
+          onLoad={onLoad}
+          onError={onError}
+          onExitOverlay={onExitOverlay}
+          onEnterTheater={onEnterTheater}
+          onEnterFullscreen={onEnterFullscreen}
+        />
+      )}
+    </div>
   );
 }
