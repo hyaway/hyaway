@@ -21,6 +21,10 @@ import {
 } from "@/stores/file-viewer-settings-store";
 import { Toggle } from "@/components/ui-primitives/toggle";
 
+// ============================================================================
+// Types
+// ============================================================================
+
 interface ImageViewerV2Props {
   fileUrl: string;
   fileId: number;
@@ -29,7 +33,87 @@ interface ImageViewerV2Props {
   onError: () => void;
 }
 
-// Controls for pan mode - must be inside TransformWrapper
+type OverlayMode = "theater" | "fullscreen" | null;
+
+// ============================================================================
+// Hooks
+// ============================================================================
+
+/** Hook to get background style and class based on settings */
+function useBackgroundStyles(
+  loaded: boolean,
+  averageColor: string | undefined,
+) {
+  const imageBackground = useImageBackground();
+  const fillCanvasBackground = useFillCanvasBackground();
+
+  const style = useMemo(() => {
+    if (fillCanvasBackground && loaded && averageColor) {
+      return { backgroundColor: averageColor };
+    }
+    return {};
+  }, [fillCanvasBackground, loaded, averageColor]);
+
+  const className = useMemo(() => {
+    if (fillCanvasBackground && loaded) return "";
+
+    switch (imageBackground) {
+      case "checkerboard":
+        return "bg-checkered";
+      case "solid":
+        return "bg-background";
+      case "average":
+        return "";
+      default:
+        return "bg-background";
+    }
+  }, [imageBackground, fillCanvasBackground, loaded]);
+
+  return { style, className };
+}
+
+/** Hook to track container size for responsive fit scale */
+function useContainerSize(container: HTMLElement | null) {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  const handleResize = useCallback(() => {
+    if (container) {
+      const rect = container.getBoundingClientRect();
+      setSize({ width: rect.width, height: rect.height });
+    }
+  }, [container]);
+
+  useEffect(() => {
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [handleResize]);
+
+  return size;
+}
+
+/** Hook to load image natural size */
+function useImageNaturalSize(src: string, enabled: boolean) {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const image = new Image();
+    image.onload = () => {
+      setSize({ width: image.naturalWidth, height: image.naturalHeight });
+    };
+    image.src = src;
+  }, [src, enabled]);
+
+  return size;
+}
+
+// ============================================================================
+// Subcomponents
+// ============================================================================
+
+/** Controls toolbar for pan mode - must be inside TransformWrapper */
 function PanModeControls({
   onExitOverlay,
   onToggleFullscreen,
@@ -117,6 +201,206 @@ function PanModeControls({
   );
 }
 
+/** Controls toolbar for normal mode */
+function NormalModeControls({
+  onEnterTheater,
+  onEnterFullscreen,
+}: {
+  onEnterTheater: () => void;
+  onEnterFullscreen: () => void;
+}) {
+  return (
+    <div className="bg-card/90 absolute right-4 bottom-4 z-10 flex gap-1 rounded-md border p-1 opacity-0 shadow-lg backdrop-blur-sm transition-opacity group-hover:opacity-100">
+      <Toggle
+        variant="outline"
+        size="sm"
+        pressed={false}
+        onClick={(e) => {
+          e.stopPropagation();
+          onEnterTheater();
+        }}
+        title="Theater mode"
+      >
+        <IconArrowsMaximize className="size-4" />
+      </Toggle>
+
+      <Toggle
+        variant="outline"
+        size="sm"
+        pressed={false}
+        onClick={(e) => {
+          e.stopPropagation();
+          onEnterFullscreen();
+        }}
+        title="Fullscreen"
+      >
+        <IconMaximize className="size-4" />
+      </Toggle>
+    </div>
+  );
+}
+
+/** Normal mode viewer - simple image with fit/expand toggle */
+function NormalModeViewer({
+  fileUrl,
+  fileId,
+  blurhash,
+  averageColor,
+  loaded,
+  isExpanded,
+  containerRef,
+  imageRef,
+  backgroundStyle,
+  backgroundClass,
+  containerClass,
+  onToggleZoom,
+  onLoad,
+  onError,
+  onEnterTheater,
+  onEnterFullscreen,
+}: {
+  fileUrl: string;
+  fileId: number;
+  blurhash?: string;
+  averageColor: string | undefined;
+  loaded: boolean;
+  isExpanded: boolean;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  imageRef: React.RefObject<HTMLImageElement | null>;
+  backgroundStyle: React.CSSProperties;
+  backgroundClass: string;
+  containerClass: string;
+  onToggleZoom: () => void;
+  onLoad: () => void;
+  onError: () => void;
+  onEnterTheater: () => void;
+  onEnterFullscreen: () => void;
+}) {
+  return (
+    <div
+      ref={containerRef}
+      style={backgroundStyle}
+      className={cn(
+        "group relative flex items-center justify-center overflow-hidden",
+        containerClass,
+        backgroundClass,
+        isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
+      )}
+      onClick={onToggleZoom}
+    >
+      {/* Blurhash placeholder */}
+      {!loaded && blurhash && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className="bg-muted size-full animate-pulse"
+            style={{ backgroundColor: averageColor || undefined }}
+          />
+        </div>
+      )}
+
+      {/* Image */}
+      <img
+        ref={imageRef}
+        key={fileId}
+        src={fileUrl}
+        alt=""
+        className={cn(
+          "transition-opacity duration-300",
+          loaded ? "opacity-100" : "opacity-0",
+          isExpanded ? "max-w-full" : "max-h-full max-w-full object-contain",
+        )}
+        onLoad={onLoad}
+        onError={onError}
+        draggable={false}
+      />
+
+      <NormalModeControls
+        onEnterTheater={onEnterTheater}
+        onEnterFullscreen={onEnterFullscreen}
+      />
+    </div>
+  );
+}
+
+/** Pan mode viewer - zoom/pan with TransformWrapper */
+function PanModeViewer({
+  fileUrl,
+  fileId,
+  fitScale,
+  containerSize,
+  onContainerRef,
+  imageRef,
+  backgroundStyle,
+  backgroundClass,
+  containerClass,
+  isFullscreen,
+  onLoad,
+  onError,
+  onExitOverlay,
+  onToggleFullscreen,
+}: {
+  fileUrl: string;
+  fileId: number;
+  fitScale: number;
+  containerSize: { width: number; height: number };
+  onContainerRef: (el: HTMLDivElement | null) => void;
+  imageRef: React.RefObject<HTMLImageElement | null>;
+  backgroundStyle: React.CSSProperties;
+  backgroundClass: string;
+  containerClass: string;
+  isFullscreen: boolean;
+  onLoad: () => void;
+  onError: () => void;
+  onExitOverlay: () => void;
+  onToggleFullscreen: () => void;
+}) {
+  return (
+    <div
+      ref={onContainerRef}
+      style={backgroundStyle}
+      className={cn(
+        "group relative h-full w-full overflow-hidden",
+        containerClass,
+        backgroundClass,
+      )}
+    >
+      {fitScale > 0 && (
+        <TransformWrapper
+          key={`${containerSize.width}x${containerSize.height}`}
+          // Fit if larger, original size if smaller (never scale up beyond 100%)
+          initialScale={Math.min(1, fitScale)}
+          minScale={Math.min(1, fitScale)}
+          maxScale={Math.max(1, fitScale) * 8}
+          centerOnInit
+          doubleClick={{ disabled: false, mode: "reset" }}
+        >
+          <PanModeControls
+            onExitOverlay={onExitOverlay}
+            onToggleFullscreen={onToggleFullscreen}
+            isFullscreen={isFullscreen}
+          />
+
+          <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
+            <img
+              ref={imageRef}
+              key={fileId}
+              src={fileUrl}
+              alt=""
+              onLoad={onLoad}
+              onError={onError}
+              draggable={false}
+            />
+          </TransformComponent>
+        </TransformWrapper>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
 export function ImageViewerV2({
   fileUrl,
   fileId,
@@ -125,61 +409,77 @@ export function ImageViewerV2({
   onError,
 }: ImageViewerV2Props) {
   const startExpanded = useFileViewerStartExpanded();
-  const imageBackground = useImageBackground();
-  const fillCanvasBackground = useFillCanvasBackground();
 
-  // Overlay mode: theater or fullscreen (null = normal view)
-  const [overlayMode, setOverlayMode] = useState<
-    "theater" | "fullscreen" | null
-  >(null);
-
-  // Normal mode: fit or expanded (1x)
+  // State
+  const [overlayMode, setOverlayMode] = useState<OverlayMode>(null);
   const [isExpanded, setIsExpanded] = useState(startExpanded);
-
   const [loaded, setLoaded] = useState(false);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
 
+  // Refs
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
+  // Derived state
   const isFullscreen = overlayMode === "fullscreen";
   const isTheater = overlayMode === "theater";
   const isPannable = isFullscreen || isTheater;
 
+  // Computed values
   const averageColor = useMemo(
     () => getAverageColorFromBlurhash(blurhash),
     [blurhash],
   );
 
-  const handleLoad = () => {
+  const containerSize = useContainerSize(container);
+  const imageNaturalSize = useImageNaturalSize(fileUrl, isPannable);
+  const { style: backgroundStyle, className: backgroundClass } =
+    useBackgroundStyles(loaded, averageColor);
+
+  // Calculate fit scale for pan mode
+  const fitScale = useMemo(() => {
+    if (
+      containerSize.width === 0 ||
+      containerSize.height === 0 ||
+      imageNaturalSize.width === 0 ||
+      imageNaturalSize.height === 0
+    ) {
+      return 0;
+    }
+    return Math.min(
+      containerSize.width / imageNaturalSize.width,
+      containerSize.height / imageNaturalSize.height,
+    );
+  }, [containerSize, imageNaturalSize]);
+
+  // Container class based on mode
+  const containerClass = useMemo(() => {
+    if (overlayMode === "theater") return "fixed inset-0 z-50 bg-black/95";
+    if (overlayMode === "fullscreen") return "bg-black";
+    return isExpanded ? viewerMinHeight : viewerFixedHeight;
+  }, [overlayMode, isExpanded]);
+
+  // Handlers
+  const handleLoad = useCallback(() => {
     setLoaded(true);
     onLoad();
-  };
+  }, [onLoad]);
 
-  // Enter theater mode
-  const enterTheater = useCallback(() => {
-    setOverlayMode("theater");
-  }, []);
+  const enterTheater = useCallback(() => setOverlayMode("theater"), []);
 
-  // Enter fullscreen mode
   const enterFullscreen = useCallback(() => {
     containerRef.current?.requestFullscreen();
     setOverlayMode("fullscreen");
   }, []);
 
-  // Exit overlay (theater or fullscreen)
   const exitOverlay = useCallback(() => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
+    if (document.fullscreenElement) document.exitFullscreen();
     setOverlayMode(null);
   }, []);
 
-  // Toggle fullscreen
   const toggleFullscreen = useCallback(() => {
     if (isFullscreen) {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      }
+      if (document.fullscreenElement) document.exitFullscreen();
       setOverlayMode("theater");
     } else {
       containerRef.current?.requestFullscreen();
@@ -187,7 +487,14 @@ export function ImageViewerV2({
     }
   }, [isFullscreen]);
 
-  // Listen for fullscreen changes (e.g., user presses Esc)
+  const toggleNormalZoom = useCallback(() => {
+    setIsExpanded((prev) => {
+      if (prev) window.scrollTo({ top: 0, behavior: "auto" });
+      return !prev;
+    });
+  }, []);
+
+  // Effects
   useEffect(() => {
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement && isFullscreen) {
@@ -199,178 +506,65 @@ export function ImageViewerV2({
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, [isFullscreen]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     if (!isPannable) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        exitOverlay();
-      }
+      if (e.key === "Escape") exitOverlay();
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isPannable, exitOverlay]);
 
-  // Toggle normal mode zoom
-  const toggleNormalZoom = () => {
-    setIsExpanded((prev) => {
-      if (prev) {
-        // Going from expanded to fit - scroll to top
-        window.scrollTo({ top: 0, behavior: "auto" });
-      }
-      return !prev;
-    });
-  };
-
-  // Get background style
-  const getBackgroundStyle = () => {
-    if (fillCanvasBackground && loaded && averageColor) {
-      return { backgroundColor: averageColor };
-    }
-    return {};
-  };
-
-  const getBackgroundClass = () => {
-    if (fillCanvasBackground && loaded) return "";
-
-    switch (imageBackground) {
-      case "checkerboard":
-        return "bg-checkered";
-      case "solid":
-        return "bg-background";
-      case "average":
-        return "";
-      default:
-        return "bg-background";
-    }
-  };
-
-  // Container classes for overlay modes
-  const getContainerClass = () => {
-    if (overlayMode === "theater") {
-      return "fixed inset-0 z-50 bg-black/95";
-    }
-    if (overlayMode === "fullscreen") {
-      return "bg-black";
-    }
-    // Normal mode: use height classes
-    return isExpanded ? viewerMinHeight : viewerFixedHeight;
-  };
-
-  // Normal mode: simple image display
+  // Render
   if (!isPannable) {
     return (
-      <div
-        ref={containerRef}
-        style={getBackgroundStyle()}
-        className={cn(
-          "group relative flex items-center justify-center overflow-hidden",
-          getContainerClass(),
-          getBackgroundClass(),
-          isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
-        )}
-        onClick={toggleNormalZoom}
-      >
-        {/* Blurhash placeholder */}
-        {!loaded && blurhash && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div
-              className="bg-muted size-full animate-pulse"
-              style={{ backgroundColor: averageColor || undefined }}
-            />
-          </div>
-        )}
-
-        {/* Image */}
-        <img
-          ref={imageRef}
-          key={fileId}
-          src={fileUrl}
-          alt=""
-          className={cn(
-            "transition-opacity duration-300",
-            loaded ? "opacity-100" : "opacity-0",
-            isExpanded
-              ? "max-w-full" // Expanded: only constrain width, allow natural height
-              : "max-h-full max-w-full object-contain", // Fit: constrain both dimensions
-          )}
-          onLoad={handleLoad}
-          onError={onError}
-          draggable={false}
-        />
-
-        {/* Controls */}
-        <div className="bg-card/90 absolute right-4 bottom-4 z-10 flex gap-1 rounded-md border p-1 opacity-0 shadow-lg backdrop-blur-sm transition-opacity group-hover:opacity-100">
-          <Toggle
-            variant="outline"
-            size="sm"
-            pressed={false}
-            onClick={(e) => {
-              e.stopPropagation();
-              enterTheater();
-            }}
-            title="Theater mode"
-          >
-            <IconArrowsMaximize className="size-4" />
-          </Toggle>
-
-          <Toggle
-            variant="outline"
-            size="sm"
-            pressed={false}
-            onClick={(e) => {
-              e.stopPropagation();
-              enterFullscreen();
-            }}
-            title="Fullscreen"
-          >
-            <IconMaximize className="size-4" />
-          </Toggle>
-        </div>
-      </div>
+      <NormalModeViewer
+        fileUrl={fileUrl}
+        fileId={fileId}
+        blurhash={blurhash}
+        averageColor={averageColor}
+        loaded={loaded}
+        isExpanded={isExpanded}
+        containerRef={containerRef}
+        imageRef={imageRef}
+        backgroundStyle={backgroundStyle}
+        backgroundClass={backgroundClass}
+        containerClass={containerClass}
+        onToggleZoom={toggleNormalZoom}
+        onLoad={handleLoad}
+        onError={onError}
+        onEnterTheater={enterTheater}
+        onEnterFullscreen={enterFullscreen}
+      />
     );
   }
 
-  // Pan mode: TransformWrapper for zoom/pan
-  return (
-    <div
-      ref={containerRef}
-      style={getBackgroundStyle()}
-      className={cn(
-        "group relative flex h-full w-full items-center justify-center overflow-hidden",
-        getContainerClass(),
-        getBackgroundClass(),
-      )}
-    >
-      <TransformWrapper
-        initialScale={1}
-        minScale={0.1}
-        maxScale={10}
-        centerOnInit={true}
-        limitToBounds={true}
-        centerZoomedOut={true}
-        panning={{ velocityDisabled: false }}
-        doubleClick={{ disabled: false, mode: "reset" }}
-      >
-        <PanModeControls
-          onExitOverlay={exitOverlay}
-          onToggleFullscreen={toggleFullscreen}
-          isFullscreen={isFullscreen}
-        />
+  // Combined ref callback for pan mode
+  const handleContainerRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      setContainer(el);
+      containerRef.current = el;
+    },
+    [setContainer],
+  );
 
-        <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
-          <img
-            ref={imageRef}
-            key={fileId}
-            src={fileUrl}
-            alt=""
-            onLoad={handleLoad}
-            onError={onError}
-            draggable={false}
-          />
-        </TransformComponent>
-      </TransformWrapper>
-    </div>
+  return (
+    <PanModeViewer
+      fileUrl={fileUrl}
+      fileId={fileId}
+      fitScale={fitScale}
+      containerSize={containerSize}
+      onContainerRef={handleContainerRef}
+      imageRef={imageRef}
+      backgroundStyle={backgroundStyle}
+      backgroundClass={backgroundClass}
+      containerClass={containerClass}
+      isFullscreen={isFullscreen}
+      onLoad={handleLoad}
+      onError={onError}
+      onExitOverlay={exitOverlay}
+      onToggleFullscreen={toggleFullscreen}
+    />
   );
 }
