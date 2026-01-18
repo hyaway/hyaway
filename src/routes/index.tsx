@@ -228,7 +228,7 @@ function LandingPage() {
   const isConfigured = useIsApiConfigured();
 
   return (
-    <div className="flex flex-col gap-12 pb-8">
+    <div className="flex flex-col gap-12">
       {isConfigured ? <WelcomeHeader /> : <MarketingHeader />}
       <ShortcutsGrid />
       <AboutSection />
@@ -467,6 +467,15 @@ function AboutSection() {
               hydrus network
             </a>
             .
+          </p>
+          <p className="text-muted-foreground text-sm">
+            <a href="/LICENSE.txt" className="text-primary hover:underline">
+              License
+            </a>
+            {" · "}
+            <a href="/NOTICE.txt" className="text-primary hover:underline">
+              Notice
+            </a>
           </p>
         </div>
         <div className="flex items-center gap-3">
