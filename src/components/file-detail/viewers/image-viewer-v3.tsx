@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IconArrowsMaximize, IconMaximize } from "@tabler/icons-react";
+import { IconArrowsMaximize, IconMaximize, IconX } from "@tabler/icons-react";
 import {
   TransformComponent,
   TransformWrapper,
@@ -344,6 +344,7 @@ export function ImageViewerV3({
                     isFullscreen={isFullscreen}
                     onToggleTheater={toggleTheater}
                     onToggleFullscreen={toggleFullscreen}
+                    onExit={returnInline}
                     onSetZoomIntent={(intent) => {
                       setZoomIntent(intent);
                     }}
@@ -371,15 +372,20 @@ export function ImageViewerV3({
                       },
                     }}
                   >
-                    <img
-                      src={fileUrl}
-                      alt={`File ${fileId}`}
-                      style={imageStyle}
-                      className={cn("max-h-none max-w-none", imageClassName)}
-                      onLoad={handleImageLoad}
-                      onError={onError}
-                      draggable={false}
-                    />
+                    <div className="inline-block pb-[calc(4rem+env(safe-area-inset-bottom))]">
+                      <img
+                        src={fileUrl}
+                        alt={`File ${fileId}`}
+                        style={imageStyle}
+                        className={cn(
+                          "block max-h-none max-w-none",
+                          imageClassName,
+                        )}
+                        onLoad={handleImageLoad}
+                        onError={onError}
+                        draggable={false}
+                      />
+                    </div>
                   </TransformComponent>
                 </>
               )}
@@ -492,7 +498,7 @@ function InlineViewer({
         alt={`File ${fileId}`}
         style={imageStyle}
         className={cn(
-          "transition-opacity duration-300",
+          "block transition-opacity duration-300",
           loaded ? "opacity-100" : "opacity-0",
           imageClassName,
           isExpanded ? "max-w-full" : "max-h-full max-w-full object-contain",
@@ -556,6 +562,7 @@ function OverlayControls({
   isFullscreen,
   onToggleTheater,
   onToggleFullscreen,
+  onExit,
   onSetZoomIntent,
 }: {
   fitScale: number;
@@ -565,6 +572,7 @@ function OverlayControls({
   isFullscreen: boolean;
   onToggleTheater: () => void;
   onToggleFullscreen: () => void;
+  onExit: () => void;
   onSetZoomIntent: (intent: ZoomIntent) => void;
 }) {
   const { centerView } = useControls();
@@ -580,7 +588,7 @@ function OverlayControls({
   }, [centerView, fitScale, onSetZoomIntent]);
 
   return (
-    <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 absolute right-4 bottom-4 z-10 flex gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
+    <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
       <Toggle
         variant="outline"
         size="sm"
@@ -633,6 +641,21 @@ function OverlayControls({
         title="Fullscreen"
       >
         <IconMaximize className="size-4" />
+      </Toggle>
+
+      <div className="bg-border mx-1 w-px" />
+
+      <Toggle
+        variant="outline"
+        size="sm"
+        pressed={false}
+        onClick={(event) => {
+          event.stopPropagation();
+          onExit();
+        }}
+        title="Exit viewer"
+      >
+        <IconX className="size-4" />
       </Toggle>
     </div>
   );
