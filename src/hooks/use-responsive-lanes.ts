@@ -146,6 +146,10 @@ export function useResponsiveLanes(
   // Apply min/max lanes constraints
   const constrainedLanes = Math.max(minLanes, Math.min(desiredLanes, maxLanes));
 
+  // Clamp lanes based on item count - use exactly itemCount when fewer items than columns
+  const lanes =
+    itemCount < constrainedLanes ? Math.max(itemCount, 1) : constrainedLanes;
+
   // Check if minLanes forced more lanes than would naturally fit
   const minLanesForced = desiredLanes < minLanes;
 
@@ -159,12 +163,8 @@ export function useResponsiveLanes(
   // - Fixed: width = defaultWidth (items are their configured size, gap is implicit)
   const newWidth =
     expandImages || minLanesForced
-      ? Math.floor(containerWidth / constrainedLanes - horizontalGap)
+      ? Math.floor(containerWidth / lanes - horizontalGap)
       : defaultWidth;
-
-  // Clamp lanes based on item count
-  const lanes =
-    itemCount < constrainedLanes ? Math.max(itemCount, 2) : constrainedLanes;
 
   const finalWidth = newWidth > 0 ? newWidth : defaultWidth;
 
