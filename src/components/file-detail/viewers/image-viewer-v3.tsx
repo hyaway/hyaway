@@ -280,6 +280,7 @@ export function ImageViewerV3({
               centerOnInit={true}
               limitToBounds={true}
               alignmentAnimation={{ sizeX: 1000, sizeY: 1000 }}
+              wheel={{ step: 0.06, smoothStep: 0.0025 }}
               doubleClick={{ disabled: true }}
               onWheelStart={() => {
                 isZoomingRef.current = true;
