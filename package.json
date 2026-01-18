@@ -24,7 +24,10 @@
     "typecheck": "tsc --noEmit",
     "check": "prettier --write . && eslint --fix",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
@@ -86,6 +89,7 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^5.1.4",
+    "vitepress": "^1.6.4",
     "vitest": "^4.0.16",
     "web-vitals": "^5.1.0"
   }
