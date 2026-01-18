@@ -7,6 +7,7 @@ import {
   useTransformEffect,
 } from "react-zoom-pan-pinch";
 import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
+import type { ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import { cn } from "@/lib/utils";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import {
@@ -52,11 +53,13 @@ export function ImageViewerV3({
   const overlayRootRef = useRef<HTMLDivElement>(null);
   const overlayStageRef = useRef<HTMLDivElement>(null);
   const currentScaleRef = useRef(1);
+  const currentPositionRef = useRef({ x: 0, y: 0 });
   const zoomIntentRef = useRef<ZoomIntent>("fit");
   const hasNotifiedLoadRef = useRef(false);
   const isZoomingRef = useRef(false);
   const isPanningRef = useRef(false);
   const [isPanning, setIsPanning] = useState(false);
+  const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
 
   const isOverlayActive = viewerMode !== "inline";
   const isTheater = viewerMode === "theater";
@@ -124,6 +127,10 @@ export function ImageViewerV3({
 
   const setCurrentScale = useCallback((scale: number) => {
     currentScaleRef.current = scale;
+  }, []);
+
+  const setCurrentPosition = useCallback((x: number, y: number) => {
+    currentPositionRef.current = { x, y };
   }, []);
 
   const getCurrentScale = useCallback(() => currentScaleRef.current, []);
@@ -211,6 +218,190 @@ export function ImageViewerV3({
   }, [isOverlayActive, returnInline]);
 
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+      const target = event.target as HTMLElement | null;
+      if (target?.isContentEditable) return;
+      const tagName = target?.tagName;
+      if (
+        tagName === "INPUT" ||
+        tagName === "TEXTAREA" ||
+        tagName === "SELECT"
+      ) {
+        return;
+      }
+
+      if (event.key === "t" || event.key === "T") {
+        event.preventDefault();
+        toggleTheater();
+        return;
+      }
+
+      if (event.key === "f" || event.key === "F") {
+        event.preventDefault();
+        toggleFullscreen();
+        return;
+      }
+
+      if (!isOverlayActive && (event.key === "z" || event.key === "Z")) {
+        event.preventDefault();
+        toggleInlineExpanded();
+        return;
+      }
+
+      if (!isOverlayActive) return;
+
+      const controls = transformRef.current;
+      if (!controls) return;
+
+      const panStep = 40;
+      const { x, y } = currentPositionRef.current;
+      const currentScale = currentScaleRef.current;
+
+      switch (event.key) {
+        case "+":
+        case "=":
+          event.preventDefault();
+          controls.zoomIn(0.2, 150, "easeOut");
+          return;
+        case "-":
+          event.preventDefault();
+          controls.zoomOut(0.2, 150, "easeOut");
+          return;
+        case "0":
+          event.preventDefault();
+          controls.centerView(fitScale, 0, "linear");
+          return;
+        case "z":
+        case "Z": {
+          event.preventDefault();
+          const nearOneX = isNearScale(currentScale, 1);
+          const targetScale = nearOneX
+            ? fitScale
+            : Math.min(MAX_ZOOM, Math.max(fitScale, 1));
+          controls.centerView(targetScale, 0, "linear");
+          return;
+        }
+        case "ArrowUp":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          controls.setTransform(x, y + panStep, currentScale, 0, "linear");
+          return;
+        case "ArrowDown":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          controls.setTransform(x, y - panStep, currentScale, 0, "linear");
+          return;
+        case "ArrowLeft":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          controls.setTransform(x + panStep, y, currentScale, 0, "linear");
+          return;
+        case "ArrowRight":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          controls.setTransform(x - panStep, y, currentScale, 0, "linear");
+          return;
+        default:
+          return;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [fitScale, isOverlayActive, toggleFullscreen, toggleTheater]);
+
+  useEffect(() => {
+    if (!isOverlayActive) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+      const target = event.target as HTMLElement | null;
+      if (target?.isContentEditable) return;
+      const tagName = target?.tagName;
+      if (
+        tagName === "INPUT" ||
+        tagName === "TEXTAREA" ||
+        tagName === "SELECT"
+      ) {
+        return;
+      }
+
+      const controls = transformRef.current;
+      if (!controls) return;
+
+      const panStep = 40;
+      const { x, y } = currentPositionRef.current;
+      const currentScale = currentScaleRef.current;
+
+      switch (event.key) {
+        case "+":
+        case "=":
+          event.preventDefault();
+          controls.zoomIn(0.2, 150, "easeOut");
+          return;
+        case "-":
+          event.preventDefault();
+          controls.zoomOut(0.2, 150, "easeOut");
+          return;
+        case "0":
+          event.preventDefault();
+          controls.centerView(fitScale, 0, "linear");
+          return;
+        case "z":
+        case "Z": {
+          event.preventDefault();
+          const nearOneX = isNearScale(currentScale, 1);
+          const targetScale = nearOneX
+            ? fitScale
+            : Math.min(MAX_ZOOM, Math.max(fitScale, 1));
+          controls.centerView(targetScale, 0, "linear");
+          return;
+        }
+        case "t":
+        case "T":
+          event.preventDefault();
+          toggleTheater();
+          return;
+        case "f":
+        case "F":
+          event.preventDefault();
+          toggleFullscreen();
+          return;
+        case "ArrowUp":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          controls.setTransform(x, y + panStep, currentScale, 0, "linear");
+          return;
+        case "ArrowDown":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          controls.setTransform(x, y - panStep, currentScale, 0, "linear");
+          return;
+        case "ArrowLeft":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          controls.setTransform(x + panStep, y, currentScale, 0, "linear");
+          return;
+        case "ArrowRight":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          controls.setTransform(x - panStep, y, currentScale, 0, "linear");
+          return;
+        default:
+          return;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [fitScale, isOverlayActive, toggleFullscreen, toggleTheater]);
+
+  useEffect(() => {
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement && isFullscreen) {
         returnInline();
@@ -232,6 +423,11 @@ export function ImageViewerV3({
     return () => {
       body.style.overflow = previousOverflow;
     };
+  }, [isOverlayActive]);
+
+  useEffect(() => {
+    if (!isOverlayActive) return;
+    overlayStageRef.current?.focus();
   }, [isOverlayActive]);
 
   const overlayRootClass = cn(
@@ -276,6 +472,7 @@ export function ImageViewerV3({
         >
           {overlayReady && (
             <TransformWrapper
+              ref={transformRef}
               minScale={minScale}
               maxScale={MAX_ZOOM}
               initialScale={fitScale}
@@ -310,6 +507,7 @@ export function ImageViewerV3({
                   <OverlayTransformState
                     fitScale={fitScale}
                     onScaleChange={setCurrentScale}
+                    onPositionChange={setCurrentPosition}
                     onZoomIntentChange={setZoomIntent}
                     onFitChange={setIsAtFit}
                     onOneXChange={setIsAt1x}
@@ -735,12 +933,14 @@ function OverlayControls({
 function OverlayTransformState({
   fitScale,
   onScaleChange,
+  onPositionChange,
   onZoomIntentChange,
   onFitChange,
   onOneXChange,
 }: {
   fitScale: number;
   onScaleChange: (scale: number) => void;
+  onPositionChange: (x: number, y: number) => void;
   onZoomIntentChange: (intent: ZoomIntent) => void;
   onFitChange: (value: boolean) => void;
   onOneXChange: (value: boolean) => void;
@@ -750,6 +950,7 @@ function OverlayTransformState({
 
   useTransformEffect(({ state }) => {
     onScaleChange(state.scale);
+    onPositionChange(state.positionX, state.positionY);
     const isAtFit = isNearScale(state.scale, fitScale);
     const isAt1x = isNearScale(state.scale, 1);
 
