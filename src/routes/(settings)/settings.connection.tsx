@@ -30,7 +30,7 @@ function SettingsConnectionComponent() {
         Connect to your Hydrus client's API.
         <br /> Need help?{" "}
         <a
-          href="https://github.com/hyaway/hyaway/blob/main/docs/SETUP.md"
+          href="https://github.com/hyaway/hyaway/blob/main/docs/setup.md"
           target="_blank"
           rel="noopener noreferrer"
           className="text-primary hover:underline"
