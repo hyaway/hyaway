@@ -269,6 +269,10 @@ export function ReviewImageViewer({
     return Math.max(fitScale, minScaleForPixels);
   }, [fitScale, naturalSize]);
 
+  // Very tall images can have a fit scale smaller than the minimum pixel clamp.
+  // In that case, allow fit to be smaller so the full image is visible.
+  const canFitBelowMinZoom = fitScale < minZoom;
+
   // Check if at fit scale
   const isAtFit =
     zoomMode === "fit" || Math.abs(zoomScale - fitScale) <= SCALE_TOLERANCE;
@@ -416,6 +420,7 @@ export function ReviewImageViewer({
   useEffect(() => {
     if (!isTop) return;
     if (isDragging || isPinching) return;
+    if (zoomMode === "fit") return;
     if (naturalSize.width === 0 || naturalSize.height === 0) return;
     if (containerSize.width === 0 || containerSize.height === 0) return;
 
@@ -459,6 +464,7 @@ export function ReviewImageViewer({
     isTop,
     isDragging,
     isPinching,
+    zoomMode,
     naturalSize.width,
     naturalSize.height,
     containerSize.width,
@@ -551,7 +557,8 @@ export function ReviewImageViewer({
       // Avoid spring-centering from an out-of-bounds pan, which can make the
       // image appear to "disappear" and then fly back in.
       if (delta < 0 && newScale <= minZoom + SCALE_TOLERANCE) {
-        const snapsToFit = Math.abs(minZoom - fitScale) <= SCALE_TOLERANCE;
+        const snapsToFit =
+          canFitBelowMinZoom || Math.abs(minZoom - fitScale) <= SCALE_TOLERANCE;
 
         dragX.stop();
         dragY.stop();
@@ -653,6 +660,7 @@ export function ReviewImageViewer({
     [
       minZoom,
       fitScale,
+      canFitBelowMinZoom,
       naturalSize,
       dragX,
       dragY,
@@ -763,7 +771,7 @@ export function ReviewImageViewer({
             const initialScale = scaleMotion.get();
             pinchStateRef.current = {
               initialDistance: distance,
-              initialScale: Math.max(minZoom, initialScale),
+              initialScale: Math.max(fitScale, initialScale),
             };
           }
         }
@@ -779,7 +787,7 @@ export function ReviewImageViewer({
         setIsDragging(false);
       }
     },
-    [isTop, setPinching, minZoom, scaleMotion],
+    [fitScale, isTop, setPinching, scaleMotion],
   );
 
   const handlePointerMove = useCallback(
@@ -815,7 +823,7 @@ export function ReviewImageViewer({
         const initialScale = scaleMotion.get();
         pinchStateRef.current = {
           initialDistance: distance,
-          initialScale: Math.max(minZoom, initialScale),
+          initialScale: Math.max(fitScale, initialScale),
         };
         return;
       }
