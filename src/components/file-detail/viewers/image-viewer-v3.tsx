@@ -139,6 +139,65 @@ export function ImageViewerV3({
     zoomIntentRef.current = intent;
   }, []);
 
+  const clampToBounds = useCallback(
+    (x: number, y: number, scale: number) => {
+      if (
+        overlaySize.width === 0 ||
+        overlaySize.height === 0 ||
+        imageNaturalSize.width === 0 ||
+        imageNaturalSize.height === 0
+      ) {
+        return { x, y };
+      }
+
+      const scaledWidth = imageNaturalSize.width * scale;
+      const scaledHeight = imageNaturalSize.height * scale;
+      const centerX = (overlaySize.width - scaledWidth) / 2;
+      const centerY = (overlaySize.height - scaledHeight) / 2;
+
+      let clampedX = x;
+      let clampedY = y;
+
+      if (scaledWidth <= overlaySize.width) {
+        clampedX = centerX;
+      } else {
+        const minX = overlaySize.width - scaledWidth;
+        clampedX = Math.min(0, Math.max(minX, clampedX));
+      }
+
+      if (scaledHeight <= overlaySize.height) {
+        clampedY = centerY;
+      } else {
+        const minY = overlaySize.height - scaledHeight;
+        clampedY = Math.min(0, Math.max(minY, clampedY));
+      }
+
+      return { x: clampedX, y: clampedY };
+    },
+    [imageNaturalSize, overlaySize],
+  );
+
+  const getVerticalBoundY = useCallback(
+    (scale: number, edge: "top" | "bottom") => {
+      if (
+        overlaySize.height === 0 ||
+        imageNaturalSize.height === 0 ||
+        scale === 0
+      ) {
+        return 0;
+      }
+
+      const scaledHeight = imageNaturalSize.height * scale;
+      if (scaledHeight <= overlaySize.height) {
+        return (overlaySize.height - scaledHeight) / 2;
+      }
+
+      const minY = overlaySize.height - scaledHeight;
+      return edge === "top" ? 0 : minY;
+    },
+    [imageNaturalSize.height, overlaySize.height],
+  );
+
   const bumpModeToken = useCallback(() => {
     setModeChangeToken((prev) => prev + 1);
   }, []);
@@ -288,25 +347,119 @@ export function ImageViewerV3({
         case "Numpad8":
           if (currentScale <= fitScale + SCALE_TOLERANCE) return;
           event.preventDefault();
-          controls.setTransform(x, y + panStep, currentScale, 0, "linear");
+          {
+            const clamped = clampToBounds(x, y + panStep, currentScale);
+            controls.setTransform(
+              clamped.x,
+              clamped.y,
+              currentScale,
+              0,
+              "linear",
+            );
+          }
           return;
         case "ArrowDown":
         case "Numpad2":
           if (currentScale <= fitScale + SCALE_TOLERANCE) return;
           event.preventDefault();
-          controls.setTransform(x, y - panStep, currentScale, 0, "linear");
+          {
+            const clamped = clampToBounds(x, y - panStep, currentScale);
+            controls.setTransform(
+              clamped.x,
+              clamped.y,
+              currentScale,
+              0,
+              "linear",
+            );
+          }
           return;
         case "ArrowLeft":
         case "Numpad4":
           if (currentScale <= fitScale + SCALE_TOLERANCE) return;
           event.preventDefault();
-          controls.setTransform(x + panStep, y, currentScale, 0, "linear");
+          {
+            const clamped = clampToBounds(x + panStep, y, currentScale);
+            controls.setTransform(
+              clamped.x,
+              clamped.y,
+              currentScale,
+              0,
+              "linear",
+            );
+          }
           return;
         case "ArrowRight":
         case "Numpad6":
           if (currentScale <= fitScale + SCALE_TOLERANCE) return;
           event.preventDefault();
-          controls.setTransform(x - panStep, y, currentScale, 0, "linear");
+          {
+            const clamped = clampToBounds(x - panStep, y, currentScale);
+            controls.setTransform(
+              clamped.x,
+              clamped.y,
+              currentScale,
+              0,
+              "linear",
+            );
+          }
+          return;
+        case "PageUp":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          {
+            const clamped = clampToBounds(x, y + panStep * 6, currentScale);
+            controls.setTransform(
+              clamped.x,
+              clamped.y,
+              currentScale,
+              0,
+              "linear",
+            );
+          }
+          return;
+        case "PageDown":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          {
+            const clamped = clampToBounds(x, y - panStep * 6, currentScale);
+            controls.setTransform(
+              clamped.x,
+              clamped.y,
+              currentScale,
+              0,
+              "linear",
+            );
+          }
+          return;
+        case "Home":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          {
+            const targetY = getVerticalBoundY(currentScale, "top");
+            const clamped = clampToBounds(x, targetY, currentScale);
+            controls.setTransform(
+              clamped.x,
+              clamped.y,
+              currentScale,
+              0,
+              "linear",
+            );
+          }
+          return;
+        case "End":
+          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
+          event.preventDefault();
+          {
+            const targetY = getVerticalBoundY(currentScale, "bottom");
+            const clamped = clampToBounds(x, targetY, currentScale);
+            controls.setTransform(
+              clamped.x,
+              clamped.y,
+              currentScale,
+              0,
+              "linear",
+            );
+          }
           return;
         default:
           return;
@@ -315,95 +468,14 @@ export function ImageViewerV3({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [fitScale, isOverlayActive, toggleFullscreen, toggleTheater]);
-
-  useEffect(() => {
-    if (!isOverlayActive) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented) return;
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
-
-      const target = event.target as HTMLElement | null;
-      if (target?.isContentEditable) return;
-      const tagName = target?.tagName;
-      if (
-        tagName === "INPUT" ||
-        tagName === "TEXTAREA" ||
-        tagName === "SELECT"
-      ) {
-        return;
-      }
-
-      const controls = transformRef.current;
-      if (!controls) return;
-
-      const panStep = 40;
-      const { x, y } = currentPositionRef.current;
-      const currentScale = currentScaleRef.current;
-
-      switch (event.key) {
-        case "+":
-        case "=":
-          event.preventDefault();
-          controls.zoomIn(0.2, 150, "easeOut");
-          return;
-        case "-":
-          event.preventDefault();
-          controls.zoomOut(0.2, 150, "easeOut");
-          return;
-        case "0":
-          event.preventDefault();
-          controls.centerView(fitScale, 0, "linear");
-          return;
-        case "z":
-        case "Z": {
-          event.preventDefault();
-          const nearOneX = isNearScale(currentScale, 1);
-          const targetScale = nearOneX
-            ? fitScale
-            : Math.min(MAX_ZOOM, Math.max(fitScale, 1));
-          controls.centerView(targetScale, 0, "linear");
-          return;
-        }
-        case "t":
-        case "T":
-          event.preventDefault();
-          toggleTheater();
-          return;
-        case "f":
-        case "F":
-          event.preventDefault();
-          toggleFullscreen();
-          return;
-        case "ArrowUp":
-          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
-          event.preventDefault();
-          controls.setTransform(x, y + panStep, currentScale, 0, "linear");
-          return;
-        case "ArrowDown":
-          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
-          event.preventDefault();
-          controls.setTransform(x, y - panStep, currentScale, 0, "linear");
-          return;
-        case "ArrowLeft":
-          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
-          event.preventDefault();
-          controls.setTransform(x + panStep, y, currentScale, 0, "linear");
-          return;
-        case "ArrowRight":
-          if (currentScale <= fitScale + SCALE_TOLERANCE) return;
-          event.preventDefault();
-          controls.setTransform(x - panStep, y, currentScale, 0, "linear");
-          return;
-        default:
-          return;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [fitScale, isOverlayActive, toggleFullscreen, toggleTheater]);
+  }, [
+    clampToBounds,
+    fitScale,
+    getVerticalBoundY,
+    isOverlayActive,
+    toggleFullscreen,
+    toggleTheater,
+  ]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -483,7 +555,7 @@ export function ImageViewerV3({
               centerOnInit={true}
               limitToBounds={true}
               alignmentAnimation={{ sizeX: 1000, sizeY: 1000 }}
-              wheel={{ step: 0.06, smoothStep: 0.0025 }}
+              wheel={{ step: 0.06, smoothStep: 0.01 }}
               doubleClick={{ disabled: true }}
               onWheelStart={() => {
                 isZoomingRef.current = true;
