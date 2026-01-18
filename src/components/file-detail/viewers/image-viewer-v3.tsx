@@ -54,6 +54,8 @@ export function ImageViewerV3({
   const currentScaleRef = useRef(1);
   const zoomIntentRef = useRef<ZoomIntent>("fit");
   const hasNotifiedLoadRef = useRef(false);
+  const isZoomingRef = useRef(false);
+  const isPanningRef = useRef(false);
 
   const isOverlayActive = viewerMode !== "inline";
   const isTheater = viewerMode === "theater";
@@ -279,6 +281,24 @@ export function ImageViewerV3({
               limitToBounds={true}
               alignmentAnimation={{ sizeX: 1000, sizeY: 1000 }}
               doubleClick={{ disabled: true }}
+              onWheelStart={() => {
+                isZoomingRef.current = true;
+              }}
+              onWheelStop={() => {
+                isZoomingRef.current = false;
+              }}
+              onPinchingStart={() => {
+                isZoomingRef.current = true;
+              }}
+              onPinchingStop={() => {
+                isZoomingRef.current = false;
+              }}
+              onPanningStart={() => {
+                isPanningRef.current = true;
+              }}
+              onPanningStop={() => {
+                isPanningRef.current = false;
+              }}
             >
               <OverlayTransformState
                 fitScale={fitScale}
@@ -286,6 +306,13 @@ export function ImageViewerV3({
                 onZoomIntentChange={setZoomIntent}
                 onFitChange={setIsAtFit}
                 onOneXChange={setIsAt1x}
+              />
+
+              <OverlayAxisCentering
+                containerSize={overlaySize}
+                imageNaturalSize={imageNaturalSize}
+                isZoomingRef={isZoomingRef}
+                isPanningRef={isPanningRef}
               />
 
               <OverlayFitReset
@@ -586,6 +613,69 @@ function OverlayTransformState({
     }
 
     onZoomIntentChange("free");
+  });
+
+  return null;
+}
+
+function OverlayAxisCentering({
+  containerSize,
+  imageNaturalSize,
+  isZoomingRef,
+  isPanningRef,
+}: {
+  containerSize: { width: number; height: number };
+  imageNaturalSize: { width: number; height: number };
+  isZoomingRef: React.MutableRefObject<boolean>;
+  isPanningRef: React.MutableRefObject<boolean>;
+}) {
+  const { setTransform } = useControls();
+  const lastAppliedRef = useRef({ x: Number.NaN, y: Number.NaN, scale: 1 });
+  const epsilon = 0.5;
+
+  useTransformEffect(({ state }) => {
+    if (!isZoomingRef.current || isPanningRef.current) return;
+    if (
+      containerSize.width === 0 ||
+      containerSize.height === 0 ||
+      imageNaturalSize.width === 0 ||
+      imageNaturalSize.height === 0
+    ) {
+      return;
+    }
+
+    const scaledWidth = imageNaturalSize.width * state.scale;
+    const scaledHeight = imageNaturalSize.height * state.scale;
+    const centerX = (containerSize.width - scaledWidth) / 2;
+    const centerY = (containerSize.height - scaledHeight) / 2;
+    let nextX = state.positionX;
+    let nextY = state.positionY;
+
+    if (scaledWidth <= containerSize.width + epsilon) {
+      nextX = centerX;
+    }
+
+    if (scaledHeight <= containerSize.height + epsilon) {
+      nextY = centerY;
+    }
+
+    if (
+      Math.abs(nextX - state.positionX) < epsilon &&
+      Math.abs(nextY - state.positionY) < epsilon
+    ) {
+      return;
+    }
+
+    if (
+      Math.abs(lastAppliedRef.current.x - nextX) < epsilon &&
+      Math.abs(lastAppliedRef.current.y - nextY) < epsilon &&
+      Math.abs(lastAppliedRef.current.scale - state.scale) < 0.0001
+    ) {
+      return;
+    }
+
+    lastAppliedRef.current = { x: nextX, y: nextY, scale: state.scale };
+    setTransform(nextX, nextY, state.scale, 0, "linear");
   });
 
   return null;
