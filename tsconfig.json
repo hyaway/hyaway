@@ -6,7 +6,9 @@
     "eslint.config.js",
     "prettier.config.js",
     "vite.config.js",
-    ".storybook/*.ts"
+    ".storybook/*.ts",
+    "./docs/.vitepress/theme/index.ts",
+    "./docs/.vitepress/config.ts"
   ],
 
   "compilerOptions": {

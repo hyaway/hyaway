@@ -1,3 +1,14 @@
+node_modules
+.DS_Store
+docs/.vitepress/cache
+docs/.vitepress/dist
+dist
+dist-ssr
+*.local
+count.txt
+.nitro
+.tanstack
+.wrangler
 package-lock.json
 pnpm-lock.yaml
 yarn.lock

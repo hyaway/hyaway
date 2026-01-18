@@ -1,6 +1,7 @@
 // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
 import storybook from "eslint-plugin-storybook";
 import reactCompiler from "eslint-plugin-react-compiler";
+import localPlugin from "./eslint-plugin-local/index.js";
 
 import pluginQuery from "@tanstack/eslint-plugin-query";
 import { tanstackConfig } from "@tanstack/eslint-config";
@@ -13,10 +14,30 @@ export default defineConfig(
   {
     plugins: {
       "react-compiler": reactCompiler,
+      local: localPlugin,
     },
     rules: {
       "react-compiler/react-compiler": "warn",
+      "local/license-header": "error",
     },
   },
-  globalIgnores(["eslint.config.js", "prettier.config.js", "public/**/*.js"]),
+  globalIgnores([
+    // Config files
+    "eslint.config.js",
+    "prettier.config.js",
+    // From .gitignore
+    "node_modules/**",
+    "dist/**",
+    "dist-ssr/**",
+    "docs/.vitepress/cache/**",
+    "docs/.vitepress/dist/**",
+    ".nitro/**",
+    ".tanstack/**",
+    ".wrangler/**",
+    // From .prettierignore
+    "pnpm-lock.yaml",
+    "routeTree.gen.ts",
+    "public/**",
+    "LICENSE",
+  ]),
 );
