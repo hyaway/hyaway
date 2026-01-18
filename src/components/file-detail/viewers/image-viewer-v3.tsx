@@ -56,6 +56,7 @@ export function ImageViewerV3({
   const hasNotifiedLoadRef = useRef(false);
   const isZoomingRef = useRef(false);
   const isPanningRef = useRef(false);
+  const [isPanning, setIsPanning] = useState(false);
 
   const isOverlayActive = viewerMode !== "inline";
   const isTheater = viewerMode === "theater";
@@ -269,6 +270,7 @@ export function ImageViewerV3({
           style={containerStyle}
           className={cn(
             "group relative h-full w-full overflow-hidden",
+            isPanning ? "cursor-grabbing" : "cursor-grab",
             containerClassName,
           )}
         >
@@ -296,9 +298,11 @@ export function ImageViewerV3({
               }}
               onPanningStart={() => {
                 isPanningRef.current = true;
+                setIsPanning(true);
               }}
               onPanningStop={() => {
                 isPanningRef.current = false;
+                setIsPanning(false);
               }}
             >
               {({ centerView, resetTransform }) => (
@@ -378,12 +382,11 @@ export function ImageViewerV3({
                         alt={`File ${fileId}`}
                         style={imageStyle}
                         className={cn(
-                          "block max-h-none max-w-none",
+                          "block max-h-none max-w-none select-none",
                           imageClassName,
                         )}
                         onLoad={handleImageLoad}
                         onError={onError}
-                        draggable={false}
                       />
                     </div>
                   </TransformComponent>
@@ -530,14 +533,13 @@ function InlineViewer({
         alt={`File ${fileId}`}
         style={imageStyle}
         className={cn(
-          "block transition-opacity duration-300",
+          "block transition-opacity duration-300 select-none",
           loaded ? "opacity-100" : "opacity-0",
           imageClassName,
           isExpanded ? "max-w-full" : "max-h-full max-w-full object-contain",
         )}
         onLoad={onLoad}
         onError={onError}
-        draggable={false}
       />
 
       <div
@@ -585,11 +587,12 @@ function InlineModeControls({
           : "absolute right-4",
       )}
     >
-      <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 flex gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
+      <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 flex cursor-default gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
         <Toggle
           variant="outline"
           size="sm"
           pressed={false}
+          className="hover:bg-accent hover:text-accent-foreground"
           onClick={(event) => {
             event.stopPropagation();
             onToggleTheater();
@@ -603,6 +606,7 @@ function InlineModeControls({
           variant="outline"
           size="sm"
           pressed={false}
+          className="hover:bg-accent hover:text-accent-foreground"
           onClick={(event) => {
             event.stopPropagation();
             onToggleFullscreen();
@@ -650,11 +654,12 @@ function OverlayControls({
   }, [centerView, fitScale, onSetZoomIntent]);
 
   return (
-    <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
+    <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 cursor-default gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
       <Toggle
         variant="outline"
         size="sm"
         pressed={isAtFit}
+        className="hover:bg-accent hover:text-accent-foreground"
         onClick={(event) => {
           event.stopPropagation();
           handleFit();
@@ -668,6 +673,7 @@ function OverlayControls({
         variant="outline"
         size="sm"
         pressed={isAt1x}
+        className="hover:bg-accent hover:text-accent-foreground"
         onClick={(event) => {
           event.stopPropagation();
           handleOneX();
@@ -683,6 +689,7 @@ function OverlayControls({
         variant="outline"
         size="sm"
         pressed={isTheater}
+        className="hover:bg-accent hover:text-accent-foreground"
         onClick={(event) => {
           event.stopPropagation();
           onToggleTheater();
@@ -696,6 +703,7 @@ function OverlayControls({
         variant="outline"
         size="sm"
         pressed={isFullscreen}
+        className="hover:bg-accent hover:text-accent-foreground"
         onClick={(event) => {
           event.stopPropagation();
           onToggleFullscreen();
@@ -711,6 +719,7 @@ function OverlayControls({
         variant="outline"
         size="sm"
         pressed={false}
+        className="hover:bg-accent hover:text-accent-foreground"
         onClick={(event) => {
           event.stopPropagation();
           onExit();
