@@ -4,6 +4,7 @@ import {
   IconAlbum,
   IconArchive,
   IconArrowsShuffle,
+  IconBook,
   IconBrandGithub,
   IconBrandX,
   IconCalendarStats,
@@ -466,6 +467,21 @@ function AboutSection() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={
+              <a
+                href="https://docs.hyaway.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            }
+          >
+            <IconBook className="size-4" />
+            Docs
+          </Button>
           <Button
             variant="outline"
             size="sm"
