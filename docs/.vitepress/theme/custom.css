@@ -22,6 +22,9 @@
   --vp-c-brand-2: oklch(0.68 0.16 277);
   --vp-c-brand-3: oklch(0.59 0.2 277);
   --vp-c-brand-soft: oklch(0.79 0.1 275 / 14%);
+
+  /* Fix header border in dark mode */
+  --vp-c-gutter: var(--vp-c-divider);
 }
 
 /* Hero title gradient */
