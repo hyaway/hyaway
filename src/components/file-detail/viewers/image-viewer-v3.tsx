@@ -433,6 +433,10 @@ function InlineViewer({
   const lastTapRef = useRef<{ time: number; x: number; y: number } | null>(
     null,
   );
+  const containerRef = useRef<HTMLDivElement>(null);
+  const bottomSentinelRef = useRef<HTMLDivElement>(null);
+  const [isBottomVisible, setIsBottomVisible] = useState(true);
+  const [isInView, setIsInView] = useState(true);
 
   const handleInlineDoubleTap = useCallback(
     (event: React.TouchEvent<HTMLDivElement>) => {
@@ -468,8 +472,36 @@ function InlineViewer({
     [onToggleTheater],
   );
 
+  useEffect(() => {
+    const container = containerRef.current;
+    const bottomSentinel = bottomSentinelRef.current;
+    if (!container || !bottomSentinel) return;
+
+    const containerObserver = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0 },
+    );
+
+    const bottomObserver = new IntersectionObserver(
+      ([entry]) => {
+        setIsBottomVisible(entry.isIntersecting);
+      },
+      { threshold: 0 },
+    );
+
+    containerObserver.observe(container);
+    bottomObserver.observe(bottomSentinel);
+    return () => {
+      containerObserver.disconnect();
+      bottomObserver.disconnect();
+    };
+  }, []);
+
   return (
     <div
+      ref={containerRef}
       style={backgroundStyle}
       className={cn(
         "group relative flex items-center justify-center overflow-hidden",
@@ -508,7 +540,15 @@ function InlineViewer({
         draggable={false}
       />
 
+      <div
+        ref={bottomSentinelRef}
+        className="absolute right-0 bottom-0 h-px w-px"
+      />
+
       <InlineModeControls
+        isExpanded={isExpanded}
+        isBottomVisible={isBottomVisible}
+        isInView={isInView}
         onToggleTheater={onToggleTheater}
         onToggleFullscreen={onToggleFullscreen}
       />
@@ -517,39 +557,61 @@ function InlineViewer({
 }
 
 function InlineModeControls({
+  isExpanded,
+  isBottomVisible,
+  isInView,
   onToggleTheater,
   onToggleFullscreen,
 }: {
+  isExpanded: boolean;
+  isBottomVisible: boolean;
+  isInView: boolean;
   onToggleTheater: () => void;
   onToggleFullscreen: () => void;
 }) {
-  return (
-    <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 absolute right-4 bottom-4 z-10 flex gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
-      <Toggle
-        variant="outline"
-        size="sm"
-        pressed={false}
-        onClick={(event) => {
-          event.stopPropagation();
-          onToggleTheater();
-        }}
-        title="Theater mode"
-      >
-        <IconArrowsMaximize className="size-4" />
-      </Toggle>
+  if (!isInView) return null;
 
-      <Toggle
-        variant="outline"
-        size="sm"
-        pressed={false}
-        onClick={(event) => {
-          event.stopPropagation();
-          onToggleFullscreen();
-        }}
-        title="Fullscreen"
-      >
-        <IconMaximize className="size-4" />
-      </Toggle>
+  return (
+    <div
+      className={cn(
+        "bottom-4 z-10 flex gap-1 opacity-50 transition-opacity hover:opacity-100",
+        isExpanded
+          ? isBottomVisible
+            ? "short:bottom-8 absolute right-0"
+            : cn(
+                "fixed right-6",
+                "short:bottom-[calc(var(--footer-height-short)+1rem)] bottom-[calc(var(--footer-height)+1rem)] sm:bottom-[calc(var(--footer-height-sm)+1rem)]",
+              )
+          : "absolute right-4",
+      )}
+    >
+      <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 flex gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
+        <Toggle
+          variant="outline"
+          size="sm"
+          pressed={false}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleTheater();
+          }}
+          title="Theater mode"
+        >
+          <IconArrowsMaximize className="size-4" />
+        </Toggle>
+
+        <Toggle
+          variant="outline"
+          size="sm"
+          pressed={false}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleFullscreen();
+          }}
+          title="Fullscreen"
+        >
+          <IconMaximize className="size-4" />
+        </Toggle>
+      </div>
     </div>
   );
 }
@@ -872,7 +934,6 @@ function ZoomBadge() {
   const [scale, setScale] = useState<number | null>(null);
   const lastScaleRef = useRef(Number.NaN);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
