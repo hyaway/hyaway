@@ -1,15 +1,11 @@
-import { useState } from "react";
 import { AudioViewer } from "./viewers/audio-viewer";
 import { DeletedFileViewer } from "./viewers/deleted-file-viewer";
-import { ImageViewerV2 } from "./viewers/image-viewer-v2";
-import { ImageViewerV3 } from "./viewers/image-viewer-v3";
+import { ImageViewer } from "./viewers/image-viewer";
 import { viewerFixedHeight } from "./viewers/style-constants";
 import { UnsupportedFileViewer } from "./viewers/unsupported-file-viewer";
 import { VideoViewer } from "./viewers/video-viewer";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
-import { Switch } from "@/components/ui-primitives/switch";
-import { Label } from "@/components/ui-primitives/label";
 import {
   RenderFormat,
   useFullFileIdUrl,
@@ -27,9 +23,6 @@ export function FileViewerSkeleton() {
 }
 
 export function FileViewer({ data }: { data: FileMetadata }) {
-  // Debug toggle for switching between image viewer versions (temporary)
-  const [useV3Viewer, setUseV3Viewer] = useState(true);
-
   // Check if this is an image project file (PSD, Krita) that needs rendering
   const projectFile = isImageProjectFile(data.mime);
 
@@ -61,28 +54,14 @@ export function FileViewer({ data }: { data: FileMetadata }) {
   const isAudio = data.mime.startsWith("audio/");
 
   if (isImage) {
-    const ImageComponent = useV3Viewer ? ImageViewerV3 : ImageViewerV2;
     return (
-      <>
-        {/* Debug toggle - remove after testing */}
-        <div className="bg-muted/50 absolute top-10 left-2 z-50 flex items-center gap-2 rounded-md px-2 py-1 text-xs opacity-50 transition-opacity hover:opacity-100">
-          <Switch
-            id="viewer-toggle"
-            checked={useV3Viewer}
-            onCheckedChange={setUseV3Viewer}
-          />
-          <Label htmlFor="viewer-toggle" className="cursor-pointer">
-            V3 Viewer
-          </Label>
-        </div>
-        <ImageComponent
-          fileUrl={fileUrl}
-          fileId={data.file_id}
-          blurhash={data.blurhash ?? undefined}
-          onLoad={onLoad}
-          onError={onError}
-        />
-      </>
+      <ImageViewer
+        fileUrl={fileUrl}
+        fileId={data.file_id}
+        blurhash={data.blurhash ?? undefined}
+        onLoad={onLoad}
+        onError={onError}
+      />
     );
   }
 

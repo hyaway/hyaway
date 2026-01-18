@@ -21,7 +21,7 @@ import { Toggle } from "@/components/ui-primitives/toggle";
 const SCALE_TOLERANCE = 0.03;
 const MAX_ZOOM = 4;
 
-interface ImageViewerV3Props {
+interface ImageViewerProps {
   fileUrl: string;
   fileId: number;
   blurhash?: string;
@@ -33,13 +33,13 @@ type ViewerMode = "inline" | "theater" | "fullscreen";
 
 type ZoomIntent = "fit" | "1x" | "free";
 
-export function ImageViewerV3({
+export function ImageViewer({
   fileUrl,
   fileId,
   blurhash,
   onLoad,
   onError,
-}: ImageViewerV3Props) {
+}: ImageViewerProps) {
   const startExpanded = useFileViewerStartExpanded();
   const [viewerMode, setViewerMode] = useState<ViewerMode>("inline");
   const [inlineExpanded, setInlineExpanded] = useState(startExpanded);
