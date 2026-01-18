@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { IconAlertTriangle, IconLock, IconRefresh } from "@tabler/icons-react";
 

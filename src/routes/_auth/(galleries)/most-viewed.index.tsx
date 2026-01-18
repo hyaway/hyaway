@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { MostViewedSettingsPopover } from "./-components/most-viewed-settings-popover";

@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import * as React from "react";
 import { Input as InputPrimitive } from "@base-ui/react/input";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";

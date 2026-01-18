@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { AudioViewer } from "./viewers/audio-viewer";
 import { DeletedFileViewer } from "./viewers/deleted-file-viewer";
 import { ImageViewer } from "./viewers/image-viewer";

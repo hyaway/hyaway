@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { cn } from "@/lib/utils";
 
 /** Base height calculation for file viewers (accounts for header, footer, and padding) */

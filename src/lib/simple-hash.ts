@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // Simple djb2 hash for key (no crypto needed for cache key)
 export const simpleHash = (str: string) => {
   let hash = 5381;

@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { FilePageHeader } from "./file-page-header";
 import { FileStatusBadgesSkeleton } from "./file-status-badges";
 import { FileViewerSettingsPopover } from "./file-viewer-settings-popover";

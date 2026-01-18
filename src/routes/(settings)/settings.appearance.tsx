@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { createFileRoute } from "@tanstack/react-router";
 import { FileViewerSettingsCard } from "./-components/file-viewer-settings-card";
 import { ThumbnailGalleryDisplaySettingsCard } from "./-components/thumbnail-gallery-display-settings-card";

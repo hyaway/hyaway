@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useAuthStore } from "../hydrus-config-store";
 import { HYDRUS_API_HEADER_SESSION_KEY } from "../models";
 

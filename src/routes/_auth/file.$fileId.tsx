@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { createFileRoute } from "@tanstack/react-router";
 
 import { FileDetail } from "@/components/file-detail/file-detail";

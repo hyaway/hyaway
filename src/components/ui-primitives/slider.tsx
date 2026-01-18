@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import * as React from "react";
 import { Slider as SliderPrimitive } from "@base-ui/react/slider";
 

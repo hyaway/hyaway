@@ -18,6 +18,14 @@ export default defineConfig(
     },
     rules: {
       "react-compiler/react-compiler": "warn",
+    },
+  },
+  {
+    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+    plugins: {
+      local: localPlugin,
+    },
+    rules: {
       "local/license-header": "error",
     },
   },

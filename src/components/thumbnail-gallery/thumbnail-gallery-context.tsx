@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { createContext, useContext, useMemo } from "react";
 import type { WatchHistoryEntry } from "@/stores/watch-history-store";
 

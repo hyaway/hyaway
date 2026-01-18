@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useMemo, useState } from "react";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";

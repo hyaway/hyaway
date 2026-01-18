@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { IconTrashX } from "@tabler/icons-react";
 import { HistorySettingsPopover } from "./-components/history-settings-popover";

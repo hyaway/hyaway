@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Expand the hit area to at least 44×44px on touch devices
  */

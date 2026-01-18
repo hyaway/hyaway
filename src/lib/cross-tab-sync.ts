@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Cross-tab synchronization utilities for Zustand stores with persist middleware.
  *

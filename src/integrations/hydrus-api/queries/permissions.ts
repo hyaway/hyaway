@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useCallback, useMemo } from "react";
 import { useVerifyPersistentAccessQuery } from "./access";
 import type { Permission } from "../models";

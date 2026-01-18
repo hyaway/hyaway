@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { TouchTarget } from "../ui-primitives/touch-target";
 import type { badgeVariants } from "@/components/ui-primitives/badge";
 import type { VariantProps } from "class-variance-authority";

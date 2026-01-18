@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useCallback, useEffect, useRef } from "react";
 import axios from "axios";
 import { incrementFileViewtime } from "@/integrations/hydrus-api/api-client";

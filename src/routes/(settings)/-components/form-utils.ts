@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 export function getFormDataWithSubmitter(e: React.FormEvent<HTMLFormElement>) {
   // IMPORTANT: new FormData(form) does NOT include the clicked submit button's name/value.
   // Modern browsers support passing the submitter (button) as the 2nd argument so its data is included.

@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import React, { useDeferredValue, useEffect, useMemo, useRef } from "react";
 import { RightSidebarPortal } from "../app-shell/right-sidebar-portal";

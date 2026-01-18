@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { HeaderActionsPortal } from "../app-shell/header-actions-portal";
 import type { ReactNode } from "react";
 

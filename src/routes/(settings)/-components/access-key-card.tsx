@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { AccessKeyField } from "./access-key-field";
 import { RequestNewPermissionsField } from "./request-new-permissions-field";
 import { SettingsCardTitle } from "@/components/settings/settings-ui";

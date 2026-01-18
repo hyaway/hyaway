@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useRef, useState } from "react";
 import { IconChevronLeftPipe, IconChevronRightPipe } from "@tabler/icons-react";
 import {

@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconPhoto, IconPhotoScan } from "@tabler/icons-react";
 import { animate, motion, useMotionValue, useTransform } from "motion/react";

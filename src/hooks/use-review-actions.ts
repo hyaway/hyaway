@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useNavigate } from "@tanstack/react-router";
 import { IconCards } from "@tabler/icons-react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";

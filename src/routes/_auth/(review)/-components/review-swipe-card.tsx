@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { memo, useRef, useState } from "react";
 import { IconArchive, IconArrowUp, IconTrash } from "@tabler/icons-react";
 import {

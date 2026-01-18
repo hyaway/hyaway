@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { forwardRef } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { Button } from "@/components/ui-primitives/button";

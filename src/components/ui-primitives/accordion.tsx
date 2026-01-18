@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion";
 
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";

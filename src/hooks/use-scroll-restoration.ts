@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useElementScrollRestoration } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { dispatchScrollRestoration } from "./use-scroll-direction";

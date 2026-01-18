@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useQuery } from "@tanstack/react-query";
 import { getServices } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";

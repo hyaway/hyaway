@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { ImageBackground } from "./file-viewer-settings-store";

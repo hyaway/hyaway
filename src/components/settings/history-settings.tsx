@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
 import {
   MAX_WATCH_HISTORY_LIMIT,

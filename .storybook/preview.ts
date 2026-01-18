@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { themes } from "storybook/theming";
 import type { Preview } from "@storybook/react-vite";
 import "../src/styles.css";

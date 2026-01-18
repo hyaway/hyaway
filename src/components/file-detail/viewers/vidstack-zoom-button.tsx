@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { Tooltip } from "@vidstack/react";
 import { IconZoomIn, IconZoomOut } from "@tabler/icons-react";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";

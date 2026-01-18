@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area";
 import { forwardRef } from "react";
 

@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Color utilities for contrast adjustment and accessibility.
  * Uses APCA (Advanced Perceptual Contrast Algorithm) for contrast calculations.

@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { SettingsCardTitle } from "@/components/settings/settings-ui";
 import { Button } from "@/components/ui-primitives/button";
 import {

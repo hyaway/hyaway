@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useFooterHasContent } from "./footer-portal";
 
 import { useScrollDirection } from "@/hooks/use-scroll-direction";

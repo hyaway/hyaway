@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useMediaQuery } from "./use-media-query";
 
 const MOBILE_BREAKPOINT = 768;

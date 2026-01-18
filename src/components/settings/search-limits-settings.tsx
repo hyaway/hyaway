@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { SettingsGroup, SliderField } from "./setting-fields";
 import { SettingsSubheading } from "./settings-ui";
 import {

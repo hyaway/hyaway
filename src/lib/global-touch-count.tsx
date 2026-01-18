@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { createContext, useContext, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 

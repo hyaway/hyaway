@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import z from "zod";
 
 export const HYDRUS_API_HEADER_ACCESS_KEY = "Hydrus-Client-API-Access-Key";

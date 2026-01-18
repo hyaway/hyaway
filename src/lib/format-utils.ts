@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import slugify from "slug";
 
 /** Length of truncated page_key suffix appended to slugs */

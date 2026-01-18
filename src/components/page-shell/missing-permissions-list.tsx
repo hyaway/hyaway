@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import type { Permission } from "@/integrations/hydrus-api/models";
 import { PERMISSION_LABELS } from "@/integrations/hydrus-api/permissions";
 

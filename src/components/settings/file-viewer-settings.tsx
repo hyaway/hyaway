@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { AccordionSection, SwitchField } from "./setting-fields";
 import type { ImageBackground } from "@/stores/file-viewer-settings-store";
 import {

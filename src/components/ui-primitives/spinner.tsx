@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { IconLoader } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 

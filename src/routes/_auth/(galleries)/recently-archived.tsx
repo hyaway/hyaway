@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { PagePermissionGate } from "@/components/page-shell/page-permission-gate";
 import { Permission } from "@/integrations/hydrus-api/models";

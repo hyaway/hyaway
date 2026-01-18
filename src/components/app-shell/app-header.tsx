@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 "use client";
 
 import { AppBreadcrumb } from "@/components/app-shell/app-breadcrumb";

@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
 import {
   SETTINGS_ACTION,

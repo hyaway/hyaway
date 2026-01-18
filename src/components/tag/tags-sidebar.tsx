@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";

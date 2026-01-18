@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Link, linkOptions } from "@tanstack/react-router";
 

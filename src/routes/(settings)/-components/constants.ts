@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 export const SETTINGS_ACCESS_KEY_FIELD_NAME = "accessKey";
 export const SETTINGS_ENDPOINT_FIELD_NAME = "endpoint";
 

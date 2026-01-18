@@ -1,3 +1,6 @@
+// Copyright 2026 hyAway contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { IconFileSad } from "@tabler/icons-react";
 import { viewerFixedHeight } from "./style-constants";
 import { cn } from "@/lib/utils";
