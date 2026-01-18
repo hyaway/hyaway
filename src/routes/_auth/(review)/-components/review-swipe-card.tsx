@@ -21,6 +21,8 @@ const OVERLAY_START = 0.4;
 const VERTICAL_OVERLAY_START = 0.6;
 /** Max rotation angle in degrees */
 const MAX_ROTATION = 12;
+/** Touch movement (px) before we start a swipe drag */
+const TOUCH_SWIPE_START_DISTANCE = 6;
 /** Debug mode - shows colored zone overlays (set VITE_DEBUG_SWIPE_ZONES=true) */
 const DEBUG_ZONES = import.meta.env.VITE_DEBUG_SWIPE_ZONES === "true";
 
@@ -157,8 +159,17 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
   const y = useMotionValue(0);
   const constraintsRef = useRef<HTMLDivElement>(null);
   const [isPinching, setIsPinching] = useState(false);
-  // Cooldown after pinch ends to prevent accidental swipe triggers
+  // Prevent accidental swipe when a pinch gesture ends.
+  // We require all touch pointers to lift before allowing a swipe to complete.
+  const activeTouchPointersRef = useRef(new Set<number>());
   const pinchCooldownRef = useRef(false);
+  const pendingTouchSwipeRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    eligible: boolean;
+    started: boolean;
+  } | null>(null);
 
   // Calculate rotation based on horizontal drag
   const rotate = useTransform(
@@ -282,44 +293,121 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
         dragElastic={0.9}
         onDragEnd={handleDragEnd}
-        onTouchStart={(e) => {
-          if (e.touches.length >= 2) {
-            setIsPinching(true);
-            pinchCooldownRef.current = true;
-            x.stop();
-            y.stop();
-          }
+        onPointerMove={(e) => {
+          if (!isTop || isExiting || !gesturesEnabled) return;
+          if (e.pointerType !== "touch") return;
+          if (isPinching || pinchCooldownRef.current) return;
+
+          const pending = pendingTouchSwipeRef.current;
+          if (!pending) return;
+          if (pending.pointerId !== e.pointerId) return;
+          if (!pending.eligible || pending.started) return;
+
+          const dx = e.clientX - pending.startX;
+          const dy = e.clientY - pending.startY;
+          const distance = Math.hypot(dx, dy);
+
+          if (distance < TOUCH_SWIPE_START_DISTANCE) return;
+
+          // Now that we know this is a deliberate swipe, start drag.
+          // Avoid setting pointer capture for touch here so nested pinch handlers
+          // keep receiving pointer moves.
+          dragControls.start(e, { snapToCursor: false });
+          pendingTouchSwipeRef.current = { ...pending, started: true };
         }}
-        onTouchMove={(e) => {
-          if (e.touches.length >= 2 && !isPinching) {
-            setIsPinching(true);
-            pinchCooldownRef.current = true;
+        onPointerUp={(e) => {
+          if (e.pointerType !== "touch") return;
+          activeTouchPointersRef.current.delete(e.pointerId);
+
+          const pending = pendingTouchSwipeRef.current;
+          if (pending?.pointerId === e.pointerId) {
+            pendingTouchSwipeRef.current = null;
           }
-        }}
-        onTouchEnd={(e) => {
-          if (e.touches.length < 2 && isPinching) {
+
+          if (activeTouchPointersRef.current.size < 2 && isPinching) {
             setIsPinching(false);
             // Reset position to prevent accidental swipe from pinch offset
             animate(x, 0, { duration: 0.15 });
             animate(y, 0, { duration: 0.15 });
-            // Brief cooldown before allowing new drag gestures
-            setTimeout(() => {
-              pinchCooldownRef.current = false;
-            }, 200);
+          }
+
+          // Only re-enable swipes once all touch pointers are lifted.
+          if (activeTouchPointersRef.current.size === 0) {
+            pinchCooldownRef.current = false;
           }
         }}
-        onTouchCancel={() => {
-          if (isPinching) {
+        onPointerCancel={(e) => {
+          if (e.pointerType !== "touch") return;
+          activeTouchPointersRef.current.delete(e.pointerId);
+
+          const pending = pendingTouchSwipeRef.current;
+          if (pending?.pointerId === e.pointerId) {
+            pendingTouchSwipeRef.current = null;
+          }
+
+          if (activeTouchPointersRef.current.size < 2 && isPinching) {
             setIsPinching(false);
             animate(x, 0, { duration: 0.15 });
             animate(y, 0, { duration: 0.15 });
-            setTimeout(() => {
-              pinchCooldownRef.current = false;
-            }, 200);
+          }
+
+          if (activeTouchPointersRef.current.size === 0) {
+            pinchCooldownRef.current = false;
           }
         }}
         onPointerDown={(e) => {
           if (!isTop || isExiting || !gesturesEnabled) return;
+
+          if (e.pointerType === "touch") {
+            activeTouchPointersRef.current.add(e.pointerId);
+
+            // Two-finger gesture: treat as pinch, block swipe + swipe completion
+            if (activeTouchPointersRef.current.size >= 2) {
+              setIsPinching(true);
+              pinchCooldownRef.current = true;
+              // If a swipe drag was started by the first finger, cancel it immediately.
+              dragControls.cancel();
+              x.stop();
+              y.stop();
+              pendingTouchSwipeRef.current = null;
+              return;
+            }
+
+            // If we are in the post-pinch cooldown, require a full lift before swiping.
+            if (pinchCooldownRef.current) {
+              return;
+            }
+
+            const target = e.target as HTMLElement;
+            // Don't start swiping when interacting with actual media control elements.
+            // Be specific: exclude buttons, sliders, interactive elements - NOT entire overlays.
+            // .vds-controls is the actual controls bar, not the full player area.
+            if (
+              target.closest(
+                ".vds-controls, .vds-slider, .vds-button, .vds-menu, button, a, input, textarea, select, [role='slider'], [role='button']",
+              )
+            ) {
+              pendingTouchSwipeRef.current = null;
+              return;
+            }
+
+            // Don't start swiping when image viewer is in pan mode (zoomed in)
+            if (target.closest("[data-pan-mode]")) {
+              pendingTouchSwipeRef.current = null;
+              return;
+            }
+
+            // Touch: delay starting drag until the finger moves a bit.
+            pendingTouchSwipeRef.current = {
+              pointerId: e.pointerId,
+              startX: e.clientX,
+              startY: e.clientY,
+              eligible: true,
+              started: false,
+            };
+            return;
+          }
+
           if (isPinching) return;
 
           const target = e.target as HTMLElement;

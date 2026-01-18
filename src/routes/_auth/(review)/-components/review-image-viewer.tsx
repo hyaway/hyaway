@@ -26,6 +26,8 @@ const MAX_ZOOM = 4.0;
 const WHEEL_ZOOM_STEP = 0.001;
 // File size threshold for optimization (5MB)
 const FILE_SIZE_THRESHOLD = 5 * 1024 * 1024;
+// Minimum visible size for the image (prevents pinching it into near-zero pixels)
+const MIN_IMAGE_DIMENSION_PX = 48;
 
 interface ReviewImageViewerProps {
   fileId: number;
@@ -172,6 +174,17 @@ export function ReviewImageViewer({
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
+  // Pointer-based pinch zoom state (more reliable than TouchEvent + preventDefault)
+  const activeTouchPointersRef = useRef(
+    new Map<number, { x: number; y: number }>(),
+  );
+  const isPinchingRef = useRef(false);
+  const [isPinching, setIsPinching] = useState(false);
+  const pinchStateRef = useRef<{
+    initialDistance: number;
+    initialScale: number;
+  } | null>(null);
+
   // Pending zoom state to restore after mode switch (optimized <-> original)
   const pendingZoomRestoreRef = useRef<{
     zoomMode: "fit" | number;
@@ -207,8 +220,22 @@ export function ReviewImageViewer({
   const scaledWidth = useTransform(scaleMotion, (s) => naturalSize.width * s);
   const scaledHeight = useTransform(scaleMotion, (s) => naturalSize.height * s);
 
-  // Min zoom is fit scale
-  const minZoom = fitScale;
+  // Min zoom: fit scale, with a hard minimum visible size so the image can't
+  // be pinched into (almost) nothing.
+  const minZoom = useMemo(() => {
+    if (naturalSize.width === 0 || naturalSize.height === 0) return fitScale;
+
+    // Don't force upscaling for small images.
+    const minScaleForPixels = Math.min(
+      1,
+      Math.max(
+        MIN_IMAGE_DIMENSION_PX / naturalSize.width,
+        MIN_IMAGE_DIMENSION_PX / naturalSize.height,
+      ),
+    );
+
+    return Math.max(fitScale, minScaleForPixels);
+  }, [fitScale, naturalSize]);
 
   // Check if at fit scale
   const isAtFit =
@@ -228,8 +255,10 @@ export function ReviewImageViewer({
     const imgWidth = naturalSize.width * zoomScale;
     const imgHeight = naturalSize.height * zoomScale;
 
-    const maxPanX = Math.abs(imgWidth - containerSize.width) / 2;
-    const maxPanY = Math.abs(imgHeight - containerSize.height) / 2;
+    // Only allow panning when the image is larger than the container.
+    // Allowing pan when smaller causes drift/jitter near "fit".
+    const maxPanX = Math.max(0, (imgWidth - containerSize.width) / 2);
+    const maxPanY = Math.max(0, (imgHeight - containerSize.height) / 2);
 
     return {
       left: -maxPanX,
@@ -326,8 +355,8 @@ export function ReviewImageViewer({
   const smoothCenterImage = useCallback(() => {
     dragX.stop();
     dragY.stop();
-    animate(dragX, 0, { type: "spring", stiffness: 100, damping: 30 });
-    animate(dragY, 0, { type: "spring", stiffness: 100, damping: 30 });
+    animate(dragX, 0, { type: "tween", duration: 0.12, ease: "easeOut" });
+    animate(dragY, 0, { type: "tween", duration: 0.12, ease: "easeOut" });
     setIsDragging(false);
   }, [dragX, dragY]);
 
@@ -378,12 +407,38 @@ export function ReviewImageViewer({
 
       if (newScale === currentScale) return;
 
-      // If we hit minimum zoom (zooming out), snap to fit mode
+      // If we hit minimum zoom (zooming out), snap to the minimum.
+      // Avoid spring-centering from an out-of-bounds pan, which can make the
+      // image appear to "disappear" and then fly back in.
       if (delta < 0 && newScale <= minZoom + SCALE_TOLERANCE) {
-        scaleMotion.set(fitScale);
-        setZoomMode("fit");
-        // Smoothly center the image when returning to fit mode
-        smoothCenterImage();
+        const snapsToFit = Math.abs(minZoom - fitScale) <= SCALE_TOLERANCE;
+
+        dragX.stop();
+        dragY.stop();
+
+        if (snapsToFit) {
+          scaleMotion.set(fitScale);
+          setZoomMode("fit");
+          dragX.set(0);
+          dragY.set(0);
+        } else {
+          // When minZoom > fitScale (e.g. due to a minimum pixel size), clamp to
+          // minZoom without switching to fit mode.
+          scaleMotion.set(minZoom);
+          setZoomMode(minZoom);
+
+          const snappedWidth = naturalSize.width * minZoom;
+          const snappedHeight = naturalSize.height * minZoom;
+          const maxPanX = Math.max(0, (snappedWidth - containerRect.width) / 2);
+          const maxPanY = Math.max(
+            0,
+            (snappedHeight - containerRect.height) / 2,
+          );
+
+          dragX.set(Math.max(-maxPanX, Math.min(maxPanX, currentDragX)));
+          dragY.set(Math.max(-maxPanY, Math.min(maxPanY, currentDragY)));
+        }
+
         showZoomIndicator();
         return;
       }
@@ -408,9 +463,8 @@ export function ReviewImageViewer({
       const newHeight = naturalSize.height * newScale;
 
       // Calculate max pan bounds
-      // Use absolute difference so anchor stays stable even when image is smaller than container
-      const maxPanX = Math.abs(newWidth - containerRect.width) / 2;
-      const maxPanY = Math.abs(newHeight - containerRect.height) / 2;
+      const maxPanX = Math.max(0, (newWidth - containerRect.width) / 2);
+      const maxPanY = Math.max(0, (newHeight - containerRect.height) / 2);
 
       let newDragX = 0;
       let newDragY = 0;
@@ -513,88 +567,128 @@ export function ReviewImageViewer({
     [isTop, scaleMotion, adjustZoom],
   );
 
-  // Pinch zoom state
-  const pinchStateRef = useRef<{
-    initialDistance: number;
-    initialScale: number;
-    centerX: number;
-    centerY: number;
-  } | null>(null);
+  const setPinching = useCallback((pinching: boolean) => {
+    if (isPinchingRef.current === pinching) return;
+    isPinchingRef.current = pinching;
+    setIsPinching(pinching);
+    if (!pinching) {
+      pinchStateRef.current = null;
+    }
+  }, []);
 
-  // Touch handlers for pinch zoom
-  const handleTouchStart = useCallback(
-    (e: React.TouchEvent) => {
-      if (!isTop || e.touches.length !== 2) return;
+  // Clear any retained pointer state when this card is no longer active.
+  useEffect(() => {
+    if (isTop) return;
+    activeTouchPointersRef.current.clear();
+    setPinching(false);
+  }, [isTop, setPinching]);
 
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (!isTop) return;
+      if (e.pointerType !== "touch") return;
+
+      // With touch-action: none, the browser shouldn't scroll/zoom.
+      // preventDefault here is still useful on some browsers.
       e.preventDefault();
 
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
+      activeTouchPointersRef.current.set(e.pointerId, {
+        x: e.clientX,
+        y: e.clientY,
+      });
 
-      const distance = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY,
-      );
+      if (activeTouchPointersRef.current.size >= 2) {
+        setPinching(true);
 
-      const centerX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
-      const centerY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
+        // Initialize pinch state from the first two active touch pointers.
+        const points = Array.from(activeTouchPointersRef.current.values());
+        const p1 = points[0];
+        const p2 = points[1];
+        const initialDistance = Math.hypot(p2.x - p1.x, p2.y - p1.y);
 
-      pinchStateRef.current = {
-        initialDistance: distance,
-        initialScale: zoomScale,
-        centerX,
-        centerY,
-      };
-    },
-    [isTop, zoomScale],
-  );
+        // Use the current motion value scale as the baseline.
+        // (This stays stable even if zoomMode state updates are batched.)
+        const initialScale = scaleMotion.get();
 
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (!isTop || e.touches.length !== 2 || !pinchStateRef.current) return;
+        // Prevent divide-by-tiny-distance explosions.
+        // Also ensures pinch can't shrink below the fit scale.
+        pinchStateRef.current = {
+          initialDistance: Math.max(10, initialDistance),
+          initialScale: Math.max(minZoom, initialScale),
+        };
 
-      e.preventDefault();
-
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-
-      const distance = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY,
-      );
-
-      const { initialDistance, initialScale, centerX, centerY } =
-        pinchStateRef.current;
-
-      const scaleRatio = distance / initialDistance;
-      const newScale = Math.max(
-        minZoom,
-        Math.min(MAX_ZOOM, initialScale * scaleRatio),
-      );
-
-      const newCenterX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
-      const newCenterY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
-
-      const anchorX = (centerX + newCenterX) / 2;
-      const anchorY = (centerY + newCenterY) / 2;
-
-      const currentScale = scaleMotion.get();
-      const delta = newScale - currentScale;
-      if (Math.abs(delta) > 0.001) {
-        // Gestures should not snap to 1x
-        adjustZoom(delta, anchorX, anchorY, false, false);
+        // Capture both pointers so we keep receiving move/up events even if
+        // the browser would otherwise retarget them (or if a parent starts drag).
+        const element = e.currentTarget as HTMLElement;
+        activeTouchPointersRef.current.forEach((_, pointerId) => {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          element.setPointerCapture?.(pointerId);
+        });
+        // Stop motion-driven dragging state; pinch should "win" over pan.
+        setIsDragging(false);
       }
     },
-    [isTop, minZoom, scaleMotion, adjustZoom],
+    [isTop, setPinching, minZoom, scaleMotion],
   );
 
-  const handleTouchEnd = useCallback(() => {
-    pinchStateRef.current = null;
-  }, []);
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!isTop) return;
+      if (e.pointerType !== "touch") return;
+      if (!activeTouchPointersRef.current.has(e.pointerId)) return;
+
+      e.preventDefault();
+
+      activeTouchPointersRef.current.set(e.pointerId, {
+        x: e.clientX,
+        y: e.clientY,
+      });
+
+      if (activeTouchPointersRef.current.size < 2) return;
+
+      const containerRect = containerRef.current?.getBoundingClientRect();
+      if (!containerRect) return;
+
+      const pinchState = pinchStateRef.current;
+      if (!pinchState) return;
+
+      const points = Array.from(activeTouchPointersRef.current.values());
+      const p1 = points[0];
+      const p2 = points[1];
+
+      const distance = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      const centerX = (p1.x + p2.x) / 2 - containerRect.left;
+      const centerY = (p1.y + p2.y) / 2 - containerRect.top;
+
+      const currentScale = scaleMotion.get();
+
+      const scaleRatio = distance / pinchState.initialDistance;
+      const newScale = Math.max(
+        minZoom,
+        Math.min(MAX_ZOOM, pinchState.initialScale * scaleRatio),
+      );
+      const delta = newScale - currentScale;
+
+      if (Math.abs(delta) > 0.0005) {
+        // Gestures should not snap to 1x
+        adjustZoom(delta, centerX, centerY, false, false);
+      }
+    },
+    [isTop, adjustZoom, minZoom, scaleMotion],
+  );
+
+  const handlePointerUpOrCancel = useCallback(
+    (e: React.PointerEvent) => {
+      if (e.pointerType !== "touch") return;
+
+      activeTouchPointersRef.current.delete(e.pointerId);
+
+      if (activeTouchPointersRef.current.size < 2) {
+        setPinching(false);
+      }
+    },
+    [setPinching],
+  );
 
   // Determine if zoomed (not at fit)
   const isZoomed = !isAtFit;
@@ -666,13 +760,15 @@ export function ReviewImageViewer({
       className={cn(
         "relative flex h-full w-full items-center justify-center overflow-hidden",
         getContainerBackgroundClass(),
-        // Disable browser pinch zoom
-        isTop ? "touch-pan-y" : "",
+        // Disable browser pinch zoom on the interactive surface.
+        // (Also makes pointer-based pinch handling reliable.)
+        isTop ? "touch-none" : "",
       )}
       style={getContainerStyle()}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUpOrCancel}
+      onPointerCancel={handlePointerUpOrCancel}
       onWheel={handleContainerWheel}
     >
       {/* Zoomed mode border overlay - above image */}
@@ -695,11 +791,11 @@ export function ReviewImageViewer({
         decoding="async"
         fetchPriority={isTop ? "high" : "low"}
         draggable={false}
-        drag={isTop && isZoomed}
+        drag={isTop && isZoomed && !isPinching}
         dragConstraints={dragConstraints}
-        dragElastic={0.3}
-        dragTransition={{ power: 0.3, timeConstant: 200 }}
-        dragMomentum={true}
+        // Keep panning strictly constrained to the image bounds (no overscroll / spring-back).
+        dragElastic={0}
+        dragMomentum={false}
         onDragStart={() => {
           setIsDragging(true);
           hasDragged.current = false;
@@ -714,9 +810,6 @@ export function ReviewImageViewer({
           }, 0);
         }}
         onWheel={handleImageWheel}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
         onLoad={handleLoad}
         onError={handleError}
         style={
