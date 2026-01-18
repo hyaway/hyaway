@@ -285,21 +285,25 @@ export function ImageViewerV3({
           return;
         }
         case "ArrowUp":
+        case "Numpad8":
           if (currentScale <= fitScale + SCALE_TOLERANCE) return;
           event.preventDefault();
           controls.setTransform(x, y + panStep, currentScale, 0, "linear");
           return;
         case "ArrowDown":
+        case "Numpad2":
           if (currentScale <= fitScale + SCALE_TOLERANCE) return;
           event.preventDefault();
           controls.setTransform(x, y - panStep, currentScale, 0, "linear");
           return;
         case "ArrowLeft":
+        case "Numpad4":
           if (currentScale <= fitScale + SCALE_TOLERANCE) return;
           event.preventDefault();
           controls.setTransform(x + panStep, y, currentScale, 0, "linear");
           return;
         case "ArrowRight":
+        case "Numpad6":
           if (currentScale <= fitScale + SCALE_TOLERANCE) return;
           event.preventDefault();
           controls.setTransform(x - panStep, y, currentScale, 0, "linear");
