@@ -574,6 +574,9 @@ export function ImageViewer({
           style={containerStyle}
           className={cn(
             "group relative h-full w-full overflow-hidden",
+            // Prevent browser-native pinch zoom/scroll on touch; the transform
+            // library handles gestures inside the overlay.
+            "touch-none",
             isPanning ? "cursor-grabbing" : "cursor-grab",
             containerClassName,
           )}
