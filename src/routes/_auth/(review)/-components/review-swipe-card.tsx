@@ -341,7 +341,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
 
           // Ensure we capture the pointer for touch to work reliably
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+          (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
           dragControls.start(e, { snapToCursor: false });
         }}
         initial={false}
@@ -384,7 +384,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
                 className="bg-destructive/80"
               >
                 <div className="flex flex-col items-center gap-2 text-white">
-                  <IconTrash className="size-16" />
+                  <IconTrash aria-hidden="true" className="size-16" />
                   <span className="text-lg font-semibold">Trash</span>
                 </div>
               </IntentOverlay>
@@ -397,7 +397,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
                 className="bg-primary/80"
               >
                 <div className="text-primary-foreground flex flex-col items-center gap-2">
-                  <IconArchive className="size-16" />
+                  <IconArchive aria-hidden="true" className="size-16" />
                   <span className="text-lg font-semibold">Archive</span>
                 </div>
               </IntentOverlay>
@@ -408,7 +408,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
                 className="bg-muted/80"
               >
                 <div className="text-muted-foreground flex flex-col items-center gap-2">
-                  <IconArrowUp className="size-16" />
+                  <IconArrowUp aria-hidden="true" className="size-16" />
                   <span className="text-lg font-semibold">Skip</span>
                 </div>
               </IntentOverlay>

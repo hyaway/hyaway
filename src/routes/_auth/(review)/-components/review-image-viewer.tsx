@@ -277,25 +277,29 @@ export function ReviewImageViewer({
 
       // Restore zoom state after mode switch (optimized <-> original)
       const pending = pendingZoomRestoreRef.current;
-      if (pending && pending.naturalWidth !== newWidth && newWidth > 0) {
-        const sizeRatio = pending.naturalWidth / newWidth;
+      if (pending && newWidth > 0) {
+        if (pending.naturalWidth !== newWidth) {
+          const sizeRatio = pending.naturalWidth / newWidth;
 
-        if (pending.zoomMode === "fit") {
-          // Stay in fit mode
-          setZoomMode("fit");
-          dragX.set(0);
-          dragY.set(0);
-        } else {
-          // Adjust zoom to maintain same visual size
-          // If old image was 1000px at 2x zoom (2000px display)
-          // and new image is 4000px, we need 0.5x zoom (2000px display)
-          const newZoomScale = pending.zoomMode * sizeRatio;
-          setZoomMode(newZoomScale);
-          scaleMotion.set(newZoomScale);
-          // Pan stays the same since we maintain same visual size
-          dragX.set(pending.dragX);
-          dragY.set(pending.dragY);
+          if (pending.zoomMode === "fit") {
+            // Stay in fit mode
+            setZoomMode("fit");
+            dragX.set(0);
+            dragY.set(0);
+          } else {
+            // Adjust zoom to maintain same visual size
+            // If old image was 1000px at 2x zoom (2000px display)
+            // and new image is 4000px, we need 0.5x zoom (2000px display)
+            const newZoomScale = pending.zoomMode * sizeRatio;
+            setZoomMode(newZoomScale);
+            scaleMotion.set(newZoomScale);
+            // Pan stays the same since we maintain same visual size
+            dragX.set(pending.dragX);
+            dragY.set(pending.dragY);
+          }
         }
+        // Always clear once we've had a successful load, so we don't restore
+        // against an unrelated future image load.
         pendingZoomRestoreRef.current = null;
       }
     }
@@ -796,9 +800,9 @@ export function ReviewImageViewer({
           >
             <span className="relative">
               {localLoadMode === "original" ? (
-                <IconPhoto className="size-4" />
+                <IconPhoto aria-hidden="true" className="size-4" />
               ) : (
-                <IconPhotoScan className="size-4" />
+                <IconPhotoScan aria-hidden="true" className="size-4" />
               )}
               {/* Indicator dot when switching to full size would provide more detail */}
               {localLoadMode === "optimized" && zoomScale > 1 && (
