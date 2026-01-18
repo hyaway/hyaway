@@ -14,14 +14,12 @@ import {
   IconDevices,
   IconExternalLink,
   IconEye,
-  IconHandFinger,
   IconHandMove,
   IconLayoutDashboard,
   IconLayoutGrid,
   IconLock,
   IconMail,
   IconPalette,
-  IconSwipe,
   IconTrash,
 } from "@tabler/icons-react";
 import { Heading, Subheading } from "@/components/ui-primitives/heading";
