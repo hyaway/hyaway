@@ -55,4 +55,3 @@ You should see a welcome page.
 
 - [Hydrus Network Documentation](https://hydrusnetwork.github.io/hydrus/) — Official docs
 - [Client API reference](https://hydrusnetwork.github.io/hydrus/client_api.html) — API endpoints and parameters
-- [Getting started with Hydrus](https://hydrusnetwork.github.io/hydrus/getting_started_installing.html) — New to Hydrus?

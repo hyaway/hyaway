@@ -19,16 +19,12 @@ export default defineConfig({
         text: "Hydrus docs",
         items: [
           {
-            text: "Hydrus Network",
+            text: "Hydrus network",
             link: "https://hydrusnetwork.github.io/hydrus/",
           },
           {
             text: "Client API",
             link: "https://hydrusnetwork.github.io/hydrus/client_api.html",
-          },
-          {
-            text: "Getting started",
-            link: "https://hydrusnetwork.github.io/hydrus/getting_started_installing.html",
           },
         ],
       },
