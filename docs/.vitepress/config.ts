@@ -7,10 +7,7 @@ export default defineConfig({
   sitemap: {
     hostname: "https://docs.hyaway.com",
   },
-  ignoreDeadLinks: [
-    /^http:\/\/localhost/,
-    /^http:\/\/127\.0\.0\.1/,
-  ],
+  ignoreDeadLinks: [/^http:\/\/localhost/, /^http:\/\/127\.0\.0\.1/],
   head: [
     ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
   ],
