@@ -13,7 +13,7 @@ import {
 import { IconArrowsMaximize, IconArrowsMinimize } from "@tabler/icons-react";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
-import { viewerFixedHeight, viewerMaxHeight } from "./style-constants";
+import { viewerFixedHeight } from "./style-constants";
 import { VidstackZoomButton } from "./vidstack-zoom-button";
 import type { VideoMimeType } from "@vidstack/react";
 import { useActiveTheme } from "@/stores/theme-store";
@@ -179,16 +179,11 @@ export function VideoViewer({
     <div
       ref={containerRef}
       className={cn(
-        "group relative flex items-center justify-center",
+        "group relative flex items-center justify-center overflow-hidden",
         getContainerClass(),
       )}
     >
-      <div
-        className={cn(
-          "flex items-center justify-center",
-          zoomFill ? "h-full w-full" : viewerMaxHeight,
-        )}
-      >
+      <div className={cn("flex h-full w-full items-center justify-center")}>
         <MediaPlayer
           title={`🎞️${fileId}`}
           src={{ src: fileUrl, type: mime as VideoMimeType }}
