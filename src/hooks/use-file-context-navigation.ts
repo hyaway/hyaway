@@ -72,6 +72,46 @@ export function useFileContextNavigation({
     }
   }, [shouldFallback, fileId, navigate]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+      const target = event.target as HTMLElement | null;
+      if (target?.isContentEditable) return;
+      const tagName = target?.tagName;
+      if (
+        tagName === "INPUT" ||
+        tagName === "TEXTAREA" ||
+        tagName === "SELECT"
+      ) {
+        return;
+      }
+
+      if (event.key === "[" || event.key === "{") {
+        if (prevId === null) return;
+        event.preventDefault();
+        navigate({
+          to: contextRoute,
+          params: buildParams(prevId),
+        });
+        return;
+      }
+
+      if (event.key === "]" || event.key === "}") {
+        if (nextId === null) return;
+        event.preventDefault();
+        navigate({
+          to: contextRoute,
+          params: buildParams(nextId),
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [buildParams, contextRoute, navigate, nextId, prevId]);
+
   const navActions: Array<FloatingFooterAction> = [
     {
       id: "nav-prev",
