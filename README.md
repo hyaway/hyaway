@@ -47,3 +47,7 @@ pnpm storybook     # Component playground on port 6006
 ### Documentation
 
 Developer docs live in `.github/docs/` (start with `.github/docs/README.md`).
+
+## License
+
+[Apache-2.0](LICENSE)

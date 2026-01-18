@@ -1,6 +1,7 @@
 {
   "name": "hyaway-app",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
@@ -27,7 +28,8 @@
     "build-storybook": "storybook build",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "licenses": "pnpx license-checker-rseidelsohn --production --relativeLicensePath --relativeModulePath --out NOTICE --nopeer --excludePrivatePackage --csv"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",

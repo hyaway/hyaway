@@ -3,3 +3,4 @@ pnpm-lock.yaml
 yarn.lock
 routeTree.gen.ts
 public/_headers
+LICENSE
