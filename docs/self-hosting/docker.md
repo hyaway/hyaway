@@ -129,7 +129,7 @@ services:
 
 ### With Caddy
 
-```caddyfile
+```
 hyaway.yourdomain.com {
     reverse_proxy localhost:4929
 }
