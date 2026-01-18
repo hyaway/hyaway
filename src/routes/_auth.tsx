@@ -158,7 +158,7 @@ function AuthNotConfiguredPrompt() {
           <span>
             Need help?{" "}
             <a
-              href="https://github.com/hyaway/hyaway/blob/main/docs/setup.md"
+              href="https://docs.hyaway.com/getting-started"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"

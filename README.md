@@ -2,7 +2,7 @@ hyAway is a web UI for browsing files from a hydrus network client via the Hydru
 
 🌐 **[hyaway.com](https://hyaway.com)** — Use hosted version on hyaway.com
 
-📖 **[Setup guide](docs/setup.md)** — Connect hyaway.com to your Hydrus client.
+📖 **[docs.hyaway.com](https://docs.hyaway.com)** — Setup guide and documentation
 
 ---
 
