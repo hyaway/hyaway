@@ -52,8 +52,8 @@ See [Self-hosting](../self-hosting/) for Docker and local deployment options.
 
 Ready to try it?
 
-1. [Enable the Hydrus API](./getting-started) — Configure your Hydrus client
-2. [Choose an access method](./access-methods) — Same machine or remote access
-3. [Connect to Hydrus](./connect) — Enter your endpoint and access key
+1. [Enable the Hydrus API](../getting-started) — Configure your Hydrus client
+2. [Choose an access method](../access-methods) — Same machine or remote access
+3. [Connect to Hydrus](../connect) — Enter your endpoint and access key
 
 Or jump straight to [hyaway.com](https://hyaway.com) if you're on the same machine as Hydrus.
