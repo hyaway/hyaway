@@ -31,6 +31,7 @@ import {
 import { Spinner } from "@/components/ui-primitives/spinner";
 import { Button } from "@/components/ui-primitives/button";
 import {
+  PRESET_ACCESS_KEY,
   useApiAccessKey,
   useApiEndpoint,
   useAuthActions,
@@ -96,6 +97,11 @@ export function AccessKeyField() {
               onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
             />
+            {PRESET_ACCESS_KEY && apiAccessKey === PRESET_ACCESS_KEY && (
+              <span className="text-muted-foreground text-xs">
+                Preconfigured value
+              </span>
+            )}
             {!field.state.meta.isValid && field.state.meta.isTouched && (
               <FieldError errors={field.state.meta.errors} />
             )}

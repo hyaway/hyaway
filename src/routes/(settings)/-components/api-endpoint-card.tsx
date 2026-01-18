@@ -26,6 +26,7 @@ import {
   CardHeader,
 } from "@/components/ui-primitives/card";
 import {
+  PRESET_ENDPOINT,
   useApiEndpoint,
   useAuthActions,
 } from "@/integrations/hydrus-api/hydrus-config-store";
@@ -147,6 +148,11 @@ export function ApiEndpointCard() {
                 )}
               </form.Field>
             </div>
+            {PRESET_ENDPOINT && apiEndpoint === PRESET_ENDPOINT && (
+              <span className="text-muted-foreground text-xs">
+                Preconfigured value
+              </span>
+            )}
           </Field>
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.values.host] as const}

@@ -6,6 +6,20 @@
 interface ImportMetaEnv {
   /** Show debug overlays for swipe zones in the review feature */
   readonly VITE_DEBUG_SWIPE_ZONES?: string;
+
+  /**
+   * Preset Hydrus API endpoint for self-hosted instances.
+   * ⚠️ DANGER: This value is embedded in the built JavaScript bundle.
+   * @example "http://127.0.0.1:45869"
+   */
+  readonly VITE_HYDRUS_ENDPOINT?: string;
+
+  /**
+   * Preset Hydrus API access key for self-hosted instances.
+   * ⚠️ DANGER: This value is embedded in the built JavaScript bundle,
+   * exposing it to all users who access the instance.
+   */
+  readonly VITE_HYDRUS_ACCESS_KEY?: string;
 }
 
 interface ImportMeta {

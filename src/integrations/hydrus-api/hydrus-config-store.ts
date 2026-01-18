@@ -11,6 +11,18 @@ import type { StateCreator } from "zustand";
 import { getContext } from "@/integrations/tanstack-query/root-provider.tsx";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
+/**
+ * Preset endpoint from environment variable (set at build time).
+ * ⚠️ This value is embedded in the JavaScript bundle.
+ */
+export const PRESET_ENDPOINT = import.meta.env.VITE_HYDRUS_ENDPOINT ?? "";
+
+/**
+ * Preset access key from environment variable (set at build time).
+ * ⚠️ This value is embedded in the JavaScript bundle, exposing it to all users.
+ */
+export const PRESET_ACCESS_KEY = import.meta.env.VITE_HYDRUS_ACCESS_KEY ?? "";
+
 type AuthState = {
   api_access_key: string;
   api_endpoint: string;
@@ -31,8 +43,8 @@ type AuthState = {
 };
 
 const authSlice: StateCreator<AuthState> = (set, get, store) => ({
-  api_access_key: "",
-  api_endpoint: "",
+  api_access_key: PRESET_ACCESS_KEY,
+  api_endpoint: PRESET_ENDPOINT,
   sessionKey: "",
   authWithSessionKey: true,
   actions: {

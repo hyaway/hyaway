@@ -71,6 +71,47 @@ services:
 
 For private/localhost instances, leave this commented out — the app works fine without it.
 
+### ⚠️ Danger zone: Preset Hydrus credentials
+
+You can preset the Hydrus API endpoint and access key at build time. This allows users to skip the connection setup entirely.
+
+::: danger Security warning
+These values are **embedded in the built JavaScript bundle** and exposed to **ALL users** who access your hyAway instance. Anyone can view the access key by opening browser developer tools.
+
+Only use this for trusted private deployments where:
+
+- All users are trusted and should have identical Hydrus access
+- The instance is not publicly accessible, or access is controlled by other means (VPN, authentication proxy, etc.)
+- You understand that the access key grants full API access per its configured permissions
+  :::
+
+```yaml
+services:
+  hyaway:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        VITE_HYDRUS_ENDPOINT: http://127.0.0.1:45869
+        VITE_HYDRUS_ACCESS_KEY: your-64-character-access-key-here
+```
+
+Or with the Docker CLI directly:
+
+```bash
+docker build \
+  --build-arg VITE_HYDRUS_ENDPOINT=http://127.0.0.1:45869 \
+  --build-arg VITE_HYDRUS_ACCESS_KEY=your-64-character-access-key-here \
+  -f docker/Dockerfile \
+  -t hyaway .
+```
+
+When credentials are preset:
+
+- The connection settings are pre-filled on first visit
+- Users see "Preconfigured value" next to the fields
+- Users can still change the values if needed (changes are stored in their browser)
+
 ---
 
 ## Production considerations

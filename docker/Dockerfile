@@ -16,6 +16,15 @@ COPY . .
 # Leave empty for private/localhost instances - app works fine without it
 ARG VITE_APP_URL=""
 ENV VITE_APP_URL=${VITE_APP_URL}
+
+# ⚠️ DANGER ZONE: Preset Hydrus credentials
+# These values are embedded in the JavaScript bundle and exposed to ALL users.
+# Only use for trusted private instances where all users share the same Hydrus access.
+ARG VITE_HYDRUS_ENDPOINT=""
+ARG VITE_HYDRUS_ACCESS_KEY=""
+ENV VITE_HYDRUS_ENDPOINT=${VITE_HYDRUS_ENDPOINT}
+ENV VITE_HYDRUS_ACCESS_KEY=${VITE_HYDRUS_ACCESS_KEY}
+
 RUN pnpm build
 
 # Production stage

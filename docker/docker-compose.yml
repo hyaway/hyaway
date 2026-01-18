@@ -7,6 +7,13 @@ services:
       # Leave commented for private/localhost instances (app works fine without it)
       # args:
       #   VITE_APP_URL: https://your-domain.com
+      #
+      # ⚠️ DANGER ZONE: Preset Hydrus credentials
+      # These values are embedded in the JavaScript bundle and exposed to ALL users.
+      # Only use for trusted private instances where all users share the same Hydrus access.
+      # See docs/self-hosting/docker.md for security implications.
+      #   VITE_HYDRUS_ENDPOINT: http://127.0.0.1:45869
+      #   VITE_HYDRUS_ACCESS_KEY: your-64-character-access-key-here
     ports:
       - "4929:80" # Access at http://localhost:4929 (4929 = hyaw on phone keypad)
     restart: unless-stopped
