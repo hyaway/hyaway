@@ -6,8 +6,8 @@ hero:
   text: Browse your Hydrus files
   tagline: A modern web interface for Hydrus Network
   image:
-    light: /logo-light.svg
-    dark: /logo-dark.svg
+    light: /images/hyaway-archive-small-light.webp
+    dark: /images/hyaway-archive-small-dark.webp
     alt: hyAway
   actions:
     - theme: brand
