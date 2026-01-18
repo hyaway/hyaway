@@ -8,6 +8,7 @@ import {
 } from "react-zoom-pan-pinch";
 import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
 import type { ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
+import type { ImageBackground } from "@/stores/file-viewer-settings-store";
 import { cn } from "@/lib/utils";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import {
@@ -70,6 +71,16 @@ export function ImageViewerV3({
     [blurhash],
   );
 
+  const imageBackground = useImageBackground();
+  const fillCanvasBackground = useFillCanvasBackground();
+  const [imageBackgroundOverride, setImageBackgroundOverride] =
+    useState<ImageBackground | null>(null);
+  const effectiveImageBackground = imageBackgroundOverride ?? imageBackground;
+
+  useEffect(() => {
+    setImageBackgroundOverride(null);
+  }, [imageBackground]);
+
   const overlaySize = useContainerSize(overlayStageRef.current);
 
   const rawFitScale = useMemo(() => {
@@ -92,7 +103,12 @@ export function ImageViewerV3({
   const minScale = fitScale > 0 ? fitScale : 1;
 
   const { containerStyle, containerClassName, imageStyle, imageClassName } =
-    useBackgroundStyles(loaded, averageColor);
+    useBackgroundStyles(
+      loaded,
+      averageColor,
+      effectiveImageBackground,
+      fillCanvasBackground,
+    );
 
   const overlayReady =
     isOverlayActive &&
@@ -138,6 +154,15 @@ export function ImageViewerV3({
   const setZoomIntent = useCallback((intent: ZoomIntent) => {
     zoomIntentRef.current = intent;
   }, []);
+
+  const cycleImageBackground = useCallback(() => {
+    const order = ["solid", "checkerboard", "average"] as const;
+    const currentValue = effectiveImageBackground;
+    const currentIndex = order.indexOf(currentValue);
+    const nextIndex =
+      currentIndex === -1 ? 0 : (currentIndex + 1) % order.length;
+    setImageBackgroundOverride(order[nextIndex]);
+  }, [effectiveImageBackground]);
 
   const clampToBounds = useCallback(
     (x: number, y: number, scale: number) => {
@@ -301,6 +326,12 @@ export function ImageViewerV3({
       if (event.key === "f" || event.key === "F") {
         event.preventDefault();
         toggleFullscreen();
+        return;
+      }
+
+      if (event.key === "b" || event.key === "B") {
+        event.preventDefault();
+        cycleImageBackground();
         return;
       }
 
@@ -470,6 +501,7 @@ export function ImageViewerV3({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
     clampToBounds,
+    cycleImageBackground,
     fitScale,
     getVerticalBoundY,
     isOverlayActive,
@@ -555,7 +587,7 @@ export function ImageViewerV3({
               centerOnInit={true}
               limitToBounds={true}
               alignmentAnimation={{ sizeX: 1000, sizeY: 1000 }}
-              wheel={{ step: 0.06, smoothStep: 0.01 }}
+              wheel={{ step: 0.06, smoothStep: 0.0025 }}
               doubleClick={{ disabled: true }}
               onWheelStart={() => {
                 isZoomingRef.current = true;
@@ -1260,10 +1292,9 @@ function ZoomBadge() {
 function useBackgroundStyles(
   loaded: boolean,
   averageColor: string | undefined,
+  imageBackground: ImageBackground,
+  fillCanvasBackground: boolean,
 ) {
-  const imageBackground = useImageBackground();
-  const fillCanvasBackground = useFillCanvasBackground();
-
   const containerStyle = useMemo(() => {
     if (
       fillCanvasBackground &&
