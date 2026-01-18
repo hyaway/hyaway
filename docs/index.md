@@ -1,10 +1,29 @@
-# hyAway Docs
+---
+layout: home
 
-Welcome! This site hosts documentation for **hyAway**.
+hero:
+  name: hyAway
+  text: Browse your Hydrus files
+  tagline: A modern web interface for Hydrus Network
+  actions:
+    - theme: brand
+      text: Get started
+      link: /getting-started
+    - theme: alt
+      text: Go to hyaway.com
+      link: https://hyaway.com
+    - theme: alt
+      text: Self-host
+      link: /self-hosting/
 
-## Guides
-
-- [Setup guide](./setup)
+features:
+  - title: No installation
+    details: Use the hosted app at hyaway.com — just connect to your Hydrus client
+  - title: Self-hostable
+    details: Run your own instance with Docker or any web server
+  - title: Mobile friendly
+    details: Browse your files from any device — phone, tablet, or desktop
+---
 
 ## Links
 

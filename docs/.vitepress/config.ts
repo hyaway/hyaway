@@ -8,11 +8,56 @@ export default defineConfig({
     ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
   ],
   themeConfig: {
-    nav: [{ text: "Setup", link: "/setup" }],
+    nav: [
+      { text: "Guide", link: "/getting-started" },
+      { text: "Self-host", link: "/self-hosting/" },
+      {
+        text: "Hydrus docs",
+        items: [
+          {
+            text: "Hydrus Network",
+            link: "https://hydrusnetwork.github.io/hydrus/",
+          },
+          {
+            text: "Client API",
+            link: "https://hydrusnetwork.github.io/hydrus/client_api.html",
+          },
+          {
+            text: "Getting started",
+            link: "https://hydrusnetwork.github.io/hydrus/getting_started_installing.html",
+          },
+        ],
+      },
+    ],
     sidebar: [
       {
         text: "Getting started",
-        items: [{ text: "Setup", link: "/setup" }],
+        items: [
+          { text: "Enable Hydrus API", link: "/getting-started" },
+          { text: "Access methods", link: "/access-methods" },
+          { text: "Connect to Hydrus", link: "/connect" },
+        ],
+      },
+      {
+        text: "Self-hosting",
+        items: [
+          { text: "Overview", link: "/self-hosting/" },
+          { text: "Docker", link: "/self-hosting/docker" },
+          { text: "Local development", link: "/self-hosting/local-dev" },
+        ],
+      },
+      {
+        text: "Hydrus documentation",
+        items: [
+          {
+            text: "Hydrus Network ↗",
+            link: "https://hydrusnetwork.github.io/hydrus/",
+          },
+          {
+            text: "Client API ↗",
+            link: "https://hydrusnetwork.github.io/hydrus/client_api.html",
+          },
+        ],
       },
     ],
     socialLinks: [{ icon: "github", link: "https://github.com/hyaway/hyaway" }],
