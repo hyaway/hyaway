@@ -5,16 +5,19 @@ hero:
   name: hyAway
   text: Browse your Hydrus files
   tagline: A modern web interface for Hydrus Network
+  image:
+    src: /favicon.svg
+    alt: hyAway
   actions:
     - theme: brand
+      text: What is hyAway?
+      link: /guide/what-is-hyaway
+    - theme: alt
       text: Get started
       link: /getting-started
     - theme: alt
       text: Go to hyaway.com
       link: https://hyaway.com
-    - theme: alt
-      text: Self-host
-      link: /self-hosting/
 
 features:
   - title: No installation
@@ -24,8 +27,3 @@ features:
   - title: Mobile friendly
     details: Browse your files from any device — phone, tablet, or desktop
 ---
-
-## Links
-
-- App: https://hyaway.com
-- Repo: https://github.com/hyaway/hyaway

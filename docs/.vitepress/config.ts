@@ -12,6 +12,7 @@ export default defineConfig({
     ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
   ],
   themeConfig: {
+    logo: "/favicon.svg",
     nav: [
       { text: "Guide", link: "/getting-started" },
       { text: "Self-host", link: "/self-hosting/" },
@@ -30,6 +31,10 @@ export default defineConfig({
       },
     ],
     sidebar: [
+      {
+        text: "Introduction",
+        items: [{ text: "What is hyAway?", link: "/guide/what-is-hyaway" }],
+      },
       {
         text: "Getting started",
         items: [
