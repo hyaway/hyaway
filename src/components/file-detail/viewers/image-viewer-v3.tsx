@@ -300,65 +300,88 @@ export function ImageViewerV3({
                 isPanningRef.current = false;
               }}
             >
-              <OverlayTransformState
-                fitScale={fitScale}
-                onScaleChange={setCurrentScale}
-                onZoomIntentChange={setZoomIntent}
-                onFitChange={setIsAtFit}
-                onOneXChange={setIsAt1x}
-              />
+              {({ centerView, resetTransform }) => (
+                <>
+                  <OverlayTransformState
+                    fitScale={fitScale}
+                    onScaleChange={setCurrentScale}
+                    onZoomIntentChange={setZoomIntent}
+                    onFitChange={setIsAtFit}
+                    onOneXChange={setIsAt1x}
+                  />
 
-              <OverlayAxisCentering
-                containerSize={overlaySize}
-                imageNaturalSize={imageNaturalSize}
-                isZoomingRef={isZoomingRef}
-                isPanningRef={isPanningRef}
-              />
+                  <OverlayAxisCentering
+                    containerSize={overlaySize}
+                    imageNaturalSize={imageNaturalSize}
+                    isZoomingRef={isZoomingRef}
+                    isPanningRef={isPanningRef}
+                  />
 
-              <OverlayFitReset
-                fitScale={fitScale}
-                modeChangeToken={modeChangeToken}
-                onScaleChange={setCurrentScale}
-                onZoomIntentChange={setZoomIntent}
-                isReady={overlayReady}
-              />
+                  <OverlayFitReset
+                    fitScale={fitScale}
+                    modeChangeToken={modeChangeToken}
+                    onScaleChange={setCurrentScale}
+                    onZoomIntentChange={setZoomIntent}
+                    isReady={overlayReady}
+                  />
 
-              <OverlayResizeClamp
-                fitScale={fitScale}
-                containerSize={overlaySize}
-                getCurrentScale={getCurrentScale}
-                onZoomIntentChange={setZoomIntent}
-                isReady={overlayReady}
-              />
+                  <OverlayResizeClamp
+                    fitScale={fitScale}
+                    containerSize={overlaySize}
+                    getCurrentScale={getCurrentScale}
+                    onZoomIntentChange={setZoomIntent}
+                    isReady={overlayReady}
+                  />
 
-              <ZoomBadge />
+                  <ZoomBadge />
 
-              <OverlayControls
-                fitScale={fitScale}
-                isAtFit={isAtFit}
-                isAt1x={isAt1x}
-                isTheater={isTheater}
-                isFullscreen={isFullscreen}
-                onToggleTheater={toggleTheater}
-                onToggleFullscreen={toggleFullscreen}
-                onSetZoomIntent={(intent) => {
-                  setZoomIntent(intent);
-                }}
-              />
+                  <OverlayControls
+                    fitScale={fitScale}
+                    isAtFit={isAtFit}
+                    isAt1x={isAt1x}
+                    isTheater={isTheater}
+                    isFullscreen={isFullscreen}
+                    onToggleTheater={toggleTheater}
+                    onToggleFullscreen={toggleFullscreen}
+                    onSetZoomIntent={(intent) => {
+                      setZoomIntent(intent);
+                    }}
+                  />
 
-              <TransformComponent
-                wrapperStyle={{ width: "100%", height: "100%" }}
-              >
-                <img
-                  src={fileUrl}
-                  alt={`File ${fileId}`}
-                  style={imageStyle}
-                  className={cn("max-h-none max-w-none", imageClassName)}
-                  onLoad={handleImageLoad}
-                  onError={onError}
-                  draggable={false}
-                />
-              </TransformComponent>
+                  <TransformComponent
+                    wrapperStyle={{ width: "100%", height: "100%" }}
+                    wrapperProps={{
+                      onDoubleClick: (event) => {
+                        event.stopPropagation();
+                        const currentScale = getCurrentScale();
+                        const isZoomedIn =
+                          currentScale > fitScale * (1 + SCALE_TOLERANCE);
+
+                        if (isZoomedIn) {
+                          resetTransform();
+                          return;
+                        }
+                        const nearFit = fitScale >= 0.5;
+                        const targetScale = nearFit
+                          ? Math.min(MAX_ZOOM, fitScale * 2)
+                          : Math.min(MAX_ZOOM, 1);
+
+                        centerView(targetScale, 300, "easeOut");
+                      },
+                    }}
+                  >
+                    <img
+                      src={fileUrl}
+                      alt={`File ${fileId}`}
+                      style={imageStyle}
+                      className={cn("max-h-none max-w-none", imageClassName)}
+                      onLoad={handleImageLoad}
+                      onError={onError}
+                      draggable={false}
+                    />
+                  </TransformComponent>
+                </>
+              )}
             </TransformWrapper>
           )}
         </div>
