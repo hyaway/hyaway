@@ -424,6 +424,44 @@ function InlineViewer({
   onToggleTheater: () => void;
   onToggleFullscreen: () => void;
 }) {
+  const lastTapRef = useRef<{ time: number; x: number; y: number } | null>(
+    null,
+  );
+
+  const handleInlineDoubleTap = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>) => {
+      if (event.changedTouches.length !== 1) return;
+
+      const touch = event.changedTouches[0];
+      const now = Date.now();
+      const previous = lastTapRef.current;
+      // Guard against accidental theater entry during scroll/gesture by
+      // requiring taps to be close in both time and distance.
+      const maxDelayMs = 250;
+      const maxDistance = 24;
+
+      if (previous) {
+        const deltaTime = now - previous.time;
+        const deltaX = touch.clientX - previous.x;
+        const deltaY = touch.clientY - previous.y;
+        const distance = Math.hypot(deltaX, deltaY);
+
+        if (deltaTime <= maxDelayMs && distance <= maxDistance) {
+          lastTapRef.current = null;
+          onToggleTheater();
+          return;
+        }
+      }
+
+      lastTapRef.current = {
+        time: now,
+        x: touch.clientX,
+        y: touch.clientY,
+      };
+    },
+    [onToggleTheater],
+  );
+
   return (
     <div
       style={backgroundStyle}
@@ -434,6 +472,11 @@ function InlineViewer({
         isExpanded ? "cursor-zoom-out" : "cursor-zoom-in",
       )}
       onClick={onToggleZoom}
+      onDoubleClick={(event) => {
+        event.stopPropagation();
+        onToggleTheater();
+      }}
+      onTouchEnd={handleInlineDoubleTap}
     >
       {!loaded && blurhash && (
         <div className="absolute inset-0 flex items-center justify-center">
