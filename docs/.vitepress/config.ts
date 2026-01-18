@@ -72,5 +72,10 @@ export default defineConfig({
       },
     ],
     socialLinks: [{ icon: "github", link: "https://github.com/hyaway/hyaway" }],
+    footer: {
+      message:
+        '<a href="https://hyaway.com/LICENSE.txt">License</a> · <a href="https://hyaway.com/NOTICE.txt">Notice</a>',
+      copyright: "Copyright 2026 hyAway contributors",
+    },
   },
 });
