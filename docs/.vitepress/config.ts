@@ -61,11 +61,11 @@ export default defineConfig({
         text: "Hydrus documentation",
         items: [
           {
-            text: "Hydrus Network ↗",
+            text: "Hydrus network",
             link: "https://hydrusnetwork.github.io/hydrus/",
           },
           {
-            text: "Client API ↗",
+            text: "Client API",
             link: "https://hydrusnetwork.github.io/hydrus/client_api.html",
           },
         ],

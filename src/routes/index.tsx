@@ -53,7 +53,7 @@ interface FeatureItem {
 
 const FEATURES: Array<FeatureItem> = [
   {
-    title: "Review your library",
+    title: "Review your files",
     description:
       "Process your inbox quickly with swipes or hotkeys. Instant commits with undo.",
     icon: IconHandMove,
@@ -299,7 +299,7 @@ function MarketingHeader() {
             >
               hydrus network
             </a>{" "}
-            library while you're away.
+            files while you're away.
           </Subheading>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -457,7 +457,7 @@ function AboutSection() {
             About hyAway
           </Heading>
           <p className="text-muted-foreground text-sm">
-            An open-source web client for{" "}
+            A modern web interface for{" "}
             <a
               href="https://hydrusnetwork.github.io/hydrus/"
               target="_blank"

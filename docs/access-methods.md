@@ -149,4 +149,4 @@ With any of these, just use your custom URL when [connecting](./connect).
 ## Getting help
 
 - [Tailscale Serve documentation](https://tailscale.com/kb/1312/serve)
-- [Hydrus Network documentation](https://hydrusnetwork.github.io/hydrus/)
+- [hydrus network documentation](https://hydrusnetwork.github.io/hydrus/)

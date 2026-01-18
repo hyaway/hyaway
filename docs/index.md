@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: hyAway
-  text: Browse your Hydrus files
-  tagline: A modern web interface for Hydrus Network
+  text: Browse and review your hydrus files while you're away.
+  tagline: A modern web interface for hydrus network
   image:
     light: /images/hyaway-archive-small-light.webp
     dark: /images/hyaway-archive-small-dark.webp

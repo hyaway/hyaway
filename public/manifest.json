@@ -1,7 +1,7 @@
 {
   "short_name": "hyAway",
   "name": "hyAway",
-  "description": "Browse and review your hydrus network library, away from home.",
+  "description": "Browse and review your hydrus network files while you're away.",
   "icons": [
     {
       "src": "favicon.svg",

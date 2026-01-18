@@ -53,5 +53,5 @@ You should see a welcome page.
 
 ## Learn more about Hydrus
 
-- [Hydrus Network Documentation](https://hydrusnetwork.github.io/hydrus/) — Official docs
+- [hydrus network Documentation](https://hydrusnetwork.github.io/hydrus/) — Official docs
 - [Client API reference](https://hydrusnetwork.github.io/hydrus/client_api.html) — API endpoints and parameters

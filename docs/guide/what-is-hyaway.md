@@ -1,6 +1,6 @@
 # What is hyAway?
 
-hyAway is a companion web interface for browsing files from your [Hydrus Network](https://hydrusnetwork.github.io/hydrus/) client.
+hyAway is a companion web interface for browsing files from your [hydrus network](https://hydrusnetwork.github.io/hydrus/) client.
 
 ## Why hyAway?
 

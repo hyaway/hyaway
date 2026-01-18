@@ -166,5 +166,5 @@ hyAway stores your endpoint + keys in your browser's local storage.
 ## Getting help
 
 - [hyAway GitHub Issues](https://github.com/hyaway/hyaway/issues)
-- [Hydrus Network documentation](https://hydrusnetwork.github.io/hydrus/)
+- [hydrus network documentation](https://hydrusnetwork.github.io/hydrus/)
 - [Hydrus Client API docs](https://hydrusnetwork.github.io/hydrus/client_api.html)
