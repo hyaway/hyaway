@@ -1,0 +1,59 @@
+/**
+ * VitePress theme customization to match hyAway app colors
+ * https://vitepress.dev/guide/extending-default-theme#customizing-css
+ */
+
+:root {
+  /* Brand purple from app - same primary in both modes like the app */
+  --vp-c-brand-1: oklch(0.73 0.4 275);
+  --vp-c-brand-2: oklch(0.68 0.16 277);
+  --vp-c-brand-3: oklch(0.59 0.2 277);
+  --vp-c-brand-soft: oklch(0.79 0.1 275 / 14%);
+
+  /* Use brand color for tips */
+  --vp-c-tip-1: var(--vp-c-brand-1);
+  --vp-c-tip-2: var(--vp-c-brand-2);
+  --vp-c-tip-3: var(--vp-c-brand-3);
+  --vp-c-tip-soft: var(--vp-c-brand-soft);
+}
+
+.dark {
+  --vp-c-brand-1: oklch(0.73 0.16 275);
+  --vp-c-brand-2: oklch(0.68 0.16 277);
+  --vp-c-brand-3: oklch(0.59 0.2 277);
+  --vp-c-brand-soft: oklch(0.79 0.1 275 / 14%);
+}
+
+/* Hero title gradient */
+:root {
+  --vp-home-hero-name-color: oklch(0.59 0.2 277);
+}
+
+/* Hero image glow */
+:root {
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    oklch(0.79 0.1 275 / 30%) 50%,
+    oklch(0.59 0.2 277 / 30%) 50%
+  );
+  --vp-home-hero-image-filter: blur(44px);
+}
+
+.dark {
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    oklch(0.79 0.1 275 / 20%) 50%,
+    oklch(0.59 0.2 277 / 20%) 50%
+  );
+}
+
+/* Button styling */
+.VPButton.brand {
+  border-color: var(--vp-c-brand-3);
+  background-color: var(--vp-c-brand-3);
+}
+
+.VPButton.brand:hover {
+  border-color: var(--vp-c-brand-2);
+  background-color: var(--vp-c-brand-2);
+}

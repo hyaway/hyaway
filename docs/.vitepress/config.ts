@@ -12,7 +12,10 @@ export default defineConfig({
     ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
   ],
   themeConfig: {
-    logo: "/favicon.svg",
+    logo: {
+      light: "/logo-light.svg",
+      dark: "/logo-dark.svg",
+    },
     nav: [
       { text: "Guide", link: "/getting-started" },
       { text: "Self-host", link: "/self-hosting/" },
