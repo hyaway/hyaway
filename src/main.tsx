@@ -1,6 +1,9 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// Polyfills - must be imported before any other code
+import "./lib/polyfills/request-idle-callback.ts";
+
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";

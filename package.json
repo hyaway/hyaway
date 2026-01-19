@@ -81,6 +81,7 @@
     "@vitejs/plugin-react": "^5.1.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9.39.2",
+    "eslint-plugin-compat": "^6.0.2",
     "eslint-plugin-react-compiler": "19.1.0-rc.2",
     "eslint-plugin-storybook": "10.0.1",
     "jsdom": "^27.4.0",
@@ -94,5 +95,8 @@
     "vitepress": "^1.6.4",
     "vitest": "^4.0.16",
     "web-vitals": "^5.1.0"
-  }
+  },
+  "browserslist": [
+    "defaults and fully supports es6-module"
+  ]
 }

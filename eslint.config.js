@@ -1,6 +1,7 @@
 // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
 import storybook from "eslint-plugin-storybook";
 import reactCompiler from "eslint-plugin-react-compiler";
+import compat from "eslint-plugin-compat";
 import localPlugin from "./eslint-plugin-local/index.js";
 
 import pluginQuery from "@tanstack/eslint-plugin-query";
@@ -11,6 +12,13 @@ export default defineConfig(
   ...pluginQuery.configs["flat/recommended"],
   ...tanstackConfig,
   ...storybook.configs["flat/recommended"],
+  compat.configs["flat/recommended"],
+  {
+    settings: {
+      // APIs with manual fallbacks or polyfills in the codebase
+      polyfills: ["requestIdleCallback", "cancelIdleCallback"],
+    },
+  },
   {
     plugins: {
       "react-compiler": reactCompiler,
