@@ -3,6 +3,7 @@
 
 import { Link } from "@tanstack/react-router";
 import { memo } from "react";
+import { HighlightedText } from "./pages-highlighted-text";
 import { Item, ItemContent, ItemTitle } from "@/components/ui-primitives/item";
 import { ThumbnailImage } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { useGetPageInfoQuery } from "@/integrations/hydrus-api/queries/manage-pages";
@@ -34,6 +35,9 @@ export interface PagesGridItemProps {
   setLinkRef?: (el: HTMLAnchorElement | null, index: number) => void;
   /** Stable callback for focus events - receives index */
   onItemFocus?: (index: number) => void;
+  labelRef?: (el: HTMLSpanElement | null) => void;
+  highlightQuery?: string;
+  useCustomHighlight?: boolean;
 }
 
 /**
@@ -48,6 +52,9 @@ export const PagesGridItem = memo(function PagesGridItem({
   tabIndex = 0,
   setLinkRef,
   onItemFocus,
+  labelRef,
+  highlightQuery = "",
+  useCustomHighlight = false,
 }: PagesGridItemProps) {
   const { data, isLoading } = useGetPageInfoQuery(pageKey, true);
   const useFriendlyUrls = usePagesUseFriendlyUrls();
@@ -143,8 +150,14 @@ export const PagesGridItem = memo(function PagesGridItem({
           </div>
         )}
       </ItemContent>
-      <ItemTitle className="line-clamp-2 w-full leading-tight wrap-break-word">
-        {pageName}
+      <ItemTitle className="line-clamp-2 w-full text-sm/5 wrap-break-word">
+        <span ref={labelRef} className="block">
+          <HighlightedText
+            text={pageName}
+            query={highlightQuery}
+            useCustomHighlight={useCustomHighlight}
+          />
+        </span>
       </ItemTitle>
     </Item>
   );
