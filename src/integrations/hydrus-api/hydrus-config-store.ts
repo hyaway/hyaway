@@ -59,8 +59,11 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
 
       const nextApiAccessKey =
         accessKey === undefined ? previousApiAccessKey : (accessKey ?? "");
+      // Normalize endpoint by removing trailing slashes
       const nextApiEndpoint =
-        endpoint === undefined ? previousApiEndpoint : (endpoint ?? "");
+        endpoint === undefined
+          ? previousApiEndpoint
+          : (endpoint ?? "").replace(/\/+$/, "");
 
       const credentialsChanged =
         nextApiAccessKey !== previousApiAccessKey ||
