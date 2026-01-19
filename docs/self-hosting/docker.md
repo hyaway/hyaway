@@ -137,11 +137,44 @@ docker build `
 
 :::
 
+Then run it (silent / runs in the background):
+
+```bash
+docker run -d --name hyaway-standalone --restart unless-stopped -p 4929:80 hyaway
+```
+
+Open **http://localhost:4929**.
+
+Note: if you started hyAway with Docker Compose, Docker Desktop may show a container name like `hyaway-1` (or `something-hyaway-1`). That's normal — Compose generates container names from the project + service name.
+
+If you see a “name is already in use” error, either stop/remove the existing container, or pick a different `--name`.
+
+If you want to run it in the foreground (shows nginx logs in your terminal):
+
+```bash
+docker run --rm -p 4929:80 hyaway
+```
+
+Stop/remove it later:
+
+```bash
+docker stop hyaway-standalone
+docker rm hyaway-standalone
+```
+
+View logs:
+
+```bash
+docker logs -f hyaway-standalone
+```
+
 When credentials are preset:
 
 - The connection settings are pre-filled on first visit
 - Users see "Preconfigured value" next to the fields
 - Users can still change the values if needed (changes are stored in their browser)
+
+If a user has already configured hyAway before (their endpoint/key are already persisted in the browser), the presets will not overwrite those values. They can go to **Settings → Connection** and click **Reset API settings** to clear the stored values.
 
 ---
 
