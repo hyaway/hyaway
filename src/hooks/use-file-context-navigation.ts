@@ -106,6 +106,7 @@ export function useFileContextNavigation({
         navigate({
           to: contextRoute,
           params: buildParams(prevId),
+          replace: true,
         });
         return;
       }
@@ -116,6 +117,7 @@ export function useFileContextNavigation({
         navigate({
           to: contextRoute,
           params: buildParams(nextId),
+          replace: true,
         });
       }
     };
@@ -202,6 +204,7 @@ export function useFileContextNavigation({
           navigate({
             to: contextRoute,
             params: buildParams(prevId),
+            replace: true,
           });
         } else if (deltaX < 0 && nextId !== null) {
           // Swipe left → go to next
@@ -209,6 +212,7 @@ export function useFileContextNavigation({
           navigate({
             to: contextRoute,
             params: buildParams(nextId),
+            replace: true,
           });
         }
       }
@@ -248,6 +252,7 @@ export function useFileContextNavigation({
           navigate({
             to: contextRoute,
             params: buildParams(prevId),
+            replace: true,
           });
         }
       },
@@ -262,6 +267,7 @@ export function useFileContextNavigation({
           navigate({
             to: contextRoute,
             params: buildParams(nextId),
+            replace: true,
           });
         }
       },
