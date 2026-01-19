@@ -97,6 +97,6 @@
     "web-vitals": "^5.1.0"
   },
   "browserslist": [
-    "defaults and fully supports es6-module"
+    "baseline widely available"
   ]
 }
