@@ -123,6 +123,14 @@ export const useAuthStore = create<AuthState>()(
       sessionKey: state.sessionKey,
       authWithSessionKey: state.authWithSessionKey,
     }),
+    merge: (persisted, current) => ({
+      ...current,
+      ...(persisted as Partial<AuthState>),
+      // Normalize endpoint by removing trailing slashes from old stored values
+      api_endpoint:
+        (persisted as Partial<AuthState>)?.api_endpoint?.replace(/\/+$/, "") ??
+        current.api_endpoint,
+    }),
     onRehydrateStorage: () => () => {
       getContext().queryClient.invalidateQueries();
     },
