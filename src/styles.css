@@ -217,3 +217,10 @@
     @apply font-sans;
   }
 }
+
+::highlight(hyaway-pages-search-grid),
+::highlight(hyaway-pages-search-tree),
+::highlight(hyaway-pages-search-tree-main) {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
