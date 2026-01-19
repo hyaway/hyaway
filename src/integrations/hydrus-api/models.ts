@@ -216,6 +216,8 @@ export const FileMetadataSchema = z.object({
     )
     .optional(),
   file_viewing_statistics: z.array(FileViewingStatisticsSchema).optional(),
+  notes: z.record(z.string(), z.string()).optional(),
+  known_urls: z.array(z.string()).optional(),
 });
 
 export type FileMetadata = z.infer<typeof FileMetadataSchema>;

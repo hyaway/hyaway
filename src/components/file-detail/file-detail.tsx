@@ -8,8 +8,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ContentDetailsTable } from "./content-details-table";
 import { FileDetailSkeleton } from "./file-detail-skeleton";
 import { FileInfoTable } from "./file-info-table";
+import { FileNotesSection } from "./file-notes-section";
 import { FilePageHeader } from "./file-page-header";
 import { FileStatusBadges } from "./file-status-badges";
+import { FileUrlsSection } from "./file-urls-section";
 import { FileViewer } from "./file-viewer";
 import { FileViewerSettingsPopover } from "./file-viewer-settings-popover";
 import { ViewingStatisticsTable } from "./viewing-statistics-table";
@@ -160,6 +162,14 @@ function FileDetailContent({
           <ViewingStatisticsTable statistics={data.file_viewing_statistics} />
         </div>
         <Separator className={"mt-2 mb-4"} />
+        <FileNotesSection data={data} />
+        {data.notes && Object.keys(data.notes).length > 0 && (
+          <Separator className={"mt-2 mb-4"} />
+        )}
+        <FileUrlsSection data={data} />
+        {data.known_urls && data.known_urls.length > 0 && (
+          <Separator className={"mt-2 mb-4"} />
+        )}
         <InlineTagsList data={data} />
       </div>
 

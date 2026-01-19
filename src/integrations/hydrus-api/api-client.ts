@@ -137,7 +137,7 @@ export async function getFileMetadata(
       only_return_basic_information,
       include_blurhash: !only_return_basic_information,
       include_milliseconds: false,
-      include_notes: false,
+      include_notes: !only_return_basic_information,
       include_services_object: false,
       include_file_viewing_statistics: !only_return_basic_information,
     },
