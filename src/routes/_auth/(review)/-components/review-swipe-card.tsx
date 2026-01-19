@@ -362,6 +362,27 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
           if (!isTop || isExiting || !gesturesEnabled) return;
 
           if (e.pointerType === "touch") {
+            const target = e.target as HTMLElement;
+            // Don't start swiping when interacting with actual media control elements.
+            // Be specific: exclude buttons, sliders, interactive elements - NOT entire overlays.
+            // .vds-controls is the actual controls bar, not the full player area.
+            // Check BEFORE adding to activeTouchPointersRef - if we bail out early,
+            // onPointerUp may fire on the control instead of our element, leaving stale IDs.
+            if (
+              target.closest(
+                ".vds-controls, .vds-slider, .vds-button, .vds-menu, button, a, input, textarea, select, [role='slider'], [role='button']",
+              )
+            ) {
+              pendingTouchSwipeRef.current = null;
+              return;
+            }
+
+            // Don't start swiping when image viewer is in pan mode (zoomed in)
+            if (target.closest("[data-pan-mode]")) {
+              pendingTouchSwipeRef.current = null;
+              return;
+            }
+
             activeTouchPointersRef.current.add(e.pointerId);
 
             // Two-finger gesture: treat as pinch, block swipe + swipe completion
@@ -378,25 +399,6 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
 
             // If we are in the post-pinch cooldown, require a full lift before swiping.
             if (pinchCooldownRef.current) {
-              return;
-            }
-
-            const target = e.target as HTMLElement;
-            // Don't start swiping when interacting with actual media control elements.
-            // Be specific: exclude buttons, sliders, interactive elements - NOT entire overlays.
-            // .vds-controls is the actual controls bar, not the full player area.
-            if (
-              target.closest(
-                ".vds-controls, .vds-slider, .vds-button, .vds-menu, button, a, input, textarea, select, [role='slider'], [role='button']",
-              )
-            ) {
-              pendingTouchSwipeRef.current = null;
-              return;
-            }
-
-            // Don't start swiping when image viewer is in pan mode (zoomed in)
-            if (target.closest("[data-pan-mode]")) {
-              pendingTouchSwipeRef.current = null;
               return;
             }
 
