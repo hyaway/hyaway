@@ -219,8 +219,7 @@
 }
 
 ::highlight(hyaway-pages-search-grid),
-::highlight(hyaway-pages-search-tree),
-::highlight(hyaway-pages-search-tree-main) {
+::highlight(hyaway-pages-search-tree) {
   background-color: var(--primary);
   color: var(--primary-foreground);
 }
