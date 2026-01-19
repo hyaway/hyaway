@@ -31,7 +31,7 @@ export function ReviewCompletion({ stats }: ReviewCompletionProps) {
 
   const handleClearAndBrowse = () => {
     clearQueue();
-    navigate({ to: "/pages" });
+    navigate({ to: "/pages", search: { q: undefined } });
   };
 
   return (
