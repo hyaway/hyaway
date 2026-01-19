@@ -193,46 +193,31 @@ logging:
 
 ---
 
-## Reverse proxy setup
+## Advanced: Reverse proxy setup
 
-### With Traefik
+::: warning You know what you're doing
+This section is intentionally **advanced** and these tips are only general guidance (they **haven't been tested** against every proxy setup).
 
-Add labels to `docker-compose.yml`:
+If you just want secure access from other devices, prefer [Expose via Tailscale](#expose-via-tailscale).
+:::
 
-```yaml
-services:
-  hyaway:
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.hyaway.rule=Host(`hyaway.yourdomain.com`)"
-      - "traefik.http.routers.hyaway.tls.certresolver=letsencrypt"
-```
+hyAway is a static web app served by nginx inside the container. In the default compose file it listens on container port `80` and is published on host port `4929`.
 
-### With Caddy
+Important: reverse proxying hyAway does **not** proxy your Hydrus API. hyAway runs in the browser, and the browser makes API calls directly to the Hydrus Client API endpoint you configure.
 
-```
-hyaway.yourdomain.com {
-    reverse_proxy localhost:4929
-}
-```
+If you're putting hyAway behind a reverse proxy, here are the main things to keep in mind:
 
-### With nginx
+- Decide whether your proxy runs **on the host** or **in Docker**.
+  - Host proxy: target `127.0.0.1:4929` (the published port).
+  - Docker proxy: target `hyaway:80` (container port) on a shared Docker network, and consider removing the `ports:` mapping so hyAway isn't exposed directly.
+- If you're serving hyAway on a public domain, set `VITE_APP_URL` to that public URL so OG tags and canonical URLs are correct.
+- Consider adding authentication at the proxy layer if the instance is exposed beyond your private network.
 
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name hyaway.yourdomain.com;
+Official docs (start here):
 
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
-
-    location / {
-        proxy_pass http://localhost:4929;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
+- Traefik (Docker provider / routers / TLS): https://doc.traefik.io/traefik/
+- Caddy (`reverse_proxy`): https://caddyserver.com/docs/caddyfile/directives/reverse_proxy
+- nginx (`proxy_pass`): https://nginx.org/en/docs/http/ngx_http_proxy_module.html
 
 ---
 
