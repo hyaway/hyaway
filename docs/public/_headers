@@ -17,3 +17,7 @@
 
 /*.html
   Cache-Control: no-cache
+
+# Allow cross-origin access for OG image (social previews)
+/images/og-image.png
+  Cross-Origin-Resource-Policy: cross-origin

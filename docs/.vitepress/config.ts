@@ -13,6 +13,46 @@ export default defineConfig({
   ignoreDeadLinks: [/^http:\/\/localhost/, /^http:\/\/127\.0\.0\.1/],
   head: [
     ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+    // OG tags
+    ["meta", { property: "og:type", content: "website" }],
+    ["meta", { property: "og:title", content: "hyAway Documentation" }],
+    [
+      "meta",
+      {
+        property: "og:description",
+        content:
+          "Documentation for hyAway - a companion web interface for hydrus network",
+      },
+    ],
+    [
+      "meta",
+      {
+        property: "og:image",
+        content: "https://docs.hyaway.com/images/og-image.png",
+      },
+    ],
+    ["meta", { property: "og:image:width", content: "1200" }],
+    ["meta", { property: "og:image:height", content: "630" }],
+    ["meta", { property: "og:url", content: "https://docs.hyaway.com" }],
+    ["meta", { property: "og:site_name", content: "hyAway" }],
+    // Twitter card
+    ["meta", { name: "twitter:card", content: "summary_large_image" }],
+    ["meta", { name: "twitter:title", content: "hyAway Documentation" }],
+    [
+      "meta",
+      {
+        name: "twitter:description",
+        content:
+          "Documentation for hyAway - a companion web interface for hydrus network",
+      },
+    ],
+    [
+      "meta",
+      {
+        name: "twitter:image",
+        content: "https://docs.hyaway.com/images/og-image.png",
+      },
+    ],
   ],
   themeConfig: {
     logo: {
