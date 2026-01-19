@@ -63,8 +63,13 @@ export function ApiEndpointCard() {
   const form = useForm({
     defaultValues: parseEndpoint(apiEndpoint),
     onSubmit: ({ value }) => {
-      const url = `${value.protocol}${value.host}`;
+      const cleanedHost = value.host.replace(/\/+$/, "");
+      const url = `${value.protocol}${cleanedHost}`;
       setApiCredentials(undefined, url);
+      // Update form with cleaned value (needed when store value didn't change)
+      if (cleanedHost !== value.host) {
+        form.setFieldValue("host", cleanedHost);
+      }
     },
   });
 
