@@ -38,6 +38,7 @@ import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-stor
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import { Permission } from "@/integrations/hydrus-api/models";
 import { PERMISSION_LABELS } from "@/integrations/hydrus-api/permissions";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -250,12 +251,15 @@ function WelcomeHeader() {
 }
 
 function MarketingHeader() {
-  const [showVideo, setShowVideo] = useState(false);
+  const [showMedia, setShowMedia] = useState(false);
+  const prefersReducedMotion = useMediaQuery(
+    "(prefers-reduced-motion: reduce)",
+  );
 
   useEffect(() => {
-    // Defer video loading until after page is interactive.
+    // Defer media loading until after page is interactive.
     // requestIdleCallback polyfill is loaded in main.tsx for Safari support.
-    const id = requestIdleCallback(() => setShowVideo(true), { timeout: 2000 });
+    const id = requestIdleCallback(() => setShowMedia(true), { timeout: 2000 });
     return () => cancelIdleCallback(id);
   }, []);
 
@@ -266,18 +270,30 @@ function MarketingHeader() {
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-xl"
         >
-          {showVideo && (
-            <video
-              src="/header.webm"
-              autoPlay
-              loop
-              muted
-              playsInline
-              disablePictureInPicture
-              disableRemotePlayback
-              className="animate-in fade-in absolute inset-0 size-full object-cover object-bottom duration-3000"
-            />
-          )}
+          {showMedia &&
+            (prefersReducedMotion ? (
+              <img
+                src="/header-poster.jpg"
+                alt=""
+                className="animate-in fade-in absolute inset-0 size-full object-cover object-bottom duration-3000"
+              />
+            ) : (
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                disablePictureInPicture
+                disableRemotePlayback
+                poster="/header-poster.jpg"
+                className="animate-in fade-in absolute inset-0 size-full object-cover object-bottom duration-3000"
+              >
+                {/* AV1 in WebM - best quality/size, Chrome/Firefox/Edge */}
+                <source src="/header.webm" type="video/webm; codecs=av01" />
+                {/* H.264 in MP4 - Safari and older browsers fallback */}
+                <source src="/header.mp4" type="video/mp4" />
+              </video>
+            ))}
           <div className="from-background to-background/80 absolute inset-0 bg-linear-to-r" />
         </div>
         <div className="flex flex-col gap-3">
