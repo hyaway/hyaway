@@ -8,11 +8,11 @@ import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 export const MIN_PAGES_LANES = 1;
 export const MAX_PAGES_LANES = 30;
 
-// Page card sizing constants - maintains 5:4 aspect ratio
+// Page card sizing constants - slightly taller than 5:4 aspect ratio
 export const DEFAULT_PAGE_CARD_WIDTH = 192;
 export const MIN_PAGE_CARD_WIDTH = 120;
 export const MAX_PAGE_CARD_WIDTH = 320;
-export const PAGE_CARD_ASPECT_RATIO = 1.25; // height = width * 1.25
+export const PAGE_CARD_ASPECT_RATIO = 1.35; // height = width * 1.35
 
 // Gap constants
 export const DEFAULT_PAGE_CARD_HORIZONTAL_GAP = 8;

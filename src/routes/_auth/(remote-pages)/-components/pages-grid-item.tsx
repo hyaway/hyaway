@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Link } from "@tanstack/react-router";
-import { IconPointFilled } from "@tabler/icons-react";
+import {
+  IconCaretRightFilled,
+  IconPoint,
+  IconPointFilled,
+} from "@tabler/icons-react";
 import { memo } from "react";
 import { HighlightedText } from "./pages-highlighted-text";
 import { Item, ItemContent, ItemTitle } from "@/components/ui-primitives/item";
@@ -75,6 +79,7 @@ export const PagesGridItem = memo(function PagesGridItem({
 
   // Use slug if friendly URLs enabled, otherwise use full page_key
   const linkPageId = useFriendlyUrls ? pageSlug : pageKey;
+  const previewAspectClass = "aspect-square";
 
   const totalFiles = data?.page_info.media.num_files ?? 0;
   // Show all 4 thumbnails if 4 or fewer files, otherwise show 3 + count card
@@ -83,10 +88,14 @@ export const PagesGridItem = memo(function PagesGridItem({
   const remainingFiles = Math.max(totalFiles - 3, 0);
   const previewFileIds =
     data?.page_info.media.hash_ids.slice(0, maxThumbnails) ?? [];
+  const totalSlots = 4;
+  const filledSlots = previewFileIds.length + (showCountCard ? 1 : 0);
+  const emptySlots = Math.max(0, totalSlots - filledSlots);
 
   return (
     <Item
       variant="muted"
+      size="xs"
       render={
         <Link
           ref={(el) => setLinkRef?.(el, index)}
@@ -97,10 +106,13 @@ export const PagesGridItem = memo(function PagesGridItem({
           onFocus={() => onItemFocus?.(index)}
         />
       }
-      className={cn("relative block h-full", className)}
+      className={cn(
+        "relative flex h-full flex-col flex-nowrap items-stretch",
+        className,
+      )}
     >
       {activeStripeColors.length > 0 ? (
-        <div className="absolute inset-x-2 bottom-0 flex gap-1">
+        <div className="absolute inset-x-1.5 bottom-0 flex gap-1">
           {activeStripeColors.map((color, colorIndex) => (
             <span
               key={`${color}-${colorIndex}`}
@@ -110,10 +122,13 @@ export const PagesGridItem = memo(function PagesGridItem({
           ))}
         </div>
       ) : null}
-      <ItemContent className="mb-3.5">
+      <ItemContent className="min-h-0 flex-1">
         {isLoading ? (
           <div
-            className="text-muted-foreground flex aspect-square flex-col items-center justify-center gap-2 rounded border border-dashed text-center text-sm"
+            className={cn(
+              "text-muted-foreground flex flex-col items-center justify-center gap-2 rounded border border-dashed text-center text-sm",
+              previewAspectClass,
+            )}
             aria-label="Loading page preview"
           >
             <Spinner className="size-5" />
@@ -133,22 +148,17 @@ export const PagesGridItem = memo(function PagesGridItem({
                 <ThumbnailImage fileId={fileId} />
               </div>
             ))}
-            {/* Show +N count card when more than 4 files */}
+            {/* Show +N count card when more than 2/4 files */}
             {showCountCard && (
               <div
-                className="bg-muted text-muted-foreground flex aspect-square items-center justify-center rounded text-sm font-medium"
+                className="bg-primary/80 text-primary-foreground flex aspect-square items-center justify-center rounded text-sm font-medium"
                 aria-label={`${remainingFiles} more files`}
               >
                 +{remainingFiles}
               </div>
             )}
             {/* Fill empty slots to maintain 2x2 grid */}
-            {Array.from({
-              length: Math.max(
-                0,
-                (showCountCard ? 3 : 4) - previewFileIds.length,
-              ),
-            }).map((_, i) => (
+            {Array.from({ length: emptySlots }).map((_, i) => (
               <div
                 key={`empty-${i}`}
                 className="aspect-square rounded border border-dashed bg-transparent"
@@ -158,7 +168,10 @@ export const PagesGridItem = memo(function PagesGridItem({
           </div>
         ) : pageStateLabel ? (
           <div
-            className="text-muted-foreground flex aspect-square flex-col items-center justify-center gap-2 rounded border border-dashed text-center text-sm"
+            className={cn(
+              "text-muted-foreground flex flex-col items-center justify-center gap-2 rounded border border-dashed text-center text-sm",
+              previewAspectClass,
+            )}
             aria-label={pageStateLabel}
           >
             {pageState !== PageState.SEARCH_CANCELLED && (
@@ -167,51 +180,75 @@ export const PagesGridItem = memo(function PagesGridItem({
             <span>{pageStateLabel}</span>
           </div>
         ) : (
-          <div className="text-muted-foreground flex aspect-square items-center justify-center rounded border border-dashed text-sm">
+          <div
+            className={cn(
+              "text-muted-foreground flex items-center justify-center rounded border border-dashed text-sm",
+              previewAspectClass,
+            )}
+          >
             No files
           </div>
         )}
       </ItemContent>
-      <ItemTitle className="line-clamp-2 w-full text-sm/5 wrap-break-word">
-        {groupLabel ? (
-          <span className="text-muted-foreground mb-0.5 flex flex-wrap items-center gap-x-0.5 gap-y-0.5 text-xs/4">
-            {groupSegments.map((segment, segmentIndex) => {
-              const dotColor = groupStripeColorsByLevel[segmentIndex];
+      <ItemTitle className="mt-auto block w-full min-w-0 text-sm/5 wrap-break-word">
+        <div
+          className="flex flex-col gap-0.5 rounded-lg bg-transparent px-1 py-1 backdrop-blur-3xl supports-backdrop-filter:bg-transparent"
+          title={groupLabel ? `${groupLabel} / ${pageName}` : pageName}
+        >
+          {groupLabel ? (
+            <span className="text-foreground line-clamp-1 flex min-w-0 flex-wrap items-center gap-x-0.5 gap-y-0.5 text-xs/4">
+              {groupSegments.map((segment, segmentIndex) => {
+                const dotColor = groupStripeColorsByLevel[segmentIndex];
 
-              return (
-                <span
-                  key={`${segment}-${segmentIndex}`}
-                  className="flex items-center gap-0.5"
-                >
-                  {dotColor ? (
-                    <IconPointFilled
-                      className="size-3 shrink-0"
-                      style={{ color: dotColor }}
-                      aria-hidden="true"
-                    />
-                  ) : null}
-                  <span ref={getGroupLabelRef?.(segmentIndex)}>
-                    <HighlightedText
-                      text={segment}
-                      query={highlightQuery}
-                      useCustomHighlight={useCustomHighlight}
-                    />
+                return (
+                  <span
+                    key={`${segment}-${segmentIndex}`}
+                    className="flex items-center gap-0.5"
+                  >
+                    {dotColor ? (
+                      <IconPointFilled
+                        className="mt-0.5 size-3 shrink-0 self-baseline"
+                        style={{ color: dotColor }}
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <IconPoint
+                        className="text-muted-foreground mt-0.5 size-3 shrink-0 self-baseline"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span
+                      ref={getGroupLabelRef?.(segmentIndex)}
+                      className="min-w-0 break-all"
+                    >
+                      <HighlightedText
+                        text={segment}
+                        query={highlightQuery}
+                        useCustomHighlight={useCustomHighlight}
+                      />
+                    </span>
+                    {segmentIndex < groupSegments.length - 1 ? (
+                      <IconCaretRightFilled
+                        className="text-muted-foreground mt-0.5 size-3 shrink-0 self-baseline"
+                        aria-hidden="true"
+                      />
+                    ) : null}
                   </span>
-                  {segmentIndex < groupSegments.length - 1 ? (
-                    <span aria-hidden="true">/</span>
-                  ) : null}
-                </span>
-              );
-            })}
+                );
+              })}
+            </span>
+          ) : null}
+          <span
+            ref={labelRef}
+            className="line-clamp-2 block min-h-10 break-all"
+          >
+            <HighlightedText
+              text={pageName}
+              query={highlightQuery}
+              useCustomHighlight={useCustomHighlight}
+            />
           </span>
-        ) : null}
-        <span ref={labelRef} className="block">
-          <HighlightedText
-            text={pageName}
-            query={highlightQuery}
-            useCustomHighlight={useCustomHighlight}
-          />
-        </span>
+        </div>
       </ItemTitle>
     </Item>
   );
@@ -240,7 +277,7 @@ export function PagesGridItemSkeleton({
           : `${DEFAULT_PAGE_CARD_WIDTH * PAGE_CARD_ASPECT_RATIO}px`,
       }}
     >
-      <ItemContent className="mb-3.5">
+      <ItemContent className="min-h-0 flex-1 pb-2">
         <div className="grid grid-cols-2 gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={`skeleton-${i}`} className="aspect-square rounded" />

@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useMemo, useState } from "react";
-import { IconChevronRight } from "@tabler/icons-react";
+import {
+  IconChevronRight,
+  IconPoint,
+  IconPointFilled,
+} from "@tabler/icons-react";
 import { usePagesSearchHighlights } from "../-hooks/use-pages-search-highlights";
 import { filterPagesTree } from "../-hooks/use-pages-tree-search";
 import { HighlightedText } from "./pages-highlighted-text";
@@ -64,6 +68,61 @@ export function PagesTreeView({
 }: PagesTreeViewProps) {
   const useFriendlyUrls = usePagesUseFriendlyUrls();
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+  const groupColorByKey = useMemo(() => {
+    const map = new Map<string, string | null>();
+
+    if (!root?.pages?.length) {
+      return map;
+    }
+
+    const baseHue = 277;
+    const baseLightness = 0.59;
+    const baseChroma = 0.2;
+
+    const hashString = (value: string) => {
+      let hash = 0;
+      for (let i = 0; i < value.length; i++) {
+        hash = (hash * 31 + value.charCodeAt(i)) % 360;
+      }
+      return hash;
+    };
+
+    const stack: Array<{ node: PagesTreeNode; path: Array<string> }> =
+      root.pages.map((node) => ({ node, path: [] }));
+
+    while (stack.length) {
+      const current = stack.pop()!;
+      const isGroup = !current.node.is_media_page;
+      const nextPath = isGroup
+        ? [...current.path, current.node.name]
+        : current.path;
+
+      if (isGroup) {
+        const key = nextPath.join(" / ");
+        const mediaCount =
+          current.node.pages?.filter((child) => child.is_media_page).length ??
+          0;
+        const color =
+          key && mediaCount > 0
+            ? (() => {
+                const hueOffset = hashString(key) - 180;
+                const hue = (baseHue + hueOffset + 360) % 360;
+                return `oklch(${baseLightness} ${baseChroma} ${hue})`;
+              })()
+            : null;
+
+        map.set(current.node.page_key, color);
+      }
+
+      if (current.node.pages?.length) {
+        current.node.pages.forEach((child) => {
+          stack.push({ node: child, path: nextPath });
+        });
+      }
+    }
+
+    return map;
+  }, [root]);
 
   const { tree: filteredTree, autoExpandKeys } = useMemo(
     () => filterPagesTree(root, query),
@@ -114,13 +173,13 @@ export function PagesTreeView({
         row.isGroup ? (
           <SidebarMenuItem
             key={row.node.page_key}
-            style={{ paddingLeft: `${row.depth * 12 + 8}px` }}
+            style={{ paddingLeft: `${row.depth * 10}px` }}
           >
             <button
               type="button"
               onClick={() => toggleGroup(row.node.page_key)}
               aria-expanded={effectiveExpandedKeys.has(row.node.page_key)}
-              className={cn(sidebarMenuButtonClassName, "gap-2")}
+              className={cn(sidebarMenuButtonClassName, "gap-1")}
             >
               <IconChevronRight
                 className={cn(
@@ -128,6 +187,20 @@ export function PagesTreeView({
                   effectiveExpandedKeys.has(row.node.page_key) && "rotate-90",
                 )}
               />
+              {groupColorByKey.get(row.node.page_key) ? (
+                <IconPointFilled
+                  className="-mx-2 size-4 shrink-0"
+                  style={{
+                    color: groupColorByKey.get(row.node.page_key) ?? "",
+                  }}
+                  aria-hidden="true"
+                />
+              ) : (
+                <IconPoint
+                  className="text-muted-foreground -mx-2 size-4 shrink-0"
+                  aria-hidden="true"
+                />
+              )}
               <span
                 ref={registerLabelRef(row.node.page_key)}
                 className="truncate"
@@ -143,7 +216,7 @@ export function PagesTreeView({
         ) : (
           <SidebarMenuItem
             key={row.node.page_key}
-            style={{ paddingLeft: `${row.depth * 12 + 24}px` }}
+            style={{ paddingLeft: `${row.depth * 10}px` }}
           >
             <SidebarMenuLinkButton
               to="/pages/$pageId"
