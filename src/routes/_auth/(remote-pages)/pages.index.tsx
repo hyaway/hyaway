@@ -2,15 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLayoutEffect, useMemo, useRef } from "react";
+import z from "zod";
 
 import {
   PagesGridItem,
   PagesGridItemSkeleton,
 } from "./-components/pages-grid-item";
+import { PagesIndexRightSidebar } from "./-components/pages-index-right-sidebar";
 import { PagesDisplaySettingsPopover } from "./-components/pages-display-settings-popover";
+import { usePagesSearchHighlights } from "./-hooks/use-pages-search-highlights";
 import { usePageGridLanes } from "./-hooks/use-page-grid-lanes";
 import type { PageGridLanesResult } from "./-hooks/use-page-grid-lanes";
 import type { MediaPage } from "@/integrations/hydrus-api/models";
@@ -22,8 +25,12 @@ import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ScrollPositionBadge } from "@/components/scroll-position-badge";
+import { Input } from "@/components/ui-primitives/input";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
-import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
+import {
+  useGetMediaPagesQuery,
+  useGetPagesTreeQuery,
+} from "@/integrations/hydrus-api/queries/manage-pages";
 import {
   usePagesCardWidth,
   usePagesExpandCards,
@@ -34,7 +41,15 @@ import {
   usePagesVerticalGap,
 } from "@/stores/pages-settings-store";
 
+const PagesSearchSchema = z.object({
+  q: z
+    .string()
+    .optional()
+    .transform((value) => value?.trim() || undefined),
+});
+
 export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
+  validateSearch: (search) => PagesSearchSchema.parse(search),
   component: PagesIndex,
 });
 
@@ -42,6 +57,8 @@ export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
  * Pages index component - shows virtualized grid of pages grid items
  */
 function PagesIndex() {
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { q } = Route.useSearch();
   const {
     data: pages,
     isPending,
@@ -49,6 +66,7 @@ function PagesIndex() {
     isError,
     error,
   } = useGetMediaPagesQuery();
+  const { data: pagesTree } = useGetPagesTreeQuery();
   const queryClient = useQueryClient();
   const minLanes = usePagesMinLanes();
   const maxLanes = usePagesMaxLanes();
@@ -57,15 +75,39 @@ function PagesIndex() {
   const verticalGap = usePagesVerticalGap();
   const expandCards = usePagesExpandCards();
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchQuery = q ?? "";
+  const normalizedQuery = searchQuery.trim();
+
+  const filteredPages = useMemo(() => {
+    if (!normalizedQuery) {
+      return pages;
+    }
+
+    const lowerQuery = normalizedQuery.toLowerCase();
+    return pages.filter((page) => page.name.toLowerCase().includes(lowerQuery));
+  }, [normalizedQuery, pages]);
+
+  const { registerLabelRef, supportsCustomHighlight } =
+    usePagesSearchHighlights({
+      query: normalizedQuery,
+      highlightName: "hyaway-pages-search-grid",
+    });
+
   const gridConfig = usePageGridLanes(
     containerRef,
     minLanes,
     maxLanes,
-    isPending ? 6 : pages.length,
+    isPending ? 6 : filteredPages.length,
     { cardWidth, horizontalGap, verticalGap, expandCards },
   );
 
-  const title = isPending ? "Pages" : `Pages (${pages.length} pages)`;
+  const totalPagesLabel = `${pages.length} ${pages.length === 1 ? "page" : "pages"}`;
+  const filteredPagesLabel = `${filteredPages.length} ${filteredPages.length === 1 ? "page" : "pages"}`;
+  const title = isPending
+    ? "Pages"
+    : normalizedQuery && filteredPages.length !== pages.length
+      ? `Pages (${filteredPagesLabel} of ${totalPagesLabel})`
+      : `Pages (${totalPagesLabel})`;
 
   const refetchButton = (
     <RefetchButton
@@ -78,37 +120,76 @@ function PagesIndex() {
     />
   );
 
+  const handleQueryChange = (value: string) => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: value.trim() ? value : undefined,
+      }),
+      replace: true,
+    });
+  };
+
+  const emptySearchMessage = "No pages match your search.";
+  const emptyPagesMessage =
+    "No media pages found. Open some file search pages in Hydrus Client.";
+  const treeSidebarEmptyMessage = isPending
+    ? "Loading pages..."
+    : normalizedQuery
+      ? emptySearchMessage
+      : "No pages found.";
+
+  const mainContent = isPending ? (
+    <div
+      className="flex flex-wrap"
+      style={{ gap: `${verticalGap}px ${horizontalGap}px` }}
+      aria-label="Loading pages"
+    >
+      {Array.from({ length: 6 }).map((_, i) => (
+        <PagesGridItemSkeleton
+          key={`page-skeleton-${i}`}
+          width={gridConfig.effectiveCardWidth}
+          height={gridConfig.effectiveCardHeight}
+        />
+      ))}
+    </div>
+  ) : isError ? (
+    <PageError error={error} fallbackMessage="Failed to load pages" />
+  ) : pages.length === 0 ? (
+    <EmptyState message={emptyPagesMessage} />
+  ) : filteredPages.length === 0 ? (
+    <EmptyState message={emptySearchMessage} />
+  ) : (
+    <PagesGrid
+      pages={filteredPages}
+      containerRef={containerRef}
+      gridConfig={gridConfig}
+      highlightQuery={normalizedQuery}
+      registerLabelRef={registerLabelRef}
+      useCustomHighlight={supportsCustomHighlight}
+    />
+  );
+
   return (
     <>
       <div ref={containerRef}>
         <PageHeading title={title} />
-
-        {isPending ? (
-          <div
-            className="flex flex-wrap"
-            style={{ gap: `${verticalGap}px ${horizontalGap}px` }}
-            aria-label="Loading pages"
-          >
-            {Array.from({ length: 6 }).map((_, i) => (
-              <PagesGridItemSkeleton
-                key={`page-skeleton-${i}`}
-                width={gridConfig.effectiveCardWidth}
-                height={gridConfig.effectiveCardHeight}
-              />
-            ))}
-          </div>
-        ) : isError ? (
-          <PageError error={error} fallbackMessage="Failed to load pages" />
-        ) : pages.length === 0 ? (
-          <EmptyState message="No media pages found. Open some file search pages in Hydrus Client." />
-        ) : (
-          <PagesGrid
-            pages={pages}
-            containerRef={containerRef}
-            gridConfig={gridConfig}
+        <div className="my-3 max-w-md">
+          <Input
+            placeholder="Search pages"
+            value={searchQuery}
+            onChange={(event) => handleQueryChange(event.target.value)}
           />
-        )}
+        </div>
+
+        {mainContent}
       </div>
+      <PagesIndexRightSidebar
+        query={searchQuery}
+        onQueryChange={handleQueryChange}
+        tree={pagesTree}
+        treeEmptyMessage={treeSidebarEmptyMessage}
+      />
       <PageHeaderActions>
         <PagesDisplaySettingsPopover />
       </PageHeaderActions>
@@ -121,10 +202,16 @@ function PagesGrid({
   pages,
   containerRef,
   gridConfig,
+  highlightQuery,
+  registerLabelRef,
+  useCustomHighlight,
 }: {
   pages: Array<MediaPage>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   gridConfig: PageGridLanesResult;
+  highlightQuery: string;
+  registerLabelRef: (key: string) => (node: HTMLSpanElement | null) => void;
+  useCustomHighlight: boolean;
 }) {
   const showScrollBadge = usePagesShowScrollBadge();
   const {
@@ -197,6 +284,9 @@ function PagesGrid({
                   tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
                   setLinkRef={setLinkRef}
                   onItemFocus={handleItemFocus}
+                  labelRef={registerLabelRef(page.page_key)}
+                  highlightQuery={highlightQuery}
+                  useCustomHighlight={useCustomHighlight}
                 />
               </li>
             );
