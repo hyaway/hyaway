@@ -11,7 +11,7 @@ The [Client API](https://hydrusnetwork.github.io/hydrus/client_api.html) lets ex
 1. In Hydrus, go to **services → manage services**
 2. Look for an existing **client api** service, or click **add → client api** to create one
 3. Set the port to `45869` (Hydrus default)
-4. Leave **allow non-local connections** unchecked (both same-machine and Tailscale setups use local connections)
+4. Leave **allow non-local connections** unchecked (recommended). Only enable it if you plan to connect from another device on your Wi‑Fi/LAN without Tailscale.
 5. Check **support CORS headers** (required for connecting between hyaway.com and your own domain)
 6. Click **Apply**
 
@@ -33,21 +33,14 @@ You should see a welcome page.
 
 ---
 
-## Choose your setup
+## Next step: Choose your setup
 
-| Setup           | Best For                                    | Link                                      |
-| --------------- | ------------------------------------------- | ----------------------------------------- |
-| **hyaway.com**  | No installation needed — use the hosted app | [Connect to hyaway.com →](./connect)      |
-| **Self-hosted** | Run your own hyAway instance                | [Self-hosting options →](./self-hosting/) |
-
----
-
-## Next steps
-
-- [Access methods](./access-methods) — Same machine vs remote access
-- [Connect to Hydrus](./connect) — Set up your API connection
-- [Self-host with Docker](./self-hosting/docker) — Run your own instance
-- [Local development](./self-hosting/local-dev) — Contribute or customize
+| I want to...                                          | Recommended path                                                                                                                                                                                                         |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Use hyAway on this computer**                       | Use the [Same machine →](./access-methods#same-machine)                                                                                                                                                                  |
+| **Use hyAway on my phone/tablet on the same Wi‑Fi**   | Use **Tailscale** (recommended, works at home too): [Remote access with Tailscale →](./access-methods#remote-access-with-tailscale) (or **LAN (advanced)**: [Local network →](./access-methods#local-network-wi-fi-lan)) |
+| **Use hyAway remotely (phone/tablet away from home)** | Use **Tailscale** (recommended): [Remote access with Tailscale →](./access-methods#remote-access-with-tailscale)                                                                                                         |
+| **Run your own hyAway instance**                      | [Self-hosting →](./self-hosting/)                                                                                                                                                                                        |
 
 ---
 

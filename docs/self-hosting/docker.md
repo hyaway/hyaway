@@ -4,6 +4,16 @@ Run hyAway in a Docker container with nginx. This is the recommended method for 
 
 ---
 
+## TL;DR
+
+::: tip Prerequisite
+Make sure Docker is running first (on Windows/macOS, start Docker Desktop).
+:::
+
+- Start: `docker compose -f docker/docker-compose.yml up -d --build` (then open http://localhost:4929)
+- Remote access with Tailscale, no port in URL: `tailscale serve --bg 4929` (example: `https://your-machine.tail1234.ts.net`)
+- Remote access with Tailscale, keep port in URL: `tailscale serve --bg --https 4929 http://127.0.0.1:4929` (example: `https://your-machine.tail1234.ts.net:4929`)
+
 ## Quick start
 
 ```bash
@@ -12,8 +22,7 @@ git clone https://github.com/hyaway/hyaway.git
 cd hyaway
 
 # Start the container
-pnpm docker
-# or: docker compose -f docker/docker-compose.yml up -d --build
+docker compose -f docker/docker-compose.yml up -d --build
 ```
 
 hyAway will be available at **http://localhost:4929**
@@ -21,6 +30,8 @@ hyAway will be available at **http://localhost:4929**
 ---
 
 ## Available commands
+
+> Note: The `pnpm docker*` scripts are developer conveniences. For self-hosting you only need Docker.
 
 | Command              | Description                               |
 | -------------------- | ----------------------------------------- |
@@ -71,7 +82,7 @@ services:
 
 For private/localhost instances, leave this commented out — the app works fine without it.
 
-### ⚠️ Danger zone: Preset Hydrus credentials
+### Danger zone: Preset Hydrus credentials
 
 You can preset the Hydrus API endpoint and access key at build time. This allows users to skip the connection setup entirely.
 
@@ -111,6 +122,35 @@ When credentials are preset:
 - The connection settings are pre-filled on first visit
 - Users see "Preconfigured value" next to the fields
 - Users can still change the values if needed (changes are stored in their browser)
+
+---
+
+## Expose via Tailscale
+
+You can use Tailscale Serve to access your self-hosted hyAway from other devices:
+
+```bash
+# Recommended: no port in the URL (matches `pnpm docker:ts`)
+tailscale serve --bg 4929
+```
+
+Then access it at `https://your-machine.tail1234.ts.net` from any device on your tailnet.
+
+If you prefer keeping the port in the URL:
+
+```bash
+tailscale serve --bg --https 4929 http://127.0.0.1:4929
+```
+
+Then access it at `https://your-machine.tail1234.ts.net:4929`.
+
+The npm scripts also support this:
+
+```bash
+pnpm docker:ts      # Start Tailscale Serve for Docker port (no-port URL)
+pnpm docker:ts:off  # Stop Tailscale Serve
+pnpm ts:status      # Check Tailscale Serve status
+```
 
 ---
 
@@ -192,27 +232,6 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
     }
 }
-```
-
----
-
-## Expose via Tailscale
-
-You can use Tailscale Serve to access your self-hosted hyAway from other devices:
-
-```bash
-# Expose hyAway on your tailnet
-tailscale serve --bg --https 4929 http://127.0.0.1:4929
-```
-
-Then access it at `https://your-machine.tail1234.ts.net:4929` from any device on your tailnet.
-
-The npm scripts also support this:
-
-```bash
-pnpm docker:ts      # Start Tailscale Serve for Docker port
-pnpm docker:ts:off  # Stop Tailscale Serve
-pnpm ts:status      # Check Tailscale Serve status
 ```
 
 ---

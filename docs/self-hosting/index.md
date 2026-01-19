@@ -4,6 +4,26 @@ Run your own instance of hyAway instead of using the hosted [hyaway.com](https:/
 
 ---
 
+## TL;DR
+
+- Most users: use Docker (`docker compose -f docker/docker-compose.yml up -d --build`), then connect to Hydrus in the browser
+- Remote access: add Tailscale Serve (recommended)
+- Sharing without logins: only via preset credentials (danger zone)
+
+## Common scenarios
+
+| I want to...                                                  | Setup needed                                                                                                                                                                |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Access Hydrus from my phone/tablet (remote via Tailscale)** | Use [hyaway.com](https://hyaway.com) + Tailscale Serve for Hydrus (see [Access methods](../access-methods#remote-access-with-tailscale)).                                   |
+| **Access Hydrus from my phone/tablet (same Wi‑Fi / LAN)**     | Use [hyaway.com](https://hyaway.com) — no self-hosting required. If you want direct LAN access (advanced), see [Access methods](../access-methods#local-network-wi-fi-lan). |
+| **Run hyAway on my local network**                            | [Basic Docker setup](#quick-start-with-docker). Each user enters their own Hydrus credentials.                                                                              |
+| **Share Hydrus with family/friends without them logging in**  | Docker with [preset credentials](./docker#danger-zone-preset-hydrus-credentials). ⚠️ Access key is exposed to all users.                                                    |
+| **Access Hydrus remotely (outside my home)**                  | Docker + [Tailscale Serve](./docker#expose-via-tailscale) for easy secure access, or set up a [reverse proxy](./docker#reverse-proxy-setup) with your own domain.           |
+| **Host a public instance for others**                         | Docker + [reverse proxy](./docker#reverse-proxy-setup) + `VITE_APP_URL`. Do NOT use preset credentials.                                                                     |
+| **Customize hyAway or contribute**                            | [Local development setup](./local-dev)                                                                                                                                      |
+
+---
+
 ## Why self-host?
 
 - **Privacy** — Keep everything on your own infrastructure

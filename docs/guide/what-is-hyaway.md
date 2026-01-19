@@ -30,6 +30,8 @@ Your files and data stay on your computer. hyAway just provides a different way 
 
 ## Two ways to use it
 
+Not sure which one fits your situation? Start with the [common scenarios](#common-scenarios) picker.
+
 ### Use the hosted app
 
 The easiest way to get started. Just visit [hyaway.com](https://hyaway.com) and connect to your Hydrus client.
@@ -47,6 +49,16 @@ Run hyAway on your own server or home network.
 - Customize to your needs
 
 See [Self-hosting](../self-hosting/) for Docker and local deployment options.
+
+## Common scenarios
+
+| I want to...                                        | Go here                                                                        |
+| --------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Use hyAway on the same computer as Hydrus**       | [Access methods →](../access-methods#same-machine)                             |
+| **Use hyAway on my phone/tablet (recommended)**     | [Access methods (Tailscale) →](../access-methods#remote-access-with-tailscale) |
+| **Use hyAway on my phone/tablet on the same Wi‑Fi** | [Access methods (LAN, advanced) →](../access-methods#local-network-wi-fi-lan)  |
+| **Connect (endpoint + key)**                        | [Connect to Hydrus →](../connect)                                              |
+| **Self-host hyAway**                                | [Self-hosting →](../self-hosting/)                                             |
 
 ## Get started
 

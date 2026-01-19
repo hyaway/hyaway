@@ -4,6 +4,12 @@ Set up a local development environment to customize hyAway for your needs.
 
 ---
 
+## TL;DR
+
+- Start dev server: `pnpm install` then `pnpm dev` (http://localhost:3000)
+- Share to your LAN: `pnpm dev:host`
+- Share to your tailnet: `pnpm dev:ts` (Tailscale URL typically has no port)
+
 ## Prerequisites
 
 - **Node.js 20+** — [Download](https://nodejs.org/)
