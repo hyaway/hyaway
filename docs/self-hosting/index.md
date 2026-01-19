@@ -19,7 +19,7 @@ Run your own instance of hyAway instead of using the hosted [hyaway.com](https:/
 | **Run hyAway on my local network**                            | [Basic Docker setup](#quick-start-with-docker). Each user enters their own Hydrus credentials.                                                                              |
 | **Share Hydrus with family/friends without them logging in**  | Docker with [preset credentials](./docker#danger-zone-preset-hydrus-credentials). ⚠️ Access key is exposed to all users.                                                    |
 | **Access Hydrus remotely (outside my home)**                  | Docker + [Tailscale Serve](./docker#expose-via-tailscale) for easy secure access, or set up a [reverse proxy](./docker#reverse-proxy-setup) with your own domain.           |
-| **Host a public instance for others**                         | Docker + [reverse proxy](./docker#reverse-proxy-setup) + `VITE_APP_URL`. Do NOT use preset credentials.                                                                     |
+| **Host a public instance for others**                         | Docker + [reverse proxy](./docker#advanced-reverse-proxy-setup) + `VITE_APP_URL`. Do NOT use preset credentials.                                                            |
 | **Customize hyAway or contribute**                            | [Local development setup](./local-dev)                                                                                                                                      |
 
 ---

@@ -68,16 +68,18 @@ ports:
 
 ### Public URL (optional)
 
-If you're hosting hyAway on a public domain, set the `VITE_APP_URL` build argument for proper OG tags and canonical URLs:
+If you're hosting hyAway on a public domain, set `VITE_APP_URL` so OG tags and canonical URLs are correct.
 
-```yaml
-services:
-  hyaway:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      args:
-        VITE_APP_URL: https://your-domain.com
+The Docker Compose setup forwards `VITE_APP_URL` into the image build automatically if it's present in your environment.
+
+Recommended: create a local env file (so you don't edit tracked files):
+
+```bash
+# .env.local
+VITE_APP_URL=https://your-domain.com
+
+# Rebuild using that env file
+docker compose --env-file .env.local -f docker/docker-compose.yml up -d --build
 ```
 
 For private/localhost instances, leave this commented out — the app works fine without it.
@@ -96,26 +98,44 @@ Only use this for trusted private deployments where:
 - You understand that the access key grants full API access per its configured permissions
   :::
 
-```yaml
-services:
-  hyaway:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      args:
-        VITE_HYDRUS_ENDPOINT: http://127.0.0.1:45869
-        VITE_HYDRUS_ACCESS_KEY: your-64-character-access-key-here
+Recommended: set these via an env file and rebuild:
+
+```bash
+# .env.local
+VITE_HYDRUS_ENDPOINT=http://127.0.0.1:45869
+VITE_HYDRUS_ACCESS_KEY=your-64-character-access-key-here
+
+# Rebuild using that env file
+docker compose --env-file .env.local -f docker/docker-compose.yml up -d --build
 ```
 
 Or with the Docker CLI directly:
 
-```bash
+::: code-group
+
+```bash [One line]
+docker build -f docker/Dockerfile --build-arg VITE_HYDRUS_ENDPOINT=http://127.0.0.1:45869 --build-arg VITE_HYDRUS_ACCESS_KEY=your-64-character-access-key-here -t hyaway .
+```
+
+```bash [Multi-line (bash/zsh)]
 docker build \
+  -f docker/Dockerfile \
   --build-arg VITE_HYDRUS_ENDPOINT=http://127.0.0.1:45869 \
   --build-arg VITE_HYDRUS_ACCESS_KEY=your-64-character-access-key-here \
-  -f docker/Dockerfile \
-  -t hyaway .
+  -t hyaway \
+  .
 ```
+
+```powershell [Multi-line (PowerShell)]
+docker build `
+  -f docker/Dockerfile `
+  --build-arg VITE_HYDRUS_ENDPOINT=http://127.0.0.1:45869 `
+  --build-arg VITE_HYDRUS_ACCESS_KEY=your-64-character-access-key-here `
+  -t hyaway `
+  .
+```
+
+:::
 
 When credentials are preset:
 

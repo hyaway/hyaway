@@ -3,19 +3,19 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-      # Set your public URL for working OG tags, canonical URLs, etc.
-      # Leave commented for private/localhost instances (app works fine without it)
-      # args:
-      #   VITE_APP_URL: https://your-domain.com
+      # Optional build args (sourced from your environment / .env)
       #
-      # ⚠️ DANGER ZONE: Preset Hydrus credentials
-      # These values are embedded in the JavaScript bundle and exposed to ALL users.
-      # Only use for trusted private instances where all users share the same Hydrus access.
-      # See docs/self-hosting/docker.md for security implications.
-      #   VITE_HYDRUS_ENDPOINT: http://127.0.0.1:45869
-      #   VITE_HYDRUS_ACCESS_KEY: your-64-character-access-key-here
+      # - VITE_APP_URL: public URL for OG tags/canonical URLs.
+      # - ⚠️ DANGER ZONE: VITE_HYDRUS_ENDPOINT / VITE_HYDRUS_ACCESS_KEY preset credentials
+      #   These values are embedded in the JavaScript bundle and exposed to ALL users.
+      #   Only use for trusted private instances.
+      #   See docs/self-hosting/docker.md for security implications.
+      args:
+        - VITE_APP_URL
+        - VITE_HYDRUS_ENDPOINT
+        - VITE_HYDRUS_ACCESS_KEY
     ports:
-      - "4929:80" # Access at http://localhost:4929 (4929 = hyaw on phone keypad)
+      - "4929:80" # Access at http://localhost:4929
     restart: unless-stopped
 
     # ─────────────────────────────────────────────────────────────
