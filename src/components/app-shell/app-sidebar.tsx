@@ -201,7 +201,11 @@ export function AppSidebar() {
                 {...navLinkProps}
               >
                 {(variant) => (
-                  <SidebarMenuLinkButton to="/pages" variant={variant}>
+                  <SidebarMenuLinkButton
+                    to="/pages"
+                    search={{ q: undefined }}
+                    variant={variant}
+                  >
                     <TouchTarget>
                       <SidebarIcon
                         icon={IconLayoutGrid}

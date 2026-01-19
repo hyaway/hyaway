@@ -56,7 +56,7 @@ function ReviewPage() {
         <EmptyState
           message="No items in review queue. Add files from a page to start reviewing."
           action={
-            <LinkButton to="/pages" variant="outline">
+            <LinkButton to="/pages" search={{ q: undefined }} variant="outline">
               Browse pages
             </LinkButton>
           }
