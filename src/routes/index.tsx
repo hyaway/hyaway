@@ -254,6 +254,10 @@ function MarketingHeader() {
 
   useEffect(() => {
     // Defer video loading until after page is interactive
+    if (typeof requestIdleCallback === "undefined") {
+      const id = setTimeout(() => setShowVideo(true), 200);
+      return () => clearTimeout(id);
+    }
     const id = requestIdleCallback(() => setShowVideo(true), { timeout: 2000 });
     return () => cancelIdleCallback(id);
   }, []);
