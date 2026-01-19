@@ -48,6 +48,64 @@ export function flattenPagesToMedia(rootPage: Page): Array<MediaPage> {
     }));
 }
 
+export type PagesTreeNode = Omit<Page, "pages"> & {
+  /** Same as page_key */
+  id: string;
+  /** URL-friendly slug for media pages */
+  slug?: string;
+  pages?: Array<PagesTreeNode>;
+};
+
+/**
+ * Builds a hierarchical pages tree that only includes nodes with media pages
+ * in their subtree. Media pages get computed `id` and `slug` fields.
+ */
+export function buildPagesTree(rootPage: Page): PagesTreeNode | null {
+  const nodes = new Map<string, PagesTreeNode | null>();
+  const stack: Array<{ page: Page; visited: boolean }> = [
+    { page: rootPage, visited: false },
+  ];
+
+  while (stack.length) {
+    const current = stack.pop()!;
+
+    if (!current.visited) {
+      stack.push({ page: current.page, visited: true });
+
+      if (current.page.pages?.length) {
+        current.page.pages.forEach((child) => {
+          stack.push({ page: child, visited: false });
+        });
+      }
+      continue;
+    }
+
+    const childNodes = (current.page.pages ?? [])
+      .map((child) => nodes.get(child.page_key) ?? null)
+      .filter((child): child is PagesTreeNode => child !== null);
+
+    const hasMedia = current.page.is_media_page || childNodes.length > 0;
+    if (!hasMedia) {
+      nodes.set(current.page.page_key, null);
+      continue;
+    }
+
+    const node: PagesTreeNode = {
+      ...current.page,
+      id: current.page.page_key,
+      pages: childNodes.length > 0 ? childNodes : undefined,
+    };
+
+    if (current.page.is_media_page) {
+      node.slug = createPageSlug(current.page.name, current.page.page_key);
+    }
+
+    nodes.set(current.page.page_key, node);
+  }
+
+  return nodes.get(rootPage.page_key) ?? null;
+}
+
 /**
  * Check if all pages in the tree are in a stable state (ready or cancelled)
  */
@@ -107,6 +165,24 @@ export const useGetMediaPagesQuery = () => {
   return {
     ...rest,
     data: mediaPages,
+  };
+};
+
+/**
+ * Query hook for getting a hierarchical pages tree that includes only nodes
+ * with media pages in their subtree.
+ */
+export const useGetPagesTreeQuery = () => {
+  const { data, ...rest } = useGetPagesQuery();
+
+  const pagesTree = useMemo(
+    () => (data?.pages ? buildPagesTree(data.pages) : null),
+    [data?.pages],
+  );
+
+  return {
+    ...rest,
+    data: pagesTree,
   };
 };
 
