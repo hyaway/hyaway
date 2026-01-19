@@ -1,10 +1,18 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
+import { useGlobalTouchCount } from "@/lib/global-touch-count";
+
+/** Minimum horizontal distance (px) to trigger a swipe */
+const SWIPE_THRESHOLD = 80;
+/** Maximum vertical distance (px) allowed during horizontal swipe */
+const VERTICAL_TOLERANCE = 100;
+/** Minimum velocity (px/ms) to trigger a swipe even below threshold */
+const VELOCITY_THRESHOLD = 0.5;
 
 export interface FileContextNavigationOptions {
   /** The current file ID being viewed */
@@ -47,6 +55,7 @@ export function useFileContextNavigation({
   buildParams,
 }: FileContextNavigationOptions): FileContextNavigationResult {
   const navigate = useNavigate();
+  const getGlobalTouchCount = useGlobalTouchCount();
 
   const currentIndex = fileIds?.indexOf(fileId) ?? -1;
   const prevId = currentIndex > 0 ? fileIds![currentIndex - 1] : null;
@@ -114,6 +123,120 @@ export function useFileContextNavigation({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [buildParams, contextRoute, navigate, nextId, prevId]);
+
+  // Swipe gesture navigation
+  const touchStartRef = useRef<{
+    x: number;
+    y: number;
+    time: number;
+    identifier: number;
+  } | null>(null);
+  const hasNavigatedRef = useRef(false);
+
+  useEffect(() => {
+    const handleTouchStart = (event: TouchEvent) => {
+      // Don't swipe when in fullscreen mode (video player, image theater)
+      if (document.fullscreenElement) {
+        touchStartRef.current = null;
+        return;
+      }
+
+      // Only track single-finger touches for swipe
+      if (event.touches.length !== 1) {
+        touchStartRef.current = null;
+        return;
+      }
+
+      const touch = event.touches[0];
+      touchStartRef.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+        time: Date.now(),
+        identifier: touch.identifier,
+      };
+      hasNavigatedRef.current = false;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      // Abort if in fullscreen mode
+      if (document.fullscreenElement) {
+        touchStartRef.current = null;
+        return;
+      }
+
+      // Abort if multiple fingers (pinch/zoom gesture)
+      if (getGlobalTouchCount() > 1 || event.touches.length > 1) {
+        touchStartRef.current = null;
+        return;
+      }
+
+      const start = touchStartRef.current;
+      if (!start || hasNavigatedRef.current) return;
+
+      // Find the touch we're tracking
+      const touch = Array.from(event.touches).find(
+        (t) => t.identifier === start.identifier,
+      );
+      if (!touch) return;
+
+      const deltaX = touch.clientX - start.x;
+      const deltaY = touch.clientY - start.y;
+      const elapsed = Date.now() - start.time;
+      const velocity = Math.abs(deltaX) / Math.max(elapsed, 1);
+
+      // If vertical movement exceeds tolerance, abort (user is scrolling)
+      if (Math.abs(deltaY) > VERTICAL_TOLERANCE) {
+        touchStartRef.current = null;
+        return;
+      }
+
+      // Check if swipe threshold or velocity threshold is met
+      const meetsDistanceThreshold = Math.abs(deltaX) >= SWIPE_THRESHOLD;
+      const meetsVelocityThreshold =
+        velocity >= VELOCITY_THRESHOLD && Math.abs(deltaX) >= 40;
+
+      if (meetsDistanceThreshold || meetsVelocityThreshold) {
+        if (deltaX > 0 && prevId !== null) {
+          // Swipe right → go to previous
+          hasNavigatedRef.current = true;
+          navigate({
+            to: contextRoute,
+            params: buildParams(prevId),
+          });
+        } else if (deltaX < 0 && nextId !== null) {
+          // Swipe left → go to next
+          hasNavigatedRef.current = true;
+          navigate({
+            to: contextRoute,
+            params: buildParams(nextId),
+          });
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      touchStartRef.current = null;
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("touchcancel", handleTouchEnd);
+    };
+  }, [
+    buildParams,
+    contextRoute,
+    getGlobalTouchCount,
+    navigate,
+    nextId,
+    prevId,
+  ]);
 
   const navActions: Array<FloatingFooterAction> = [
     {
