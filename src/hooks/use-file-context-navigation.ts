@@ -4,6 +4,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { toast } from "sonner";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import { useGlobalTouchCount } from "@/lib/global-touch-count";
 
@@ -198,22 +199,34 @@ export function useFileContextNavigation({
         velocity >= VELOCITY_THRESHOLD && Math.abs(deltaX) >= 40;
 
       if (meetsDistanceThreshold || meetsVelocityThreshold) {
-        if (deltaX > 0 && prevId !== null) {
-          // Swipe right → go to previous
-          hasNavigatedRef.current = true;
-          navigate({
-            to: contextRoute,
-            params: buildParams(prevId),
-            replace: true,
-          });
-        } else if (deltaX < 0 && nextId !== null) {
-          // Swipe left → go to next
-          hasNavigatedRef.current = true;
-          navigate({
-            to: contextRoute,
-            params: buildParams(nextId),
-            replace: true,
-          });
+        if (deltaX > 0) {
+          if (prevId !== null) {
+            // Swipe right → go to previous
+            hasNavigatedRef.current = true;
+            navigate({
+              to: contextRoute,
+              params: buildParams(prevId),
+              replace: true,
+            });
+          } else {
+            // At first item, show feedback
+            hasNavigatedRef.current = true;
+            toast("No previous file", { duration: 1500 });
+          }
+        } else if (deltaX < 0) {
+          if (nextId !== null) {
+            // Swipe left → go to next
+            hasNavigatedRef.current = true;
+            navigate({
+              to: contextRoute,
+              params: buildParams(nextId),
+              replace: true,
+            });
+          } else {
+            // At last item, show feedback
+            hasNavigatedRef.current = true;
+            toast("No next file", { duration: 1500 });
+          }
         }
       }
     };
