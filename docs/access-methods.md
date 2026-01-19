@@ -39,16 +39,6 @@ Use this setup to access Hydrus from your phone, laptop, or any other device.
 
 This also works great when you're on the same Wi-Fi/LAN — many people prefer using Tailscale everywhere so they don't have to switch setups between "at home" and "away".
 
-```
-┌─────────────────┐     Tailscale      ┌──────────────────────┐
-│  Your Phone/    │◄──── secure ──────►│  Home Computer       │
-│  Laptop         │      tunnel        │                      │
-│                 │                    │  ┌────────────────┐  │
-│  hyaway.com ────┼────────────────────┼─►│ Hydrus :45869  │  │
-│                 │                    │  └────────────────┘  │
-└─────────────────┘                    └──────────────────────┘
-```
-
 [Tailscale](https://tailscale.com) creates an encrypted, private network between your devices — no port forwarding or firewall configuration needed.
 
 ### Install Tailscale

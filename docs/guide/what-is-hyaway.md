@@ -19,14 +19,7 @@ All without installing anything on your phone or tablet.
 
 hyAway is a static web app that runs entirely in your browser. It connects directly to your Hydrus client's [Client API](https://hydrusnetwork.github.io/hydrus/client_api.html) — there's no server in the middle.
 
-```
-┌─────────────────┐                    ┌──────────────────┐
-│  Your Browser   │◄──── API calls ───►│  Hydrus Client   │
-│  (hyaway.com)   │                    │  (your computer) │
-└─────────────────┘                    └──────────────────┘
-```
-
-Your files and data stay on your computer. hyAway just provides a different way to view them.
+Your browser (running hyaway.com) makes API calls directly to your Hydrus client on your computer. Your files and data stay on your computer — hyAway just provides a different way to view them.
 
 ## Two ways to use it
 

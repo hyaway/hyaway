@@ -71,24 +71,7 @@ hyAway is a **static single-page application (SPA)**. It:
 
 This means you can host it with any web server: nginx, Apache, Caddy, etc.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Your Network                                               │
-│                                                             │
-│  ┌─────────────┐        ┌─────────────┐                     │
-│  │   Browser   │◄──────►│   hyAway    │                     │
-│  │             │        │  (nginx)    │                     │
-│  │             │        │  :4929      │                     │
-│  └─────────────┘        └─────────────┘                     │
-│         │                                                   │
-│         │  API calls (from browser, not nginx)              │
-│         ▼                                                   │
-│  ┌─────────────┐                                            │
-│  │   Hydrus    │                                            │
-│  │   :45869    │                                            │
-│  └─────────────┘                                            │
-└─────────────────────────────────────────────────────────────┘
-```
+**How it works:** Your browser loads the hyAway SPA from nginx (port 4929), then makes API calls directly to Hydrus (port 45869). The nginx server only serves static files — it doesn't proxy API requests.
 
 ---
 
