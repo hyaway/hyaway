@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Link } from "@tanstack/react-router";
+import { IconPointFilled } from "@tabler/icons-react";
 import { memo } from "react";
 import { HighlightedText } from "./pages-highlighted-text";
 import { Item, ItemContent, ItemTitle } from "@/components/ui-primitives/item";
@@ -36,8 +37,11 @@ export interface PagesGridItemProps {
   /** Stable callback for focus events - receives index */
   onItemFocus?: (index: number) => void;
   labelRef?: (el: HTMLSpanElement | null) => void;
+  getGroupLabelRef?: (index: number) => (el: HTMLSpanElement | null) => void;
   highlightQuery?: string;
   useCustomHighlight?: boolean;
+  groupLabel?: string;
+  groupStripeColorsByLevel?: Array<string | null>;
 }
 
 /**
@@ -53,11 +57,18 @@ export const PagesGridItem = memo(function PagesGridItem({
   setLinkRef,
   onItemFocus,
   labelRef,
+  getGroupLabelRef,
   highlightQuery = "",
   useCustomHighlight = false,
+  groupLabel,
+  groupStripeColorsByLevel = [],
 }: PagesGridItemProps) {
   const { data, isLoading } = useGetPageInfoQuery(pageKey, true);
   const useFriendlyUrls = usePagesUseFriendlyUrls();
+  const groupSegments = groupLabel ? groupLabel.split(" / ") : [];
+  const activeStripeColors = groupStripeColorsByLevel.filter(
+    (color): color is string => Boolean(color),
+  );
 
   const pageState = data?.page_info.page_state;
   const pageStateLabel = pageState ? PAGE_STATE_LABELS[pageState] : undefined;
@@ -86,8 +97,19 @@ export const PagesGridItem = memo(function PagesGridItem({
           onFocus={() => onItemFocus?.(index)}
         />
       }
-      className={cn("block h-full", className)}
+      className={cn("relative block h-full", className)}
     >
+      {activeStripeColors.length > 0 ? (
+        <div className="absolute inset-x-2 bottom-0 flex gap-1">
+          {activeStripeColors.map((color, colorIndex) => (
+            <span
+              key={`${color}-${colorIndex}`}
+              className="h-1 w-full rounded-full"
+              style={{ backgroundColor: color }}
+            />
+          ))}
+        </div>
+      ) : null}
       <ItemContent className="mb-3.5">
         {isLoading ? (
           <div
@@ -151,6 +173,38 @@ export const PagesGridItem = memo(function PagesGridItem({
         )}
       </ItemContent>
       <ItemTitle className="line-clamp-2 w-full text-sm/5 wrap-break-word">
+        {groupLabel ? (
+          <span className="text-muted-foreground mb-0.5 flex flex-wrap items-center gap-x-0.5 gap-y-0.5 text-xs/4">
+            {groupSegments.map((segment, segmentIndex) => {
+              const dotColor = groupStripeColorsByLevel[segmentIndex];
+
+              return (
+                <span
+                  key={`${segment}-${segmentIndex}`}
+                  className="flex items-center gap-0.5"
+                >
+                  {dotColor ? (
+                    <IconPointFilled
+                      className="size-3 shrink-0"
+                      style={{ color: dotColor }}
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                  <span ref={getGroupLabelRef?.(segmentIndex)}>
+                    <HighlightedText
+                      text={segment}
+                      query={highlightQuery}
+                      useCustomHighlight={useCustomHighlight}
+                    />
+                  </span>
+                  {segmentIndex < groupSegments.length - 1 ? (
+                    <span aria-hidden="true">/</span>
+                  ) : null}
+                </span>
+              );
+            })}
+          </span>
+        ) : null}
         <span ref={labelRef} className="block">
           <HighlightedText
             text={pageName}
@@ -193,6 +247,7 @@ export function PagesGridItemSkeleton({
           ))}
         </div>
       </ItemContent>
+      <Skeleton className="mb-1 h-3 w-1/2" />
       <Skeleton className="h-5 w-3/4" />
     </Item>
   );

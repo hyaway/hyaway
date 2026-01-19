@@ -80,6 +80,19 @@ export function filterPagesTree(
     };
   };
 
-  const tree = filterNode(root, false);
-  return { tree, autoExpandKeys };
+  const filteredChildren = root.pages
+    ?.map((child) => filterNode(child, false))
+    .filter((child): child is PagesTreeNode => child !== null);
+
+  if (!filteredChildren?.length) {
+    return { tree: null, autoExpandKeys };
+  }
+
+  return {
+    tree: {
+      ...root,
+      pages: filteredChildren,
+    },
+    autoExpandKeys,
+  };
 }
