@@ -8,6 +8,7 @@ import {
   IconHistory,
   IconMailFilled,
   IconMovie,
+  IconNotes,
   IconTrashFilled,
   IconVolume,
 } from "@tabler/icons-react";
@@ -86,6 +87,12 @@ export function ThumbnailGalleryItemContent({
         )}
         {infoContent}
         <span className="flex-1" />
+        {item.notes && Object.keys(item.notes).length > 0 && (
+          <IconNotes
+            className="size-2 @[60px]:size-3 @[150px]:size-4"
+            aria-label="Has notes"
+          />
+        )}
         {item.is_inbox && (
           <IconMailFilled
             className="text-foreground size-2 @[60px]:size-3 @[150px]:size-4"
