@@ -63,17 +63,17 @@ function FileNote({ name, content }: FileNoteProps) {
       </div>
       {isLongNote ? (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleContent className="text-sm wrap-break-word whitespace-pre-wrap">
-            {content}
-          </CollapsibleContent>
           {!isOpen && (
             <p className="text-muted-foreground text-sm wrap-break-word whitespace-pre-wrap">
               {preview}
             </p>
           )}
+          <CollapsibleContent className="text-sm wrap-break-word whitespace-pre-wrap">
+            {content}
+          </CollapsibleContent>
           <CollapsibleTrigger
             className={cn(
-              "text-primary hover:text-primary/80 mt-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors",
+              "text-foreground hover:bg-muted mt-2 inline-flex cursor-pointer items-center gap-1 rounded-sm px-1.5 py-0.5 text-sm font-medium transition-colors",
             )}
           >
             <IconChevronDown

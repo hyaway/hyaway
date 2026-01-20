@@ -61,9 +61,9 @@ function UrlListItem({ url }: { url: string }) {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-muted/50 hover:bg-muted flex items-start gap-2 rounded-lg border p-2 transition-colors"
+        className="bg-muted/50 hover:bg-muted flex items-center gap-2 rounded-lg border p-2 transition-colors"
       >
-        <IconLink className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+        <IconLink className="text-muted-foreground size-4 shrink-0" />
         <div className="min-w-0 flex-1">
           <span className="text-sm font-medium">{displayInfo.domain}</span>
           {displayInfo.path && displayInfo.path !== "/" && (
@@ -72,7 +72,7 @@ function UrlListItem({ url }: { url: string }) {
             </span>
           )}
         </div>
-        <IconExternalLink className="text-muted-foreground mt-0.5 size-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
+        <IconExternalLink className="text-muted-foreground size-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
       </a>
     </li>
   );
