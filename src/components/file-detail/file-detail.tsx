@@ -157,11 +157,6 @@ function FileDetailContent({
           </div>
         </div>
         <Separator className={"mt-2 mb-4"} />
-        <div className="@container space-y-4">
-          <Heading level={2}>Viewing statistics</Heading>
-          <ViewingStatisticsTable statistics={data.file_viewing_statistics} />
-        </div>
-        <Separator className={"mt-2 mb-4"} />
         <FileNotesSection data={data} />
         {data.notes && Object.keys(data.notes).length > 0 && (
           <Separator className={"mt-2 mb-4"} />
@@ -170,6 +165,11 @@ function FileDetailContent({
         {data.known_urls && data.known_urls.length > 0 && (
           <Separator className={"mt-2 mb-4"} />
         )}
+        <div className="@container space-y-4">
+          <Heading level={2}>Viewing statistics</Heading>
+          <ViewingStatisticsTable statistics={data.file_viewing_statistics} />
+        </div>
+        <Separator className={"mt-2 mb-4"} />
         <InlineTagsList data={data} />
       </div>
 
