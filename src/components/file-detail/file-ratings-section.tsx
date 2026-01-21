@@ -2,17 +2,55 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
+  IconCaretLeftFilled,
+  IconCaretRightFilled,
+  IconCircle,
   IconCircleDashed,
   IconCircleDashedNumber0,
+  IconCircleFilled,
+  IconDiamond,
+  IconDiamondFilled,
+  IconDroplet,
+  IconDropletFilled,
+  IconHeart,
+  IconHeartFilled,
+  IconHexagon,
+  IconHexagonFilled,
+  IconHexagonLetterS,
+  IconHexagonLetterSFilled,
+  IconHourglass,
+  IconHourglassFilled,
+  IconJewishStar,
+  IconJewishStarFilled,
   IconMinus,
+  IconMoon,
+  IconMoonFilled,
+  IconPentagon,
+  IconPentagonFilled,
+  IconPentagram,
   IconPlus,
+  IconRectangularPrism,
+  IconRosette,
+  IconRosetteFilled,
+  IconSquare,
+  IconSquareFilled,
+  IconSquareRotated,
+  IconSquareRotatedFilled,
+  IconSquareX,
+  IconSquareXFilled,
   IconStar,
   IconStarFilled,
   IconThumbDown,
   IconThumbDownFilled,
   IconThumbUp,
   IconThumbUpFilled,
+  IconTriangle,
+  IconTriangleFilled,
+  IconTriangleInverted,
+  IconTriangleInvertedFilled,
+  IconX,
 } from "@tabler/icons-react";
+import type { ComponentType, SVGProps } from "react";
 
 import type {
   FileMetadata,
@@ -26,6 +64,80 @@ import { cn } from "@/lib/utils";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+interface ShapeIcons {
+  filled: IconComponent;
+  outline: IconComponent;
+  /** Additional className for icon styling (e.g., stroke-width, transforms) */
+  className?: string;
+}
+
+/**
+ * Maps Hydrus star_shape values to Tabler icon components.
+ * Hydrus shapes: https://hydrusnetwork.github.io/hydrus/developer_api.html#get_services
+ */
+const SHAPE_ICONS: Record<string, ShapeIcons> = {
+  circle: { filled: IconCircleFilled, outline: IconCircle },
+  square: { filled: IconSquareFilled, outline: IconSquare },
+  "fat star": { filled: IconStarFilled, outline: IconStar },
+  "pentagram star": {
+    filled: IconPentagram,
+    outline: IconPentagram,
+    className: "[--icon-stroke:2.5]",
+  },
+  "six point star": { filled: IconJewishStarFilled, outline: IconJewishStar },
+  "eight point star": { filled: IconRosetteFilled, outline: IconRosette },
+  "x shape": { filled: IconX, outline: IconX, className: "[--icon-stroke:3]" },
+  "square cross": { filled: IconSquareXFilled, outline: IconSquareX },
+  "triangle up": { filled: IconTriangleFilled, outline: IconTriangle },
+  "triangle down": {
+    filled: IconTriangleInvertedFilled,
+    outline: IconTriangleInverted,
+  },
+  "triangle right": {
+    filled: IconCaretRightFilled,
+    outline: IconCaretRightFilled,
+  },
+  "triangle left": {
+    filled: IconCaretLeftFilled,
+    outline: IconCaretLeftFilled,
+  },
+  diamond: { filled: IconDiamondFilled, outline: IconDiamond },
+  "rhombus right": {
+    filled: IconRectangularPrism,
+    outline: IconRectangularPrism,
+  },
+  "rhombus left": {
+    filled: IconRectangularPrism,
+    outline: IconRectangularPrism,
+    className: "-scale-x-100",
+  },
+  hourglass: { filled: IconHourglassFilled, outline: IconHourglass },
+  pentagon: { filled: IconPentagonFilled, outline: IconPentagon },
+  hexagon: { filled: IconHexagonFilled, outline: IconHexagon },
+  "small hexagon": {
+    filled: IconHexagonLetterSFilled,
+    outline: IconHexagonLetterS,
+  },
+  heart: { filled: IconHeartFilled, outline: IconHeart },
+  teardrop: { filled: IconDropletFilled, outline: IconDroplet },
+  "crescent moon": { filled: IconMoonFilled, outline: IconMoon },
+  // Fallback for rhombus without direction (same as square rotated 45°)
+  rhombus: { filled: IconSquareRotatedFilled, outline: IconSquareRotated },
+};
+
+/** Default shape when star_shape is not specified or not found */
+const DEFAULT_SHAPE: ShapeIcons = {
+  filled: IconStarFilled,
+  outline: IconStar,
+};
+
+function getShapeIcons(starShape?: string): ShapeIcons {
+  if (!starShape) return DEFAULT_SHAPE;
+  return SHAPE_ICONS[starShape.toLowerCase()] ?? DEFAULT_SHAPE;
+}
 
 interface FileRatingsSectionProps {
   data: FileMetadata;
@@ -110,10 +222,14 @@ function RatingControl({
     return null;
   };
 
+  // Get icon for the service (all rating types can have a star_shape)
+  const ServiceIcon = getShapeIcons(service.star_shape).outline;
+
   return (
     <div className="bg-muted/50 flex flex-wrap items-center gap-2 rounded-lg border p-3">
       <div className="flex flex-col">
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-center gap-1.5">
+          <ServiceIcon className="text-muted-foreground size-4 shrink-0" />
           <span className="text-sm font-medium">{service.name}</span>
           <span className="text-muted-foreground text-xs tabular-nums">
             ({getRatingDisplay()})
@@ -136,6 +252,7 @@ function RatingControl({
             value={currentRating as number | null}
             minStars={service.min_stars ?? 0}
             maxStars={service.max_stars ?? 5}
+            starShape={service.star_shape}
             onChange={handleSetRating}
             disabled={disabled || isPending}
           />
@@ -220,6 +337,7 @@ interface NumericalRatingControlProps {
   value: number | null;
   minStars: number;
   maxStars: number;
+  starShape?: string;
   onChange: (value: number | null) => void;
   disabled?: boolean;
 }
@@ -228,10 +346,16 @@ function NumericalRatingControl({
   value,
   minStars,
   maxStars,
+  starShape,
   onChange,
   disabled,
 }: NumericalRatingControlProps) {
   const stars = Array.from({ length: maxStars }, (_, i) => i + 1);
+  const {
+    filled: FilledIcon,
+    outline: OutlineIcon,
+    className: shapeClassName,
+  } = getShapeIcons(starShape);
 
   const isZero = value === 0;
   const canSetZero = minStars === 0;
@@ -300,9 +424,10 @@ function NumericalRatingControl({
               aria-label={`${star} star${star !== 1 ? "s" : ""}`}
             >
               {/* Show both icons, toggle visibility with CSS on hover */}
-              <IconStarFilled
+              <FilledIcon
                 className={cn(
                   "size-7 transition-transform",
+                  shapeClassName,
                   isFilled ? "block" : "hidden",
                   // Show filled on hover
                   isClickable &&
@@ -312,9 +437,10 @@ function NumericalRatingControl({
                   isFilled && !disabled && "[button:hover~button_&]:opacity-40",
                 )}
               />
-              <IconStar
+              <OutlineIcon
                 className={cn(
                   "size-7 transition-transform",
+                  shapeClassName,
                   isFilled ? "hidden" : "block",
                   // Hide outline on hover
                   isClickable &&
