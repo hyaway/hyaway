@@ -20,6 +20,7 @@ import type {
 import { isImageProjectFile } from "@/lib/mime-utils";
 
 import { FileStateBadge } from "@/components/file-detail/file-state-badge";
+import { RatingsOverlay } from "@/components/file-detail/ratings-overlay";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import {
   useLocalWatchHistoryTracker,
@@ -223,6 +224,11 @@ export const ReviewCardContent = memo(function ReviewCardContent({
       {/* File state badge overlay */}
       <div className="absolute top-3 left-3">
         <FileStateBadge data={metadata} />
+      </div>
+
+      {/* Ratings overlay */}
+      <div className="absolute top-3 right-3">
+        <RatingsOverlay item={metadata} size="md" />
       </div>
     </div>
   );

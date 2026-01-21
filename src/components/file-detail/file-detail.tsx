@@ -15,6 +15,7 @@ import { FileStatusBadges } from "./file-status-badges";
 import { FileUrlsSection } from "./file-urls-section";
 import { FileViewer } from "./file-viewer";
 import { FileViewerSettingsPopover } from "./file-viewer-settings-popover";
+import { RatingsOverlay } from "./ratings-overlay";
 import { ViewingStatisticsTable } from "./viewing-statistics-table";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
@@ -140,8 +141,12 @@ function FileDetailContent({
   return (
     <>
       <div className="flex min-w-0 flex-1 flex-col gap-2 pb-12 sm:pb-16">
-        <div className="-mx-4 sm:-mx-6">
+        <div className="relative -mx-4 sm:-mx-6">
           <FileViewer data={data} />
+          {/* Ratings overlay on file viewer */}
+          <div className="pointer-events-none absolute top-2 right-2 z-10 sm:top-3 sm:right-3">
+            <RatingsOverlay item={data} size="lg" />
+          </div>
         </div>
         <FilePageHeader fileId={fileId} />
         <Separator className={"mt-4"} />
