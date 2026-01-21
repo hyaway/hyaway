@@ -82,7 +82,13 @@ export const ServiceInfoSchema = z.object({
   name: z.string(),
   type: z.enum(ServiceType),
   type_pretty: z.string(),
+  // Rating service fields (optional, only present on rating services)
+  star_shape: z.string().optional(),
+  min_stars: z.number().optional(),
+  max_stars: z.number().optional(),
 });
+
+export type ServiceInfo = z.infer<typeof ServiceInfoSchema>;
 
 export const GetServicesResponseSchema = BaseResponseSchema.extend({
   services: z.record(z.string(), ServiceInfoSchema),
@@ -215,6 +221,15 @@ export const FileMetadataSchema = z.object({
       }),
     )
     .optional(),
+  /**
+   * Ratings keyed by rating service key.
+   * - Like/Dislike: `null` (unset), `true` (like), `false` (dislike)
+   * - Numerical: `null` (unset), or integer (number of stars)
+   * - Inc/Dec: integer (0 is minimum/default)
+   */
+  ratings: z
+    .record(z.string(), z.boolean().or(z.number()).nullable())
+    .optional(),
   file_viewing_statistics: z.array(FileViewingStatisticsSchema).optional(),
   notes: z.record(z.string(), z.string()).optional(),
   known_urls: z.array(z.string()).optional(),
@@ -230,6 +245,28 @@ export type GetFileMetadataResponse = z.infer<
   typeof GetFileMetadataResponseSchema
 >;
 // #endregion Search
+
+// #region Ratings
+/**
+ * Rating value for set_rating endpoint.
+ * - Like/Dislike: `true` (like), `false` (dislike), `null` (unset)
+ * - Numerical: integer (number of stars), `null` (unset)
+ * - Inc/Dec: integer (0 is minimum)
+ */
+export type RatingValue = boolean | number | null;
+
+export type SetRatingOptions = {
+  /** File identifier (use one of file_id, file_ids, hash, or hashes) */
+  file_id?: number;
+  file_ids?: Array<number>;
+  hash?: string;
+  hashes?: Array<string>;
+  /** Hex service key for the rating service */
+  rating_service_key: string;
+  /** The rating value to set */
+  rating: RatingValue;
+};
+// #endregion Ratings
 
 // #region Pages
 export enum PageType {

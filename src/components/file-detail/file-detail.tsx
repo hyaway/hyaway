@@ -10,6 +10,7 @@ import { FileDetailSkeleton } from "./file-detail-skeleton";
 import { FileInfoTable } from "./file-info-table";
 import { FileNotesSection } from "./file-notes-section";
 import { FilePageHeader } from "./file-page-header";
+import { FileRatingsSection } from "./file-ratings-section";
 import { FileStatusBadges } from "./file-status-badges";
 import { FileUrlsSection } from "./file-urls-section";
 import { FileViewer } from "./file-viewer";
@@ -156,6 +157,8 @@ function FileDetailContent({
             <FileInfoTable data={data} />
           </div>
         </div>
+        <Separator className={"mt-2 mb-4"} />
+        <FileRatingsSection data={data} />
         <Separator className={"mt-2 mb-4"} />
         <FileNotesSection data={data} />
         {data.notes && Object.keys(data.notes).length > 0 && (

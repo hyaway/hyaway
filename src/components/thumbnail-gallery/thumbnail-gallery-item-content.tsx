@@ -14,6 +14,7 @@ import {
 } from "@tabler/icons-react";
 
 import { ThumbnailImage } from "./thumbnail-gallery-item-image";
+import { ThumbnailRatingsOverlay } from "./thumbnail-ratings-overlay";
 import { useThumbnailGalleryContext } from "./thumbnail-gallery-context";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
@@ -71,6 +72,7 @@ export function ThumbnailGalleryItemContent({
             height={item.thumbnail_height}
           />
         )}
+        <ThumbnailRatingsOverlay item={item} />
       </div>
       <div className="bg-muted text-muted-foreground flex h-6 shrink-0 items-center gap-0.5 px-0.5 text-[8px] @[150px]:gap-1 @[150px]:px-1 @[150px]:text-xs">
         {item.mime.startsWith("video/") && (

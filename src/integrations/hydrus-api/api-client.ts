@@ -32,6 +32,7 @@ import type {
   RequestNewPermissionsResponse,
   SearchFilesOptions,
   SearchFilesResponse,
+  SetRatingOptions,
   VerifyAccessKeyResponse,
 } from "./models";
 
@@ -328,4 +329,23 @@ export async function setFileViewtime(
 }
 
 // #endregion File Viewing Statistics
+
+// #region Ratings
+
+/**
+ * Set a rating for a file.
+ *
+ * Rating values by service type:
+ * - Like/Dislike: `true` (like), `false` (dislike), `null` (unset)
+ * - Numerical: integer (number of stars), `null` (unset)
+ * - Inc/Dec: integer (0 is minimum)
+ *
+ * @permission Requires: Edit Ratings (9)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#edit_ratings_set_rating
+ */
+export async function setRating(options: SetRatingOptions): Promise<void> {
+  await sessionKeyClient.post("/edit_ratings/set_rating", options);
+}
+
+// #endregion Ratings
 // #endregion API Functions
