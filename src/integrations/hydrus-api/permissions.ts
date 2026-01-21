@@ -17,12 +17,14 @@ export const MINIMUM_REQUIRED_PERMISSIONS =
  * - MANAGE_PAGES: View/manage Hydrus pages
  * - MANAGE_DATABASE: Access thumbnail dimensions, namespace colors
  * - EDIT_FILE_TIMES: Sync view statistics to Hydrus
+ * - EDIT_FILE_RATINGS: Set file ratings
  */
 export const OPTIONAL_PERMISSIONS = [
   Permission.IMPORT_AND_DELETE_FILES,
   Permission.MANAGE_PAGES,
   Permission.MANAGE_DATABASE,
   Permission.EDIT_FILE_TIMES,
+  Permission.EDIT_FILE_RATINGS,
 ] as const;
 
 export const ALL_PERMISSIONS = [

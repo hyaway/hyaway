@@ -42,7 +42,14 @@ export function FileRatingsSection({ data }: FileRatingsSectionProps) {
 
   return (
     <div className="space-y-4">
-      <Heading level={2}>Ratings</Heading>
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <Heading level={2}>Ratings</Heading>
+        {!canEditRatings && (
+          <span className="text-muted-foreground text-xs">
+            (read-only, no 'Edit file ratings' permission)
+          </span>
+        )}
+      </div>
       <div className="space-y-3">
         {ratingServices.map(([serviceKey, service]) => (
           <RatingControl
@@ -167,7 +174,8 @@ function LikeDislikeControl({
         className={cn(
           "size-10 p-0",
           isLiked &&
-            "bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-500",
+            "bg-green-500/10 text-green-600 disabled:opacity-100 dark:text-green-500",
+          isLiked && !disabled && "hover:bg-green-500/20",
           !isLiked &&
             !disabled &&
             "hover:text-green-600 dark:hover:text-green-500",
@@ -188,7 +196,8 @@ function LikeDislikeControl({
         className={cn(
           "size-10 p-0",
           isDisliked &&
-            "bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-500",
+            "bg-red-500/10 text-red-600 disabled:opacity-100 dark:text-red-500",
+          isDisliked && !disabled && "hover:bg-red-500/20",
           !isDisliked &&
             !disabled &&
             "hover:text-red-600 dark:hover:text-red-500",
@@ -241,7 +250,8 @@ function NumericalRatingControl({
           size="sm"
           className={cn(
             "flex h-auto flex-col gap-0.5 px-1.5 py-1",
-            !disabled && "hover:text-destructive",
+            isZero && "text-destructive disabled:opacity-100",
+            !disabled && !isZero && "hover:text-destructive",
           )}
           onClick={() => onChange(value === 0 ? null : 0)}
           disabled={disabled}
@@ -272,7 +282,8 @@ function NumericalRatingControl({
               className={cn(
                 "flex h-auto flex-col gap-0.5 px-1.5 py-1",
                 // Base filled state
-                isFilled && "text-amber-600 dark:text-amber-500",
+                isFilled &&
+                  "text-amber-600 disabled:opacity-100 dark:text-amber-500",
                 !isFilled && isZero && "text-muted-foreground/50",
                 !isClickable && "cursor-not-allowed opacity-30",
                 // CSS hover: highlight this and all previous stars

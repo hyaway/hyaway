@@ -168,6 +168,7 @@ The app uses a permission-based feature gating system. Features degrade graceful
 | `MANAGE_PAGES`               | 4     | No       | View/refresh/focus Hydrus pages                     |
 | `MANAGE_DATABASE`            | 6     | No       | Thumbnail dimensions, namespace colors              |
 | `EDIT_FILE_TIMES`            | 11    | No       | Sync view statistics to Hydrus                      |
+| `EDIT_FILE_RATINGS`          | 9     | No       | Set file ratings                                    |
 
 ### Key Files
 

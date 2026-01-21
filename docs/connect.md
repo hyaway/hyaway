@@ -113,6 +113,7 @@ hyAway requests these permissions from the [Hydrus Client API](https://hydrusnet
 | Manage pages               | Optional | View and interact with Hydrus pages              |
 | Manage database            | Optional | Access thumbnail dimensions and namespace colors |
 | Edit file times            | Optional | Sync view statistics to Hydrus                   |
+| Edit file ratings          | Optional | Set file ratings                                 |
 
 You can grant all permissions or only the ones you need.
 
