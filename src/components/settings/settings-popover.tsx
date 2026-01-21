@@ -47,7 +47,7 @@ export function SettingsPopover({
         <SheetHeader>
           <SheetTitle>{label}</SheetTitle>
         </SheetHeader>
-        <ScrollArea className="h-full" viewportClassName="pe-3">
+        <ScrollArea className="min-h-0 flex-1" viewportClassName="pe-3">
           <div className="space-y-6 px-2 py-5 @sm:px-4">{children}</div>
         </ScrollArea>
       </SheetContent>

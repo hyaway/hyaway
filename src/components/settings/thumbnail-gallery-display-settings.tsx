@@ -1,14 +1,14 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo, useState, useSyncExternalStore } from "react";
-import { IconX } from "@tabler/icons-react";
+import { useState, useSyncExternalStore } from "react";
 import {
   AccordionSection,
   RangeSliderField,
   SliderField,
   SwitchField,
 } from "./setting-fields";
+import { RatingsOverlaySettings } from "./ratings-overlay-settings";
 import type { ImageBackground } from "@/stores/file-viewer-settings-store";
 import type { TagsSortMode } from "@/stores/tags-settings-store";
 import {
@@ -46,15 +46,10 @@ import {
   useTagsSettingsActions,
   useTagsSortMode,
 } from "@/stores/tags-settings-store";
-import {
-  useRatingsDisplaySettingsActions,
-  useRatingsServiceSettings,
-} from "@/stores/ratings-display-settings-store";
-import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
+import { useHasRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { Permission } from "@/integrations/hydrus-api/models";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
-import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { Accordion } from "@/components/ui-primitives/accordion";
-import { Button } from "@/components/ui-primitives/button";
 import { Label } from "@/components/ui-primitives/label";
 import { Switch } from "@/components/ui-primitives/switch";
 import {
@@ -113,37 +108,12 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryLastOpenSection = useGalleryLastOpenSection();
   const fileViewerImageBackground = useImageBackground();
   const tagsSortMode = useTagsSortMode();
-  const { ratingServices: ratingServicesRaw } = useRatingServices();
-  const ratingsServiceSettings = useRatingsServiceSettings();
+  const hasRatingServices = useHasRatingServices();
   const { hasPermission } = usePermissions();
   const canManageDatabase = hasPermission(Permission.MANAGE_DATABASE);
   const { setImageBackground: setFileViewerImageBackground } =
     useFileViewerSettingsActions();
   const { setSortMode: setTagsSortMode } = useTagsSettingsActions();
-  const {
-    setServiceShowInThumbnail,
-    setServiceShowEvenWhenNull,
-    removeServiceSettings,
-  } = useRatingsDisplaySettingsActions();
-
-  // Get rating services for settings UI (map to include type for label logic)
-  const ratingServices = useMemo(
-    () =>
-      ratingServicesRaw.map(([serviceKey, service]) => ({
-        serviceKey,
-        name: service.name,
-        type: service.type,
-      })),
-    [ratingServicesRaw],
-  );
-
-  // Find orphaned services (in settings but no longer in Hydrus)
-  const orphanedServices = useMemo(() => {
-    const activeServiceKeys = new Set(ratingServices.map((s) => s.serviceKey));
-    return Object.keys(ratingsServiceSettings).filter(
-      (key) => !activeServiceKeys.has(key),
-    );
-  }, [ratingServices, ratingsServiceSettings]);
 
   // Check if min lanes would overflow the window width
   const minLayoutWidth =
@@ -404,71 +374,9 @@ export function ThumbnailGalleryDisplaySettings({
         </div>
       </AccordionSection>
 
-      {(ratingServices.length > 0 || orphanedServices.length > 0) && (
+      {hasRatingServices && (
         <AccordionSection value="ratings" title="Ratings overlay">
-          <div className="flex flex-col gap-3">
-            {ratingServices.map(({ serviceKey, name, type }) => {
-              const settings = ratingsServiceSettings[serviceKey] ?? {
-                show_in_thumbnail: false,
-                show_in_thumbnail_even_when_null: false,
-              };
-              const whenLabel =
-                type === ServiceType.RATING_INC_DEC
-                  ? "When zero"
-                  : "When unset";
-              return (
-                <div
-                  key={serviceKey}
-                  className="bg-muted/50 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border p-3"
-                >
-                  <span className="grow text-sm font-medium">{name}</span>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                    <SwitchField
-                      id={`${idPrefix}rating-${serviceKey}-show`}
-                      label="Show"
-                      checked={settings.show_in_thumbnail}
-                      onCheckedChange={(checked) =>
-                        setServiceShowInThumbnail(serviceKey, checked)
-                      }
-                    />
-                    <SwitchField
-                      id={`${idPrefix}rating-${serviceKey}-show-null`}
-                      label={whenLabel}
-                      checked={settings.show_in_thumbnail_even_when_null}
-                      onCheckedChange={(checked) =>
-                        setServiceShowEvenWhenNull(serviceKey, checked)
-                      }
-                      disabled={!settings.show_in_thumbnail}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-            {orphanedServices.map((serviceKey) => (
-              <div
-                key={serviceKey}
-                className="bg-muted/50 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-dashed p-3 opacity-60"
-              >
-                <div className="flex grow flex-col">
-                  <span className="text-sm font-medium line-through">
-                    {serviceKey.slice(0, 8)}...
-                  </span>
-                  <span className="text-muted-foreground text-xs">
-                    Service no longer exists
-                  </span>
-                </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => removeServiceSettings(serviceKey)}
-                  aria-label="Remove orphaned service settings"
-                >
-                  <IconX className="size-4" />
-                  Remove
-                </Button>
-              </div>
-            ))}
-          </div>
+          <RatingsOverlaySettings idPrefix={idPrefix} />
         </AccordionSection>
       )}
     </Accordion>

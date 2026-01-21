@@ -4,6 +4,7 @@
 import { useMemo } from "react";
 import { ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
+import { useRatingsServiceSettings } from "@/stores/ratings-display-settings-store";
 
 /**
  * Hook that returns rating services from the Hydrus API.
@@ -28,4 +29,25 @@ export function useRatingServices() {
     isLoading,
     ...rest,
   };
+}
+
+/**
+ * Hook that returns whether there are any rating services available or
+ * orphaned service settings (to show settings UI for cleanup).
+ */
+export function useHasRatingServices() {
+  const { ratingServices, isLoading } = useRatingServices();
+  const ratingsServiceSettings = useRatingsServiceSettings();
+
+  // Check for orphaned services (in settings but no longer in Hydrus)
+  const hasOrphanedServices = useMemo(() => {
+    const activeServiceKeys = new Set(ratingServices.map(([key]) => key));
+    return Object.keys(ratingsServiceSettings).some(
+      (key) => !activeServiceKeys.has(key),
+    );
+  }, [ratingServices, ratingsServiceSettings]);
+
+  // Show settings if we have rating services OR orphaned settings to clean up
+  if (isLoading) return false;
+  return ratingServices.length > 0 || hasOrphanedServices;
 }

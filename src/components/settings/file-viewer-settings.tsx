@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccordionSection, SwitchField } from "./setting-fields";
+import { RatingsOverlaySettings } from "./ratings-overlay-settings";
 import type { ImageBackground } from "@/stores/file-viewer-settings-store";
 import {
   ToggleGroup,
@@ -20,6 +21,7 @@ import {
   useGalleryLinkImageBackground,
   useGallerySettingsActions,
 } from "@/stores/gallery-settings-store";
+import { useHasRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { Accordion } from "@/components/ui-primitives/accordion";
 import { Label } from "@/components/ui-primitives/label";
 
@@ -73,6 +75,7 @@ export function FileViewerSettings({
   const linkImageBackground = useGalleryLinkImageBackground();
   const { setImageBackground: setGalleryImageBackground } =
     useGallerySettingsActions();
+  const hasRatingServices = useHasRatingServices();
 
   const handleImageBackgroundChange = (value: ImageBackground) => {
     setImageBackground(value);
@@ -158,6 +161,12 @@ export function FileViewerSettings({
           onCheckedChange={setMediaStartWithSound}
         />
       </AccordionSection>
+
+      {hasRatingServices && (
+        <AccordionSection value="ratings" title="Ratings overlay">
+          <RatingsOverlaySettings idPrefix={idPrefix} />
+        </AccordionSection>
+      )}
     </Accordion>
   );
 }
