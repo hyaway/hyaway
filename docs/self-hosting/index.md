@@ -6,21 +6,21 @@ Run your own instance of hyAway instead of using the hosted [hyaway.com](https:/
 
 ## TL;DR
 
-- Most users: use Docker (`docker compose -f docker/docker-compose.yml up -d --build`), then connect to Hydrus in the browser
+- Most users: use Docker (`docker compose -f docker/docker-compose.yml up -d`), then connect to Hydrus in the browser
 - Remote access: add Tailscale Serve (recommended)
-- Sharing without logins: only via preset credentials (danger zone)
+- Sharing without logins: only via preset credentials (danger zone, requires building from source)
 
 ## Common scenarios
 
-| I want to...                                                  | Setup needed                                                                                                                                                                |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Access Hydrus from my phone/tablet (remote via Tailscale)** | Use [hyaway.com](https://hyaway.com) + Tailscale Serve for Hydrus (see [Access methods](../access-methods#remote-access-with-tailscale)).                                   |
-| **Access Hydrus from my phone/tablet (same Wi‑Fi / LAN)**     | Use [hyaway.com](https://hyaway.com) — no self-hosting required. If you want direct LAN access (advanced), see [Access methods](../access-methods#local-network-wi-fi-lan). |
-| **Run hyAway on my local network**                            | [Basic Docker setup](#quick-start-with-docker). Each user enters their own Hydrus credentials.                                                                              |
-| **Share Hydrus with family/friends without them logging in**  | Docker with [preset credentials](./docker#danger-zone-preset-hydrus-credentials). ⚠️ Access key is exposed to all users.                                                    |
-| **Access Hydrus remotely (outside my home)**                  | Docker + [Tailscale Serve](./docker#expose-via-tailscale) for easy secure access, or set up a [reverse proxy](./docker#reverse-proxy-setup) with your own domain.           |
-| **Host a public instance for others**                         | Docker + [reverse proxy](./docker#advanced-reverse-proxy-setup) + `VITE_APP_URL`. Do NOT use preset credentials.                                                            |
-| **Customize hyAway or contribute**                            | [Local development setup](./local-dev)                                                                                                                                      |
+| I want to...                                                  | Setup needed                                                                                                                                                                      |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Access Hydrus from my phone/tablet (remote via Tailscale)** | Use [hyaway.com](https://hyaway.com) + Tailscale Serve for Hydrus (see [Remote access with Tailscale](../access-methods#remote-access-with-tailscale)).                           |
+| **Access Hydrus from my phone/tablet (same Wi‑Fi / LAN)**     | Use [hyaway.com](https://hyaway.com) — no self-hosting required. If you want direct LAN access (advanced), see [Local network access](../access-methods#local-network-wi-fi-lan). |
+| **Run hyAway on my local network**                            | [Basic Docker setup](#quick-start-with-docker). Each user enters their own Hydrus credentials.                                                                                    |
+| **Share Hydrus with family/friends without them logging in**  | [Build from source](./build-from-source) with [preset credentials](./build-from-source#danger-zone-preset-hydrus-credentials). ⚠️ Access key is exposed to all users.             |
+| **Access Hydrus remotely (outside my home)**                  | Docker + [Tailscale Serve](./docker#expose-via-tailscale) for easy secure access, or set up a [reverse proxy](./docker#advanced-reverse-proxy-setup) with your own domain.        |
+| **Host a public instance for others**                         | [Build from source](./build-from-source) + [reverse proxy](./docker#advanced-reverse-proxy-setup) + `VITE_APP_URL`. Do NOT use preset credentials.                                |
+| **Customize hyAway or contribute**                            | [Local development setup](./local-dev)                                                                                                                                            |
 
 ---
 
@@ -35,10 +35,11 @@ Run your own instance of hyAway instead of using the hosted [hyaway.com](https:/
 
 ## Deployment options
 
-| Method                               | Best For                             | Difficulty |
-| ------------------------------------ | ------------------------------------ | ---------- |
-| [**Docker**](./docker)               | Production deployments, easy updates | Easy       |
-| [**Local development**](./local-dev) | Run and customize locally            | Medium     |
+| Method                                       | Best For                                        | Difficulty |
+| -------------------------------------------- | ----------------------------------------------- | ---------- |
+| [**Docker**](./docker)                       | Most users — pull pre-built image, easy updates | Easy       |
+| [**Build from source**](./build-from-source) | Preset credentials, custom `VITE_APP_URL`       | Medium     |
+| [**Local development**](./local-dev)         | Contributors, code modifications                | Medium     |
 
 ---
 
@@ -47,12 +48,11 @@ Run your own instance of hyAway instead of using the hosted [hyaway.com](https:/
 The fastest way to self-host hyAway:
 
 ```bash
-# Clone the repository
-git clone https://github.com/hyaway/hyaway.git
-cd hyaway
+# Download the compose file
+curl -O https://raw.githubusercontent.com/hyaway/hyaway/main/docker/docker-compose.yml
 
-# Start the container
-docker compose -f docker/docker-compose.yml up -d --build
+# Start the container (pulls from GitHub Container Registry)
+docker compose up -d
 ```
 
 hyAway will be available at `http://localhost:4929`

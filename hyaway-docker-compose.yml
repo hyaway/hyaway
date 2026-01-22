@@ -1,15 +1,19 @@
-# Pull pre-built image from GitHub Container Registry
-# Usage: docker compose -f docker/docker-compose.yml up
-#
-# Other options:
-#   - docker-compose.build.yml: Build from source locally
-#   - docker-compose.dev.yml: Quick dev with pre-built dist/
 services:
   hyaway:
-    image: ghcr.io/hyaway/hyaway:latest
-    # Pin to specific build if needed:
-    # image: ghcr.io/hyaway/hyaway:build-42
-    # image: ghcr.io/hyaway/hyaway:a1b2c3d
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      # Optional build args (sourced from your environment / .env)
+      #
+      # - VITE_APP_URL: public URL for OG tags/canonical URLs.
+      # - ⚠️ DANGER ZONE: VITE_HYDRUS_ENDPOINT / VITE_HYDRUS_ACCESS_KEY preset credentials
+      #   These values are embedded in the JavaScript bundle and exposed to ALL users.
+      #   Only use for trusted private instances.
+      #   See docs/self-hosting/docker.md for security implications.
+      args:
+        - VITE_APP_URL
+        - VITE_HYDRUS_ENDPOINT
+        - VITE_HYDRUS_ACCESS_KEY
     ports:
       - "4929:80" # Access at http://localhost:4929
     restart: unless-stopped

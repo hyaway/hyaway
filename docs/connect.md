@@ -28,8 +28,8 @@ Connect hyAway to your Hydrus client by setting the API endpoint and access key.
 Enter your endpoint URL:
 
 - **Same machine:** `http://127.0.0.1:45869`
-- **Tailscale:** `https://my-computer.tail1234.ts.net` (or `https://my-computer.tail1234.ts.net:45869` if you configured Serve to keep the port) — see [Access methods](./access-methods#remote-access-with-tailscale)
-- **Local network (Wi‑Fi/LAN, advanced):** `http://192.168.1.50:45869` (see [Access methods](./access-methods#local-network-wi-fi-lan))
+- **Tailscale:** `https://my-computer.tail1234.ts.net` (or `https://my-computer.tail1234.ts.net:45869` if you configured Serve to keep the port) — see [Remote access with Tailscale](./access-methods#remote-access-with-tailscale)
+- **Local network (Wi‑Fi/LAN, advanced):** `http://192.168.1.50:45869` (see [Local network access](./access-methods#local-network-wi-fi-lan))
 - **Custom setup (advanced):** Your reverse proxy or VPN URL
 
 Click **Check endpoint** to verify the connection. You should see the Hydrus and API version numbers.
