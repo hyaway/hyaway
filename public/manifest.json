@@ -42,17 +42,20 @@
     {
       "name": "Pages",
       "short_name": "Pages",
-      "url": "/pages"
+      "url": "/pages",
+      "icons": [{ "src": "/shortcut-pages.png", "sizes": "96x96" }]
     },
     {
       "name": "Random inbox",
       "short_name": "Random",
-      "url": "/random-inbox"
+      "url": "/random-inbox",
+      "icons": [{ "src": "/shortcut-random.png", "sizes": "96x96" }]
     },
     {
       "name": "Review queue",
       "short_name": "Review",
-      "url": "/review"
+      "url": "/review",
+      "icons": [{ "src": "/shortcut-review.png", "sizes": "96x96" }]
     }
   ]
 }

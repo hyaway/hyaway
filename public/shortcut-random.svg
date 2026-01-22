@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" fill="url(#bgGradient)"/>
+  <!-- Tabler IconArrowsShuffle -->
+  <g transform="translate(12, 12) scale(3)" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 4l3 3l-3 3"/>
+    <path d="M18 20l3 -3l-3 -3"/>
+    <path d="M3 7h3a5 5 0 0 1 5 5a5 5 0 0 0 5 5h5"/>
+    <path d="M21 7h-5a4.978 4.978 0 0 0 -3 1m-4 8a4.984 4.984 0 0 1 -3 1h-3"/>
+  </g>
+</svg>
