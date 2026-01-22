@@ -1,4 +1,5 @@
 {
+  "id": "/?source=pwa",
   "short_name": "hyAway",
   "name": "hyAway",
   "description": "Browse and review your hydrus network files while you're away.",
@@ -11,16 +12,47 @@
     {
       "src": "logo192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "logo512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "logo512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#1c1c1c",
-  "background_color": "#1c1c1c"
+  "background_color": "#1c1c1c",
+  "shortcuts": [
+    {
+      "name": "Pages",
+      "short_name": "Pages",
+      "url": "/pages"
+    },
+    {
+      "name": "Random inbox",
+      "short_name": "Random",
+      "url": "/random-inbox"
+    },
+    {
+      "name": "Review queue",
+      "short_name": "Review",
+      "url": "/review"
+    }
+  ]
 }

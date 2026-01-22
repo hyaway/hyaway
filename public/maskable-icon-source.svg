@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Deeper purple gradient with more contrast -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect x="0" y="0" width="512" height="512" fill="url(#bgGradient)"/>
+  
+  <!-- Text "hA" centered in safe zone -->
+  <text 
+    x="256" 
+    y="330" 
+    font-family="'JetBrains Mono', monospace" 
+    font-size="220" 
+    font-weight="700" 
+    fill="#ffffff" 
+    text-anchor="middle"
+  >hA</text>
+</svg>
