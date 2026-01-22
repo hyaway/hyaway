@@ -8,16 +8,21 @@ import {
   IconCircleDashed,
   IconCircleDashedNumber0,
   IconCircleFilled,
+  IconCircleOff,
   IconDiamond,
   IconDiamondFilled,
+  IconDiamondOff,
   IconDroplet,
   IconDropletFilled,
+  IconDropletOff,
   IconHeart,
   IconHeartFilled,
+  IconHeartOff,
   IconHexagon,
   IconHexagonFilled,
   IconHexagonLetterS,
   IconHexagonLetterSFilled,
+  IconHexagonOff,
   IconHourglass,
   IconHourglassFilled,
   IconJewishStar,
@@ -25,29 +30,32 @@ import {
   IconMinus,
   IconMoon,
   IconMoonFilled,
+  IconMoonOff,
   IconPentagon,
   IconPentagonFilled,
+  IconPentagonOff,
   IconPentagram,
   IconPlus,
   IconRectangularPrism,
+  IconRectangularPrismOff,
   IconRosette,
   IconRosetteFilled,
   IconSquare,
   IconSquareFilled,
+  IconSquareOff,
   IconSquareRotated,
   IconSquareRotatedFilled,
+  IconSquareRotatedOff,
   IconSquareX,
   IconSquareXFilled,
   IconStar,
   IconStarFilled,
-  IconThumbDown,
-  IconThumbDownFilled,
-  IconThumbUp,
-  IconThumbUpFilled,
+  IconStarOff,
   IconTriangle,
   IconTriangleFilled,
   IconTriangleInverted,
   IconTriangleInvertedFilled,
+  IconTriangleOff,
   IconX,
 } from "@tabler/icons-react";
 import type { ComponentType, SVGProps } from "react";
@@ -70,6 +78,8 @@ type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 interface ShapeIcons {
   filled: IconComponent;
   outline: IconComponent;
+  /** Icon for dislike/negative state (typically the "Off" variant with slash) */
+  dislike: IconComponent;
   /** Additional className for icon styling (e.g., stroke-width, transforms) */
   className?: string;
 }
@@ -79,59 +89,128 @@ interface ShapeIcons {
  * Hydrus shapes: https://hydrusnetwork.github.io/hydrus/developer_api.html#get_services
  */
 const SHAPE_ICONS: Record<string, ShapeIcons> = {
-  circle: { filled: IconCircleFilled, outline: IconCircle },
-  square: { filled: IconSquareFilled, outline: IconSquare },
-  "fat star": { filled: IconStarFilled, outline: IconStar },
+  circle: {
+    filled: IconCircleFilled,
+    outline: IconCircle,
+    dislike: IconCircleOff,
+  },
+  square: {
+    filled: IconSquareFilled,
+    outline: IconSquare,
+    dislike: IconSquareOff,
+  },
+  "fat star": {
+    filled: IconStarFilled,
+    outline: IconStar,
+    dislike: IconStarOff,
+  },
   "pentagram star": {
     filled: IconPentagram,
     outline: IconPentagram,
+    dislike: IconStarOff, // No pentagram-off, use star-off
     className: "[--icon-stroke:2.5]",
   },
-  "six point star": { filled: IconJewishStarFilled, outline: IconJewishStar },
-  "eight point star": { filled: IconRosetteFilled, outline: IconRosette },
-  "x shape": { filled: IconX, outline: IconX, className: "[--icon-stroke:3]" },
-  "square cross": { filled: IconSquareXFilled, outline: IconSquareX },
-  "triangle up": { filled: IconTriangleFilled, outline: IconTriangle },
+  "six point star": {
+    filled: IconJewishStarFilled,
+    outline: IconJewishStar,
+    dislike: IconStarOff, // No jewish-star-off, use star-off
+  },
+  "eight point star": {
+    filled: IconRosetteFilled,
+    outline: IconRosette,
+    dislike: IconStarOff, // No rosette-off, use star-off
+  },
+  "x shape": {
+    filled: IconX,
+    outline: IconX,
+    dislike: IconX, // X is already negative
+    className: "[--icon-stroke:3]",
+  },
+  "square cross": {
+    filled: IconSquareXFilled,
+    outline: IconSquareX,
+    dislike: IconSquareOff,
+  },
+  "triangle up": {
+    filled: IconTriangleFilled,
+    outline: IconTriangle,
+    dislike: IconTriangleOff,
+  },
   "triangle down": {
     filled: IconTriangleInvertedFilled,
     outline: IconTriangleInverted,
+    dislike: IconTriangleOff,
   },
   "triangle right": {
     filled: IconCaretRightFilled,
     outline: IconCaretRightFilled,
+    dislike: IconTriangleOff,
   },
   "triangle left": {
     filled: IconCaretLeftFilled,
     outline: IconCaretLeftFilled,
+    dislike: IconTriangleOff,
   },
-  diamond: { filled: IconDiamondFilled, outline: IconDiamond },
+  diamond: {
+    filled: IconDiamondFilled,
+    outline: IconDiamond,
+    dislike: IconDiamondOff,
+  },
   "rhombus right": {
     filled: IconRectangularPrism,
     outline: IconRectangularPrism,
+    dislike: IconRectangularPrismOff,
   },
   "rhombus left": {
     filled: IconRectangularPrism,
     outline: IconRectangularPrism,
+    dislike: IconRectangularPrismOff,
     className: "-scale-x-100",
   },
-  hourglass: { filled: IconHourglassFilled, outline: IconHourglass },
-  pentagon: { filled: IconPentagonFilled, outline: IconPentagon },
-  hexagon: { filled: IconHexagonFilled, outline: IconHexagon },
+  hourglass: {
+    filled: IconHourglassFilled,
+    outline: IconHourglass,
+    dislike: IconStarOff, // No hourglass-off, use star-off
+  },
+  pentagon: {
+    filled: IconPentagonFilled,
+    outline: IconPentagon,
+    dislike: IconPentagonOff,
+  },
+  hexagon: {
+    filled: IconHexagonFilled,
+    outline: IconHexagon,
+    dislike: IconHexagonOff,
+  },
   "small hexagon": {
     filled: IconHexagonLetterSFilled,
     outline: IconHexagonLetterS,
+    dislike: IconHexagonOff,
   },
-  heart: { filled: IconHeartFilled, outline: IconHeart },
-  teardrop: { filled: IconDropletFilled, outline: IconDroplet },
-  "crescent moon": { filled: IconMoonFilled, outline: IconMoon },
+  heart: { filled: IconHeartFilled, outline: IconHeart, dislike: IconHeartOff },
+  teardrop: {
+    filled: IconDropletFilled,
+    outline: IconDroplet,
+    dislike: IconDropletOff,
+  },
+  "crescent moon": {
+    filled: IconMoonFilled,
+    outline: IconMoon,
+    dislike: IconMoonOff,
+  },
   // Fallback for rhombus without direction (same as square rotated 45°)
-  rhombus: { filled: IconSquareRotatedFilled, outline: IconSquareRotated },
+  rhombus: {
+    filled: IconSquareRotatedFilled,
+    outline: IconSquareRotated,
+    dislike: IconSquareRotatedOff,
+  },
 };
 
 /** Default shape when star_shape is not specified or not found */
 const DEFAULT_SHAPE: ShapeIcons = {
   filled: IconStarFilled,
   outline: IconStar,
+  dislike: IconStarOff,
 };
 
 function getShapeIcons(starShape?: string): ShapeIcons {
@@ -243,6 +322,7 @@ function RatingControl({
         {service.type === ServiceType.RATING_LIKE && (
           <LikeDislikeControl
             value={currentRating as boolean | null}
+            starShape={service.star_shape}
             onChange={handleSetRating}
             disabled={disabled || isPending}
           />
@@ -271,17 +351,25 @@ function RatingControl({
 
 interface LikeDislikeControlProps {
   value: boolean | null;
+  starShape?: string;
   onChange: (value: boolean | null) => void;
   disabled?: boolean;
 }
 
 function LikeDislikeControl({
   value,
+  starShape,
   onChange,
   disabled,
 }: LikeDislikeControlProps) {
   const isLiked = value === true;
   const isDisliked = value === false;
+  const {
+    filled: FilledIcon,
+    outline: OutlineIcon,
+    dislike: DislikeIcon,
+    className: shapeClassName,
+  } = getShapeIcons(starShape);
 
   return (
     <div className="flex items-center gap-1">
@@ -302,9 +390,9 @@ function LikeDislikeControl({
         aria-label={isLiked ? "Remove like" : "Like"}
       >
         {isLiked ? (
-          <IconThumbUpFilled className="size-7" />
+          <FilledIcon className={cn("size-7", shapeClassName)} />
         ) : (
-          <IconThumbUp className="size-7" />
+          <OutlineIcon className={cn("size-7", shapeClassName)} />
         )}
       </Button>
       <Button
@@ -323,11 +411,7 @@ function LikeDislikeControl({
         disabled={disabled}
         aria-label={isDisliked ? "Remove dislike" : "Dislike"}
       >
-        {isDisliked ? (
-          <IconThumbDownFilled className="size-7" />
-        ) : (
-          <IconThumbDown className="size-7" />
-        )}
+        <DislikeIcon className={cn("size-7", shapeClassName)} />
       </Button>
     </div>
   );
