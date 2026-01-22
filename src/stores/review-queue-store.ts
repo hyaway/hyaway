@@ -9,6 +9,15 @@ import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 /** Types of actions that can be performed on a file during review */
 export type ReviewAction = "archive" | "trash" | "skip";
 
+/** Default threshold as percentage of card width for horizontal swipe (archive/trash) */
+export const DEFAULT_HORIZONTAL_THRESHOLD = 25;
+/** Default threshold as percentage of card height for vertical swipe (skip) */
+export const DEFAULT_VERTICAL_THRESHOLD = 20;
+/** Minimum threshold percentage for swipe gestures */
+export const MIN_SWIPE_THRESHOLD = 10;
+/** Maximum threshold percentage for swipe gestures (from center, so 45% is near edge) */
+export const MAX_SWIPE_THRESHOLD = 45;
+
 /** How images are loaded in review mode */
 export type ReviewImageLoadMode = "original" | "optimized";
 
@@ -43,6 +52,12 @@ type ReviewQueueState = {
   shortcutsEnabled: boolean;
   /** Enable swipe gestures for review actions */
   gesturesEnabled: boolean;
+  /** Show gesture threshold debug overlay */
+  showGestureThresholds: boolean;
+  /** Threshold as percentage of card width for horizontal swipe (archive/trash) */
+  horizontalThreshold: number;
+  /** Threshold as percentage of card height for vertical swipe (skip) */
+  verticalThreshold: number;
   /** Track viewed files in watch history (local + remote sync) */
   trackWatchHistory: boolean;
   /** How to load static images: 'original' for full size, 'resized' for server-side resize */
@@ -69,6 +84,12 @@ type ReviewQueueState = {
     setShortcutsEnabled: (enabled: boolean) => void;
     /** Enable or disable swipe gestures */
     setGesturesEnabled: (enabled: boolean) => void;
+    /** Enable or disable gesture threshold overlay */
+    setShowGestureThresholds: (show: boolean) => void;
+    /** Set horizontal swipe threshold */
+    setHorizontalThreshold: (threshold: number) => void;
+    /** Set vertical swipe threshold */
+    setVerticalThreshold: (threshold: number) => void;
     /** Enable or disable watch history tracking */
     setTrackWatchHistory: (enabled: boolean) => void;
     /** Set image load mode */
@@ -88,6 +109,9 @@ const useReviewQueueStore = create<ReviewQueueState>()(
       history: [],
       shortcutsEnabled: true,
       gesturesEnabled: true,
+      showGestureThresholds: false,
+      horizontalThreshold: DEFAULT_HORIZONTAL_THRESHOLD,
+      verticalThreshold: DEFAULT_VERTICAL_THRESHOLD,
       trackWatchHistory: true,
       imageLoadMode: "optimized",
 
@@ -157,6 +181,18 @@ const useReviewQueueStore = create<ReviewQueueState>()(
           set({ gesturesEnabled });
         },
 
+        setShowGestureThresholds: (showGestureThresholds: boolean) => {
+          set({ showGestureThresholds });
+        },
+
+        setHorizontalThreshold: (horizontalThreshold: number) => {
+          set({ horizontalThreshold });
+        },
+
+        setVerticalThreshold: (verticalThreshold: number) => {
+          set({ verticalThreshold });
+        },
+
         setTrackWatchHistory: (trackWatchHistory: boolean) => {
           set({ trackWatchHistory });
         },
@@ -169,6 +205,9 @@ const useReviewQueueStore = create<ReviewQueueState>()(
           set({
             shortcutsEnabled: initial.shortcutsEnabled,
             gesturesEnabled: initial.gesturesEnabled,
+            showGestureThresholds: initial.showGestureThresholds,
+            horizontalThreshold: initial.horizontalThreshold,
+            verticalThreshold: initial.verticalThreshold,
           });
         },
         /** Reset data settings (trackWatchHistory, imageLoadMode) to defaults */
@@ -190,6 +229,9 @@ const useReviewQueueStore = create<ReviewQueueState>()(
         currentIndex: state.currentIndex,
         shortcutsEnabled: state.shortcutsEnabled,
         gesturesEnabled: state.gesturesEnabled,
+        showGestureThresholds: state.showGestureThresholds,
+        horizontalThreshold: state.horizontalThreshold,
+        verticalThreshold: state.verticalThreshold,
         trackWatchHistory: state.trackWatchHistory,
         imageLoadMode: state.imageLoadMode,
       }),
@@ -209,6 +251,13 @@ const useReviewQueueStore = create<ReviewQueueState>()(
             persisted.shortcutsEnabled ?? currentState.shortcutsEnabled,
           gesturesEnabled:
             persisted.gesturesEnabled ?? currentState.gesturesEnabled,
+          showGestureThresholds:
+            persisted.showGestureThresholds ??
+            currentState.showGestureThresholds,
+          horizontalThreshold:
+            persisted.horizontalThreshold ?? currentState.horizontalThreshold,
+          verticalThreshold:
+            persisted.verticalThreshold ?? currentState.verticalThreshold,
           trackWatchHistory:
             persisted.trackWatchHistory ?? currentState.trackWatchHistory,
           imageLoadMode: persisted.imageLoadMode ?? currentState.imageLoadMode,
@@ -312,6 +361,18 @@ export const useReviewShortcutsEnabled = () =>
 /** Get gestures enabled setting */
 export const useReviewGesturesEnabled = () =>
   useReviewQueueStore((state) => state.gesturesEnabled);
+
+/** Get show gesture thresholds setting */
+export const useReviewShowGestureThresholds = () =>
+  useReviewQueueStore((state) => state.showGestureThresholds);
+
+/** Get horizontal threshold setting */
+export const useReviewHorizontalThreshold = () =>
+  useReviewQueueStore((state) => state.horizontalThreshold);
+
+/** Get vertical threshold setting */
+export const useReviewVerticalThreshold = () =>
+  useReviewQueueStore((state) => state.verticalThreshold);
 
 /** Get track watch history setting */
 export const useReviewTrackWatchHistory = () =>

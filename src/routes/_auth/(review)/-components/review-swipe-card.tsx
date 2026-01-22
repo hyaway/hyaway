@@ -12,12 +12,13 @@ import {
 } from "motion/react";
 import type { MotionValue, PanInfo } from "motion/react";
 import type { ReviewAction } from "@/stores/review-queue-store";
+import {
+  useReviewHorizontalThreshold,
+  useReviewShowGestureThresholds,
+  useReviewVerticalThreshold,
+} from "@/stores/review-queue-store";
 import { cn } from "@/lib/utils";
 
-/** Threshold in pixels for horizontal swipe (archive/trash) */
-const HORIZONTAL_THRESHOLD = 90;
-/** Threshold in pixels for vertical swipe (skip) - lower = easier to trigger */
-const VERTICAL_THRESHOLD = 80;
 /** Distance before overlay starts appearing (as fraction of threshold) */
 const OVERLAY_START = 0.4;
 /** Vertical overlay starts later and ramps faster (higher = later start) */
@@ -26,8 +27,6 @@ const VERTICAL_OVERLAY_START = 0.6;
 const MAX_ROTATION = 12;
 /** Touch movement (px) before we start a swipe drag */
 const TOUCH_SWIPE_START_DISTANCE = 6;
-/** Debug mode - shows colored zone overlays (set VITE_DEBUG_SWIPE_ZONES=true) */
-const DEBUG_ZONES = import.meta.env.VITE_DEBUG_SWIPE_ZONES === "true";
 
 export type SwipeDirection = "left" | "right" | "up" | "down" | null;
 
@@ -38,12 +37,17 @@ type SwipeZone = "skip" | "trash" | "archive" | null;
  * Determine which swipe zone we're in based on coordinates.
  * Skip (up) takes priority, then horizontal actions apply.
  */
-function getSwipeZone(xVal: number, yVal: number): SwipeZone {
+function getSwipeZone(
+  xVal: number,
+  yVal: number,
+  horizontalThreshold: number,
+  verticalThreshold: number,
+): SwipeZone {
   // Skip takes priority when swiping up past threshold
-  if (yVal < -VERTICAL_THRESHOLD) return "skip";
+  if (yVal < -verticalThreshold) return "skip";
   // Horizontal zones
-  if (xVal < -HORIZONTAL_THRESHOLD) return "trash";
-  if (xVal > HORIZONTAL_THRESHOLD) return "archive";
+  if (xVal < -horizontalThreshold) return "trash";
+  if (xVal > horizontalThreshold) return "archive";
   return null;
 }
 
@@ -52,24 +56,26 @@ function getZoneOpacity(
   xVal: number,
   yVal: number,
   zone: "skip" | "trash" | "archive",
+  horizontalThreshold: number,
+  verticalThreshold: number,
 ): number {
-  const horizontalStart = HORIZONTAL_THRESHOLD * OVERLAY_START;
-  const verticalStart = VERTICAL_THRESHOLD * VERTICAL_OVERLAY_START;
+  const horizontalStart = horizontalThreshold * OVERLAY_START;
+  const verticalStart = verticalThreshold * VERTICAL_OVERLAY_START;
 
   // Determine which zone is currently "active" based on which threshold we're closer to
   // Skip zone wins when: past skip threshold OR (approaching skip AND vertical > horizontal progress)
-  const inSkipZone = yVal < -VERTICAL_THRESHOLD;
+  const inSkipZone = yVal < -verticalThreshold;
   const skipProgress =
     yVal >= -verticalStart
       ? 0
-      : (-yVal - verticalStart) / (VERTICAL_THRESHOLD - verticalStart);
+      : (-yVal - verticalStart) / (verticalThreshold - verticalStart);
 
   const horizontalProgress =
     xVal >= -horizontalStart && xVal <= horizontalStart
       ? 0
       : xVal < 0
-        ? (-xVal - horizontalStart) / (HORIZONTAL_THRESHOLD - horizontalStart)
-        : (xVal - horizontalStart) / (HORIZONTAL_THRESHOLD - horizontalStart);
+        ? (-xVal - horizontalStart) / (horizontalThreshold - horizontalStart)
+        : (xVal - horizontalStart) / (horizontalThreshold - horizontalStart);
 
   // Skip zone takes priority when past threshold or when skip progress > horizontal progress
   const skipWins =
@@ -95,6 +101,12 @@ function getZoneOpacity(
   }
 }
 
+/** Card dimensions for threshold calculations */
+export interface CardSize {
+  width: number;
+  height: number;
+}
+
 export interface ReviewSwipeCardProps {
   /** The file ID being displayed */
   fileId: number;
@@ -102,6 +114,8 @@ export interface ReviewSwipeCardProps {
   isTop: boolean;
   /** Stack position (0 = top, 1 = second, etc.) */
   stackIndex: number;
+  /** Card dimensions for calculating percentage-based thresholds */
+  cardSize: CardSize;
   /** Content to render inside the card */
   children: React.ReactNode;
   /** Exit direction for animation (triggers exit when set) */
@@ -150,6 +164,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
   fileId,
   isTop,
   stackIndex,
+  cardSize,
   children,
   exitDirection,
   gesturesEnabled = true,
@@ -174,6 +189,17 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
     started: boolean;
   } | null>(null);
 
+  // Get threshold settings from store (percentages)
+  const showGestureThresholds = useReviewShowGestureThresholds();
+  const horizontalThresholdPercent = useReviewHorizontalThreshold();
+  const verticalThresholdPercent = useReviewVerticalThreshold();
+
+  // Convert percentage thresholds to pixels based on card dimensions
+  const horizontalThresholdPx =
+    (cardSize.width * horizontalThresholdPercent) / 100;
+  const verticalThresholdPx =
+    (cardSize.height * verticalThresholdPercent) / 100;
+
   // Calculate rotation based on horizontal drag
   const rotate = useTransform(
     x,
@@ -183,13 +209,31 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
 
   // Calculate opacity for intent overlays using shared zone logic
   const trashOpacity = useTransform(x, (xVal) =>
-    getZoneOpacity(xVal, y.get(), "trash"),
+    getZoneOpacity(
+      xVal,
+      y.get(),
+      "trash",
+      horizontalThresholdPx,
+      verticalThresholdPx,
+    ),
   );
   const archiveOpacity = useTransform(x, (xVal) =>
-    getZoneOpacity(xVal, y.get(), "archive"),
+    getZoneOpacity(
+      xVal,
+      y.get(),
+      "archive",
+      horizontalThresholdPx,
+      verticalThresholdPx,
+    ),
   );
   const skipOpacity = useTransform(y, (yVal) =>
-    getZoneOpacity(x.get(), yVal, "skip"),
+    getZoneOpacity(
+      x.get(),
+      yVal,
+      "skip",
+      horizontalThresholdPx,
+      verticalThresholdPx,
+    ),
   );
 
   // Scale for stacked cards (cards behind are slightly smaller)
@@ -206,7 +250,12 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
     }
 
     const { offset } = info;
-    const zone = getSwipeZone(offset.x, offset.y);
+    const zone = getSwipeZone(
+      offset.x,
+      offset.y,
+      horizontalThresholdPx,
+      verticalThresholdPx,
+    );
 
     if (zone) {
       // Map zone to direction
@@ -239,7 +288,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
     >
       {/* Debug zone visualization - shows threshold lines from center */}
 
-      {DEBUG_ZONES && isTop && (
+      {showGestureThresholds && isTop && (
         <div className="pointer-events-none absolute inset-0 z-50">
           {/* Center crosshair - moves with card */}
           <motion.div
@@ -249,7 +298,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
           {/* Trash threshold line (left of center) */}
           <div
             className="absolute top-0 bottom-0 w-0.5 bg-red-500"
-            style={{ left: `calc(50% - ${HORIZONTAL_THRESHOLD}px)` }}
+            style={{ left: `calc(50% - ${horizontalThresholdPercent}%)` }}
           >
             <span className="absolute top-4 left-2 text-xs font-bold whitespace-nowrap text-red-500">
               ← TRASH
@@ -258,7 +307,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
           {/* Archive threshold line (right of center) */}
           <div
             className="absolute top-0 bottom-0 w-0.5 bg-green-500"
-            style={{ left: `calc(50% + ${HORIZONTAL_THRESHOLD}px)` }}
+            style={{ left: `calc(50% + ${horizontalThresholdPercent}%)` }}
           >
             <span className="absolute top-4 right-2 text-xs font-bold whitespace-nowrap text-green-500">
               ARCHIVE →
@@ -267,7 +316,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
           {/* Skip threshold line (above center) */}
           <div
             className="absolute right-0 left-0 h-0.5 bg-blue-500"
-            style={{ top: `calc(50% - ${VERTICAL_THRESHOLD}px)` }}
+            style={{ top: `calc(50% - ${verticalThresholdPercent}%)` }}
           >
             <span className="absolute bottom-2 left-4 text-xs font-bold whitespace-nowrap text-blue-500">
               ↑ SKIP

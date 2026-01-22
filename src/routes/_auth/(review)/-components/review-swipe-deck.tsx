@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence } from "motion/react";
 import { ReviewSwipeCard } from "./review-swipe-card";
@@ -62,6 +62,44 @@ function isInOpenOverlay(target: EventTarget | null): boolean {
 const STACK_SIZE = 3;
 /** Number of next cards to prefetch metadata for */
 const PREFETCH_COUNT = 3;
+
+/** Card dimensions for threshold calculations */
+export interface CardSize {
+  width: number;
+  height: number;
+}
+
+/** Container that measures deck size once and passes it to children */
+function DeckContainer({
+  children,
+}: {
+  children: (cardSize: CardSize) => React.ReactNode;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [cardSize, setCardSize] = useState<CardSize>({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      setCardSize({
+        width: entry.contentRect.width,
+        height: entry.contentRect.height,
+      });
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={containerRef} className="relative h-full w-full">
+      {children(cardSize)}
+    </div>
+  );
+}
 
 /** Check if an action didn't change the file state (e.g., archiving already archived) */
 function wasActionUnchanged(
@@ -305,39 +343,42 @@ export function ReviewSwipeDeckVisual({
   }
 
   return (
-    <div className="relative h-full w-full">
-      <AnimatePresence>
-        {allVisibleFileIds.map((fileId, index) => {
-          const exitDirection = exitingCards.get(fileId);
-          const isExiting = exitDirection != null;
-          // Calculate stack index - exiting cards don't count toward stack position
-          const nonExitingIndex = isExiting
-            ? 0
-            : allVisibleFileIds
-                .slice(0, index)
-                .filter((id) => !exitingCards.has(id)).length;
-          // First non-exiting card is the interactive top card
-          const isTopCard =
-            !isExiting &&
-            allVisibleFileIds.findIndex((id) => !exitingCards.has(id)) ===
-              index;
+    <DeckContainer>
+      {(cardSize) => (
+        <AnimatePresence>
+          {allVisibleFileIds.map((fileId, index) => {
+            const exitDirection = exitingCards.get(fileId);
+            const isExiting = exitDirection != null;
+            // Calculate stack index - exiting cards don't count toward stack position
+            const nonExitingIndex = isExiting
+              ? 0
+              : allVisibleFileIds
+                  .slice(0, index)
+                  .filter((id) => !exitingCards.has(id)).length;
+            // First non-exiting card is the interactive top card
+            const isTopCard =
+              !isExiting &&
+              allVisibleFileIds.findIndex((id) => !exitingCards.has(id)) ===
+                index;
 
-          return (
-            <ReviewSwipeCard
-              key={fileId}
-              fileId={fileId}
-              isTop={isTopCard}
-              stackIndex={nonExitingIndex}
-              exitDirection={exitDirection}
-              gesturesEnabled={gesturesEnabled}
-              onSwipe={handleSwipe}
-              onExitComplete={() => handleExitComplete(fileId)}
-            >
-              <ReviewCardContent fileId={fileId} isTop={isTopCard} />
-            </ReviewSwipeCard>
-          );
-        })}
-      </AnimatePresence>
-    </div>
+            return (
+              <ReviewSwipeCard
+                key={fileId}
+                fileId={fileId}
+                isTop={isTopCard}
+                stackIndex={nonExitingIndex}
+                cardSize={cardSize}
+                exitDirection={exitDirection}
+                gesturesEnabled={gesturesEnabled}
+                onSwipe={handleSwipe}
+                onExitComplete={() => handleExitComplete(fileId)}
+              >
+                <ReviewCardContent fileId={fileId} isTop={isTopCard} />
+              </ReviewSwipeCard>
+            );
+          })}
+        </AnimatePresence>
+      )}
+    </DeckContainer>
   );
 }
