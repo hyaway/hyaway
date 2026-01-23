@@ -13,7 +13,7 @@ hyAway gives you a responsive, touch-friendly way to:
 - **View files** with support for images, video, and audio
 - **Access your pages** to see what you've been working on
 
-All without installing anything on your phone or tablet.
+All without installing anything on your phone or tablet. [See screenshots →](../screenshots)
 
 ## How it works
 
@@ -65,4 +65,4 @@ Or jump straight to [hyaway.com](https://hyaway.com) if you're on the same machi
 
 ---
 
-**[What's new?](../changelog)** — See the latest features and improvements.
+**[Screenshots](../screenshots)** — See hyAway in action | **[What's new?](../changelog)** — Latest features and improvements

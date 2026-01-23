@@ -60,27 +60,18 @@ export default defineConfig({
       dark: "/logo-dark.svg",
     },
     nav: [
+      { text: "Go to app", link: "https://hyaway.com" },
       { text: "Guide", link: "/getting-started" },
-      { text: "Self-host", link: "/self-hosting/" },
+      { text: "Screenshots", link: "/screenshots" },
       { text: "Changelog", link: "/changelog" },
-      {
-        text: "Hydrus docs",
-        items: [
-          {
-            text: "Hydrus network",
-            link: "https://hydrusnetwork.github.io/hydrus/",
-          },
-          {
-            text: "Client API",
-            link: "https://hydrusnetwork.github.io/hydrus/client_api.html",
-          },
-        ],
-      },
     ],
     sidebar: [
       {
         text: "Introduction",
-        items: [{ text: "What is hyAway?", link: "/guide/what-is-hyaway" }],
+        items: [
+          { text: "What is hyAway?", link: "/guide/what-is-hyaway" },
+          { text: "Screenshots", link: "/screenshots" },
+        ],
       },
       {
         text: "Getting started",

@@ -9,6 +9,7 @@ All notable changes to hyAway are documented here.
 ### Added
 
 - This changelog page
+- Screenshots page in documentation
 
 ---
 
