@@ -62,6 +62,7 @@ export default defineConfig({
     nav: [
       { text: "Guide", link: "/getting-started" },
       { text: "Self-host", link: "/self-hosting/" },
+      { text: "Changelog", link: "/changelog" },
       {
         text: "Hydrus docs",
         items: [
@@ -110,11 +111,15 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: "Resources",
+        items: [{ text: "Changelog", link: "/changelog" }],
+      },
     ],
     socialLinks: [{ icon: "github", link: "https://github.com/hyaway/hyaway" }],
     footer: {
       message:
-        '<a href="https://hyaway.com/LICENSE.txt">License</a> · <a href="https://hyaway.com/NOTICE.txt">Notice</a>',
+        '<a href="https://hyaway.com/LICENSE.txt">License</a> · <a href="https://hyaway.com/NOTICE.txt">Notice</a> · <a href="/changelog">Changelog</a>',
       copyright: "Copyright 2026 hyAway contributors",
     },
   },

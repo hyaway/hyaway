@@ -17,8 +17,8 @@ hero:
       text: Get started
       link: /getting-started
     - theme: alt
-      text: Go to hyaway.com
-      link: https://hyaway.com
+      text: What's new?
+      link: /changelog
 
 features:
   - title: No installation

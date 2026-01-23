@@ -62,3 +62,7 @@ Ready to try it?
 3. [Connect to Hydrus](../connect) — Enter your endpoint and access key
 
 Or jump straight to [hyaway.com](https://hyaway.com) if you're on the same machine as Hydrus.
+
+---
+
+**[What's new?](../changelog)** — See the latest features and improvements.

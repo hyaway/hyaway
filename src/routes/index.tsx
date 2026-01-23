@@ -493,6 +493,15 @@ function AboutSection() {
             <a href="/NOTICE.txt" className="text-primary hover:underline">
               Notice
             </a>
+            {" · "}
+            <a
+              href="https://docs.hyaway.com/changelog"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Changelog
+            </a>
           </p>
         </div>
         <div className="flex items-center gap-3">

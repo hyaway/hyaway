@@ -264,3 +264,12 @@ When making significant changes, update the relevant documentation in `.github/d
 | New UI primitive            | `docs/ui/primitives.md` - add to component list     |
 | New Tailwind variant        | `docs/ui/responsive-design.md` - document variant   |
 | New CSS/animation pattern   | `docs/ui/css-patterns.md` - document pattern        |
+
+## Changelog
+
+The changelog lives at `docs/changelog.md`. Follow the [Keep a Changelog](https://keepachangelog.com) format:
+
+- **ISO dates**: `YYYY-MM-DD` format as headings (no version numbers)
+- **Standard categories**: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`
+- **User-focused entries**: Describe the benefit, not the implementation
+- **Reverse chronological**: Latest date first
