@@ -205,10 +205,7 @@ export const useInfiniteSearchFilesQuery = (
 export const useRemoteWatchHistoryQuery = () => {
   const limit = useRemoteHistoryLimit();
 
-  const tags: HydrusTagSearch = [
-    `system:limit=${limit}`,
-    "system:last viewed time < 7 years 45 days 7 hours ago",
-  ];
+  const tags: HydrusTagSearch = [`system:limit=${limit}`];
   const options: Omit<SearchFilesOptions, "tags"> = {
     file_sort_type: HydrusFileSortType.LastViewedTime,
     file_sort_asc: false,
