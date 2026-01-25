@@ -347,5 +347,23 @@ export async function setRating(options: SetRatingOptions): Promise<void> {
   await sessionKeyClient.post("/edit_ratings/set_rating", options);
 }
 
+/**
+ * Get the custom SVG icon for a rating service.
+ * Use this when a rating service has `star_shape: "svg"`.
+ *
+ * @permission Requires: At least one of Import Files (0), Add Tags (2), Manage Pages (4), or Search Files (3).
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#get_service_rating_svg
+ */
+export async function getServiceRatingSvg(serviceKey: string): Promise<string> {
+  const response = await sessionKeyClient.get<string>(
+    "/get_service_rating_svg",
+    {
+      params: { service_key: serviceKey },
+      responseType: "text",
+    },
+  );
+  return response.data;
+}
+
 // #endregion Ratings
 // #endregion API Functions

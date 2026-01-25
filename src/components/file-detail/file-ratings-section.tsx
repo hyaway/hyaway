@@ -19,6 +19,8 @@ import {
   IconEscalatorFilled,
   IconHeart,
   IconHeartFilled,
+  IconHelpCircle,
+  IconHelpCircleFilled,
   IconHexagon,
   IconHexagonFilled,
   IconHourglass,
@@ -43,7 +45,8 @@ import {
   IconTriangleInvertedFilled,
   IconX,
 } from "@tabler/icons-react";
-import type { ComponentType, SVGProps } from "react";
+import { memo, useMemo } from "react";
+import type { ComponentType } from "react";
 
 import type {
   FileMetadata,
@@ -57,8 +60,9 @@ import { cn } from "@/lib/utils";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import { useServiceRatingSvgQuery } from "@/integrations/hydrus-api/queries/service-rating-svg";
 
-type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+type IconComponent = ComponentType<{ className?: string }>;
 
 interface ShapeIcons {
   filled: IconComponent;
@@ -163,15 +167,121 @@ const SHAPE_ICONS: Record<string, ShapeIcons> = {
 
 /** Default shape when star_shape is not specified or not found */
 const DEFAULT_SHAPE: ShapeIcons = {
-  filled: IconStarFilled,
-  outline: IconStar,
+  filled: IconHelpCircleFilled,
+  outline: IconHelpCircle,
 };
 
 function getShapeIcons(starShape?: string): ShapeIcons {
+  // Don't look up "svg" in SHAPE_ICONS - it needs special handling
+  if (starShape?.toLowerCase() === "svg") return DEFAULT_SHAPE;
   const shape = starShape ? SHAPE_ICONS[starShape.toLowerCase()] : undefined;
   if (!shape) return DEFAULT_SHAPE;
   return shape;
 }
+
+// #region Custom SVG Icon Support
+
+/**
+ * Props for CustomSvgIcon
+ */
+interface CustomSvgIconProps {
+  /** Raw SVG string from Hydrus API */
+  svgContent: string;
+  /** Whether to render as filled or outline (lower opacity) */
+  filled?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+/**
+ * Renders an SVG as an icon using CSS mask-image.
+ * This approach avoids parsing the SVG and allows it to inherit currentColor.
+ */
+const CustomSvgIcon = memo(function CustomSvgIcon({
+  svgContent,
+  filled = false,
+  className,
+  style,
+}: CustomSvgIconProps) {
+  const maskUrl = useMemo(
+    () => `url("data:image/svg+xml,${encodeURIComponent(svgContent)}")`,
+    [svgContent],
+  );
+
+  return (
+    <span
+      className={cn("inline-block size-6", className)}
+      style={{
+        backgroundColor: "currentColor",
+        mask: `${maskUrl} center / contain no-repeat`,
+        WebkitMask: `${maskUrl} center / contain no-repeat`,
+        opacity: filled ? 1 : 0.4,
+        ...style,
+      }}
+      role="img"
+      aria-hidden="true"
+    />
+  );
+});
+
+/**
+ * Creates icon components from custom SVG content.
+ * Returns a ShapeIcons-compatible object with filled and outline variants.
+ */
+function createCustomSvgIcons(svgContent: string): ShapeIcons {
+  const FilledIcon: IconComponent = ({ className }) => (
+    <CustomSvgIcon svgContent={svgContent} filled className={className} />
+  );
+  const OutlineIcon: IconComponent = ({ className }) => (
+    <CustomSvgIcon
+      svgContent={svgContent}
+      filled={false}
+      className={className}
+    />
+  );
+
+  return {
+    filled: FilledIcon,
+    outline: OutlineIcon,
+  };
+}
+
+/**
+ * Hook that returns shape icons for a rating service.
+ * Handles both predefined shapes and custom SVGs.
+ */
+function useShapeIcons(
+  serviceKey: string,
+  starShape?: string,
+): ShapeIcons & { isLoading: boolean } {
+  const isCustomSvg = starShape?.toLowerCase() === "svg";
+
+  // Only fetch SVG if star_shape is "svg"
+  const { data: svgContent, isLoading } = useServiceRatingSvgQuery(
+    serviceKey,
+    isCustomSvg,
+  );
+
+  // Memoize the custom icons to prevent recreating on every render
+  const customIcons = useMemo(() => {
+    if (!isCustomSvg || !svgContent) return null;
+    return createCustomSvgIcons(svgContent);
+  }, [isCustomSvg, svgContent]);
+
+  // Return custom icons if available, otherwise fall back to predefined shapes
+  if (isCustomSvg) {
+    if (customIcons) {
+      return { ...customIcons, isLoading: false };
+    }
+    // Still loading or failed - use default
+    return { ...DEFAULT_SHAPE, isLoading };
+  }
+
+  // Use predefined shape icons
+  return { ...getShapeIcons(starShape), isLoading: false };
+}
+
+// #endregion Custom SVG Icon Support
 
 interface FileRatingsSectionProps {
   data: FileMetadata;
@@ -230,6 +340,12 @@ function RatingControl({
 }: RatingControlProps) {
   const { mutate: setRating, isPending } = useSetRatingMutation();
 
+  // Get icons for this service - handles both predefined shapes and custom SVGs
+  const { outline: OutlineServiceIcon } = useShapeIcons(
+    serviceKey,
+    service.star_shape,
+  );
+
   const handleSetRating = (rating: RatingValue) => {
     setRating({
       file_id: fileId,
@@ -257,14 +373,11 @@ function RatingControl({
     return null;
   };
 
-  // Get icon for the service (all rating types can have a star_shape)
-  const ServiceIcon = getShapeIcons(service.star_shape).outline;
-
   return (
     <div className="bg-muted/50 flex flex-wrap items-center gap-2 rounded-lg border p-3">
       <div className="flex flex-col">
         <div className="flex items-center gap-1.5">
-          <ServiceIcon className="text-muted-foreground size-4 shrink-0" />
+          <OutlineServiceIcon className="text-muted-foreground size-4 shrink-0" />
           <span className="text-sm font-medium">{service.name}</span>
           <span className="text-muted-foreground text-xs tabular-nums">
             ({getRatingDisplay()})
@@ -278,6 +391,7 @@ function RatingControl({
         {service.type === ServiceType.RATING_LIKE && (
           <LikeDislikeControl
             value={currentRating as boolean | null}
+            serviceKey={serviceKey}
             starShape={service.star_shape}
             onChange={handleSetRating}
             disabled={disabled || isPending}
@@ -288,6 +402,7 @@ function RatingControl({
             value={currentRating as number | null}
             minStars={service.min_stars ?? 0}
             maxStars={service.max_stars ?? 5}
+            serviceKey={serviceKey}
             starShape={service.star_shape}
             onChange={handleSetRating}
             disabled={disabled || isPending}
@@ -307,6 +422,7 @@ function RatingControl({
 
 interface LikeDislikeControlProps {
   value: boolean | null;
+  serviceKey: string;
   starShape?: string;
   onChange: (value: boolean | null) => void;
   disabled?: boolean;
@@ -314,6 +430,7 @@ interface LikeDislikeControlProps {
 
 function LikeDislikeControl({
   value,
+  serviceKey,
   starShape,
   onChange,
   disabled,
@@ -324,7 +441,7 @@ function LikeDislikeControl({
     filled: FilledIcon,
     outline: OutlineIcon,
     className: shapeClassName,
-  } = getShapeIcons(starShape);
+  } = useShapeIcons(serviceKey, starShape);
 
   return (
     <div
@@ -426,6 +543,7 @@ interface NumericalRatingControlProps {
   value: number | null;
   minStars: number;
   maxStars: number;
+  serviceKey: string;
   starShape?: string;
   onChange: (value: number | null) => void;
   disabled?: boolean;
@@ -435,6 +553,7 @@ function NumericalRatingControl({
   value,
   minStars,
   maxStars,
+  serviceKey,
   starShape,
   onChange,
   disabled,
@@ -444,7 +563,7 @@ function NumericalRatingControl({
     filled: FilledIcon,
     outline: OutlineIcon,
     className: shapeClassName,
-  } = getShapeIcons(starShape);
+  } = useShapeIcons(serviceKey, starShape);
 
   const isZero = value === 0;
   const canSetZero = minStars === 0;
