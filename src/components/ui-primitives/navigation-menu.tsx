@@ -7,6 +7,7 @@ import { cva } from "class-variance-authority";
 import { IconChevronDown } from "@tabler/icons-react";
 import { createLink } from "@tanstack/react-router";
 import { TouchTarget } from "./touch-target";
+import type { ComponentPropsWithoutRef } from "react";
 import type { LinkComponent } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +34,7 @@ function NavigationMenu({
 function NavigationMenuList({
   className,
   ...props
-}: NavigationMenuPrimitive.List.Props) {
+}: ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.List>) {
   return (
     <NavigationMenuPrimitive.List
       data-slot="navigation-menu-list"
@@ -49,7 +50,7 @@ function NavigationMenuList({
 function NavigationMenuItem({
   className,
   ...props
-}: NavigationMenuPrimitive.Item.Props) {
+}: ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Item>) {
   return (
     <NavigationMenuPrimitive.Item
       data-slot="navigation-menu-item"
@@ -165,7 +166,7 @@ const RouterNavigationMenuLink: LinkComponent<typeof NavigationMenuLink> = (
 function NavigationMenuIndicator({
   className,
   ...props
-}: NavigationMenuPrimitive.Icon.Props) {
+}: ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Icon>) {
   return (
     <NavigationMenuPrimitive.Icon
       data-slot="navigation-menu-indicator"
