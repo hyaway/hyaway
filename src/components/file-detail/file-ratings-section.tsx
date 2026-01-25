@@ -2,27 +2,25 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
+  IconBackslash,
+  IconCarambola,
+  IconCarambolaFilled,
   IconCaretLeftFilled,
   IconCaretRightFilled,
   IconCircle,
   IconCircleDashed,
   IconCircleDashedNumber0,
   IconCircleFilled,
-  IconCircleOff,
   IconDiamond,
   IconDiamondFilled,
-  IconDiamondOff,
   IconDroplet,
   IconDropletFilled,
-  IconDropletOff,
+  IconEscalator,
+  IconEscalatorFilled,
   IconHeart,
   IconHeartFilled,
-  IconHeartOff,
   IconHexagon,
   IconHexagonFilled,
-  IconHexagonLetterS,
-  IconHexagonLetterSFilled,
-  IconHexagonOff,
   IconHourglass,
   IconHourglassFilled,
   IconJewishStar,
@@ -30,32 +28,19 @@ import {
   IconMinus,
   IconMoon,
   IconMoonFilled,
-  IconMoonOff,
   IconPentagon,
   IconPentagonFilled,
-  IconPentagonOff,
-  IconPentagram,
   IconPlus,
-  IconRectangularPrism,
-  IconRectangularPrismOff,
   IconRosette,
   IconRosetteFilled,
   IconSquare,
   IconSquareFilled,
-  IconSquareOff,
-  IconSquareRotated,
-  IconSquareRotatedFilled,
-  IconSquareRotatedOff,
-  IconSquareX,
-  IconSquareXFilled,
   IconStar,
   IconStarFilled,
-  IconStarOff,
   IconTriangle,
   IconTriangleFilled,
   IconTriangleInverted,
   IconTriangleInvertedFilled,
-  IconTriangleOff,
   IconX,
 } from "@tabler/icons-react";
 import type { ComponentType, SVGProps } from "react";
@@ -78,8 +63,6 @@ type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 interface ShapeIcons {
   filled: IconComponent;
   outline: IconComponent;
-  /** Icon for dislike/negative state (typically the "Off" variant with slash) */
-  dislike: IconComponent;
   /** Additional className for icon styling (e.g., stroke-width, transforms) */
   className?: string;
 }
@@ -92,117 +75,89 @@ const SHAPE_ICONS: Record<string, ShapeIcons> = {
   circle: {
     filled: IconCircleFilled,
     outline: IconCircle,
-    dislike: IconCircleOff,
   },
   square: {
     filled: IconSquareFilled,
     outline: IconSquare,
-    dislike: IconSquareOff,
   },
   "fat star": {
-    filled: IconStarFilled,
-    outline: IconStar,
-    dislike: IconStarOff,
+    filled: IconCarambolaFilled,
+    outline: IconCarambola,
   },
   "pentagram star": {
-    filled: IconPentagram,
-    outline: IconPentagram,
-    dislike: IconStarOff, // No pentagram-off, use star-off
-    className: "[--icon-stroke:2.5]",
+    filled: IconStarFilled,
+    outline: IconStar,
   },
   "six point star": {
     filled: IconJewishStarFilled,
     outline: IconJewishStar,
-    dislike: IconStarOff, // No jewish-star-off, use star-off
   },
   "eight point star": {
     filled: IconRosetteFilled,
     outline: IconRosette,
-    dislike: IconStarOff, // No rosette-off, use star-off
   },
   "x shape": {
     filled: IconX,
     outline: IconX,
-    dislike: IconX, // X is already negative
-    className: "[--icon-stroke:3]",
   },
   "square cross": {
-    filled: IconSquareXFilled,
-    outline: IconSquareX,
-    dislike: IconSquareOff,
+    filled: IconPlus,
+    outline: IconPlus,
   },
   "triangle up": {
     filled: IconTriangleFilled,
     outline: IconTriangle,
-    dislike: IconTriangleOff,
   },
   "triangle down": {
     filled: IconTriangleInvertedFilled,
     outline: IconTriangleInverted,
-    dislike: IconTriangleOff,
   },
   "triangle right": {
     filled: IconCaretRightFilled,
     outline: IconCaretRightFilled,
-    dislike: IconTriangleOff,
   },
   "triangle left": {
     filled: IconCaretLeftFilled,
     outline: IconCaretLeftFilled,
-    dislike: IconTriangleOff,
   },
   diamond: {
     filled: IconDiamondFilled,
     outline: IconDiamond,
-    dislike: IconDiamondOff,
   },
   "rhombus right": {
-    filled: IconRectangularPrism,
-    outline: IconRectangularPrism,
-    dislike: IconRectangularPrismOff,
+    filled: IconEscalatorFilled,
+    outline: IconEscalator,
   },
   "rhombus left": {
-    filled: IconRectangularPrism,
-    outline: IconRectangularPrism,
-    dislike: IconRectangularPrismOff,
+    filled: IconEscalatorFilled,
+    outline: IconEscalator,
     className: "-scale-x-100",
   },
   hourglass: {
     filled: IconHourglassFilled,
     outline: IconHourglass,
-    dislike: IconStarOff, // No hourglass-off, use star-off
   },
   pentagon: {
     filled: IconPentagonFilled,
     outline: IconPentagon,
-    dislike: IconPentagonOff,
   },
   hexagon: {
     filled: IconHexagonFilled,
     outline: IconHexagon,
-    dislike: IconHexagonOff,
   },
   "small hexagon": {
-    filled: IconHexagonLetterSFilled,
-    outline: IconHexagonLetterS,
-    dislike: IconHexagonOff,
+    filled: IconHexagonFilled,
+    outline: IconHexagon,
+    className: "scale-75",
   },
-  heart: { filled: IconHeartFilled, outline: IconHeart, dislike: IconHeartOff },
+  heart: { filled: IconHeartFilled, outline: IconHeart },
   teardrop: {
     filled: IconDropletFilled,
     outline: IconDroplet,
-    dislike: IconDropletOff,
   },
-  "crescent moon": {
+  crescent: {
     filled: IconMoonFilled,
     outline: IconMoon,
-    dislike: IconMoonOff,
-  },
-  // Fallback for rhombus without direction (same as square rotated 45°)
-  rhombus: {
-    filled: IconSquareRotatedFilled,
-    outline: IconSquareRotated,
-    dislike: IconSquareRotatedOff,
   },
 };
 
@@ -210,12 +165,12 @@ const SHAPE_ICONS: Record<string, ShapeIcons> = {
 const DEFAULT_SHAPE: ShapeIcons = {
   filled: IconStarFilled,
   outline: IconStar,
-  dislike: IconStarOff,
 };
 
 function getShapeIcons(starShape?: string): ShapeIcons {
-  if (!starShape) return DEFAULT_SHAPE;
-  return SHAPE_ICONS[starShape.toLowerCase()] ?? DEFAULT_SHAPE;
+  const shape = starShape ? SHAPE_ICONS[starShape.toLowerCase()] : undefined;
+  if (!shape) return DEFAULT_SHAPE;
+  return shape;
 }
 
 interface FileRatingsSectionProps {
@@ -233,6 +188,7 @@ export function FileRatingsSection({ data }: FileRatingsSectionProps) {
 
   return (
     <div className="space-y-4">
+      <ShapeIconsDebug />
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
         <Heading level={2}>Ratings</Heading>
         {!canEditRatings && (
@@ -367,51 +323,100 @@ function LikeDislikeControl({
   const {
     filled: FilledIcon,
     outline: OutlineIcon,
-    dislike: DislikeIcon,
     className: shapeClassName,
   } = getShapeIcons(starShape);
 
   return (
-    <div className="flex items-center gap-1">
+    <div
+      className="flex items-center gap-1"
+      role="group"
+      aria-label={`Rating: ${isLiked ? "liked" : isDisliked ? "disliked" : "no rating"}`}
+    >
       <Button
         variant="ghost"
         size="sm"
         className={cn(
           "size-10 p-0",
-          isLiked &&
-            "bg-green-500/10 text-green-600 disabled:opacity-100 dark:text-green-500",
-          isLiked && !disabled && "hover:bg-green-500/20",
-          !isLiked &&
-            !disabled &&
-            "hover:text-green-600 dark:hover:text-green-500",
+          isLiked && "text-emerald-500 disabled:opacity-100",
+          !disabled && "hover:text-emerald-500",
         )}
         onClick={() => onChange(isLiked ? null : true)}
         disabled={disabled}
         aria-label={isLiked ? "Remove like" : "Like"}
       >
-        {isLiked ? (
-          <FilledIcon className={cn("size-7", shapeClassName)} />
-        ) : (
-          <OutlineIcon className={cn("size-7", shapeClassName)} />
-        )}
+        {/* Show both icons, toggle visibility with CSS on hover */}
+        <FilledIcon
+          aria-hidden
+          className={cn(
+            "size-7 transition-transform",
+            shapeClassName,
+            isLiked ? "block" : "hidden",
+            // Show filled on hover
+            !disabled && "[button:hover_&]:block [button:hover_&]:scale-125",
+          )}
+        />
+        <OutlineIcon
+          aria-hidden
+          className={cn(
+            "size-7 transition-transform",
+            shapeClassName,
+            isLiked ? "hidden" : "block",
+            // Hide outline on hover, scale up when visible
+            !disabled && "[button:hover_&]:hidden",
+            !isLiked && !disabled && "[button:hover_&]:scale-125",
+          )}
+        />
       </Button>
       <Button
         variant="ghost"
         size="sm"
         className={cn(
           "size-10 p-0",
-          isDisliked &&
-            "bg-red-500/10 text-red-600 disabled:opacity-100 dark:text-red-500",
-          isDisliked && !disabled && "hover:bg-red-500/20",
-          !isDisliked &&
-            !disabled &&
-            "hover:text-red-600 dark:hover:text-red-500",
+          isDisliked && "text-destructive disabled:opacity-100",
+          !disabled && "hover:text-destructive",
         )}
         onClick={() => onChange(isDisliked ? null : false)}
         disabled={disabled}
         aria-label={isDisliked ? "Remove dislike" : "Dislike"}
       >
-        <DislikeIcon className={cn("size-7", shapeClassName)} />
+        {/* Show both icons with overlay, toggle visibility with CSS on hover */}
+        <span
+          className={cn(
+            "relative transition-transform",
+            !disabled && "[button:hover_&]:scale-125",
+          )}
+        >
+          <FilledIcon
+            aria-hidden
+            className={cn(
+              "size-7",
+              shapeClassName,
+              isDisliked ? "block" : "hidden",
+              // Show filled on hover
+              !disabled && "[button:hover_&]:block",
+            )}
+          />
+          <OutlineIcon
+            aria-hidden
+            className={cn(
+              "size-7",
+              shapeClassName,
+              isDisliked ? "hidden" : "block",
+              // Hide outline on hover
+              !disabled && "[button:hover_&]:hidden",
+            )}
+          />
+          <IconBackslash
+            aria-hidden
+            className="text-background pointer-events-none absolute -inset-2.5 size-12"
+            strokeWidth={3}
+          />
+          <IconBackslash
+            aria-hidden
+            className="pointer-events-none absolute -inset-2.5 size-12"
+            strokeWidth={1.5}
+          />
+        </span>
       </Button>
     </div>
   );
@@ -450,7 +455,11 @@ function NumericalRatingControl({
   );
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div
+      className="flex flex-wrap items-center gap-2"
+      role="group"
+      aria-label={`Rating: ${value === null ? "no rating" : `${value} of ${maxStars}`}`}
+    >
       {/* Zero star - outside grid, doesn't participate in reflow */}
       {canSetZero && (
         <Button
@@ -466,11 +475,22 @@ function NumericalRatingControl({
           aria-label="0 stars"
         >
           {isZero ? (
-            <IconCircleDashedNumber0 className="size-7 transition-transform [button:hover_&]:scale-125" />
+            <IconCircleDashedNumber0
+              aria-hidden
+              className="size-7 transition-transform [button:hover_&]:scale-125"
+            />
           ) : (
-            <IconCircleDashed className="size-7 transition-transform [button:hover_&]:scale-125" />
+            <IconCircleDashed
+              aria-hidden
+              className="size-7 transition-transform [button:hover_&]:scale-125"
+            />
           )}
-          <span className="text-muted-foreground text-xs tabular-nums">0</span>
+          <span
+            className="text-muted-foreground text-xs tabular-nums"
+            aria-hidden
+          >
+            0
+          </span>
         </Button>
       )}
       <div
@@ -490,14 +510,13 @@ function NumericalRatingControl({
               className={cn(
                 "flex h-auto flex-col gap-0.5 px-1.5 py-1",
                 // Base filled state
-                isFilled &&
-                  "text-amber-600 disabled:opacity-100 dark:text-amber-500",
+                isFilled && "text-amber-500 disabled:opacity-100",
                 !isFilled && isZero && "text-muted-foreground/50",
                 !isClickable && "cursor-not-allowed opacity-30",
                 // CSS hover: highlight this and all previous stars
                 isClickable &&
                   !disabled &&
-                  "[&:has(~button:hover)]:text-amber-600 dark:[&:has(~button:hover)]:text-amber-500 [&:hover]:text-amber-600 dark:[&:hover]:text-amber-500",
+                  "[&:has(~button:hover)]:text-amber-500 [&:hover]:text-amber-500",
               )}
               onClick={() => {
                 if (!isClickable) return;
@@ -509,6 +528,7 @@ function NumericalRatingControl({
             >
               {/* Show both icons, toggle visibility with CSS on hover */}
               <FilledIcon
+                aria-hidden
                 className={cn(
                   "size-7 transition-transform",
                   shapeClassName,
@@ -522,6 +542,7 @@ function NumericalRatingControl({
                 )}
               />
               <OutlineIcon
+                aria-hidden
                 className={cn(
                   "size-7 transition-transform",
                   shapeClassName,
@@ -537,7 +558,10 @@ function NumericalRatingControl({
                     "[button:hover_&]:scale-125",
                 )}
               />
-              <span className="text-muted-foreground text-xs tabular-nums">
+              <span
+                className="text-muted-foreground text-xs tabular-nums"
+                aria-hidden
+              >
                 {star}
               </span>
             </Button>
@@ -560,7 +584,11 @@ function IncDecRatingControl({
   disabled,
 }: IncDecRatingControlProps) {
   return (
-    <div className="flex items-center gap-1.5">
+    <div
+      className="flex items-center gap-1.5"
+      role="group"
+      aria-label={`Rating: ${value}`}
+    >
       <Button
         variant="outline"
         size="sm"
@@ -569,9 +597,12 @@ function IncDecRatingControl({
         disabled={disabled || value <= 0}
         aria-label="Decrease"
       >
-        <IconMinus className="size-6" />
+        <IconMinus aria-hidden className="size-6" />
       </Button>
-      <span className="bg-muted min-w-10 rounded border px-2 py-1.5 text-center text-base tabular-nums">
+      <span
+        className="bg-muted min-w-10 rounded border px-2 py-1.5 text-center text-base tabular-nums"
+        aria-live="polite"
+      >
         {value}
       </span>
       <Button
@@ -582,8 +613,76 @@ function IncDecRatingControl({
         disabled={disabled}
         aria-label="Increase"
       >
-        <IconPlus className="size-6" />
+        <IconPlus aria-hidden className="size-6" />
       </Button>
+    </div>
+  );
+}
+
+// Debug component to preview all shapes
+export function ShapeIconsDebug() {
+  const allShapes = Object.entries(SHAPE_ICONS);
+
+  return (
+    <div className="space-y-4 p-4">
+      <Heading level={2}>Shape Icons Debug</Heading>
+      <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] items-center gap-2">
+        <span className="text-muted-foreground text-xs font-medium">Shape</span>
+        <span />
+        <span className="text-muted-foreground text-center text-xs font-medium">
+          Filled
+        </span>
+        <span className="text-muted-foreground text-center text-xs font-medium">
+          Outline
+        </span>
+        <span className="text-muted-foreground text-center text-xs font-medium">
+          Dislike
+        </span>
+        <span className="text-muted-foreground text-center text-xs font-medium">
+          Disliked
+        </span>
+        {allShapes.map(([name, icons]) => (
+          <>
+            <span key={`${name}-label`} className="text-sm">
+              {name}
+            </span>
+            <span />
+            <icons.filled
+              key={`${name}-filled`}
+              className={cn("size-6 text-emerald-500", icons.className)}
+            />
+            <icons.outline
+              key={`${name}-outline`}
+              className={cn("size-6", icons.className)}
+            />
+            <span key={`${name}-dislike`} className="relative">
+              <icons.outline className={cn("size-6", icons.className)} />
+              <IconBackslash
+                className="text-background absolute -inset-2 size-10"
+                strokeWidth={3}
+              />
+              <IconBackslash
+                className="absolute -inset-2 size-10"
+                strokeWidth={1.5}
+              />
+            </span>
+            <span
+              key={`${name}-disliked`}
+              className="text-destructive relative"
+            >
+              <icons.filled className={cn("size-6", icons.className)} />
+              <IconBackslash
+                className="text-background absolute -inset-2 size-10"
+                strokeWidth={3}
+              />
+              <IconBackslash
+                className="absolute -inset-2 size-10"
+                strokeWidth={1.5}
+              />
+            </span>
+          </>
+        ))}
+      </div>
     </div>
   );
 }
