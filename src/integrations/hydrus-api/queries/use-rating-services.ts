@@ -1,17 +1,20 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
 import { useRatingsServiceSettings } from "@/stores/ratings-display-settings-store";
+import { usePrefetchServiceRatingSvgs } from "./service-rating-svg";
 
 /**
  * Hook that returns rating services from the Hydrus API.
  * Filters to only rating services (like/dislike, numerical, inc/dec).
+ * Also prefetches custom SVGs for services with `star_shape: "svg"`.
  */
 export function useRatingServices() {
   const { data: servicesData, isLoading, ...rest } = useGetServicesQuery();
+  const prefetchSvgs = usePrefetchServiceRatingSvgs();
 
   const ratingServices = useMemo(() => {
     if (!servicesData?.services) return [];
@@ -23,6 +26,17 @@ export function useRatingServices() {
         service.type === ServiceType.RATING_INC_DEC,
     );
   }, [servicesData?.services]);
+
+  // Prefetch custom SVG icons for rating services that use them
+  useEffect(() => {
+    const svgServiceKeys = ratingServices
+      .filter(([, service]) => service.star_shape?.toLowerCase() === "svg")
+      .map(([key]) => key);
+
+    if (svgServiceKeys.length > 0) {
+      prefetchSvgs(svgServiceKeys);
+    }
+  }, [ratingServices, prefetchSvgs]);
 
   return {
     ratingServices,
