@@ -102,18 +102,20 @@ function ReviewRatingServiceRow({
   const { filled: FilledIcon } = useShapeIcons(serviceKey, starShape);
 
   return (
-    <div className="bg-muted/50 flex items-center gap-3 rounded-lg border p-3">
-      {/* Service icon */}
-      {type === ServiceType.RATING_INC_DEC ? (
-        <IconTallymarks className="text-muted-foreground size-6 shrink-0" />
-      ) : (
-        <FilledIcon className="text-muted-foreground size-6 shrink-0" />
-      )}
+    <div className="bg-muted/50 hover:bg-muted flex items-center gap-2 rounded-lg border p-3 transition-colors">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        {/* Service icon */}
+        {type === ServiceType.RATING_INC_DEC ? (
+          <IconTallymarks className="text-muted-foreground size-6 shrink-0" />
+        ) : (
+          <FilledIcon className="text-muted-foreground size-6 shrink-0" />
+        )}
 
-      {/* Service info */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-sm font-medium">{name}</span>
-        <span className="text-muted-foreground text-xs">{typeLabel}</span>
+        {/* Service info */}
+        <div className="flex min-w-0 flex-col">
+          <span className="text-sm font-medium">{name}</span>
+          <span className="text-muted-foreground text-xs">{typeLabel}</span>
+        </div>
       </div>
 
       {/* Enable toggle */}

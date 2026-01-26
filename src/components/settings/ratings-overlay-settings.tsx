@@ -151,16 +151,18 @@ function RatingServiceSettingsRow({
   const { filled: FilledIcon } = useShapeIcons(serviceKey, starShape);
 
   return (
-    <div className="bg-muted/50 flex flex-wrap items-center gap-3 rounded-lg border p-3">
-      {/* Large icon spanning both text lines */}
-      {type === ServiceType.RATING_INC_DEC ? (
-        <IconTallymarks className="text-muted-foreground size-8 shrink-0" />
-      ) : (
-        <FilledIcon className="text-muted-foreground size-8 shrink-0" />
-      )}
-      <div className="flex grow flex-col">
-        <span className="text-sm font-medium">{name}</span>
-        <span className="text-muted-foreground text-xs">{typeLabel}</span>
+    <div className="bg-muted/50 hover:bg-muted flex flex-col gap-2 rounded-lg border p-3 transition-colors">
+      <div className="flex items-center gap-2">
+        {/* Service icon */}
+        {type === ServiceType.RATING_INC_DEC ? (
+          <IconTallymarks className="text-muted-foreground size-6 shrink-0" />
+        ) : (
+          <FilledIcon className="text-muted-foreground size-6 shrink-0" />
+        )}
+        <div className="flex min-w-0 flex-col">
+          <span className="text-sm font-medium">{name}</span>
+          <span className="text-muted-foreground text-xs">{typeLabel}</span>
+        </div>
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <SwitchField
