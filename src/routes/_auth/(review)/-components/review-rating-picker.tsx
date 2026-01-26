@@ -1,8 +1,8 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { IconHeart, IconX } from "@tabler/icons-react";
+import { useMemo, useState } from "react";
+import { IconHeart } from "@tabler/icons-react";
 import type {
   FileMetadata,
   RatingValue,
@@ -23,16 +23,11 @@ import {
   NumericalRatingControl,
 } from "@/components/ratings/rating-controls";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
-import { Button } from "@/components/ui-primitives/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui-primitives/popover";
-import { Slider } from "@/components/ui-primitives/slider";
-
-/** Threshold for using slider instead of star buttons */
-const SLIDER_THRESHOLD = 5;
 
 /**
  * Hook to get enabled rating services for review mode.
@@ -97,21 +92,6 @@ export function ReviewRatingButton({
   if (isSingleService && enabledServices[0]) {
     const [serviceKey, service] = enabledServices[0];
     const currentRating = currentMetadata?.ratings?.[serviceKey] ?? null;
-    const usesSlider =
-      service.type === ServiceType.RATING_NUMERICAL &&
-      (service.max_stars ?? 5) > SLIDER_THRESHOLD;
-
-    // If numeric with slider, always show popover (same as multi-service)
-    if (usesSlider) {
-      return (
-        <MultiServiceRatingButton
-          services={enabledServices}
-          metadata={currentMetadata}
-          className={className}
-          truncateLabel={truncateLabel}
-        />
-      );
-    }
 
     // Otherwise use single-service optimized button
     return (
@@ -527,21 +507,6 @@ function ServiceRatingControl({
       {/* Service header - deprioritized */}
       <div className="flex items-center gap-2">
         <span className="text-muted-foreground text-xs">{service.name}</span>
-        {/* Clear button for slider ratings */}
-        {service.type === ServiceType.RATING_NUMERICAL &&
-          (service.max_stars ?? 5) > SLIDER_THRESHOLD &&
-          currentRating !== null && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleSetRating(null)}
-              disabled={isPending}
-              className="text-muted-foreground -my-1 ml-auto h-6 px-1.5 text-xs"
-            >
-              <IconX className="size-3.5" />
-              Clear
-            </Button>
-          )}
       </div>
 
       {/* Rating control based on type */}
@@ -555,28 +520,17 @@ function ServiceRatingControl({
             disabled={isPending}
           />
         )}
-        {service.type === ServiceType.RATING_NUMERICAL &&
-          ((service.max_stars ?? 5) > SLIDER_THRESHOLD ? (
-            <SliderRatingControl
-              value={currentRating as number | null}
-              minStars={service.min_stars ?? 0}
-              maxStars={service.max_stars ?? 5}
-              serviceKey={serviceKey}
-              starShape={service.star_shape}
-              onChange={handleSetRating}
-              disabled={isPending}
-            />
-          ) : (
-            <NumericalRatingControl
-              value={currentRating as number | null}
-              minStars={service.min_stars ?? 0}
-              maxStars={service.max_stars ?? 5}
-              serviceKey={serviceKey}
-              starShape={service.star_shape}
-              onChange={handleSetRating}
-              disabled={isPending}
-            />
-          ))}
+        {service.type === ServiceType.RATING_NUMERICAL && (
+          <NumericalRatingControl
+            value={currentRating as number | null}
+            minStars={service.min_stars ?? 0}
+            maxStars={service.max_stars ?? 5}
+            serviceKey={serviceKey}
+            starShape={service.star_shape}
+            onChange={handleSetRating}
+            disabled={isPending}
+          />
+        )}
         {service.type === ServiceType.RATING_INC_DEC && (
           <IncDecRatingControl
             value={(currentRating as number | null) ?? 0}
@@ -585,87 +539,6 @@ function ServiceRatingControl({
           />
         )}
       </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// Slider Control (unique to review popover)
-// ============================================================================
-
-interface SliderRatingControlProps {
-  value: number | null;
-  minStars: number;
-  maxStars: number;
-  serviceKey: string;
-  starShape?: string;
-  onChange: (value: number | null) => void;
-  disabled?: boolean;
-}
-
-function SliderRatingControl({
-  value,
-  minStars,
-  maxStars,
-  serviceKey,
-  starShape,
-  onChange,
-  disabled,
-}: SliderRatingControlProps) {
-  // Track the last value we committed to avoid sync loops
-  const lastCommittedValue = useRef<number | null | undefined>(undefined);
-  const [localValue, setLocalValue] = useState(value ?? minStars);
-  // Track if user has actually dragged (not just tapped)
-  const hasInteracted = useRef(false);
-  const { filled: FilledIcon, outline: OutlineIcon } = useShapeIcons(
-    serviceKey,
-    starShape,
-  );
-
-  // Sync when external value changes (but not to what we just set)
-  useEffect(() => {
-    if (value !== lastCommittedValue.current) {
-      setLocalValue(value ?? minStars);
-      // Reset interaction flag when value changes externally (e.g., cleared)
-      hasInteracted.current = value !== null;
-    }
-    lastCommittedValue.current = undefined;
-  }, [value, minStars]);
-
-  const displayText = value === null ? "-" : String(localValue);
-  const hasRating = value !== null;
-
-  return (
-    <div className="flex items-center gap-2">
-      {hasRating ? (
-        <FilledIcon className="size-5 shrink-0 text-amber-500" />
-      ) : (
-        <OutlineIcon className="text-muted-foreground size-5 shrink-0" />
-      )}
-      <Slider
-        value={[localValue]}
-        onValueChange={(v) => {
-          hasInteracted.current = true;
-          const newValue = Array.isArray(v) ? v[0] : v;
-          setLocalValue(newValue);
-        }}
-        onValueCommitted={(v) => {
-          // Only commit if user has interacted (dragged)
-          if (hasInteracted.current) {
-            const newValue = Array.isArray(v) ? v[0] : v;
-            lastCommittedValue.current = newValue;
-            onChange(newValue);
-          }
-        }}
-        min={minStars}
-        max={maxStars}
-        step={1}
-        disabled={disabled}
-        className="flex-1"
-      />
-      <span className="text-muted-foreground min-w-12 text-right text-sm tabular-nums">
-        {displayText}/{maxStars}
-      </span>
     </div>
   );
 }
