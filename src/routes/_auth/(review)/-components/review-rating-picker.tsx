@@ -391,15 +391,18 @@ function NumericRatingButton({
         sideOffset={8}
         className="w-auto"
       >
-        <NumericalRatingControl
-          value={currentRating}
-          minStars={service.min_stars ?? 0}
-          maxStars={maxStars}
-          serviceKey={serviceKey}
-          starShape={service.star_shape}
-          onChange={handleSetRating}
-          disabled={isPending}
-        />
+        <div className="flex flex-col gap-2">
+          <span className="text-muted-foreground text-xs">{service.name}</span>
+          <NumericalRatingControl
+            value={currentRating}
+            minStars={service.min_stars ?? 0}
+            maxStars={maxStars}
+            serviceKey={serviceKey}
+            starShape={service.star_shape}
+            onChange={handleSetRating}
+            disabled={isPending}
+          />
+        </div>
       </PopoverContent>
     </Popover>
   );
