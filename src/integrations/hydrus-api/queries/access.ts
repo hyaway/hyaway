@@ -7,7 +7,11 @@ import {
   requestNewPermissions,
   verifyAccessKey,
 } from "../api-client";
-import { useApiEndpoint, useIsApiConfigured } from "../hydrus-config-store";
+import {
+  useApiEndpoint,
+  useAuthWithSessionKey,
+  useIsApiConfigured,
+} from "../hydrus-config-store";
 import { ALL_PERMISSIONS, checkMinimumPermissions } from "../permissions";
 import type {
   AccessKeyType,
@@ -71,6 +75,7 @@ export const useVerifyPersistentAccessQuery = () => {
 export const useVerifySessionAccessQuery = () => {
   const isConfigured = useIsApiConfigured();
   const validEndpoint = useApiVersionQuery();
+  const authWithSessionKey = useAuthWithSessionKey();
 
   return useQuery({
     queryKey: ["verifyAccess", "session"],
@@ -83,7 +88,8 @@ export const useVerifySessionAccessQuery = () => {
       raw: data,
       hasRequiredPermissions: checkMinimumPermissions(data),
     }),
-    enabled: isConfigured && validEndpoint.isSuccess,
+    // Only run when session key auth is enabled
+    enabled: isConfigured && validEndpoint.isSuccess && authWithSessionKey,
     // Session key lasts up to a day or until remote client restarts.
     // Use a generous stale time & focus/refetch triggers instead of frequent polling.
     // If the client restarts and a 419/403 occurs, interceptor + error state will surface it.
@@ -94,8 +100,15 @@ export const useVerifySessionAccessQuery = () => {
 };
 
 export const useIsAuthenticated = (): boolean => {
+  const authWithSessionKey = useAuthWithSessionKey();
   const { data: persistentData } = useVerifyPersistentAccessQuery();
   const { data: sessionData } = useVerifySessionAccessQuery();
+
+  // When session keys are disabled, only check persistent key
+  if (!authWithSessionKey) {
+    return !!persistentData?.hasRequiredPermissions;
+  }
+
   return (
     !!persistentData?.hasRequiredPermissions &&
     !!sessionData?.hasRequiredPermissions

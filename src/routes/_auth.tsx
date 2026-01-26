@@ -11,7 +11,10 @@ import {
   IconRefresh,
 } from "@tabler/icons-react";
 
-import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
+import {
+  useAuthWithSessionKey,
+  useIsApiConfigured,
+} from "@/integrations/hydrus-api/hydrus-config-store";
 import {
   useApiVersionQuery,
   useVerifyPersistentAccessQuery,
@@ -32,6 +35,7 @@ export const Route = createFileRoute("/_auth")({
  */
 function AuthPageLayout() {
   const isConfigured = useIsApiConfigured();
+  const authWithSessionKey = useAuthWithSessionKey();
   const versionQuery = useApiVersionQuery();
   const persistentQuery = useVerifyPersistentAccessQuery();
   const sessionQuery = useVerifySessionAccessQuery();
@@ -42,30 +46,39 @@ function AuthPageLayout() {
   }
 
   // Check if we have cached data (allows background refetches without showing loading)
-  const hasData =
-    versionQuery.data && persistentQuery.data && sessionQuery.data;
+  // When session keys are disabled, we don't need sessionQuery.data
+  const hasData = authWithSessionKey
+    ? versionQuery.data && persistentQuery.data && sessionQuery.data
+    : versionQuery.data && persistentQuery.data;
 
   // Only show loading on initial load, not background refetches
+  // When session keys are disabled, sessionQuery won't run (isPending stays true but enabled is false)
   const isInitialLoading =
     (versionQuery.isPending ||
       persistentQuery.isPending ||
-      sessionQuery.isPending) &&
+      (authWithSessionKey && sessionQuery.isPending)) &&
     !hasData;
 
-  const hasError =
-    versionQuery.isError || persistentQuery.isError || sessionQuery.isError;
+  // When session keys are disabled, ignore sessionQuery errors
+  const hasError = authWithSessionKey
+    ? versionQuery.isError || persistentQuery.isError || sessionQuery.isError
+    : versionQuery.isError || persistentQuery.isError;
 
   // Show error state - but only if we don't have cached data
   if (hasError && !hasData) {
     return (
       <AuthErrorScreen
         error={
-          versionQuery.error || persistentQuery.error || sessionQuery.error
+          versionQuery.error ||
+          persistentQuery.error ||
+          (authWithSessionKey ? sessionQuery.error : null)
         }
         onRetry={() => {
           versionQuery.refetch();
           persistentQuery.refetch();
-          sessionQuery.refetch();
+          if (authWithSessionKey) {
+            sessionQuery.refetch();
+          }
         }}
       />
     );
@@ -77,7 +90,7 @@ function AuthPageLayout() {
       <AuthLoadingScreen
         versionPending={versionQuery.isPending}
         persistentPending={persistentQuery.isPending}
-        sessionPending={sessionQuery.isPending}
+        sessionPending={authWithSessionKey && sessionQuery.isPending}
       />
     );
   }
