@@ -239,6 +239,7 @@ export function NumericalRatingControl({
           const isFilled = localValue !== null && star <= localValue;
           // Stars 1+ are always clickable when minStars is 0 or 1
           const isClickable = star >= minStars;
+          const isDisabled = disabled || !isClickable;
 
           return (
             <Button
@@ -254,7 +255,7 @@ export function NumericalRatingControl({
                 // Clicking the currently selected star clears the rating
                 handleChange(localValue === star ? null : star);
               }}
-              disabled={disabled || !isClickable}
+              disabled={isDisabled}
               aria-label={
                 !isClickable
                   ? `${star} of ${maxStars} (disabled)`
@@ -339,6 +340,7 @@ export function IncDecRatingControl({
       <span
         className="bg-muted min-w-10 rounded border px-2 py-1.5 text-center text-base tabular-nums"
         aria-live="polite"
+        aria-atomic="true"
       >
         {value}
       </span>
