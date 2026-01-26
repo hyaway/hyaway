@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import { Heading } from "@/components/ui-primitives/heading";
+import { SectionHeading } from "@/components/page-shell/section-heading";
 import { Input } from "@/components/ui-primitives/input";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
@@ -45,22 +46,23 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <Heading level={2}>
-          Tags{" "}
-          {search.trim()
-            ? `(${filteredCount} of ${tags.length})`
-            : `(${tags.length})`}
-        </Heading>
-        <Input
-          type="search"
-          placeholder="Filter tags..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-48 text-sm"
-        />
-      </div>
+    <div className="flex flex-col gap-4">
+      <SectionHeading
+        title={
+          search.trim()
+            ? `Tags (${filteredCount} of ${tags.length})`
+            : `Tags (${tags.length})`
+        }
+        right={
+          <Input
+            type="search"
+            placeholder="Filter tags..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-48 text-sm"
+          />
+        }
+      />
       <div className="flex flex-wrap gap-0.5">
         {tags.map((tag) => {
           const isVisible = !filteredTagsSet || filteredTagsSet.has(tag);
@@ -82,12 +84,14 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
 
 export function InlineTagsListSkeleton({
   tagCount = 8,
+  heading,
 }: {
   tagCount?: number;
+  heading?: ReactNode;
 }) {
   return (
-    <div className="space-y-4">
-      <Heading level={2}>Tags</Heading>
+    <div className="flex flex-col gap-4">
+      {heading ?? <SectionHeading title="Tags" />}
       <div className="flex flex-wrap gap-2">
         {Array.from({ length: tagCount }).map((_, i) => (
           <Skeleton

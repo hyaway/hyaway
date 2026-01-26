@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { IconExternalLink, IconLink } from "@tabler/icons-react";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import { Heading } from "@/components/ui-primitives/heading";
+import { SectionHeading } from "@/components/page-shell/section-heading";
 
 interface FileUrlsSectionProps {
   data: FileMetadata;
@@ -31,9 +31,9 @@ export function FileUrlsSection({ data }: FileUrlsSectionProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <Heading level={2}>URLs ({urls.length})</Heading>
-      <ul className="space-y-2">
+    <div className="flex flex-col gap-4">
+      <SectionHeading title={`URLs (${urls.length})`} />
+      <ul className="flex flex-col gap-2">
         {urls.map((url) => (
           <UrlListItem key={url} url={url} />
         ))}
@@ -61,9 +61,9 @@ function UrlListItem({ url }: { url: string }) {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-muted/50 hover:bg-muted flex items-center gap-2 rounded-lg border p-2 transition-colors"
+        className="bg-muted/50 hover:bg-muted flex items-center gap-2 rounded-lg border p-3 transition-colors"
       >
-        <IconLink className="text-muted-foreground size-4 shrink-0" />
+        <IconLink className="text-muted-foreground size-6 shrink-0" />
         <div className="min-w-0 flex-1">
           <span className="text-sm font-medium">{displayInfo.domain}</span>
           {displayInfo.path && displayInfo.path !== "/" && (

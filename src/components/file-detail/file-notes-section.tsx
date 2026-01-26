@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { IconChevronDown, IconNote } from "@tabler/icons-react";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import { Heading } from "@/components/ui-primitives/heading";
+import { SectionHeading } from "@/components/page-shell/section-heading";
 import {
   Collapsible,
   CollapsibleContent,
@@ -28,9 +28,9 @@ export function FileNotesSection({ data }: FileNotesSectionProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <Heading level={2}>Notes ({notes.length})</Heading>
-      <div className="space-y-3">
+    <div className="flex flex-col gap-4">
+      <SectionHeading title={`Notes (${notes.length})`} />
+      <div className="flex flex-col gap-3">
         {notes.map(([name, content]) => (
           <FileNote key={name} name={name} content={content} />
         ))}
@@ -56,38 +56,42 @@ function FileNote({ name, content }: FileNoteProps) {
       : previewLines + (content.split("\n").length > 3 ? "…" : "");
 
   return (
-    <div className="bg-muted/50 rounded-lg border p-3">
-      <div className="mb-2 flex items-center gap-2">
-        <IconNote className="text-muted-foreground size-4 shrink-0" />
-        <span className="text-sm font-medium">{name}</span>
-      </div>
-      {isLongNote ? (
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          {!isOpen && (
-            <p className="text-muted-foreground text-sm wrap-break-word whitespace-pre-wrap">
-              {preview}
-            </p>
-          )}
-          <CollapsibleContent className="text-sm wrap-break-word whitespace-pre-wrap">
-            {content}
-          </CollapsibleContent>
-          <CollapsibleTrigger
-            className={cn(
-              "text-foreground hover:bg-muted mt-2 inline-flex cursor-pointer items-center gap-1 rounded-sm px-1.5 py-0.5 text-sm font-medium transition-colors",
+    <div className="bg-muted/50 hover:bg-muted flex items-start gap-2 rounded-lg border p-3 transition-colors">
+      <IconNote className="text-muted-foreground mt-1.5 size-6 shrink-0" />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">{name}</span>
+        </div>
+        {isLongNote ? (
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            {!isOpen && (
+              <p className="text-muted-foreground text-sm wrap-break-word whitespace-pre-wrap">
+                {preview}
+              </p>
             )}
-          >
-            <IconChevronDown
+            <CollapsibleContent className="text-sm wrap-break-word whitespace-pre-wrap">
+              {content}
+            </CollapsibleContent>
+            <CollapsibleTrigger
               className={cn(
-                "size-4 transition-transform",
-                isOpen && "rotate-180",
+                "text-foreground hover:bg-muted mt-2 inline-flex cursor-pointer items-center gap-1 rounded-sm px-1.5 py-0.5 text-sm font-medium transition-colors",
               )}
-            />
-            {isOpen ? "Show less" : "Show more"}
-          </CollapsibleTrigger>
-        </Collapsible>
-      ) : (
-        <p className="text-sm wrap-break-word whitespace-pre-wrap">{content}</p>
-      )}
+            >
+              <IconChevronDown
+                className={cn(
+                  "size-4 transition-transform",
+                  isOpen && "rotate-180",
+                )}
+              />
+              {isOpen ? "Show less" : "Show more"}
+            </CollapsibleTrigger>
+          </Collapsible>
+        ) : (
+          <p className="text-sm wrap-break-word whitespace-pre-wrap">
+            {content}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

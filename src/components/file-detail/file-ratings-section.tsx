@@ -9,7 +9,7 @@ import type {
   ServiceInfo,
 } from "@/integrations/hydrus-api/models";
 import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
-import { Heading } from "@/components/ui-primitives/heading";
+import { SectionHeading } from "@/components/page-shell/section-heading";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
@@ -34,16 +34,16 @@ export function FileRatingsSection({ data }: FileRatingsSectionProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <Heading level={2}>Ratings</Heading>
-        {!canEditRatings && (
-          <span className="text-muted-foreground text-xs">
-            (read-only, no 'Edit file ratings' permission)
-          </span>
-        )}
-      </div>
-      <div className="space-y-3">
+    <div className="flex flex-col gap-4">
+      <SectionHeading
+        title="Ratings"
+        suffix={
+          !canEditRatings
+            ? "(read-only, no 'Edit file ratings' permission)"
+            : null
+        }
+      />
+      <div className="flex flex-col gap-3">
         {ratingServices.map(([serviceKey, service]) => (
           <RatingControl
             key={serviceKey}
@@ -110,23 +110,24 @@ function RatingControl({
   };
 
   return (
-    <div className="bg-muted/50 flex flex-wrap items-center gap-3 rounded-lg border p-3">
-      {/* Large icon spanning both text lines */}
-      {service.type === ServiceType.RATING_INC_DEC ? (
-        <IconTallymarks className="text-muted-foreground size-8 shrink-0" />
-      ) : (
-        <FilledServiceIcon className="text-muted-foreground size-8 shrink-0" />
-      )}
-      <div className="flex flex-col">
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm font-medium">{service.name}</span>
-          <span className="text-muted-foreground text-xs tabular-nums">
-            ({getRatingDisplay()})
+    <div className="bg-muted/50 hover:bg-muted flex flex-wrap items-center gap-2 rounded-lg border p-3 transition-colors">
+      <div className="flex min-w-0 items-center gap-2">
+        {service.type === ServiceType.RATING_INC_DEC ? (
+          <IconTallymarks className="text-muted-foreground size-6 shrink-0" />
+        ) : (
+          <FilledServiceIcon className="text-muted-foreground size-6 shrink-0" />
+        )}
+        <div className="flex min-w-0 flex-col">
+          <div className="flex flex-wrap items-center gap-x-1.5">
+            <span className="text-sm font-medium">{service.name}</span>
+            <span className="text-muted-foreground text-xs tabular-nums">
+              ({getRatingDisplay()})
+            </span>
+          </div>
+          <span className="text-muted-foreground text-xs">
+            {service.type_pretty}
           </span>
         </div>
-        <span className="text-muted-foreground text-xs">
-          {service.type_pretty}
-        </span>
       </div>
       <div className="ml-auto flex items-center gap-2">
         {service.type === ServiceType.RATING_LIKE && (

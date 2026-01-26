@@ -23,7 +23,7 @@ import { Alert, AlertTitle } from "@/components/ui-primitives/alert";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
-import { Heading } from "@/components/ui-primitives/heading";
+import { SectionHeading } from "@/components/page-shell/section-heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { LOADING_ACTIONS, useFileActions } from "@/hooks/use-file-actions";
 import {
@@ -149,35 +149,35 @@ function FileDetailContent({
           </div>
         </div>
         <FilePageHeader fileId={fileId} />
-        <Separator className={"mt-4"} />
+        <Separator className="my-2" />
         <div className="flex items-center justify-between gap-2">
           <FileStatusBadges data={data} />
         </div>
-        <Separator className={"mb-4"} />
+        <Separator className="my-2" />
 
-        <div className="@container space-y-4">
-          <Heading level={2}>File metadata</Heading>
-          <div className="grid gap-4 @lg:grid-cols-2">
+        <div className="@container flex flex-col gap-2">
+          <SectionHeading title="File metadata" />
+          <div className="grid gap-2 @lg:grid-cols-2">
             <ContentDetailsTable data={data} />
             <FileInfoTable data={data} />
           </div>
         </div>
-        <Separator className={"mt-2 mb-4"} />
+        <Separator className="my-2" />
         <FileRatingsSection data={data} />
-        <Separator className={"mt-2 mb-4"} />
+        <Separator className="my-2" />
         <FileNotesSection data={data} />
         {data.notes && Object.keys(data.notes).length > 0 && (
-          <Separator className={"mt-2 mb-4"} />
+          <Separator className="my-2" />
         )}
         <FileUrlsSection data={data} />
         {data.known_urls && data.known_urls.length > 0 && (
-          <Separator className={"mt-2 mb-4"} />
+          <Separator className="my-2" />
         )}
-        <div className="@container space-y-4">
-          <Heading level={2}>Viewing statistics</Heading>
+        <div className="@container flex flex-col gap-2">
+          <SectionHeading title="Viewing statistics" />
           <ViewingStatisticsTable statistics={data.file_viewing_statistics} />
         </div>
-        <Separator className={"mt-2 mb-4"} />
+        <Separator className="my-2" />
         <InlineTagsList data={data} />
       </div>
 
