@@ -12,7 +12,10 @@ import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
-import { useReviewRatingsExcludedServices } from "@/stores/review-ratings-settings-store";
+import {
+  useRatingsServiceSettings,
+  useRatingsSettingsActions,
+} from "@/stores/ratings-settings-store";
 import { useReviewQueueCurrentFileId } from "@/stores/review-queue-store";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
@@ -36,13 +39,15 @@ import {
  */
 export function useEnabledReviewRatingServices() {
   const { ratingServices, isLoading } = useRatingServices();
-  const excludedServices = useReviewRatingsExcludedServices();
+  const serviceSettings = useRatingsServiceSettings();
+  const { getServiceSettings } = useRatingsSettingsActions();
   const { hasPermission, isFetched: permissionsFetched } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
 
   const enabledServices = useMemo(
-    () => ratingServices.filter(([key]) => !excludedServices.has(key)),
-    [ratingServices, excludedServices],
+    () =>
+      ratingServices.filter(([key]) => getServiceSettings(key).showInReview),
+    [ratingServices, serviceSettings, getServiceSettings],
   );
 
   return {

@@ -7,7 +7,7 @@ import { ThumbnailGalleryDisplaySettingsCard } from "./-components/thumbnail-gal
 import { PagesDisplaySettingsCard } from "./-components/pages-display-settings-card";
 import { ThemeCard } from "./-components/theme-card";
 import { ReviewControlsSettingsCard } from "./-components/review-controls-settings-card";
-import { ReviewRatingsSettingsCard } from "./-components/review-ratings-settings-card";
+import { RatingsSettingsCard } from "./-components/ratings-settings-card";
 import { ResetAllAppearanceSettingsCard } from "./-components/reset-all-appearance-settings-card";
 import { Heading } from "@/components/ui-primitives/heading";
 
@@ -30,7 +30,7 @@ function SettingsAppearanceComponent() {
       <ThumbnailGalleryDisplaySettingsCard />
       <FileViewerSettingsCard />
       <ReviewControlsSettingsCard />
-      <ReviewRatingsSettingsCard />
+      <RatingsSettingsCard />
       <ResetAllAppearanceSettingsCard />
     </div>
   );

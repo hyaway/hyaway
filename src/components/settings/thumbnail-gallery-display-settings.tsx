@@ -8,7 +8,6 @@ import {
   SliderField,
   SwitchField,
 } from "./setting-fields";
-import { RatingsOverlaySettings } from "./ratings-overlay-settings";
 import type { ImageBackground } from "@/stores/file-viewer-settings-store";
 import type { TagsSortMode } from "@/stores/tags-settings-store";
 import {
@@ -46,7 +45,6 @@ import {
   useTagsSettingsActions,
   useTagsSortMode,
 } from "@/stores/tags-settings-store";
-import { useHasRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { Permission } from "@/integrations/hydrus-api/models";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import { Accordion } from "@/components/ui-primitives/accordion";
@@ -108,7 +106,6 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryLastOpenSection = useGalleryLastOpenSection();
   const fileViewerImageBackground = useImageBackground();
   const tagsSortMode = useTagsSortMode();
-  const hasRatingServices = useHasRatingServices();
   const { hasPermission } = usePermissions();
   const canManageDatabase = hasPermission(Permission.MANAGE_DATABASE);
   const { setImageBackground: setFileViewerImageBackground } =
@@ -373,12 +370,6 @@ export function ThumbnailGalleryDisplaySettings({
           </ToggleGroup>
         </div>
       </AccordionSection>
-
-      {hasRatingServices && (
-        <AccordionSection value="ratings" title="Ratings overlay">
-          <RatingsOverlaySettings idPrefix={idPrefix} />
-        </AccordionSection>
-      )}
     </Accordion>
   );
 }

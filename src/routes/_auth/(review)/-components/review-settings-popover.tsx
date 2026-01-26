@@ -14,9 +14,9 @@ import {
   ReviewQueueSettings,
 } from "@/components/settings/review-queue-settings";
 import {
-  REVIEW_RATINGS_SETTINGS_TITLE,
-  ReviewRatingsSettings,
-} from "@/components/settings/review-ratings-settings";
+  RATINGS_SETTINGS_TITLE,
+  RatingsSettings,
+} from "@/components/settings/ratings-settings";
 import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   SettingsHeader,
@@ -51,9 +51,9 @@ export function ReviewSettingsPopover() {
           <Separator className="my-2" />
 
           <SettingsHeader>
-            <SettingsTitle>{REVIEW_RATINGS_SETTINGS_TITLE}</SettingsTitle>
+            <SettingsTitle>{RATINGS_SETTINGS_TITLE}</SettingsTitle>
           </SettingsHeader>
-          <ReviewRatingsSettings idPrefix="popover-" />
+          <RatingsSettings idPrefix="popover-" />
         </>
       )}
       <Separator className="my-2" />

@@ -11,9 +11,9 @@ import type {
 import { ServiceType } from "@/integrations/hydrus-api/models";
 import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
 import {
-  useRatingsDisplaySettingsActions,
+  useRatingsSettingsActions,
   useRatingsServiceSettings,
-} from "@/stores/ratings-display-settings-store";
+} from "@/stores/ratings-settings-store";
 
 export interface RatingToShow {
   serviceKey: string;
@@ -24,7 +24,7 @@ export interface RatingToShow {
 export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
   const { data: servicesData } = useGetServicesQuery();
   const serviceSettings = useRatingsServiceSettings();
-  const { getServiceSettings } = useRatingsDisplaySettingsActions();
+  const { getServiceSettings } = useRatingsSettingsActions();
 
   return useMemo(() => {
     if (!servicesData?.services || !item.ratings) return [];
@@ -41,12 +41,12 @@ export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
         }
 
         const settings = getServiceSettings(serviceKey);
-        if (!settings.show_in_thumbnail) return false;
+        if (!settings.showInOverlay) return false;
 
         const ratingValue = item.ratings?.[serviceKey];
 
         // Check if we should show when null/unset
-        if (!settings.show_in_thumbnail_even_when_null) {
+        if (!settings.showInOverlayEvenWhenNull) {
           // Like/Dislike: null means unset
           if (
             service.type === ServiceType.RATING_LIKE &&

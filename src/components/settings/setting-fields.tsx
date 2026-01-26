@@ -171,17 +171,15 @@ export function SwitchField({
   ...switchProps
 }: SwitchFieldProps) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div
+      className={cn("flex items-center justify-between gap-4", {
+        "opacity-50": disabled,
+      })}
+    >
       <div className="flex flex-col gap-0.5">
         <Label htmlFor={id}>{label}</Label>
         {description && (
-          <span
-            className={cn("text-muted-foreground text-xs", {
-              "text-destructive": disabled,
-            })}
-          >
-            {description}
-          </span>
+          <span className="text-muted-foreground text-xs">{description}</span>
         )}
       </div>
       <Switch

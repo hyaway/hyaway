@@ -113,17 +113,18 @@ When updating a component with a skeleton, **always update the skeleton to match
 
 ### State Management
 
-| Store         | Purpose         | Location                                         |
-| ------------- | --------------- | ------------------------------------------------ |
-| Theme         | Dark/light mode | `stores/theme-store.ts`                          |
-| Gallery       | Gallery prefs   | `stores/gallery-settings-store.ts`               |
-| File Viewer   | Viewer prefs    | `stores/file-viewer-settings-store.ts`           |
-| Pages         | Pages layout    | `stores/pages-settings-store.ts`                 |
-| Search Limits | Query limits    | `stores/search-limits-store.ts`                  |
-| Tags          | Tag sorting     | `stores/tags-settings-store.ts`                  |
-| Watch History | View tracking   | `stores/watch-history-store.ts`                  |
-| Sidebar       | Sidebar state   | `stores/sidebar-store.ts`                        |
-| Hydrus Config | API connection  | `integrations/hydrus-api/hydrus-config-store.ts` |
+| Store         | Purpose          | Location                                         |
+| ------------- | ---------------- | ------------------------------------------------ |
+| Theme         | Dark/light mode  | `stores/theme-store.ts`                          |
+| Gallery       | Gallery prefs    | `stores/gallery-settings-store.ts`               |
+| File Viewer   | Viewer prefs     | `stores/file-viewer-settings-store.ts`           |
+| Pages         | Pages layout     | `stores/pages-settings-store.ts`                 |
+| Search Limits | Query limits     | `stores/search-limits-store.ts`                  |
+| Tags          | Tag sorting      | `stores/tags-settings-store.ts`                  |
+| Ratings       | Overlay & review | `stores/ratings-settings-store.ts`               |
+| Watch History | View tracking    | `stores/watch-history-store.ts`                  |
+| Sidebar       | Sidebar state    | `stores/sidebar-store.ts`                        |
+| Hydrus Config | API connection   | `integrations/hydrus-api/hydrus-config-store.ts` |
 
 Each store exports explicit selector hooks:
 

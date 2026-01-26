@@ -5,7 +5,7 @@ import { useEffect, useMemo } from "react";
 import { ServiceType } from "../models";
 import { useGetServicesQuery } from "./services";
 import { usePrefetchServiceRatingSvgs } from "./service-rating-svg";
-import { useRatingsServiceSettings } from "@/stores/ratings-display-settings-store";
+import { useRatingsServiceSettings } from "@/stores/ratings-settings-store";
 
 /**
  * Hook that returns rating services from the Hydrus API.
