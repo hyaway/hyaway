@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useMemo } from "react";
-import { IconX } from "@tabler/icons-react";
+import { IconTallymarks, IconX } from "@tabler/icons-react";
 import { SwitchField } from "./setting-fields";
 import { ServiceType } from "@/integrations/hydrus-api/models";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
@@ -11,6 +11,7 @@ import {
   useRatingsServiceSettings,
 } from "@/stores/ratings-display-settings-store";
 import { Button } from "@/components/ui-primitives/button";
+import { useShapeIcons } from "@/components/ratings/use-shape-icons";
 
 export const RATINGS_OVERLAY_SETTINGS_TITLE = "Ratings overlay";
 
@@ -40,6 +41,7 @@ export function RatingsOverlaySettings({
         serviceKey,
         name: service.name,
         type: service.type,
+        starShape: service.star_shape,
       })),
     [ratingServicesRaw],
   );
@@ -58,7 +60,7 @@ export function RatingsOverlaySettings({
 
   return (
     <div className="flex flex-col gap-3">
-      {ratingServices.map(({ serviceKey, name, type }) => {
+      {ratingServices.map(({ serviceKey, name, type, starShape }) => {
         const settings = ratingsServiceSettings[serviceKey] ?? {
           show_in_thumbnail: false,
           show_in_thumbnail_even_when_null: false,
@@ -72,34 +74,23 @@ export function RatingsOverlaySettings({
               ? "Numerical"
               : "Inc / Dec";
         return (
-          <div
+          <RatingServiceSettingsRow
             key={serviceKey}
-            className="bg-muted/50 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border p-3"
-          >
-            <div className="flex grow flex-col">
-              <span className="text-sm font-medium">{name}</span>
-              <span className="text-muted-foreground text-xs">{typeLabel}</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <SwitchField
-                id={`${idPrefix}rating-${serviceKey}-show`}
-                label="Show"
-                checked={settings.show_in_thumbnail}
-                onCheckedChange={(checked) =>
-                  setServiceShowInThumbnail(serviceKey, checked)
-                }
-              />
-              <SwitchField
-                id={`${idPrefix}rating-${serviceKey}-show-null`}
-                label={whenLabel}
-                checked={settings.show_in_thumbnail_even_when_null}
-                onCheckedChange={(checked) =>
-                  setServiceShowEvenWhenNull(serviceKey, checked)
-                }
-                disabled={!settings.show_in_thumbnail}
-              />
-            </div>
-          </div>
+            serviceKey={serviceKey}
+            name={name}
+            type={type}
+            starShape={starShape}
+            typeLabel={typeLabel}
+            whenLabel={whenLabel}
+            settings={settings}
+            idPrefix={idPrefix}
+            onShowChange={(checked) =>
+              setServiceShowInThumbnail(serviceKey, checked)
+            }
+            onShowWhenNullChange={(checked) =>
+              setServiceShowEvenWhenNull(serviceKey, checked)
+            }
+          />
         );
       })}
       {orphanedServices.map((serviceKey) => (
@@ -126,6 +117,66 @@ export function RatingsOverlaySettings({
           </Button>
         </div>
       ))}
+    </div>
+  );
+}
+interface RatingServiceSettingsRowProps {
+  serviceKey: string;
+  name: string;
+  type: ServiceType;
+  starShape?: string;
+  typeLabel: string;
+  whenLabel: string;
+  settings: {
+    show_in_thumbnail: boolean;
+    show_in_thumbnail_even_when_null: boolean;
+  };
+  idPrefix: string;
+  onShowChange: (checked: boolean) => void;
+  onShowWhenNullChange: (checked: boolean) => void;
+}
+
+function RatingServiceSettingsRow({
+  serviceKey,
+  name,
+  type,
+  starShape,
+  typeLabel,
+  whenLabel,
+  settings,
+  idPrefix,
+  onShowChange,
+  onShowWhenNullChange,
+}: RatingServiceSettingsRowProps) {
+  const { filled: FilledIcon } = useShapeIcons(serviceKey, starShape);
+
+  return (
+    <div className="bg-muted/50 flex flex-wrap items-center gap-3 rounded-lg border p-3">
+      {/* Large icon spanning both text lines */}
+      {type === ServiceType.RATING_INC_DEC ? (
+        <IconTallymarks className="text-muted-foreground size-8 shrink-0" />
+      ) : (
+        <FilledIcon className="text-muted-foreground size-8 shrink-0" />
+      )}
+      <div className="flex grow flex-col">
+        <span className="text-sm font-medium">{name}</span>
+        <span className="text-muted-foreground text-xs">{typeLabel}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <SwitchField
+          id={`${idPrefix}rating-${serviceKey}-show`}
+          label="Show"
+          checked={settings.show_in_thumbnail}
+          onCheckedChange={onShowChange}
+        />
+        <SwitchField
+          id={`${idPrefix}rating-${serviceKey}-show-null`}
+          label={whenLabel}
+          checked={settings.show_in_thumbnail_even_when_null}
+          onCheckedChange={onShowWhenNullChange}
+          disabled={!settings.show_in_thumbnail}
+        />
+      </div>
     </div>
   );
 }

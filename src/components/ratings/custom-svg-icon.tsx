@@ -35,12 +35,11 @@ export const CustomSvgIcon = memo(function CustomSvgIcon({
 
   return (
     <span
-      className={cn("inline-block size-6", className)}
+      className={cn("inline-block size-6", !filled && "opacity-40", className)}
       style={{
         backgroundColor: "currentColor",
         mask: `${maskUrl} center / contain no-repeat`,
         WebkitMask: `${maskUrl} center / contain no-repeat`,
-        opacity: filled ? 1 : 0.4,
         ...style,
       }}
       role="img"

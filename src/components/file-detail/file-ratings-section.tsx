@@ -7,6 +7,7 @@ import {
   IconCircleDashedNumber0,
   IconMinus,
   IconPlus,
+  IconTallymarks,
 } from "@tabler/icons-react";
 
 import type {
@@ -82,7 +83,7 @@ function RatingControl({
   const { mutate: setRating, isPending } = useSetRatingMutation();
 
   // Get icons for this service - handles both predefined shapes and custom SVGs
-  const { outline: OutlineServiceIcon } = useShapeIcons(
+  const { filled: FilledServiceIcon } = useShapeIcons(
     serviceKey,
     service.star_shape,
   );
@@ -115,10 +116,15 @@ function RatingControl({
   };
 
   return (
-    <div className="bg-muted/50 flex flex-wrap items-center gap-2 rounded-lg border p-3">
+    <div className="bg-muted/50 flex flex-wrap items-center gap-3 rounded-lg border p-3">
+      {/* Large icon spanning both text lines */}
+      {service.type === ServiceType.RATING_INC_DEC ? (
+        <IconTallymarks className="text-muted-foreground size-8 shrink-0" />
+      ) : (
+        <FilledServiceIcon className="text-muted-foreground size-8 shrink-0" />
+      )}
       <div className="flex flex-col">
         <div className="flex items-center gap-1.5">
-          <OutlineServiceIcon className="text-muted-foreground size-4 shrink-0" />
           <span className="text-sm font-medium">{service.name}</span>
           <span className="text-muted-foreground text-xs tabular-nums">
             ({getRatingDisplay()})
