@@ -1,8 +1,15 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useState } from "react";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
-import { IconAlertTriangle, IconLock, IconRefresh } from "@tabler/icons-react";
+import {
+  IconAlertTriangle,
+  IconChevronDown,
+  IconChevronUp,
+  IconLock,
+  IconRefresh,
+} from "@tabler/icons-react";
 
 import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
 import {
@@ -118,6 +125,8 @@ function AuthErrorScreen({
   error: Error | null;
   onRetry: () => void;
 }) {
+  const [showStack, setShowStack] = useState(false);
+
   return (
     <AuthStatusScreen
       icon={<IconAlertTriangle className="text-destructive size-8" />}
@@ -127,18 +136,47 @@ function AuthErrorScreen({
         error?.message || "Could not verify access to the Hydrus client."
       }
       actions={
-        <div className="flex w-full gap-2">
-          <Button variant="outline" onClick={onRetry} className="flex-1">
-            <IconRefresh data-icon="inline-start" />
-            Retry
-          </Button>
-          <LinkButton
-            to="/settings/connection"
-            variant="default"
-            className="flex-1"
-          >
-            Configure connection
-          </LinkButton>
+        <div className="flex w-full flex-col gap-3">
+          <div className="flex w-full gap-2">
+            <Button variant="outline" onClick={onRetry} className="flex-1">
+              <IconRefresh data-icon="inline-start" />
+              Retry
+            </Button>
+            <LinkButton
+              to="/settings/connection"
+              variant="default"
+              className="flex-1"
+            >
+              Configure connection
+            </LinkButton>
+          </div>
+          {error?.stack && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground h-auto self-center p-0 text-xs"
+                onClick={() => setShowStack((s) => !s)}
+              >
+                {showStack ? (
+                  <>
+                    <IconChevronUp className="mr-1 size-3" />
+                    Hide error details
+                  </>
+                ) : (
+                  <>
+                    <IconChevronDown className="mr-1 size-3" />
+                    Show error details
+                  </>
+                )}
+              </Button>
+              {showStack && (
+                <pre className="bg-muted text-muted-foreground w-full overflow-auto rounded p-2 text-left text-xs wrap-break-word whitespace-pre-wrap">
+                  {error.stack}
+                </pre>
+              )}
+            </>
+          )}
         </div>
       }
     />
