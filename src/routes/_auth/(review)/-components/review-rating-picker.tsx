@@ -23,6 +23,7 @@ import {
   NumericalRatingControl,
 } from "@/components/ratings/rating-controls";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
+import { cn } from "@/lib/utils";
 import {
   Popover,
   PopoverContent,
@@ -78,14 +79,27 @@ export function ReviewRatingButton({
     isSingleService,
   } = useEnabledReviewRatingServices();
 
+  const placeholderLabel =
+    enabledServices.length === 1
+      ? (enabledServices[0]?.[1].name ?? "Rate")
+      : "Rate";
+
   const currentFileId = useReviewQueueCurrentFileId();
   const { data: currentMetadata } = useGetSingleFileMetadata(
     currentFileId ?? 0,
   );
 
-  // Don't render if conditions not met
+  // Keep footer layout stable even when ratings are unavailable/disabled.
   if (isLoading || !canEditRatings || !hasEnabledServices || !currentFileId) {
-    return null;
+    return (
+      <BottomNavButton
+        label={placeholderLabel}
+        icon={<IconHeart className="size-6" />}
+        disabled
+        className={cn("pointer-events-none invisible", className)}
+        truncateLabel={truncateLabel}
+      />
+    );
   }
 
   // Single service mode: special behavior based on service type

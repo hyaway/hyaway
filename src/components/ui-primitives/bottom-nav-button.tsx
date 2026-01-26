@@ -112,19 +112,19 @@ const labelVariants = cva(["text-xs"], {
       maxButtons: 4,
       truncateLabel: true,
       className:
-        "short:@xl:max-w-[10ch] short:@xl:truncate max-w-[10ch] truncate",
+        "short:@xl:max-w-[4ch] short:@xl:overflow-hidden short:@xl:whitespace-nowrap short:@xl:text-clip max-w-[4ch] overflow-hidden whitespace-nowrap text-clip",
     },
     {
       maxButtons: 5,
       truncateLabel: true,
       className:
-        "short:@2xl:max-w-[10ch] short:@2xl:truncate max-w-[10ch] truncate",
+        "short:@2xl:max-w-[4ch] short:@2xl:overflow-hidden short:@2xl:whitespace-nowrap short:@2xl:text-clip max-w-[4ch] overflow-hidden whitespace-nowrap text-clip",
     },
     {
       maxButtons: 6,
       truncateLabel: true,
       className:
-        "short:@3xl:max-w-[10ch] short:@3xl:truncate max-w-[10ch] truncate",
+        "short:@3xl:max-w-[4ch] short:@3xl:overflow-hidden short:@3xl:whitespace-nowrap short:@3xl:text-clip max-w-[4ch] overflow-hidden whitespace-nowrap text-clip",
     },
   ],
   defaultVariants: {
