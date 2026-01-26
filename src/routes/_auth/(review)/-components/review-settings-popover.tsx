@@ -46,12 +46,6 @@ export function ReviewSettingsPopover() {
         defaultSections="all"
         hideExpandedSettings
       />
-      <Separator className="my-2" />
-      <SettingsHeader>
-        <SettingsTitle>{REVIEW_CONTROLS_SETTINGS_TITLE}</SettingsTitle>
-      </SettingsHeader>
-      <ReviewControlsSettings idPrefix="popover-" />
-
       {hasRatingServices && (
         <>
           <Separator className="my-2" />
@@ -62,6 +56,11 @@ export function ReviewSettingsPopover() {
           <ReviewRatingsSettings idPrefix="popover-" />
         </>
       )}
+      <Separator className="my-2" />
+      <SettingsHeader>
+        <SettingsTitle>{REVIEW_CONTROLS_SETTINGS_TITLE}</SettingsTitle>
+      </SettingsHeader>
+      <ReviewControlsSettings idPrefix="popover-" />
     </SettingsPopover>
   );
 }
