@@ -192,57 +192,15 @@ export function ThumbnailGalleryDisplaySettings({
           onValueChange={setLanesRange}
           isDestructive={isColumnsDestructive}
         />
-
         <SwitchField
           id={`${idPrefix}expand-images-switch`}
           label="Stretch thumbnails to fill columns"
           checked={galleryExpandImages}
           onCheckedChange={setExpandImages}
         />
-        <SwitchField
-          id={`${idPrefix}show-scroll-badge-switch`}
-          label="Show scroll position"
-          checked={galleryShowScrollBadge}
-          onCheckedChange={setShowScrollBadge}
-        />
-      </AccordionSection>
-      <AccordionSection value="thumbnails" title="Thumbnails">
-        <div className="@container/bg flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <Label>Image background</Label>
-            {settingsPage && (
-              <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm">
-                <Switch
-                  checked={galleryLinkImageBackground}
-                  onCheckedChange={handleLinkChange}
-                />
-                Sync with viewer
-              </label>
-            )}
-          </div>
-          <ToggleGroup
-            value={[effectiveBackground]}
-            onValueChange={(value) => {
-              const newValue = value[0] as ImageBackground | undefined;
-              if (newValue) handleImageBackgroundChange(newValue);
-            }}
-            variant="outline"
-            size="sm"
-            spacing={1}
-            orientation="vertical"
-            className="w-full"
-          >
-            <ToggleGroupItem value="solid">Solid</ToggleGroupItem>
-            <ToggleGroupItem value="checkerboard">Checkerboard</ToggleGroupItem>
-            <ToggleGroupItem value="average">
-              Average
-              <span className="hidden @[12rem]/bg:inline"> from image</span>
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-3">
-            <Label>Thumbnail size</Label>
+            <Label>Thumbnail width</Label>
             <ToggleGroup
               value={[galleryBaseWidthMode]}
               onValueChange={(values) => {
@@ -280,10 +238,10 @@ export function ThumbnailGalleryDisplaySettings({
           )}
         </div>
         <SwitchField
-          id={`${idPrefix}show-context-menu-switch`}
-          label="Show context menu on right-click"
-          checked={galleryEnableContextMenu}
-          onCheckedChange={setEnableContextMenu}
+          id={`${idPrefix}show-scroll-badge-switch`}
+          label="Show scroll position"
+          checked={galleryShowScrollBadge}
+          onCheckedChange={setShowScrollBadge}
         />
       </AccordionSection>
 
@@ -307,6 +265,48 @@ export function ThumbnailGalleryDisplaySettings({
           step={1}
           onValueChange={setVerticalGap}
           formatValue={(v) => `${v}px`}
+        />
+      </AccordionSection>
+
+      <AccordionSection value="thumbnails" title="Thumbnails">
+        <div className="@container/bg flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <Label>Image background</Label>
+            {settingsPage && (
+              <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm">
+                <Switch
+                  checked={galleryLinkImageBackground}
+                  onCheckedChange={handleLinkChange}
+                />
+                Sync with viewer
+              </label>
+            )}
+          </div>
+          <ToggleGroup
+            value={[effectiveBackground]}
+            onValueChange={(value) => {
+              const newValue = value[0] as ImageBackground | undefined;
+              if (newValue) handleImageBackgroundChange(newValue);
+            }}
+            variant="outline"
+            size="sm"
+            spacing={1}
+            orientation="vertical"
+            className="w-full"
+          >
+            <ToggleGroupItem value="solid">Solid</ToggleGroupItem>
+            <ToggleGroupItem value="checkerboard">Checkerboard</ToggleGroupItem>
+            <ToggleGroupItem value="average">
+              Average
+              <span className="hidden @[12rem]/bg:inline"> from image</span>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        <SwitchField
+          id={`${idPrefix}show-context-menu-switch`}
+          label="Show context menu on right-click"
+          checked={galleryEnableContextMenu}
+          onCheckedChange={setEnableContextMenu}
         />
       </AccordionSection>
 
