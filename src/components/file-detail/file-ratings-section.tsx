@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconBackslash, IconTallymarks } from "@tabler/icons-react";
+import { IconTallymarks } from "@tabler/icons-react";
 
 import type {
   FileMetadata,
@@ -10,11 +10,9 @@ import type {
 } from "@/integrations/hydrus-api/models";
 import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
 import { Heading } from "@/components/ui-primitives/heading";
-import { cn } from "@/lib/utils";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
-import { SHAPE_ICONS } from "@/components/ratings/shape-icons";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
 import {
   IncDecRatingControl,
@@ -37,7 +35,6 @@ export function FileRatingsSection({ data }: FileRatingsSectionProps) {
 
   return (
     <div className="space-y-4">
-      <ShapeIconsDebug />
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
         <Heading level={2}>Ratings</Heading>
         {!canEditRatings && (
@@ -159,74 +156,6 @@ function RatingControl({
             disabled={disabled || isPending}
           />
         )}
-      </div>
-    </div>
-  );
-}
-
-// Debug component to preview all shapes
-export function ShapeIconsDebug() {
-  const allShapes = Object.entries(SHAPE_ICONS);
-
-  return (
-    <div className="space-y-4 p-4">
-      <Heading level={2}>Shape Icons Debug</Heading>
-      <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] items-center gap-2">
-        <span className="text-muted-foreground text-xs font-medium">Shape</span>
-        <span />
-        <span className="text-muted-foreground text-center text-xs font-medium">
-          Filled
-        </span>
-        <span className="text-muted-foreground text-center text-xs font-medium">
-          Outline
-        </span>
-        <span className="text-muted-foreground text-center text-xs font-medium">
-          Dislike
-        </span>
-        <span className="text-muted-foreground text-center text-xs font-medium">
-          Disliked
-        </span>
-        {allShapes.map(([name, icons]) => (
-          <>
-            <span key={`${name}-label`} className="text-sm">
-              {name}
-            </span>
-            <span />
-            <icons.filled
-              key={`${name}-filled`}
-              className={cn("size-6 text-emerald-500", icons.className)}
-            />
-            <icons.outline
-              key={`${name}-outline`}
-              className={cn("size-6", icons.className)}
-            />
-            <span key={`${name}-dislike`} className="relative">
-              <icons.outline className={cn("size-6", icons.className)} />
-              <IconBackslash
-                className="text-background absolute -inset-2 size-10"
-                strokeWidth={3}
-              />
-              <IconBackslash
-                className="absolute -inset-2 size-10"
-                strokeWidth={1.5}
-              />
-            </span>
-            <span
-              key={`${name}-disliked`}
-              className="text-destructive relative"
-            >
-              <icons.filled className={cn("size-6", icons.className)} />
-              <IconBackslash
-                className="text-background absolute -inset-2 size-10"
-                strokeWidth={3}
-              />
-              <IconBackslash
-                className="absolute -inset-2 size-10"
-                strokeWidth={1.5}
-              />
-            </span>
-          </>
-        ))}
       </div>
     </div>
   );
