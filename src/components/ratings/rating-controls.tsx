@@ -208,7 +208,9 @@ export function NumericalRatingControl({
           )}
           onClick={() => handleChange(localValue === 0 ? null : 0)}
           disabled={disabled}
-          aria-label="0 stars"
+          aria-label={
+            isZero ? "Clear rating (was 0)" : `Set rating to 0 of ${maxStars}`
+          }
         >
           {isZero ? (
             <IconCircleDashedNumber0
@@ -253,7 +255,13 @@ export function NumericalRatingControl({
                 handleChange(localValue === star ? null : star);
               }}
               disabled={disabled || !isClickable}
-              aria-label={`${star} star${star !== 1 ? "s" : ""}`}
+              aria-label={
+                !isClickable
+                  ? `${star} of ${maxStars} (disabled)`
+                  : localValue === star
+                    ? `Clear rating (was ${star} of ${maxStars})`
+                    : `Set rating to ${star} of ${maxStars}`
+              }
             >
               {isFilled ? (
                 <FilledIcon
