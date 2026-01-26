@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   IconBackslash,
   IconCircleDashed,
@@ -33,20 +33,14 @@ export function LikeDislikeControl({
   onChange,
   disabled,
 }: LikeDislikeControlProps) {
-  // Track the last value we set ourselves to avoid sync loops
-  const lastSetValue = useRef<boolean | null | undefined>(undefined);
-  const [localValue, setLocalValue] = useState(value);
+  const [localValue, setLocalValue] = useState<boolean | null>(value);
 
-  // Sync when external value changes (but not to what we just set)
+  // Sync when the external value changes
   useEffect(() => {
-    if (value !== lastSetValue.current) {
-      setLocalValue(value);
-    }
-    lastSetValue.current = undefined;
+    setLocalValue(value);
   }, [value]);
 
   const handleChange = (newValue: boolean | null) => {
-    lastSetValue.current = newValue;
     setLocalValue(newValue);
     onChange(newValue);
   };
@@ -72,6 +66,7 @@ export function LikeDislikeControl({
         onClick={() => handleChange(isLiked ? null : true)}
         disabled={disabled}
         aria-label={isLiked ? "Remove like" : "Like"}
+        aria-pressed={isLiked}
       >
         {isLiked ? (
           <FilledIcon
@@ -101,6 +96,7 @@ export function LikeDislikeControl({
         onClick={() => handleChange(isDisliked ? null : false)}
         disabled={disabled}
         aria-label={isDisliked ? "Remove dislike" : "Dislike"}
+        aria-pressed={isDisliked}
       >
         <span
           className={cn(
@@ -167,20 +163,14 @@ export function NumericalRatingControl({
   onChange,
   disabled,
 }: NumericalRatingControlProps) {
-  // Track the last value we set ourselves to avoid sync loops
-  const lastSetValue = useRef<number | null | undefined>(undefined);
-  const [localValue, setLocalValue] = useState(value);
+  const [localValue, setLocalValue] = useState<number | null>(value);
 
-  // Sync when external value changes (but not to what we just set)
+  // Sync when the external value changes
   useEffect(() => {
-    if (value !== lastSetValue.current) {
-      setLocalValue(value);
-    }
-    lastSetValue.current = undefined;
+    setLocalValue(value);
   }, [value]);
 
   const handleChange = (newValue: number | null) => {
-    lastSetValue.current = newValue;
     setLocalValue(newValue);
     onChange(newValue);
   };
@@ -259,7 +249,6 @@ export function NumericalRatingControl({
                 !isClickable && "cursor-not-allowed opacity-30",
               )}
               onClick={() => {
-                if (!isClickable) return;
                 // Clicking the currently selected star clears the rating
                 handleChange(localValue === star ? null : star);
               }}

@@ -52,13 +52,21 @@ const Button = React.forwardRef<
   ButtonPrimitive.Props & VariantProps<typeof buttonVariants>
 >(
   (
-    { className, variant = "default", size = "default", children, ...props },
+    {
+      className,
+      variant = "default",
+      size = "default",
+      type = "button",
+      children,
+      ...props
+    },
     ref,
   ) => {
     return (
       <ButtonPrimitive
         ref={ref}
         data-slot="button"
+        type={type}
         className={cn(buttonVariants({ variant, size, className }))}
         {...props}
       >
