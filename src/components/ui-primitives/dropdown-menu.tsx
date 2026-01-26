@@ -33,6 +33,7 @@ function DropdownMenuContent({
   >) {
   return (
     <MenuPrimitive.Portal>
+      <MenuPrimitive.Backdrop className="fixed inset-0 z-50" />
       <MenuPrimitive.Positioner
         className="isolate z-50 outline-none"
         align={align}

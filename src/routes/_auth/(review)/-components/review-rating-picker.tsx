@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useMemo, useRef, useState } from "react";
-import { IconX } from "@tabler/icons-react";
+import { IconHeart, IconX } from "@tabler/icons-react";
 import type {
   FileMetadata,
   RatingValue,
@@ -430,7 +430,7 @@ function MultiServiceRatingButton({
 }: MultiServiceRatingButtonProps) {
   const [open, setOpen] = useState(false);
 
-  // Get first service icon for button display
+  // Get first service icon for button display (only used for single service)
   const firstEntry = services[0] as [string, ServiceInfo] | undefined;
   const firstServiceKey = firstEntry ? firstEntry[0] : "";
   const firstService = firstEntry ? firstEntry[1] : undefined;
@@ -457,8 +457,10 @@ function MultiServiceRatingButton({
         {firstRating as number}
       </span>
     </span>
-  ) : (
+  ) : isSingleService ? (
     <FirstOutlineIcon className="size-6" />
+  ) : (
+    <IconHeart className="size-6" />
   );
 
   return (
@@ -612,7 +614,10 @@ function SliderRatingControl({
   const [localValue, setLocalValue] = useState(value ?? minStars);
   const isDragging = useRef(false);
   const displayValue = localValue;
-  const { filled: FilledIcon } = useShapeIcons(serviceKey, starShape);
+  const { filled: FilledIcon, outline: OutlineIcon } = useShapeIcons(
+    serviceKey,
+    starShape,
+  );
 
   // Sync local value when external value changes (but not while dragging)
   if (!isDragging.current && localValue !== (value ?? minStars)) {
@@ -623,9 +628,15 @@ function SliderRatingControl({
   const displayText =
     value === null && !isDragging.current ? "-" : String(displayValue);
 
+  const hasRating = value !== null;
+
   return (
     <div className="flex items-center gap-2">
-      <FilledIcon className="size-5 shrink-0 text-amber-500" />
+      {hasRating ? (
+        <FilledIcon className="size-5 shrink-0 text-amber-500" />
+      ) : (
+        <OutlineIcon className="text-muted-foreground size-5 shrink-0" />
+      )}
       <Slider
         value={[displayValue]}
         onValueChange={(v) => {

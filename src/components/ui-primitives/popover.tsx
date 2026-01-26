@@ -29,6 +29,7 @@ function PopoverContent({
   >) {
   return (
     <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Backdrop className="fixed inset-0 z-50" />
       <PopoverPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
