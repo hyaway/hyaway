@@ -84,7 +84,7 @@ export function LikeDislikeControl({
               "size-7 transition-transform",
               shapeClassName,
               !disabled &&
-                "pointer-hover:[button:hover_&]:scale-125 pointer-hover:[button:hover_&]:text-emerald-500",
+                "pointer-hover:[button:hover_&]:scale-125 pointer-hover:[button:hover_&]:text-emerald-500 pointer-hover:[button:hover_&]:opacity-100",
             )}
           />
         )}
@@ -115,7 +115,8 @@ export function LikeDislikeControl({
               className={cn(
                 "size-7",
                 shapeClassName,
-                !disabled && "pointer-hover:[button:hover_&]:text-destructive",
+                !disabled &&
+                  "pointer-hover:[button:hover_&]:text-destructive pointer-hover:[button:hover_&]:opacity-100",
               )}
             />
           )}
@@ -284,11 +285,11 @@ export function NumericalRatingControl({
                     shapeClassName,
                     isClickable &&
                       !disabled &&
-                      "pointer-hover:[button:hover_&]:scale-125 pointer-hover:[button:hover_&]:text-amber-500",
+                      "pointer-hover:[button:hover_&]:scale-125 pointer-hover:[button:hover_&]:text-amber-500 pointer-hover:[button:hover_&]:opacity-100",
                     // Also highlight preceding stars on hover (pointer devices only)
                     isClickable &&
                       !disabled &&
-                      "pointer-hover:[button:has(~button:hover)_&]:text-amber-500",
+                      "pointer-hover:[button:has(~button:hover)_&]:text-amber-500 pointer-hover:[button:has(~button:hover)_&]:opacity-100",
                   )}
                 />
               )}
