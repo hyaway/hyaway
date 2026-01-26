@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { IconHeart, IconX } from "@tabler/icons-react";
 import type {
   FileMetadata,
@@ -489,7 +489,6 @@ function MultiServiceRatingButton({
               serviceKey={serviceKey}
               service={service}
               fileId={metadata?.file_id ?? 0}
-              currentRating={metadata?.ratings?.[serviceKey] ?? null}
             />
           ))}
         </div>
@@ -502,15 +501,17 @@ interface ServiceRatingControlProps {
   serviceKey: string;
   service: ServiceInfo;
   fileId: number;
-  currentRating: RatingValue;
 }
 
 function ServiceRatingControl({
   serviceKey,
   service,
   fileId,
-  currentRating,
 }: ServiceRatingControlProps) {
+  // Get rating directly from the query - this will update when cache updates
+  const { data: metadata } = useGetSingleFileMetadata(fileId);
+  const currentRating = metadata?.ratings?.[serviceKey] ?? null;
+
   const { mutate: setRating, isPending } = useSetRatingMutation();
 
   const handleSetRating = (rating: RatingValue) => {
@@ -611,23 +612,27 @@ function SliderRatingControl({
   onChange,
   disabled,
 }: SliderRatingControlProps) {
+  // Track the last value we committed to avoid sync loops
+  const lastCommittedValue = useRef<number | null | undefined>(undefined);
   const [localValue, setLocalValue] = useState(value ?? minStars);
-  const isDragging = useRef(false);
-  const displayValue = localValue;
+  // Track if user has actually dragged (not just tapped)
+  const hasInteracted = useRef(false);
   const { filled: FilledIcon, outline: OutlineIcon } = useShapeIcons(
     serviceKey,
     starShape,
   );
 
-  // Sync local value when external value changes (but not while dragging)
-  if (!isDragging.current && localValue !== (value ?? minStars)) {
-    setLocalValue(value ?? minStars);
-  }
+  // Sync when external value changes (but not to what we just set)
+  useEffect(() => {
+    if (value !== lastCommittedValue.current) {
+      setLocalValue(value ?? minStars);
+      // Reset interaction flag when value changes externally (e.g., cleared)
+      hasInteracted.current = value !== null;
+    }
+    lastCommittedValue.current = undefined;
+  }, [value, minStars]);
 
-  // Show "-" when value is null and not dragging, otherwise show the display value
-  const displayText =
-    value === null && !isDragging.current ? "-" : String(displayValue);
-
+  const displayText = value === null ? "-" : String(localValue);
   const hasRating = value !== null;
 
   return (
@@ -638,16 +643,19 @@ function SliderRatingControl({
         <OutlineIcon className="text-muted-foreground size-5 shrink-0" />
       )}
       <Slider
-        value={[displayValue]}
+        value={[localValue]}
         onValueChange={(v) => {
+          hasInteracted.current = true;
           const newValue = Array.isArray(v) ? v[0] : v;
-          isDragging.current = true;
           setLocalValue(newValue);
         }}
         onValueCommitted={(v) => {
-          isDragging.current = false;
-          const newValue = Array.isArray(v) ? v[0] : v;
-          onChange(newValue);
+          // Only commit if user has interacted (dragged)
+          if (hasInteracted.current) {
+            const newValue = Array.isArray(v) ? v[0] : v;
+            lastCommittedValue.current = newValue;
+            onChange(newValue);
+          }
         }}
         min={minStars}
         max={maxStars}

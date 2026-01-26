@@ -111,8 +111,19 @@ export const useSetRatingMutation = () => {
 
   return useMutation({
     mutationFn: (options: SetRatingOptions) => setRating(options),
-    onSuccess: (_data, variables) => {
+    // Optimistic update: update cache immediately before server call
+    onMutate: async (variables) => {
       const fileIds = getFileIdsFromOptions(variables);
+      if (!fileIds) return;
+
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      for (const fileId of fileIds) {
+        await queryClient.cancelQueries({
+          queryKey: ["getSingleFileMetadata", fileId],
+        });
+      }
+
+      // Optimistically update the cache
       updateFileMetadataRating(
         queryClient,
         fileIds,
@@ -120,6 +131,8 @@ export const useSetRatingMutation = () => {
         variables.rating,
       );
     },
+    // No need to update on success - already done optimistically
+    // If there's an error, React Query will automatically rollback
     mutationKey: ["setRating"],
   });
 };
