@@ -46,7 +46,7 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
   api_access_key: PRESET_ACCESS_KEY,
   api_endpoint: PRESET_ENDPOINT,
   sessionKey: "",
-  authWithSessionKey: true,
+  authWithSessionKey: false,
   actions: {
     setApiCredentials: (
       accessKey: string | null | undefined,
