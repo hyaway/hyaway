@@ -10,6 +10,7 @@ import {
   useMotionValue,
   useTransform,
 } from "motion/react";
+import { ReviewThresholdOverlay } from "./review-threshold-overlay";
 import type { MotionValue, PanInfo } from "motion/react";
 import type { ReviewAction } from "@/stores/review-queue-store";
 import {
@@ -286,43 +287,15 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
       )}
       style={{ zIndex }}
     >
-      {/* Debug zone visualization - shows threshold lines from center */}
-
+      {/* Debug zone visualization - shows threshold areas and lines from center */}
       {showGestureThresholds && isTop && (
-        <div className="pointer-events-none absolute inset-0 z-50">
-          {/* Center crosshair - moves with card */}
-          <motion.div
-            className="absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-yellow-500 bg-yellow-500/20"
-            style={{ x, y }}
-          />
-          {/* Trash threshold line (left of center) */}
-          <div
-            className="absolute top-0 bottom-0 w-0.5 bg-red-500"
-            style={{ left: `calc(50% - ${horizontalThresholdPercent}%)` }}
-          >
-            <span className="absolute top-4 left-2 text-xs font-bold whitespace-nowrap text-red-500">
-              ← TRASH
-            </span>
-          </div>
-          {/* Archive threshold line (right of center) */}
-          <div
-            className="absolute top-0 bottom-0 w-0.5 bg-green-500"
-            style={{ left: `calc(50% + ${horizontalThresholdPercent}%)` }}
-          >
-            <span className="absolute top-4 right-2 text-xs font-bold whitespace-nowrap text-green-500">
-              ARCHIVE →
-            </span>
-          </div>
-          {/* Skip threshold line (above center) */}
-          <div
-            className="absolute right-0 left-0 h-0.5 bg-blue-500"
-            style={{ top: `calc(50% - ${verticalThresholdPercent}%)` }}
-          >
-            <span className="absolute bottom-2 left-4 text-xs font-bold whitespace-nowrap text-blue-500">
-              ↑ SKIP
-            </span>
-          </div>
-        </div>
+        <ReviewThresholdOverlay
+          x={x}
+          y={y}
+          cardSize={cardSize}
+          horizontalThresholdPercent={horizontalThresholdPercent}
+          verticalThresholdPercent={verticalThresholdPercent}
+        />
       )}
       <motion.div
         key={fileId}
