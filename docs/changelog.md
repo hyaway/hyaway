@@ -4,6 +4,34 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-01-26
+
+### Added
+
+- **Ratings support** — View and set like/dislike and numerical (star) ratings from Hydrus on files. Requires "edit file ratings" permission to set ratings.
+- **File ratings section** — Dedicated section on file details page showing all rating services with interactive controls
+- **Ratings overlay** — Ratings display on thumbnails and file viewers, configurable per rating service
+- **Ratings in review queue** — Set ratings while reviewing files with touch-friendly buttons and visual feedback
+- **Ratings settings** — Control which ratings appear in overlays and review mode, per service
+- **Gesture sensitivity settings** — Customize horizontal and vertical swipe thresholds in review mode
+- **Gesture threshold debug overlay** — Visual grid showing swipe zones when adjusting gesture sensitivity
+- **Background toggle button** — New button in file viewer and review queue card to cycle through background colors for transparent images
+- **Keyboard shortcut hints** — Buttons now show keyboard shortcuts in tooltips on hover
+
+### Changed
+
+- Session key is automatically disabled when using HTTP (non-HTTPS) connections for compatibility. You can still reenable it and it will use alternate flow to refresh that doesn't need https.
+- Reorganized review queue settings with consolidated ratings and gesture controls
+- Moved thumbnail card size settings into layout section since usually updating them at the same time
+- Improved more error pages (e.g. auth error page) to show full stack traces for easier debugging
+- Permissions page now shows "edit file ratings" permission status
+
+### Fixed
+
+- Don't use `navigator.locks.request` when it doesn't exist (in HTTP contexts). This should when, for example, serving docker image via `http://192.168.x.y` and calling hydrus in `http://192.168.x.y:45869`
+
+---
+
 ## 2026-01-22
 
 ### Added
