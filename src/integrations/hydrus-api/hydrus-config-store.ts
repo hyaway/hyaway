@@ -46,7 +46,7 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
   api_access_key: PRESET_ACCESS_KEY,
   api_endpoint: PRESET_ENDPOINT,
   sessionKey: "",
-  authWithSessionKey: false,
+  authWithSessionKey: true,
   actions: {
     setApiCredentials: (
       accessKey: string | null | undefined,
@@ -59,11 +59,16 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
 
       const nextApiAccessKey =
         accessKey === undefined ? previousApiAccessKey : (accessKey ?? "");
-      // Normalize endpoint by removing trailing slashes
+      // Normalize endpoint by trimming whitespace and removing trailing slashes
       const nextApiEndpoint =
         endpoint === undefined
           ? previousApiEndpoint
-          : (endpoint ?? "").replace(/\/+$/, "");
+          : (endpoint ?? "").trim().replace(/\/+$/, "");
+
+      // Disable session key auth for HTTP endpoints (less secure transport)
+      const isHttpEndpoint =
+        endpoint !== undefined &&
+        nextApiEndpoint.toLowerCase().startsWith("http://");
 
       const credentialsChanged =
         nextApiAccessKey !== previousApiAccessKey ||
@@ -75,6 +80,8 @@ const authSlice: StateCreator<AuthState> = (set, get, store) => ({
           api_access_key: nextApiAccessKey,
           api_endpoint: nextApiEndpoint,
           sessionKey: "",
+          // Disable session key auth for HTTP endpoints
+          ...(isHttpEndpoint && { authWithSessionKey: false }),
         });
         getContext().queryClient.resetQueries();
       } else {
@@ -126,10 +133,11 @@ export const useAuthStore = create<AuthState>()(
     merge: (persisted, current) => ({
       ...current,
       ...(persisted as Partial<AuthState>),
-      // Normalize endpoint by removing trailing slashes from old stored values
+      // Normalize endpoint by trimming whitespace and removing trailing slashes from old stored values
       api_endpoint:
-        (persisted as Partial<AuthState>)?.api_endpoint?.replace(/\/+$/, "") ??
-        current.api_endpoint,
+        (persisted as Partial<AuthState>)?.api_endpoint
+          ?.trim()
+          .replace(/\/+$/, "") ?? current.api_endpoint,
     }),
     onRehydrateStorage: () => () => {
       getContext().queryClient.invalidateQueries();
