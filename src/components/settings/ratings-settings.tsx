@@ -3,7 +3,6 @@
 
 import { useMemo } from "react";
 import { IconTallymarks, IconX } from "@tabler/icons-react";
-import { SwitchField } from "./setting-fields";
 import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
@@ -12,7 +11,9 @@ import {
   useRatingsSettingsActions,
 } from "@/stores/ratings-settings-store";
 import { Button } from "@/components/ui-primitives/button";
+import { Switch } from "@/components/ui-primitives/switch";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
+import { cn } from "@/lib/utils";
 
 export const RATINGS_SETTINGS_TITLE = "Ratings";
 
@@ -68,159 +69,180 @@ export function RatingsSettings({
     );
   }
 
+  const getSettings = (serviceKey: string) =>
+    ratingsServiceSettings[serviceKey] ?? {
+      showInOverlay: true,
+      showInOverlayEvenWhenNull: false,
+      showInReview: true,
+    };
+
   return (
-    <div className="flex flex-col gap-3">
-      {ratingServices.map(({ serviceKey, name, type, starShape }) => {
-        const settings = ratingsServiceSettings[serviceKey] ?? {
-          showInOverlay: true,
-          showInOverlayEvenWhenNull: false,
-          showInReview: true,
-        };
-        return (
-          <RatingServiceRow
+    <div className="flex flex-col gap-6">
+      {/* Show overlay setting */}
+      <SettingGroup
+        label="Show overlay"
+        description="Display rating on gallery thumbnails and in file viewers"
+      >
+        {ratingServices.map(({ serviceKey, name, type, starShape }) => (
+          <ServiceSwitch
             key={serviceKey}
+            id={`${idPrefix}rating-${serviceKey}-overlay`}
             serviceKey={serviceKey}
             name={name}
             type={type}
             starShape={starShape}
-            showInOverlay={settings.showInOverlay}
-            showInOverlayEvenWhenNull={settings.showInOverlayEvenWhenNull}
-            showInReview={settings.showInReview}
-            showReviewSetting={showReviewSetting}
-            canEditRatings={canEditRatings}
-            idPrefix={idPrefix}
-            onShowInOverlayChange={(checked) =>
-              setShowInOverlay(serviceKey, checked)
-            }
-            onShowWhenNullChange={(checked) =>
-              setShowInOverlayEvenWhenNull(serviceKey, checked)
-            }
-            onShowInReviewChange={(checked) =>
-              setShowInReview(serviceKey, checked)
-            }
+            checked={getSettings(serviceKey).showInOverlay}
+            onCheckedChange={(checked) => setShowInOverlay(serviceKey, checked)}
           />
-        );
-      })}
+        ))}
+      </SettingGroup>
+
+      {/* Show when unset/zero setting */}
+      <SettingGroup
+        label="Show when unset"
+        description="Display in overlay even when not rated (or zero for counters)"
+      >
+        {ratingServices.map(({ serviceKey, name, type, starShape }) => {
+          const settings = getSettings(serviceKey);
+          return (
+            <ServiceSwitch
+              key={serviceKey}
+              id={`${idPrefix}rating-${serviceKey}-show-null`}
+              serviceKey={serviceKey}
+              name={name}
+              type={type}
+              starShape={starShape}
+              checked={settings.showInOverlayEvenWhenNull}
+              onCheckedChange={(checked) =>
+                setShowInOverlayEvenWhenNull(serviceKey, checked)
+              }
+              disabled={!settings.showInOverlay}
+            />
+          );
+        })}
+      </SettingGroup>
+
+      {/* Button in review setting */}
+      {showReviewSetting && (
+        <SettingGroup
+          label="Button in review"
+          description={
+            canEditRatings
+              ? "Display rating button in review queue footer"
+              : "Disabled: missing 'Edit file ratings' permission"
+          }
+        >
+          {ratingServices.map(({ serviceKey, name, type, starShape }) => (
+            <ServiceSwitch
+              key={serviceKey}
+              id={`${idPrefix}rating-${serviceKey}-review`}
+              serviceKey={serviceKey}
+              name={name}
+              type={type}
+              starShape={starShape}
+              checked={getSettings(serviceKey).showInReview && canEditRatings}
+              onCheckedChange={(checked) =>
+                setShowInReview(serviceKey, checked)
+              }
+              disabled={!canEditRatings}
+            />
+          ))}
+        </SettingGroup>
+      )}
 
       {/* Orphaned services */}
-      {orphanedServices.map((serviceKey) => (
-        <div
-          key={serviceKey}
-          className="bg-muted/50 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-dashed p-3 opacity-60"
+      {orphanedServices.length > 0 && (
+        <SettingGroup
+          label="Orphaned services"
+          description="Settings for services that no longer exist in Hydrus"
         >
-          <div className="flex grow flex-col">
-            <span className="text-sm font-medium line-through">
-              {serviceKey.slice(0, 8)}...
-            </span>
-            <span className="text-muted-foreground text-xs">
-              Service no longer exists
-            </span>
-          </div>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => removeServiceSettings(serviceKey)}
-            aria-label="Remove orphaned service settings"
-          >
-            <IconX className="size-4" />
-            Remove
-          </Button>
-        </div>
-      ))}
+          {orphanedServices.map((serviceKey) => (
+            <div
+              key={serviceKey}
+              className="flex items-center justify-between gap-2 opacity-60"
+            >
+              <span className="text-sm line-through">
+                {serviceKey.slice(0, 8)}...
+              </span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => removeServiceSettings(serviceKey)}
+                aria-label="Remove orphaned service settings"
+              >
+                <IconX className="size-4" />
+              </Button>
+            </div>
+          ))}
+        </SettingGroup>
+      )}
     </div>
   );
 }
 
-interface RatingServiceRowProps {
+interface SettingGroupProps {
+  label: string;
+  description: string;
+  children: React.ReactNode;
+}
+
+function SettingGroup({ label, description, children }: SettingGroupProps) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-0.5">
+        <span className="text-sm font-medium">{label}</span>
+        <span className="text-muted-foreground text-xs">{description}</span>
+      </div>
+      <div className="flex flex-col gap-2">{children}</div>
+    </div>
+  );
+}
+
+interface ServiceSwitchProps {
+  id: string;
   serviceKey: string;
   name: string;
   type: ServiceType;
   starShape?: string;
-  showInOverlay: boolean;
-  showInOverlayEvenWhenNull: boolean;
-  showInReview: boolean;
-  showReviewSetting: boolean;
-  canEditRatings: boolean;
-  idPrefix: string;
-  onShowInOverlayChange: (checked: boolean) => void;
-  onShowWhenNullChange: (checked: boolean) => void;
-  onShowInReviewChange: (checked: boolean) => void;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  disabled?: boolean;
 }
 
-function RatingServiceRow({
+function ServiceSwitch({
+  id,
   serviceKey,
   name,
   type,
   starShape,
-  showInOverlay,
-  showInOverlayEvenWhenNull,
-  showInReview,
-  showReviewSetting,
-  canEditRatings,
-  idPrefix,
-  onShowInOverlayChange,
-  onShowWhenNullChange,
-  onShowInReviewChange,
-}: RatingServiceRowProps) {
+  checked,
+  onCheckedChange,
+  disabled,
+}: ServiceSwitchProps) {
   const { filled: FilledIcon } = useShapeIcons(serviceKey, starShape);
 
-  const typeLabel =
-    type === ServiceType.RATING_LIKE
-      ? "Like / Dislike"
-      : type === ServiceType.RATING_NUMERICAL
-        ? "Numerical"
-        : "Inc / Dec";
-
-  const whenNullLabel =
-    type === ServiceType.RATING_INC_DEC ? "Show when zero" : "Show when unset";
-
-  const whenNullDescription =
-    type === ServiceType.RATING_INC_DEC
-      ? "Display in overlay even when count is zero"
-      : "Display in overlay even when not rated";
-
   return (
-    <div className="bg-muted/50 hover:bg-muted flex flex-col gap-3 rounded-lg border p-3 transition-colors">
+    <label
+      htmlFor={id}
+      className={cn(
+        "flex cursor-pointer items-center justify-between gap-3 rounded-lg py-1",
+        disabled && "cursor-not-allowed opacity-50",
+      )}
+    >
       <div className="flex items-center gap-2">
         {type === ServiceType.RATING_INC_DEC ? (
-          <IconTallymarks className="text-muted-foreground size-6 shrink-0" />
+          <IconTallymarks className="text-muted-foreground size-5 shrink-0" />
         ) : (
-          <FilledIcon className="text-muted-foreground size-6 shrink-0" />
+          <FilledIcon className="text-muted-foreground size-5 shrink-0" />
         )}
-        <div className="flex min-w-0 flex-col">
-          <span className="text-sm font-medium">{name}</span>
-          <span className="text-muted-foreground text-xs">{typeLabel}</span>
-        </div>
+        <span className="text-sm">{name}</span>
       </div>
-      <SwitchField
-        id={`${idPrefix}rating-${serviceKey}-overlay`}
-        label="Show overlay"
-        description="Display rating on gallery thumbnails and in file viewers"
-        checked={showInOverlay}
-        onCheckedChange={onShowInOverlayChange}
+      <Switch
+        id={id}
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
       />
-      <SwitchField
-        id={`${idPrefix}rating-${serviceKey}-show-null`}
-        label={whenNullLabel}
-        description={whenNullDescription}
-        checked={showInOverlayEvenWhenNull}
-        onCheckedChange={onShowWhenNullChange}
-        disabled={!showInOverlay}
-      />
-      {showReviewSetting && (
-        <SwitchField
-          id={`${idPrefix}rating-${serviceKey}-review`}
-          label="Show in review"
-          description={
-            canEditRatings
-              ? "Display rating button in review mode footer"
-              : "Disabled: missing 'Edit file ratings' permission"
-          }
-          checked={showInReview && canEditRatings}
-          disabled={!canEditRatings}
-          onCheckedChange={onShowInReviewChange}
-        />
-      )}
-    </div>
+    </label>
   );
 }

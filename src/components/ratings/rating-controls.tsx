@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import {
   IconBackslash,
+  IconChevronDown,
   IconCircleDashed,
   IconCircleDashedNumber0,
   IconMinus,
@@ -12,7 +13,21 @@ import {
 import { useShapeIcons } from "./use-shape-icons";
 import type { RatingValue } from "@/integrations/hydrus-api/models";
 import { Button } from "@/components/ui-primitives/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui-primitives/dropdown-menu";
 import { cn } from "@/lib/utils";
+
+/** Threshold for switching from star grid to dropdown in compact mode */
+const COMPACT_DROPDOWN_THRESHOLD = 6;
 
 // ============================================================================
 // Like/Dislike Control
@@ -24,6 +39,8 @@ interface LikeDislikeControlProps {
   starShape?: string;
   onChange: (value: boolean | null) => void;
   disabled?: boolean;
+  /** Compact mode with smaller buttons */
+  compact?: boolean;
 }
 
 export function LikeDislikeControl({
@@ -32,6 +49,7 @@ export function LikeDislikeControl({
   starShape,
   onChange,
   disabled,
+  compact,
 }: LikeDislikeControlProps) {
   const [localValue, setLocalValue] = useState<boolean | null>(value);
 
@@ -53,6 +71,11 @@ export function LikeDislikeControl({
     className: shapeClassName,
   } = useShapeIcons(serviceKey, starShape);
 
+  const buttonSize = compact ? "size-8" : "size-10";
+  const iconSize = compact ? "size-5" : "size-7";
+  const slashInset = compact ? "-inset-1.5" : "-inset-2.5";
+  const slashSize = compact ? "size-8" : "size-12";
+
   return (
     <div
       className="flex items-center gap-1"
@@ -62,7 +85,7 @@ export function LikeDislikeControl({
       <Button
         variant="ghost"
         size="sm"
-        className="size-10 p-0"
+        className={cn(buttonSize, "p-0")}
         onClick={() => handleChange(isLiked ? null : true)}
         disabled={disabled}
         aria-label={isLiked ? "Remove like" : "Like"}
@@ -72,7 +95,8 @@ export function LikeDislikeControl({
           <FilledIcon
             aria-hidden
             className={cn(
-              "size-7 text-emerald-500 transition-transform",
+              iconSize,
+              "text-emerald-500 transition-transform",
               shapeClassName,
               !disabled && "pointer-hover:[button:hover_&]:scale-125",
             )}
@@ -81,7 +105,8 @@ export function LikeDislikeControl({
           <OutlineIcon
             aria-hidden
             className={cn(
-              "size-7 transition-transform",
+              iconSize,
+              "transition-transform",
               shapeClassName,
               !disabled &&
                 "pointer-hover:[button:hover_&]:scale-125 pointer-hover:[button:hover_&]:text-emerald-500 pointer-hover:[button:hover_&]:opacity-100",
@@ -92,7 +117,7 @@ export function LikeDislikeControl({
       <Button
         variant="ghost"
         size="sm"
-        className="size-10 p-0"
+        className={cn(buttonSize, "p-0")}
         onClick={() => handleChange(isDisliked ? null : false)}
         disabled={disabled}
         aria-label={isDisliked ? "Remove dislike" : "Dislike"}
@@ -107,13 +132,13 @@ export function LikeDislikeControl({
           {isDisliked ? (
             <FilledIcon
               aria-hidden
-              className={cn("text-destructive size-7", shapeClassName)}
+              className={cn("text-destructive", iconSize, shapeClassName)}
             />
           ) : (
             <OutlineIcon
               aria-hidden
               className={cn(
-                "size-7",
+                iconSize,
                 shapeClassName,
                 !disabled &&
                   "pointer-hover:[button:hover_&]:text-destructive pointer-hover:[button:hover_&]:opacity-100",
@@ -122,13 +147,19 @@ export function LikeDislikeControl({
           )}
           <IconBackslash
             aria-hidden
-            className="text-background pointer-events-none absolute -inset-2.5 size-12"
+            className={cn(
+              "text-background pointer-events-none absolute",
+              slashInset,
+              slashSize,
+            )}
             strokeWidth={3}
           />
           <IconBackslash
             aria-hidden
             className={cn(
-              "pointer-events-none absolute -inset-2.5 size-12",
+              "pointer-events-none absolute",
+              slashInset,
+              slashSize,
               isDisliked
                 ? "text-destructive"
                 : "pointer-hover:[button:hover_&]:text-destructive",
@@ -153,6 +184,8 @@ interface NumericalRatingControlProps {
   starShape?: string;
   onChange: (value: number | null) => void;
   disabled?: boolean;
+  /** Compact mode: hides number labels, uses dropdown for high star counts */
+  compact?: boolean;
 }
 
 export function NumericalRatingControl({
@@ -163,6 +196,7 @@ export function NumericalRatingControl({
   starShape,
   onChange,
   disabled,
+  compact,
 }: NumericalRatingControlProps) {
   const [localValue, setLocalValue] = useState<number | null>(value);
 
@@ -176,29 +210,48 @@ export function NumericalRatingControl({
     onChange(newValue);
   };
 
-  const stars = Array.from({ length: maxStars }, (_, i) => i + 1);
   const {
     filled: FilledIcon,
     outline: OutlineIcon,
     className: shapeClassName,
   } = useShapeIcons(serviceKey, starShape);
 
+  // Use dropdown for high star counts in compact mode
+  if (compact && maxStars >= COMPACT_DROPDOWN_THRESHOLD) {
+    return (
+      <NumericalRatingDropdown
+        value={localValue}
+        minStars={minStars}
+        maxStars={maxStars}
+        onChange={handleChange}
+        disabled={disabled}
+        FilledIcon={FilledIcon}
+        OutlineIcon={OutlineIcon}
+        shapeClassName={shapeClassName}
+      />
+    );
+  }
+
+  const stars = Array.from({ length: maxStars }, (_, i) => i + 1);
   const isZero = localValue === 0;
   const canSetZero = minStars === 0;
 
-  const columns = Math.min(
-    maxStars > 10 ? Math.ceil(maxStars / 2) : maxStars,
-    10,
-  );
+  const iconSize = "size-7";
+
+  // In compact mode, include zero in the grid; otherwise keep it outside
+  const gridColumns = compact && canSetZero ? maxStars + 1 : maxStars;
+  const effectiveColumns = compact
+    ? gridColumns
+    : Math.min(gridColumns > 10 ? Math.ceil(gridColumns / 2) : gridColumns, 10);
 
   return (
     <div
-      className="flex flex-wrap items-center gap-2"
+      className={cn("flex items-center", !compact && "flex-wrap gap-2")}
       role="group"
       aria-label={`Rating: ${localValue === null ? "no rating" : `${localValue} of ${maxStars}`}`}
     >
-      {/* Zero star - outside grid, doesn't participate in reflow */}
-      {canSetZero && (
+      {/* Zero star - outside grid in non-compact mode */}
+      {canSetZero && !compact && (
         <Button
           variant="ghost"
           size="sm"
@@ -216,12 +269,18 @@ export function NumericalRatingControl({
           {isZero ? (
             <IconCircleDashedNumber0
               aria-hidden
-              className="pointer-hover:[button:hover_&]:scale-125 size-7 transition-transform"
+              className={cn(
+                "pointer-hover:[button:hover_&]:scale-125 transition-transform",
+                iconSize,
+              )}
             />
           ) : (
             <IconCircleDashed
               aria-hidden
-              className="pointer-hover:[button:hover_&]:scale-125 size-7 transition-transform"
+              className={cn(
+                "pointer-hover:[button:hover_&]:scale-125 transition-transform",
+                iconSize,
+              )}
             />
           )}
           <span
@@ -234,8 +293,45 @@ export function NumericalRatingControl({
       )}
       <div
         className="group/stars grid"
-        style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+        style={{
+          gridTemplateColumns: `repeat(${effectiveColumns}, minmax(${compact ? "2.75rem" : "0"}, 1fr))`,
+        }}
       >
+        {/* Zero star - inside grid in compact mode */}
+        {canSetZero && compact && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "flex h-auto min-h-11 min-w-11 items-center justify-center p-1",
+              isZero && "text-destructive disabled:opacity-100",
+              !disabled && !isZero && "pointer-hover:hover:text-destructive",
+            )}
+            onClick={() => handleChange(localValue === 0 ? null : 0)}
+            disabled={disabled}
+            aria-label={
+              isZero ? "Clear rating (was 0)" : `Set rating to 0 of ${maxStars}`
+            }
+          >
+            {isZero ? (
+              <IconCircleDashedNumber0
+                aria-hidden
+                className={cn(
+                  "pointer-hover:[button:hover_&]:scale-125 transition-transform",
+                  iconSize,
+                )}
+              />
+            ) : (
+              <IconCircleDashed
+                aria-hidden
+                className={cn(
+                  "pointer-hover:[button:hover_&]:scale-125 transition-transform",
+                  iconSize,
+                )}
+              />
+            )}
+          </Button>
+        )}
         {stars.map((star) => {
           const isFilled = localValue !== null && star <= localValue;
           // Stars 1+ are always clickable when minStars is 0 or 1
@@ -248,7 +344,10 @@ export function NumericalRatingControl({
               variant="ghost"
               size="sm"
               className={cn(
-                "flex h-auto flex-col gap-0.5 px-1.5 py-1",
+                "flex h-auto flex-col gap-0.5",
+                compact
+                  ? "min-h-11 min-w-11 items-center justify-center p-1"
+                  : "px-1.5 py-1",
                 !isFilled && isZero && "text-muted-foreground/50",
                 !isClickable && "cursor-not-allowed opacity-30",
               )}
@@ -269,7 +368,8 @@ export function NumericalRatingControl({
                 <FilledIcon
                   aria-hidden
                   className={cn(
-                    "size-7 text-amber-500 transition-transform",
+                    iconSize,
+                    "text-amber-500 transition-transform",
                     shapeClassName,
                     !disabled && "pointer-hover:[button:hover_&]:scale-125",
                     // Dim filled stars that come after hovered star (pointer devices only)
@@ -281,7 +381,8 @@ export function NumericalRatingControl({
                 <OutlineIcon
                   aria-hidden
                   className={cn(
-                    "size-7 transition-transform",
+                    iconSize,
+                    "transition-transform",
                     shapeClassName,
                     isClickable &&
                       !disabled &&
@@ -293,17 +394,124 @@ export function NumericalRatingControl({
                   )}
                 />
               )}
-              <span
-                className="text-muted-foreground text-xs tabular-nums"
-                aria-hidden
-              >
-                {star}
-              </span>
+              {!compact && (
+                <span
+                  className="text-muted-foreground text-xs tabular-nums"
+                  aria-hidden
+                >
+                  {star}
+                </span>
+              )}
             </Button>
           );
         })}
       </div>
     </div>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// Dropdown variant for high star counts
+// ----------------------------------------------------------------------------
+
+interface NumericalRatingDropdownProps {
+  value: number | null;
+  minStars: number;
+  maxStars: number;
+  onChange: (value: number | null) => void;
+  disabled?: boolean;
+  FilledIcon: React.ComponentType<{ className?: string }>;
+  OutlineIcon: React.ComponentType<{ className?: string }>;
+  shapeClassName?: string;
+}
+
+function NumericalRatingDropdown({
+  value,
+  minStars,
+  maxStars,
+  onChange,
+  disabled,
+  FilledIcon,
+  OutlineIcon,
+  shapeClassName,
+}: NumericalRatingDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const canSetZero = minStars === 0;
+  const hasValue = value !== null;
+
+  const handleValueChange = (newValue: string) => {
+    if (newValue === "null") {
+      onChange(null);
+    } else {
+      onChange(Number(newValue));
+    }
+    setOpen(false);
+  };
+
+  const displayValue = value === null ? "—" : String(value);
+  const radioValue = value === null ? "null" : String(value);
+
+  const renderRatingItem = (num: number) => (
+    <DropdownMenuRadioItem key={num} value={String(num)} className="py-2">
+      {value !== null && num <= value ? (
+        <FilledIcon className={cn("size-4 text-amber-500", shapeClassName)} />
+      ) : (
+        <OutlineIcon className={cn("size-4", shapeClassName)} />
+      )}
+      {num}
+    </DropdownMenuRadioItem>
+  );
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger
+        disabled={disabled}
+        className={cn(
+          "border-input bg-background ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 flex h-10 items-center gap-1.5 rounded-lg border px-3 text-sm shadow-xs outline-1 -outline-offset-1 transition-[color,box-shadow] focus-visible:ring-4",
+          disabled && "pointer-events-none opacity-50",
+        )}
+      >
+        {value === 0 ? (
+          <IconCircleDashedNumber0 className="text-destructive size-5" />
+        ) : hasValue ? (
+          <FilledIcon className={cn("size-5 text-amber-500", shapeClassName)} />
+        ) : (
+          <OutlineIcon className={cn("size-5", shapeClassName)} />
+        )}
+        <span className="min-w-4 tabular-nums">{displayValue}</span>
+        <span className="text-muted-foreground">/ {maxStars}</span>
+        <IconChevronDown className="text-muted-foreground size-4" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="center"
+        side="right"
+        className="max-h-64 min-w-32 overflow-y-auto"
+      >
+        <DropdownMenuRadioGroup
+          value={radioValue}
+          onValueChange={handleValueChange}
+        >
+          {Array.from(
+            { length: maxStars - Math.max(1, minStars) + 1 },
+            (_, i) => maxStars - i,
+          ).map(renderRatingItem)}
+          {canSetZero && (
+            <DropdownMenuRadioItem value="0" className="py-2">
+              {value === 0 ? (
+                <IconCircleDashedNumber0 className="text-destructive size-4" />
+              ) : (
+                <IconCircleDashed className="size-4" />
+              )}
+              0
+            </DropdownMenuRadioItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuRadioItem value="null" className="py-2">
+            <OutlineIcon className={cn("size-4 shrink-0", shapeClassName)} />—
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -315,13 +523,19 @@ interface IncDecRatingControlProps {
   value: number;
   onChange: (value: RatingValue) => void;
   disabled?: boolean;
+  /** Compact mode with smaller buttons */
+  compact?: boolean;
 }
 
 export function IncDecRatingControl({
   value,
   onChange,
   disabled,
+  compact,
 }: IncDecRatingControlProps) {
+  const buttonSize = compact ? "size-7" : "size-9.5";
+  const iconSize = compact ? "size-4" : "size-6";
+
   return (
     <div
       className="flex items-center gap-1.5"
@@ -331,15 +545,20 @@ export function IncDecRatingControl({
       <Button
         variant="outline"
         size="sm"
-        className="size-9.5 p-0"
+        className={cn(buttonSize, "p-0")}
         onClick={() => onChange(Math.max(0, value - 1))}
         disabled={disabled || value <= 0}
         aria-label="Decrease"
       >
-        <IconMinus aria-hidden className="size-6" />
+        <IconMinus aria-hidden className={iconSize} />
       </Button>
       <span
-        className="bg-muted min-w-10 rounded border px-2 py-1.5 text-center text-base tabular-nums"
+        className={cn(
+          "bg-muted rounded border text-center tabular-nums",
+          compact
+            ? "min-w-8 px-1.5 py-1 text-sm"
+            : "min-w-10 px-2 py-1.5 text-base",
+        )}
         aria-live="polite"
         aria-atomic="true"
       >
@@ -348,12 +567,12 @@ export function IncDecRatingControl({
       <Button
         variant="outline"
         size="sm"
-        className="size-9.5 p-0"
+        className={cn(buttonSize, "p-0")}
         onClick={() => onChange(value + 1)}
         disabled={disabled}
         aria-label="Increase"
       >
-        <IconPlus aria-hidden className="size-6" />
+        <IconPlus aria-hidden className={iconSize} />
       </Button>
     </div>
   );

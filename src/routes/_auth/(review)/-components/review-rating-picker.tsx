@@ -12,10 +12,7 @@ import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
-import {
-  useRatingsServiceSettings,
-  useRatingsSettingsActions,
-} from "@/stores/ratings-settings-store";
+import { useRatingsServiceSettings } from "@/stores/ratings-settings-store";
 import { useReviewQueueCurrentFileId } from "@/stores/review-queue-store";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
@@ -32,6 +29,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui-primitives/popover";
+import { ScrollArea } from "@/components/ui-primitives/scroll-area";
+import { Separator } from "@/components/ui-primitives/separator";
 
 /**
  * Hook to get enabled rating services for review mode.
@@ -40,14 +39,16 @@ import {
 export function useEnabledReviewRatingServices() {
   const { ratingServices, isLoading } = useRatingServices();
   const serviceSettings = useRatingsServiceSettings();
-  const { getServiceSettings } = useRatingsSettingsActions();
   const { hasPermission, isFetched: permissionsFetched } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
 
   const enabledServices = useMemo(
     () =>
-      ratingServices.filter(([key]) => getServiceSettings(key).showInReview),
-    [ratingServices, serviceSettings, getServiceSettings],
+      ratingServices.filter(
+        ([key]) =>
+          !(key in serviceSettings) || serviceSettings[key].showInReview,
+      ),
+    [ratingServices, serviceSettings],
   );
 
   return {
@@ -394,20 +395,24 @@ function NumericRatingButton({
         side="top"
         align="center"
         sideOffset={8}
-        className="w-auto"
+        className="w-auto p-0"
       >
-        <div className="flex flex-col gap-2">
-          <span className="text-muted-foreground text-xs">{service.name}</span>
-          <NumericalRatingControl
-            value={currentRating}
-            minStars={service.min_stars ?? 0}
-            maxStars={maxStars}
-            serviceKey={serviceKey}
-            starShape={service.star_shape}
-            onChange={handleSetRating}
-            disabled={isPending}
-          />
-        </div>
+        <ScrollArea viewportClassName="max-h-(--available-height) p-4">
+          <div className="flex flex-col gap-4">
+            <span className="text-muted-foreground text-xs">
+              {service.name}
+            </span>
+            <NumericalRatingControl
+              value={currentRating}
+              minStars={service.min_stars ?? 0}
+              maxStars={maxStars}
+              serviceKey={serviceKey}
+              starShape={service.star_shape}
+              onChange={handleSetRating}
+              disabled={isPending}
+            />
+          </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );
@@ -482,18 +487,22 @@ function MultiServiceRatingButton({
         side="top"
         align="center"
         sideOffset={8}
-        className="w-80 max-w-[90vw]"
+        className="w-80 max-w-[90vw] p-0"
       >
-        <div className="flex flex-col gap-3">
-          {services.map(([serviceKey, service]) => (
-            <ServiceRatingControl
-              key={serviceKey}
-              serviceKey={serviceKey}
-              service={service}
-              fileId={metadata?.file_id ?? 0}
-            />
-          ))}
-        </div>
+        <ScrollArea viewportClassName="max-h-(--available-height) p-4">
+          <div className="flex flex-col gap-4">
+            {services.map(([serviceKey, service], index) => (
+              <div key={serviceKey} className="flex flex-col gap-4">
+                {index > 0 && <Separator />}
+                <ServiceRatingControl
+                  serviceKey={serviceKey}
+                  service={service}
+                  fileId={metadata?.file_id ?? 0}
+                />
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );
@@ -524,43 +533,59 @@ function ServiceRatingControl({
     });
   };
 
-  return (
-    <div className="flex flex-col gap-1.5">
-      {/* Service header - deprioritized */}
-      <div className="flex items-center gap-2">
-        <span className="text-muted-foreground text-xs">{service.name}</span>
-      </div>
+  // Numerical ratings with star grid need vertical layout
+  const isStarGrid =
+    service.type === ServiceType.RATING_NUMERICAL &&
+    (service.max_stars ?? 5) < 6;
 
+  return (
+    <div
+      className={cn(
+        "flex gap-3",
+        isStarGrid
+          ? "flex-col-reverse items-start"
+          : "items-center justify-between",
+      )}
+    >
       {/* Rating control based on type */}
-      <div>
-        {service.type === ServiceType.RATING_LIKE && (
-          <LikeDislikeControl
-            value={currentRating as boolean | null}
-            serviceKey={serviceKey}
-            starShape={service.star_shape}
-            onChange={handleSetRating}
-            disabled={isPending}
-          />
+      {service.type === ServiceType.RATING_LIKE && (
+        <LikeDislikeControl
+          value={currentRating as boolean | null}
+          serviceKey={serviceKey}
+          starShape={service.star_shape}
+          onChange={handleSetRating}
+          disabled={isPending}
+        />
+      )}
+      {service.type === ServiceType.RATING_NUMERICAL && (
+        <NumericalRatingControl
+          value={currentRating as number | null}
+          minStars={service.min_stars ?? 0}
+          maxStars={service.max_stars ?? 5}
+          serviceKey={serviceKey}
+          starShape={service.star_shape}
+          onChange={handleSetRating}
+          disabled={isPending}
+          compact
+        />
+      )}
+      {service.type === ServiceType.RATING_INC_DEC && (
+        <IncDecRatingControl
+          value={(currentRating as number | null) ?? 0}
+          onChange={handleSetRating}
+          disabled={isPending}
+        />
+      )}
+
+      {/* Service label */}
+      <span
+        className={cn(
+          "text-muted-foreground min-w-0 text-xs",
+          isStarGrid && "w-full text-right",
         )}
-        {service.type === ServiceType.RATING_NUMERICAL && (
-          <NumericalRatingControl
-            value={currentRating as number | null}
-            minStars={service.min_stars ?? 0}
-            maxStars={service.max_stars ?? 5}
-            serviceKey={serviceKey}
-            starShape={service.star_shape}
-            onChange={handleSetRating}
-            disabled={isPending}
-          />
-        )}
-        {service.type === ServiceType.RATING_INC_DEC && (
-          <IncDecRatingControl
-            value={(currentRating as number | null) ?? 0}
-            onChange={handleSetRating}
-            disabled={isPending}
-          />
-        )}
-      </div>
+      >
+        {service.name}
+      </span>
     </div>
   );
 }
