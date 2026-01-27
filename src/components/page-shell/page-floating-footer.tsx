@@ -30,6 +30,8 @@ export interface FloatingFooterAction {
   disabled?: boolean;
   /** If true, this action will always be in the overflow menu */
   overflowOnly?: boolean;
+  /** Tooltip text (shown on hover) */
+  title?: string;
 }
 
 interface PageFloatingFooterProps {
@@ -131,6 +133,7 @@ function ActionButton({ action }: { action: FloatingFooterAction }) {
       intent={action.variant}
       isLoading={action.isPending}
       disabled={action.disabled}
+      title={action.title}
       render={
         action.href ? (
           <a

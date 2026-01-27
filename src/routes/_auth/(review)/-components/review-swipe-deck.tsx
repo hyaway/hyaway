@@ -30,33 +30,7 @@ import {
   useUndeleteFilesMutation,
 } from "@/integrations/hydrus-api/queries/manage-files";
 import { getFileMetadata } from "@/integrations/hydrus-api/api-client";
-
-function isTextInputLikeTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target instanceof HTMLSelectElement ||
-    target.isContentEditable ||
-    target.getAttribute("role") === "textbox"
-  );
-}
-
-function isInOpenOverlay(target: EventTarget | null): boolean {
-  const overlaySelectors =
-    '[data-slot="popover-content"],[data-slot="dropdown-menu-content"],[data-slot="dropdown-menu-sub-content"]';
-
-  if (target instanceof HTMLElement && target.closest(overlaySelectors)) {
-    return true;
-  }
-
-  // If an overlay is open anywhere, disable shortcuts globally.
-  const openOverlaySelectors =
-    '[data-slot="popover-content"][data-open],[data-slot="dropdown-menu-content"][data-open],[data-slot="dropdown-menu-sub-content"][data-open]';
-
-  return Boolean(document.querySelector(openOverlaySelectors));
-}
+import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
 
 /** Number of cards to render in the stack */
 const STACK_SIZE = 3;
@@ -246,17 +220,7 @@ export function useReviewSwipeDeck({
     if (!shortcutsEnabled) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.defaultPrevented) return;
-      // Don't hijack modified shortcuts
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      // Ignore typing/inputs
-      if (isTextInputLikeTarget(e.target)) {
-        return;
-      }
-      // Ignore while interacting with popovers/menus
-      if (isInOpenOverlay(e.target)) {
-        return;
-      }
+      if (shouldIgnoreKeyboardEvent(e, { checkOverlays: true })) return;
 
       switch (e.key) {
         case "ArrowLeft":

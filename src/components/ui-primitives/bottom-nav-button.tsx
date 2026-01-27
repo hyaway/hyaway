@@ -197,6 +197,8 @@ interface BottomNavButtonProps {
   kbd?: string;
   /** Truncate label at max characters */
   truncateLabel?: boolean;
+  /** Tooltip text (native title attribute) */
+  title?: string;
 }
 
 export const BottomNavButton = forwardRef<
@@ -218,6 +220,7 @@ export const BottomNavButton = forwardRef<
     badge,
     kbd,
     truncateLabel,
+    title,
   },
   ref,
 ) {
@@ -234,6 +237,7 @@ export const BottomNavButton = forwardRef<
       disabled={disabled || isLoading}
       render={render}
       data-menu-open={dataMenuOpen || undefined}
+      title={title}
     >
       {isLoading ? (
         <Spinner className="short:size-5 size-6" />

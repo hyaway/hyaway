@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IconPhoto, IconPhotoScan } from "@tabler/icons-react";
+import { IconPalette, IconPhoto, IconPhotoScan } from "@tabler/icons-react";
 import { animate, motion, useMotionValue, useTransform } from "motion/react";
 import type { ReviewImageLoadMode } from "@/stores/review-queue-store";
 import { cn } from "@/lib/utils";
@@ -13,11 +13,10 @@ import {
   useRenderFileIdUrl,
 } from "@/hooks/use-url-with-api-key";
 import { useReviewImageLoadMode } from "@/stores/review-queue-store";
-import {
-  useFillCanvasBackground,
-  useImageBackground,
-} from "@/stores/file-viewer-settings-store";
+import { useFillCanvasBackground } from "@/stores/file-viewer-settings-store";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
+import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
+import { useImageBackgroundCycle } from "@/hooks/use-image-background-cycle";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { Toggle } from "@/components/ui-primitives/toggle";
 
@@ -65,8 +64,10 @@ export function ReviewImageViewer({
   isTop = false,
 }: ReviewImageViewerProps) {
   const globalImageLoadMode = useReviewImageLoadMode();
-  const imageBackground = useImageBackground();
   const fillCanvasBackground = useFillCanvasBackground();
+
+  // Image background with local override capability
+  const { imageBackground, cycleImageBackground } = useImageBackgroundCycle();
 
   // Check if this mime type is a static image or image project file
   const staticImage = isStaticImage(mime);
@@ -337,6 +338,45 @@ export function ReviewImageViewer({
       dragY.set(0);
     }
   }, [isTop, dragX, dragY]);
+
+  // Toggle load mode (for keyboard shortcut)
+  const toggleLoadMode = useCallback(() => {
+    if (!canOptimize) return;
+    // Capture current zoom state before switching modes
+    pendingZoomRestoreRef.current = {
+      zoomMode,
+      dragX: dragX.get(),
+      dragY: dragY.get(),
+      naturalWidth: naturalSize.width,
+    };
+    setLocalLoadMode((prev) =>
+      prev === "original" ? "optimized" : "original",
+    );
+    setModeToggleCount((c) => c + 1);
+  }, [canOptimize, zoomMode, dragX, dragY, naturalSize.width]);
+
+  // Keyboard shortcuts for background (B) and original/optimized toggle (O)
+  useEffect(() => {
+    if (!isTop) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (shouldIgnoreKeyboardEvent(e)) return;
+
+      switch (e.key.toLowerCase()) {
+        case "b":
+          e.preventDefault();
+          cycleImageBackground();
+          break;
+        case "o":
+          e.preventDefault();
+          toggleLoadMode();
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isTop, cycleImageBackground, toggleLoadMode]);
 
   const handleLoad = () => {
     setLoaded(true);
@@ -1036,47 +1076,64 @@ export function ReviewImageViewer({
         </div>
       )}
 
-      {/* Image load mode toggle - only show when optimization is available */}
-      {isTop && canOptimize && (
-        <div className="absolute bottom-2 left-2">
+      {/* Bottom-left controls: background toggle + image load mode toggle */}
+      {isTop && (
+        <div className="absolute bottom-2 left-2 flex gap-1">
+          {/* Background cycle toggle - always visible */}
           <Toggle
             size="sm"
-            pressed={localLoadMode === "original"}
-            onPressedChange={(pressed) => {
-              // Capture current zoom state before switching modes
-              pendingZoomRestoreRef.current = {
-                zoomMode,
-                dragX: dragX.get(),
-                dragY: dragY.get(),
-                naturalWidth: naturalSize.width,
-              };
-              setLocalLoadMode(pressed ? "original" : "optimized");
-              // Increment to trigger mode indicator animation
-              setModeToggleCount((c) => c + 1);
-            }}
-            aria-label={
-              localLoadMode === "original"
-                ? "Using original image - click for optimized"
-                : "Using optimized image - click for original"
-            }
+            pressed={false}
+            onPressedChange={cycleImageBackground}
+            aria-label="Cycle background (B)"
+            title="Cycle background (B)"
             variant="muted"
-            className={"bg-card"}
+            className="bg-card"
           >
-            <span className="relative">
-              {localLoadMode === "original" ? (
-                <IconPhoto aria-hidden="true" className="size-4" />
-              ) : (
-                <IconPhotoScan aria-hidden="true" className="size-4" />
-              )}
-              {/* Indicator dot when switching to full size would provide more detail */}
-              {localLoadMode === "optimized" && zoomScale > 1 && (
-                <span className="absolute -top-0.5 -right-0.5 flex size-1.5">
-                  <span className="bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-                  <span className="bg-primary relative inline-flex size-1.5 rounded-full" />
-                </span>
-              )}
-            </span>
+            <IconPalette aria-hidden="true" className="size-4" />
           </Toggle>
+
+          {/* Image load mode toggle - only show when optimization is available */}
+          {canOptimize && (
+            <Toggle
+              size="sm"
+              pressed={localLoadMode === "original"}
+              onPressedChange={(pressed) => {
+                // Capture current zoom state before switching modes
+                pendingZoomRestoreRef.current = {
+                  zoomMode,
+                  dragX: dragX.get(),
+                  dragY: dragY.get(),
+                  naturalWidth: naturalSize.width,
+                };
+                setLocalLoadMode(pressed ? "original" : "optimized");
+                // Increment to trigger mode indicator animation
+                setModeToggleCount((c) => c + 1);
+              }}
+              aria-label={
+                localLoadMode === "original"
+                  ? "Using original image - click for optimized"
+                  : "Using optimized image - click for original"
+              }
+              title="Toggle original/optimized (O)"
+              variant="muted"
+              className="bg-card"
+            >
+              <span className="relative">
+                {localLoadMode === "original" ? (
+                  <IconPhoto aria-hidden="true" className="size-4" />
+                ) : (
+                  <IconPhotoScan aria-hidden="true" className="size-4" />
+                )}
+                {/* Indicator dot when switching to full size would provide more detail */}
+                {localLoadMode === "optimized" && zoomScale > 1 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex size-1.5">
+                    <span className="bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+                    <span className="bg-primary relative inline-flex size-1.5 rounded-full" />
+                  </span>
+                )}
+              </span>
+            </Toggle>
+          )}
         </div>
       )}
     </div>

@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IconArrowsMaximize, IconMaximize, IconX } from "@tabler/icons-react";
+import {
+  IconArrowsMaximize,
+  IconMaximize,
+  IconPalette,
+  IconX,
+} from "@tabler/icons-react";
 import {
   TransformComponent,
   TransformWrapper,
@@ -14,10 +19,11 @@ import type { ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import type { ImageBackground } from "@/stores/file-viewer-settings-store";
 import { cn } from "@/lib/utils";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
+import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
+import { useImageBackgroundCycle } from "@/hooks/use-image-background-cycle";
 import {
   useFileViewerStartExpanded,
   useFillCanvasBackground,
-  useImageBackground,
 } from "@/stores/file-viewer-settings-store";
 import { Toggle } from "@/components/ui-primitives/toggle";
 
@@ -74,15 +80,9 @@ export function ImageViewer({
     [blurhash],
   );
 
-  const imageBackground = useImageBackground();
+  const { imageBackground: effectiveImageBackground, cycleImageBackground } =
+    useImageBackgroundCycle();
   const fillCanvasBackground = useFillCanvasBackground();
-  const [imageBackgroundOverride, setImageBackgroundOverride] =
-    useState<ImageBackground | null>(null);
-  const effectiveImageBackground = imageBackgroundOverride ?? imageBackground;
-
-  useEffect(() => {
-    setImageBackgroundOverride(null);
-  }, [imageBackground]);
 
   const overlaySize = useContainerSize(overlayStageRef.current);
 
@@ -157,15 +157,6 @@ export function ImageViewer({
   const setZoomIntent = useCallback((intent: ZoomIntent) => {
     zoomIntentRef.current = intent;
   }, []);
-
-  const cycleImageBackground = useCallback(() => {
-    const order = ["solid", "checkerboard", "average"] as const;
-    const currentValue = effectiveImageBackground;
-    const currentIndex = order.indexOf(currentValue);
-    const nextIndex =
-      currentIndex === -1 ? 0 : (currentIndex + 1) % order.length;
-    setImageBackgroundOverride(order[nextIndex]);
-  }, [effectiveImageBackground]);
 
   const clampToBounds = useCallback(
     (x: number, y: number, scale: number) => {
@@ -306,19 +297,7 @@ export function ImageViewer({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented) return;
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
-
-      const target = event.target as HTMLElement | null;
-      if (target?.isContentEditable) return;
-      const tagName = target?.tagName;
-      if (
-        tagName === "INPUT" ||
-        tagName === "TEXTAREA" ||
-        tagName === "SELECT"
-      ) {
-        return;
-      }
+      if (shouldIgnoreKeyboardEvent(event)) return;
 
       if (event.key === "t" || event.key === "T") {
         event.preventDefault();
@@ -565,6 +544,7 @@ export function ImageViewer({
         onError={onError}
         onToggleTheater={toggleTheater}
         onToggleFullscreen={toggleFullscreen}
+        onCycleBackground={cycleImageBackground}
       />
 
       <div
@@ -660,6 +640,7 @@ export function ImageViewer({
                     isFullscreen={isFullscreen}
                     onToggleTheater={toggleTheater}
                     onToggleFullscreen={toggleFullscreen}
+                    onCycleBackground={cycleImageBackground}
                     onExit={returnInline}
                     onSetZoomIntent={(intent) => {
                       setZoomIntent(intent);
@@ -728,6 +709,7 @@ function InlineViewer({
   onError,
   onToggleTheater,
   onToggleFullscreen,
+  onCycleBackground,
 }: {
   fileUrl: string;
   fileId: number;
@@ -744,6 +726,7 @@ function InlineViewer({
   onError: () => void;
   onToggleTheater: () => void;
   onToggleFullscreen: () => void;
+  onCycleBackground: () => void;
 }) {
   const lastTapRef = useRef<{ time: number; x: number; y: number } | null>(
     null,
@@ -865,6 +848,7 @@ function InlineViewer({
         isInView={isInView}
         onToggleTheater={onToggleTheater}
         onToggleFullscreen={onToggleFullscreen}
+        onCycleBackground={onCycleBackground}
       />
     </div>
   );
@@ -876,12 +860,14 @@ function InlineModeControls({
   isInView,
   onToggleTheater,
   onToggleFullscreen,
+  onCycleBackground,
 }: {
   isExpanded: boolean;
   isBottomVisible: boolean;
   isInView: boolean;
   onToggleTheater: () => void;
   onToggleFullscreen: () => void;
+  onCycleBackground: () => void;
 }) {
   if (!isInView) return null;
 
@@ -899,7 +885,24 @@ function InlineModeControls({
           : "absolute right-4",
       )}
     >
-      <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 flex cursor-default gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
+      <div
+        className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 flex cursor-default gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity"
+        onDoubleClick={(e) => e.stopPropagation()}
+      >
+        <Toggle
+          variant="outline"
+          size="sm"
+          pressed={false}
+          className="hover:bg-accent hover:text-accent-foreground"
+          onClick={(event) => {
+            event.stopPropagation();
+            onCycleBackground();
+          }}
+          title="Cycle background (B)"
+        >
+          <IconPalette className="size-4" />
+        </Toggle>
+
         <Toggle
           variant="outline"
           size="sm"
@@ -909,7 +912,7 @@ function InlineModeControls({
             event.stopPropagation();
             onToggleTheater();
           }}
-          title="Theater mode"
+          title="Theater mode (T)"
         >
           <IconArrowsMaximize className="size-4" />
         </Toggle>
@@ -923,7 +926,7 @@ function InlineModeControls({
             event.stopPropagation();
             onToggleFullscreen();
           }}
-          title="Fullscreen"
+          title="Fullscreen (F)"
         >
           <IconMaximize className="size-4" />
         </Toggle>
@@ -940,6 +943,7 @@ function OverlayControls({
   isFullscreen,
   onToggleTheater,
   onToggleFullscreen,
+  onCycleBackground,
   onExit,
   onSetZoomIntent,
 }: {
@@ -950,6 +954,7 @@ function OverlayControls({
   isFullscreen: boolean;
   onToggleTheater: () => void;
   onToggleFullscreen: () => void;
+  onCycleBackground: () => void;
   onExit: () => void;
   onSetZoomIntent: (intent: ZoomIntent) => void;
 }) {
@@ -976,7 +981,7 @@ function OverlayControls({
           event.stopPropagation();
           handleFit();
         }}
-        title="Fit to screen"
+        title="Fit to screen (0)"
       >
         <span className="text-xs font-medium">Fit</span>
       </Toggle>
@@ -990,12 +995,26 @@ function OverlayControls({
           event.stopPropagation();
           handleOneX();
         }}
-        title="Original size"
+        title="Original size (Z)"
       >
         <span className="text-xs font-medium">1x</span>
       </Toggle>
 
       <div className="bg-border mx-1 w-px" />
+
+      <Toggle
+        variant="outline"
+        size="sm"
+        pressed={false}
+        className="hover:bg-accent hover:text-accent-foreground"
+        onClick={(event) => {
+          event.stopPropagation();
+          onCycleBackground();
+        }}
+        title="Cycle background (B)"
+      >
+        <IconPalette className="size-4" />
+      </Toggle>
 
       <Toggle
         variant="outline"
@@ -1006,7 +1025,7 @@ function OverlayControls({
           event.stopPropagation();
           onToggleTheater();
         }}
-        title="Theater mode"
+        title="Theater mode (T)"
       >
         <IconArrowsMaximize className="size-4" />
       </Toggle>
@@ -1020,7 +1039,7 @@ function OverlayControls({
           event.stopPropagation();
           onToggleFullscreen();
         }}
-        title="Fullscreen"
+        title="Fullscreen (F)"
       >
         <IconMaximize className="size-4" />
       </Toggle>
@@ -1036,7 +1055,7 @@ function OverlayControls({
           event.stopPropagation();
           onExit();
         }}
-        title="Exit viewer"
+        title="Exit viewer (Esc)"
       >
         <IconX className="size-4" />
       </Toggle>

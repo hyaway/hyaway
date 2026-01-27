@@ -6,6 +6,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { toast } from "sonner";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
+import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
 import { useGlobalTouchCount } from "@/lib/global-touch-count";
 
 /** Minimum horizontal distance (px) to trigger a swipe */
@@ -87,19 +88,7 @@ export function useFileContextNavigation({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented) return;
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
-
-      const target = event.target as HTMLElement | null;
-      if (target?.isContentEditable) return;
-      const tagName = target?.tagName;
-      if (
-        tagName === "INPUT" ||
-        tagName === "TEXTAREA" ||
-        tagName === "SELECT"
-      ) {
-        return;
-      }
+      if (shouldIgnoreKeyboardEvent(event)) return;
 
       if (event.key === "[" || event.key === "{") {
         if (prevId === null) return;
@@ -260,6 +249,7 @@ export function useFileContextNavigation({
       id: "nav-prev",
       label: "Previous",
       icon: IconChevronLeft,
+      title: "Previous file ( [])",
       onClick: () => {
         if (prevId !== null) {
           navigate({
@@ -275,6 +265,7 @@ export function useFileContextNavigation({
       id: "nav-next",
       label: "Next",
       icon: IconChevronRight,
+      title: "Next file ( ] )",
       onClick: () => {
         if (nextId !== null) {
           navigate({
