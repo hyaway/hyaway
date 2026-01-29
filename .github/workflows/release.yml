@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*" # Triggers on tags like v2026.01.28
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g., v2026.01.28)"
+        required: true
+        type: string
 
 jobs:
   release:
@@ -15,11 +21,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Determine tag
+        id: get_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Extract changelog for this version
         id: changelog
         run: |
           # Extract date from tag (v2026.01.28 -> 2026-01-28)
-          TAG="${GITHUB_REF#refs/tags/v}"
+          TAG="${{ steps.get_tag.outputs.tag }}"
+          TAG="${TAG#v}"
           DATE=$(echo "$TAG" | tr '.' '-')
 
           echo "Extracting changelog for date: $DATE"
@@ -47,5 +63,6 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.get_tag.outputs.tag }}
           body: ${{ steps.changelog.outputs.notes }}
           generate_release_notes: false
