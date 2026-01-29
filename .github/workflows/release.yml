@@ -21,9 +21,9 @@ jobs:
           # Extract date from tag (v2026.01.28 -> 2026-01-28)
           TAG="${GITHUB_REF#refs/tags/v}"
           DATE=$(echo "$TAG" | tr '.' '-')
-          
+
           echo "Extracting changelog for date: $DATE"
-          
+
           # Extract the section for this date from changelog
           # Matches from "## DATE" until the next "## " or "---" or end of file
           NOTES=$(awk -v date="$DATE" '
@@ -38,7 +38,7 @@ jobs:
             }
             found { print }
           ' docs/changelog.md)
-          
+
           # Use GitHub's delimiter syntax for multiline output
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           echo "$NOTES" >> $GITHUB_OUTPUT
