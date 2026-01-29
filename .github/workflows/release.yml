@@ -1,0 +1,51 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - "v*" # Triggers on tags like v2026.01.28
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          # Extract date from tag (v2026.01.28 -> 2026-01-28)
+          TAG="${GITHUB_REF#refs/tags/v}"
+          DATE=$(echo "$TAG" | tr '.' '-')
+          
+          echo "Extracting changelog for date: $DATE"
+          
+          # Extract the section for this date from changelog
+          # Matches from "## DATE" until the next "## " or "---" or end of file
+          NOTES=$(awk -v date="$DATE" '
+            /^## / { 
+              if (found) exit
+              if ($2 == date) found=1
+              next
+            }
+            /^---$/ {
+              if (found) exit
+              next
+            }
+            found { print }
+          ' docs/changelog.md)
+          
+          # Use GitHub's delimiter syntax for multiline output
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.changelog.outputs.notes }}
+          generate_release_notes: false
