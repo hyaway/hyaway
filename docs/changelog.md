@@ -4,6 +4,14 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-01-28
+
+### Added
+
+- **ARM64 Docker support** — Docker images now support both AMD64 and ARM64 architectures, enabling deployment on Raspberry Pi, Orange Pi, and other ARM-based devices
+
+---
+
 ## 2026-01-26
 
 ### Added
