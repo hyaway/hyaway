@@ -86,6 +86,7 @@ export default defineConfig({
         items: [
           { text: "Overview", link: "/self-hosting/" },
           { text: "Docker", link: "/self-hosting/docker" },
+          { text: "Build from source", link: "/self-hosting/build-from-source" },
           { text: "Local development", link: "/self-hosting/local-dev" },
         ],
       },
