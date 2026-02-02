@@ -21,6 +21,7 @@ Create releases with changelog entry and git tag.
 ## What Happens Automatically
 
 Tag push triggers:
+
 - GitHub release with changelog content extracted
 - Docker image tagged `ghcr.io/hyaway/hyaway:v2026.01.28`
 

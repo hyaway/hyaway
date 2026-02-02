@@ -13,12 +13,15 @@ Add entries to `docs/changelog.md` following Keep a Changelog format.
 ## YYYY-MM-DD
 
 ### Added
+
 - **Feature name** — User-facing description
 
 ### Changed
+
 - Description of behavior change
 
 ### Fixed
+
 - Description of bug fix
 ```
 
