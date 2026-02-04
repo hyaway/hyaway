@@ -77,6 +77,9 @@ export const VerifyAccessKeyResponseSchema = BaseResponseSchema.extend({
 export type VerifyAccessKeyResponse = z.infer<
   typeof VerifyAccessKeyResponseSchema
 >;
+// #endregion Access
+
+// #region Services
 
 export const ServiceInfoSchema = z.object({
   name: z.string(),
@@ -95,7 +98,7 @@ export const GetServicesResponseSchema = BaseResponseSchema.extend({
 });
 
 export type GetServicesResponse = z.infer<typeof GetServicesResponseSchema>;
-// #endregion Access
+// #endregion Services
 
 // #region File actions
 // (No models currently needed)
