@@ -81,17 +81,218 @@ export type VerifyAccessKeyResponse = z.infer<
 
 // #region Services
 
-export const ServiceInfoSchema = z.object({
+// -----------------------------------------------------------------------------
+// Base Schemas
+// -----------------------------------------------------------------------------
+
+/**
+ * Base fields shared by all service types.
+ */
+const BaseServiceInfoSchema = z.object({
   name: z.string(),
-  type: z.enum(ServiceType),
   type_pretty: z.string(),
-  // Rating service fields (optional, only present on rating services)
-  star_shape: z.string().optional(),
-  min_stars: z.number().optional(),
-  max_stars: z.number().optional(),
 });
 
+// -----------------------------------------------------------------------------
+// Basic (Non-Rating) Services
+// -----------------------------------------------------------------------------
+
+/** All non-rating service types */
+const BASIC_SERVICE_TYPES = [
+  ServiceType.TAG_REPOSITORY,
+  ServiceType.FILE_REPOSITORY,
+  ServiceType.LOCAL_FILE_DOMAIN,
+  ServiceType.LOCAL_TAG_DOMAIN,
+  ServiceType.ALL_KNOWN_TAGS,
+  ServiceType.ALL_KNOWN_FILES,
+  ServiceType.LOCAL_BOORU,
+  ServiceType.IPFS,
+  ServiceType.TRASH,
+  ServiceType.LOCAL_FILE_STORAGE,
+  ServiceType.FILE_NOTES,
+  ServiceType.CLIENT_API,
+  ServiceType.DELETED_FROM_ANYWHERE,
+  ServiceType.LOCAL_UPDATES,
+  ServiceType.ALL_MY_FILES,
+  ServiceType.SERVER_ADMIN,
+] as const;
+
+/** Helper to create a basic (non-rating) service schema for a specific type */
+const basicService = <T extends ServiceType>(serviceType: T) =>
+  BaseServiceInfoSchema.extend({ type: z.literal(serviceType) });
+
+// -----------------------------------------------------------------------------
+// Rating Services
+// -----------------------------------------------------------------------------
+
+/**
+ * Base fields shared by all rating service types.
+ */
+const BaseRatingServiceInfoSchema = BaseServiceInfoSchema.extend({
+  show_in_thumbnail: z.boolean().optional(),
+  show_in_thumbnail_even_when_null: z.boolean().optional(),
+});
+
+/**
+ * Color configuration for a rating state.
+ * `brush` is the fill color, `pen` is the stroke/outline color.
+ */
+export const RatingColourSchema = z.object({
+  brush: z.string(),
+  pen: z.string(),
+});
+
+export type RatingColour = z.infer<typeof RatingColourSchema>;
+
+// --- Like/Dislike Rating Service ---
+
+/**
+ * Like/Dislike rating service (type 7).
+ * Has on/off status: `true` (like), `false` (dislike), `null` (unset).
+ */
+export const LikeRatingServiceInfoSchema = BaseRatingServiceInfoSchema.extend({
+  type: z.literal(ServiceType.RATING_LIKE),
+  star_shape: z.string().optional(),
+  colours: z
+    .object({
+      like: RatingColourSchema.optional(),
+      dislike: RatingColourSchema.optional(),
+      mixed: RatingColourSchema.optional(),
+      null: RatingColourSchema.optional(),
+    })
+    .optional(),
+});
+
+export type LikeRatingServiceInfo = z.infer<typeof LikeRatingServiceInfoSchema>;
+
+// --- Numerical Rating Service ---
+
+/**
+ * Numerical rating service (type 6).
+ * Has a range of stars from `min_stars` to `max_stars`.
+ */
+export const NumericalRatingServiceInfoSchema =
+  BaseRatingServiceInfoSchema.extend({
+    type: z.literal(ServiceType.RATING_NUMERICAL),
+    star_shape: z.string().optional(),
+    min_stars: z.number().optional(),
+    max_stars: z.number().optional(),
+    allows_zero: z.boolean().optional(),
+    colours: z
+      .object({
+        like: RatingColourSchema.optional(),
+        dislike: RatingColourSchema.optional(),
+        mixed: RatingColourSchema.optional(),
+        null: RatingColourSchema.optional(),
+      })
+      .optional(),
+  });
+
+export type NumericalRatingServiceInfo = z.infer<
+  typeof NumericalRatingServiceInfoSchema
+>;
+
+// --- Inc/Dec Rating Service ---
+
+/**
+ * Inc/Dec rating service (type 22).
+ * Has a positive integer rating, 0 is the minimum/default.
+ */
+export const IncDecRatingServiceInfoSchema = BaseRatingServiceInfoSchema.extend(
+  {
+    type: z.literal(ServiceType.RATING_INC_DEC),
+    colours: z
+      .object({
+        like: RatingColourSchema.optional(),
+        mixed: RatingColourSchema.optional(),
+      })
+      .optional(),
+  },
+);
+
+export type IncDecRatingServiceInfo = z.infer<
+  typeof IncDecRatingServiceInfoSchema
+>;
+
+// --- Rating Service Union ---
+
+/**
+ * Union of all rating service types.
+ */
+export const RatingServiceInfoSchema = z.discriminatedUnion("type", [
+  LikeRatingServiceInfoSchema,
+  NumericalRatingServiceInfoSchema,
+  IncDecRatingServiceInfoSchema,
+]);
+
+export type RatingServiceInfo = z.infer<typeof RatingServiceInfoSchema>;
+
+// -----------------------------------------------------------------------------
+// Combined Service Schema
+// -----------------------------------------------------------------------------
+
+/**
+ * Union of all service types.
+ * Uses discriminated union on `type` field for efficient parsing.
+ */
+export const ServiceInfoSchema = z.discriminatedUnion("type", [
+  // Rating services
+  LikeRatingServiceInfoSchema,
+  NumericalRatingServiceInfoSchema,
+  IncDecRatingServiceInfoSchema,
+  // Basic services (non-rating)
+  ...BASIC_SERVICE_TYPES.map(basicService),
+]);
+
 export type ServiceInfo = z.infer<typeof ServiceInfoSchema>;
+
+// -----------------------------------------------------------------------------
+// Type Guards
+// -----------------------------------------------------------------------------
+
+/**
+ * Type guard to check if a service is a rating service.
+ */
+export function isRatingService(
+  service: ServiceInfo,
+): service is RatingServiceInfo {
+  return (
+    service.type === ServiceType.RATING_LIKE ||
+    service.type === ServiceType.RATING_NUMERICAL ||
+    service.type === ServiceType.RATING_INC_DEC
+  );
+}
+
+/**
+ * Type guard to check if a service is a like/dislike rating service.
+ */
+export function isLikeRatingService(
+  service: ServiceInfo,
+): service is LikeRatingServiceInfo {
+  return service.type === ServiceType.RATING_LIKE;
+}
+
+/**
+ * Type guard to check if a service is a numerical rating service.
+ */
+export function isNumericalRatingService(
+  service: ServiceInfo,
+): service is NumericalRatingServiceInfo {
+  return service.type === ServiceType.RATING_NUMERICAL;
+}
+
+/**
+ * Type guard to check if a service is an inc/dec rating service.
+ */
+export function isIncDecRatingService(
+  service: ServiceInfo,
+): service is IncDecRatingServiceInfo {
+  return service.type === ServiceType.RATING_INC_DEC;
+}
+
+// -----------------------------------------------------------------------------
+// API Response
+// -----------------------------------------------------------------------------
 
 export const GetServicesResponseSchema = BaseResponseSchema.extend({
   services: z.record(z.string(), ServiceInfoSchema),
