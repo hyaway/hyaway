@@ -12,19 +12,19 @@ import type {
  */
 export const DEFAULT_LIKE_COLORS: RatingColour = {
   brush: "#50C878",
-  pen: "#000000",
+  pen: "#50C878",
 }; // Emerald green
 
 export const DEFAULT_DISLIKE_COLORS: RatingColour = {
-  brush: "#FFFFFF",
-  pen: "#000000",
-};
+  brush: "#E5484D",
+  pen: "#E5484D",
+}; // Destructive red
 
 const DEFAULT_COLORS = {
   like: DEFAULT_LIKE_COLORS,
   dislike: DEFAULT_DISLIKE_COLORS,
-  mixed: { brush: "#5F5F5F", pen: "#000000" },
-  null: { brush: "#BFBFBF", pen: "#000000" },
+  mixed: { brush: "#5F5F5F", pen: "#5F5F5F" },
+  null: { brush: "#BFBFBF", pen: "#BFBFBF" },
 } satisfies Record<string, RatingColour>;
 
 /**
@@ -32,7 +32,7 @@ const DEFAULT_COLORS = {
  */
 export const DEFAULT_NUMERICAL_FILLED: RatingColour = {
   brush: "#F59E0B",
-  pen: "#000000",
+  pen: "#F59E0B",
 };
 
 /**
@@ -79,6 +79,6 @@ export function getNumericalFilledColors(
  */
 export function getIncDecPositiveColors(
   service: RatingServiceInfo,
-): RatingColour {
-  return service.colours?.like ?? DEFAULT_COLORS.like;
+): RatingColour | undefined {
+  return service.colours?.like;
 }
