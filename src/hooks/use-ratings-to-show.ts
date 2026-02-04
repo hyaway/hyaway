@@ -8,6 +8,7 @@ import type {
   RatingServiceInfo,
   RatingValue,
 } from "@/integrations/hydrus-api/models";
+import type { RatingServiceSettings } from "@/stores/ratings-settings-store";
 import {
   Permission,
   isIncDecRatingService,
@@ -19,7 +20,6 @@ import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-
 import {
   useRatingsOverlayMode,
   useRatingsServiceSettings,
-  useRatingsSettingsActions,
 } from "@/stores/ratings-settings-store";
 
 export interface RatingToShow {
@@ -42,7 +42,6 @@ export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
   const { ratingServices } = useRatingServices();
   const serviceSettings = useRatingsServiceSettings();
   const overlayMode = useRatingsOverlayMode();
-  const { getServiceSettings } = useRatingsSettingsActions();
   const hasSearchPermission = useHasPermission(
     Permission.SEARCH_FOR_AND_FETCH_FILES,
   );
@@ -62,6 +61,14 @@ export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
   return useMemo(() => {
     if (!item.ratings) return [];
 
+    // Helper to get settings with defaults
+    const getSettings = (serviceKey: string): RatingServiceSettings =>
+      serviceSettings[serviceKey] ?? {
+        showInOverlay: true,
+        showInOverlayEvenWhenNull: false,
+        showInReview: true,
+      };
+
     return ratingServices
       .filter(([serviceKey, service]) => {
         const ratingValue = item.ratings?.[serviceKey];
@@ -74,7 +81,7 @@ export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
           showInOverlay = service.show_in_thumbnail;
           showWhenNull = service.show_in_thumbnail_even_when_null ?? false;
         } else {
-          const settings = getServiceSettings(serviceKey);
+          const settings = getSettings(serviceKey);
           showInOverlay = settings.showInOverlay;
           showWhenNull = settings.showInOverlayEvenWhenNull;
         }
@@ -104,11 +111,5 @@ export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
         service,
         value: item.ratings?.[serviceKey] ?? null,
       }));
-  }, [
-    ratingServices,
-    item.ratings,
-    serviceSettings,
-    effectiveMode,
-    getServiceSettings,
-  ]);
+  }, [ratingServices, item.ratings, serviceSettings, effectiveMode]);
 }
