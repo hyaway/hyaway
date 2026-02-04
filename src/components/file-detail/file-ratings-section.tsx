@@ -20,6 +20,11 @@ import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
 import {
+  getDislikeColors,
+  getLikeColors,
+  getNumericalFilledColors,
+} from "@/components/ratings/rating-colors";
+import {
   IncDecRatingControl,
   LikeDislikeControl,
   NumericalRatingControl,
@@ -140,6 +145,8 @@ function RatingControl({
             starShape={service.star_shape}
             onChange={handleSetRating}
             disabled={disabled || isPending}
+            likeColors={getLikeColors(service)}
+            dislikeColors={getDislikeColors(service)}
           />
         )}
         {isNumericalRatingService(service) && (
@@ -151,6 +158,7 @@ function RatingControl({
             starShape={service.star_shape}
             onChange={handleSetRating}
             disabled={disabled || isPending}
+            filledColors={getNumericalFilledColors(service)}
           />
         )}
         {isIncDecRatingService(service) && (

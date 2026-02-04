@@ -42,11 +42,14 @@ import {
   IconTriangleInvertedFilled,
   IconX,
 } from "@tabler/icons-react";
-import type { ComponentType } from "react";
+import type { CSSProperties, ComponentType } from "react";
 
 import type { StarShape } from "@/integrations/hydrus-api/models";
 
-export type IconComponent = ComponentType<{ className?: string }>;
+export type IconComponent = ComponentType<{
+  className?: string;
+  style?: CSSProperties;
+}>;
 
 export interface ShapeIcons {
   filled: IconComponent;

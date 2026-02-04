@@ -4,6 +4,12 @@
 import { IconTallymarks } from "@tabler/icons-react";
 
 import { CrossedOutIcon } from "./crossed-out-icon";
+import {
+  getDislikeColors,
+  getIncDecPositiveColors,
+  getLikeColors,
+  getNumericalFilledColors,
+} from "./rating-colors";
 import { useShapeIcons } from "./use-shape-icons";
 import type {
   RatingServiceInfo,
@@ -47,19 +53,24 @@ export function RatingsOverlayBadge({
     const isDisliked = value === false;
 
     if (isLiked) {
+      const likeColors = getLikeColors(service);
       return (
         <div className={badgeClassName}>
-          <FilledIcon className={cn(iconClass, "text-emerald-500")} />
+          <FilledIcon
+            className={iconClass}
+            style={{ color: likeColors.brush, stroke: likeColors.pen }}
+          />
         </div>
       );
     }
     if (isDisliked) {
+      const dislikeColors = getDislikeColors(service);
       return (
         <div className={badgeClassName}>
           <CrossedOutIcon
-            className="text-destructive"
             strokeBackgroundColor="text-card"
             backslashClassName={crossedOutBackslashClassName}
+            style={{ color: dislikeColors.brush, stroke: dislikeColors.pen }}
           >
             <FilledIcon className={iconClass} />
           </CrossedOutIcon>
@@ -78,6 +89,7 @@ export function RatingsOverlayBadge({
     const numValue = value as number | null;
     const maxStars = service.max_stars;
     const isUnset = numValue === null;
+    const filledColors = getNumericalFilledColors(service);
 
     return (
       <div
@@ -86,7 +98,14 @@ export function RatingsOverlayBadge({
           isUnset && "bg-card/60 text-muted-foreground",
         )}
       >
-        <FilledIcon className={cn(iconClass, !isUnset && "text-amber-500")} />
+        <FilledIcon
+          className={iconClass}
+          style={
+            !isUnset
+              ? { color: filledColors.brush, stroke: filledColors.pen }
+              : undefined
+          }
+        />
         <span className={valueClassName}>
           {numValue === null ? "-" : numValue}/{maxStars}
         </span>
@@ -98,6 +117,9 @@ export function RatingsOverlayBadge({
   const numValue = typeof value === "number" ? value : 0;
   const sign = numValue > 0 ? "+" : "";
   const isZero = numValue === 0;
+  const isPositive = numValue > 0;
+
+  const incDecColors = isPositive ? getIncDecPositiveColors(service) : null;
 
   return (
     <div
@@ -106,7 +128,10 @@ export function RatingsOverlayBadge({
         isZero && "bg-card/60 text-muted-foreground",
       )}
     >
-      <IconTallymarks className={iconClass} />
+      <IconTallymarks
+        className={iconClass}
+        style={incDecColors ? { color: incDecColors.brush } : undefined}
+      />
       <span className={valueClassName}>
         {sign}
         {numValue}

@@ -11,7 +11,16 @@ import {
   IconPlus,
 } from "@tabler/icons-react";
 import { useShapeIcons } from "./use-shape-icons";
-import type { RatingValue, StarShape } from "@/integrations/hydrus-api/models";
+import {
+  DEFAULT_DISLIKE_COLORS,
+  DEFAULT_LIKE_COLORS,
+  DEFAULT_NUMERICAL_FILLED,
+} from "./rating-colors";
+import type {
+  RatingColour,
+  RatingValue,
+  StarShape,
+} from "@/integrations/hydrus-api/models";
 import { Button } from "@/components/ui-primitives/button";
 import {
   DropdownMenu,
@@ -38,6 +47,10 @@ interface LikeDislikeControlProps {
   disabled?: boolean;
   /** Compact mode with smaller buttons */
   compact?: boolean;
+  /** Custom like colors from service */
+  likeColors?: RatingColour;
+  /** Custom dislike colors from service */
+  dislikeColors?: RatingColour;
 }
 
 export function LikeDislikeControl({
@@ -47,6 +60,8 @@ export function LikeDislikeControl({
   onChange,
   disabled,
   compact,
+  likeColors = DEFAULT_LIKE_COLORS,
+  dislikeColors = DEFAULT_DISLIKE_COLORS,
 }: LikeDislikeControlProps) {
   const [localValue, setLocalValue] = useState<boolean | null>(value);
 
@@ -93,10 +108,11 @@ export function LikeDislikeControl({
             aria-hidden
             className={cn(
               iconSize,
-              "text-emerald-500 transition-transform",
+              "transition-transform",
               shapeClassName,
               !disabled && "pointer-hover:[button:hover_&]:scale-125",
             )}
+            style={{ color: likeColors.brush, stroke: likeColors.pen }}
           />
         ) : (
           <OutlineIcon
@@ -106,8 +122,16 @@ export function LikeDislikeControl({
               "transition-transform",
               shapeClassName,
               !disabled &&
-                "pointer-hover:[button:hover_&]:scale-125 pointer-hover:[button:hover_&]:text-emerald-500 pointer-hover:[button:hover_&]:opacity-100",
+                "pointer-hover:[button:hover_&]:scale-125 pointer-hover:[button:hover_&]:opacity-100",
             )}
+            style={
+              !disabled
+                ? ({
+                    "--hover-color": likeColors.brush,
+                    "--hover-stroke": likeColors.pen,
+                  } as React.CSSProperties)
+                : undefined
+            }
           />
         )}
       </Button>
@@ -125,20 +149,21 @@ export function LikeDislikeControl({
             "relative transition-transform",
             !disabled && "pointer-hover:[button:hover_&]:scale-125",
           )}
+          style={
+            isDisliked
+              ? { color: dislikeColors.brush, stroke: dislikeColors.pen }
+              : undefined
+          }
         >
           {isDisliked ? (
-            <FilledIcon
-              aria-hidden
-              className={cn("text-destructive", iconSize, shapeClassName)}
-            />
+            <FilledIcon aria-hidden className={cn(iconSize, shapeClassName)} />
           ) : (
             <OutlineIcon
               aria-hidden
               className={cn(
                 iconSize,
                 shapeClassName,
-                !disabled &&
-                  "pointer-hover:[button:hover_&]:text-destructive pointer-hover:[button:hover_&]:opacity-100",
+                !disabled && "pointer-hover:[button:hover_&]:opacity-100",
               )}
             />
           )}
@@ -157,10 +182,8 @@ export function LikeDislikeControl({
               "pointer-events-none absolute",
               slashInset,
               slashSize,
-              isDisliked
-                ? "text-destructive"
-                : "pointer-hover:[button:hover_&]:text-destructive",
             )}
+            style={{ color: dislikeColors.brush }}
             strokeWidth={1.5}
           />
         </span>
@@ -183,6 +206,11 @@ interface NumericalRatingControlProps {
   disabled?: boolean;
   /** Compact mode: hides number labels, uses dropdown for high star counts */
   compact?: boolean;
+  /**
+   * Custom filled star colors from service.
+   * @default DEFAULT_NUMERICAL_FILLED
+   */
+  filledColors?: RatingColour;
 }
 
 export function NumericalRatingControl({
@@ -194,6 +222,7 @@ export function NumericalRatingControl({
   onChange,
   disabled,
   compact,
+  filledColors = DEFAULT_NUMERICAL_FILLED,
 }: NumericalRatingControlProps) {
   const [localValue, setLocalValue] = useState<number | null>(value);
 
@@ -225,6 +254,7 @@ export function NumericalRatingControl({
         FilledIcon={FilledIcon}
         OutlineIcon={OutlineIcon}
         shapeClassName={shapeClassName}
+        filledColors={filledColors}
       />
     );
   }
@@ -366,13 +396,17 @@ export function NumericalRatingControl({
                   aria-hidden
                   className={cn(
                     iconSize,
-                    "text-amber-500 transition-transform",
+                    "transition-transform",
                     shapeClassName,
                     !disabled && "pointer-hover:[button:hover_&]:scale-125",
                     // Dim filled stars that come after hovered star (pointer devices only)
                     !disabled &&
                       "pointer-hover:[button:hover~button_&]:opacity-40",
                   )}
+                  style={{
+                    color: filledColors.brush,
+                    stroke: filledColors.pen,
+                  }}
                 />
               ) : (
                 <OutlineIcon
@@ -383,12 +417,20 @@ export function NumericalRatingControl({
                     shapeClassName,
                     isClickable &&
                       !disabled &&
-                      "pointer-hover:[button:hover_&]:scale-125 pointer-hover:[button:hover_&]:text-amber-500 pointer-hover:[button:hover_&]:opacity-100",
+                      "pointer-hover:[button:hover_&]:scale-125 pointer-hover:[button:hover_&]:opacity-100",
                     // Also highlight preceding stars on hover (pointer devices only)
                     isClickable &&
                       !disabled &&
-                      "pointer-hover:[button:has(~button:hover)_&]:text-amber-500 pointer-hover:[button:has(~button:hover)_&]:opacity-100",
+                      "pointer-hover:[button:has(~button:hover)_&]:opacity-100",
                   )}
+                  style={
+                    isClickable && !disabled
+                      ? ({
+                          "--hover-color": filledColors.brush,
+                          "--hover-stroke": filledColors.pen,
+                        } as React.CSSProperties)
+                      : undefined
+                  }
                 />
               )}
               {!compact && (
@@ -417,9 +459,13 @@ interface NumericalRatingDropdownProps {
   maxStars: number;
   onChange: (value: number | null) => void;
   disabled?: boolean;
-  FilledIcon: React.ComponentType<{ className?: string }>;
+  FilledIcon: React.ComponentType<{
+    className?: string;
+    style?: React.CSSProperties;
+  }>;
   OutlineIcon: React.ComponentType<{ className?: string }>;
   shapeClassName?: string;
+  filledColors?: RatingColour;
 }
 
 function NumericalRatingDropdown({
@@ -431,6 +477,7 @@ function NumericalRatingDropdown({
   FilledIcon,
   OutlineIcon,
   shapeClassName,
+  filledColors = DEFAULT_NUMERICAL_FILLED,
 }: NumericalRatingDropdownProps) {
   const [open, setOpen] = useState(false);
   const canSetZero = minStars === 0;
@@ -451,7 +498,10 @@ function NumericalRatingDropdown({
   const renderRatingItem = (num: number) => (
     <DropdownMenuRadioItem key={num} value={String(num)} className="py-2">
       {value !== null && num <= value ? (
-        <FilledIcon className={cn("size-4 text-amber-500", shapeClassName)} />
+        <FilledIcon
+          className={cn("size-4", shapeClassName)}
+          style={{ color: filledColors.brush, stroke: filledColors.pen }}
+        />
       ) : (
         <OutlineIcon className={cn("size-4", shapeClassName)} />
       )}
@@ -471,7 +521,10 @@ function NumericalRatingDropdown({
         {value === 0 ? (
           <IconCircleDashedNumber0 className="text-destructive size-5" />
         ) : hasValue ? (
-          <FilledIcon className={cn("size-5 text-amber-500", shapeClassName)} />
+          <FilledIcon
+            className={cn("size-5", shapeClassName)}
+            style={{ color: filledColors.brush, stroke: filledColors.pen }}
+          />
         ) : (
           <OutlineIcon className={cn("size-5", shapeClassName)} />
         )}

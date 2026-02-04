@@ -27,6 +27,11 @@ import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/mana
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
 import { CrossedOutIcon } from "@/components/ratings/crossed-out-icon";
 import {
+  getDislikeColors,
+  getLikeColors,
+  getNumericalFilledColors,
+} from "@/components/ratings/rating-colors";
+import {
   IncDecRatingControl,
   LikeDislikeControl,
   NumericalRatingControl,
@@ -235,11 +240,19 @@ function LikeDislikeRatingButton({
 
   const isLiked = currentRating === true;
   const isDisliked = currentRating === false;
+  const likeColors = getLikeColors(service);
+  const dislikeColors = getDislikeColors(service);
 
   const icon = isLiked ? (
-    <FilledIcon className="size-6 text-emerald-500" />
+    <FilledIcon
+      className="size-6"
+      style={{ color: likeColors.brush, stroke: likeColors.pen }}
+    />
   ) : isDisliked ? (
-    <CrossedOutIcon className="text-destructive size-6">
+    <CrossedOutIcon
+      className="size-6"
+      style={{ color: dislikeColors.brush, stroke: dislikeColors.pen }}
+    >
       <FilledIcon className="size-6" />
     </CrossedOutIcon>
   ) : (
@@ -365,12 +378,16 @@ function NumericRatingButton({
   );
 
   const { max_stars: maxStars, min_stars: minStars } = service;
+  const filledColors = getNumericalFilledColors(service);
 
   // Show star count when rated, otherwise show outline icon
   const content =
     currentRating !== null ? (
       <span className="flex items-center gap-0.5">
-        <FilledIcon className="size-4 text-amber-500" />
+        <FilledIcon
+          className="size-4"
+          style={{ color: filledColors.brush, stroke: filledColors.pen }}
+        />
         <span className="text-base font-semibold tabular-nums">
           {currentRating}
         </span>
@@ -419,6 +436,7 @@ function NumericRatingButton({
               starShape={service.star_shape}
               onChange={handleSetRating}
               disabled={isPending}
+              filledColors={filledColors}
             />
           </div>
         </ScrollArea>
@@ -466,10 +484,20 @@ function MultiServiceRatingButton({
     firstService !== undefined &&
     isNumericalRatingService(firstService) &&
     firstRating !== null;
+  const numericFilledColors =
+    firstService && isNumericalRatingService(firstService)
+      ? getNumericalFilledColors(firstService)
+      : { brush: "#F59E0B", pen: "#000000" };
 
   const content = showNumericValue ? (
     <span className="flex items-center gap-0.5">
-      <FirstFilledIcon className="size-4 text-amber-500" />
+      <FirstFilledIcon
+        className="size-4"
+        style={{
+          color: numericFilledColors.brush,
+          stroke: numericFilledColors.pen,
+        }}
+      />
       <span className="text-base font-semibold tabular-nums">
         {firstRating as number}
       </span>
@@ -563,6 +591,8 @@ function ServiceRatingControl({
           starShape={service.star_shape}
           onChange={handleSetRating}
           disabled={isPending}
+          likeColors={getLikeColors(service)}
+          dislikeColors={getDislikeColors(service)}
         />
       )}
       {isNumericalRatingService(service) && (
@@ -575,6 +605,7 @@ function ServiceRatingControl({
           onChange={handleSetRating}
           disabled={isPending}
           compact
+          filledColors={getNumericalFilledColors(service)}
         />
       )}
       {isIncDecRatingService(service) && (

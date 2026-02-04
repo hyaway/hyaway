@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { IconBackslash } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,10 @@ interface CrossedOutIconProps {
    * @default "text-background"
    */
   strokeBackgroundColor?: string;
+  /**
+   * Inline style for the wrapper (used for dynamic service colors).
+   */
+  style?: CSSProperties;
 }
 
 /**
@@ -39,11 +43,12 @@ export function CrossedOutIcon({
   className,
   backslashClassName,
   strokeBackgroundColor = "text-background",
+  style,
 }: CrossedOutIconProps) {
   const backslashClasses = backslashClassName ?? "-inset-[35%] size-[170%]";
 
   return (
-    <span className={cn("relative", className)}>
+    <span className={cn("relative", className)} style={style}>
       {children}
       <IconBackslash
         aria-hidden
