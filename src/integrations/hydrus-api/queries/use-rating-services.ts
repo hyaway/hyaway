@@ -2,10 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useMemo } from "react";
-import { ServiceType } from "../models";
+import { isRatingService } from "../models";
 import { useGetServicesQuery } from "./services";
 import { usePrefetchServiceRatingSvgs } from "./service-rating-svg";
+import type { RatingServiceInfo, ServiceInfo } from "../models";
 import { useRatingsServiceSettings } from "@/stores/ratings-settings-store";
+
+/**
+ * Type guard for rating services with star_shape property.
+ */
+function hasStarShape(
+  service: ServiceInfo,
+): service is RatingServiceInfo & { star_shape: string } {
+  return "star_shape" in service && typeof service.star_shape === "string";
+}
+
+/**
+ * Type guard for rating services with overlay settings from Hydrus.
+ */
+function hasServiceOverlaySettings(
+  service: ServiceInfo,
+): service is RatingServiceInfo & { show_in_thumbnail: boolean } {
+  return typeof (service as RatingServiceInfo).show_in_thumbnail === "boolean";
+}
 
 /**
  * Hook that returns rating services from the Hydrus API.
@@ -19,18 +38,18 @@ export function useRatingServices() {
   const ratingServices = useMemo(() => {
     if (!servicesData?.services) return [];
 
-    return Object.entries(servicesData.services).filter(
-      ([, service]) =>
-        service.type === ServiceType.RATING_LIKE ||
-        service.type === ServiceType.RATING_NUMERICAL ||
-        service.type === ServiceType.RATING_INC_DEC,
+    return Object.entries(servicesData.services).filter(([, service]) =>
+      isRatingService(service),
     );
   }, [servicesData?.services]);
 
   // Prefetch custom SVG icons for rating services that use them
   useEffect(() => {
     const svgServiceKeys = ratingServices
-      .filter(([, service]) => service.star_shape?.toLowerCase() === "svg")
+      .filter(
+        ([, service]) =>
+          hasStarShape(service) && service.star_shape.toLowerCase() === "svg",
+      )
       .map(([key]) => key);
 
     if (svgServiceKeys.length > 0) {
@@ -64,4 +83,21 @@ export function useHasRatingServices() {
   // Show settings if we have rating services OR orphaned settings to clean up
   if (isLoading) return false;
   return ratingServices.length > 0 || hasOrphanedServices;
+}
+
+/**
+ * Hook that returns whether any rating service has the overlay settings
+ * (show_in_thumbnail, show_in_thumbnail_even_when_null) from Hydrus.
+ * This is used to determine if the "Hydrus" option should be available.
+ */
+export function useHasServiceOverlaySettings(): boolean {
+  const { ratingServices, isLoading, isFetched } = useRatingServices();
+
+  return useMemo(() => {
+    // Don't show as available until we've fetched
+    if (isLoading || !isFetched) return false;
+    return ratingServices.some(([, service]) =>
+      hasServiceOverlaySettings(service),
+    );
+  }, [ratingServices, isLoading, isFetched]);
 }

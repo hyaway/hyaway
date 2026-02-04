@@ -3,15 +3,25 @@
 
 import { useMemo } from "react";
 import { IconTallymarks, IconX } from "@tabler/icons-react";
+import type { StarShape } from "@/integrations/hydrus-api/models";
 import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
-import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
+import {
+  useHasServiceOverlaySettings,
+  useRatingServices,
+} from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import {
+  useRatingsOverlayMode,
   useRatingsServiceSettings,
   useRatingsSettingsActions,
 } from "@/stores/ratings-settings-store";
 import { Button } from "@/components/ui-primitives/button";
 import { Switch } from "@/components/ui-primitives/switch";
+import { Label } from "@/components/ui-primitives/label";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui-primitives/toggle-group";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +42,10 @@ export function RatingsSettings({
 }: RatingsSettingsProps) {
   const { ratingServices: ratingServicesRaw } = useRatingServices();
   const ratingsServiceSettings = useRatingsServiceSettings();
+  const overlayMode = useRatingsOverlayMode();
+  const hasServiceOverlaySettings = useHasServiceOverlaySettings();
   const {
+    setOverlayMode,
     setShowInOverlay,
     setShowInOverlayEvenWhenNull,
     setShowInReview,
@@ -40,6 +53,15 @@ export function RatingsSettings({
   } = useRatingsSettingsActions();
   const { hasPermission } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
+  const canSearch = hasPermission(Permission.SEARCH_FOR_AND_FETCH_FILES);
+
+  // Hydrus option available when we can search files AND services have overlay properties
+  const canUseHydrusOverlay = canSearch && hasServiceOverlaySettings;
+
+  // Auto-switch to custom mode if Hydrus overlay becomes unavailable
+  if (!canUseHydrusOverlay && overlayMode === "service") {
+    setOverlayMode("custom");
+  }
 
   // Get rating services for settings UI
   const ratingServices = useMemo(
@@ -48,7 +70,10 @@ export function RatingsSettings({
         serviceKey,
         name: service.name,
         type: service.type,
-        starShape: service.star_shape,
+        starShape: "star_shape" in service ? service.star_shape : undefined,
+        // Hydrus overlay settings (may be undefined if not available)
+        hydrusShowInThumbnail: service.show_in_thumbnail,
+        hydrusShowWhenNull: service.show_in_thumbnail_even_when_null,
       })),
     [ratingServicesRaw],
   );
@@ -76,25 +101,64 @@ export function RatingsSettings({
       showInReview: true,
     };
 
+  const isCustomMode = overlayMode === "custom";
+
   return (
     <div className="flex flex-col gap-6">
+      {/* Overlay mode toggle */}
+      <div className="flex flex-col gap-3">
+        <Label>Rating overlay source</Label>
+        <ToggleGroup
+          value={[overlayMode]}
+          onValueChange={(values) => {
+            const value = values[0];
+            if (value === "service" || value === "custom") {
+              setOverlayMode(value);
+            }
+          }}
+          variant="outline"
+          size="sm"
+        >
+          <ToggleGroupItem value="service" disabled={!canUseHydrusOverlay}>
+            Hydrus
+          </ToggleGroupItem>
+          <ToggleGroupItem value="custom">Custom</ToggleGroupItem>
+        </ToggleGroup>
+        {!canUseHydrusOverlay && (
+          <p className="text-muted-foreground text-xs">
+            {!canSearch
+              ? "Hydrus option disabled: missing search permission"
+              : "Hydrus option disabled: no rating services have overlay settings configured"}
+          </p>
+        )}
+      </div>
+
       {/* Show overlay setting */}
       <SettingGroup
         label="Show overlay"
         description="Display rating on gallery thumbnails and in file viewers"
       >
-        {ratingServices.map(({ serviceKey, name, type, starShape }) => (
-          <ServiceSwitch
-            key={serviceKey}
-            id={`${idPrefix}rating-${serviceKey}-overlay`}
-            serviceKey={serviceKey}
-            name={name}
-            type={type}
-            starShape={starShape}
-            checked={getSettings(serviceKey).showInOverlay}
-            onCheckedChange={(checked) => setShowInOverlay(serviceKey, checked)}
-          />
-        ))}
+        {ratingServices.map(
+          ({ serviceKey, name, type, starShape, hydrusShowInThumbnail }) => {
+            const customSettings = getSettings(serviceKey);
+            const checked = isCustomMode
+              ? customSettings.showInOverlay
+              : (hydrusShowInThumbnail ?? true);
+            return (
+              <ServiceSwitch
+                key={serviceKey}
+                id={`${idPrefix}rating-${serviceKey}-overlay`}
+                serviceKey={serviceKey}
+                name={name}
+                type={type}
+                starShape={starShape}
+                checked={checked}
+                onCheckedChange={(value) => setShowInOverlay(serviceKey, value)}
+                disabled={!isCustomMode}
+              />
+            );
+          },
+        )}
       </SettingGroup>
 
       {/* Show when unset/zero setting */}
@@ -102,24 +166,39 @@ export function RatingsSettings({
         label="Show when unset"
         description="Display in overlay even when not rated (or zero for counters)"
       >
-        {ratingServices.map(({ serviceKey, name, type, starShape }) => {
-          const settings = getSettings(serviceKey);
-          return (
-            <ServiceSwitch
-              key={serviceKey}
-              id={`${idPrefix}rating-${serviceKey}-show-null`}
-              serviceKey={serviceKey}
-              name={name}
-              type={type}
-              starShape={starShape}
-              checked={settings.showInOverlayEvenWhenNull}
-              onCheckedChange={(checked) =>
-                setShowInOverlayEvenWhenNull(serviceKey, checked)
-              }
-              disabled={!settings.showInOverlay}
-            />
-          );
-        })}
+        {ratingServices.map(
+          ({
+            serviceKey,
+            name,
+            type,
+            starShape,
+            hydrusShowInThumbnail,
+            hydrusShowWhenNull,
+          }) => {
+            const customSettings = getSettings(serviceKey);
+            const showInOverlay = isCustomMode
+              ? customSettings.showInOverlay
+              : (hydrusShowInThumbnail ?? true);
+            const checked = isCustomMode
+              ? customSettings.showInOverlayEvenWhenNull
+              : (hydrusShowWhenNull ?? false);
+            return (
+              <ServiceSwitch
+                key={serviceKey}
+                id={`${idPrefix}rating-${serviceKey}-show-null`}
+                serviceKey={serviceKey}
+                name={name}
+                type={type}
+                starShape={starShape}
+                checked={checked}
+                onCheckedChange={(value) =>
+                  setShowInOverlayEvenWhenNull(serviceKey, value)
+                }
+                disabled={!isCustomMode || !showInOverlay}
+              />
+            );
+          },
+        )}
       </SettingGroup>
 
       {/* Button in review setting */}
@@ -203,7 +282,7 @@ interface ServiceSwitchProps {
   serviceKey: string;
   name: string;
   type: ServiceType;
-  starShape?: string;
+  starShape?: StarShape;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
