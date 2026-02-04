@@ -137,12 +137,12 @@ const BaseRatingServiceInfoSchema = BaseServiceInfoSchema.extend({
  * Color configuration for a rating state.
  * `brush` is the fill color, `pen` is the stroke/outline color.
  */
-export const RatingColourSchema = z.object({
+export const RatingColorSchema = z.object({
   brush: z.string(),
   pen: z.string(),
 });
 
-export type RatingColour = z.infer<typeof RatingColourSchema>;
+export type RatingColor = z.infer<typeof RatingColorSchema>;
 
 /**
  * Known star shapes for rating services.
@@ -189,10 +189,10 @@ export const LikeRatingServiceInfoSchema = BaseRatingServiceInfoSchema.extend({
   star_shape: z.enum(STAR_SHAPES).catch("fat star"),
   colours: z
     .object({
-      like: RatingColourSchema,
-      dislike: RatingColourSchema,
-      mixed: RatingColourSchema,
-      null: RatingColourSchema,
+      like: RatingColorSchema,
+      dislike: RatingColorSchema,
+      mixed: RatingColorSchema,
+      null: RatingColorSchema,
     })
     .optional(),
 });
@@ -214,10 +214,10 @@ export const NumericalRatingServiceInfoSchema =
     allows_zero: z.boolean().optional(),
     colours: z
       .object({
-        like: RatingColourSchema,
-        dislike: RatingColourSchema,
-        mixed: RatingColourSchema,
-        null: RatingColourSchema,
+        like: RatingColorSchema,
+        dislike: RatingColorSchema,
+        mixed: RatingColorSchema,
+        null: RatingColorSchema,
       })
       .optional(),
   });
@@ -240,8 +240,8 @@ export const IncDecRatingServiceInfoSchema = BaseRatingServiceInfoSchema.extend(
     star_shape: z.enum(STAR_SHAPES).default("tallymarks"),
     colours: z
       .object({
-        like: RatingColourSchema,
-        mixed: RatingColourSchema,
+        like: RatingColorSchema,
+        mixed: RatingColorSchema,
       })
       .optional(),
   },

@@ -17,7 +17,7 @@ import {
   DEFAULT_NUMERICAL_FILLED,
 } from "./rating-colors";
 import type {
-  RatingColour,
+  RatingColor,
   RatingValue,
   StarShape,
 } from "@/integrations/hydrus-api/models";
@@ -48,9 +48,9 @@ interface LikeDislikeControlProps {
   /** Compact mode with smaller buttons */
   compact?: boolean;
   /** Custom like colors from service */
-  likeColors?: RatingColour;
+  likeColors?: RatingColor;
   /** Custom dislike colors from service */
-  dislikeColors?: RatingColour;
+  dislikeColors?: RatingColor;
 }
 
 export function LikeDislikeControl({
@@ -210,7 +210,7 @@ interface NumericalRatingControlProps {
    * Custom filled star colors from service.
    * @default DEFAULT_NUMERICAL_FILLED
    */
-  filledColors?: RatingColour;
+  filledColors?: RatingColor;
 }
 
 export function NumericalRatingControl({
@@ -465,7 +465,7 @@ interface NumericalRatingDropdownProps {
   }>;
   OutlineIcon: React.ComponentType<{ className?: string }>;
   shapeClassName?: string;
-  filledColors?: RatingColour;
+  filledColors?: RatingColor;
 }
 
 function NumericalRatingDropdown({

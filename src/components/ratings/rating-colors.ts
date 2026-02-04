@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type {
-  RatingColour,
+  RatingColor,
   RatingServiceInfo,
 } from "@/integrations/hydrus-api/models";
 
@@ -10,12 +10,12 @@ import type {
  * Default rating colors to use when the service doesn't provide them.
  * These match the typical Hydrus defaults.
  */
-export const DEFAULT_LIKE_COLORS: RatingColour = {
+export const DEFAULT_LIKE_COLORS: RatingColor = {
   brush: "#50C878",
   pen: "#50C878",
 }; // Emerald green
 
-export const DEFAULT_DISLIKE_COLORS: RatingColour = {
+export const DEFAULT_DISLIKE_COLORS: RatingColor = {
   brush: "#E5484D",
   pen: "#E5484D",
 }; // Destructive red
@@ -25,12 +25,12 @@ const DEFAULT_COLORS = {
   dislike: DEFAULT_DISLIKE_COLORS,
   mixed: { brush: "#5F5F5F", pen: "#5F5F5F" },
   null: { brush: "#BFBFBF", pen: "#BFBFBF" },
-} satisfies Record<string, RatingColour>;
+} satisfies Record<string, RatingColor>;
 
 /**
  * Default color for filled numerical ratings (amber/gold).
  */
-export const DEFAULT_NUMERICAL_FILLED: RatingColour = {
+export const DEFAULT_NUMERICAL_FILLED: RatingColor = {
   brush: "#F59E0B",
   pen: "#F59E0B",
 };
@@ -41,7 +41,7 @@ export const DEFAULT_NUMERICAL_FILLED: RatingColour = {
  * @param service - The rating service info
  * @returns Object with brush (fill) and pen (stroke) colors
  */
-export function getLikeColors(service: RatingServiceInfo): RatingColour {
+export function getLikeColors(service: RatingServiceInfo): RatingColor {
   return service.colours?.like ?? DEFAULT_COLORS.like;
 }
 
@@ -51,8 +51,8 @@ export function getLikeColors(service: RatingServiceInfo): RatingColour {
  * @param service - The rating service info
  * @returns Object with brush (fill) and pen (stroke) colors
  */
-export function getDislikeColors(service: RatingServiceInfo): RatingColour {
-  const colors = (service.colours as Record<string, RatingColour> | undefined)
+export function getDislikeColors(service: RatingServiceInfo): RatingColor {
+  const colors = (service.colours as Record<string, RatingColor> | undefined)
     ?.dislike;
   return colors ?? DEFAULT_COLORS.dislike;
 }
@@ -66,7 +66,7 @@ export function getDislikeColors(service: RatingServiceInfo): RatingColour {
  */
 export function getNumericalFilledColors(
   service: RatingServiceInfo,
-): RatingColour {
+): RatingColor {
   return service.colours?.like ?? DEFAULT_NUMERICAL_FILLED;
 }
 
@@ -79,6 +79,6 @@ export function getNumericalFilledColors(
  */
 export function getIncDecPositiveColors(
   service: RatingServiceInfo,
-): RatingColour | undefined {
+): RatingColor | undefined {
   return service.colours?.like;
 }
