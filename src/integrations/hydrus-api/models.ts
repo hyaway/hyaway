@@ -173,6 +173,7 @@ export const STAR_SHAPES = [
   "teardrop",
   "crescent moon",
   "svg",
+  "tallymarks", // Virtual shape for inc/dec services (not from Hydrus)
 ] as const;
 
 export type StarShape = (typeof STAR_SHAPES)[number];
@@ -185,13 +186,13 @@ export type StarShape = (typeof STAR_SHAPES)[number];
  */
 export const LikeRatingServiceInfoSchema = BaseRatingServiceInfoSchema.extend({
   type: z.literal(ServiceType.RATING_LIKE),
-  star_shape: z.enum(STAR_SHAPES).optional().catch(undefined),
+  star_shape: z.enum(STAR_SHAPES).catch("fat star"),
   colours: z
     .object({
-      like: RatingColourSchema.optional(),
-      dislike: RatingColourSchema.optional(),
-      mixed: RatingColourSchema.optional(),
-      null: RatingColourSchema.optional(),
+      like: RatingColourSchema,
+      dislike: RatingColourSchema,
+      mixed: RatingColourSchema,
+      null: RatingColourSchema,
     })
     .optional(),
 });
@@ -207,16 +208,16 @@ export type LikeRatingServiceInfo = z.infer<typeof LikeRatingServiceInfoSchema>;
 export const NumericalRatingServiceInfoSchema =
   BaseRatingServiceInfoSchema.extend({
     type: z.literal(ServiceType.RATING_NUMERICAL),
-    star_shape: z.enum(STAR_SHAPES).optional().catch(undefined),
-    min_stars: z.number().optional(),
-    max_stars: z.number().optional(),
+    star_shape: z.enum(STAR_SHAPES).catch("fat star"),
+    min_stars: z.number(),
+    max_stars: z.number(),
     allows_zero: z.boolean().optional(),
     colours: z
       .object({
-        like: RatingColourSchema.optional(),
-        dislike: RatingColourSchema.optional(),
-        mixed: RatingColourSchema.optional(),
-        null: RatingColourSchema.optional(),
+        like: RatingColourSchema,
+        dislike: RatingColourSchema,
+        mixed: RatingColourSchema,
+        null: RatingColourSchema,
       })
       .optional(),
   });
@@ -230,14 +231,17 @@ export type NumericalRatingServiceInfo = z.infer<
 /**
  * Inc/Dec rating service (type 22).
  * Has a positive integer rating, 0 is the minimum/default.
+ * Note: star_shape defaults to "tallymarks" since Hydrus doesn't provide one.
  */
 export const IncDecRatingServiceInfoSchema = BaseRatingServiceInfoSchema.extend(
   {
     type: z.literal(ServiceType.RATING_INC_DEC),
+    // Default to "tallymarks" since Hydrus doesn't provide star_shape for inc/dec
+    star_shape: z.enum(STAR_SHAPES).default("tallymarks"),
     colours: z
       .object({
-        like: RatingColourSchema.optional(),
-        mixed: RatingColourSchema.optional(),
+        like: RatingColourSchema,
+        mixed: RatingColourSchema,
       })
       .optional(),
   },

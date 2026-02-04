@@ -7,15 +7,15 @@ import type {
   FileMetadata,
   RatingServiceInfo,
   RatingValue,
-  ServiceInfo,
 } from "@/integrations/hydrus-api/models";
 import {
   Permission,
-  ServiceType,
-  isRatingService,
+  isIncDecRatingService,
+  isLikeRatingService,
+  isNumericalRatingService,
 } from "@/integrations/hydrus-api/models";
-import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
+import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import {
   useRatingsOverlayMode,
   useRatingsServiceSettings,
@@ -24,7 +24,7 @@ import {
 
 export interface RatingToShow {
   serviceKey: string;
-  service: ServiceInfo;
+  service: RatingServiceInfo;
   value: RatingValue;
 }
 
@@ -33,13 +33,13 @@ export interface RatingToShow {
  * These properties are only available if the services endpoint returns them.
  */
 function hasServiceOverlaySettings(
-  service: ServiceInfo,
+  service: RatingServiceInfo,
 ): service is RatingServiceInfo & { show_in_thumbnail: boolean } {
-  return typeof (service as RatingServiceInfo).show_in_thumbnail === "boolean";
+  return typeof service.show_in_thumbnail === "boolean";
 }
 
 export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
-  const { data: servicesData } = useGetServicesQuery();
+  const { ratingServices } = useRatingServices();
   const serviceSettings = useRatingsServiceSettings();
   const overlayMode = useRatingsOverlayMode();
   const { getServiceSettings } = useRatingsSettingsActions();
@@ -52,26 +52,18 @@ export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
     if (overlayMode !== "service" || !hasSearchPermission) return "custom";
 
     // Check if any rating service has the overlay properties
-    const ratingServicesWithOverlay = servicesData?.services
-      ? Object.values(servicesData.services).filter(
-          (s): s is RatingServiceInfo & { show_in_thumbnail: boolean } =>
-            isRatingService(s) && hasServiceOverlaySettings(s),
-        )
-      : [];
+    const hasOverlaySettings = ratingServices.some(([, service]) =>
+      hasServiceOverlaySettings(service),
+    );
 
-    return ratingServicesWithOverlay.length > 0 ? "service" : "custom";
-  }, [overlayMode, servicesData?.services, hasSearchPermission]);
+    return hasOverlaySettings ? "service" : "custom";
+  }, [overlayMode, ratingServices, hasSearchPermission]);
 
   return useMemo(() => {
-    if (!servicesData?.services || !item.ratings) return [];
+    if (!item.ratings) return [];
 
-    return Object.entries(servicesData.services)
+    return ratingServices
       .filter(([serviceKey, service]) => {
-        // Only rating services
-        if (!isRatingService(service)) {
-          return false;
-        }
-
         const ratingValue = item.ratings?.[serviceKey];
 
         // Determine visibility based on mode
@@ -92,24 +84,15 @@ export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
         // Check if we should show when null/unset
         if (!showWhenNull) {
           // Like/Dislike: null means unset
-          if (
-            service.type === ServiceType.RATING_LIKE &&
-            ratingValue === null
-          ) {
+          if (isLikeRatingService(service) && ratingValue === null) {
             return false;
           }
           // Numerical: null means unset
-          if (
-            service.type === ServiceType.RATING_NUMERICAL &&
-            ratingValue === null
-          ) {
+          if (isNumericalRatingService(service) && ratingValue === null) {
             return false;
           }
           // Inc/Dec: 0 is treated as "not set" for the second toggle
-          if (
-            service.type === ServiceType.RATING_INC_DEC &&
-            ratingValue === 0
-          ) {
+          if (isIncDecRatingService(service) && ratingValue === 0) {
             return false;
           }
         }
@@ -122,7 +105,7 @@ export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
         value: item.ratings?.[serviceKey] ?? null,
       }));
   }, [
-    servicesData?.services,
+    ratingServices,
     item.ratings,
     serviceSettings,
     effectiveMode,

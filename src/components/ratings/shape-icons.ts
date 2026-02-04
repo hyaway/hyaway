@@ -35,6 +35,7 @@ import {
   IconSquareFilled,
   IconStar,
   IconStarFilled,
+  IconTallymarks,
   IconTriangle,
   IconTriangleFilled,
   IconTriangleInverted,
@@ -55,7 +56,7 @@ export interface ShapeIcons {
 }
 
 /**
- * Default shape when star_shape is not specified.
+ * Default shape when star_shape is not specified or unknown.
  */
 export const DEFAULT_SHAPE: ShapeIcons = {
   filled: IconHelpCircleFilled,
@@ -156,6 +157,11 @@ export const SHAPE_ICONS: Record<StarShape, ShapeIcons> = {
   },
   // Custom SVG uses default shape as fallback (actual SVG fetched separately)
   svg: DEFAULT_SHAPE,
+  // Virtual shape for inc/dec services (not from Hydrus)
+  tallymarks: {
+    filled: IconTallymarks,
+    outline: IconTallymarks,
+  },
 };
 
 /**

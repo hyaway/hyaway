@@ -5,10 +5,15 @@ import { IconTallymarks } from "@tabler/icons-react";
 
 import type {
   FileMetadata,
+  RatingServiceInfo,
   RatingValue,
-  ServiceInfo,
 } from "@/integrations/hydrus-api/models";
-import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
+import {
+  Permission,
+  isIncDecRatingService,
+  isLikeRatingService,
+  isNumericalRatingService,
+} from "@/integrations/hydrus-api/models";
 import { SectionHeading } from "@/components/page-shell/section-heading";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
@@ -61,7 +66,7 @@ export function FileRatingsSection({ data }: FileRatingsSectionProps) {
 
 interface RatingControlProps {
   serviceKey: string;
-  service: ServiceInfo;
+  service: RatingServiceInfo;
   fileId: number;
   currentRating: RatingValue;
   disabled?: boolean;
@@ -92,27 +97,25 @@ function RatingControl({
 
   // Format the current rating for display in the title
   const getRatingDisplay = () => {
-    if (service.type === ServiceType.RATING_LIKE) {
+    if (isLikeRatingService(service)) {
       const value = currentRating as boolean | null;
       if (value === true) return "liked";
       if (value === false) return "disliked";
       return "no rating";
     }
-    if (service.type === ServiceType.RATING_NUMERICAL) {
+    if (isNumericalRatingService(service)) {
       const value = currentRating as number | null;
-      const max = service.max_stars ?? 5;
+      const max = service.max_stars;
       return value === null ? `-/${max}` : `${value}/${max}`;
     }
-    if (service.type === ServiceType.RATING_INC_DEC) {
-      return String(currentRating ?? 0);
-    }
-    return null;
+    // Inc/Dec
+    return String(currentRating ?? 0);
   };
 
   return (
     <div className="bg-muted/50 hover:bg-muted flex flex-wrap items-center gap-2 rounded-lg border p-3 transition-colors">
       <div className="flex min-w-0 items-center gap-2">
-        {service.type === ServiceType.RATING_INC_DEC ? (
+        {isIncDecRatingService(service) ? (
           <IconTallymarks className="text-muted-foreground size-6 shrink-0" />
         ) : (
           <FilledServiceIcon className="text-muted-foreground size-6 shrink-0" />
@@ -130,7 +133,7 @@ function RatingControl({
         </div>
       </div>
       <div className="ml-auto flex items-center gap-2">
-        {service.type === ServiceType.RATING_LIKE && (
+        {isLikeRatingService(service) && (
           <LikeDislikeControl
             value={currentRating as boolean | null}
             serviceKey={serviceKey}
@@ -139,18 +142,18 @@ function RatingControl({
             disabled={disabled || isPending}
           />
         )}
-        {service.type === ServiceType.RATING_NUMERICAL && (
+        {isNumericalRatingService(service) && (
           <NumericalRatingControl
             value={currentRating as number | null}
-            minStars={service.min_stars ?? 0}
-            maxStars={service.max_stars ?? 5}
+            minStars={service.min_stars}
+            maxStars={service.max_stars}
             serviceKey={serviceKey}
             starShape={service.star_shape}
             onChange={handleSetRating}
             disabled={disabled || isPending}
           />
         )}
-        {service.type === ServiceType.RATING_INC_DEC && (
+        {isIncDecRatingService(service) && (
           <IncDecRatingControl
             value={currentRating as number}
             onChange={handleSetRating}

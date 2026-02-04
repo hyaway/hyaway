@@ -9,15 +9,6 @@ import type { RatingServiceInfo, ServiceInfo } from "../models";
 import { useRatingsServiceSettings } from "@/stores/ratings-settings-store";
 
 /**
- * Type guard for rating services with star_shape property.
- */
-function hasStarShape(
-  service: ServiceInfo,
-): service is RatingServiceInfo & { star_shape: string } {
-  return "star_shape" in service && typeof service.star_shape === "string";
-}
-
-/**
  * Type guard for rating services with overlay settings from Hydrus.
  */
 function hasServiceOverlaySettings(
@@ -35,21 +26,19 @@ export function useRatingServices() {
   const { data: servicesData, isLoading, ...rest } = useGetServicesQuery();
   const prefetchSvgs = usePrefetchServiceRatingSvgs();
 
-  const ratingServices = useMemo(() => {
+  const ratingServices = useMemo((): Array<[string, RatingServiceInfo]> => {
     if (!servicesData?.services) return [];
 
-    return Object.entries(servicesData.services).filter(([, service]) =>
-      isRatingService(service),
+    return Object.entries(servicesData.services).filter(
+      (entry): entry is [string, RatingServiceInfo] =>
+        isRatingService(entry[1]),
     );
   }, [servicesData?.services]);
 
   // Prefetch custom SVG icons for rating services that use them
   useEffect(() => {
     const svgServiceKeys = ratingServices
-      .filter(
-        ([, service]) =>
-          hasStarShape(service) && service.star_shape.toLowerCase() === "svg",
-      )
+      .filter(([, service]) => service.star_shape === "svg")
       .map(([key]) => key);
 
     if (svgServiceKeys.length > 0) {

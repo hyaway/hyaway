@@ -3,8 +3,8 @@
 
 import { RatingsOverlayBadge } from "./ratings-overlay-badge";
 import type {
+  RatingServiceInfo,
   RatingValue,
-  ServiceInfo,
 } from "@/integrations/hydrus-api/models";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ type RatingsOverlayBadgeVariant = "overlay" | "thumbnail";
 
 interface RatingsOverlayBadgeItemProps {
   serviceKey: string;
-  service: ServiceInfo;
+  service: RatingServiceInfo;
   value: RatingValue;
   variant: RatingsOverlayBadgeVariant;
   size?: RatingsOverlayBadgeSize;

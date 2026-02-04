@@ -6,15 +6,18 @@ import { IconTallymarks } from "@tabler/icons-react";
 import { CrossedOutIcon } from "./crossed-out-icon";
 import { useShapeIcons } from "./use-shape-icons";
 import type {
+  RatingServiceInfo,
   RatingValue,
-  ServiceInfo,
 } from "@/integrations/hydrus-api/models";
-import { ServiceType } from "@/integrations/hydrus-api/models";
+import {
+  isLikeRatingService,
+  isNumericalRatingService,
+} from "@/integrations/hydrus-api/models";
 import { cn } from "@/lib/utils";
 
 interface RatingsOverlayBadgeProps {
   serviceKey: string;
-  service: ServiceInfo;
+  service: RatingServiceInfo;
   value: RatingValue;
   badgeClassName: string;
   iconClassName: string;
@@ -39,7 +42,7 @@ export function RatingsOverlayBadge({
 
   const iconClass = cn(iconClassName, shapeClassName);
 
-  if (service.type === ServiceType.RATING_LIKE) {
+  if (isLikeRatingService(service)) {
     const isLiked = value === true;
     const isDisliked = value === false;
 
@@ -71,9 +74,9 @@ export function RatingsOverlayBadge({
     );
   }
 
-  if (service.type === ServiceType.RATING_NUMERICAL) {
+  if (isNumericalRatingService(service)) {
     const numValue = value as number | null;
-    const maxStars = service.max_stars ?? 5;
+    const maxStars = service.max_stars;
     const isUnset = numValue === null;
 
     return (
@@ -91,26 +94,23 @@ export function RatingsOverlayBadge({
     );
   }
 
-  if (service.type === ServiceType.RATING_INC_DEC) {
-    const numValue = typeof value === "number" ? value : 0;
-    const sign = numValue > 0 ? "+" : "";
-    const isZero = numValue === 0;
+  // Inc/Dec
+  const numValue = typeof value === "number" ? value : 0;
+  const sign = numValue > 0 ? "+" : "";
+  const isZero = numValue === 0;
 
-    return (
-      <div
-        className={cn(
-          badgeClassName,
-          isZero && "bg-card/60 text-muted-foreground",
-        )}
-      >
-        <IconTallymarks className={iconClass} />
-        <span className={valueClassName}>
-          {sign}
-          {numValue}
-        </span>
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <div
+      className={cn(
+        badgeClassName,
+        isZero && "bg-card/60 text-muted-foreground",
+      )}
+    >
+      <IconTallymarks className={iconClass} />
+      <span className={valueClassName}>
+        {sign}
+        {numValue}
+      </span>
+    </div>
+  );
 }

@@ -70,8 +70,7 @@ export function RatingsSettings({
         serviceKey,
         name: service.name,
         type: service.type,
-        starShape: "star_shape" in service ? service.star_shape : undefined,
-        // Hydrus overlay settings (may be undefined if not available)
+        starShape: service.star_shape,
         hydrusShowInThumbnail: service.show_in_thumbnail,
         hydrusShowWhenNull: service.show_in_thumbnail_even_when_null,
       })),
@@ -282,7 +281,7 @@ interface ServiceSwitchProps {
   serviceKey: string;
   name: string;
   type: ServiceType;
-  starShape?: StarShape;
+  starShape: StarShape;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;

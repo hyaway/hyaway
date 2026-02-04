@@ -5,10 +5,19 @@ import { useMemo, useState } from "react";
 import { IconHeart } from "@tabler/icons-react";
 import type {
   FileMetadata,
+  IncDecRatingServiceInfo,
+  LikeRatingServiceInfo,
+  NumericalRatingServiceInfo,
+  RatingServiceInfo,
   RatingValue,
-  ServiceInfo,
 } from "@/integrations/hydrus-api/models";
-import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
+
+import {
+  Permission,
+  isIncDecRatingService,
+  isLikeRatingService,
+  isNumericalRatingService,
+} from "@/integrations/hydrus-api/models";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
@@ -143,7 +152,7 @@ export function ReviewRatingButton({
 
 interface SingleServiceRatingButtonProps {
   serviceKey: string;
-  service: ServiceInfo;
+  service: RatingServiceInfo;
   fileId: number;
   currentRating: RatingValue;
   className?: string;
@@ -158,7 +167,7 @@ function SingleServiceRatingButton({
   className,
   truncateLabel,
 }: SingleServiceRatingButtonProps) {
-  if (service.type === ServiceType.RATING_LIKE) {
+  if (isLikeRatingService(service)) {
     return (
       <LikeDislikeRatingButton
         serviceKey={serviceKey}
@@ -171,7 +180,7 @@ function SingleServiceRatingButton({
     );
   }
 
-  if (service.type === ServiceType.RATING_INC_DEC) {
+  if (isIncDecRatingService(service)) {
     return (
       <IncDecRatingButton
         serviceKey={serviceKey}
@@ -203,7 +212,7 @@ function SingleServiceRatingButton({
 
 interface LikeDislikeRatingButtonProps {
   serviceKey: string;
-  service: ServiceInfo;
+  service: LikeRatingServiceInfo;
   fileId: number;
   currentRating: boolean | null;
   className?: string;
@@ -275,7 +284,7 @@ function LikeDislikeRatingButton({
 
 interface IncDecRatingButtonProps {
   serviceKey: string;
-  service: ServiceInfo;
+  service: IncDecRatingServiceInfo;
   fileId: number;
   currentRating: number;
   className?: string;
@@ -334,7 +343,7 @@ function IncDecRatingButton({
 
 interface NumericRatingButtonProps {
   serviceKey: string;
-  service: ServiceInfo;
+  service: NumericalRatingServiceInfo;
   fileId: number;
   currentRating: number | null;
   className?: string;
@@ -355,7 +364,7 @@ function NumericRatingButton({
     service.star_shape,
   );
 
-  const maxStars = service.max_stars ?? 5;
+  const { max_stars: maxStars, min_stars: minStars } = service;
 
   // Show star count when rated, otherwise show outline icon
   const content =
@@ -404,7 +413,7 @@ function NumericRatingButton({
             </span>
             <NumericalRatingControl
               value={currentRating}
-              minStars={service.min_stars ?? 0}
+              minStars={minStars}
               maxStars={maxStars}
               serviceKey={serviceKey}
               starShape={service.star_shape}
@@ -423,7 +432,7 @@ function NumericRatingButton({
 // ============================================================================
 
 interface MultiServiceRatingButtonProps {
-  services: Array<[string, ServiceInfo]>;
+  services: Array<[string, RatingServiceInfo]>;
   metadata?: FileMetadata;
   className?: string;
   truncateLabel?: boolean;
@@ -438,7 +447,7 @@ function MultiServiceRatingButton({
   const [open, setOpen] = useState(false);
 
   // Get first service icon for button display (only used for single service)
-  const firstEntry = services[0] as [string, ServiceInfo] | undefined;
+  const firstEntry = services[0] as [string, RatingServiceInfo] | undefined;
   const firstServiceKey = firstEntry ? firstEntry[0] : "";
   const firstService = firstEntry ? firstEntry[1] : undefined;
   const { filled: FirstFilledIcon, outline: FirstOutlineIcon } = useShapeIcons(
@@ -454,7 +463,8 @@ function MultiServiceRatingButton({
   const firstRating = metadata?.ratings?.[firstServiceKey] ?? null;
   const showNumericValue =
     isSingleService &&
-    firstService?.type === ServiceType.RATING_NUMERICAL &&
+    firstService !== undefined &&
+    isNumericalRatingService(firstService) &&
     firstRating !== null;
 
   const content = showNumericValue ? (
@@ -510,7 +520,7 @@ function MultiServiceRatingButton({
 
 interface ServiceRatingControlProps {
   serviceKey: string;
-  service: ServiceInfo;
+  service: RatingServiceInfo;
   fileId: number;
 }
 
@@ -534,9 +544,7 @@ function ServiceRatingControl({
   };
 
   // Numerical ratings with star grid need vertical layout
-  const isStarGrid =
-    service.type === ServiceType.RATING_NUMERICAL &&
-    (service.max_stars ?? 5) < 6;
+  const isStarGrid = isNumericalRatingService(service) && service.max_stars < 6;
 
   return (
     <div
@@ -548,7 +556,7 @@ function ServiceRatingControl({
       )}
     >
       {/* Rating control based on type */}
-      {service.type === ServiceType.RATING_LIKE && (
+      {isLikeRatingService(service) && (
         <LikeDislikeControl
           value={currentRating as boolean | null}
           serviceKey={serviceKey}
@@ -557,11 +565,11 @@ function ServiceRatingControl({
           disabled={isPending}
         />
       )}
-      {service.type === ServiceType.RATING_NUMERICAL && (
+      {isNumericalRatingService(service) && (
         <NumericalRatingControl
           value={currentRating as number | null}
-          minStars={service.min_stars ?? 0}
-          maxStars={service.max_stars ?? 5}
+          minStars={service.min_stars}
+          maxStars={service.max_stars}
           serviceKey={serviceKey}
           starShape={service.star_shape}
           onChange={handleSetRating}
@@ -569,7 +577,7 @@ function ServiceRatingControl({
           compact
         />
       )}
-      {service.type === ServiceType.RATING_INC_DEC && (
+      {isIncDecRatingService(service) && (
         <IncDecRatingControl
           value={(currentRating as number | null) ?? 0}
           onChange={handleSetRating}

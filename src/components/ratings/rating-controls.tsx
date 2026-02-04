@@ -11,7 +11,7 @@ import {
   IconPlus,
 } from "@tabler/icons-react";
 import { useShapeIcons } from "./use-shape-icons";
-import type { RatingValue } from "@/integrations/hydrus-api/models";
+import type { RatingValue, StarShape } from "@/integrations/hydrus-api/models";
 import { Button } from "@/components/ui-primitives/button";
 import {
   DropdownMenu,
@@ -33,7 +33,7 @@ const COMPACT_DROPDOWN_THRESHOLD = 6;
 interface LikeDislikeControlProps {
   value: boolean | null;
   serviceKey: string;
-  starShape?: string;
+  starShape: StarShape;
   onChange: (value: boolean | null) => void;
   disabled?: boolean;
   /** Compact mode with smaller buttons */
@@ -178,7 +178,7 @@ interface NumericalRatingControlProps {
   minStars: number;
   maxStars: number;
   serviceKey: string;
-  starShape?: string;
+  starShape: StarShape;
   onChange: (value: number | null) => void;
   disabled?: boolean;
   /** Compact mode: hides number labels, uses dropdown for high star counts */
