@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { createCustomSvgIcons } from "./custom-svg-icon";
 import { DEFAULT_SHAPE, getShapeIcons } from "./shape-icons";
 import type { ShapeIcons } from "./shape-icons";
+import type { StarShape } from "@/integrations/hydrus-api/models";
 import { useServiceRatingSvgQuery } from "@/integrations/hydrus-api/queries/service-rating-svg";
 
 /**
@@ -18,9 +19,9 @@ import { useServiceRatingSvgQuery } from "@/integrations/hydrus-api/queries/serv
  */
 export function useShapeIcons(
   serviceKey: string,
-  starShape?: string,
+  starShape?: StarShape,
 ): ShapeIcons & { isLoading: boolean } {
-  const isCustomSvg = starShape?.toLowerCase() === "svg";
+  const isCustomSvg = starShape === "svg";
 
   // Only fetch SVG if star_shape is "svg"
   const { data: svgContent, isLoading } = useServiceRatingSvgQuery(

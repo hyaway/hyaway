@@ -43,6 +43,8 @@ import {
 } from "@tabler/icons-react";
 import type { ComponentType } from "react";
 
+import type { StarShape } from "@/integrations/hydrus-api/models";
+
 export type IconComponent = ComponentType<{ className?: string }>;
 
 export interface ShapeIcons {
@@ -53,10 +55,18 @@ export interface ShapeIcons {
 }
 
 /**
+ * Default shape when star_shape is not specified.
+ */
+export const DEFAULT_SHAPE: ShapeIcons = {
+  filled: IconHelpCircleFilled,
+  outline: IconHelpCircle,
+};
+
+/**
  * Maps Hydrus star_shape values to Tabler icon components.
  * Hydrus shapes: https://hydrusnetwork.github.io/hydrus/developer_api.html#get_services
  */
-export const SHAPE_ICONS: Record<string, ShapeIcons> = {
+export const SHAPE_ICONS: Record<StarShape, ShapeIcons> = {
   circle: {
     filled: IconCircleFilled,
     outline: IconCircle,
@@ -140,26 +150,18 @@ export const SHAPE_ICONS: Record<string, ShapeIcons> = {
     filled: IconDropletFilled,
     outline: IconDroplet,
   },
-  crescent: {
+  "crescent moon": {
     filled: IconMoonFilled,
     outline: IconMoon,
   },
-};
-
-/** Default shape when star_shape is not specified or not found */
-export const DEFAULT_SHAPE: ShapeIcons = {
-  filled: IconHelpCircleFilled,
-  outline: IconHelpCircle,
+  // Custom SVG uses default shape as fallback (actual SVG fetched separately)
+  svg: DEFAULT_SHAPE,
 };
 
 /**
  * Gets the shape icons for a given star_shape value.
- * Returns DEFAULT_SHAPE if the shape is not found or is "svg" (custom SVGs need special handling).
+ * Returns DEFAULT_SHAPE if the shape is not specified.
  */
-export function getShapeIcons(starShape?: string): ShapeIcons {
-  // Don't look up "svg" in SHAPE_ICONS - it needs special handling
-  if (starShape?.toLowerCase() === "svg") return DEFAULT_SHAPE;
-  const shape = starShape ? SHAPE_ICONS[starShape.toLowerCase()] : undefined;
-  if (!shape) return DEFAULT_SHAPE;
-  return shape;
+export function getShapeIcons(starShape?: StarShape): ShapeIcons {
+  return starShape ? SHAPE_ICONS[starShape] : DEFAULT_SHAPE;
 }

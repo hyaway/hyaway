@@ -144,6 +144,39 @@ export const RatingColourSchema = z.object({
 
 export type RatingColour = z.infer<typeof RatingColourSchema>;
 
+/**
+ * Known star shapes for rating services.
+ * "svg" means a custom user SVG that can be fetched with /get_service_rating_svg.
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#services_object
+ */
+export const STAR_SHAPES = [
+  "circle",
+  "square",
+  "fat star",
+  "pentagram star",
+  "six point star",
+  "eight point star",
+  "x shape",
+  "square cross",
+  "triangle up",
+  "triangle down",
+  "triangle right",
+  "triangle left",
+  "diamond",
+  "rhombus right",
+  "rhombus left",
+  "hourglass",
+  "pentagon",
+  "hexagon",
+  "small hexagon",
+  "heart",
+  "teardrop",
+  "crescent moon",
+  "svg",
+] as const;
+
+export type StarShape = (typeof STAR_SHAPES)[number];
+
 // --- Like/Dislike Rating Service ---
 
 /**
@@ -152,7 +185,7 @@ export type RatingColour = z.infer<typeof RatingColourSchema>;
  */
 export const LikeRatingServiceInfoSchema = BaseRatingServiceInfoSchema.extend({
   type: z.literal(ServiceType.RATING_LIKE),
-  star_shape: z.string().optional(),
+  star_shape: z.enum(STAR_SHAPES).optional().catch(undefined),
   colours: z
     .object({
       like: RatingColourSchema.optional(),
@@ -174,7 +207,7 @@ export type LikeRatingServiceInfo = z.infer<typeof LikeRatingServiceInfoSchema>;
 export const NumericalRatingServiceInfoSchema =
   BaseRatingServiceInfoSchema.extend({
     type: z.literal(ServiceType.RATING_NUMERICAL),
-    star_shape: z.string().optional(),
+    star_shape: z.enum(STAR_SHAPES).optional().catch(undefined),
     min_stars: z.number().optional(),
     max_stars: z.number().optional(),
     allows_zero: z.boolean().optional(),
