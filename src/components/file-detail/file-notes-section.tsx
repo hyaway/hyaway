@@ -56,7 +56,7 @@ function FileNote({ name, content }: FileNoteProps) {
       : previewLines + (content.split("\n").length > 3 ? "…" : "");
 
   return (
-    <div className="bg-muted/50 hover:bg-muted flex items-start gap-2 rounded-lg border p-3 transition-colors">
+    <div className="bg-muted/50 flex items-start gap-2 rounded-lg border p-3 transition-colors">
       <IconNote className="text-muted-foreground mt-1.5 size-6 shrink-0" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">

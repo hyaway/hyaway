@@ -118,7 +118,7 @@ function RatingControl({
   };
 
   return (
-    <div className="bg-muted/50 hover:bg-muted flex flex-wrap items-center gap-2 rounded-lg border p-3 transition-colors">
+    <div className="bg-muted/50 flex flex-wrap items-center gap-2 rounded-lg border p-3 transition-colors">
       <div className="flex min-w-0 items-center gap-2">
         {isIncDecRatingService(service) ? (
           <IconTallymarks className="text-muted-foreground size-6 shrink-0" />
