@@ -110,7 +110,7 @@ const theme = getActiveThemeSnapshot();
 | `useReviewQueueRemaining`     | `number`                                             |
 | `useReviewQueueIsComplete`    | `boolean`                                            |
 | `useReviewQueueIsEmpty`       | `boolean`                                            |
-| `useReviewStats`              | `ReviewStats`                                        |
+| `useReviewDirectionStats`     | `ReviewDirectionStats`                               |
 | `useReviewShortcutsEnabled`   | `boolean`                                            |
 | `useReviewGesturesEnabled`    | `boolean`                                            |
 | `useReviewQueueActions`       | `{ setQueue, clearQueue, setShortcutsEnabled, ... }` |

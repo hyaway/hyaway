@@ -9,19 +9,28 @@ import { ReviewCardContent } from "./review-card-content";
 import type { SwipeDirection } from "./review-swipe-card";
 import type {
   PreviousFileState,
-  ReviewAction,
+  RatingRestoreEntry,
+  RestoreData,
   ReviewHistoryEntry,
 } from "@/stores/review-queue-store";
+import type {
+  ReviewFileAction,
+  SwipeBindings,
+} from "@/stores/review-settings-store";
 import {
-  useReviewGesturesEnabled,
   useReviewQueueActions,
   useReviewQueueCurrentFileId,
   useReviewQueueCurrentIndex,
   useReviewQueueFileIds,
   useReviewQueueHistory,
   useReviewQueueNextFileIds,
-  useReviewShortcutsEnabled,
 } from "@/stores/review-queue-store";
+import {
+  getBindingForDirection,
+  useReviewGesturesEnabled,
+  useReviewShortcutsEnabled,
+  useReviewSwipeBindings,
+} from "@/stores/review-settings-store";
 import {
   useArchiveFilesMutation,
   useDeleteFilesMutation,
@@ -29,6 +38,7 @@ import {
   useUnarchiveFilesMutation,
   useUndeleteFilesMutation,
 } from "@/integrations/hydrus-api/queries/manage-files";
+import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { getFileMetadata } from "@/integrations/hydrus-api/api-client";
 import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
 
@@ -75,20 +85,20 @@ function DeckContainer({
   );
 }
 
-/** Check if an action didn't change the file state (e.g., archiving already archived) */
-function wasActionUnchanged(
-  action: ReviewAction,
-  previousState: PreviousFileState,
+/** Check if a file action didn't change the file state (e.g., archiving already archived) */
+function wasFileActionUnchanged(
+  action: ReviewFileAction | null | undefined,
+  fileState: PreviousFileState,
 ): boolean {
   return (
-    (action === "archive" && previousState === "archived") ||
-    (action === "trash" && previousState === "trashed")
+    (action === "archive" && fileState === "archived") ||
+    (action === "trash" && fileState === "trashed")
   );
 }
 
 export interface UseReviewSwipeDeckOptions {
   /** Callback when an action is performed */
-  onAction?: (action: ReviewAction, fileId: number) => void;
+  onAction?: (direction: SwipeDirection, fileId: number) => void;
 }
 
 export function useReviewSwipeDeck({
@@ -100,6 +110,7 @@ export function useReviewSwipeDeck({
   const history = useReviewQueueHistory();
   const nextFileIds = useReviewQueueNextFileIds(PREFETCH_COUNT);
   const { recordAction, undo } = useReviewQueueActions();
+  const bindings = useReviewSwipeBindings();
 
   const queryClient = useQueryClient();
 
@@ -108,6 +119,7 @@ export function useReviewSwipeDeck({
   const trashMutation = useDeleteFilesMutation();
   const unarchiveMutation = useUnarchiveFilesMutation();
   const undeleteMutation = useUndeleteFilesMutation();
+  const setRatingMutation = useSetRatingMutation();
 
   // Current file metadata
   const { data: currentMetadata } = useGetSingleFileMetadata(
@@ -137,7 +149,7 @@ export function useReviewSwipeDeck({
   }, [nextFileIds, queryClient]);
 
   // Determine previous state for undo purposes
-  const getPreviousState = useCallback((): PreviousFileState => {
+  const getFileState = useCallback((): PreviousFileState => {
     if (!currentMetadata) return null;
     if (currentMetadata.is_trashed) return "trashed";
     if (currentMetadata.is_inbox) return "inbox";
@@ -150,19 +162,41 @@ export function useReviewSwipeDeck({
 
     const lastEntry = undo();
     if (lastEntry) {
-      // Only reverse the action if it actually changed the state
-      if (!wasActionUnchanged(lastEntry.action, lastEntry.previousState)) {
-        if (lastEntry.action === "archive") {
+      const { restore } = lastEntry;
+      const binding = getBindingForDirection(bindings, lastEntry.direction);
+      const fileAction = binding.fileAction;
+
+      // Reverse file action if it actually changed the state
+      if (!wasFileActionUnchanged(fileAction, restore.fileState)) {
+        if (fileAction === "archive") {
           // Was archived, need to unarchive (put back in inbox)
           unarchiveMutation.mutate({ file_ids: [lastEntry.fileId] });
-        } else if (lastEntry.action === "trash") {
+        } else if (fileAction === "trash") {
           // Was trashed, need to undelete
           undeleteMutation.mutate({ file_ids: [lastEntry.fileId] });
         }
         // Skip doesn't need reversal
       }
+
+      // Reverse rating action if present
+      if (restore.ratings && restore.ratings.length > 0) {
+        for (const rating of restore.ratings) {
+          setRatingMutation.mutate({
+            file_id: lastEntry.fileId,
+            rating_service_key: rating.serviceKey,
+            rating: rating.previousValue,
+          });
+        }
+      }
     }
-  }, [history.length, undo, unarchiveMutation, undeleteMutation]);
+  }, [
+    history.length,
+    undo,
+    bindings,
+    unarchiveMutation,
+    undeleteMutation,
+    setRatingMutation,
+  ]);
 
   // Handle exit animation complete - remove card from exiting list
   const handleExitComplete = useCallback((fileId: number) => {
@@ -175,41 +209,109 @@ export function useReviewSwipeDeck({
 
   // Perform action based on swipe direction
   const handleSwipe = useCallback(
-    (direction: SwipeDirection, action: ReviewAction) => {
+    (direction: SwipeDirection) => {
       if (!currentFileId) return;
+
+      // Get the binding for this direction
+      const binding = getBindingForDirection(bindings, direction);
 
       // Add to exiting cards to trigger exit animation
       setExitingCards((prev) => new Map(prev).set(currentFileId, direction));
 
-      // Get state synchronously before any updates
-      const previousState = getPreviousState();
-      const isUnchanged = wasActionUnchanged(action, previousState);
+      // Capture current state for restoration
+      const fileState = getFileState();
+      const fileAction = binding.fileAction;
+      const isUnchanged = wasFileActionUnchanged(fileAction, fileState);
 
-      // Only call mutation if the action will actually change the state
+      // Execute file action mutation if it will change state
       if (!isUnchanged) {
-        if (action === "archive") {
+        if (fileAction === "archive") {
           archiveMutation.mutate({ file_ids: [currentFileId] });
-        } else if (action === "trash") {
+        } else if (fileAction === "trash") {
           trashMutation.mutate({ file_ids: [currentFileId] });
         }
         // Skip doesn't need a mutation
       }
 
+      // Execute secondary actions (rating actions, etc.)
+      const ratingsRestore: Array<RatingRestoreEntry> = [];
+      const secondaryActions = binding.secondaryActions ?? [];
+
+      for (const action of secondaryActions) {
+        if (action.actionType === "rating") {
+          const serviceKey = action.serviceKey;
+          const currentRating = currentMetadata?.ratings?.[serviceKey] ?? null;
+
+          if (action.type === "setLike") {
+            // Store previous value for undo
+            ratingsRestore.push({
+              serviceKey,
+              actionType: "setLike",
+              previousValue: currentRating as boolean | null,
+            });
+            // Set the new value
+            setRatingMutation.mutate({
+              file_id: currentFileId,
+              rating_service_key: serviceKey,
+              rating: action.value,
+            });
+          } else if (action.type === "setNumerical") {
+            // Store previous value for undo
+            ratingsRestore.push({
+              serviceKey,
+              actionType: "setNumerical",
+              previousValue: currentRating as number | null,
+            });
+            // Set the new value
+            setRatingMutation.mutate({
+              file_id: currentFileId,
+              rating_service_key: serviceKey,
+              rating: action.value,
+            });
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          } else if (action.type === "incDecDelta") {
+            // Store previous value for undo
+            const prevValue = (currentRating as number | null) ?? 0;
+            ratingsRestore.push({
+              serviceKey,
+              actionType: "incDecDelta",
+              previousValue: prevValue,
+            });
+            // Apply delta
+            const newValue = Math.max(0, prevValue + action.delta);
+            setRatingMutation.mutate({
+              file_id: currentFileId,
+              rating_service_key: serviceKey,
+              rating: newValue,
+            });
+          }
+        }
+      }
+
+      // Build restore data for undo
+      const restore: RestoreData = {
+        fileState,
+        ratings: ratingsRestore.length > 0 ? ratingsRestore : undefined,
+      };
+
       // Record the action in history (always record, even if unchanged)
       const entry: ReviewHistoryEntry = {
         fileId: currentFileId,
-        action,
-        previousState,
+        direction,
+        restore,
       };
       recordAction(entry);
-      onAction?.(action, currentFileId);
+      onAction?.(direction, currentFileId);
     },
     [
       currentFileId,
-      getPreviousState,
+      currentMetadata,
+      bindings,
+      getFileState,
       recordAction,
       archiveMutation,
       trashMutation,
+      setRatingMutation,
       onAction,
     ],
   );
@@ -227,19 +329,19 @@ export function useReviewSwipeDeck({
         case "h":
         case "H":
           e.preventDefault();
-          handleSwipe("left", "trash");
+          handleSwipe("left");
           break;
         case "ArrowRight":
         case "l":
         case "L":
           e.preventDefault();
-          handleSwipe("right", "archive");
+          handleSwipe("right");
           break;
         case "ArrowUp":
         case "k":
         case "K":
           e.preventDefault();
-          handleSwipe("up", "skip");
+          handleSwipe("up");
           break;
         case "ArrowDown":
         case "z":
@@ -258,27 +360,14 @@ export function useReviewSwipeDeck({
   const visibleFileIds = fileIds.slice(currentIndex, currentIndex + STACK_SIZE);
   const gesturesEnabled = useReviewGesturesEnabled();
 
-  // Handle programmatic actions from footer buttons
-  const performAction = useCallback(
-    (action: ReviewAction | "undo") => {
-      if (action === "undo") {
-        performUndo();
-      } else {
-        const direction: SwipeDirection =
-          action === "trash" ? "left" : action === "archive" ? "right" : "up";
-        handleSwipe(direction, action);
-      }
-    },
-    [handleSwipe, performUndo],
-  );
-
   return {
     visibleFileIds,
     exitingCards,
     gesturesEnabled,
+    bindings,
     handleSwipe,
     handleExitComplete,
-    performAction,
+    performUndo,
     currentMetadata,
   };
 }
@@ -288,13 +377,15 @@ export function ReviewSwipeDeckVisual({
   visibleFileIds,
   exitingCards,
   gesturesEnabled,
+  bindings,
   handleSwipe,
   handleExitComplete,
 }: {
   visibleFileIds: Array<number>;
   exitingCards: Map<number, SwipeDirection>;
   gesturesEnabled: boolean;
-  handleSwipe: (direction: SwipeDirection, action: ReviewAction) => void;
+  bindings: SwipeBindings;
+  handleSwipe: (direction: SwipeDirection) => void;
   handleExitComplete: (fileId: number) => void;
 }) {
   // Combine visible cards with exiting cards (exiting cards may not be in visible list anymore)
@@ -332,6 +423,7 @@ export function ReviewSwipeDeckVisual({
                 isTop={isTopCard}
                 stackIndex={nonExitingIndex}
                 cardSize={cardSize}
+                bindings={bindings}
                 exitDirection={exitDirection}
                 gesturesEnabled={gesturesEnabled}
                 onSwipe={handleSwipe}

@@ -6,10 +6,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ReviewCompletion } from "./-components/review-completion";
 import { ReviewFooter } from "./-components/review-footer";
 import { ReviewSettingsPopover } from "./-components/review-settings-popover";
+import { ReviewStatsBreakdown } from "./-components/review-stats-breakdown";
 import {
   ReviewSwipeDeckVisual,
   useReviewSwipeDeck,
 } from "./-components/review-swipe-deck";
+import { SwipeBindingsConfig } from "./-components/swipe-bindings-config";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
@@ -20,13 +22,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui-primitives/tooltip";
 import {
+  useReviewDirectionStats,
   useReviewQueueActions,
   useReviewQueueCount,
   useReviewQueueCurrentIndex,
   useReviewQueueHistory,
   useReviewQueueIsComplete,
   useReviewQueueIsEmpty,
-  useReviewStats,
 } from "@/stores/review-queue-store";
 import { Progress } from "@/components/ui-primitives/progress";
 
@@ -40,7 +42,7 @@ function ReviewPage() {
   const count = useReviewQueueCount();
   const currentIndex = useReviewQueueCurrentIndex();
   const history = useReviewQueueHistory();
-  const stats = useReviewStats();
+  const directionStats = useReviewDirectionStats();
   const { skipToEnd } = useReviewQueueActions();
 
   // All hooks must be called unconditionally - call deck hook here
@@ -48,7 +50,7 @@ function ReviewPage() {
 
   if (isEmpty) {
     return (
-      <div className="flex flex-col">
+      <div className="flex min-w-0 flex-col overflow-hidden">
         <PageHeading title="Review Queue" />
         <PageHeaderActions>
           <ReviewSettingsPopover />
@@ -61,6 +63,7 @@ function ReviewPage() {
             </LinkButton>
           }
         />
+        <SwipeBindingsConfig className="mt-8" />
       </div>
     );
   }
@@ -71,9 +74,13 @@ function ReviewPage() {
         <PageHeaderActions>
           <ReviewSettingsPopover />
         </PageHeaderActions>
-        <ReviewCompletion stats={stats} />
+        <ReviewCompletion
+          stats={directionStats}
+          bindings={deckState.bindings}
+        />
         <ReviewFooter
-          onAction={deckState.performAction}
+          onSwipe={deckState.handleSwipe}
+          onUndo={deckState.performUndo}
           undoCount={history.length}
           disabled
         />
@@ -93,24 +100,12 @@ function ReviewPage() {
 
       {/* Stats breakdown */}
       {history.length > 0 && (
-        <div className="text-muted-foreground flex items-center justify-center gap-3 px-4 pb-1 text-sm tabular-nums">
-          {stats.archived > 0 && (
-            <span className="text-primary">{stats.archived} archived</span>
-          )}
-          {stats.trashed > 0 && (
-            <span className="text-destructive">{stats.trashed} trashed</span>
-          )}
-          {stats.skipped > 0 && (
-            <span className="text-muted-foreground">
-              {stats.skipped} skipped
-            </span>
-          )}
-          {stats.unchanged > 0 && (
-            <span className="text-muted-foreground">
-              {stats.unchanged} unchanged
-            </span>
-          )}
-        </div>
+        <ReviewStatsBreakdown
+          stats={directionStats}
+          bindings={deckState.bindings}
+          variant="inline"
+          className="px-4 pb-1"
+        />
       )}
       {/* Progress indicator */}
       <div className="text-muted-foreground flex items-center gap-2 px-4 py-1 text-sm tabular-nums">
@@ -142,6 +137,7 @@ function ReviewPage() {
           visibleFileIds={deckState.visibleFileIds}
           exitingCards={deckState.exitingCards}
           gesturesEnabled={deckState.gesturesEnabled}
+          bindings={deckState.bindings}
           handleSwipe={deckState.handleSwipe}
           handleExitComplete={deckState.handleExitComplete}
         />
@@ -149,7 +145,8 @@ function ReviewPage() {
 
       {/* Footer - renders via portal */}
       <ReviewFooter
-        onAction={deckState.performAction}
+        onSwipe={deckState.handleSwipe}
+        onUndo={deckState.performUndo}
         undoCount={history.length}
       />
     </div>

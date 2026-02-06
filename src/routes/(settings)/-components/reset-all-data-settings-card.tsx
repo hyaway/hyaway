@@ -9,14 +9,14 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui-primitives/card";
-import { useReviewQueueActions } from "@/stores/review-queue-store";
+import { useReviewSettingsActions } from "@/stores/review-settings-store";
 import { useSearchLimitsActions } from "@/stores/search-limits-store";
 import { useWatchHistoryActions } from "@/stores/watch-history-store";
 
 export function ResetAllDataSettingsCard() {
   const { reset: resetSearchLimits } = useSearchLimitsActions();
   const { reset: resetWatchHistory } = useWatchHistoryActions();
-  const { resetDataSettings: resetReviewData } = useReviewQueueActions();
+  const { resetDataSettings: resetReviewData } = useReviewSettingsActions();
 
   const handleResetAll = () => {
     resetSearchLimits();

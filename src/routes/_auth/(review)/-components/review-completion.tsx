@@ -1,15 +1,11 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  IconArchive,
-  IconArrowUp,
-  IconCheck,
-  IconEqual,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
-import type { ReviewStats } from "@/stores/review-queue-store";
+import { ReviewStatsBreakdown } from "./review-stats-breakdown";
+import type { ReviewDirectionStats } from "@/stores/review-queue-store";
+import type { SwipeBindings } from "@/stores/review-settings-store";
 import { useReviewQueueActions } from "@/stores/review-queue-store";
 import { Button } from "@/components/ui-primitives/button";
 import {
@@ -20,14 +16,14 @@ import {
 } from "@/components/ui-primitives/card";
 
 interface ReviewCompletionProps {
-  stats: ReviewStats;
+  stats: ReviewDirectionStats;
+  bindings: SwipeBindings;
 }
 
-export function ReviewCompletion({ stats }: ReviewCompletionProps) {
+export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
   const { clearQueue } = useReviewQueueActions();
   const navigate = useNavigate();
-  const total =
-    stats.archived + stats.trashed + stats.skipped + stats.unchanged;
+  const total = stats.left + stats.right + stats.up + stats.down;
 
   const handleClearAndBrowse = () => {
     clearQueue();
@@ -55,49 +51,20 @@ export function ReviewCompletion({ stats }: ReviewCompletionProps) {
           <CardTitle className="text-base">Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-4 gap-4 text-center">
-            <div className="flex flex-col items-center gap-1">
-              <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-full">
-                <IconArchive className="size-5" />
-              </div>
-              <span className="text-2xl font-semibold tabular-nums">
-                {stats.archived}
-              </span>
-              <span className="text-muted-foreground text-xs">Archived</span>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <div className="bg-destructive/10 text-destructive flex size-10 items-center justify-center rounded-full">
-                <IconTrash className="size-5" />
-              </div>
-              <span className="text-2xl font-semibold tabular-nums">
-                {stats.trashed}
-              </span>
-              <span className="text-muted-foreground text-xs">Trashed</span>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <div className="bg-muted text-muted-foreground flex size-10 items-center justify-center rounded-full">
-                <IconArrowUp className="size-5" />
-              </div>
-              <span className="text-2xl font-semibold tabular-nums">
-                {stats.skipped}
-              </span>
-              <span className="text-muted-foreground text-xs">Skipped</span>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <div className="bg-muted text-muted-foreground flex size-10 items-center justify-center rounded-full">
-                <IconEqual className="size-5" />
-              </div>
-              <span className="text-2xl font-semibold tabular-nums">
-                {stats.unchanged}
-              </span>
-              <span className="text-muted-foreground text-xs">Unchanged</span>
-            </div>
-          </div>
+          <ReviewStatsBreakdown
+            stats={stats}
+            bindings={bindings}
+            variant="grid"
+            hideZero={false}
+          />
         </CardContent>
       </Card>
 
       {/* Actions */}
       <div className="flex w-full flex-col gap-2">
+        <Button variant="outline" onClick={clearQueue} className="w-full">
+          Configure actions
+        </Button>
         <Button
           variant="outline"
           onClick={handleClearAndBrowse}

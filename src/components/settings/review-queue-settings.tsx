@@ -3,7 +3,7 @@
 
 import { IconTrashX } from "@tabler/icons-react";
 import { SettingsGroup, SwitchField } from "./setting-fields";
-import type { ReviewImageLoadMode } from "@/stores/review-queue-store";
+import type { ReviewImageLoadMode } from "@/stores/review-settings-store";
 import { Button } from "@/components/ui-primitives/button";
 import { Label } from "@/components/ui-primitives/label";
 import {
@@ -12,9 +12,12 @@ import {
 } from "@/components/ui-primitives/toggle-group";
 import {
   useReviewImageLoadMode,
+  useReviewSettingsActions,
+  useReviewTrackWatchHistory,
+} from "@/stores/review-settings-store";
+import {
   useReviewQueueActions,
   useReviewQueueCount,
-  useReviewTrackWatchHistory,
 } from "@/stores/review-queue-store";
 
 export const REVIEW_QUEUE_SETTINGS_TITLE = "Review queue";
@@ -29,8 +32,8 @@ export function ReviewQueueSettings({
   const count = useReviewQueueCount();
   const trackWatchHistory = useReviewTrackWatchHistory();
   const imageLoadMode = useReviewImageLoadMode();
-  const { clearQueue, setTrackWatchHistory, setImageLoadMode } =
-    useReviewQueueActions();
+  const { setTrackWatchHistory, setImageLoadMode } = useReviewSettingsActions();
+  const { clearQueue } = useReviewQueueActions();
 
   return (
     <SettingsGroup>

@@ -3,18 +3,27 @@
 
 import { useState } from "react";
 import {
-  IconArchive,
   IconArrowBackUp,
+  IconArrowDown,
+  IconArrowLeft,
+  IconArrowRight,
   IconArrowUp,
   IconDots,
-  IconTrash,
 } from "@tabler/icons-react";
+import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import { ReviewRatingButton } from "./review-rating-picker";
-import type { ReviewAction } from "@/stores/review-queue-store";
+import type { Icon } from "@tabler/icons-react";
+import type { ReactNode } from "react";
+import type {
+  ReviewFileAction,
+  SwipeDirection,
+} from "@/stores/review-settings-store";
+import { useReviewQueueCurrentFileId } from "@/stores/review-queue-store";
 import {
-  useReviewQueueCurrentFileId,
   useReviewShortcutsEnabled,
-} from "@/stores/review-queue-store";
+  useReviewSwipeBindings,
+} from "@/stores/review-settings-store";
+import { useRatingServiceNames } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useFileActions } from "@/hooks/use-file-actions";
 import { FooterPortal } from "@/components/app-shell/footer-portal";
@@ -31,9 +40,36 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
 
+/** Arrow icons for each swipe direction */
+const DIRECTION_ICONS: Record<SwipeDirection, Icon> = {
+  left: IconArrowLeft,
+  right: IconArrowRight,
+  up: IconArrowUp,
+  down: IconArrowDown,
+};
+
+/** Combines a direction arrow with an action icon (half and half size) */
+function DirectionalIcon({
+  direction,
+  children,
+}: {
+  direction: SwipeDirection;
+  children: ReactNode;
+}) {
+  const ArrowIcon = DIRECTION_ICONS[direction];
+  return (
+    <span className="flex max-w-5 items-center justify-center -space-x-1 overflow-visible">
+      <span className="hidden @xs:inline [&>svg]:size-5">{children}</span>
+      <ArrowIcon className="size-5 shrink-0" />
+    </span>
+  );
+}
+
 interface ReviewFooterProps {
-  /** Callback when an action button is clicked */
-  onAction: (action: ReviewAction | "undo") => void;
+  /** Callback to perform swipe action in a direction */
+  onSwipe: (direction: SwipeDirection) => void;
+  /** Callback to undo last action */
+  onUndo: () => void;
   /** Number of actions that can be undone */
   undoCount: number;
   /** Whether the deck is empty/complete */
@@ -41,20 +77,43 @@ interface ReviewFooterProps {
 }
 
 export function ReviewFooter({
-  onAction,
+  onSwipe,
+  onUndo,
   undoCount,
   disabled,
 }: ReviewFooterProps) {
   const showShortcuts = useReviewShortcutsEnabled();
+  const bindings = useReviewSwipeBindings();
+  const serviceNames = useRatingServiceNames();
 
   // Don't show footer when review is complete
   if (disabled) {
     return null;
   }
 
+  // Get icons for action directions (using descriptors for icons but not labels)
+  const leftDescriptor = getSwipeBindingDescriptor(bindings.left, serviceNames);
+  const upDescriptor = getSwipeBindingDescriptor(bindings.up, serviceNames);
+  const rightDescriptor = getSwipeBindingDescriptor(
+    bindings.right,
+    serviceNames,
+  );
+  const downDescriptor = getSwipeBindingDescriptor(bindings.down, serviceNames);
+
+  // Get file action label (simple capitalized text)
+  const getFileActionLabel = (fileAction: ReviewFileAction) => {
+    return fileAction.charAt(0).toUpperCase() + fileAction.slice(1);
+  };
+
+  // Determine button intent based on file action
+  const getIntent = (fileAction: ReviewFileAction) => {
+    if (fileAction === "trash") return "destructive" as const;
+    return undefined;
+  };
+
   return (
     <FooterPortal>
-      <BottomNavButtonProvider maxButtons={6}>
+      <BottomNavButtonProvider maxButtons={7}>
         <div className="flex h-full w-[100cqw] items-center justify-between">
           {/* Left section - Rating */}
           <ReviewRatingButton truncateLabel />
@@ -65,35 +124,58 @@ export function ReviewFooter({
             <BottomNavButton
               label="Undo"
               icon={<IconArrowBackUp className="size-6" />}
-              onClick={() => onAction("undo")}
+              onClick={onUndo}
               disabled={undoCount === 0}
-              kbd={showShortcuts ? "↓" : undefined}
+              kbd={showShortcuts ? "Z" : undefined}
               badge={undoCount > 0 ? undoCount : undefined}
             />
 
-            {/* Trash button */}
+            {/* Left direction button */}
             <BottomNavButton
-              label="Trash"
-              icon={<IconTrash className="size-6" />}
-              onClick={() => onAction("trash")}
-              intent="destructive"
-              kbd={showShortcuts ? "←" : undefined}
+              label={getFileActionLabel(bindings.left.fileAction)}
+              customContent={
+                <DirectionalIcon direction="left">
+                  <leftDescriptor.icon className="size-6" />
+                </DirectionalIcon>
+              }
+              onClick={() => onSwipe("left")}
+              intent={getIntent(bindings.left.fileAction)}
             />
 
-            {/* Skip button */}
+            {/* Up direction button */}
             <BottomNavButton
-              label="Skip"
-              icon={<IconArrowUp className="size-6" />}
-              onClick={() => onAction("skip")}
-              kbd={showShortcuts ? "↑" : undefined}
+              label={getFileActionLabel(bindings.up.fileAction)}
+              customContent={
+                <DirectionalIcon direction="up">
+                  <upDescriptor.icon className="size-6" />
+                </DirectionalIcon>
+              }
+              onClick={() => onSwipe("up")}
+              intent={getIntent(bindings.up.fileAction)}
             />
 
-            {/* Archive button */}
+            {/* Down direction button */}
             <BottomNavButton
-              label="Archive"
-              icon={<IconArchive className="size-6" />}
-              onClick={() => onAction("archive")}
-              kbd={showShortcuts ? "→" : undefined}
+              label={getFileActionLabel(bindings.down.fileAction)}
+              customContent={
+                <DirectionalIcon direction="down">
+                  <downDescriptor.icon className="size-6" />
+                </DirectionalIcon>
+              }
+              onClick={() => onSwipe("down")}
+              intent={getIntent(bindings.down.fileAction)}
+            />
+
+            {/* Right direction button */}
+            <BottomNavButton
+              label={getFileActionLabel(bindings.right.fileAction)}
+              customContent={
+                <DirectionalIcon direction="right">
+                  <rightDescriptor.icon className="size-6" />
+                </DirectionalIcon>
+              }
+              onClick={() => onSwipe("right")}
+              intent={getIntent(bindings.right.fileAction)}
             />
           </div>
 

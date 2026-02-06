@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconPalette, IconPhoto, IconPhotoScan } from "@tabler/icons-react";
 import { animate, motion, useMotionValue, useTransform } from "motion/react";
-import type { ReviewImageLoadMode } from "@/stores/review-queue-store";
+import type { ReviewImageLoadMode } from "@/stores/review-settings-store";
 import { cn } from "@/lib/utils";
 import { isImageProjectFile, isStaticImage } from "@/lib/mime-utils";
 import {
@@ -12,7 +12,7 @@ import {
   useFullFileIdUrl,
   useRenderFileIdUrl,
 } from "@/hooks/use-url-with-api-key";
-import { useReviewImageLoadMode } from "@/stores/review-queue-store";
+import { useReviewImageLoadMode } from "@/stores/review-settings-store";
 import { useFillCanvasBackground } from "@/stores/file-viewer-settings-store";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";

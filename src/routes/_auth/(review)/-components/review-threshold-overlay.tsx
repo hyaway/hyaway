@@ -2,9 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { IconCrosshair } from "@tabler/icons-react";
-import { motion, useMotionTemplate, useTransform } from "motion/react";
+import {
+  motion,
+  useMotionTemplate,
+  useMotionValueEvent,
+  useTransform,
+} from "motion/react";
+import { getSwipeBindingOverlayDescriptor } from "./review-swipe-descriptors";
 import type { MotionValue } from "motion/react";
 import type { CardSize } from "./review-swipe-card";
+import type { SwipeThresholds } from "@/stores/review-settings-store";
+import { useReviewSwipeBindings } from "@/stores/review-settings-store";
+import { useRatingServiceNames } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { cn } from "@/lib/utils";
 
 export interface ReviewThresholdOverlayProps {
   /** Motion value for x position */
@@ -13,10 +23,8 @@ export interface ReviewThresholdOverlayProps {
   y: MotionValue<number>;
   /** Card dimensions for percentage calculations */
   cardSize: CardSize;
-  /** Horizontal threshold as percentage from center */
-  horizontalThresholdPercent: number;
-  /** Vertical threshold as percentage from center */
-  verticalThresholdPercent: number;
+  /** Threshold percentages for each direction */
+  thresholds: SwipeThresholds;
 }
 
 /** Debug overlay showing gesture threshold zones and grid */
@@ -24,9 +32,28 @@ export function ReviewThresholdOverlay({
   x,
   y,
   cardSize,
-  horizontalThresholdPercent,
-  verticalThresholdPercent,
+  thresholds,
 }: ReviewThresholdOverlayProps) {
+  const bindings = useReviewSwipeBindings();
+  const serviceNames = useRatingServiceNames();
+  // Get descriptors for each direction
+  const leftDescriptor = getSwipeBindingOverlayDescriptor(
+    bindings.left,
+    serviceNames,
+  );
+  const rightDescriptor = getSwipeBindingOverlayDescriptor(
+    bindings.right,
+    serviceNames,
+  );
+  const upDescriptor = getSwipeBindingOverlayDescriptor(
+    bindings.up,
+    serviceNames,
+  );
+  const downDescriptor = getSwipeBindingOverlayDescriptor(
+    bindings.down,
+    serviceNames,
+  );
+
   // Calculate percentage coordinates for crosshair label (doubled to match settings display)
   // Negate y so up is positive (DOM y-axis is inverted)
   const xPercent = useTransform(x, (xVal) =>
@@ -35,7 +62,31 @@ export function ReviewThresholdOverlay({
   const yPercent = useTransform(y, (yVal) =>
     cardSize.height > 0 ? Math.round((-yVal / cardSize.height) * 100 * 2) : 0,
   );
-  const coordsLabel = useMotionTemplate`${xPercent}%, ${yPercent}%`;
+  const coordsLabel = useMotionTemplate`X ${xPercent}%, Y ${yPercent}%`;
+
+  // Debug logging for crosshair position
+  useMotionValueEvent(y, "change", (yVal) => {
+    const xVal = x.get();
+    const rawXPercent = cardSize.width > 0 ? (xVal / cardSize.width) * 100 : 0;
+    const rawYPercent =
+      cardSize.height > 0 ? (-yVal / cardSize.height) * 100 : 0;
+    console.log(
+      "[Crosshair]",
+      JSON.stringify({
+        raw: { x: xVal, y: yVal },
+        rawPercent: { x: rawXPercent, y: rawYPercent },
+        displayedPercent: { x: rawXPercent * 2, y: rawYPercent * 2 },
+        thresholds,
+      }),
+    );
+  });
+
+  // Threshold rectangle corners (as percentages from center, for CSS positioning)
+  // Each direction can have a different threshold
+  const thresholdLeft = 50 - thresholds.left;
+  const thresholdRight = 50 + thresholds.right;
+  const thresholdTop = 50 - thresholds.up;
+  const thresholdBottom = 50 + thresholds.down;
 
   return (
     <div className="pointer-events-none absolute inset-0 z-50">
@@ -88,42 +139,75 @@ export function ReviewThresholdOverlay({
       {/* Center lines */}
       <div className="absolute top-0 bottom-0 left-1/2 w-px bg-yellow-500/50" />
       <div className="absolute top-1/2 right-0 left-0 h-px bg-yellow-500/50" />
-      {/* Trash zone area (left of center, below skip threshold) */}
+
+      {/* Left zone - trapezoid from left edge to threshold, bounded by diagonals */}
       <div
-        className="bg-destructive/50 absolute bottom-0 left-0 flex items-center justify-center"
+        className={cn(
+          "absolute inset-0 flex items-center justify-start pl-4",
+          leftDescriptor.bgClass,
+          "opacity-50",
+        )}
         style={{
-          width: `calc(50% - ${horizontalThresholdPercent}%)`,
-          top: `calc(50% - ${verticalThresholdPercent}%)`,
+          clipPath: `polygon(0 0, ${thresholdLeft}% ${thresholdTop}%, ${thresholdLeft}% ${thresholdBottom}%, 0 100%)`,
         }}
       >
         <span className="bg-background text-foreground flex flex-col items-center px-1 text-xs font-bold">
-          <span>TRASH</span>
-          <span>{horizontalThresholdPercent * 2}%</span>
+          <span>{leftDescriptor.label.toUpperCase()}</span>
+          <span>{thresholds.left * 2}%</span>
         </span>
       </div>
-      {/* Archive zone area (right of center, below skip threshold) */}
+
+      {/* Right zone - trapezoid from right edge to threshold */}
       <div
-        className="bg-primary/50 absolute right-0 bottom-0 flex items-center justify-center"
+        className={cn(
+          "absolute inset-0 flex items-center justify-end pr-4",
+          rightDescriptor.bgClass,
+          "opacity-50",
+        )}
         style={{
-          width: `calc(50% - ${horizontalThresholdPercent}%)`,
-          top: `calc(50% - ${verticalThresholdPercent}%)`,
+          clipPath: `polygon(100% 0, ${thresholdRight}% ${thresholdTop}%, ${thresholdRight}% ${thresholdBottom}%, 100% 100%)`,
         }}
       >
         <span className="bg-background text-foreground flex flex-col items-center px-1 text-xs font-bold">
-          <span>ARCHIVE</span>
-          <span>{horizontalThresholdPercent * 2}%</span>
+          <span>{rightDescriptor.label.toUpperCase()}</span>
+          <span>{thresholds.right * 2}%</span>
         </span>
       </div>
-      {/* Skip zone area (above center, full width) */}
+
+      {/* Up zone - trapezoid from top edge to threshold */}
       <div
-        className="bg-muted/50 absolute top-0 right-0 left-0 flex items-center justify-center"
-        style={{ height: `calc(50% - ${verticalThresholdPercent}%)` }}
+        className={cn(
+          "absolute inset-0 flex items-start justify-center pt-4",
+          upDescriptor.bgClass,
+          "opacity-50",
+        )}
+        style={{
+          clipPath: `polygon(0 0, ${thresholdLeft}% ${thresholdTop}%, ${thresholdRight}% ${thresholdTop}%, 100% 0)`,
+        }}
       >
         <span className="bg-background text-foreground flex flex-col items-center px-1 text-xs font-bold">
-          <span>SKIP</span>
-          <span>{verticalThresholdPercent * 2}%</span>
+          <span>{upDescriptor.label.toUpperCase()}</span>
+          <span>{thresholds.up * 2}%</span>
         </span>
       </div>
+
+      {/* Down zone - trapezoid from bottom edge to threshold */}
+      <div
+        className={cn(
+          "absolute inset-0 flex items-end justify-center pb-4",
+          downDescriptor.bgClass,
+          "opacity-50",
+        )}
+        style={{
+          clipPath: `polygon(0 100%, ${thresholdLeft}% ${thresholdBottom}%, ${thresholdRight}% ${thresholdBottom}%, 100% 100%)`,
+        }}
+      >
+        <span className="bg-background text-foreground flex flex-col items-center px-1 text-xs font-bold">
+          <span>{downDescriptor.label.toUpperCase()}</span>
+          <span>{thresholds.down * 2}%</span>
+        </span>
+      </div>
+
       {/* Center crosshair - moves with card */}
       <motion.div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
@@ -134,27 +218,56 @@ export function ReviewThresholdOverlay({
           {coordsLabel}
         </motion.span>
       </motion.div>
-      {/* Trash threshold line (left of center, below skip threshold) */}
-      <div
-        className="bg-destructive absolute bottom-0 w-0.5"
-        style={{
-          left: `calc(50% - ${horizontalThresholdPercent}%)`,
-          top: `calc(50% - ${verticalThresholdPercent}%)`,
-        }}
-      />
-      {/* Archive threshold line (right of center, below skip threshold) */}
-      <div
-        className="bg-primary absolute bottom-0 w-0.5"
-        style={{
-          left: `calc(50% + ${horizontalThresholdPercent}%)`,
-          top: `calc(50% - ${verticalThresholdPercent}%)`,
-        }}
-      />
-      {/* Skip threshold line (above center) */}
-      <div
-        className="bg-muted-foreground absolute right-0 left-0 h-0.5"
-        style={{ top: `calc(50% - ${verticalThresholdPercent}%)` }}
-      />
+
+      {/* SVG for diagonal lines from center to threshold corners */}
+      <svg className="absolute inset-0 h-full w-full">
+        {/* Diagonal from top-left threshold corner to top-left image corner */}
+        <line
+          x1={`${thresholdLeft}%`}
+          y1={`${thresholdTop}%`}
+          x2="0%"
+          y2="0%"
+          stroke="#eab308"
+          strokeWidth="2"
+        />
+        {/* Diagonal from top-right threshold corner to top-right image corner */}
+        <line
+          x1={`${thresholdRight}%`}
+          y1={`${thresholdTop}%`}
+          x2="100%"
+          y2="0%"
+          stroke="#eab308"
+          strokeWidth="2"
+        />
+        {/* Diagonal from bottom-right threshold corner to bottom-right image corner */}
+        <line
+          x1={`${thresholdRight}%`}
+          y1={`${thresholdBottom}%`}
+          x2="100%"
+          y2="100%"
+          stroke="#eab308"
+          strokeWidth="2"
+        />
+        {/* Diagonal from bottom-left threshold corner to bottom-left image corner */}
+        <line
+          x1={`${thresholdLeft}%`}
+          y1={`${thresholdBottom}%`}
+          x2="0%"
+          y2="100%"
+          stroke="#eab308"
+          strokeWidth="2"
+        />
+        {/* Threshold rectangle outline */}
+        <rect
+          x={`${thresholdLeft}%`}
+          y={`${thresholdTop}%`}
+          width={`${thresholds.left + thresholds.right}%`}
+          height={`${thresholds.up + thresholds.down}%`}
+          fill="none"
+          stroke="#eab308"
+          strokeWidth="2"
+        />
+      </svg>
     </div>
   );
 }

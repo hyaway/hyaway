@@ -29,7 +29,7 @@ import {
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useFullFileIdUrl } from "@/hooks/use-url-with-api-key";
 import { useActiveTheme } from "@/stores/theme-store";
-import { useReviewTrackWatchHistory } from "@/stores/review-queue-store";
+import { useReviewTrackWatchHistory } from "@/stores/review-settings-store";
 import {
   useMediaAutoPlay,
   useMediaStartWithSound,

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { memo, useRef, useState } from "react";
-import { IconArchive, IconArrowUp, IconTrash } from "@tabler/icons-react";
 import {
   animate,
   motion,
@@ -10,15 +9,24 @@ import {
   useMotionValue,
   useTransform,
 } from "motion/react";
+import { getSwipeBindingOverlayDescriptor } from "./review-swipe-descriptors";
 import { ReviewThresholdOverlay } from "./review-threshold-overlay";
 import type { MotionValue, PanInfo } from "motion/react";
-import type { ReviewAction } from "@/stores/review-queue-store";
+import type {
+  SwipeBindings,
+  SwipeDirection,
+  SwipeThresholds,
+} from "@/stores/review-settings-store";
 import {
-  useReviewHorizontalThreshold,
+  SWIPE_DIRECTIONS,
   useReviewShowGestureThresholds,
-  useReviewVerticalThreshold,
-} from "@/stores/review-queue-store";
+  useReviewSwipeThresholds,
+} from "@/stores/review-settings-store";
+import { useRatingServiceNames } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { cn } from "@/lib/utils";
+
+// Re-export SwipeDirection for consumers that import from this file
+export type { SwipeDirection } from "@/stores/review-settings-store";
 
 /** Distance before overlay starts appearing (as fraction of threshold) */
 const OVERLAY_START = 0.4;
@@ -28,75 +36,126 @@ const VERTICAL_OVERLAY_START = 0.6;
 const MAX_ROTATION = 12;
 /** Touch movement (px) before we start a swipe drag */
 const TOUCH_SWIPE_START_DISTANCE = 6;
-
-export type SwipeDirection = "left" | "right" | "up" | "down" | null;
-
-/** Swipe zone detection result */
-type SwipeZone = "skip" | "trash" | "archive" | null;
+/** Drag elasticity - how much the card follows the finger (0-1) */
+const DRAG_ELASTIC = 0.9;
 
 /**
- * Determine which swipe zone we're in based on coordinates.
- * Skip (up) takes priority, then horizontal actions apply.
+ * Determine which swipe direction we're in based on coordinates.
+ * Zone boundaries are diagonal lines from threshold corners to image corners.
+ * Returns null if no threshold is crossed.
  */
-function getSwipeZone(
+function getSwipeDirection(
   xVal: number,
   yVal: number,
-  horizontalThreshold: number,
-  verticalThreshold: number,
-): SwipeZone {
-  // Skip takes priority when swiping up past threshold
-  if (yVal < -verticalThreshold) return "skip";
-  // Horizontal zones
-  if (xVal < -horizontalThreshold) return "trash";
-  if (xVal > horizontalThreshold) return "archive";
+  thresholds: SwipeThresholds,
+  cardSize: CardSize,
+): SwipeDirection | null {
+  const absX = Math.abs(xVal);
+  const absY = Math.abs(yVal);
+
+  // Get thresholds based on which direction the point is in
+  const horizontalThresholdPercent =
+    xVal < 0 ? thresholds.left : thresholds.right;
+  const verticalThresholdPercent = yVal < 0 ? thresholds.up : thresholds.down;
+
+  const halfW = cardSize.width / 2;
+  const halfH = cardSize.height / 2;
+  const horizontalThreshold =
+    (cardSize.width * horizontalThresholdPercent) / 100;
+  const verticalThreshold = (cardSize.height * verticalThresholdPercent) / 100;
+
+  // Check if we've crossed any threshold
+  const crossedHorizontal = absX >= horizontalThreshold;
+  const crossedVertical = absY >= verticalThreshold;
+
+  if (!crossedHorizontal && !crossedVertical) return null;
+
+  // The zone boundary is the line from threshold corner to image corner.
+  // We use cross product to determine which side of this diagonal the point is on.
+  // Vector from threshold corner to image corner
+  const edgeX = halfW - horizontalThreshold;
+  const edgeY = halfH - verticalThreshold;
+
+  // Vector from threshold corner to current point
+  const pointX = absX - horizontalThreshold;
+  const pointY = absY - verticalThreshold;
+
+  // Cross product: positive means point is above the diagonal (vertical zone)
+  const cross = edgeX * pointY - edgeY * pointX;
+
+  // If cross >= 0, we're in vertical zone; if cross < 0, we're in horizontal zone
+  if (crossedVertical && (!crossedHorizontal || cross >= 0)) {
+    return yVal < 0 ? "up" : "down";
+  }
+
+  // Horizontal
+  if (crossedHorizontal) {
+    return xVal < 0 ? "left" : "right";
+  }
+
   return null;
 }
 
-/** Calculate overlay opacity for a zone based on progress toward threshold */
-function getZoneOpacity(
+/** Calculate overlay opacity for a direction based on progress toward threshold */
+function getDirectionOpacity(
   xVal: number,
   yVal: number,
-  zone: "skip" | "trash" | "archive",
-  horizontalThreshold: number,
-  verticalThreshold: number,
+  direction: SwipeDirection,
+  thresholds: SwipeThresholds,
+  cardSize: CardSize,
 ): number {
+  // Get thresholds based on which direction the point is in
+  const horizontalThresholdPercent =
+    xVal < 0 ? thresholds.left : thresholds.right;
+  const verticalThresholdPercent = yVal < 0 ? thresholds.up : thresholds.down;
+
+  const horizontalThreshold =
+    (cardSize.width * horizontalThresholdPercent) / 100;
+  const verticalThreshold = (cardSize.height * verticalThresholdPercent) / 100;
   const horizontalStart = horizontalThreshold * OVERLAY_START;
   const verticalStart = verticalThreshold * VERTICAL_OVERLAY_START;
 
-  // Determine which zone is currently "active" based on which threshold we're closer to
-  // Skip zone wins when: past skip threshold OR (approaching skip AND vertical > horizontal progress)
-  const inSkipZone = yVal < -verticalThreshold;
-  const skipProgress =
-    yVal >= -verticalStart
-      ? 0
-      : (-yVal - verticalStart) / (verticalThreshold - verticalStart);
+  // Calculate progress for each axis
+  const absX = Math.abs(xVal);
+  const absY = Math.abs(yVal);
 
   const horizontalProgress =
-    xVal >= -horizontalStart && xVal <= horizontalStart
+    absX <= horizontalStart
       ? 0
-      : xVal < 0
-        ? (-xVal - horizontalStart) / (horizontalThreshold - horizontalStart)
-        : (xVal - horizontalStart) / (horizontalThreshold - horizontalStart);
+      : (absX - horizontalStart) / (horizontalThreshold - horizontalStart);
 
-  // Skip zone takes priority when past threshold or when skip progress > horizontal progress
-  const skipWins =
-    inSkipZone || (skipProgress > 0 && skipProgress >= horizontalProgress);
+  const verticalProgress =
+    absY <= verticalStart
+      ? 0
+      : (absY - verticalStart) / (verticalThreshold - verticalStart);
 
-  switch (zone) {
-    case "skip": {
-      if (!skipWins && horizontalProgress > 0) return 0;
-      if (inSkipZone) return 1;
-      if (yVal >= -verticalStart) return 0;
-      return Math.min(1, skipProgress);
+  // Use same cross-product logic as getSwipeDirection to determine zone
+  const halfW = cardSize.width / 2;
+  const halfH = cardSize.height / 2;
+  const edgeX = halfW - horizontalThreshold;
+  const edgeY = halfH - verticalThreshold;
+  const pointX = absX - horizontalThreshold;
+  const pointY = absY - verticalThreshold;
+  const cross = edgeX * pointY - edgeY * pointX;
+
+  const verticalWins = cross >= 0;
+  const horizontalWins = cross < 0;
+
+  switch (direction) {
+    case "up": {
+      if (!verticalWins || yVal >= 0) return 0;
+      return Math.min(1, verticalProgress);
     }
-    case "trash": {
-      if (skipWins) return 0;
-      if (xVal >= -horizontalStart) return 0;
+    case "down": {
+      if (!verticalWins || yVal <= 0) return 0;
+      return Math.min(1, verticalProgress);
+    }
+    case "left": {
+      if (!horizontalWins || xVal >= 0) return 0;
       return Math.min(1, horizontalProgress);
     }
-    case "archive": {
-      if (skipWins) return 0;
-      if (xVal <= horizontalStart) return 0;
+    case "right": {
+      if (!horizontalWins || xVal <= 0) return 0;
       return Math.min(1, horizontalProgress);
     }
   }
@@ -119,30 +178,16 @@ export interface ReviewSwipeCardProps {
   cardSize: CardSize;
   /** Content to render inside the card */
   children: React.ReactNode;
+  /** Current swipe bindings for overlay display */
+  bindings: SwipeBindings;
   /** Exit direction for animation (triggers exit when set) */
-  exitDirection?: SwipeDirection;
+  exitDirection?: SwipeDirection | null;
   /** Whether swipe gestures are enabled */
   gesturesEnabled?: boolean;
-  /** Callback when swipe completes with a direction */
-  onSwipe: (direction: SwipeDirection, action: ReviewAction) => void;
+  /** Callback when swipe completes with a direction (only called if direction has a binding) */
+  onSwipe: (direction: SwipeDirection) => void;
   /** Callback when exit animation completes */
   onExitComplete?: () => void;
-}
-
-/** Map swipe direction to action */
-function getActionFromDirection(
-  direction: SwipeDirection,
-): ReviewAction | null {
-  switch (direction) {
-    case "left":
-      return "trash";
-    case "right":
-      return "archive";
-    case "up":
-      return "skip";
-    default:
-      return null;
-  }
 }
 
 /** Get exit animation coordinates based on direction */
@@ -167,6 +212,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
   stackIndex,
   cardSize,
   children,
+  bindings,
   exitDirection,
   gesturesEnabled = true,
   onSwipe,
@@ -192,14 +238,8 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
 
   // Get threshold settings from store (percentages)
   const showGestureThresholds = useReviewShowGestureThresholds();
-  const horizontalThresholdPercent = useReviewHorizontalThreshold();
-  const verticalThresholdPercent = useReviewVerticalThreshold();
-
-  // Convert percentage thresholds to pixels based on card dimensions
-  const horizontalThresholdPx =
-    (cardSize.width * horizontalThresholdPercent) / 100;
-  const verticalThresholdPx =
-    (cardSize.height * verticalThresholdPercent) / 100;
+  const thresholds = useReviewSwipeThresholds();
+  const serviceNames = useRatingServiceNames();
 
   // Calculate rotation based on horizontal drag
   const rotate = useTransform(
@@ -208,34 +248,27 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
     [-MAX_ROTATION, 0, MAX_ROTATION],
   );
 
-  // Calculate opacity for intent overlays using shared zone logic
-  const trashOpacity = useTransform(x, (xVal) =>
-    getZoneOpacity(
-      xVal,
-      y.get(),
-      "trash",
-      horizontalThresholdPx,
-      verticalThresholdPx,
-    ),
+  // Calculate opacity for intent overlays per direction
+  const leftOpacity = useTransform(x, (xVal) =>
+    getDirectionOpacity(xVal, y.get(), "left", thresholds, cardSize),
   );
-  const archiveOpacity = useTransform(x, (xVal) =>
-    getZoneOpacity(
-      xVal,
-      y.get(),
-      "archive",
-      horizontalThresholdPx,
-      verticalThresholdPx,
-    ),
+  const rightOpacity = useTransform(x, (xVal) =>
+    getDirectionOpacity(xVal, y.get(), "right", thresholds, cardSize),
   );
-  const skipOpacity = useTransform(y, (yVal) =>
-    getZoneOpacity(
-      x.get(),
-      yVal,
-      "skip",
-      horizontalThresholdPx,
-      verticalThresholdPx,
-    ),
+  const upOpacity = useTransform(y, (yVal) =>
+    getDirectionOpacity(x.get(), yVal, "up", thresholds, cardSize),
   );
+  const downOpacity = useTransform(y, (yVal) =>
+    getDirectionOpacity(x.get(), yVal, "down", thresholds, cardSize),
+  );
+
+  // Map direction to opacity motion value
+  const directionOpacities: Record<SwipeDirection, MotionValue<number>> = {
+    left: leftOpacity,
+    right: rightOpacity,
+    up: upOpacity,
+    down: downOpacity,
+  };
 
   // Scale for stacked cards (cards behind are slightly smaller)
   const stackScale = 1 - stackIndex * 0.05;
@@ -251,21 +284,27 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
     }
 
     const { offset } = info;
-    const zone = getSwipeZone(
-      offset.x,
-      offset.y,
-      horizontalThresholdPx,
-      verticalThresholdPx,
+    // Scale offset by drag elasticity to get the visual position
+    // (the card doesn't follow the finger exactly due to elasticity)
+    const visualX = offset.x * DRAG_ELASTIC;
+    const visualY = offset.y * DRAG_ELASTIC;
+    const direction = getSwipeDirection(visualX, visualY, thresholds, cardSize);
+
+    // Debug logging
+    console.log(
+      "[Swipe]",
+      JSON.stringify({
+        offset: { x: offset.x, y: offset.y },
+        visual: { x: visualX, y: visualY },
+        cardSize,
+        thresholds,
+        direction,
+      }),
     );
 
-    if (zone) {
-      // Map zone to direction
-      const direction: SwipeDirection =
-        zone === "skip" ? "up" : zone === "trash" ? "left" : "right";
-      const action = getActionFromDirection(direction);
-      if (action) {
-        onSwipe(direction, action);
-      }
+    // Only trigger if direction crossed threshold
+    if (direction) {
+      onSwipe(direction);
     }
   };
 
@@ -293,8 +332,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
           x={x}
           y={y}
           cardSize={cardSize}
-          horizontalThresholdPercent={horizontalThresholdPercent}
-          verticalThresholdPercent={verticalThresholdPercent}
+          thresholds={thresholds}
         />
       )}
       <motion.div
@@ -316,7 +354,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
         dragListener={false}
         dragControls={dragControls}
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-        dragElastic={0.9}
+        dragElastic={DRAG_ELASTIC}
         onDragEnd={handleDragEnd}
         onPointerMove={(e) => {
           if (!isTop || isExiting || !gesturesEnabled) return;
@@ -489,46 +527,40 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
           {children}
 
           {/* Intent overlays - show on top card during drag, or locked during exit */}
-          {(isTop || isExiting) && (
-            <>
-              {/* Trash overlay (left) */}
-              <IntentOverlay
-                opacity={
-                  isExiting && exitDirection === "left" ? 1 : trashOpacity
-                }
-                className="bg-destructive/80"
-              >
-                <div className="flex flex-col items-center gap-2 text-white">
-                  <IconTrash aria-hidden="true" className="size-16" />
-                  <span className="text-lg font-semibold">Trash</span>
-                </div>
-              </IntentOverlay>
+          {(isTop || isExiting) &&
+            SWIPE_DIRECTIONS.map((direction) => {
+              const binding = bindings[direction];
 
-              {/* Archive overlay (right) */}
-              <IntentOverlay
-                opacity={
-                  isExiting && exitDirection === "right" ? 1 : archiveOpacity
-                }
-                className="bg-primary/80"
-              >
-                <div className="text-primary-foreground flex flex-col items-center gap-2">
-                  <IconArchive aria-hidden="true" className="size-16" />
-                  <span className="text-lg font-semibold">Archive</span>
-                </div>
-              </IntentOverlay>
+              const descriptor = getSwipeBindingOverlayDescriptor(
+                binding,
+                serviceNames,
+              );
+              const Icon = descriptor.icon;
+              const opacity =
+                isExiting && exitDirection === direction
+                  ? 1
+                  : directionOpacities[direction];
 
-              {/* Skip overlay (up) */}
-              <IntentOverlay
-                opacity={isExiting && exitDirection === "up" ? 1 : skipOpacity}
-                className="bg-muted/80"
-              >
-                <div className="text-muted-foreground flex flex-col items-center gap-2">
-                  <IconArrowUp aria-hidden="true" className="size-16" />
-                  <span className="text-lg font-semibold">Skip</span>
-                </div>
-              </IntentOverlay>
-            </>
-          )}
+              return (
+                <IntentOverlay
+                  key={direction}
+                  opacity={opacity}
+                  className={descriptor.bgClass}
+                >
+                  <div
+                    className={cn(
+                      "flex flex-col items-center gap-2",
+                      descriptor.textClass,
+                    )}
+                  >
+                    <Icon aria-hidden="true" className="size-16" />
+                    <span className="text-lg font-semibold">
+                      {descriptor.label}
+                    </span>
+                  </div>
+                </IntentOverlay>
+              );
+            })}
         </div>
       </motion.div>
     </div>

@@ -75,6 +75,22 @@ export function useHasRatingServices() {
 }
 
 /**
+ * Hook that returns a Map of service keys to service names.
+ * Useful for displaying user-friendly service names in UI.
+ */
+export function useRatingServiceNames(): Map<string, string> {
+  const { ratingServices } = useRatingServices();
+
+  return useMemo(() => {
+    const map = new Map<string, string>();
+    for (const [key, service] of ratingServices) {
+      map.set(key, service.name);
+    }
+    return map;
+  }, [ratingServices]);
+}
+
+/**
  * Hook that returns whether any rating service has the overlay settings
  * (show_in_thumbnail, show_in_thumbnail_even_when_null) from Hydrus.
  * This is used to determine if the "Hydrus" option should be available.

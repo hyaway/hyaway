@@ -15,10 +15,10 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui-primitives/card";
-import { useReviewQueueActions } from "@/stores/review-queue-store";
+import { useReviewSettingsActions } from "@/stores/review-settings-store";
 
 export function ReviewControlsSettingsCard() {
-  const { resetControlsSettings } = useReviewQueueActions();
+  const { resetControlsSettings } = useReviewSettingsActions();
 
   return (
     <Card>

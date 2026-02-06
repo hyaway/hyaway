@@ -13,7 +13,7 @@ import { useFileViewerSettingsActions } from "@/stores/file-viewer-settings-stor
 import { useGallerySettingsActions } from "@/stores/gallery-settings-store";
 import { usePagesSettingsActions } from "@/stores/pages-settings-store";
 import { useRatingsSettingsActions } from "@/stores/ratings-settings-store";
-import { useReviewQueueActions } from "@/stores/review-queue-store";
+import { useReviewSettingsActions } from "@/stores/review-settings-store";
 import { useTagsSettingsActions } from "@/stores/tags-settings-store";
 
 export function ResetAllAppearanceSettingsCard() {
@@ -23,7 +23,7 @@ export function ResetAllAppearanceSettingsCard() {
   const { reset: resetRatings } = useRatingsSettingsActions();
   const { reset: resetTags } = useTagsSettingsActions();
   const { resetControlsSettings: resetReviewControls } =
-    useReviewQueueActions();
+    useReviewSettingsActions();
 
   const handleResetAll = () => {
     resetGallery();

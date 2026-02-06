@@ -6,12 +6,11 @@ import {
   MAX_SWIPE_THRESHOLD,
   MIN_SWIPE_THRESHOLD,
   useReviewGesturesEnabled,
-  useReviewHorizontalThreshold,
-  useReviewQueueActions,
+  useReviewSettingsActions,
   useReviewShortcutsEnabled,
   useReviewShowGestureThresholds,
-  useReviewVerticalThreshold,
-} from "@/stores/review-queue-store";
+  useReviewSwipeThresholds,
+} from "@/stores/review-settings-store";
 
 export const REVIEW_CONTROLS_SETTINGS_TITLE = "Review controls";
 
@@ -25,15 +24,13 @@ export function ReviewControlsSettings({
   const shortcutsEnabled = useReviewShortcutsEnabled();
   const gesturesEnabled = useReviewGesturesEnabled();
   const showGestureThresholds = useReviewShowGestureThresholds();
-  const horizontalThreshold = useReviewHorizontalThreshold();
-  const verticalThreshold = useReviewVerticalThreshold();
+  const thresholds = useReviewSwipeThresholds();
   const {
     setShortcutsEnabled,
     setGesturesEnabled,
     setShowGestureThresholds,
-    setHorizontalThreshold,
-    setVerticalThreshold,
-  } = useReviewQueueActions();
+    setThreshold,
+  } = useReviewSettingsActions();
 
   return (
     <SettingsGroup>
@@ -60,23 +57,43 @@ export function ReviewControlsSettings({
         disabled={!gesturesEnabled}
       />
       <SliderField
-        id={`${idPrefix}horizontal-threshold`}
-        label="Horizontal threshold"
-        value={horizontalThreshold}
+        id={`${idPrefix}left-threshold`}
+        label="Left threshold"
+        value={thresholds.left}
         min={MIN_SWIPE_THRESHOLD}
         max={MAX_SWIPE_THRESHOLD}
         step={5}
-        onValueChange={setHorizontalThreshold}
+        onValueChange={(v) => setThreshold("left", v)}
         formatValue={(v) => `${v * 2}%`}
       />
       <SliderField
-        id={`${idPrefix}vertical-threshold`}
-        label="Vertical threshold"
-        value={verticalThreshold}
+        id={`${idPrefix}right-threshold`}
+        label="Right threshold"
+        value={thresholds.right}
         min={MIN_SWIPE_THRESHOLD}
         max={MAX_SWIPE_THRESHOLD}
         step={5}
-        onValueChange={setVerticalThreshold}
+        onValueChange={(v) => setThreshold("right", v)}
+        formatValue={(v) => `${v * 2}%`}
+      />
+      <SliderField
+        id={`${idPrefix}up-threshold`}
+        label="Up threshold"
+        value={thresholds.up}
+        min={MIN_SWIPE_THRESHOLD}
+        max={MAX_SWIPE_THRESHOLD}
+        step={5}
+        onValueChange={(v) => setThreshold("up", v)}
+        formatValue={(v) => `${v * 2}%`}
+      />
+      <SliderField
+        id={`${idPrefix}down-threshold`}
+        label="Down threshold"
+        value={thresholds.down}
+        min={MIN_SWIPE_THRESHOLD}
+        max={MAX_SWIPE_THRESHOLD}
+        step={5}
+        onValueChange={(v) => setThreshold("down", v)}
         formatValue={(v) => `${v * 2}%`}
       />
     </SettingsGroup>
