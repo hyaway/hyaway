@@ -39,6 +39,7 @@ import {
   useUndeleteFilesMutation,
 } from "@/integrations/hydrus-api/queries/manage-files";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
+import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { getFileMetadata } from "@/integrations/hydrus-api/api-client";
 import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
 
@@ -120,6 +121,10 @@ export function useReviewSwipeDeck({
   const unarchiveMutation = useUnarchiveFilesMutation();
   const undeleteMutation = useUndeleteFilesMutation();
   const setRatingMutation = useSetRatingMutation();
+
+  // Rating services (for filtering orphaned actions)
+  const { ratingServices } = useRatingServices();
+  const validServiceKeys = new Set(ratingServices.map(([key]) => key));
 
   // Current file metadata
   const { data: currentMetadata } = useGetSingleFileMetadata(
@@ -240,6 +245,12 @@ export function useReviewSwipeDeck({
       for (const action of secondaryActions) {
         if (action.actionType === "rating") {
           const serviceKey = action.serviceKey;
+
+          // Skip orphaned rating actions (service no longer exists)
+          if (!validServiceKeys.has(serviceKey)) {
+            continue;
+          }
+
           const currentRating = currentMetadata?.ratings?.[serviceKey] ?? null;
 
           if (action.type === "setLike") {

@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import {
+  IconAlertCircle,
   IconArchive,
   IconArrowDown,
   IconArrowLeft,
@@ -63,6 +64,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
 import { Button } from "@/components/ui-primitives/button";
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui-primitives/alert";
 import { SettingsResetButton } from "@/components/settings/settings-ui";
 import { cn } from "@/lib/utils";
 
@@ -377,6 +384,11 @@ function DirectionBindingEditor({
     ([key]) => key === selectedServiceKey,
   )?.[1];
 
+  // Detect orphaned rating action (service no longer exists)
+  const isOrphanedRating =
+    ratingAction?.serviceKey != null &&
+    !ratingServices.some(([key]) => key === ratingAction.serviceKey);
+
   const handleFileActionChange = (value: Array<string>) => {
     const fileAction = value[0] as ReviewFileAction | undefined;
     // File action is required, ignore attempts to clear
@@ -482,6 +494,24 @@ function DirectionBindingEditor({
               ? "No permission to edit ratings"
               : "No rating services available"}
           </span>
+        ) : isOrphanedRating ? (
+          <Alert variant="destructive">
+            <IconAlertCircle />
+            <AlertTitle>Rating service does not exist</AlertTitle>
+            <AlertDescription>
+              Rating service {ratingAction.serviceKey} associated with this
+              action was not found in services object.
+            </AlertDescription>
+            <AlertAction>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleRatingActionChange(undefined)}
+              >
+                Clear
+              </Button>
+            </AlertAction>
+          </Alert>
         ) : (
           <div className="flex min-w-0 flex-col gap-2">
             {/* Service selector */}
