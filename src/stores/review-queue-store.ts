@@ -219,6 +219,9 @@ export const useReviewQueueNextFileIds = (count: number) =>
     }),
   );
 
+/** File IDs grouped by swipe direction (preserves action order) */
+export type ReviewFileIdsByDirection = Record<SwipeDirection, Array<number>>;
+
 /** Get actions */
 export const useReviewQueueActions = () =>
   useReviewQueueStore((state) => state.actions);

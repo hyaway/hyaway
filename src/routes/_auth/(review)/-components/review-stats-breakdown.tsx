@@ -27,11 +27,11 @@ const DIRECTION_ICONS: Record<
   down: IconArrowDown,
 };
 
-/** Display order matches footer button layout: left, up, down, right */
+/** Display order matches vim hjkl: left, down, up, right */
 const DISPLAY_DIRECTIONS: ReadonlyArray<SwipeDirection> = [
   "left",
-  "up",
   "down",
+  "up",
   "right",
 ];
 
@@ -79,7 +79,7 @@ export function ReviewStatsBreakdown({
     return (
       <div
         className={cn(
-          "flex items-center justify-center gap-3 text-sm tabular-nums",
+          "flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm tabular-nums",
           className,
         )}
       >
@@ -127,9 +127,16 @@ function InlineStatItem({
 }: StatItemProps) {
   const binding = bindings[direction];
   const descriptor = getSwipeBindingDescriptor(binding, services);
+  const DirectionIcon = DIRECTION_ICONS[direction];
 
   return (
-    <span className={descriptor.textClass}>
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap",
+        descriptor.textClass,
+      )}
+    >
+      <DirectionIcon className="size-3" />
       {count} {descriptor.label.toLowerCase()}
     </span>
   );
@@ -145,7 +152,7 @@ function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
     <div className="flex flex-col items-center gap-1">
       <div
         className={cn(
-          "flex size-10 items-center justify-center rounded-full",
+          "flex size-10 items-center justify-center",
           descriptor.bgClass,
           descriptor.textClass,
         )}
