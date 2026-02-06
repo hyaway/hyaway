@@ -39,6 +39,8 @@ interface ThumbnailGalleryItemContextMenuProps {
   >;
   /** Index of this item in the gallery (for review from here) */
   itemIndex?: number;
+  /** Hide review queue actions (useful when already in review context) */
+  hideReviewActions?: boolean;
 }
 
 /** Get Client API viewing statistics from file metadata */
@@ -51,6 +53,7 @@ function getClientApiStats(item: ThumbnailGalleryItemContextMenuProps["item"]) {
 export function ThumbnailGalleryItemContextMenu({
   item,
   itemIndex,
+  hideReviewActions = false,
 }: ThumbnailGalleryItemContextMenuProps) {
   const navigate = useNavigate();
   const { setQueue, addToQueue } = useReviewQueueActions();
@@ -109,17 +112,21 @@ export function ThumbnailGalleryItemContextMenu({
       }
     >
       {/* Review actions */}
-      <ContextMenuItem onClick={handleNewReview}>
-        <IconCards />
-        {fileIdsFromHere.length > 1 ? "New review from here" : "New review"}
-      </ContextMenuItem>
-      {queueRemaining > 0 && (
-        <ContextMenuItem onClick={handleAddToReview}>
-          <IconCards />
-          {fileIdsFromHere.length > 1
-            ? "Add to review from here"
-            : "Add to review"}
-        </ContextMenuItem>
+      {!hideReviewActions && (
+        <>
+          <ContextMenuItem onClick={handleNewReview}>
+            <IconCards />
+            {fileIdsFromHere.length > 1 ? "New review from here" : "New review"}
+          </ContextMenuItem>
+          {queueRemaining > 0 && (
+            <ContextMenuItem onClick={handleAddToReview}>
+              <IconCards />
+              {fileIdsFromHere.length > 1
+                ? "Add to review from here"
+                : "Add to review"}
+            </ContextMenuItem>
+          )}
+        </>
       )}
 
       {/* Clear viewtime/views actions based on infoMode */}

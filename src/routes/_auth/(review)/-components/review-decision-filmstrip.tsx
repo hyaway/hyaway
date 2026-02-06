@@ -1,19 +1,25 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useDeferredValue, useEffect, useMemo, useRef } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 
 import { ThumbnailGalleryItemContent } from "@/components/thumbnail-gallery/thumbnail-gallery-item-content";
+import { ThumbnailGalleryItemContextMenu } from "@/components/thumbnail-gallery/thumbnail-gallery-item-context-menu";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+} from "@/components/ui-primitives/context-menu";
 import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
 import {
+  useGalleryEnableContextMenu,
   useGalleryEntryDuration,
   useGalleryHorizontalGap,
   useGalleryImageBackground,
@@ -53,6 +59,10 @@ export function ReviewDecisionFilmstrip({
   const horizontalGap = useGalleryHorizontalGap();
   const imageBackground = useGalleryImageBackground();
   const entryDuration = useGalleryEntryDuration();
+  const enableContextMenu = useGalleryEnableContextMenu();
+
+  // Track which item has an open context menu
+  const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
 
   // Fetch metadata for the file IDs (same as ThumbnailGallery)
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -189,13 +199,16 @@ export function ReviewDecisionFilmstrip({
                   }}
                 >
                   {item ? (
-                    <Link
-                      to="/file/$fileId"
-                      params={{ fileId: String(fileId) }}
-                      className="block h-full w-full"
-                    >
-                      <ThumbnailGalleryItemContent item={item} />
-                    </Link>
+                    <FilmstripItem
+                      item={item}
+                      fileId={fileId}
+                      itemIndex={virtualItem.index}
+                      enableContextMenu={enableContextMenu}
+                      isMenuOpen={openMenuIndex === virtualItem.index}
+                      onMenuOpenChange={(open) =>
+                        setOpenMenuIndex(open ? virtualItem.index : null)
+                      }
+                    />
                   ) : (
                     <Skeleton className="h-full w-full rounded-sm" />
                   )}
@@ -206,5 +219,52 @@ export function ReviewDecisionFilmstrip({
         </ScrollArea>
       </div>
     </ThumbnailGalleryProvider>
+  );
+}
+
+// --- Filmstrip Item (with optional context menu) ---
+
+interface FilmstripItemProps {
+  item: FileMetadata;
+  fileId: number;
+  itemIndex: number;
+  enableContextMenu: boolean;
+  isMenuOpen: boolean;
+  onMenuOpenChange: (open: boolean) => void;
+}
+
+function FilmstripItem({
+  item,
+  fileId,
+  itemIndex,
+  enableContextMenu,
+  isMenuOpen,
+  onMenuOpenChange,
+}: FilmstripItemProps) {
+  const linkContent = (
+    <Link
+      to="/file/$fileId"
+      params={{ fileId: String(fileId) }}
+      className="block h-full w-full"
+    >
+      <ThumbnailGalleryItemContent item={item} />
+    </Link>
+  );
+
+  if (!enableContextMenu) {
+    return linkContent;
+  }
+
+  return (
+    <ContextMenu open={isMenuOpen} onOpenChange={onMenuOpenChange}>
+      <ContextMenuTrigger className="h-full w-full">
+        {linkContent}
+      </ContextMenuTrigger>
+      <ThumbnailGalleryItemContextMenu
+        item={item}
+        itemIndex={itemIndex}
+        hideReviewActions
+      />
+    </ContextMenu>
   );
 }
