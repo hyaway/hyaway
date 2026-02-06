@@ -355,8 +355,14 @@ export function useReviewSwipeDeck({
           handleSwipe("up");
           break;
         case "ArrowDown":
+        case "j":
+        case "J":
+          e.preventDefault();
+          handleSwipe("down");
+          break;
         case "z":
         case "Z":
+        case "Backspace":
           e.preventDefault();
           performUndo();
           break;
