@@ -15,8 +15,9 @@ import { cn } from "@/lib/utils";
  * - 4: Default, labels at @xl
  * - 5: Labels at @2xl
  * - 6: Labels at @3xl, tighter mobile padding, extra tight under 250px
+ * - 7: Labels at @4xl, tightest mobile padding, extra tight under 280px
  */
-export type BottomNavButtonMaxButtons = 4 | 5 | 6;
+export type BottomNavButtonMaxButtons = 4 | 5 | 6 | 7;
 
 /**
  * Context for setting maxButtons for all BottomNavButton descendants.
@@ -75,6 +76,12 @@ const bottomNavButtonVariants = cva(
           "@3xl:flex-row @3xl:gap-1.5 @3xl:px-4",
           "short:@3xl:flex-row short:@3xl:gap-1.5 short:@3xl:px-4",
         ],
+        // 7 buttons: labels at @4xl, tightest mobile padding, extra tight under 300px
+        7: [
+          "px-1.5 short:px-1.5 max-[300px]:px-0",
+          "@4xl:flex-row @4xl:gap-1.5 @4xl:px-4",
+          "short:@4xl:flex-row short:@4xl:gap-1.5 short:@4xl:px-4",
+        ],
       },
       intent: {
         default: "",
@@ -101,6 +108,8 @@ const labelVariants = cva(["text-xs"], {
       5: "max-[300px]:sr-only short:sr-only short:@2xl:not-sr-only @2xl:text-sm",
       // 6: show labels, hide at narrow widths, desktop at @3xl
       6: "max-[360px]:sr-only short:sr-only short:@3xl:not-sr-only @3xl:text-sm",
+      // 7: show labels, hide at narrow widths, desktop at @4xl
+      7: "max-[400px]:sr-only short:sr-only short:@4xl:not-sr-only @4xl:text-sm",
     },
     truncateLabel: {
       true: "",
@@ -126,6 +135,12 @@ const labelVariants = cva(["text-xs"], {
       className:
         "short:@3xl:max-w-[4ch] short:@3xl:overflow-hidden short:@3xl:whitespace-nowrap short:@3xl:text-clip max-w-[4ch] overflow-hidden whitespace-nowrap text-clip",
     },
+    {
+      maxButtons: 7,
+      truncateLabel: true,
+      className:
+        "short:@4xl:max-w-[4ch] short:@4xl:overflow-hidden short:@4xl:whitespace-nowrap short:@4xl:text-clip max-w-[4ch] overflow-hidden whitespace-nowrap text-clip",
+    },
   ],
   defaultVariants: {
     maxButtons: 4,
@@ -135,6 +150,7 @@ const labelVariants = cva(["text-xs"], {
 
 /**
  * Kbd visibility variants based on maxButtons.
+ * Hidden by default, shown at breakpoint.
  */
 const kbdVariants = cva(["hidden"], {
   variants: {
@@ -142,6 +158,7 @@ const kbdVariants = cva(["hidden"], {
       4: "@xl:inline-flex short:@xl:inline-flex",
       5: "@2xl:inline-flex short:@2xl:inline-flex",
       6: "@3xl:inline-flex short:@3xl:inline-flex",
+      7: "@4xl:inline-flex short:@4xl:inline-flex",
     },
   },
   defaultVariants: {
@@ -158,6 +175,7 @@ const labelFlexVariants = cva(["flex flex-col items-center gap-0.5"], {
       4: "@xl:flex-row @xl:gap-1.5 short:@xl:flex-row short:@xl:gap-1.5",
       5: "@2xl:flex-row @2xl:gap-1.5 short:@2xl:flex-row short:@2xl:gap-1.5",
       6: "@3xl:flex-row @3xl:gap-1.5 short:@3xl:flex-row short:@3xl:gap-1.5",
+      7: "@4xl:flex-row @4xl:gap-1.5 short:@4xl:flex-row short:@4xl:gap-1.5",
     },
   },
   defaultVariants: {
