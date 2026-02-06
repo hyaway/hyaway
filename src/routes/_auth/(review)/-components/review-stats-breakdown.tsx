@@ -1,6 +1,12 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import {
+  IconArrowDown,
+  IconArrowLeft,
+  IconArrowRight,
+  IconArrowUp,
+} from "@tabler/icons-react";
 import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import type { ReviewDirectionStats } from "@/stores/review-queue-store";
 import type {
@@ -10,6 +16,16 @@ import type {
 import { cn } from "@/lib/utils";
 import { SWIPE_DIRECTIONS } from "@/stores/review-settings-store";
 import { useRatingServiceNames } from "@/integrations/hydrus-api/queries/use-rating-services";
+
+const DIRECTION_ICONS: Record<
+  SwipeDirection,
+  React.ComponentType<{ className?: string }>
+> = {
+  left: IconArrowLeft,
+  right: IconArrowRight,
+  up: IconArrowUp,
+  down: IconArrowDown,
+};
 
 export interface ReviewStatsBreakdownProps {
   /** Counts per direction from review history */
@@ -119,7 +135,8 @@ function GridStatItem({
 }: StatItemProps) {
   const binding = bindings[direction];
   const descriptor = getSwipeBindingDescriptor(binding, serviceNames);
-  const Icon = descriptor.icon;
+  const ActionIcon = descriptor.icon;
+  const DirectionIcon = DIRECTION_ICONS[direction];
 
   return (
     <div className="flex flex-col items-center gap-1">
@@ -130,10 +147,13 @@ function GridStatItem({
           descriptor.textClass,
         )}
       >
-        <Icon className="size-5" />
+        <ActionIcon className="size-5" />
       </div>
       <span className="text-2xl font-semibold tabular-nums">{count}</span>
-      <span className="text-muted-foreground text-xs">{descriptor.label}</span>
+      <span className="text-muted-foreground flex items-center gap-0.5 text-xs">
+        <DirectionIcon className="size-3" />
+        {descriptor.label}
+      </span>
     </div>
   );
 }
