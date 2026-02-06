@@ -8,11 +8,19 @@ import { cn } from "@/lib/utils";
 
 interface ScrollAreaProps extends ScrollAreaPrimitive.Root.Props {
   viewportClassName?: string;
+  /** Scrollbar orientation(s) to show. Defaults to "vertical". */
+  orientation?: "vertical" | "horizontal" | "both";
 }
 
 const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
   function ScrollArea(
-    { className, viewportClassName, children, ...props },
+    {
+      className,
+      viewportClassName,
+      orientation = "vertical",
+      children,
+      ...props
+    },
     ref,
   ) {
     return (
@@ -31,7 +39,12 @@ const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
         >
           {children}
         </ScrollAreaPrimitive.Viewport>
-        <ScrollBar />
+        {(orientation === "vertical" || orientation === "both") && (
+          <ScrollBar orientation="vertical" />
+        )}
+        {(orientation === "horizontal" || orientation === "both") && (
+          <ScrollBar orientation="horizontal" />
+        )}
         <ScrollAreaPrimitive.Corner />
       </ScrollAreaPrimitive.Root>
     );
