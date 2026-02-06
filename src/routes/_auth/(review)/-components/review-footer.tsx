@@ -23,7 +23,7 @@ import {
   useReviewShortcutsEnabled,
   useReviewSwipeBindings,
 } from "@/stores/review-settings-store";
-import { useRatingServiceNames } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useFileActions } from "@/hooks/use-file-actions";
 import { FooterPortal } from "@/components/app-shell/footer-portal";
@@ -84,7 +84,7 @@ export function ReviewFooter({
 }: ReviewFooterProps) {
   const showShortcuts = useReviewShortcutsEnabled();
   const bindings = useReviewSwipeBindings();
-  const serviceNames = useRatingServiceNames();
+  const { servicesMap } = useRatingServices();
 
   // Don't show footer when review is complete
   if (disabled) {
@@ -92,13 +92,13 @@ export function ReviewFooter({
   }
 
   // Get icons for action directions (using descriptors for icons but not labels)
-  const leftDescriptor = getSwipeBindingDescriptor(bindings.left, serviceNames);
-  const upDescriptor = getSwipeBindingDescriptor(bindings.up, serviceNames);
+  const leftDescriptor = getSwipeBindingDescriptor(bindings.left, servicesMap);
+  const upDescriptor = getSwipeBindingDescriptor(bindings.up, servicesMap);
   const rightDescriptor = getSwipeBindingDescriptor(
     bindings.right,
-    serviceNames,
+    servicesMap,
   );
-  const downDescriptor = getSwipeBindingDescriptor(bindings.down, serviceNames);
+  const downDescriptor = getSwipeBindingDescriptor(bindings.down, servicesMap);
 
   // Get file action label (simple capitalized text)
   const getFileActionLabel = (fileAction: ReviewFileAction) => {

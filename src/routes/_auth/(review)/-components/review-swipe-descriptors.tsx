@@ -11,6 +11,8 @@ import type {
   ReviewSwipeBinding,
   SecondarySwipeAction,
 } from "@/stores/review-settings-store";
+import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
+import { isNumericalRatingService } from "@/integrations/hydrus-api/models";
 
 /** Visual descriptor for a swipe binding */
 export interface SwipeBindingDescriptor {
@@ -45,29 +47,34 @@ function getRatingActions(
 
 /**
  * Format a rating action as a display string.
- * Examples: "favorite like", "mynumeric 7", "myinc +1"
+ * Examples: "favorite like", "mynumeric 7/10", "myinc +1"
  *
  * @param action The rating action to format
- * @param serviceNames Optional map of serviceKey -> serviceName for display
+ * @param services Optional map of serviceKey -> RatingServiceInfo for display
  */
 export function formatRatingAction(
   action: RatingSwipeAction,
-  serviceNames?: Map<string, string>,
+  services?: Map<string, RatingServiceInfo>,
 ): string {
+  const service = services?.get(action.serviceKey);
   // Look up service name, fall back to key, truncate to 10 chars
-  const serviceName = truncate(
-    serviceNames?.get(action.serviceKey) ?? action.serviceKey,
-    10,
-  );
+  const serviceName = truncate(service?.name ?? action.serviceKey, 10);
 
   switch (action.type) {
     case "setLike":
       if (action.value === true) return `${serviceName} like`;
       if (action.value === false) return `${serviceName} dislike`;
       return `${serviceName} clear`;
-    case "setNumerical":
+    case "setNumerical": {
       if (action.value === null) return `${serviceName} clear`;
+      // Show value/maxStars if service info available
+      const maxStars =
+        service && isNumericalRatingService(service)
+          ? service.max_stars
+          : undefined;
+      if (maxStars != null) return `${serviceName} ${action.value}/${maxStars}`;
       return `${serviceName} ${action.value}`;
+    }
     case "incDecDelta":
       return `${serviceName} ${action.delta > 0 ? "+1" : "-1"}`;
   }
@@ -128,12 +135,12 @@ const FILE_ACTION_OVERLAY_DESCRIPTORS: Record<
  * Used for stats display and other UI elements.
  *
  * @param binding The swipe binding to describe
- * @param serviceNames Optional map of serviceKey -> serviceName for display
+ * @param services Optional map of serviceKey -> RatingServiceInfo for display
  * @returns Descriptor with label, icon, and styling classes
  */
 export function getSwipeBindingDescriptor(
   binding: ReviewSwipeBinding,
-  serviceNames?: Map<string, string>,
+  services?: Map<string, RatingServiceInfo>,
 ): SwipeBindingDescriptor {
   const fileDescriptor = FILE_ACTION_DESCRIPTORS[binding.fileAction];
   const ratingActions = getRatingActions(binding.secondaryActions);
@@ -141,7 +148,7 @@ export function getSwipeBindingDescriptor(
   // If there are also rating actions, append formatted ratings
   if (ratingActions.length > 0) {
     const ratingLabels = ratingActions
-      .map((a) => formatRatingAction(a, serviceNames))
+      .map((a) => formatRatingAction(a, services))
       .join(", ");
     return {
       ...fileDescriptor,
@@ -157,12 +164,12 @@ export function getSwipeBindingDescriptor(
  * Uses stronger background colors suitable for overlay display.
  *
  * @param binding The swipe binding to describe
- * @param serviceNames Optional map of serviceKey -> serviceName for display
+ * @param services Optional map of serviceKey -> RatingServiceInfo for display
  * @returns Descriptor with label, icon, and overlay styling classes
  */
 export function getSwipeBindingOverlayDescriptor(
   binding: ReviewSwipeBinding,
-  serviceNames?: Map<string, string>,
+  services?: Map<string, RatingServiceInfo>,
 ): SwipeBindingDescriptor {
   const fileDescriptor = FILE_ACTION_OVERLAY_DESCRIPTORS[binding.fileAction];
   const ratingActions = getRatingActions(binding.secondaryActions);
@@ -170,7 +177,7 @@ export function getSwipeBindingOverlayDescriptor(
   // If there are also rating actions, append formatted ratings
   if (ratingActions.length > 0) {
     const ratingLabels = ratingActions
-      .map((a) => formatRatingAction(a, serviceNames))
+      .map((a) => formatRatingAction(a, services))
       .join(", ");
     return {
       ...fileDescriptor,

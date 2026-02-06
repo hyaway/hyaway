@@ -22,7 +22,7 @@ import {
   useReviewShowGestureThresholds,
   useReviewSwipeThresholds,
 } from "@/stores/review-settings-store";
-import { useRatingServiceNames } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { cn } from "@/lib/utils";
 
 // Re-export SwipeDirection for consumers that import from this file
@@ -239,7 +239,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
   // Get threshold settings from store (percentages)
   const showGestureThresholds = useReviewShowGestureThresholds();
   const thresholds = useReviewSwipeThresholds();
-  const serviceNames = useRatingServiceNames();
+  const { servicesMap } = useRatingServices();
 
   // Calculate rotation based on horizontal drag
   const rotate = useTransform(
@@ -533,7 +533,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
 
               const descriptor = getSwipeBindingOverlayDescriptor(
                 binding,
-                serviceNames,
+                servicesMap,
               );
               const Icon = descriptor.icon;
               const opacity =

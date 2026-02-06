@@ -35,6 +35,15 @@ export function useRatingServices() {
     );
   }, [servicesData?.services]);
 
+  // Create a map for easy lookup by service key
+  const servicesMap = useMemo(() => {
+    const map = new Map<string, RatingServiceInfo>();
+    for (const [key, service] of ratingServices) {
+      map.set(key, service);
+    }
+    return map;
+  }, [ratingServices]);
+
   // Prefetch custom SVG icons for rating services that use them
   useEffect(() => {
     const svgServiceKeys = ratingServices
@@ -48,6 +57,7 @@ export function useRatingServices() {
 
   return {
     ratingServices,
+    servicesMap,
     isLoading,
     ...rest,
   };
@@ -72,22 +82,6 @@ export function useHasRatingServices() {
   // Show settings if we have rating services OR orphaned settings to clean up
   if (isLoading) return false;
   return ratingServices.length > 0 || hasOrphanedServices;
-}
-
-/**
- * Hook that returns a Map of service keys to service names.
- * Useful for displaying user-friendly service names in UI.
- */
-export function useRatingServiceNames(): Map<string, string> {
-  const { ratingServices } = useRatingServices();
-
-  return useMemo(() => {
-    const map = new Map<string, string>();
-    for (const [key, service] of ratingServices) {
-      map.set(key, service.name);
-    }
-    return map;
-  }, [ratingServices]);
 }
 
 /**

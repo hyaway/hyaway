@@ -13,9 +13,9 @@ import type {
   SwipeBindings,
   SwipeDirection,
 } from "@/stores/review-settings-store";
+import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
 import { cn } from "@/lib/utils";
-import { SWIPE_DIRECTIONS } from "@/stores/review-settings-store";
-import { useRatingServiceNames } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 
 const DIRECTION_ICONS: Record<
   SwipeDirection,
@@ -26,6 +26,14 @@ const DIRECTION_ICONS: Record<
   up: IconArrowUp,
   down: IconArrowDown,
 };
+
+/** Display order matches footer button layout: left, up, down, right */
+const DISPLAY_DIRECTIONS: ReadonlyArray<SwipeDirection> = [
+  "left",
+  "up",
+  "down",
+  "right",
+];
 
 export interface ReviewStatsBreakdownProps {
   /** Counts per direction from review history */
@@ -51,10 +59,10 @@ export function ReviewStatsBreakdown({
   hideZero = true,
   className,
 }: ReviewStatsBreakdownProps) {
-  const serviceNames = useRatingServiceNames();
+  const { servicesMap } = useRatingServices();
 
   // Filter to only directions that have bindings (and optionally non-zero counts)
-  const visibleDirections = SWIPE_DIRECTIONS.filter((direction) => {
+  const visibleDirections = DISPLAY_DIRECTIONS.filter((direction) => {
     const count = stats[direction];
 
     // Skip if hideZero and count is 0
@@ -81,7 +89,7 @@ export function ReviewStatsBreakdown({
             direction={direction}
             count={stats[direction]}
             bindings={bindings}
-            serviceNames={serviceNames}
+            services={servicesMap}
           />
         ))}
       </div>
@@ -97,7 +105,7 @@ export function ReviewStatsBreakdown({
           direction={direction}
           count={stats[direction]}
           bindings={bindings}
-          serviceNames={serviceNames}
+          services={servicesMap}
         />
       ))}
     </div>
@@ -108,17 +116,17 @@ interface StatItemProps {
   direction: SwipeDirection;
   count: number;
   bindings: SwipeBindings;
-  serviceNames: Map<string, string>;
+  services: Map<string, RatingServiceInfo>;
 }
 
 function InlineStatItem({
   direction,
   count,
   bindings,
-  serviceNames,
+  services,
 }: StatItemProps) {
   const binding = bindings[direction];
-  const descriptor = getSwipeBindingDescriptor(binding, serviceNames);
+  const descriptor = getSwipeBindingDescriptor(binding, services);
 
   return (
     <span className={descriptor.textClass}>
@@ -127,14 +135,9 @@ function InlineStatItem({
   );
 }
 
-function GridStatItem({
-  direction,
-  count,
-  bindings,
-  serviceNames,
-}: StatItemProps) {
+function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
   const binding = bindings[direction];
-  const descriptor = getSwipeBindingDescriptor(binding, serviceNames);
+  const descriptor = getSwipeBindingDescriptor(binding, services);
   const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];
 
@@ -147,11 +150,11 @@ function GridStatItem({
           descriptor.textClass,
         )}
       >
-        <ActionIcon className="size-5" />
+        <ActionIcon className="size-4" />
+        <DirectionIcon className="size-4" />
       </div>
       <span className="text-2xl font-semibold tabular-nums">{count}</span>
       <span className="text-muted-foreground flex items-center gap-0.5 text-xs">
-        <DirectionIcon className="size-3" />
         {descriptor.label}
       </span>
     </div>

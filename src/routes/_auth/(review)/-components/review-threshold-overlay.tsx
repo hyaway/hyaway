@@ -13,7 +13,7 @@ import type { MotionValue } from "motion/react";
 import type { CardSize } from "./review-swipe-card";
 import type { SwipeThresholds } from "@/stores/review-settings-store";
 import { useReviewSwipeBindings } from "@/stores/review-settings-store";
-import { useRatingServiceNames } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { cn } from "@/lib/utils";
 
 export interface ReviewThresholdOverlayProps {
@@ -35,23 +35,23 @@ export function ReviewThresholdOverlay({
   thresholds,
 }: ReviewThresholdOverlayProps) {
   const bindings = useReviewSwipeBindings();
-  const serviceNames = useRatingServiceNames();
+  const { servicesMap } = useRatingServices();
   // Get descriptors for each direction
   const leftDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.left,
-    serviceNames,
+    servicesMap,
   );
   const rightDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.right,
-    serviceNames,
+    servicesMap,
   );
   const upDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.up,
-    serviceNames,
+    servicesMap,
   );
   const downDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.down,
-    serviceNames,
+    servicesMap,
   );
 
   // Calculate percentage coordinates for crosshair label (doubled to match settings display)
