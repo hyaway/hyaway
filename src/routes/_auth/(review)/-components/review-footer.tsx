@@ -130,7 +130,7 @@ export function ReviewFooter({
               badge={undoCount > 0 ? undoCount : undefined}
             />
 
-            {/* Left direction button */}
+            {/* Left direction button (h) */}
             <BottomNavButton
               label={getFileActionLabel(bindings.left.fileAction)}
               customContent={
@@ -142,19 +142,7 @@ export function ReviewFooter({
               intent={getIntent(bindings.left.fileAction)}
             />
 
-            {/* Up direction button */}
-            <BottomNavButton
-              label={getFileActionLabel(bindings.up.fileAction)}
-              customContent={
-                <DirectionalIcon direction="up">
-                  <upDescriptor.icon className="size-6" />
-                </DirectionalIcon>
-              }
-              onClick={() => onSwipe("up")}
-              intent={getIntent(bindings.up.fileAction)}
-            />
-
-            {/* Down direction button */}
+            {/* Down direction button (j) */}
             <BottomNavButton
               label={getFileActionLabel(bindings.down.fileAction)}
               customContent={
@@ -166,7 +154,19 @@ export function ReviewFooter({
               intent={getIntent(bindings.down.fileAction)}
             />
 
-            {/* Right direction button */}
+            {/* Up direction button (k) */}
+            <BottomNavButton
+              label={getFileActionLabel(bindings.up.fileAction)}
+              customContent={
+                <DirectionalIcon direction="up">
+                  <upDescriptor.icon className="size-6" />
+                </DirectionalIcon>
+              }
+              onClick={() => onSwipe("up")}
+              intent={getIntent(bindings.up.fileAction)}
+            />
+
+            {/* Right direction button (l) */}
             <BottomNavButton
               label={getFileActionLabel(bindings.right.fileAction)}
               customContent={

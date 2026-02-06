@@ -84,7 +84,7 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
   return (
     <div className="flex w-full flex-col items-center gap-6">
       {/* Header section - centered with max width */}
-      <div className="flex w-full max-w-2xl flex-col items-center gap-6">
+      <div className="flex w-full max-w-2xl flex-col items-center gap-6 px-4">
         {/* Success icon */}
         <div className="bg-primary/10 text-primary flex size-20 items-center justify-center">
           <IconCheck className="size-10" strokeWidth={2.5} />

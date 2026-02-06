@@ -29,7 +29,10 @@ export interface SwipeBindingDescriptor {
 /** Truncate a string to maxLength, adding ellipsis if needed */
 function truncate(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str;
-  return `${str.slice(0, maxLength - 1)}…`;
+  return `${str
+    .trim()
+    .slice(0, maxLength - 1)
+    .trim()}`;
 }
 
 /** Extract rating actions from secondary actions array */
@@ -57,8 +60,8 @@ export function formatRatingAction(
   services?: Map<string, RatingServiceInfo>,
 ): string {
   const service = services?.get(action.serviceKey);
-  // Look up service name, fall back to key, truncate to 10 chars
-  const serviceName = truncate(service?.name ?? action.serviceKey, 10);
+  // Look up service name, fall back to key, truncate to 4 chars
+  const serviceName = truncate(service?.name ?? action.serviceKey, 20);
 
   switch (action.type) {
     case "setLike":
@@ -149,10 +152,10 @@ export function getSwipeBindingDescriptor(
   if (ratingActions.length > 0) {
     const ratingLabels = ratingActions
       .map((a) => formatRatingAction(a, services))
-      .join(", ");
+      .join(",");
     return {
       ...fileDescriptor,
-      label: `${fileDescriptor.label} + ${ratingLabels}`,
+      label: `${fileDescriptor.label}+${ratingLabels}`,
     };
   }
 

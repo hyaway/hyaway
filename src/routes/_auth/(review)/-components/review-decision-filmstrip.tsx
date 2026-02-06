@@ -33,7 +33,7 @@ const MIN_ASPECT_RATIO = 0.5;
 const MAX_ASPECT_RATIO = 3;
 
 /** Maximum height for filmstrip tiles */
-const MAX_FILMSTRIP_HEIGHT = 300;
+const MAX_FILMSTRIP_HEIGHT = 250;
 
 interface ReviewDecisionFilmstripProps {
   /** File IDs to display in this filmstrip */

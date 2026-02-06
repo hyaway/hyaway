@@ -6,6 +6,8 @@ import {
   IconArrowLeft,
   IconArrowRight,
   IconArrowUp,
+  IconCircle,
+  IconCircleFilled,
 } from "@tabler/icons-react";
 import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import type { ReviewDirectionStats } from "@/stores/review-queue-store";
@@ -83,14 +85,18 @@ export function ReviewStatsBreakdown({
           className,
         )}
       >
-        {visibleDirections.map((direction) => (
-          <InlineStatItem
-            key={direction}
-            direction={direction}
-            count={stats[direction]}
-            bindings={bindings}
-            services={servicesMap}
-          />
+        {visibleDirections.map((direction, index) => (
+          <span key={direction} className="inline-flex items-center gap-3">
+            {index > 0 && (
+              <IconCircleFilled className="text-muted-foreground size-1" />
+            )}
+            <InlineStatItem
+              direction={direction}
+              count={stats[direction]}
+              bindings={bindings}
+              services={servicesMap}
+            />
+          </span>
         ))}
       </div>
     );
@@ -136,8 +142,8 @@ function InlineStatItem({
         descriptor.textClass,
       )}
     >
-      <DirectionIcon className="size-3" />
       {count} {descriptor.label.toLowerCase()}
+      <DirectionIcon className="size-3" />
     </span>
   );
 }
