@@ -140,7 +140,7 @@ const useReviewQueueStore = create<ReviewQueueState>()(
       },
     }),
     {
-      name: "hyaway-review-queue-history",
+      name: "hyaway-review-queue-state",
       storage: createJSONStorage(() => sessionStorage),
       // Persist full state - sessionStorage is ephemeral per tab/session
       partialize: (state) => ({
