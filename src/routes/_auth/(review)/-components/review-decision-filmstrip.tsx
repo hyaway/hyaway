@@ -1,7 +1,14 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
@@ -63,6 +70,79 @@ export function ReviewDecisionFilmstrip({
 
   // Track which item has an open context menu
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
+
+  // Roving tabindex: only one item is tabbable at a time
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const linkRefs = useRef<Map<number, HTMLAnchorElement>>(new Map());
+  const pendingFocusRef = useRef<number | null>(null);
+
+  const setLinkRef = useCallback(
+    (el: HTMLAnchorElement | null, index: number) => {
+      if (el) {
+        linkRefs.current.set(index, el);
+        if (pendingFocusRef.current === index) {
+          pendingFocusRef.current = null;
+          el.focus({ preventScroll: true });
+        }
+      } else {
+        linkRefs.current.delete(index);
+      }
+    },
+    [],
+  );
+
+  const getTabIndex = (index: number): number => {
+    const target = focusedIndex ?? 0;
+    const visibleIndices = virtualizer.getVirtualItems().map((v) => v.index);
+    if (visibleIndices.includes(target)) {
+      return index === target ? 0 : -1;
+    }
+    const firstVisible = Math.min(...visibleIndices);
+    return index === firstVisible ? 0 : -1;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    const currentIndex = focusedIndex ?? 0;
+    let nextIndex: number | null = null;
+
+    switch (e.key) {
+      case "ArrowRight":
+        if (currentIndex < fileIds.length - 1) nextIndex = currentIndex + 1;
+        break;
+      case "ArrowLeft":
+        if (currentIndex > 0) nextIndex = currentIndex - 1;
+        break;
+      case "Home":
+        nextIndex = 0;
+        break;
+      case "End":
+        nextIndex = fileIds.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    if (nextIndex !== null && nextIndex !== currentIndex) {
+      e.preventDefault();
+      setFocusedIndex(nextIndex);
+
+      const nextEl = linkRefs.current.get(nextIndex);
+      if (nextEl) {
+        nextEl.focus({ preventScroll: true });
+        nextEl.scrollIntoView({
+          behavior: e.repeat ? "instant" : "smooth",
+          block: "nearest",
+          inline: "nearest",
+        });
+      } else {
+        pendingFocusRef.current = nextIndex;
+        virtualizer.scrollToIndex(nextIndex, {
+          align: "auto",
+          behavior: e.repeat ? "auto" : "smooth",
+        });
+      }
+    }
+  };
 
   // Fetch metadata for the file IDs (same as ThumbnailGallery)
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -183,6 +263,7 @@ export function ReviewDecisionFilmstrip({
       <div
         className="group/gallery"
         data-image-bg={imageBackground}
+        onKeyDown={handleKeyDown}
         style={
           {
             "--gallery-entry-duration": `${entryDuration}ms`,
@@ -190,9 +271,10 @@ export function ReviewDecisionFilmstrip({
         }
       >
         <ScrollArea
-          viewportClassName="pb-4"
+          viewportClassName="px-1 py-1 pb-4"
           orientation="horizontal"
           ref={scrollContainerRef}
+          tabIndex={-1}
         >
           <div
             className="relative mx-auto"
@@ -221,6 +303,9 @@ export function ReviewDecisionFilmstrip({
                       item={item}
                       fileId={fileId}
                       itemIndex={virtualItem.index}
+                      tabIndex={getTabIndex(virtualItem.index)}
+                      setLinkRef={setLinkRef}
+                      onItemFocus={setFocusedIndex}
                       enableContextMenu={enableContextMenu}
                       isMenuOpen={openMenuIndex === virtualItem.index}
                       onMenuOpenChange={(open) =>
@@ -246,6 +331,9 @@ interface FilmstripItemProps {
   item: FileMetadata;
   fileId: number;
   itemIndex: number;
+  tabIndex: number;
+  setLinkRef: (el: HTMLAnchorElement | null, index: number) => void;
+  onItemFocus: (index: number) => void;
   enableContextMenu: boolean;
   isMenuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
@@ -255,6 +343,9 @@ function FilmstripItem({
   item,
   fileId,
   itemIndex,
+  tabIndex,
+  setLinkRef,
+  onItemFocus,
   enableContextMenu,
   isMenuOpen,
   onMenuOpenChange,
@@ -264,6 +355,9 @@ function FilmstripItem({
       to="/file/$fileId"
       params={{ fileId: String(fileId) }}
       className="block h-full w-full"
+      tabIndex={tabIndex}
+      ref={(el) => setLinkRef(el, itemIndex)}
+      onFocus={() => onItemFocus(itemIndex)}
     >
       <ThumbnailGalleryItemContent item={item} />
     </Link>

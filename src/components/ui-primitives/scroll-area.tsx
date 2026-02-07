@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 
 interface ScrollAreaProps extends ScrollAreaPrimitive.Root.Props {
   viewportClassName?: string;
+  /** tabIndex for the scrollable viewport element */
+  tabIndex?: number;
   /** Scrollbar orientation(s) to show. Defaults to "vertical". */
   orientation?: "vertical" | "horizontal" | "both";
 }
@@ -18,6 +20,7 @@ const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
       className,
       viewportClassName,
       orientation = "vertical",
+      tabIndex,
       children,
       ...props
     },
@@ -32,6 +35,7 @@ const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
         <ScrollAreaPrimitive.Viewport
           ref={ref}
           data-slot="scroll-area-viewport"
+          tabIndex={tabIndex}
           className={cn(
             "focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1",
             viewportClassName,
