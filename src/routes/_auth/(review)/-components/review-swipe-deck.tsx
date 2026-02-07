@@ -209,14 +209,7 @@ function executeSecondaryRatingActions(
   return restoreEntries;
 }
 
-export interface UseReviewSwipeDeckOptions {
-  /** Callback when an action is performed */
-  onAction?: (direction: SwipeDirection, fileId: number) => void;
-}
-
-export function useReviewSwipeDeck({
-  onAction,
-}: UseReviewSwipeDeckOptions = {}) {
+export function useReviewSwipeDeck() {
   const fileIds = useReviewQueueFileIds();
   const currentIndex = useReviewQueueCurrentIndex();
   const currentFileId = useReviewQueueCurrentFileId();
@@ -347,7 +340,6 @@ export function useReviewSwipeDeck({
         fileAction: binding.fileAction,
         restore,
       });
-      onAction?.(direction, currentFileId);
     },
     [
       currentFileId,
@@ -358,7 +350,6 @@ export function useReviewSwipeDeck({
       archiveFiles,
       trashFiles,
       setRating,
-      onAction,
       validServiceKeys,
     ],
   );
