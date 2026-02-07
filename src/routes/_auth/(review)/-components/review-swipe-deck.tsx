@@ -110,8 +110,9 @@ type RatingMutate = (args: {
 
 /**
  * Execute the primary file action if it would change state.
- * "skip" is an explicit no-op. Mutation actions use a complete (non-Partial)
- * map so adding a new mutation action forces a compile error until handled.
+ * "skip" and "undo" are explicit no-ops. Mutation actions use a complete
+ * (non-Partial) map so adding a new mutation action forces a compile error
+ * until handled.
  */
 function executeFileAction(
   fileAction: ReviewFileAction,
@@ -119,7 +120,7 @@ function executeFileAction(
   fileState: PreviousFileState,
   mutations: Record<ReviewFileMutationAction, FileMutate>,
 ): void {
-  if (fileAction === "skip") return;
+  if (fileAction === "skip" || fileAction === "undo") return;
   if (wasMutationUnchanged(fileAction, fileState)) return;
   mutations[fileAction]({ file_ids: [fileId] });
 }
@@ -134,7 +135,7 @@ function reverseFileAction(
   fileState: PreviousFileState,
   undoMutations: Record<ReviewFileMutationAction, FileMutate>,
 ): void {
-  if (fileAction === "skip") return;
+  if (fileAction === "skip" || fileAction === "undo") return;
   if (wasMutationUnchanged(fileAction, fileState)) return;
   undoMutations[fileAction]({ file_ids: [fileId] });
 }
@@ -315,6 +316,13 @@ export function useReviewSwipeDeck() {
 
       const binding = getBindingForDirection(bindings, direction);
 
+      // Undo path — reverse last action instead of advancing (no animation, instant swap)
+      if (binding.fileAction === "undo") {
+        if (history.length === 0) return; // Nothing to undo
+        performUndo();
+        return;
+      }
+
       // Add to exiting cards to trigger exit animation
       setExitingCards((prev) => new Map(prev).set(currentFileId, direction));
 
@@ -356,6 +364,8 @@ export function useReviewSwipeDeck() {
       trashFiles,
       setRating,
       validServiceKeys,
+      history.length,
+      performUndo,
     ],
   );
 
@@ -372,6 +382,7 @@ export function useReviewSwipeDeck() {
     gesturesEnabled,
     bindings,
     lastInteractionRef,
+    canUndo: history.length > 0,
     handleSwipe,
     handleExitComplete,
     performUndo,
@@ -385,6 +396,7 @@ export function ReviewSwipeDeckVisual({
   exitingCards,
   gesturesEnabled,
   bindings,
+  canUndo,
   lastInteractionRef,
   handleSwipe,
   handleExitComplete,
@@ -393,6 +405,7 @@ export function ReviewSwipeDeckVisual({
   exitingCards: Map<number, SwipeDirection>;
   gesturesEnabled: boolean;
   bindings: SwipeBindings;
+  canUndo: boolean;
   lastInteractionRef: React.RefObject<InteractionType>;
   handleSwipe: (direction: SwipeDirection) => void;
   handleExitComplete: (fileId: number) => void;
@@ -443,6 +456,7 @@ export function ReviewSwipeDeckVisual({
                 stackIndex={nonExitingIndex}
                 cardSize={cardSize}
                 bindings={bindings}
+                canUndo={canUndo}
                 exitDirection={exitDirection}
                 gesturesEnabled={gesturesEnabled}
                 lastInteractionRef={lastInteractionRef}

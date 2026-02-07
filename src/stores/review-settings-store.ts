@@ -16,8 +16,8 @@ export type SwipeDirection = (typeof SWIPE_DIRECTIONS)[number];
 /** File actions that mutate file state (archive, trash, etc.) */
 export type ReviewFileMutationAction = "archive" | "trash";
 
-/** All file actions during review — mutation actions + skip (no-op) */
-export type ReviewFileAction = ReviewFileMutationAction | "skip";
+/** All file actions during review — mutation actions + skip (no-op) + undo */
+export type ReviewFileAction = ReviewFileMutationAction | "skip" | "undo";
 
 /** How images are loaded in review mode */
 export type ReviewImageLoadMode = "original" | "optimized";
@@ -112,7 +112,7 @@ export const DEFAULT_SWIPE_BINDINGS: SwipeBindings = {
   left: { fileAction: "trash" },
   right: { fileAction: "archive" },
   up: { fileAction: "skip" },
-  down: { fileAction: "skip" },
+  down: { fileAction: "undo" },
 };
 
 // #endregion
@@ -238,7 +238,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
     }),
     {
       name: "hyaway-review-queue", // Keeping this key for backward compatibility
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         shortcutsEnabled: state.shortcutsEnabled,
@@ -274,6 +274,24 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
             horizontalThreshold: undefined,
             verticalThreshold: undefined,
           };
+        }
+
+        // v1 -> v2: default down binding changed from "skip" to "undo"
+        if (version < 2 && state && typeof state === "object") {
+          const bindings = state.bindings as SwipeBindings | undefined;
+          if (
+            bindings?.down &&
+            bindings.down.fileAction === "skip" &&
+            !bindings.down.secondaryActions?.length
+          ) {
+            state = {
+              ...state,
+              bindings: {
+                ...bindings,
+                down: { fileAction: "undo" },
+              },
+            };
+          }
         }
 
         return state;
@@ -360,6 +378,13 @@ export function getBindingForDirection(
   direction: SwipeDirection,
 ): ReviewSwipeBinding {
   return bindings[direction];
+}
+
+/**
+ * Check if any swipe direction is bound to the undo action.
+ */
+export function hasUndoBinding(bindings: SwipeBindings): boolean {
+  return SWIPE_DIRECTIONS.some((d) => bindings[d].fileAction === "undo");
 }
 
 // #endregion

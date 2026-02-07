@@ -63,7 +63,10 @@ export function ReviewStatsBreakdown({
   const { servicesMap } = useRatingServices();
 
   // Filter to only directions that have bindings (and optionally non-zero counts)
+  // Always exclude undo-bound directions since they don't produce countable stats
   const visibleDirections = DISPLAY_DIRECTIONS.filter((direction) => {
+    if (bindings[direction].fileAction === "undo") return false;
+
     const count = stats[direction];
 
     // Skip if hideZero and count is 0

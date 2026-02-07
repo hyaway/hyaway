@@ -188,6 +188,8 @@ export interface ReviewSwipeCardProps {
   children: React.ReactNode;
   /** Current swipe bindings for overlay display */
   bindings: SwipeBindings;
+  /** Whether undo is available (history has entries) */
+  canUndo: boolean;
   /** Exit direction for animation (triggers exit when set) */
   exitDirection?: SwipeDirection | null;
   /** Whether swipe gestures are enabled */
@@ -223,6 +225,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
   cardSize,
   children,
   bindings,
+  canUndo,
   exitDirection,
   gesturesEnabled = true,
   lastInteractionRef,
@@ -536,11 +539,17 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
                   ? 1
                   : directionOpacities[direction];
 
+              // Undo-bound direction with nothing to undo: show disabled overlay
+              const isDisabledUndo = binding.fileAction === "undo" && !canUndo;
+
               return (
                 <IntentOverlay
                   key={direction}
                   opacity={opacity}
-                  className={descriptor.bgClass}
+                  className={cn(
+                    descriptor.bgClass,
+                    isDisabledUndo && "opacity-60 grayscale",
+                  )}
                 >
                   <div
                     className={cn(
@@ -550,7 +559,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
                   >
                     <Icon aria-hidden="true" className="size-16" />
                     <span className="text-lg font-semibold">
-                      {descriptor.label}
+                      {isDisabledUndo ? "Nothing to undo" : descriptor.label}
                     </span>
                   </div>
                 </IntentOverlay>

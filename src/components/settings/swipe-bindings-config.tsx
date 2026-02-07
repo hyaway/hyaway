@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import {
   IconAlertCircle,
   IconArchive,
+  IconArrowBackUp,
   IconArrowDown,
   IconArrowLeft,
   IconArrowRight,
@@ -96,6 +97,7 @@ const FILE_ACTIONS: Array<{
   { value: "archive", label: "Archive", icon: IconArchive },
   { value: "trash", label: "Trash", icon: IconTrash },
   { value: "skip", label: "Skip", icon: IconPlayerTrackNext },
+  { value: "undo", label: "Undo", icon: IconArrowBackUp },
 ];
 
 /** Extract the first rating action from secondary actions */
@@ -398,6 +400,8 @@ function DirectionBindingEditor({
     onBindingChange({
       ...binding,
       fileAction,
+      // Undo doesn't support secondary actions — clear them
+      ...(fileAction === "undo" ? { secondaryActions: undefined } : {}),
     });
   };
 
@@ -475,102 +479,104 @@ function DirectionBindingEditor({
         </ToggleGroup>
       </div>
 
-      {/* Rating Action */}
-      <div className="flex min-w-0 flex-col gap-2">
-        <Label
-          className={cn(
-            "text-xs",
-            canConfigureRating
-              ? "text-muted-foreground"
-              : "text-muted-foreground/50",
-          )}
-        >
-          Rating action (optional)
-        </Label>
-
-        {!canConfigureRating ? (
-          <span className="text-muted-foreground/50 text-xs">
-            {!canEditRatings
-              ? "No permission to edit ratings"
-              : "No rating services available"}
-          </span>
-        ) : isOrphanedRating ? (
-          <Alert variant="destructive">
-            <IconAlertCircle />
-            <AlertTitle>Rating service does not exist</AlertTitle>
-            <AlertDescription>
-              Rating service {ratingAction.serviceKey} associated with this
-              action was not found in services object.
-            </AlertDescription>
-            <AlertAction>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleRatingActionChange(undefined)}
-              >
-                Clear
-              </Button>
-            </AlertAction>
-          </Alert>
-        ) : (
-          <div className="flex min-w-0 flex-col gap-2">
-            {/* Service selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={(props) => (
-                  <Button
-                    {...props}
-                    variant="outline"
-                    size="sm"
-                    className="w-full min-w-0 justify-start"
-                  >
-                    <span className="truncate">
-                      {selectedService?.name ?? "Select rating service..."}
-                    </span>
-                  </Button>
-                )}
-              />
-              <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuRadioGroup
-                  value={selectedServiceKey}
-                  onValueChange={handleServiceChange}
-                >
-                  <DropdownMenuRadioItem value="">None</DropdownMenuRadioItem>
-                  <DropdownMenuSeparator />
-                  {ratingServices.map(([key, service]) => (
-                    <DropdownMenuRadioItem key={key} value={key}>
-                      {service.name}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Rating value picker */}
-            {selectedService && (
-              <div className="flex min-w-0 flex-col gap-1">
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <span className="text-muted-foreground shrink-0 text-xs">
-                    Set to:
-                  </span>
-                  <RatingValuePicker
-                    serviceKey={selectedServiceKey}
-                    service={selectedService}
-                    ratingAction={ratingAction}
-                    onRatingActionChange={handleRatingActionChange}
-                  />
-                </div>
-                {ratingAction && (
-                  <span className="text-muted-foreground text-xs">
-                    Will set {selectedService.name} to:{" "}
-                    <strong>{getRatingActionLabel(ratingAction)}</strong>
-                  </span>
-                )}
-              </div>
+      {/* Rating Action — hidden when undo is selected (no secondary actions for undo) */}
+      {binding.fileAction !== "undo" && (
+        <div className="flex min-w-0 flex-col gap-2">
+          <Label
+            className={cn(
+              "text-xs",
+              canConfigureRating
+                ? "text-muted-foreground"
+                : "text-muted-foreground/50",
             )}
-          </div>
-        )}
-      </div>
+          >
+            Rating action (optional)
+          </Label>
+
+          {!canConfigureRating ? (
+            <span className="text-muted-foreground/50 text-xs">
+              {!canEditRatings
+                ? "No permission to edit ratings"
+                : "No rating services available"}
+            </span>
+          ) : isOrphanedRating ? (
+            <Alert variant="destructive">
+              <IconAlertCircle />
+              <AlertTitle>Rating service does not exist</AlertTitle>
+              <AlertDescription>
+                Rating service {ratingAction.serviceKey} associated with this
+                action was not found in services object.
+              </AlertDescription>
+              <AlertAction>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleRatingActionChange(undefined)}
+                >
+                  Clear
+                </Button>
+              </AlertAction>
+            </Alert>
+          ) : (
+            <div className="flex min-w-0 flex-col gap-2">
+              {/* Service selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={(props) => (
+                    <Button
+                      {...props}
+                      variant="outline"
+                      size="sm"
+                      className="w-full min-w-0 justify-start"
+                    >
+                      <span className="truncate">
+                        {selectedService?.name ?? "Select rating service..."}
+                      </span>
+                    </Button>
+                  )}
+                />
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuRadioGroup
+                    value={selectedServiceKey}
+                    onValueChange={handleServiceChange}
+                  >
+                    <DropdownMenuRadioItem value="">None</DropdownMenuRadioItem>
+                    <DropdownMenuSeparator />
+                    {ratingServices.map(([key, service]) => (
+                      <DropdownMenuRadioItem key={key} value={key}>
+                        {service.name}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Rating value picker */}
+              {selectedService && (
+                <div className="flex min-w-0 flex-col gap-1">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <span className="text-muted-foreground shrink-0 text-xs">
+                      Set to:
+                    </span>
+                    <RatingValuePicker
+                      serviceKey={selectedServiceKey}
+                      service={selectedService}
+                      ratingAction={ratingAction}
+                      onRatingActionChange={handleRatingActionChange}
+                    />
+                  </div>
+                  {ratingAction && (
+                    <span className="text-muted-foreground text-xs">
+                      Will set {selectedService.name} to:{" "}
+                      <strong>{getRatingActionLabel(ratingAction)}</strong>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -138,6 +138,7 @@ function ReviewPage() {
           exitingCards={deckState.exitingCards}
           gesturesEnabled={deckState.gesturesEnabled}
           bindings={deckState.bindings}
+          canUndo={deckState.canUndo}
           lastInteractionRef={deckState.lastInteractionRef}
           handleSwipe={deckState.handleSwipe}
           handleExitComplete={deckState.handleExitComplete}

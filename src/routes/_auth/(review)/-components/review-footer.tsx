@@ -20,6 +20,7 @@ import type {
 } from "@/stores/review-settings-store";
 import { useReviewQueueCurrentFileId } from "@/stores/review-queue-store";
 import {
+  hasUndoBinding,
   useReviewShortcutsEnabled,
   useReviewSwipeBindings,
 } from "@/stores/review-settings-store";
@@ -85,6 +86,7 @@ export function ReviewFooter({
   const showShortcuts = useReviewShortcutsEnabled();
   const bindings = useReviewSwipeBindings();
   const { servicesMap } = useRatingServices();
+  const hasUndoDirection = hasUndoBinding(bindings);
 
   // Don't show footer when review is complete
   if (disabled) {
@@ -120,15 +122,17 @@ export function ReviewFooter({
 
           {/* Center section - Action buttons */}
           <div className="flex h-full items-center justify-center gap-1">
-            {/* Undo button */}
-            <BottomNavButton
-              label="Undo"
-              icon={<IconArrowBackUp className="size-6" />}
-              onClick={onUndo}
-              disabled={undoCount === 0}
-              kbd={showShortcuts ? "Z" : undefined}
-              badge={undoCount > 0 ? undoCount : undefined}
-            />
+            {/* Undo button — hidden when undo is bound to a swipe direction */}
+            {!hasUndoDirection && (
+              <BottomNavButton
+                label="Undo"
+                icon={<IconArrowBackUp className="size-6" />}
+                onClick={onUndo}
+                disabled={undoCount === 0}
+                kbd={showShortcuts ? "Z" : undefined}
+                badge={undoCount > 0 ? undoCount : undefined}
+              />
+            )}
 
             {/* Left direction button (h) */}
             <BottomNavButton
@@ -140,6 +144,12 @@ export function ReviewFooter({
               }
               onClick={() => onSwipe("left")}
               intent={getIntent(bindings.left.fileAction)}
+              disabled={bindings.left.fileAction === "undo" && undoCount === 0}
+              badge={
+                bindings.left.fileAction === "undo" && undoCount > 0
+                  ? undoCount
+                  : undefined
+              }
             />
 
             {/* Down direction button (j) */}
@@ -152,6 +162,12 @@ export function ReviewFooter({
               }
               onClick={() => onSwipe("down")}
               intent={getIntent(bindings.down.fileAction)}
+              disabled={bindings.down.fileAction === "undo" && undoCount === 0}
+              badge={
+                bindings.down.fileAction === "undo" && undoCount > 0
+                  ? undoCount
+                  : undefined
+              }
             />
 
             {/* Up direction button (k) */}
@@ -164,6 +180,12 @@ export function ReviewFooter({
               }
               onClick={() => onSwipe("up")}
               intent={getIntent(bindings.up.fileAction)}
+              disabled={bindings.up.fileAction === "undo" && undoCount === 0}
+              badge={
+                bindings.up.fileAction === "undo" && undoCount > 0
+                  ? undoCount
+                  : undefined
+              }
             />
 
             {/* Right direction button (l) */}
@@ -176,6 +198,12 @@ export function ReviewFooter({
               }
               onClick={() => onSwipe("right")}
               intent={getIntent(bindings.right.fileAction)}
+              disabled={bindings.right.fileAction === "undo" && undoCount === 0}
+              badge={
+                bindings.right.fileAction === "undo" && undoCount > 0
+                  ? undoCount
+                  : undefined
+              }
             />
           </div>
 

@@ -3,6 +3,7 @@
 
 import {
   IconArchive,
+  IconArrowBackUp,
   IconPlayerTrackNext,
   IconTrash,
 } from "@tabler/icons-react";
@@ -107,6 +108,12 @@ const FILE_ACTION_DESCRIPTORS: Record<
     textClass: "text-muted-foreground",
     bgClass: "bg-muted",
   },
+  undo: {
+    label: "Undo",
+    icon: IconArrowBackUp,
+    textClass: "text-muted-foreground",
+    bgClass: "bg-muted",
+  },
 };
 
 /** Descriptors for file actions with stronger overlay backgrounds */
@@ -129,6 +136,12 @@ const FILE_ACTION_OVERLAY_DESCRIPTORS: Record<
   skip: {
     label: "Skip",
     icon: IconPlayerTrackNext,
+    textClass: "text-muted-foreground",
+    bgClass: "bg-muted/80",
+  },
+  undo: {
+    label: "Undo",
+    icon: IconArrowBackUp,
     textClass: "text-muted-foreground",
     bgClass: "bg-muted/80",
   },
