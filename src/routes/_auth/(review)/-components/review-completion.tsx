@@ -107,7 +107,7 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
         <ReviewStatsBreakdown
           stats={stats}
           bindings={bindings}
-          variant="inline"
+          variant="grid"
           hideZero={false}
         />
       </div>
@@ -115,7 +115,7 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
       {/* Decision filmstrips - only for directions with files */}
       {activeDirections.length > 0 && (
         <div className="flex w-full flex-col gap-6">
-          <Heading level={3} className="text-center">
+          <Heading level={3} className="text-center leading-normal">
             Review breakdown
           </Heading>
           {activeDirections.map((direction) => (
@@ -166,7 +166,10 @@ function DecisionFilmstripSection({
 
   return (
     <div className="w-full">
-      <div className="mb-2 flex items-center justify-center gap-2">
+      <Heading
+        level={4}
+        className="flex items-center justify-center gap-2 leading-normal"
+      >
         <div
           className={cn(
             "flex size-8 items-center justify-center rounded-lg",
@@ -177,11 +180,11 @@ function DecisionFilmstripSection({
           <ActionIcon className="size-3" />
           <DirectionIcon className="size-3" />
         </div>
-        <span className="font-medium">{descriptor.label}</span>
-        <span className="text-muted-foreground text-sm tabular-nums">
+        <span>{descriptor.label}</span>
+        <span className="text-muted-foreground text-sm font-normal tabular-nums">
           ({fileIds.length})
         </span>
-      </div>
+      </Heading>
       <ReviewDecisionFilmstrip fileIds={fileIds} />
     </div>
   );
