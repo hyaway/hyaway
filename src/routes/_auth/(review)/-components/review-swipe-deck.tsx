@@ -113,16 +113,24 @@ function executeFileAction(
   fileAction: ReviewFileAction,
   fileId: number,
   fileState: PreviousFileState,
-  mutations: { archive: FileMutate; trash: FileMutate },
+  mutations: Partial<Record<ReviewFileAction, FileMutate>>,
 ): void {
   if (wasFileActionUnchanged(fileAction, fileState)) return;
+  mutations[fileAction]?.({ file_ids: [fileId] });
+}
 
-  if (fileAction === "archive") {
-    mutations.archive({ file_ids: [fileId] });
-  } else if (fileAction === "trash") {
-    mutations.trash({ file_ids: [fileId] });
-  }
-  // "skip" doesn't need a mutation
+/**
+ * Reverse a previously-applied file action for undo.
+ * Maps each forward action to its inverse mutation.
+ */
+function reverseFileAction(
+  fileAction: ReviewFileAction,
+  fileId: number,
+  fileState: PreviousFileState,
+  undoMutations: Partial<Record<ReviewFileAction, FileMutate>>,
+): void {
+  if (wasFileActionUnchanged(fileAction, fileState)) return;
+  undoMutations[fileAction]?.({ file_ids: [fileId] });
 }
 
 /**
@@ -267,16 +275,10 @@ export function useReviewSwipeDeck({
       const fileAction = binding.fileAction;
 
       // Reverse file action if it actually changed the state
-      if (!wasFileActionUnchanged(fileAction, restore.fileState)) {
-        if (fileAction === "archive") {
-          // Was archived, need to unarchive (put back in inbox)
-          unarchiveFiles({ file_ids: [lastEntry.fileId] });
-        } else if (fileAction === "trash") {
-          // Was trashed, need to undelete
-          undeleteFiles({ file_ids: [lastEntry.fileId] });
-        }
-        // Skip doesn't need reversal
-      }
+      reverseFileAction(fileAction, lastEntry.fileId, restore.fileState, {
+        archive: unarchiveFiles,
+        trash: undeleteFiles,
+      });
 
       // Reverse rating action if present
       if (restore.ratings && restore.ratings.length > 0) {
