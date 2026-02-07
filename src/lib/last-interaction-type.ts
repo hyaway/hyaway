@@ -40,5 +40,5 @@ export function useLastInteractionType() {
     };
   }, []);
 
-  return ref;
+  return { ref } as const;
 }

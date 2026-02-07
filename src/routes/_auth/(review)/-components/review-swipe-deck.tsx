@@ -8,7 +8,6 @@ import { ReviewSwipeCard } from "./review-swipe-card";
 import { ReviewCardContent } from "./review-card-content";
 import { useReviewKeyboardShortcuts } from "./use-review-keyboard-shortcuts";
 import type { SwipeDirection } from "./review-swipe-card";
-import type { InteractionType } from "@/lib/last-interaction-type";
 import type {
   PreviousFileState,
   RatingRestoreEntry,
@@ -20,7 +19,6 @@ import type {
   SecondarySwipeAction,
   SwipeBindings,
 } from "@/stores/review-settings-store";
-import { useLastInteractionType } from "@/lib/last-interaction-type";
 import {
   useReviewQueueActions,
   useReviewQueueCurrentFileId,
@@ -247,8 +245,8 @@ export function useReviewSwipeDeck() {
     new Map(),
   );
 
-  // Track last interaction type to skip animations on keyboard swipes
-  const lastInteractionRef = useLastInteractionType();
+  // When true, skip exit + stack animations (set by keyboard/footer, cleared by gesture swipes)
+  const skipAnimationRef = useRef(false);
 
   // Prefetch next cards' metadata
   useEffect(() => {
@@ -315,7 +313,6 @@ export function useReviewSwipeDeck() {
       if (!currentFileId) return;
 
       const binding = getBindingForDirection(bindings, direction);
-
       // Undo path — reverse last action instead of advancing (no animation, instant swap)
       if (binding.fileAction === "undo") {
         if (history.length === 0) return; // Nothing to undo
@@ -370,7 +367,23 @@ export function useReviewSwipeDeck() {
   );
 
   // Keyboard shortcuts
-  useReviewKeyboardShortcuts(handleSwipe, performUndo);
+  const handleInstantSwipe = useCallback(
+    (direction: SwipeDirection) => {
+      skipAnimationRef.current = true;
+      handleSwipe(direction);
+    },
+    [handleSwipe],
+  );
+  useReviewKeyboardShortcuts(handleInstantSwipe, performUndo);
+
+  // Gesture swipe from card drag — resets skip flag so animations play
+  const handleGestureSwipe = useCallback(
+    (direction: SwipeDirection) => {
+      skipAnimationRef.current = false;
+      handleSwipe(direction);
+    },
+    [handleSwipe],
+  );
 
   // Get visible cards for the stack (current + next few)
   const visibleFileIds = fileIds.slice(currentIndex, currentIndex + STACK_SIZE);
@@ -381,9 +394,10 @@ export function useReviewSwipeDeck() {
     exitingCards,
     gesturesEnabled,
     bindings,
-    lastInteractionRef,
+    skipAnimationRef,
     canUndo: history.length > 0,
-    handleSwipe,
+    handleGestureSwipe,
+    handleInstantSwipe,
     handleExitComplete,
     performUndo,
     currentMetadata,
@@ -397,7 +411,7 @@ export function ReviewSwipeDeckVisual({
   gesturesEnabled,
   bindings,
   canUndo,
-  lastInteractionRef,
+  skipAnimationRef,
   handleSwipe,
   handleExitComplete,
 }: {
@@ -406,7 +420,7 @@ export function ReviewSwipeDeckVisual({
   gesturesEnabled: boolean;
   bindings: SwipeBindings;
   canUndo: boolean;
-  lastInteractionRef: React.RefObject<InteractionType>;
+  skipAnimationRef: React.RefObject<boolean>;
   handleSwipe: (direction: SwipeDirection) => void;
   handleExitComplete: (fileId: number) => void;
 }) {
@@ -459,7 +473,7 @@ export function ReviewSwipeDeckVisual({
                 canUndo={canUndo}
                 exitDirection={exitDirection}
                 gesturesEnabled={gesturesEnabled}
-                lastInteractionRef={lastInteractionRef}
+                skipAnimationRef={skipAnimationRef}
                 onSwipe={handleSwipe}
                 onExitComplete={() => handleExitComplete(fileId)}
               >

@@ -12,7 +12,6 @@ import {
 import { getSwipeBindingOverlayDescriptor } from "./review-swipe-descriptors";
 import { ReviewThresholdOverlay } from "./review-threshold-overlay";
 import type { MotionValue, PanInfo } from "motion/react";
-import type { InteractionType } from "@/lib/last-interaction-type";
 import type {
   SwipeBindings,
   SwipeDirection,
@@ -194,8 +193,8 @@ export interface ReviewSwipeCardProps {
   exitDirection?: SwipeDirection | null;
   /** Whether swipe gestures are enabled */
   gesturesEnabled?: boolean;
-  /** Ref tracking last interaction type for animation decisions */
-  lastInteractionRef: React.RefObject<InteractionType>;
+  /** Ref controlling whether to skip transition animations */
+  skipAnimationRef: React.RefObject<boolean>;
   /** Callback when swipe completes with a direction (only called if direction has a binding) */
   onSwipe: (direction: SwipeDirection) => void;
   /** Callback when exit animation completes */
@@ -228,7 +227,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
   canUndo,
   exitDirection,
   gesturesEnabled = true,
-  lastInteractionRef,
+  skipAnimationRef,
   onSwipe,
   onExitComplete,
 }: ReviewSwipeCardProps) {
@@ -513,10 +512,10 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
           }
         }}
         transition={
-          isExiting
-            ? { duration: 0.2 }
-            : lastInteractionRef.current === "keyboard"
-              ? { duration: 0 }
+          skipAnimationRef.current
+            ? { duration: 0 }
+            : isExiting
+              ? { duration: 0.2 }
               : { duration: 0.25, ease: "easeOut" }
         }
       >

@@ -79,7 +79,7 @@ function ReviewPage() {
           bindings={deckState.bindings}
         />
         <ReviewFooter
-          onSwipe={deckState.handleSwipe}
+          onSwipe={deckState.handleInstantSwipe}
           onUndo={deckState.performUndo}
           undoCount={history.length}
           disabled
@@ -139,15 +139,15 @@ function ReviewPage() {
           gesturesEnabled={deckState.gesturesEnabled}
           bindings={deckState.bindings}
           canUndo={deckState.canUndo}
-          lastInteractionRef={deckState.lastInteractionRef}
-          handleSwipe={deckState.handleSwipe}
+          skipAnimationRef={deckState.skipAnimationRef}
+          handleSwipe={deckState.handleGestureSwipe}
           handleExitComplete={deckState.handleExitComplete}
         />
       </div>
 
       {/* Footer - renders via portal */}
       <ReviewFooter
-        onSwipe={deckState.handleSwipe}
+        onSwipe={deckState.handleInstantSwipe}
         onUndo={deckState.performUndo}
         undoCount={history.length}
       />
