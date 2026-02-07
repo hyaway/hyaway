@@ -93,15 +93,6 @@ export function ReviewFooter({
     return null;
   }
 
-  // Get icons for action directions (using descriptors for icons but not labels)
-  const leftDescriptor = getSwipeBindingDescriptor(bindings.left, servicesMap);
-  const upDescriptor = getSwipeBindingDescriptor(bindings.up, servicesMap);
-  const rightDescriptor = getSwipeBindingDescriptor(
-    bindings.right,
-    servicesMap,
-  );
-  const downDescriptor = getSwipeBindingDescriptor(bindings.down, servicesMap);
-
   // Get file action label (simple capitalized text)
   const getFileActionLabel = (fileAction: ReviewFileAction) => {
     return fileAction.charAt(0).toUpperCase() + fileAction.slice(1);
@@ -113,9 +104,35 @@ export function ReviewFooter({
     return undefined;
   };
 
+  /** Direction buttons in display order: left, down, up, right (vim hjkl) */
+  const directions: Array<{
+    direction: SwipeDirection;
+    descriptor: ReturnType<typeof getSwipeBindingDescriptor>;
+  }> = [
+    {
+      direction: "left",
+      descriptor: getSwipeBindingDescriptor(bindings.left, servicesMap),
+    },
+    {
+      direction: "down",
+      descriptor: getSwipeBindingDescriptor(bindings.down, servicesMap),
+    },
+    {
+      direction: "up",
+      descriptor: getSwipeBindingDescriptor(bindings.up, servicesMap),
+    },
+    {
+      direction: "right",
+      descriptor: getSwipeBindingDescriptor(bindings.right, servicesMap),
+    },
+  ];
+
+  // Fewer buttons when undo is in a direction (standalone undo button removed)
+  const maxButtons = hasUndoDirection ? 6 : 7;
+
   return (
     <FooterPortal>
-      <BottomNavButtonProvider maxButtons={7}>
+      <BottomNavButtonProvider maxButtons={maxButtons}>
         <div className="flex h-full w-[100cqw] items-center justify-between">
           {/* Left section - Rating */}
           <ReviewRatingButton truncateLabel />
@@ -134,77 +151,25 @@ export function ReviewFooter({
               />
             )}
 
-            {/* Left direction button (h) */}
-            <BottomNavButton
-              label={getFileActionLabel(bindings.left.fileAction)}
-              customContent={
-                <DirectionalIcon direction="left">
-                  <leftDescriptor.icon className="size-6" />
-                </DirectionalIcon>
-              }
-              onClick={() => onSwipe("left")}
-              intent={getIntent(bindings.left.fileAction)}
-              disabled={bindings.left.fileAction === "undo" && undoCount === 0}
-              badge={
-                bindings.left.fileAction === "undo" && undoCount > 0
-                  ? undoCount
-                  : undefined
-              }
-            />
-
-            {/* Down direction button (j) */}
-            <BottomNavButton
-              label={getFileActionLabel(bindings.down.fileAction)}
-              customContent={
-                <DirectionalIcon direction="down">
-                  <downDescriptor.icon className="size-6" />
-                </DirectionalIcon>
-              }
-              onClick={() => onSwipe("down")}
-              intent={getIntent(bindings.down.fileAction)}
-              disabled={bindings.down.fileAction === "undo" && undoCount === 0}
-              badge={
-                bindings.down.fileAction === "undo" && undoCount > 0
-                  ? undoCount
-                  : undefined
-              }
-            />
-
-            {/* Up direction button (k) */}
-            <BottomNavButton
-              label={getFileActionLabel(bindings.up.fileAction)}
-              customContent={
-                <DirectionalIcon direction="up">
-                  <upDescriptor.icon className="size-6" />
-                </DirectionalIcon>
-              }
-              onClick={() => onSwipe("up")}
-              intent={getIntent(bindings.up.fileAction)}
-              disabled={bindings.up.fileAction === "undo" && undoCount === 0}
-              badge={
-                bindings.up.fileAction === "undo" && undoCount > 0
-                  ? undoCount
-                  : undefined
-              }
-            />
-
-            {/* Right direction button (l) */}
-            <BottomNavButton
-              label={getFileActionLabel(bindings.right.fileAction)}
-              customContent={
-                <DirectionalIcon direction="right">
-                  <rightDescriptor.icon className="size-6" />
-                </DirectionalIcon>
-              }
-              onClick={() => onSwipe("right")}
-              intent={getIntent(bindings.right.fileAction)}
-              disabled={bindings.right.fileAction === "undo" && undoCount === 0}
-              badge={
-                bindings.right.fileAction === "undo" && undoCount > 0
-                  ? undoCount
-                  : undefined
-              }
-            />
+            {directions.map(({ direction, descriptor }) => {
+              const binding = bindings[direction];
+              const isUndo = binding.fileAction === "undo";
+              return (
+                <BottomNavButton
+                  key={direction}
+                  label={getFileActionLabel(binding.fileAction)}
+                  customContent={
+                    <DirectionalIcon direction={direction}>
+                      <descriptor.icon className="size-6" />
+                    </DirectionalIcon>
+                  }
+                  onClick={() => onSwipe(direction)}
+                  intent={getIntent(binding.fileAction)}
+                  disabled={isUndo && undoCount === 0}
+                  badge={isUndo && undoCount > 0 ? undoCount : undefined}
+                />
+              );
+            })}
           </div>
 
           {/* Right section - More actions */}
