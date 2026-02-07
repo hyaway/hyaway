@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import {
   IconArrowDown,
   IconArrowLeft,
@@ -76,14 +76,15 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
     return byDirection;
   }, [history]);
 
-  const handleClearAndBrowse = () => {
+  const handleClearAndBrowse = useCallback(() => {
     clearQueue();
     navigate({ to: "/pages", search: { q: undefined } });
-  };
+  }, [clearQueue, navigate]);
 
   // Directions that actually have files assigned
-  const activeDirections = DISPLAY_DIRECTIONS.filter(
-    (d) => fileIdsByDirection[d].length > 0,
+  const activeDirections = useMemo(
+    () => DISPLAY_DIRECTIONS.filter((d) => fileIdsByDirection[d].length > 0),
+    [fileIdsByDirection],
   );
 
   return (
@@ -153,14 +154,17 @@ interface DecisionFilmstripSectionProps {
   servicesMap: Map<string, RatingServiceInfo>;
 }
 
-function DecisionFilmstripSection({
+const DecisionFilmstripSection = memo(function DecisionFilmstripSection({
   direction,
   fileIds,
   bindings,
   servicesMap,
 }: DecisionFilmstripSectionProps) {
   const binding = bindings[direction];
-  const descriptor = getSwipeBindingDescriptor(binding, servicesMap);
+  const descriptor = useMemo(
+    () => getSwipeBindingDescriptor(binding, servicesMap),
+    [binding, servicesMap],
+  );
   const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];
 
@@ -188,4 +192,4 @@ function DecisionFilmstripSection({
       <ReviewDecisionFilmstrip fileIds={fileIds} />
     </div>
   );
-}
+});
