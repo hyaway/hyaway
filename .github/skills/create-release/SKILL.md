@@ -22,7 +22,7 @@ Create releases with changelog entry and git tag.
 Once you push the tag (`git push origin v2026.01.28`), it triggers:
 
 - GitHub release with changelog content extracted
-- Docker image tagged `ghcr.io/hyaway/hyaway:v2026.01.28`
+- Docker image tagged `ghcr.io/hyaway/hyaway:v2026.01.28` (on release publish)
 
 ## Commands
 
