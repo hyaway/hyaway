@@ -1,8 +1,14 @@
 name: Publish Docker Image
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - ".github/workflows/release.yml"
+      - "*.md"
+      - "LICENSE"
+      - "NOTICE"
 
 env:
   REGISTRY: ghcr.io
@@ -41,7 +47,6 @@ jobs:
             type=raw,value=latest
             type=raw,value=build-${{ github.run_number }}
             type=sha,prefix=,format=short
-            type=ref,event=tag
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6

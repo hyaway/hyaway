@@ -32,7 +32,7 @@ This pushes the branch **and** any tags pointing to commits being pushed in one 
 Once the tag reaches the remote, it triggers:
 
 - GitHub release with changelog content extracted
-- Docker image tagged `ghcr.io/hyaway/hyaway:v2026.01.28` (on release publish)
+- Docker image tagged `ghcr.io/hyaway/hyaway:v2026.01.28`
 
 ## Commands
 
