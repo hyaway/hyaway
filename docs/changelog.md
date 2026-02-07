@@ -4,6 +4,29 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-02-06
+
+### Added
+
+- **Rating actions on swipe** — Swipe directions can trigger rating changes (like/dislike, numerical stars, or inc/dec) alongside the primary file action, allowing one-gesture triage + rating
+- **Customizable swipe bindings in review mode** — Each swipe direction (left, right, up, down) can be mapped to any file action (archive, trash, or skip), plus optional secondary action for setting a rating
+- **Per-direction swipe thresholds** — Each direction now has its own configurable activation threshold instead of shared horizontal/vertical values
+- **Decision filmstrip on review completion** — After finishing a review queue, each direction group shows a horizontally-scrolling filmstrip of thumbnails so you can see which files were sorted where
+- **Context menu in review filmstrip** — Right-click thumbnails in the decision filmstrip for the same actions available in gallery context menus
+- **"More actions" overflow menu in review footer** — Access file actions (open externally, download, copy URL, etc.) for the current file without leaving review mode
+- **Rating colors from Hydrus** — Rating overlay badges and controls now use the custom colors configured in your Hydrus rating services instead of hardcoded defaults
+- **Rating overlay source setting** — Choose between "Hydrus" (use the server's thumbnail visibility flags) and "Custom" (manual per-service toggles) for controlling which ratings appear on thumbnails
+- **Orphaned rating service cleanup** — Rating settings now detect services that were removed from Hydrus and let you delete their leftover local settings
+
+### Changed
+
+- Review footer supports up to 7 buttons (undo, 4 directional actions, rating, more) with responsive layout on small screens
+- Swipe threshold overlay now displays the icon and label for each direction's configured binding instead of generic direction arrows
+- Review completion screen redesigned with a grid stats breakdown and per-direction filmstrips
+- Stricter rating service type parsing via Zod discriminated unions
+
+---
+
 ## 2026-01-28
 
 ### Added

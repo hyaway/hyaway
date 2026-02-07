@@ -6,7 +6,6 @@ import {
   IconArrowLeft,
   IconArrowRight,
   IconArrowUp,
-  IconCircle,
   IconCircleFilled,
 } from "@tabler/icons-react";
 import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
