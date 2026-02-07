@@ -11,7 +11,7 @@ import {
   ReviewSwipeDeckVisual,
   useReviewSwipeDeck,
 } from "./-components/review-swipe-deck";
-import { SwipeBindingsConfig } from "./-components/swipe-bindings-config";
+import { SwipeBindingsConfig } from "@/components/settings/swipe-bindings-config";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";

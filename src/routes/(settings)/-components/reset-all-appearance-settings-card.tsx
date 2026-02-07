@@ -15,6 +15,10 @@ import { usePagesSettingsActions } from "@/stores/pages-settings-store";
 import { useRatingsSettingsActions } from "@/stores/ratings-settings-store";
 import { useReviewSettingsActions } from "@/stores/review-settings-store";
 import { useTagsSettingsActions } from "@/stores/tags-settings-store";
+import {
+  useReviewQueueIsComplete,
+  useReviewQueueIsEmpty,
+} from "@/stores/review-queue-store";
 
 export function ResetAllAppearanceSettingsCard() {
   const { reset: resetGallery } = useGallerySettingsActions();
@@ -22,8 +26,11 @@ export function ResetAllAppearanceSettingsCard() {
   const { reset: resetPages } = usePagesSettingsActions();
   const { reset: resetRatings } = useRatingsSettingsActions();
   const { reset: resetTags } = useTagsSettingsActions();
-  const { resetControlsSettings: resetReviewControls } =
+  const { resetControlsSettings: resetReviewControls, resetBindings } =
     useReviewSettingsActions();
+  const isEmpty = useReviewQueueIsEmpty();
+  const isComplete = useReviewQueueIsComplete();
+  const hasActiveQueue = !isEmpty && !isComplete;
 
   const handleResetAll = () => {
     resetGallery();
@@ -32,6 +39,9 @@ export function ResetAllAppearanceSettingsCard() {
     resetRatings();
     resetTags();
     resetReviewControls();
+    if (!hasActiveQueue) {
+      resetBindings();
+    }
   };
 
   return (

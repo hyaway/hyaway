@@ -581,13 +581,24 @@ function DirectionBindingEditor({
 
 export interface SwipeBindingsConfigProps {
   className?: string;
+  /** When true, shows the section header with title and description */
+  showHeader?: boolean;
+  /** When true, disables all interactive elements */
+  disabled?: boolean;
+  /** Number of columns for direction editors. Defaults to 2 (responsive grid). Use 1 for list layout. */
+  columns?: 1 | 2;
 }
 
 /**
  * Configuration UI for swipe direction bindings.
  * Allows setting file action and optional rating action for each swipe direction.
  */
-export function SwipeBindingsConfig({ className }: SwipeBindingsConfigProps) {
+export function SwipeBindingsConfig({
+  className,
+  showHeader = true,
+  disabled = false,
+  columns = 2,
+}: SwipeBindingsConfigProps) {
   const bindings = useReviewSwipeBindings();
   const { setBinding, resetBindings } = useReviewSettingsActions();
   const { ratingServices } = useRatingServices();
@@ -617,23 +628,36 @@ export function SwipeBindingsConfig({ className }: SwipeBindingsConfigProps) {
   const hasAnyModifications = SWIPE_DIRECTIONS.some(isDirectionModified);
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-lg font-semibold">Swipe Actions</h3>
-          <p className="text-muted-foreground text-sm">
-            Configure what happens when you swipe in each direction.
-          </p>
+    <div
+      className={cn(
+        "flex flex-col gap-4",
+        disabled && "pointer-events-none opacity-60",
+        className,
+      )}
+    >
+      {showHeader && (
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-lg font-semibold">Swipe Actions</h3>
+            <p className="text-muted-foreground text-sm">
+              Configure what happens when you swipe in each direction.
+            </p>
+          </div>
+          {hasAnyModifications && (
+            <SettingsResetButton
+              onReset={resetBindings}
+              label="Reset all swipe actions"
+            />
+          )}
         </div>
-        {hasAnyModifications && (
-          <SettingsResetButton
-            onReset={resetBindings}
-            label="Reset all swipe actions"
-          />
-        )}
-      </div>
+      )}
 
-      <div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-2">
+      <div
+        className={cn(
+          "grid min-w-0 gap-3 sm:gap-4",
+          columns === 2 && "lg:grid-cols-2",
+        )}
+      >
         {SWIPE_DIRECTIONS.map((direction) => (
           <DirectionBindingEditor
             key={direction}

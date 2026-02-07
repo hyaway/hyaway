@@ -16,9 +16,23 @@ import {
   CardHeader,
 } from "@/components/ui-primitives/card";
 import { useReviewSettingsActions } from "@/stores/review-settings-store";
+import {
+  useReviewQueueIsComplete,
+  useReviewQueueIsEmpty,
+} from "@/stores/review-queue-store";
 
 export function ReviewControlsSettingsCard() {
-  const { resetControlsSettings } = useReviewSettingsActions();
+  const { resetControlsSettings, resetBindings } = useReviewSettingsActions();
+  const isEmpty = useReviewQueueIsEmpty();
+  const isComplete = useReviewQueueIsComplete();
+  const hasActiveQueue = !isEmpty && !isComplete;
+
+  const handleReset = () => {
+    resetControlsSettings();
+    if (!hasActiveQueue) {
+      resetBindings();
+    }
+  };
 
   return (
     <Card>
@@ -27,14 +41,18 @@ export function ReviewControlsSettingsCard() {
           <SettingsCardTitle>
             {REVIEW_CONTROLS_SETTINGS_TITLE}
           </SettingsCardTitle>
-          <SettingsResetButton onReset={resetControlsSettings} />
+          <SettingsResetButton onReset={handleReset} />
         </div>
         <CardDescription>
           Configure how you interact with files during review mode.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ReviewControlsSettings />
+        <ReviewControlsSettings
+          idPrefix="settings-"
+          openMultiple
+          defaultSections={["controls"]}
+        />
       </CardContent>
     </Card>
   );
