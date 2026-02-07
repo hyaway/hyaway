@@ -115,12 +115,12 @@ export function useReviewSwipeDeck({
 
   const queryClient = useQueryClient();
 
-  // Mutations
-  const archiveMutation = useArchiveFilesMutation();
-  const trashMutation = useDeleteFilesMutation();
-  const unarchiveMutation = useUnarchiveFilesMutation();
-  const undeleteMutation = useUndeleteFilesMutation();
-  const setRatingMutation = useSetRatingMutation();
+  // Mutations — destructure to stable .mutate refs to avoid dep churn
+  const { mutate: archiveFiles } = useArchiveFilesMutation();
+  const { mutate: trashFiles } = useDeleteFilesMutation();
+  const { mutate: unarchiveFiles } = useUnarchiveFilesMutation();
+  const { mutate: undeleteFiles } = useUndeleteFilesMutation();
+  const { mutate: setRating } = useSetRatingMutation();
 
   // Rating services (for filtering orphaned actions)
   const { ratingServices } = useRatingServices();
@@ -175,10 +175,10 @@ export function useReviewSwipeDeck({
       if (!wasFileActionUnchanged(fileAction, restore.fileState)) {
         if (fileAction === "archive") {
           // Was archived, need to unarchive (put back in inbox)
-          unarchiveMutation.mutate({ file_ids: [lastEntry.fileId] });
+          unarchiveFiles({ file_ids: [lastEntry.fileId] });
         } else if (fileAction === "trash") {
           // Was trashed, need to undelete
-          undeleteMutation.mutate({ file_ids: [lastEntry.fileId] });
+          undeleteFiles({ file_ids: [lastEntry.fileId] });
         }
         // Skip doesn't need reversal
       }
@@ -186,7 +186,7 @@ export function useReviewSwipeDeck({
       // Reverse rating action if present
       if (restore.ratings && restore.ratings.length > 0) {
         for (const rating of restore.ratings) {
-          setRatingMutation.mutate({
+          setRating({
             file_id: lastEntry.fileId,
             rating_service_key: rating.serviceKey,
             rating: rating.previousValue,
@@ -198,9 +198,9 @@ export function useReviewSwipeDeck({
     history.length,
     undo,
     bindings,
-    unarchiveMutation,
-    undeleteMutation,
-    setRatingMutation,
+    unarchiveFiles,
+    undeleteFiles,
+    setRating,
   ]);
 
   // Handle exit animation complete - remove card from exiting list
@@ -231,9 +231,9 @@ export function useReviewSwipeDeck({
       // Execute file action mutation if it will change state
       if (!isUnchanged) {
         if (fileAction === "archive") {
-          archiveMutation.mutate({ file_ids: [currentFileId] });
+          archiveFiles({ file_ids: [currentFileId] });
         } else if (fileAction === "trash") {
-          trashMutation.mutate({ file_ids: [currentFileId] });
+          trashFiles({ file_ids: [currentFileId] });
         }
         // Skip doesn't need a mutation
       }
@@ -261,7 +261,7 @@ export function useReviewSwipeDeck({
               previousValue: currentRating as boolean | null,
             });
             // Set the new value
-            setRatingMutation.mutate({
+            setRating({
               file_id: currentFileId,
               rating_service_key: serviceKey,
               rating: action.value,
@@ -274,7 +274,7 @@ export function useReviewSwipeDeck({
               previousValue: currentRating as number | null,
             });
             // Set the new value
-            setRatingMutation.mutate({
+            setRating({
               file_id: currentFileId,
               rating_service_key: serviceKey,
               rating: action.value,
@@ -290,7 +290,7 @@ export function useReviewSwipeDeck({
             });
             // Apply delta
             const newValue = Math.max(0, prevValue + action.delta);
-            setRatingMutation.mutate({
+            setRating({
               file_id: currentFileId,
               rating_service_key: serviceKey,
               rating: newValue,
@@ -320,9 +320,9 @@ export function useReviewSwipeDeck({
       bindings,
       getFileState,
       recordAction,
-      archiveMutation,
-      trashMutation,
-      setRatingMutation,
+      archiveFiles,
+      trashFiles,
+      setRating,
       onAction,
     ],
   );
