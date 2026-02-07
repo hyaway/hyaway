@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useEffectEvent,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -223,7 +224,10 @@ export function useReviewSwipeDeck({
 
   // Rating services (for filtering orphaned actions)
   const { ratingServices } = useRatingServices();
-  const validServiceKeys = new Set(ratingServices.map(([key]) => key));
+  const validServiceKeys = useMemo(
+    () => new Set(ratingServices.map(([key]) => key)),
+    [ratingServices],
+  );
 
   // Current file metadata
   const { data: currentMetadata } = useGetSingleFileMetadata(
