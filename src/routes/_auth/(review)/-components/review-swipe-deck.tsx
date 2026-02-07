@@ -147,50 +147,58 @@ function executeSecondaryRatingActions(
   const restoreEntries: Array<RatingRestoreEntry> = [];
 
   for (const action of secondaryActions) {
-    if (action.actionType !== "rating") continue;
+    switch (action.actionType) {
+      case "rating": {
+        const { serviceKey } = action;
 
-    const { serviceKey } = action;
+        // Skip orphaned rating actions (service no longer exists)
+        if (!validServiceKeys.has(serviceKey)) break;
 
-    // Skip orphaned rating actions (service no longer exists)
-    if (!validServiceKeys.has(serviceKey)) continue;
+        const currentRating = ratings?.[serviceKey] ?? null;
 
-    const currentRating = ratings?.[serviceKey] ?? null;
-
-    if (action.type === "setLike") {
-      restoreEntries.push({
-        serviceKey,
-        actionType: "setLike",
-        previousValue: currentRating as boolean | null,
-      });
-      setRating({
-        file_id: fileId,
-        rating_service_key: serviceKey,
-        rating: action.value,
-      });
-    } else if (action.type === "setNumerical") {
-      restoreEntries.push({
-        serviceKey,
-        actionType: "setNumerical",
-        previousValue: currentRating as number | null,
-      });
-      setRating({
-        file_id: fileId,
-        rating_service_key: serviceKey,
-        rating: action.value,
-      });
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (action.type === "incDecDelta") {
-      const prevValue = (currentRating as number | null) ?? 0;
-      restoreEntries.push({
-        serviceKey,
-        actionType: "incDecDelta",
-        previousValue: prevValue,
-      });
-      setRating({
-        file_id: fileId,
-        rating_service_key: serviceKey,
-        rating: Math.max(0, prevValue + action.delta),
-      });
+        if (action.type === "setLike") {
+          restoreEntries.push({
+            serviceKey,
+            actionType: "setLike",
+            previousValue: currentRating as boolean | null,
+          });
+          setRating({
+            file_id: fileId,
+            rating_service_key: serviceKey,
+            rating: action.value,
+          });
+        } else if (action.type === "setNumerical") {
+          restoreEntries.push({
+            serviceKey,
+            actionType: "setNumerical",
+            previousValue: currentRating as number | null,
+          });
+          setRating({
+            file_id: fileId,
+            rating_service_key: serviceKey,
+            rating: action.value,
+          });
+        } else {
+          // action.type === "incDecDelta"
+          const prevValue = (currentRating as number | null) ?? 0;
+          restoreEntries.push({
+            serviceKey,
+            actionType: "incDecDelta",
+            previousValue: prevValue,
+          });
+          setRating({
+            file_id: fileId,
+            rating_service_key: serviceKey,
+            rating: Math.max(0, prevValue + action.delta),
+          });
+        }
+        break;
+      }
+      case "addTag":
+        // TODO: implement tag secondary actions
+        break;
+      default:
+        action satisfies never;
     }
   }
 

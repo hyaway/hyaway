@@ -4,7 +4,10 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
-import type { SwipeDirection } from "@/stores/review-settings-store";
+import type {
+  RatingSwipeAction,
+  SwipeDirection,
+} from "@/stores/review-settings-store";
 
 /** Types of actions that can be performed on a file during review */
 export type ReviewAction = "archive" | "trash" | "skip";
@@ -12,8 +15,8 @@ export type ReviewAction = "archive" | "trash" | "skip";
 /** Previous state of a file before action, used for undo */
 export type PreviousFileState = "inbox" | "archived" | "trashed" | null;
 
-/** Rating type for restoration */
-export type RatingActionType = "setLike" | "setNumerical" | "incDecDelta";
+/** Rating type for restoration — derived from the source action type */
+export type RatingActionType = RatingSwipeAction["type"];
 
 /** A single rating restoration entry */
 export interface RatingRestoreEntry {
