@@ -1,18 +1,12 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence } from "motion/react";
 import { ReviewSwipeCard } from "./review-swipe-card";
 import { ReviewCardContent } from "./review-card-content";
+import { useReviewKeyboardShortcuts } from "./use-review-keyboard-shortcuts";
 import type { SwipeDirection } from "./review-swipe-card";
 import type {
   PreviousFileState,
@@ -35,7 +29,6 @@ import {
 import {
   getBindingForDirection,
   useReviewGesturesEnabled,
-  useReviewShortcutsEnabled,
   useReviewSwipeBindings,
 } from "@/stores/review-settings-store";
 import {
@@ -48,7 +41,6 @@ import {
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { getFileMetadata } from "@/integrations/hydrus-api/api-client";
-import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
 
 /** Number of cards to render in the stack */
 const STACK_SIZE = 3;
@@ -363,60 +355,8 @@ export function useReviewSwipeDeck({
     ],
   );
 
-  // Stable event callbacks — always call the latest version without
-  // tearing down the keyboard listener on every state change
-  const onSwipeKey = useEffectEvent((direction: SwipeDirection) => {
-    handleSwipe(direction);
-  });
-  const onUndoKey = useEffectEvent(() => {
-    performUndo();
-  });
-
-  // Keyboard shortcuts — only re-subscribes when the toggle flips
-  const shortcutsEnabled = useReviewShortcutsEnabled();
-  useEffect(() => {
-    if (!shortcutsEnabled) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (shouldIgnoreKeyboardEvent(e, { checkOverlays: true })) return;
-
-      switch (e.key) {
-        case "ArrowLeft":
-        case "h":
-        case "H":
-          e.preventDefault();
-          onSwipeKey("left");
-          break;
-        case "ArrowRight":
-        case "l":
-        case "L":
-          e.preventDefault();
-          onSwipeKey("right");
-          break;
-        case "ArrowUp":
-        case "k":
-        case "K":
-          e.preventDefault();
-          onSwipeKey("up");
-          break;
-        case "ArrowDown":
-        case "j":
-        case "J":
-          e.preventDefault();
-          onSwipeKey("down");
-          break;
-        case "z":
-        case "Z":
-        case "Backspace":
-          e.preventDefault();
-          onUndoKey();
-          break;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [shortcutsEnabled]);
+  // Keyboard shortcuts
+  useReviewKeyboardShortcuts(handleSwipe, performUndo);
 
   // Get visible cards for the stack (current + next few)
   const visibleFileIds = fileIds.slice(currentIndex, currentIndex + STACK_SIZE);
