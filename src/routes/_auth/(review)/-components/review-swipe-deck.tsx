@@ -282,9 +282,7 @@ export function useReviewSwipeDeck({
 
     const lastEntry = undo();
     if (lastEntry) {
-      const { restore } = lastEntry;
-      const binding = getBindingForDirection(bindings, lastEntry.direction);
-      const fileAction = binding.fileAction;
+      const { restore, fileAction } = lastEntry;
 
       // Reverse file action if it actually changed the state
       reverseFileAction(fileAction, lastEntry.fileId, restore.fileState, {
@@ -292,25 +290,16 @@ export function useReviewSwipeDeck({
         trash: undeleteFiles,
       });
 
-      // Reverse rating action if present
-      if (restore.ratings && restore.ratings.length > 0) {
-        for (const rating of restore.ratings) {
-          setRating({
-            file_id: lastEntry.fileId,
-            rating_service_key: rating.serviceKey,
-            rating: rating.previousValue,
-          });
-        }
+      // Reverse rating actions
+      for (const rating of restore.ratings ?? []) {
+        setRating({
+          file_id: lastEntry.fileId,
+          rating_service_key: rating.serviceKey,
+          rating: rating.previousValue,
+        });
       }
     }
-  }, [
-    history.length,
-    undo,
-    bindings,
-    unarchiveFiles,
-    undeleteFiles,
-    setRating,
-  ]);
+  }, [history.length, undo, unarchiveFiles, undeleteFiles, setRating]);
 
   // Handle exit animation complete - remove card from exiting list
   const handleExitComplete = useCallback((fileId: number) => {
@@ -352,7 +341,12 @@ export function useReviewSwipeDeck({
         fileState,
         ratings: ratingsRestore.length > 0 ? ratingsRestore : undefined,
       };
-      recordAction({ fileId: currentFileId, direction, restore });
+      recordAction({
+        fileId: currentFileId,
+        direction,
+        fileAction: binding.fileAction,
+        restore,
+      });
       onAction?.(direction, currentFileId);
     },
     [

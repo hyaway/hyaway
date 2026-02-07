@@ -6,6 +6,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type {
   RatingSwipeAction,
+  ReviewFileAction,
   SwipeDirection,
 } from "@/stores/review-settings-store";
 
@@ -35,6 +36,8 @@ export interface ReviewHistoryEntry {
   fileId: number;
   /** The swipe direction that triggered this action */
   direction: SwipeDirection;
+  /** The file action that was performed (recorded at swipe time, not re-derived) */
+  fileAction: ReviewFileAction;
   /** Data needed to undo this action */
   restore: RestoreData;
 }
