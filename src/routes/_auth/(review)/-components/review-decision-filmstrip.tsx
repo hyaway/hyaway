@@ -25,6 +25,7 @@ import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useThumbnailDimensions } from "@/integrations/hydrus-api/queries/options";
+import { cn } from "@/lib/utils";
 import {
   useGalleryEnableContextMenu,
   useGalleryEntryDuration,
@@ -271,7 +272,7 @@ export function ReviewDecisionFilmstrip({
         }
       >
         <ScrollArea
-          viewportClassName="px-1 py-1 pb-4"
+          viewportClassName="scroll-p-2 p-2 pb-5"
           orientation="horizontal"
           ref={scrollContainerRef}
           tabIndex={-1}
@@ -350,33 +351,45 @@ function FilmstripItem({
   isMenuOpen,
   onMenuOpenChange,
 }: FilmstripItemProps) {
-  const linkContent = (
+  const linkElement = (
     <Link
       to="/file/$fileId"
       params={{ fileId: String(fileId) }}
-      className="block h-full w-full"
+      className="absolute inset-0 z-10 outline-hidden"
       tabIndex={tabIndex}
       ref={(el) => setLinkRef(el, itemIndex)}
       onFocus={() => onItemFocus(itemIndex)}
-    >
-      <ThumbnailGalleryItemContent item={item} />
-    </Link>
+      aria-label={`File ${fileId}`}
+    />
   );
 
-  if (!enableContextMenu) {
-    return linkContent;
-  }
-
-  return (
+  const wrappedLink = enableContextMenu ? (
     <ContextMenu open={isMenuOpen} onOpenChange={onMenuOpenChange}>
-      <ContextMenuTrigger className="h-full w-full">
-        {linkContent}
-      </ContextMenuTrigger>
+      <ContextMenuTrigger>{linkElement}</ContextMenuTrigger>
       <ThumbnailGalleryItemContextMenu
         item={item}
         itemIndex={itemIndex}
         hideReviewActions
       />
     </ContextMenu>
+  ) : (
+    linkElement
+  );
+
+  return (
+    <div className="group relative h-full w-full">
+      {wrappedLink}
+      <div
+        className={cn(
+          "pointer-events-none h-full w-full",
+          "group-has-focus-visible:ring-3 group-has-focus-visible:ring-black group-has-focus-visible:ring-offset-3 group-has-focus-visible:ring-offset-white dark:group-has-focus-visible:ring-white dark:group-has-focus-visible:ring-offset-black",
+          enableContextMenu &&
+            isMenuOpen &&
+            "ring-primary-foreground ring-offset-primary ring-0 ring-offset-3",
+        )}
+      >
+        <ThumbnailGalleryItemContent item={item} />
+      </div>
+    </div>
   );
 }
