@@ -134,7 +134,7 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
       {/* Actions */}
       <div className="flex w-full flex-col items-center gap-2">
         <Heading level={3}>What's next</Heading>
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row flex-wrap justify-center gap-2">
           <Button variant="outline" onClick={clearQueue}>
             Configure actions
           </Button>
@@ -172,11 +172,11 @@ const DecisionFilmstripSection = memo(function DecisionFilmstripSection({
     <div className="w-full">
       <Heading
         level={4}
-        className="flex items-center justify-center gap-2 leading-normal"
+        className="flex items-start justify-center gap-2 leading-normal"
       >
         <div
           className={cn(
-            "flex size-8 items-center justify-center rounded-lg",
+            "hidden aspect-square size-8 items-center justify-center rounded-lg min-[400px]:inline-flex",
             descriptor.bgClass,
             descriptor.textClass,
           )}
@@ -184,9 +184,11 @@ const DecisionFilmstripSection = memo(function DecisionFilmstripSection({
           <ActionIcon className="size-3" />
           <DirectionIcon className="size-3" />
         </div>
-        <span>{descriptor.label}</span>
-        <span className="text-muted-foreground text-sm font-normal tabular-nums">
-          ({fileIds.length})
+        <span>
+          {descriptor.label}{" "}
+          <span className="text-muted-foreground font-normal tabular-nums">
+            ({fileIds.length})
+          </span>
         </span>
       </Heading>
       <ReviewDecisionFilmstrip fileIds={fileIds} />

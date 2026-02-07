@@ -104,7 +104,12 @@ export function ReviewStatsBreakdown({
 
   // Grid variant
   return (
-    <div className={cn("grid grid-cols-4 gap-4 text-center", className)}>
+    <div
+      className={cn(
+        "grid grid-cols-2 gap-4 text-center min-[250px]:grid-cols-4",
+        className,
+      )}
+    >
       {visibleDirections.map((direction) => (
         <GridStatItem
           key={direction}
@@ -155,7 +160,7 @@ function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
   const DirectionIcon = DIRECTION_ICONS[direction];
 
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex min-w-0 flex-col items-center gap-1">
       <div
         className={cn(
           "flex size-10 items-center justify-center",
@@ -167,7 +172,7 @@ function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
         <DirectionIcon className="size-4" />
       </div>
       <span className="text-2xl font-semibold tabular-nums">{count}</span>
-      <span className="text-muted-foreground flex items-center gap-0.5 text-xs">
+      <span className="text-muted-foreground text-center text-xs leading-tight break-all">
         {descriptor.label}
       </span>
     </div>
