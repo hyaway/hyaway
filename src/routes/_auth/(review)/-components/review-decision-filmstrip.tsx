@@ -156,6 +156,24 @@ export function ReviewDecisionFilmstrip({
     virtualizer.measure();
   }, [deferredItems, contentHeight, horizontalGap, virtualizer]);
 
+  // Redirect vertical wheel events to horizontal scroll (pointer devices only)
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Only redirect vertical scroll when there's horizontal overflow
+      if (el.scrollWidth <= el.clientWidth) return;
+      if (e.deltaY === 0) return;
+
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, []);
+
   if (fileIds.length === 0) {
     return null;
   }
