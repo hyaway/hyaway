@@ -4,6 +4,28 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-02-07
+
+### Added
+
+- **Undo as swipe direction** — Undo can now be assigned to any swipe direction, allowing one-gesture undo without the dedicated footer button
+- **Swipe bindings in settings page** — Swipe action configuration is now accessible from the main settings page and sidebar, not just during review mode
+
+### Changed
+
+- Swipe and keyboard animations improved — footer buttons and keyboard actions now skip exit animations
+- Review footer dynamically hides standalone undo button when undo is bound to a swipe direction
+- Review controls settings reorganized into collapsible accordion sections (swipe actions, thresholds)
+- Swipe bindings editor warns when queue is active and disables editing until cleared
+- Default down-swipe binding changed from "skip" to "undo" (existing users migrated automatically unless customized)
+- Undo-bound swipe overlay shows disabled state when there's nothing to undo
+
+### Fixed
+
+- Dragging cards out of bounds in review mode no longer causes vertical page scrollbar to appear or allow scrolling to the empty area
+
+---
+
 ## 2026-02-06
 
 ### Added
