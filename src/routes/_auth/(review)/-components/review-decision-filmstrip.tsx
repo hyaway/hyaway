@@ -30,6 +30,7 @@ import {
   useGalleryEnableContextMenu,
   useGalleryEntryDuration,
   useGalleryHorizontalGap,
+  useGalleryHoverZoomDuration,
   useGalleryImageBackground,
 } from "@/stores/gallery-settings-store";
 
@@ -67,6 +68,7 @@ export function ReviewDecisionFilmstrip({
   const horizontalGap = useGalleryHorizontalGap();
   const imageBackground = useGalleryImageBackground();
   const entryDuration = useGalleryEntryDuration();
+  const hoverZoomDuration = useGalleryHoverZoomDuration();
   const enableContextMenu = useGalleryEnableContextMenu();
 
   // Track which item has an open context menu
@@ -268,6 +270,7 @@ export function ReviewDecisionFilmstrip({
         style={
           {
             "--gallery-entry-duration": `${entryDuration}ms`,
+            "--gallery-hover-zoom-duration": `${hoverZoomDuration}ms`,
           } as React.CSSProperties
         }
       >
@@ -382,6 +385,8 @@ function FilmstripItem({
       <div
         className={cn(
           "pointer-events-none h-full w-full",
+          "[&_img]:transition-transform [&_img]:duration-(--gallery-hover-zoom-duration) [&_img]:ease-out",
+          "group-hover:[&_img]:scale-105",
           "group-has-focus-visible:ring-3 group-has-focus-visible:ring-black group-has-focus-visible:ring-offset-3 group-has-focus-visible:ring-offset-white dark:group-has-focus-visible:ring-white dark:group-has-focus-visible:ring-offset-black",
           enableContextMenu &&
             isMenuOpen &&
