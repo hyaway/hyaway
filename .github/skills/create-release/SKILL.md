@@ -1,6 +1,6 @@
 ---
 name: create-release
-description: Create a GitHub release for hyAway by updating the changelog and tagging commits. Use when user wants to "release", "publish", "tag a version", or "create a release". Handles changelog updates, git tagging with date format (v2026.01.28), and pushing to trigger automated workflows.
+description: Create a GitHub release for hyAway by updating the changelog and tagging commits. Use when user wants to "release", "publish", "tag a version", or "create a release". Handles changelog updates and git tagging with date format (v2026.01.28).
 ---
 
 # Create Release
@@ -16,11 +16,10 @@ Create releases with changelog entry and git tag.
 1. **Update changelog** for today's date in `docs/changelog.md`
 2. **Commit** if there are uncommitted changes
 3. **Tag**: `git tag v2026.01.28`
-4. **Push**: `git push origin v2026.01.28`
 
-## What Happens Automatically
+## After Pushing
 
-Tag push triggers:
+Once you push the tag (`git push origin v2026.01.28`), it triggers:
 
 - GitHub release with changelog content extracted
 - Docker image tagged `ghcr.io/hyaway/hyaway:v2026.01.28`
@@ -28,8 +27,8 @@ Tag push triggers:
 ## Commands
 
 ```bash
-# Create and push release
-git tag v2026.01.28 && git push origin v2026.01.28
+# Create release tag
+git tag v2026.01.28
 
 # Tag specific commit
 git tag v2026.01.28 <commit-hash>
