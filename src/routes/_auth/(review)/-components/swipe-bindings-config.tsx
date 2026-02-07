@@ -208,7 +208,7 @@ function LikeRatingValuePicker({
       serviceKey={serviceKey}
       starShape={service.star_shape}
       onChange={handleChange}
-      compact
+      size="compact"
       likeColors={getLikeColors(service)}
       dislikeColors={getDislikeColors(service)}
     />
@@ -248,7 +248,7 @@ function NumericalRatingValuePicker({
       serviceKey={serviceKey}
       starShape={service.star_shape}
       onChange={handleChange}
-      compact
+      size="compact"
       filledColors={getNumericalFilledColors(service)}
     />
   );

@@ -604,7 +604,7 @@ function ServiceRatingControl({
           starShape={service.star_shape}
           onChange={handleSetRating}
           disabled={isPending}
-          compact
+          size="compact"
           filledColors={getNumericalFilledColors(service)}
         />
       )}

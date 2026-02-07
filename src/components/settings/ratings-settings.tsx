@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { IconTallymarks, IconX } from "@tabler/icons-react";
 import type { StarShape } from "@/integrations/hydrus-api/models";
 import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
@@ -59,9 +59,11 @@ export function RatingsSettings({
   const canUseHydrusOverlay = canSearch && hasServiceOverlaySettings;
 
   // Auto-switch to custom mode if Hydrus overlay becomes unavailable
-  if (!canUseHydrusOverlay && overlayMode === "service") {
-    setOverlayMode("custom");
-  }
+  useEffect(() => {
+    if (!canUseHydrusOverlay && overlayMode === "service") {
+      setOverlayMode("custom");
+    }
+  }, [canUseHydrusOverlay, overlayMode, setOverlayMode]);
 
   // Get rating services for settings UI
   const ratingServices = useMemo(

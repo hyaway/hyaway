@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   IconBackslash,
   IconChevronDown,
@@ -32,6 +32,9 @@ import {
 } from "@/components/ui-primitives/dropdown-menu";
 import { cn } from "@/lib/utils";
 
+/** Rating control size variant */
+export type RatingControlSize = "default" | "compact";
+
 /** Threshold for switching from star grid to dropdown in compact mode */
 const COMPACT_DROPDOWN_THRESHOLD = 6;
 
@@ -45,8 +48,8 @@ interface LikeDislikeControlProps {
   starShape: StarShape;
   onChange: (value: boolean | null) => void;
   disabled?: boolean;
-  /** Compact mode with smaller buttons */
-  compact?: boolean;
+  /** Size variant for the control */
+  size?: RatingControlSize;
   /** Custom like colors from service */
   likeColors?: RatingColor;
   /** Custom dislike colors from service */
@@ -59,24 +62,13 @@ export function LikeDislikeControl({
   starShape,
   onChange,
   disabled,
-  compact,
+  size = "default",
   likeColors = DEFAULT_LIKE_COLORS,
   dislikeColors = DEFAULT_DISLIKE_COLORS,
 }: LikeDislikeControlProps) {
-  const [localValue, setLocalValue] = useState<boolean | null>(value);
-
-  // Sync when the external value changes
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
-
-  const handleChange = (newValue: boolean | null) => {
-    setLocalValue(newValue);
-    onChange(newValue);
-  };
-
-  const isLiked = localValue === true;
-  const isDisliked = localValue === false;
+  const compact = size === "compact";
+  const isLiked = value === true;
+  const isDisliked = value === false;
   const {
     filled: FilledIcon,
     outline: OutlineIcon,
@@ -98,7 +90,7 @@ export function LikeDislikeControl({
         variant="ghost"
         size="sm"
         className={cn(buttonSize, "p-0")}
-        onClick={() => handleChange(isLiked ? null : true)}
+        onClick={() => onChange(isLiked ? null : true)}
         disabled={disabled}
         aria-label={isLiked ? "Remove like" : "Like"}
         aria-pressed={isLiked}
@@ -124,14 +116,6 @@ export function LikeDislikeControl({
               !disabled &&
                 "pointer-hover:[button:hover_&]:scale-125 pointer-hover:[button:hover_&]:opacity-100",
             )}
-            style={
-              !disabled
-                ? ({
-                    "--hover-color": likeColors.brush,
-                    "--hover-stroke": likeColors.pen,
-                  } as React.CSSProperties)
-                : undefined
-            }
           />
         )}
       </Button>
@@ -139,7 +123,7 @@ export function LikeDislikeControl({
         variant="ghost"
         size="sm"
         className={cn(buttonSize, "p-0")}
-        onClick={() => handleChange(isDisliked ? null : false)}
+        onClick={() => onChange(isDisliked ? null : false)}
         disabled={disabled}
         aria-label={isDisliked ? "Remove dislike" : "Dislike"}
         aria-pressed={isDisliked}
@@ -204,8 +188,8 @@ interface NumericalRatingControlProps {
   starShape: StarShape;
   onChange: (value: number | null) => void;
   disabled?: boolean;
-  /** Compact mode: hides number labels, uses dropdown for high star counts */
-  compact?: boolean;
+  /** Size variant: compact hides number labels and uses dropdown for high star counts */
+  size?: RatingControlSize;
   /**
    * Custom filled star colors from service.
    * @default DEFAULT_NUMERICAL_FILLED
@@ -221,20 +205,10 @@ export function NumericalRatingControl({
   starShape,
   onChange,
   disabled,
-  compact,
+  size = "default",
   filledColors = DEFAULT_NUMERICAL_FILLED,
 }: NumericalRatingControlProps) {
-  const [localValue, setLocalValue] = useState<number | null>(value);
-
-  // Sync when the external value changes
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
-
-  const handleChange = (newValue: number | null) => {
-    setLocalValue(newValue);
-    onChange(newValue);
-  };
+  const compact = size === "compact";
 
   const {
     filled: FilledIcon,
@@ -246,10 +220,10 @@ export function NumericalRatingControl({
   if (compact && maxStars >= COMPACT_DROPDOWN_THRESHOLD) {
     return (
       <NumericalRatingDropdown
-        value={localValue}
+        value={value}
         minStars={minStars}
         maxStars={maxStars}
-        onChange={handleChange}
+        onChange={onChange}
         disabled={disabled}
         FilledIcon={FilledIcon}
         OutlineIcon={OutlineIcon}
@@ -260,7 +234,7 @@ export function NumericalRatingControl({
   }
 
   const stars = Array.from({ length: maxStars }, (_, i) => i + 1);
-  const isZero = localValue === 0;
+  const isZero = value === 0;
   const canSetZero = minStars === 0;
 
   const iconSize = "size-7";
@@ -275,7 +249,7 @@ export function NumericalRatingControl({
     <div
       className={cn("flex items-center", !compact && "flex-wrap gap-2")}
       role="group"
-      aria-label={`Rating: ${localValue === null ? "no rating" : `${localValue} of ${maxStars}`}`}
+      aria-label={`Rating: ${value === null ? "no rating" : `${value} of ${maxStars}`}`}
     >
       {/* Zero star - outside grid in non-compact mode */}
       {canSetZero && !compact && (
@@ -287,7 +261,7 @@ export function NumericalRatingControl({
             isZero && "text-destructive disabled:opacity-100",
             !disabled && !isZero && "pointer-hover:hover:text-destructive",
           )}
-          onClick={() => handleChange(localValue === 0 ? null : 0)}
+          onClick={() => onChange(value === 0 ? null : 0)}
           disabled={disabled}
           aria-label={
             isZero ? "Clear rating (was 0)" : `Set rating to 0 of ${maxStars}`
@@ -334,7 +308,7 @@ export function NumericalRatingControl({
               isZero && "text-destructive disabled:opacity-100",
               !disabled && !isZero && "pointer-hover:hover:text-destructive",
             )}
-            onClick={() => handleChange(localValue === 0 ? null : 0)}
+            onClick={() => onChange(value === 0 ? null : 0)}
             disabled={disabled}
             aria-label={
               isZero ? "Clear rating (was 0)" : `Set rating to 0 of ${maxStars}`
@@ -360,7 +334,7 @@ export function NumericalRatingControl({
           </Button>
         )}
         {stars.map((star) => {
-          const isFilled = localValue !== null && star <= localValue;
+          const isFilled = value !== null && star <= value;
           // Stars 1+ are always clickable when minStars is 0 or 1
           const isClickable = star >= minStars;
           const isDisabled = disabled || !isClickable;
@@ -380,13 +354,13 @@ export function NumericalRatingControl({
               )}
               onClick={() => {
                 // Clicking the currently selected star clears the rating
-                handleChange(localValue === star ? null : star);
+                onChange(value === star ? null : star);
               }}
               disabled={isDisabled}
               aria-label={
                 !isClickable
                   ? `${star} of ${maxStars} (disabled)`
-                  : localValue === star
+                  : value === star
                     ? `Clear rating (was ${star} of ${maxStars})`
                     : `Set rating to ${star} of ${maxStars}`
               }
@@ -423,14 +397,6 @@ export function NumericalRatingControl({
                       !disabled &&
                       "pointer-hover:[button:has(~button:hover)_&]:opacity-100",
                   )}
-                  style={
-                    isClickable && !disabled
-                      ? ({
-                          "--hover-color": filledColors.brush,
-                          "--hover-stroke": filledColors.pen,
-                        } as React.CSSProperties)
-                      : undefined
-                  }
                 />
               )}
               {!compact && (
@@ -517,6 +483,7 @@ function NumericalRatingDropdown({
           "border-input bg-background ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 flex h-10 items-center gap-1.5 rounded-lg border px-3 text-sm shadow-xs outline-1 -outline-offset-1 transition-[color,box-shadow] focus-visible:ring-4",
           disabled && "pointer-events-none opacity-50",
         )}
+        aria-label={`Rating: ${displayValue} of ${maxStars}. Click to change`}
       >
         {value === 0 ? (
           <IconCircleDashedNumber0 className="text-destructive size-5" />
@@ -573,16 +540,17 @@ interface IncDecRatingControlProps {
   value: number;
   onChange: (value: RatingValue) => void;
   disabled?: boolean;
-  /** Compact mode with smaller buttons */
-  compact?: boolean;
+  /** Size variant for the control */
+  size?: RatingControlSize;
 }
 
 export function IncDecRatingControl({
   value,
   onChange,
   disabled,
-  compact,
+  size = "default",
 }: IncDecRatingControlProps) {
+  const compact = size === "compact";
   const buttonSize = compact ? "size-7" : "size-9.5";
   const iconSize = compact ? "size-4" : "size-6";
 

@@ -42,7 +42,6 @@ export function RatingsOverlay({
     <div
       className={cn(
         "pointer-events-none flex flex-col items-end gap-0.5",
-        size === "sm" && "gap-0.5",
         size === "md" && "gap-1",
         size === "lg" && "gap-1.5",
         className,
