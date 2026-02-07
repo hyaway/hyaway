@@ -130,7 +130,9 @@ export function ThumbnailGalleryItemContextMenu({
       )}
 
       {/* Clear viewtime/views actions based on infoMode */}
-      {(showClearViewtime || showClearViews) && <ContextMenuSeparator />}
+      {(showClearViewtime || showClearViews) && !hideReviewActions && (
+        <ContextMenuSeparator />
+      )}
       {showClearViewtime && (
         <ContextMenuItem
           onClick={handleClearViewtime}
@@ -152,7 +154,10 @@ export function ThumbnailGalleryItemContextMenu({
         </ContextMenuItem>
       )}
 
-      {actionGroups.length > 0 && <ContextMenuSeparator />}
+      {actionGroups.length > 0 &&
+        (!hideReviewActions || showClearViewtime || showClearViews) && (
+          <ContextMenuSeparator />
+        )}
 
       {actionGroups.map((group, groupIndex) => (
         <div key={group.id}>
