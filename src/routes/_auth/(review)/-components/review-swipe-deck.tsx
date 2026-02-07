@@ -8,6 +8,7 @@ import { ReviewSwipeCard } from "./review-swipe-card";
 import { ReviewCardContent } from "./review-card-content";
 import { useReviewKeyboardShortcuts } from "./use-review-keyboard-shortcuts";
 import type { SwipeDirection } from "./review-swipe-card";
+import type { InteractionType } from "@/lib/last-interaction-type";
 import type {
   PreviousFileState,
   RatingRestoreEntry,
@@ -19,6 +20,7 @@ import type {
   SecondarySwipeAction,
   SwipeBindings,
 } from "@/stores/review-settings-store";
+import { useLastInteractionType } from "@/lib/last-interaction-type";
 import {
   useReviewQueueActions,
   useReviewQueueCurrentFileId,
@@ -244,6 +246,9 @@ export function useReviewSwipeDeck() {
     new Map(),
   );
 
+  // Track last interaction type to skip animations on keyboard swipes
+  const lastInteractionRef = useLastInteractionType();
+
   // Prefetch next cards' metadata
   useEffect(() => {
     for (const fileId of nextFileIds) {
@@ -366,6 +371,7 @@ export function useReviewSwipeDeck() {
     exitingCards,
     gesturesEnabled,
     bindings,
+    lastInteractionRef,
     handleSwipe,
     handleExitComplete,
     performUndo,
@@ -379,6 +385,7 @@ export function ReviewSwipeDeckVisual({
   exitingCards,
   gesturesEnabled,
   bindings,
+  lastInteractionRef,
   handleSwipe,
   handleExitComplete,
 }: {
@@ -386,6 +393,7 @@ export function ReviewSwipeDeckVisual({
   exitingCards: Map<number, SwipeDirection>;
   gesturesEnabled: boolean;
   bindings: SwipeBindings;
+  lastInteractionRef: React.RefObject<InteractionType>;
   handleSwipe: (direction: SwipeDirection) => void;
   handleExitComplete: (fileId: number) => void;
 }) {
@@ -427,6 +435,7 @@ export function ReviewSwipeDeckVisual({
                 bindings={bindings}
                 exitDirection={exitDirection}
                 gesturesEnabled={gesturesEnabled}
+                lastInteractionRef={lastInteractionRef}
                 onSwipe={handleSwipe}
                 onExitComplete={() => handleExitComplete(fileId)}
               >
