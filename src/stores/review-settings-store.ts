@@ -13,8 +13,11 @@ export const SWIPE_DIRECTIONS = ["up", "down", "left", "right"] as const;
 /** Swipe directions that can be bound to actions */
 export type SwipeDirection = (typeof SWIPE_DIRECTIONS)[number];
 
-/** File actions that can be performed during review */
-export type ReviewFileAction = "archive" | "trash" | "skip";
+/** File actions that mutate file state (archive, trash, etc.) */
+export type ReviewFileMutationAction = "archive" | "trash";
+
+/** All file actions during review — mutation actions + skip (no-op) */
+export type ReviewFileAction = ReviewFileMutationAction | "skip";
 
 /** How images are loaded in review mode */
 export type ReviewImageLoadMode = "original" | "optimized";

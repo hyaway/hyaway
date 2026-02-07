@@ -8,6 +8,7 @@ import {
 } from "@tabler/icons-react";
 import type {
   RatingSwipeAction,
+  ReviewFileAction,
   ReviewSwipeBinding,
   SecondarySwipeAction,
 } from "@/stores/review-settings-store";
@@ -85,7 +86,7 @@ export function formatRatingAction(
 
 /** Descriptors for file actions */
 const FILE_ACTION_DESCRIPTORS: Record<
-  "archive" | "trash" | "skip",
+  ReviewFileAction,
   SwipeBindingDescriptor
 > = {
   archive: {
@@ -110,7 +111,7 @@ const FILE_ACTION_DESCRIPTORS: Record<
 
 /** Descriptors for file actions with stronger overlay backgrounds */
 const FILE_ACTION_OVERLAY_DESCRIPTORS: Record<
-  "archive" | "trash" | "skip",
+  ReviewFileAction,
   SwipeBindingDescriptor
 > = {
   archive: {

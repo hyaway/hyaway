@@ -15,6 +15,7 @@ import type {
 } from "@/stores/review-queue-store";
 import type {
   ReviewFileAction,
+  ReviewFileMutationAction,
   SecondarySwipeAction,
   SwipeBindings,
 } from "@/stores/review-settings-store";
@@ -85,9 +86,9 @@ function DeckContainer({
   );
 }
 
-/** Check if a file action didn't change the file state (e.g., archiving already archived) */
-function wasFileActionUnchanged(
-  action: ReviewFileAction | null | undefined,
+/** Check if a mutation action didn't change the file state (e.g., archiving already archived) */
+function wasMutationUnchanged(
+  action: ReviewFileMutationAction,
   fileState: PreviousFileState,
 ): boolean {
   return (
@@ -106,17 +107,19 @@ type RatingMutate = (args: {
 }) => void;
 
 /**
- * Execute the primary file action (archive/trash) if it would change state.
- * Pure function — takes explicit mutation callbacks.
+ * Execute the primary file action if it would change state.
+ * "skip" is an explicit no-op. Mutation actions use a complete (non-Partial)
+ * map so adding a new mutation action forces a compile error until handled.
  */
 function executeFileAction(
   fileAction: ReviewFileAction,
   fileId: number,
   fileState: PreviousFileState,
-  mutations: Partial<Record<ReviewFileAction, FileMutate>>,
+  mutations: Record<ReviewFileMutationAction, FileMutate>,
 ): void {
-  if (wasFileActionUnchanged(fileAction, fileState)) return;
-  mutations[fileAction]?.({ file_ids: [fileId] });
+  if (fileAction === "skip") return;
+  if (wasMutationUnchanged(fileAction, fileState)) return;
+  mutations[fileAction]({ file_ids: [fileId] });
 }
 
 /**
@@ -127,10 +130,11 @@ function reverseFileAction(
   fileAction: ReviewFileAction,
   fileId: number,
   fileState: PreviousFileState,
-  undoMutations: Partial<Record<ReviewFileAction, FileMutate>>,
+  undoMutations: Record<ReviewFileMutationAction, FileMutate>,
 ): void {
-  if (wasFileActionUnchanged(fileAction, fileState)) return;
-  undoMutations[fileAction]?.({ file_ids: [fileId] });
+  if (fileAction === "skip") return;
+  if (wasMutationUnchanged(fileAction, fileState)) return;
+  undoMutations[fileAction]({ file_ids: [fileId] });
 }
 
 /**

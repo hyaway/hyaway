@@ -9,9 +9,6 @@ import type {
   SwipeDirection,
 } from "@/stores/review-settings-store";
 
-/** Types of actions that can be performed on a file during review */
-export type ReviewAction = "archive" | "trash" | "skip";
-
 /** Previous state of a file before action, used for undo */
 export type PreviousFileState = "inbox" | "archived" | "trashed" | null;
 
