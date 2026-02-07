@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence } from "motion/react";
 import { ReviewSwipeCard } from "./review-swipe-card";
@@ -327,7 +327,16 @@ export function useReviewSwipeDeck({
     ],
   );
 
-  // Keyboard shortcuts
+  // Stable event callbacks — always call the latest version without
+  // tearing down the keyboard listener on every state change
+  const onSwipeKey = useEffectEvent((direction: SwipeDirection) => {
+    handleSwipe(direction);
+  });
+  const onUndoKey = useEffectEvent(() => {
+    performUndo();
+  });
+
+  // Keyboard shortcuts — only re-subscribes when the toggle flips
   const shortcutsEnabled = useReviewShortcutsEnabled();
   useEffect(() => {
     if (!shortcutsEnabled) return;
@@ -340,38 +349,38 @@ export function useReviewSwipeDeck({
         case "h":
         case "H":
           e.preventDefault();
-          handleSwipe("left");
+          onSwipeKey("left");
           break;
         case "ArrowRight":
         case "l":
         case "L":
           e.preventDefault();
-          handleSwipe("right");
+          onSwipeKey("right");
           break;
         case "ArrowUp":
         case "k":
         case "K":
           e.preventDefault();
-          handleSwipe("up");
+          onSwipeKey("up");
           break;
         case "ArrowDown":
         case "j":
         case "J":
           e.preventDefault();
-          handleSwipe("down");
+          onSwipeKey("down");
           break;
         case "z":
         case "Z":
         case "Backspace":
           e.preventDefault();
-          performUndo();
+          onUndoKey();
           break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [shortcutsEnabled, handleSwipe, performUndo]);
+  }, [shortcutsEnabled]);
 
   // Get visible cards for the stack (current + next few)
   const visibleFileIds = fileIds.slice(currentIndex, currentIndex + STACK_SIZE);
