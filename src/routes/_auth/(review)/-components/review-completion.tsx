@@ -81,12 +81,17 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
     navigate({ to: "/pages", search: { q: undefined } });
   };
 
+  // Directions that actually have files assigned
+  const activeDirections = DISPLAY_DIRECTIONS.filter(
+    (d) => fileIdsByDirection[d].length > 0,
+  );
+
   return (
     <div className="flex w-full flex-col items-center gap-6">
       {/* Header section - centered with max width */}
       <div className="flex w-full max-w-2xl flex-col items-center gap-6 px-4">
         {/* Success icon */}
-        <div className="bg-primary/10 text-primary flex size-20 items-center justify-center">
+        <div className="bg-primary/10 text-primary flex size-20 items-center justify-center rounded-xl">
           <IconCheck className="size-10" strokeWidth={2.5} />
         </div>
 
@@ -107,22 +112,26 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
         />
       </div>
 
-      {/* Decision filmstrips - full width */}
-      <div className="flex w-full flex-col gap-4">
-        <Heading level={3}>Review breakdown</Heading>
-        {DISPLAY_DIRECTIONS.map((direction) => (
-          <DecisionFilmstripSection
-            key={direction}
-            direction={direction}
-            fileIds={fileIdsByDirection[direction]}
-            bindings={bindings}
-            servicesMap={servicesMap}
-          />
-        ))}
-      </div>
+      {/* Decision filmstrips - only for directions with files */}
+      {activeDirections.length > 0 && (
+        <div className="flex w-full flex-col gap-6">
+          <Heading level={3} className="text-center">
+            Review breakdown
+          </Heading>
+          {activeDirections.map((direction) => (
+            <DecisionFilmstripSection
+              key={direction}
+              direction={direction}
+              fileIds={fileIdsByDirection[direction]}
+              bindings={bindings}
+              servicesMap={servicesMap}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Actions - left aligned */}
-      <div className="flex w-full flex-col gap-2">
+      {/* Actions */}
+      <div className="flex w-full flex-col items-center gap-2">
         <Heading level={3}>What's next</Heading>
         <div className="flex flex-row gap-2">
           <Button variant="outline" onClick={clearQueue}>
@@ -157,10 +166,10 @@ function DecisionFilmstripSection({
 
   return (
     <div className="w-full">
-      <div className="mb-2 flex items-center gap-2">
+      <div className="mb-2 flex items-center justify-center gap-2">
         <div
           className={cn(
-            "flex size-8 items-center justify-center",
+            "flex size-8 items-center justify-center rounded-lg",
             descriptor.bgClass,
             descriptor.textClass,
           )}

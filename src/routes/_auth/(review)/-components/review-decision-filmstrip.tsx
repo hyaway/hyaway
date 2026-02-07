@@ -177,7 +177,7 @@ export function ReviewDecisionFilmstrip({
           ref={scrollContainerRef}
         >
           <div
-            className="relative"
+            className="relative mx-auto"
             style={{
               width: `${virtualizer.getTotalSize()}px`,
               height: `${fixedHeight}px`,
