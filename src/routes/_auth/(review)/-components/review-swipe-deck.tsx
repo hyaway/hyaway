@@ -17,10 +17,10 @@ import type {
   PreviousFileState,
   RatingRestoreEntry,
   RestoreData,
-  ReviewHistoryEntry,
 } from "@/stores/review-queue-store";
 import type {
   ReviewFileAction,
+  SecondarySwipeAction,
   SwipeBindings,
 } from "@/stores/review-settings-store";
 import {
@@ -101,6 +101,99 @@ function wasFileActionUnchanged(
     (action === "archive" && fileState === "archived") ||
     (action === "trash" && fileState === "trashed")
   );
+}
+
+/** Mutation function signature for file management operations */
+type FileMutate = (args: { file_ids: Array<number> }) => void;
+/** Mutation function signature for rating operations */
+type RatingMutate = (args: {
+  file_id: number;
+  rating_service_key: string;
+  rating: boolean | number | null;
+}) => void;
+
+/**
+ * Execute the primary file action (archive/trash) if it would change state.
+ * Pure function — takes explicit mutation callbacks.
+ */
+function executeFileAction(
+  fileAction: ReviewFileAction,
+  fileId: number,
+  fileState: PreviousFileState,
+  mutations: { archive: FileMutate; trash: FileMutate },
+): void {
+  if (wasFileActionUnchanged(fileAction, fileState)) return;
+
+  if (fileAction === "archive") {
+    mutations.archive({ file_ids: [fileId] });
+  } else if (fileAction === "trash") {
+    mutations.trash({ file_ids: [fileId] });
+  }
+  // "skip" doesn't need a mutation
+}
+
+/**
+ * Execute secondary rating actions and build restore entries for undo.
+ * Returns the restore entries so the caller can record them in history.
+ */
+function executeSecondaryRatingActions(
+  secondaryActions: Array<SecondarySwipeAction>,
+  fileId: number,
+  ratings: Record<string, unknown> | undefined,
+  validServiceKeys: Set<string>,
+  setRating: RatingMutate,
+): Array<RatingRestoreEntry> {
+  const restoreEntries: Array<RatingRestoreEntry> = [];
+
+  for (const action of secondaryActions) {
+    if (action.actionType !== "rating") continue;
+
+    const { serviceKey } = action;
+
+    // Skip orphaned rating actions (service no longer exists)
+    if (!validServiceKeys.has(serviceKey)) continue;
+
+    const currentRating = ratings?.[serviceKey] ?? null;
+
+    if (action.type === "setLike") {
+      restoreEntries.push({
+        serviceKey,
+        actionType: "setLike",
+        previousValue: currentRating as boolean | null,
+      });
+      setRating({
+        file_id: fileId,
+        rating_service_key: serviceKey,
+        rating: action.value,
+      });
+    } else if (action.type === "setNumerical") {
+      restoreEntries.push({
+        serviceKey,
+        actionType: "setNumerical",
+        previousValue: currentRating as number | null,
+      });
+      setRating({
+        file_id: fileId,
+        rating_service_key: serviceKey,
+        rating: action.value,
+      });
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    } else if (action.type === "incDecDelta") {
+      const prevValue = (currentRating as number | null) ?? 0;
+      restoreEntries.push({
+        serviceKey,
+        actionType: "incDecDelta",
+        previousValue: prevValue,
+      });
+      setRating({
+        file_id: fileId,
+        rating_service_key: serviceKey,
+        rating: Math.max(0, prevValue + action.delta),
+      });
+    }
+  }
+
+  return restoreEntries;
 }
 
 export interface UseReviewSwipeDeckOptions {
@@ -223,101 +316,33 @@ export function useReviewSwipeDeck({
     (direction: SwipeDirection) => {
       if (!currentFileId) return;
 
-      // Get the binding for this direction
       const binding = getBindingForDirection(bindings, direction);
 
       // Add to exiting cards to trigger exit animation
       setExitingCards((prev) => new Map(prev).set(currentFileId, direction));
 
-      // Capture current state for restoration
+      // Execute primary file action
       const fileState = getFileState();
-      const fileAction = binding.fileAction;
-      const isUnchanged = wasFileActionUnchanged(fileAction, fileState);
+      executeFileAction(binding.fileAction, currentFileId, fileState, {
+        archive: archiveFiles,
+        trash: trashFiles,
+      });
 
-      // Execute file action mutation if it will change state
-      if (!isUnchanged) {
-        if (fileAction === "archive") {
-          archiveFiles({ file_ids: [currentFileId] });
-        } else if (fileAction === "trash") {
-          trashFiles({ file_ids: [currentFileId] });
-        }
-        // Skip doesn't need a mutation
-      }
+      // Execute secondary actions and collect restore data
+      const ratingsRestore = executeSecondaryRatingActions(
+        binding.secondaryActions ?? [],
+        currentFileId,
+        currentMetadata?.ratings,
+        validServiceKeys,
+        setRating,
+      );
 
-      // Execute secondary actions (rating actions, etc.)
-      const ratingsRestore: Array<RatingRestoreEntry> = [];
-      const secondaryActions = binding.secondaryActions ?? [];
-
-      for (const action of secondaryActions) {
-        if (action.actionType === "rating") {
-          const serviceKey = action.serviceKey;
-
-          // Skip orphaned rating actions (service no longer exists)
-          if (!validServiceKeys.has(serviceKey)) {
-            continue;
-          }
-
-          const currentRating = currentMetadata?.ratings?.[serviceKey] ?? null;
-
-          if (action.type === "setLike") {
-            // Store previous value for undo
-            ratingsRestore.push({
-              serviceKey,
-              actionType: "setLike",
-              previousValue: currentRating as boolean | null,
-            });
-            // Set the new value
-            setRating({
-              file_id: currentFileId,
-              rating_service_key: serviceKey,
-              rating: action.value,
-            });
-          } else if (action.type === "setNumerical") {
-            // Store previous value for undo
-            ratingsRestore.push({
-              serviceKey,
-              actionType: "setNumerical",
-              previousValue: currentRating as number | null,
-            });
-            // Set the new value
-            setRating({
-              file_id: currentFileId,
-              rating_service_key: serviceKey,
-              rating: action.value,
-            });
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          } else if (action.type === "incDecDelta") {
-            // Store previous value for undo
-            const prevValue = (currentRating as number | null) ?? 0;
-            ratingsRestore.push({
-              serviceKey,
-              actionType: "incDecDelta",
-              previousValue: prevValue,
-            });
-            // Apply delta
-            const newValue = Math.max(0, prevValue + action.delta);
-            setRating({
-              file_id: currentFileId,
-              rating_service_key: serviceKey,
-              rating: newValue,
-            });
-          }
-        }
-      }
-
-      // Build restore data for undo
+      // Record the action in history (always record, even if unchanged)
       const restore: RestoreData = {
         fileState,
         ratings: ratingsRestore.length > 0 ? ratingsRestore : undefined,
       };
-
-      // Record the action in history (always record, even if unchanged)
-      const entry: ReviewHistoryEntry = {
-        fileId: currentFileId,
-        direction,
-        restore,
-      };
-      recordAction(entry);
+      recordAction({ fileId: currentFileId, direction, restore });
       onAction?.(direction, currentFileId);
     },
     [
@@ -330,6 +355,7 @@ export function useReviewSwipeDeck({
       trashFiles,
       setRating,
       onAction,
+      validServiceKeys,
     ],
   );
 
