@@ -40,6 +40,13 @@ const TOUCH_SWIPE_START_DISTANCE = 6;
 const DRAG_ELASTIC = 0.9;
 
 /**
+ * CSS selector for interactive elements that should block swipe initiation.
+ * Covers media player controls (vidstack), standard form elements, and ARIA roles.
+ */
+const INTERACTIVE_ELEMENT_SELECTOR =
+  ".vds-controls, .vds-slider, .vds-button, .vds-menu, button, a, input, textarea, select, [role='slider'], [role='button']";
+
+/**
  * Determine which swipe direction we're in based on coordinates.
  * Zone boundaries are diagonal lines from threshold corners to image corners.
  * Returns null if no threshold is crossed.
@@ -290,18 +297,6 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
     const visualY = offset.y * DRAG_ELASTIC;
     const direction = getSwipeDirection(visualX, visualY, thresholds, cardSize);
 
-    // Debug logging
-    console.log(
-      "[Swipe]",
-      JSON.stringify({
-        offset: { x: offset.x, y: offset.y },
-        visual: { x: visualX, y: visualY },
-        cardSize,
-        thresholds,
-        direction,
-      }),
-    );
-
     // Only trigger if direction crossed threshold
     if (direction) {
       onSwipe(direction);
@@ -428,11 +423,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
             // .vds-controls is the actual controls bar, not the full player area.
             // Check BEFORE adding to activeTouchPointersRef - if we bail out early,
             // onPointerUp may fire on the control instead of our element, leaving stale IDs.
-            if (
-              target.closest(
-                ".vds-controls, .vds-slider, .vds-button, .vds-menu, button, a, input, textarea, select, [role='slider'], [role='button']",
-              )
-            ) {
+            if (target.closest(INTERACTIVE_ELEMENT_SELECTOR)) {
               pendingTouchSwipeRef.current = null;
               return;
             }
@@ -479,11 +470,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCard({
           // Don't start swiping when interacting with actual media control elements.
           // Be specific: exclude buttons, sliders, interactive elements - NOT entire overlays.
           // .vds-controls is the actual controls bar, not the full player area.
-          if (
-            target.closest(
-              ".vds-controls, .vds-slider, .vds-button, .vds-menu, button, a, input, textarea, select, [role='slider'], [role='button']",
-            )
-          ) {
+          if (target.closest(INTERACTIVE_ELEMENT_SELECTOR)) {
             return;
           }
 
