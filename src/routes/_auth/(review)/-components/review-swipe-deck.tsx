@@ -397,6 +397,16 @@ export function ReviewSwipeDeckVisual({
   handleSwipe: (direction: SwipeDirection) => void;
   handleExitComplete: (fileId: number) => void;
 }) {
+  // Prevent page scrollbar from appearing when swiping cards near edges.
+  // The card uses transforms so it doesn't affect layout, but the exit
+  // animation can momentarily extend past the viewport.
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   // Combine visible cards with exiting cards (exiting cards may not be in visible list anymore)
   const allVisibleFileIds = [...visibleFileIds];
   for (const exitingId of exitingCards.keys()) {
