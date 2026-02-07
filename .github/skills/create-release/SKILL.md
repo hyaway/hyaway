@@ -17,9 +17,19 @@ Create releases with changelog entry and git tag.
 2. **Commit** if there are uncommitted changes
 3. **Tag**: `git tag v2026.01.28`
 
-## After Pushing
+## After Tagging
 
-Once you push the tag (`git push origin v2026.01.28`), it triggers:
+Push the branch and tag together using `--follow-tags`:
+
+```bash
+git push --follow-tags
+```
+
+This pushes the branch **and** any tags pointing to commits being pushed in one command. Prefer this over separate `git push` + `git push origin <tag>` calls.
+
+> **Tip:** Set `git config --global push.followTags true` to make this the default for `git push`.
+
+Once the tag reaches the remote, it triggers:
 
 - GitHub release with changelog content extracted
 - Docker image tagged `ghcr.io/hyaway/hyaway:v2026.01.28` (on release publish)
@@ -29,6 +39,9 @@ Once you push the tag (`git push origin v2026.01.28`), it triggers:
 ```bash
 # Create release tag
 git tag v2026.01.28
+
+# Push branch + tag together
+git push --follow-tags
 
 # Tag specific commit
 git tag v2026.01.28 <commit-hash>
