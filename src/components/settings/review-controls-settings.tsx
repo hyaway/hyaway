@@ -129,7 +129,7 @@ export function ReviewControlsSettings({
               value={thresholds.left}
               min={MIN_SWIPE_THRESHOLD}
               max={MAX_SWIPE_THRESHOLD}
-              step={0.5}
+              step={2.5}
               onValueChange={(v) => setThreshold("left", v)}
               formatValue={(v) => `${v * 2}%`}
             />
@@ -139,7 +139,7 @@ export function ReviewControlsSettings({
               value={thresholds.right}
               min={MIN_SWIPE_THRESHOLD}
               max={MAX_SWIPE_THRESHOLD}
-              step={0.5}
+              step={2.5}
               onValueChange={(v) => setThreshold("right", v)}
               formatValue={(v) => `${v * 2}%`}
             />
@@ -149,7 +149,7 @@ export function ReviewControlsSettings({
               value={thresholds.up}
               min={MIN_SWIPE_THRESHOLD}
               max={MAX_SWIPE_THRESHOLD}
-              step={0.5}
+              step={2.5}
               onValueChange={(v) => setThreshold("up", v)}
               formatValue={(v) => `${v * 2}%`}
             />
@@ -159,7 +159,7 @@ export function ReviewControlsSettings({
               value={thresholds.down}
               min={MIN_SWIPE_THRESHOLD}
               max={MAX_SWIPE_THRESHOLD}
-              step={0.5}
+              step={2.5}
               onValueChange={(v) => setThreshold("down", v)}
               formatValue={(v) => `${v * 2}%`}
             />
