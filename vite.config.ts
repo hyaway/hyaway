@@ -43,18 +43,57 @@ function copyLicenseFiles(): Plugin {
   };
 }
 
+interface ManifestOptions {
+  appName?: string;
+  iconVariant?: string;
+}
+
 /**
- * Replaces `name` and `short_name` in manifest.json with the given app name.
- * In dev, intercepts requests to /manifest.json and serves the modified JSON.
- * In production, rewrites the file after Vite copies it to dist.
+ * Transforms manifest.json at dev-serve and build time:
+ * - Replaces `name`/`short_name` when appName is provided
+ * - Rewrites icon paths to use variant-suffixed files (e.g. `-dev`) when iconVariant is set
+ *
+ * In dev, also intercepts favicon.svg and apple-touch-icon.png to serve variants.
  */
-function transformManifest(appName: string): Plugin {
+function transformManifest({ appName, iconVariant }: ManifestOptions): Plugin {
   const MANIFEST_SRC = join("public", "manifest.json");
+
+  /** Map of files that need to be swapped to their variant counterparts */
+  const VARIANT_FILE_MAP: Record<string, string> = iconVariant
+    ? {
+        "/favicon.svg": `/favicon-${iconVariant}.svg`,
+        "/apple-touch-icon.png": `/apple-touch-icon-${iconVariant}.png`,
+      }
+    : {};
+
+  function addVariantSuffix(filename: string): string {
+    if (!iconVariant) return filename;
+    // "logo192.png" → "logo192-dev.png", "favicon.svg" → "favicon-dev.svg"
+    const dotIndex = filename.lastIndexOf(".");
+    if (dotIndex === -1) return filename;
+    return `${filename.slice(0, dotIndex)}-${iconVariant}${filename.slice(dotIndex)}`;
+  }
 
   function patchManifest(raw: string): string {
     const manifest = JSON.parse(raw);
-    manifest.name = appName;
-    manifest.short_name = appName;
+    if (appName) {
+      manifest.name = appName;
+      manifest.short_name = appName;
+    }
+    if (iconVariant) {
+      // Rewrite app icon paths
+      for (const icon of manifest.icons ?? []) {
+        icon.src = addVariantSuffix(icon.src);
+      }
+      // Rewrite shortcut icon paths
+      for (const shortcut of manifest.shortcuts ?? []) {
+        for (const icon of shortcut.icons ?? []) {
+          // Strip leading slash for suffix, then re-add
+          const src = icon.src.startsWith("/") ? icon.src.slice(1) : icon.src;
+          icon.src = `/${addVariantSuffix(src)}`;
+        }
+      }
+    }
     return JSON.stringify(manifest, null, 2);
   }
 
@@ -68,14 +107,32 @@ function transformManifest(appName: string): Plugin {
           res.end(patched);
           return;
         }
+        // Serve variant icons in place of originals (favicon, apple-touch-icon)
+        const variantPath = VARIANT_FILE_MAP[req.url ?? ""];
+        if (variantPath) {
+          const filePath = join("public", variantPath.slice(1));
+          const ext = variantPath.endsWith(".svg")
+            ? "image/svg+xml"
+            : "image/png";
+          res.setHeader("Content-Type", ext);
+          res.end(readFileSync(filePath));
+          return;
+        }
         next();
       });
     },
     writeBundle(options) {
       const outDir = options.dir ?? "dist";
+      // Patch manifest
       const manifestPath = join(outDir, "manifest.json");
       const patched = patchManifest(readFileSync(manifestPath, "utf-8"));
       writeFileSync(manifestPath, patched, "utf-8");
+      // Overwrite favicon and apple-touch-icon with variants
+      for (const [original, variant] of Object.entries(VARIANT_FILE_MAP)) {
+        const src = join(outDir, variant.slice(1));
+        const dest = join(outDir, original.slice(1));
+        copyFileSync(src, dest);
+      }
     },
   };
 }
@@ -83,6 +140,20 @@ function transformManifest(appName: string): Plugin {
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
+
+  // Resolve effective app name: auto-suffix "(dev)" in development when using the default
+  const isDev = mode === "development";
+  const resolvedAppName =
+    env.VITE_APP_NAME && env.VITE_APP_NAME !== "hyAway"
+      ? env.VITE_APP_NAME
+      : isDev
+        ? "hyAway (dev)"
+        : "hyAway";
+  // Make it available for Vite's %VITE_APP_NAME% HTML substitution
+  process.env.VITE_APP_NAME = resolvedAppName;
+
+  const resolvedIconVariant =
+    env.VITE_APP_ICON_VARIANT || (isDev ? "dev" : undefined);
 
   const allowedHosts: Array<string> = [];
   if (env.VITE_ALLOWED_HOST) {
@@ -107,7 +178,12 @@ export default defineConfig(({ mode }) => {
       }),
       tailwindcss(),
       copyLicenseFiles(),
-      env.VITE_APP_NAME ? transformManifest(env.VITE_APP_NAME) : null,
+      resolvedIconVariant || resolvedAppName !== "hyAway"
+        ? transformManifest({
+            appName: resolvedAppName,
+            iconVariant: resolvedIconVariant,
+          })
+        : null,
     ].filter(Boolean),
     resolve: {
       alias: {

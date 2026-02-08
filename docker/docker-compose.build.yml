@@ -8,12 +8,16 @@ services:
       # Optional build args (sourced from your environment / .env)
       #
       # - VITE_APP_URL: public URL for OG tags/canonical URLs.
+      # - VITE_APP_NAME: override PWA name (defaults to "hyAway")
+      # - VITE_APP_ICON_VARIANT: alternate icon set (e.g. "dev" for blue icons)
       # - ⚠️ DANGER ZONE: VITE_HYDRUS_ENDPOINT / VITE_HYDRUS_ACCESS_KEY preset credentials
       #   These values are embedded in the JavaScript bundle and exposed to ALL users.
       #   Only use for trusted private instances.
       #   See docs/self-hosting/docker.md for security implications.
       args:
         - VITE_APP_URL
+        - VITE_APP_NAME
+        - VITE_APP_ICON_VARIANT
         - VITE_HYDRUS_ENDPOINT
         - VITE_HYDRUS_ACCESS_KEY
     ports:

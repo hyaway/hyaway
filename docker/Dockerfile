@@ -17,6 +17,13 @@ COPY . .
 ARG VITE_APP_URL=""
 ENV VITE_APP_URL=${VITE_APP_URL}
 
+# Override PWA app name and icon variant
+# VITE_APP_NAME defaults to "hyAway", VITE_APP_ICON_VARIANT can be "dev" for blue icons
+ARG VITE_APP_NAME="hyAway"
+ARG VITE_APP_ICON_VARIANT=""
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+ENV VITE_APP_ICON_VARIANT=${VITE_APP_ICON_VARIANT}
+
 # ⚠️ DANGER ZONE: Preset Hydrus credentials
 # These values are embedded in the JavaScript bundle and exposed to ALL users.
 # Only use for trusted private instances where all users share the same Hydrus access.

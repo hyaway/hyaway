@@ -7,6 +7,9 @@ interface ImportMetaEnv {
   /** Override the PWA app name shown on the home screen (defaults to "hyAway") */
   readonly VITE_APP_NAME?: string;
 
+  /** Use an alternate icon set (e.g. "dev" for blue-gradient icons) */
+  readonly VITE_APP_ICON_VARIANT?: string;
+
   /** Show debug overlays for swipe zones in the review feature */
   readonly VITE_DEBUG_SWIPE_ZONES?: string;
 
