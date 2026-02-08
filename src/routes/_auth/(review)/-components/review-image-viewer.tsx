@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IconPalette, IconPhoto, IconPhotoScan } from "@tabler/icons-react";
+import {
+  IconArrowsMaximize,
+  IconArrowsMinimize,
+  IconPalette,
+  IconPhoto,
+  IconPhotoScan,
+} from "@tabler/icons-react";
 import { animate, motion, useMotionValue, useTransform } from "motion/react";
 import type { ReviewImageLoadMode } from "@/stores/review-settings-store";
 import { cn } from "@/lib/utils";
@@ -12,7 +18,11 @@ import {
   useFullFileIdUrl,
   useRenderFileIdUrl,
 } from "@/hooks/use-url-with-api-key";
-import { useReviewImageLoadMode } from "@/stores/review-settings-store";
+import {
+  useReviewImageLoadMode,
+  useReviewImmersiveMode,
+  useReviewSettingsActions,
+} from "@/stores/review-settings-store";
 import { useFillCanvasBackground } from "@/stores/file-viewer-settings-store";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
@@ -65,6 +75,8 @@ export function ReviewImageViewer({
 }: ReviewImageViewerProps) {
   const globalImageLoadMode = useReviewImageLoadMode();
   const fillCanvasBackground = useFillCanvasBackground();
+  const immersiveMode = useReviewImmersiveMode();
+  const { setImmersiveMode } = useReviewSettingsActions();
 
   // Image background with local override capability
   const { imageBackground, cycleImageBackground } = useImageBackgroundCycle();
@@ -209,6 +221,16 @@ export function ReviewImageViewer({
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+
+  // Double-tap / double-click detection for zoom toggle
+  const lastTapRef = useRef<{ time: number; x: number; y: number } | null>(
+    null,
+  );
+  const lastMouseDownRef = useRef<{
+    time: number;
+    x: number;
+    y: number;
+  } | null>(null);
 
   // Pointer-based pinch zoom state (more reliable than TouchEvent + preventDefault)
   const activeTouchPointersRef = useRef(
@@ -716,8 +738,9 @@ export function ReviewImageViewer({
 
   // Wheel zoom handler for image (cursor anchor)
   // When dragging, skip drag position update so image stays "grabbed"
+  // Attached via useEffect with { passive: false } so preventDefault() works.
   const handleImageWheel = useCallback(
-    (e: React.WheelEvent) => {
+    (e: WheelEvent) => {
       if (!isTop) return;
 
       e.preventDefault();
@@ -740,7 +763,7 @@ export function ReviewImageViewer({
 
   // Wheel zoom handler for container (closest edge anchor)
   const handleContainerWheel = useCallback(
-    (e: React.WheelEvent) => {
+    (e: WheelEvent) => {
       if (!isTop) return;
 
       e.preventDefault();
@@ -768,6 +791,24 @@ export function ReviewImageViewer({
     [isTop, scaleMotion, adjustZoom],
   );
 
+  // Attach wheel handlers with { passive: false } so preventDefault() works.
+  // React registers wheel listeners as passive by default.
+  useEffect(() => {
+    const container = containerRef.current;
+    const image = imageRef.current;
+    if (!container) return;
+
+    container.addEventListener("wheel", handleContainerWheel, {
+      passive: false,
+    });
+    image?.addEventListener("wheel", handleImageWheel, { passive: false });
+
+    return () => {
+      container.removeEventListener("wheel", handleContainerWheel);
+      image?.removeEventListener("wheel", handleImageWheel);
+    };
+  }, [handleContainerWheel, handleImageWheel]);
+
   const setPinching = useCallback((pinching: boolean) => {
     if (isPinchingRef.current === pinching) return;
     isPinchingRef.current = pinching;
@@ -784,10 +825,67 @@ export function ReviewImageViewer({
     setPinching(false);
   }, [isTop, setPinching]);
 
+  // Smart zoom toggle: if zoomed → fit, if at fit → zoom in (matching file detail viewer)
+  const toggleSmartZoom = useCallback(() => {
+    if (!isTop || naturalSize.width === 0) return;
+
+    const currentScale = scaleMotion.get();
+    const isZoomedIn = currentScale > fitScale * (1 + SCALE_TOLERANCE);
+
+    if (isZoomedIn) {
+      // Zoomed in → return to fit
+      setZoomMode("fit");
+      smoothCenterImage();
+    } else {
+      const targetScale = Math.min(MAX_ZOOM, fitScale * 2);
+      scaleMotion.set(targetScale);
+      setZoomMode(targetScale);
+      dragX.stop();
+      dragY.stop();
+      dragX.set(0);
+      dragY.set(0);
+    }
+    showZoomIndicator();
+  }, [
+    isTop,
+    naturalSize.width,
+    scaleMotion,
+    fitScale,
+    smoothCenterImage,
+    dragX,
+    dragY,
+    showZoomIndicator,
+  ]);
+
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!isTop) return;
-      if (e.pointerType !== "touch") return;
+
+      // Mouse/pen double-click detection via rapid pointerdown timing.
+      // The native dblclick event doesn't fire because the parent swipe card
+      // captures the pointer and starts a drag on every mousedown.
+      if (e.pointerType !== "touch") {
+        const now = Date.now();
+        const prev = lastMouseDownRef.current;
+        const maxDelayMs = 400;
+        const maxDistance = 24;
+
+        if (prev) {
+          const dt = now - prev.time;
+          const dist = Math.hypot(e.clientX - prev.x, e.clientY - prev.y);
+
+          if (dt <= maxDelayMs && dist <= maxDistance) {
+            lastMouseDownRef.current = null;
+            // Stop propagation so the swipe card doesn't start a drag
+            e.stopPropagation();
+            toggleSmartZoom();
+            return;
+          }
+        }
+
+        lastMouseDownRef.current = { time: now, x: e.clientX, y: e.clientY };
+        return;
+      }
 
       // With touch-action: none, the browser shouldn't scroll/zoom.
       // preventDefault here is still useful on some browsers.
@@ -830,7 +928,7 @@ export function ReviewImageViewer({
         setIsDragging(false);
       }
     },
-    [fitScale, isTop, setPinching, scaleMotion],
+    [fitScale, isTop, setPinching, scaleMotion, toggleSmartZoom],
   );
 
   const handlePointerMove = useCallback(
@@ -904,8 +1002,33 @@ export function ReviewImageViewer({
       if (activeTouchPointersRef.current.size < 2) {
         setPinching(false);
       }
+
+      // Touch double-tap detection (only when single finger lifts and not pinching)
+      if (activeTouchPointersRef.current.size === 0 && !isPinchingRef.current) {
+        const now = Date.now();
+        const prev = lastTapRef.current;
+        const maxDelayMs = 250;
+        const maxDistance = 24;
+
+        if (prev) {
+          const dt = now - prev.time;
+          const dist = Math.hypot(e.clientX - prev.x, e.clientY - prev.y);
+
+          if (dt <= maxDelayMs && dist <= maxDistance) {
+            lastTapRef.current = null;
+            toggleSmartZoom();
+            return;
+          }
+        }
+
+        lastTapRef.current = {
+          time: now,
+          x: e.clientX,
+          y: e.clientY,
+        };
+      }
     },
-    [setPinching],
+    [setPinching, toggleSmartZoom],
   );
 
   // Determine if zoomed (not at fit)
@@ -987,7 +1110,6 @@ export function ReviewImageViewer({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUpOrCancel}
       onPointerCancel={handlePointerUpOrCancel}
-      onWheel={handleContainerWheel}
     >
       {/* Zoomed mode border overlay - above image */}
       {isZoomed && (
@@ -1020,7 +1142,6 @@ export function ReviewImageViewer({
         onDragEnd={() => {
           setIsDragging(false);
         }}
-        onWheel={handleImageWheel}
         onLoad={handleLoad}
         onError={handleError}
         style={
@@ -1134,6 +1255,23 @@ export function ReviewImageViewer({
               </span>
             </Toggle>
           )}
+
+          {/* Theater mode toggle */}
+          <Toggle
+            size="sm"
+            pressed={immersiveMode}
+            onPressedChange={setImmersiveMode}
+            aria-label="Theater mode (T)"
+            title="Theater mode (T)"
+            variant="muted"
+            className="bg-card"
+          >
+            {immersiveMode ? (
+              <IconArrowsMinimize aria-hidden="true" className="size-4" />
+            ) : (
+              <IconArrowsMaximize aria-hidden="true" className="size-4" />
+            )}
+          </Toggle>
         </div>
       )}
     </div>

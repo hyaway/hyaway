@@ -7,6 +7,10 @@ import { AnimatePresence } from "motion/react";
 import { ReviewSwipeCard } from "./review-swipe-card";
 import { ReviewCardContent } from "./review-card-content";
 import { useReviewKeyboardShortcuts } from "./use-review-keyboard-shortcuts";
+import {
+  useReviewImmersiveMode,
+  useReviewSettingsActions,
+} from "@/stores/review-settings-store";
 import type { SwipeDirection } from "./review-swipe-card";
 import type {
   PreviousFileState,
@@ -366,6 +370,13 @@ export function useReviewSwipeDeck() {
     ],
   );
 
+  const immersiveMode = useReviewImmersiveMode();
+  const { setImmersiveMode } = useReviewSettingsActions();
+  const toggleImmersive = useCallback(
+    () => setImmersiveMode(!immersiveMode),
+    [setImmersiveMode, immersiveMode],
+  );
+
   // Keyboard shortcuts
   const handleInstantSwipe = useCallback(
     (direction: SwipeDirection) => {
@@ -374,7 +385,7 @@ export function useReviewSwipeDeck() {
     },
     [handleSwipe],
   );
-  useReviewKeyboardShortcuts(handleInstantSwipe, performUndo);
+  useReviewKeyboardShortcuts(handleInstantSwipe, performUndo, toggleImmersive);
 
   // Gesture swipe from card drag — resets skip flag so animations play
   const handleGestureSwipe = useCallback(

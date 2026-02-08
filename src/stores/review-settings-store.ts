@@ -132,6 +132,8 @@ type ReviewSettingsState = {
   trackWatchHistory: boolean;
   /** How to load static images: 'original' for full size, 'resized' for server-side resize */
   imageLoadMode: ReviewImageLoadMode;
+  /** Start review in immersive (fullscreen overlay) mode */
+  immersiveMode: boolean;
   /** Mapping of swipe directions to action bindings */
   bindings: SwipeBindings;
 
@@ -148,6 +150,8 @@ type ReviewSettingsState = {
     setTrackWatchHistory: (enabled: boolean) => void;
     /** Set image load mode */
     setImageLoadMode: (mode: ReviewImageLoadMode) => void;
+    /** Set immersive mode */
+    setImmersiveMode: (enabled: boolean) => void;
     /** Set the binding for a specific direction */
     setBinding: (
       direction: SwipeDirection,
@@ -155,7 +159,7 @@ type ReviewSettingsState = {
     ) => void;
     /** Reset controls settings (shortcuts, gestures) to defaults */
     resetControlsSettings: () => void;
-    /** Reset data settings (trackWatchHistory, imageLoadMode) to defaults */
+    /** Reset data settings (trackWatchHistory, imageLoadMode, immersiveMode) to defaults */
     resetDataSettings: () => void;
     /** Reset all swipe bindings to defaults */
     resetBindings: () => void;
@@ -171,6 +175,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
       thresholds: DEFAULT_SWIPE_THRESHOLDS,
       trackWatchHistory: true,
       imageLoadMode: "optimized",
+      immersiveMode: false,
       bindings: DEFAULT_SWIPE_BINDINGS,
 
       actions: {
@@ -203,6 +208,10 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           set({ imageLoadMode });
         },
 
+        setImmersiveMode: (immersiveMode: boolean) => {
+          set({ immersiveMode });
+        },
+
         setBinding: (direction, binding) => {
           set((state) => ({
             bindings: {
@@ -227,6 +236,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           set({
             trackWatchHistory: initial.trackWatchHistory,
             imageLoadMode: initial.imageLoadMode,
+            immersiveMode: initial.immersiveMode,
           });
         },
 
@@ -247,6 +257,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
         thresholds: state.thresholds,
         trackWatchHistory: state.trackWatchHistory,
         imageLoadMode: state.imageLoadMode,
+        immersiveMode: state.immersiveMode,
         bindings: state.bindings,
       }),
       // Migrations from older store shapes
@@ -334,6 +345,10 @@ export const useReviewTrackWatchHistory = () =>
 /** Get image load mode setting */
 export const useReviewImageLoadMode = () =>
   useReviewSettingsStore((state) => state.imageLoadMode);
+
+/** Get immersive mode setting */
+export const useReviewImmersiveMode = () =>
+  useReviewSettingsStore((state) => state.immersiveMode);
 
 /** Get the complete bindings object */
 export const useReviewSwipeBindings = () =>

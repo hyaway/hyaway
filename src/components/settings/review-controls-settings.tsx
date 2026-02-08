@@ -12,10 +12,16 @@ import {
 import { SwipeBindingsConfig } from "./swipe-bindings-config";
 import { Button } from "@/components/ui-primitives/button";
 import { Accordion } from "@/components/ui-primitives/accordion";
+import { Label } from "@/components/ui-primitives/label";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui-primitives/toggle-group";
 import {
   MAX_SWIPE_THRESHOLD,
   MIN_SWIPE_THRESHOLD,
   useReviewGesturesEnabled,
+  useReviewImmersiveMode,
   useReviewSettingsActions,
   useReviewShortcutsEnabled,
   useReviewShowGestureThresholds,
@@ -46,11 +52,13 @@ export function ReviewControlsSettings({
   const shortcutsEnabled = useReviewShortcutsEnabled();
   const gesturesEnabled = useReviewGesturesEnabled();
   const showGestureThresholds = useReviewShowGestureThresholds();
+  const immersiveMode = useReviewImmersiveMode();
   const thresholds = useReviewSwipeThresholds();
   const {
     setShortcutsEnabled,
     setGesturesEnabled,
     setShowGestureThresholds,
+    setImmersiveMode,
     setThreshold,
   } = useReviewSettingsActions();
 
@@ -74,6 +82,26 @@ export function ReviewControlsSettings({
           checked={shortcutsEnabled}
           onCheckedChange={setShortcutsEnabled}
         />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-0.5">
+            <Label>Display mode</Label>
+            <span className="text-muted-foreground text-xs">
+              Theater mode hides most UI for a more immersive review experience
+            </span>
+          </div>
+          <ToggleGroup
+            value={[immersiveMode ? "theater" : "regular"]}
+            onValueChange={(value) => {
+              const newValue = value[0] as "regular" | "theater" | undefined;
+              if (newValue) setImmersiveMode(newValue === "theater");
+            }}
+            variant="outline"
+            size="sm"
+          >
+            <ToggleGroupItem value="regular">Regular</ToggleGroupItem>
+            <ToggleGroupItem value="theater">Theater</ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </SettingsGroup>
 
       <Accordion

@@ -14,6 +14,7 @@ import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
 export function useReviewKeyboardShortcuts(
   onSwipe: (direction: SwipeDirection) => void,
   onUndo: () => void,
+  onToggleImmersive?: () => void,
 ) {
   const shortcutsEnabled = useReviewShortcutsEnabled();
 
@@ -22,6 +23,9 @@ export function useReviewKeyboardShortcuts(
   });
   const onUndoKey = useEffectEvent(() => {
     onUndo();
+  });
+  const onImmersiveKey = useEffectEvent(() => {
+    onToggleImmersive?.();
   });
 
   useEffect(() => {
@@ -60,6 +64,11 @@ export function useReviewKeyboardShortcuts(
         case "Backspace":
           e.preventDefault();
           onUndoKey();
+          break;
+        case "t":
+        case "T":
+          e.preventDefault();
+          onImmersiveKey();
           break;
       }
     };
