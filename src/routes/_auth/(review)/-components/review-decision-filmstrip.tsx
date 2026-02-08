@@ -393,7 +393,7 @@ function FilmstripItem({
             "ring-primary-foreground ring-offset-primary ring-0 ring-offset-3",
         )}
       >
-        <ThumbnailGalleryItemContent item={item} />
+        <ThumbnailGalleryItemContent item={item} imageLoading="eager" />
       </div>
     </div>
   );

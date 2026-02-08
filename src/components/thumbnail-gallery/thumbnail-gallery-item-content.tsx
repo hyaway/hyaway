@@ -28,10 +28,13 @@ import { cn } from "@/lib/utils";
 
 interface ThumbnailGalleryItemContentProps {
   item: FileMetadata;
+  /** Image loading strategy passed to thumbnail. Defaults to "lazy". */
+  imageLoading?: "lazy" | "eager";
 }
 
 export function ThumbnailGalleryItemContent({
   item,
+  imageLoading,
 }: ThumbnailGalleryItemContentProps) {
   const { infoMode, localHistoryEntries } = useThumbnailGalleryContext();
 
@@ -70,6 +73,7 @@ export function ThumbnailGalleryItemContent({
             fileId={item.file_id}
             width={item.thumbnail_width}
             height={item.thumbnail_height}
+            loading={imageLoading}
           />
         )}
         <ThumbnailRatingsOverlay item={item} />

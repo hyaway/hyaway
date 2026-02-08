@@ -10,6 +10,8 @@ export interface ThumbnailImageProps extends React.HTMLAttributes<HTMLImageEleme
   fileId: number;
   width?: number;
   height?: number;
+  /** Image loading strategy. Defaults to "lazy". */
+  loading?: "lazy" | "eager";
 }
 
 export function ThumbnailImage({
@@ -17,6 +19,7 @@ export function ThumbnailImage({
   className,
   width,
   height,
+  loading = "lazy",
 }: ThumbnailImageProps) {
   const [loaded, setLoaded] = useState(false);
   const { url, onLoad, onError } = useThumbnailUrl(fileId);
@@ -43,7 +46,7 @@ export function ThumbnailImage({
         ],
         className,
       )}
-      loading="lazy"
+      loading={loading}
       decoding="async"
       onLoad={handleLoad}
       onError={onError}
