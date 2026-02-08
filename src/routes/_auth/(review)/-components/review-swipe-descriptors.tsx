@@ -20,6 +20,8 @@ import { isNumericalRatingService } from "@/integrations/hydrus-api/models";
 export interface SwipeBindingDescriptor {
   /** Display label for the binding */
   label: string;
+  /** Short label without rating service names (for small screens) */
+  shortLabel: string;
   /** Icon component to render */
   icon: React.ComponentType<{ className?: string }>;
   /** Tailwind classes for the icon/text color */
@@ -51,6 +53,35 @@ function getRatingActions(
 }
 
 /**
+ * Get the rating value portion of a rating action.
+ * Examples: "like", "7/10", "+1"
+ */
+function getRatingValueString(
+  action: RatingSwipeAction,
+  services?: Map<string, RatingServiceInfo>,
+): string {
+  const service = services?.get(action.serviceKey);
+
+  switch (action.type) {
+    case "setLike":
+      if (action.value === true) return "like";
+      if (action.value === false) return "dislike";
+      return "clear";
+    case "setNumerical": {
+      if (action.value === null) return "clear";
+      const maxStars =
+        service && isNumericalRatingService(service)
+          ? service.max_stars
+          : undefined;
+      if (maxStars != null) return `${action.value}/${maxStars}`;
+      return `${action.value}`;
+    }
+    case "incDecDelta":
+      return action.delta > 0 ? "+1" : "-1";
+  }
+}
+
+/**
  * Format a rating action as a display string.
  * Examples: "favorite like", "mynumeric 7/10", "myinc +1"
  *
@@ -62,90 +93,90 @@ export function formatRatingAction(
   services?: Map<string, RatingServiceInfo>,
 ): string {
   const service = services?.get(action.serviceKey);
-  // Look up service name, fall back to key, truncate to 4 chars
   const serviceName = truncate(service?.name ?? action.serviceKey, 20);
-
-  switch (action.type) {
-    case "setLike":
-      if (action.value === true) return `${serviceName} like`;
-      if (action.value === false) return `${serviceName} dislike`;
-      return `${serviceName} clear`;
-    case "setNumerical": {
-      if (action.value === null) return `${serviceName} clear`;
-      // Show value/maxStars if service info available
-      const maxStars =
-        service && isNumericalRatingService(service)
-          ? service.max_stars
-          : undefined;
-      if (maxStars != null) return `${serviceName} ${action.value}/${maxStars}`;
-      return `${serviceName} ${action.value}`;
-    }
-    case "incDecDelta":
-      return `${serviceName} ${action.delta > 0 ? "+1" : "-1"}`;
-  }
+  const valueStr = getRatingValueString(action, services);
+  return `${serviceName} ${valueStr}`;
 }
 
-/** Descriptors for file actions */
-const FILE_ACTION_DESCRIPTORS: Record<
-  ReviewFileAction,
-  SwipeBindingDescriptor
-> = {
-  archive: {
-    label: "Archive",
-    icon: IconArchive,
-    textClass: "text-primary",
-    bgClass: "bg-primary/10",
-  },
-  trash: {
-    label: "Trash",
-    icon: IconTrash,
-    textClass: "text-destructive",
-    bgClass: "bg-destructive/10",
-  },
-  skip: {
-    label: "Skip",
-    icon: IconPlayerTrackNext,
-    textClass: "text-muted-foreground",
-    bgClass: "bg-muted",
-  },
-  undo: {
-    label: "Undo",
-    icon: IconArrowBackUp,
-    textClass: "text-muted-foreground",
-    bgClass: "bg-muted",
-  },
+/**
+ * Format a rating action as a short string (without service name).
+ * Examples: "like", "7/10", "+1"
+ */
+export function formatRatingActionShort(
+  action: RatingSwipeAction,
+  services?: Map<string, RatingServiceInfo>,
+): string {
+  return getRatingValueString(action, services);
+}
+
+/** Base descriptor without styling (shared between normal and overlay) */
+interface BaseDescriptor {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+/** Styling for a descriptor */
+interface DescriptorStyle {
+  textClass: string;
+  bgClass: string;
+}
+
+/** Base descriptors for file actions (label + icon only) */
+const FILE_ACTION_BASE: Record<ReviewFileAction, BaseDescriptor> = {
+  archive: { label: "Archive", icon: IconArchive },
+  trash: { label: "Trash", icon: IconTrash },
+  skip: { label: "Skip", icon: IconPlayerTrackNext },
+  undo: { label: "Undo", icon: IconArrowBackUp },
 };
 
-/** Descriptors for file actions with stronger overlay backgrounds */
-const FILE_ACTION_OVERLAY_DESCRIPTORS: Record<
-  ReviewFileAction,
-  SwipeBindingDescriptor
-> = {
-  archive: {
-    label: "Archive",
-    icon: IconArchive,
-    textClass: "text-primary-foreground",
-    bgClass: "bg-primary/80",
-  },
-  trash: {
-    label: "Trash",
-    icon: IconTrash,
-    textClass: "text-white",
-    bgClass: "bg-destructive/80",
-  },
-  skip: {
-    label: "Skip",
-    icon: IconPlayerTrackNext,
-    textClass: "text-muted-foreground",
-    bgClass: "bg-muted/80",
-  },
-  undo: {
-    label: "Undo",
-    icon: IconArrowBackUp,
-    textClass: "text-muted-foreground",
-    bgClass: "bg-muted/80",
-  },
+/** Normal styling for file actions */
+const FILE_ACTION_STYLES: Record<ReviewFileAction, DescriptorStyle> = {
+  archive: { textClass: "text-primary", bgClass: "bg-primary/10" },
+  trash: { textClass: "text-destructive", bgClass: "bg-destructive/10" },
+  skip: { textClass: "text-muted-foreground", bgClass: "bg-muted" },
+  undo: { textClass: "text-muted-foreground", bgClass: "bg-muted" },
 };
+
+/** Overlay styling for file actions (stronger backgrounds) */
+const FILE_ACTION_OVERLAY_STYLES: Record<ReviewFileAction, DescriptorStyle> = {
+  archive: { textClass: "text-primary-foreground", bgClass: "bg-primary/80" },
+  trash: { textClass: "text-white", bgClass: "bg-destructive/80" },
+  skip: { textClass: "text-muted-foreground", bgClass: "bg-muted/80" },
+  undo: { textClass: "text-muted-foreground", bgClass: "bg-muted/80" },
+};
+
+/** Internal helper to build a swipe binding descriptor */
+function buildSwipeBindingDescriptor(
+  binding: ReviewSwipeBinding,
+  services: Map<string, RatingServiceInfo> | undefined,
+  styles: Record<ReviewFileAction, DescriptorStyle>,
+): SwipeBindingDescriptor {
+  const base = FILE_ACTION_BASE[binding.fileAction];
+  const style = styles[binding.fileAction];
+  const fileDescriptor: SwipeBindingDescriptor = {
+    label: base.label,
+    shortLabel: base.label,
+    icon: base.icon,
+    ...style,
+  };
+  const ratingActions = getRatingActions(binding.secondaryActions);
+
+  if (ratingActions.length > 0) {
+    const ratingLabels = ratingActions
+      .map((a) => formatRatingAction(a, services))
+      .join(", ");
+    const shortRatingLabels = ratingActions
+      .map((a) => formatRatingActionShort(a, services))
+      .join(",");
+    return {
+      ...fileDescriptor,
+      label: `${fileDescriptor.label} + ${ratingLabels}`,
+      shortLabel: `${fileDescriptor.shortLabel} ${shortRatingLabels}`,
+    };
+  }
+
+  return fileDescriptor;
+}
 
 /**
  * Get a visual descriptor for a swipe binding.
@@ -159,21 +190,7 @@ export function getSwipeBindingDescriptor(
   binding: ReviewSwipeBinding,
   services?: Map<string, RatingServiceInfo>,
 ): SwipeBindingDescriptor {
-  const fileDescriptor = FILE_ACTION_DESCRIPTORS[binding.fileAction];
-  const ratingActions = getRatingActions(binding.secondaryActions);
-
-  // If there are also rating actions, append formatted ratings
-  if (ratingActions.length > 0) {
-    const ratingLabels = ratingActions
-      .map((a) => formatRatingAction(a, services))
-      .join(",");
-    return {
-      ...fileDescriptor,
-      label: `${fileDescriptor.label}+${ratingLabels}`,
-    };
-  }
-
-  return fileDescriptor;
+  return buildSwipeBindingDescriptor(binding, services, FILE_ACTION_STYLES);
 }
 
 /**
@@ -188,19 +205,9 @@ export function getSwipeBindingOverlayDescriptor(
   binding: ReviewSwipeBinding,
   services?: Map<string, RatingServiceInfo>,
 ): SwipeBindingDescriptor {
-  const fileDescriptor = FILE_ACTION_OVERLAY_DESCRIPTORS[binding.fileAction];
-  const ratingActions = getRatingActions(binding.secondaryActions);
-
-  // If there are also rating actions, append formatted ratings
-  if (ratingActions.length > 0) {
-    const ratingLabels = ratingActions
-      .map((a) => formatRatingAction(a, services))
-      .join(", ");
-    return {
-      ...fileDescriptor,
-      label: `${fileDescriptor.label} + ${ratingLabels}`,
-    };
-  }
-
-  return fileDescriptor;
+  return buildSwipeBindingDescriptor(
+    binding,
+    services,
+    FILE_ACTION_OVERLAY_STYLES,
+  );
 }

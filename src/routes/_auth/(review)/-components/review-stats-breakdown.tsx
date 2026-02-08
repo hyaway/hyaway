@@ -156,7 +156,20 @@ function InlineStatItem({
       )}
     >
       {count}
-      {showLabel && ` ${descriptor.label.toLowerCase()}`}
+      {showLabel && (
+        <>
+          {/* Short label on small screens */}
+          <span className="sm:hidden">
+            {" "}
+            {descriptor.shortLabel.toLowerCase()}
+          </span>
+          {/* Full label on larger screens */}
+          <span className="hidden sm:inline">
+            {" "}
+            {descriptor.label.toLowerCase()}
+          </span>
+        </>
+      )}
       <DirectionIcon className="size-3" />
     </span>
   );
