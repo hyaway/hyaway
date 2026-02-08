@@ -22,6 +22,13 @@ const shortcutPagesSvg = join(publicDir, "shortcut-pages.svg");
 const shortcutRandomSvg = join(publicDir, "shortcut-random.svg");
 const shortcutReviewSvg = join(publicDir, "shortcut-review.svg");
 
+// Dev variant source files (blue gradient)
+const faviconDevSvg = join(publicDir, "favicon-dark-dev.svg");
+const maskableDevSvg = join(publicDir, "maskable-icon-source-dev.svg");
+const shortcutPagesDevSvg = join(publicDir, "shortcut-pages-dev.svg");
+const shortcutRandomDevSvg = join(publicDir, "shortcut-random-dev.svg");
+const shortcutReviewDevSvg = join(publicDir, "shortcut-review-dev.svg");
+
 // Icon configurations
 const icons = [
   // Non-maskable icons (use bordered favicon-dark.svg)
@@ -39,6 +46,22 @@ const icons = [
   { name: "shortcut-pages.png", size: 96, source: shortcutPagesSvg },
   { name: "shortcut-random.png", size: 96, source: shortcutRandomSvg },
   { name: "shortcut-review.png", size: 96, source: shortcutReviewSvg },
+
+  // Dev variant: non-maskable icons (blue bordered)
+  { name: "logo192-dev.png", size: 192, source: faviconDevSvg },
+  { name: "logo512-dev.png", size: 512, source: faviconDevSvg },
+
+  // Dev variant: maskable icons (blue gradient)
+  { name: "logo192-maskable-dev.png", size: 192, source: maskableDevSvg },
+  { name: "logo512-maskable-dev.png", size: 512, source: maskableDevSvg },
+
+  // Dev variant: apple touch icon
+  { name: "apple-touch-icon-dev.png", size: 180, source: maskableDevSvg },
+
+  // Dev variant: shortcut icons
+  { name: "shortcut-pages-dev.png", size: 96, source: shortcutPagesDevSvg },
+  { name: "shortcut-random-dev.png", size: 96, source: shortcutRandomDevSvg },
+  { name: "shortcut-review-dev.png", size: 96, source: shortcutReviewDevSvg },
 ];
 
 console.log("🎨 Generating icons...\n");
