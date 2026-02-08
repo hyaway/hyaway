@@ -88,9 +88,9 @@ export type SwipeBindings = Record<SwipeDirection, ReviewSwipeBinding>;
 // #region Defaults
 
 /** Default threshold as percentage of card dimension for left/right swipe */
-export const DEFAULT_HORIZONTAL_THRESHOLD = 25;
+export const DEFAULT_HORIZONTAL_THRESHOLD = 20;
 /** Default threshold as percentage of card dimension for up/down swipe */
-export const DEFAULT_VERTICAL_THRESHOLD = 20;
+export const DEFAULT_VERTICAL_THRESHOLD = 15;
 /** Minimum threshold percentage for swipe gestures */
 export const MIN_SWIPE_THRESHOLD = 5;
 /** Maximum threshold percentage for swipe gestures (from center, so 45% is near edge) */
