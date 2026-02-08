@@ -7,10 +7,6 @@ import { AnimatePresence } from "motion/react";
 import { ReviewSwipeCard } from "./review-swipe-card";
 import { ReviewCardContent } from "./review-card-content";
 import { useReviewKeyboardShortcuts } from "./use-review-keyboard-shortcuts";
-import {
-  useReviewImmersiveMode,
-  useReviewSettingsActions,
-} from "@/stores/review-settings-store";
 import type { SwipeDirection } from "./review-swipe-card";
 import type {
   PreviousFileState,
@@ -24,6 +20,13 @@ import type {
   SwipeBindings,
 } from "@/stores/review-settings-store";
 import {
+  getBindingForDirection,
+  useReviewGesturesEnabled,
+  useReviewImmersiveMode,
+  useReviewSettingsActions,
+  useReviewSwipeBindings,
+} from "@/stores/review-settings-store";
+import {
   useReviewQueueActions,
   useReviewQueueCurrentFileId,
   useReviewQueueCurrentIndex,
@@ -31,11 +34,6 @@ import {
   useReviewQueueHistory,
   useReviewQueueNextFileIds,
 } from "@/stores/review-queue-store";
-import {
-  getBindingForDirection,
-  useReviewGesturesEnabled,
-  useReviewSwipeBindings,
-} from "@/stores/review-settings-store";
 import {
   useArchiveFilesMutation,
   useDeleteFilesMutation,
@@ -84,7 +82,7 @@ function DeckContainer({
   }, []);
 
   return (
-    <div ref={containerRef} className="relative h-full w-full">
+    <div ref={containerRef} className="relative h-full w-full" data-review-deck>
       {children(cardSize)}
     </div>
   );
@@ -435,16 +433,6 @@ export function ReviewSwipeDeckVisual({
   handleSwipe: (direction: SwipeDirection) => void;
   handleExitComplete: (fileId: number) => void;
 }) {
-  // Prevent page scrollbar from appearing when swiping cards near edges.
-  // The card uses transforms so it doesn't affect layout, but the exit
-  // animation can momentarily extend past the viewport.
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
-
   // Combine visible cards with exiting cards (exiting cards may not be in visible list anymore)
   const allVisibleFileIds = [...visibleFileIds];
   for (const exitingId of exitingCards.keys()) {

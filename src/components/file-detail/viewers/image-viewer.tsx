@@ -505,18 +505,6 @@ export function ImageViewer({
 
   useEffect(() => {
     if (!isOverlayActive) return;
-
-    const body = document.body;
-    const previousOverflow = body.style.overflow;
-    body.style.overflow = "hidden";
-
-    return () => {
-      body.style.overflow = previousOverflow;
-    };
-  }, [isOverlayActive]);
-
-  useEffect(() => {
-    if (!isOverlayActive) return;
     overlayStageRef.current?.focus();
   }, [isOverlayActive]);
 
@@ -551,6 +539,7 @@ export function ImageViewer({
         ref={overlayRootRef}
         className={overlayRootClass}
         aria-hidden={!isOverlayActive}
+        data-viewer-overlay={isOverlayActive || undefined}
       >
         <div
           ref={overlayStageRef}

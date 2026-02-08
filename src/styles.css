@@ -213,6 +213,11 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+  body:has([data-review-deck]),
+  body:has([data-video-theater]),
+  body:has([data-viewer-overlay]) {
+    overflow: hidden;
+  }
   html {
     @apply font-sans;
   }

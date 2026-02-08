@@ -161,16 +161,6 @@ export function VideoViewer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isTheater]);
 
-  // Disable body scroll in theater mode
-  useEffect(() => {
-    if (isTheater) {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "";
-      };
-    }
-  }, [isTheater]);
-
   const getContainerClass = () => {
     if (isTheater) {
       return "fixed inset-0 z-50 bg-black/95";
@@ -185,6 +175,7 @@ export function VideoViewer({
         "group relative flex items-center justify-center overflow-hidden",
         getContainerClass(),
       )}
+      data-video-theater={isTheater || undefined}
     >
       <div className={cn("flex h-full w-full items-center justify-center")}>
         <MediaPlayer
