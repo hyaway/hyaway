@@ -176,17 +176,17 @@ const DecisionFilmstripSection = memo(function DecisionFilmstripSection({
     <div className="w-full">
       <Heading
         level={4}
-        className="flex items-start justify-center gap-2 leading-normal"
+        className="flex items-center justify-center gap-2 text-lg/normal 2xl:text-2xl/loose"
       >
         <div
           className={cn(
-            "hidden aspect-square size-8 items-center justify-center rounded-lg min-[400px]:inline-flex",
+            "hidden aspect-square size-7 items-center justify-center rounded-lg min-[400px]:inline-flex 2xl:size-10",
             descriptor.bgClass,
             descriptor.textClass,
           )}
         >
-          <ActionIcon className="size-3" />
-          <DirectionIcon className="size-3" />
+          <ActionIcon className="size-3 2xl:size-4" />
+          <DirectionIcon className="size-3 2xl:size-4" />
         </div>
         <span>
           {descriptor.label}{" "}
