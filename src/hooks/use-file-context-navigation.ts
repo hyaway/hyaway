@@ -6,6 +6,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { toast } from "sonner";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
+import { usePrefetchFileImage } from "@/hooks/use-url-with-api-key";
+import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
 import { useGlobalTouchCount } from "@/lib/global-touch-count";
 
@@ -244,12 +246,20 @@ export function useFileContextNavigation({
     prevId,
   ]);
 
+  // Prefetch metadata for adjacent files so navigation feels instant
+  const { data: prevData } = useGetSingleFileMetadata(prevId ?? 0);
+  const { data: nextData } = useGetSingleFileMetadata(nextId ?? 0);
+
+  // Prefetch actual image into browser cache once metadata is available
+  usePrefetchFileImage(prevData);
+  usePrefetchFileImage(nextData);
+
   const navActions: Array<FloatingFooterAction> = [
     {
       id: "nav-prev",
       label: "Previous",
       icon: IconChevronLeft,
-      title: "Previous file ( [])",
+      title: "Previous file ( [ )",
       onClick: () => {
         if (prevId !== null) {
           navigate({

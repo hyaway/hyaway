@@ -1,7 +1,8 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import {
   useApiAccessKey,
   useApiEndpoint,
@@ -12,6 +13,7 @@ import {
   HYDRUS_API_HEADER_ACCESS_KEY,
   HYDRUS_API_HEADER_SESSION_KEY,
 } from "@/integrations/hydrus-api/models";
+import { isStaticImage } from "@/lib/mime-utils";
 import { refreshSessionKey } from "@/integrations/hydrus-api/clients/session-key-client";
 
 // Shared probe state to avoid hundreds of HEAD requests when many images fail at once
@@ -103,6 +105,24 @@ const useMediaUrlWithRetry = (baseUrl: string) => {
 
   return { url, onLoad, onError };
 };
+
+/**
+ * Hook that prefetches a static image into the browser cache.
+ * No-ops for non-image MIME types or when metadata is undefined.
+ */
+export function usePrefetchFileImage(metadata: FileMetadata | undefined): void {
+  const apiEndpoint = useApiEndpoint();
+  const url = useUrlWithApiKey(
+    `${apiEndpoint}/get_files/file?file_id=${metadata?.file_id ?? 0}`,
+  );
+
+  useEffect(() => {
+    if (!metadata || !isStaticImage(metadata.mime)) return;
+    const img = new Image();
+    img.fetchPriority = "low";
+    img.src = url;
+  }, [metadata, url]);
+}
 
 export const useFullFileIdUrl = (fileId: number) => {
   const apiEndpoint = useApiEndpoint();
