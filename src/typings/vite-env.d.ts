@@ -4,6 +4,9 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  /** Override the PWA app name shown on the home screen (defaults to "hyAway") */
+  readonly VITE_APP_NAME?: string;
+
   /** Show debug overlays for swipe zones in the review feature */
   readonly VITE_DEBUG_SWIPE_ZONES?: string;
 

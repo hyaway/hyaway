@@ -1,7 +1,8 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { copyFileSync, readFileSync } from "node:fs";
+import { copyFileSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { URL, fileURLToPath } from "node:url";
 import { defineConfig, loadEnv } from "vite";
 import viteReact from "@vitejs/plugin-react";
@@ -42,6 +43,43 @@ function copyLicenseFiles(): Plugin {
   };
 }
 
+/**
+ * Replaces `name` and `short_name` in manifest.json with the given app name.
+ * In dev, intercepts requests to /manifest.json and serves the modified JSON.
+ * In production, rewrites the file after Vite copies it to dist.
+ */
+function transformManifest(appName: string): Plugin {
+  const MANIFEST_SRC = join("public", "manifest.json");
+
+  function patchManifest(raw: string): string {
+    const manifest = JSON.parse(raw);
+    manifest.name = appName;
+    manifest.short_name = appName;
+    return JSON.stringify(manifest, null, 2);
+  }
+
+  return {
+    name: "transform-manifest",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === "/manifest.json") {
+          const patched = patchManifest(readFileSync(MANIFEST_SRC, "utf-8"));
+          res.setHeader("Content-Type", "application/manifest+json");
+          res.end(patched);
+          return;
+        }
+        next();
+      });
+    },
+    writeBundle(options) {
+      const outDir = options.dir ?? "dist";
+      const manifestPath = join(outDir, "manifest.json");
+      const patched = patchManifest(readFileSync(manifestPath, "utf-8"));
+      writeFileSync(manifestPath, patched, "utf-8");
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -69,7 +107,8 @@ export default defineConfig(({ mode }) => {
       }),
       tailwindcss(),
       copyLicenseFiles(),
-    ],
+      env.VITE_APP_NAME ? transformManifest(env.VITE_APP_NAME) : null,
+    ].filter(Boolean),
     resolve: {
       alias: {
         "@": fileURLToPath(new URL("./src", import.meta.url)),
