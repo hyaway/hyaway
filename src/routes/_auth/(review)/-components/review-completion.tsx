@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { memo, useCallback, useMemo } from "react";
+import { memo, useMemo } from "react";
 import {
   IconArrowDown,
   IconArrowLeft,
@@ -9,7 +9,6 @@ import {
   IconArrowUp,
   IconCheck,
 } from "@tabler/icons-react";
-import { useNavigate } from "@tanstack/react-router";
 
 import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import { ReviewDecisionFilmstrip } from "./review-decision-filmstrip";
@@ -28,7 +27,7 @@ import {
   useReviewQueueHistory,
 } from "@/stores/review-queue-store";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
-import { Button } from "@/components/ui-primitives/button";
+import { Button, LinkButton } from "@/components/ui-primitives/button";
 import { cn } from "@/lib/utils";
 import { Heading } from "@/components/ui-primitives/heading";
 
@@ -57,7 +56,6 @@ interface ReviewCompletionProps {
 
 export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
   const { clearQueue } = useReviewQueueActions();
-  const navigate = useNavigate();
   const total = stats.left + stats.right + stats.up + stats.down;
   const history = useReviewQueueHistory();
   const { servicesMap } = useRatingServices();
@@ -76,11 +74,6 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
     return byDirection;
   }, [history]);
 
-  const handleClearAndBrowse = useCallback(() => {
-    clearQueue();
-    navigate({ to: "/pages", search: { q: undefined } });
-  }, [clearQueue, navigate]);
-
   // Directions that actually have files assigned
   const activeDirections = useMemo(
     () => DISPLAY_DIRECTIONS.filter((d) => fileIdsByDirection[d].length > 0),
@@ -88,7 +81,7 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
   );
 
   return (
-    <div className="flex w-full flex-col items-center gap-6">
+    <div className="flex w-full flex-col items-center gap-6 pb-16">
       {/* Header section - centered with max width */}
       <div className="flex w-full max-w-2xl flex-col items-center gap-6 px-4">
         {/* Success icon */}
@@ -133,13 +126,24 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
 
       {/* Actions */}
       <div className="flex w-full flex-col items-center gap-2">
-        <Heading level={3}>What's next</Heading>
+        <Heading level={3}>What's next?</Heading>
         <div className="flex flex-row flex-wrap justify-center gap-2">
-          <Button variant="outline" onClick={clearQueue}>
-            Configure actions
-          </Button>
-          <Button variant="outline" onClick={handleClearAndBrowse}>
-            Browse pages
+          <LinkButton
+            variant="outline"
+            size="xl"
+            to="/pages"
+            search={{ q: undefined }}
+          >
+            Pages
+          </LinkButton>
+          <LinkButton variant="outline" size="xl" to="/random-inbox">
+            Random inbox
+          </LinkButton>
+          <LinkButton variant="outline" size="xl" to="/recently-inboxed">
+            Recently inboxed
+          </LinkButton>
+          <Button variant="outline" onClick={clearQueue} size="xl">
+            Clear review queue
           </Button>
         </div>
       </div>
