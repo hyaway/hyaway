@@ -30,7 +30,6 @@ import {
 import {
   useReviewQueueActions,
   useReviewQueueCount,
-  useReviewQueueIsComplete,
   useReviewQueueIsEmpty,
 } from "@/stores/review-queue-store";
 
@@ -64,10 +63,13 @@ export function ReviewControlsSettings({
 
   const count = useReviewQueueCount();
   const isEmpty = useReviewQueueIsEmpty();
-  const isComplete = useReviewQueueIsComplete();
   const { clearQueue } = useReviewQueueActions();
 
-  const hasActiveQueue = !isEmpty && !isComplete;
+  // Disable bindings when queue has items (active or complete)
+  // NOTE: Same logic exists in:
+  // - routes/(settings)/-components/review-controls-settings-card.tsx
+  // - routes/(settings)/-components/reset-all-appearance-settings-card.tsx
+  const hasActiveQueue = !isEmpty;
 
   const [openSections, setOpenSections] =
     useState<Array<string>>(defaultSections);
@@ -122,10 +124,10 @@ export function ReviewControlsSettings({
             <div className="flex items-center justify-between gap-4 rounded-lg border p-3">
               <div className="flex flex-col gap-1">
                 <span className="text-muted-foreground text-sm">
-                  Clear the queue to edit swipe actions
+                  Clear review queue to edit swipe actions
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  {count} {count === 1 ? "file" : "files"} in queue
+                  {count} {count === 1 ? "file" : "files"} in review
                 </span>
               </div>
               <Button variant="outline" size="sm" onClick={clearQueue}>

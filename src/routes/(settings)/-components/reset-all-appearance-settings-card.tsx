@@ -15,10 +15,7 @@ import { usePagesSettingsActions } from "@/stores/pages-settings-store";
 import { useRatingsSettingsActions } from "@/stores/ratings-settings-store";
 import { useReviewSettingsActions } from "@/stores/review-settings-store";
 import { useTagsSettingsActions } from "@/stores/tags-settings-store";
-import {
-  useReviewQueueIsComplete,
-  useReviewQueueIsEmpty,
-} from "@/stores/review-queue-store";
+import { useReviewQueueIsEmpty } from "@/stores/review-queue-store";
 
 export function ResetAllAppearanceSettingsCard() {
   const { reset: resetGallery } = useGallerySettingsActions();
@@ -29,8 +26,11 @@ export function ResetAllAppearanceSettingsCard() {
   const { resetControlsSettings: resetReviewControls, resetBindings } =
     useReviewSettingsActions();
   const isEmpty = useReviewQueueIsEmpty();
-  const isComplete = useReviewQueueIsComplete();
-  const hasActiveQueue = !isEmpty && !isComplete;
+  // Disable bindings when queue has items (active or complete)
+  // NOTE: Same logic exists in:
+  // - components/settings/review-controls-settings.tsx
+  // - routes/(settings)/-components/review-controls-settings-card.tsx
+  const hasActiveQueue = !isEmpty;
 
   const handleResetAll = () => {
     resetGallery();

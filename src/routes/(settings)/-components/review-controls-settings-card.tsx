@@ -16,16 +16,16 @@ import {
   CardHeader,
 } from "@/components/ui-primitives/card";
 import { useReviewSettingsActions } from "@/stores/review-settings-store";
-import {
-  useReviewQueueIsComplete,
-  useReviewQueueIsEmpty,
-} from "@/stores/review-queue-store";
+import { useReviewQueueIsEmpty } from "@/stores/review-queue-store";
 
 export function ReviewControlsSettingsCard() {
   const { resetControlsSettings, resetBindings } = useReviewSettingsActions();
   const isEmpty = useReviewQueueIsEmpty();
-  const isComplete = useReviewQueueIsComplete();
-  const hasActiveQueue = !isEmpty && !isComplete;
+  // Disable bindings when queue has items (active or complete)
+  // NOTE: Same logic exists in:
+  // - components/settings/review-controls-settings.tsx
+  // - routes/(settings)/-components/reset-all-appearance-settings-card.tsx
+  const hasActiveQueue = !isEmpty;
 
   const handleReset = () => {
     resetControlsSettings();
