@@ -191,7 +191,7 @@ const DecisionFilmstripSection = memo(function DecisionFilmstripSection({
           </span>
         </span>
       </Heading>
-      <ReviewDecisionFilmstrip fileIds={fileIds} />
+      <ReviewDecisionFilmstrip fileIds={fileIds} scrollKey={direction} />
     </div>
   );
 });

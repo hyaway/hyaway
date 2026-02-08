@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useElementScrollRestoration } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
@@ -47,6 +47,8 @@ const MAX_FILMSTRIP_HEIGHT = 250;
 interface ReviewDecisionFilmstripProps {
   /** File IDs to display in this filmstrip */
   fileIds: Array<number>;
+  /** Unique key for scroll restoration (e.g., direction name) */
+  scrollKey?: string;
 }
 
 /**
@@ -56,8 +58,19 @@ interface ReviewDecisionFilmstripProps {
  */
 export function ReviewDecisionFilmstrip({
   fileIds,
+  scrollKey,
 }: ReviewDecisionFilmstripProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Unique ID for scroll restoration
+  const scrollRestorationId = scrollKey ? `filmstrip-${scrollKey}` : undefined;
+
+  // Get scroll restoration entry for horizontal scroll position
+  // id is required when using data-scroll-restoration-id attribute
+  const scrollEntry = useElementScrollRestoration({
+    id: scrollRestorationId ?? "filmstrip",
+  });
+  const initialOffset = scrollRestorationId ? scrollEntry?.scrollX : undefined;
 
   // Get thumbnail dimensions from Hydrus service settings, capped at max height
   const dimensions = useThumbnailDimensions();
@@ -201,6 +214,7 @@ export function ReviewDecisionFilmstrip({
       return (item ? getItemWidth(item) : defaultWidth) + horizontalGap;
     },
     overscan: 3,
+    initialOffset,
   });
 
   const virtualItems = virtualizer.getVirtualItems();
@@ -279,6 +293,7 @@ export function ReviewDecisionFilmstrip({
           orientation="horizontal"
           ref={scrollContainerRef}
           tabIndex={-1}
+          scrollRestorationId={scrollRestorationId}
         >
           <div
             className="relative mx-auto"

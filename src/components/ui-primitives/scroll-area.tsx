@@ -12,6 +12,8 @@ interface ScrollAreaProps extends ScrollAreaPrimitive.Root.Props {
   tabIndex?: number;
   /** Scrollbar orientation(s) to show. Defaults to "vertical". */
   orientation?: "vertical" | "horizontal" | "both";
+  /** Optional ID for TanStack Router scroll restoration */
+  scrollRestorationId?: string;
 }
 
 const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
@@ -21,6 +23,7 @@ const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
       viewportClassName,
       orientation = "vertical",
       tabIndex,
+      scrollRestorationId,
       children,
       ...props
     },
@@ -35,6 +38,7 @@ const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
         <ScrollAreaPrimitive.Viewport
           ref={ref}
           data-slot="scroll-area-viewport"
+          data-scroll-restoration-id={scrollRestorationId}
           tabIndex={tabIndex}
           className={cn(
             "focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1",
