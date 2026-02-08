@@ -92,7 +92,7 @@ export const DEFAULT_HORIZONTAL_THRESHOLD = 20;
 /** Default threshold as percentage of card dimension for up/down swipe */
 export const DEFAULT_VERTICAL_THRESHOLD = 15;
 /** Minimum threshold percentage for swipe gestures */
-export const MIN_SWIPE_THRESHOLD = 5;
+export const MIN_SWIPE_THRESHOLD = 2.5;
 /** Maximum threshold percentage for swipe gestures (from center, so 45% is near edge) */
 export const MAX_SWIPE_THRESHOLD = 45;
 
