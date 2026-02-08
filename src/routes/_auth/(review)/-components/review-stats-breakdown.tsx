@@ -108,7 +108,7 @@ export function ReviewStatsBreakdown({
   return (
     <div
       className={cn(
-        "grid grid-cols-2 gap-4 text-center min-[250px]:grid-cols-4",
+        "flex flex-wrap items-start justify-center gap-4 text-center",
         className,
       )}
     >
@@ -162,7 +162,7 @@ function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
   const DirectionIcon = DIRECTION_ICONS[direction];
 
   return (
-    <div className="flex min-w-0 flex-col items-center gap-1">
+    <div className="flex w-20 min-w-0 flex-col items-center gap-1">
       <div
         className={cn(
           "flex size-10 items-center justify-center",
