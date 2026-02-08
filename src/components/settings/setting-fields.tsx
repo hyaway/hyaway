@@ -213,9 +213,20 @@ export function AccordionSection({
   title,
   children,
 }: AccordionSectionProps) {
+  const itemRef = useRef<HTMLDivElement>(null);
+
   return (
     <AccordionItem
       value={value}
+      ref={itemRef}
+      onAnimationEnd={(e) => {
+        if (e.animationName.includes("accordion-down")) {
+          itemRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        }
+      }}
       className={
         "border-s-primary @container data-open:mt-2 data-open:border-s-4 data-open:bg-transparent data-open:ps-2"
       }
