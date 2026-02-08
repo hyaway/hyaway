@@ -45,6 +45,8 @@ export interface ReviewStatsBreakdownProps {
   variant: "inline" | "grid";
   /** Whether to hide directions with zero count (default: true) */
   hideZero?: boolean;
+  /** Whether to show action labels (default: true, inline variant only) */
+  showLabels?: boolean;
   /** Additional class name */
   className?: string;
 }
@@ -58,6 +60,7 @@ export function ReviewStatsBreakdown({
   bindings,
   variant,
   hideZero = true,
+  showLabels = true,
   className,
 }: ReviewStatsBreakdownProps) {
   const { servicesMap } = useRatingServices();
@@ -89,7 +92,7 @@ export function ReviewStatsBreakdown({
       >
         {visibleDirections.map((direction, index) => (
           <span key={direction} className="inline-flex items-center gap-3">
-            {index > 0 && (
+            {index > 0 && showLabels && (
               <IconCircleFilled className="text-muted-foreground size-1" />
             )}
             <InlineStatItem
@@ -97,6 +100,7 @@ export function ReviewStatsBreakdown({
               count={stats[direction]}
               bindings={bindings}
               services={servicesMap}
+              showLabel={showLabels}
             />
           </span>
         ))}
@@ -130,6 +134,7 @@ interface StatItemProps {
   count: number;
   bindings: SwipeBindings;
   services: Map<string, RatingServiceInfo>;
+  showLabel?: boolean;
 }
 
 function InlineStatItem({
@@ -137,6 +142,7 @@ function InlineStatItem({
   count,
   bindings,
   services,
+  showLabel = true,
 }: StatItemProps) {
   const binding = bindings[direction];
   const descriptor = getSwipeBindingDescriptor(binding, services);
@@ -149,7 +155,8 @@ function InlineStatItem({
         descriptor.textClass,
       )}
     >
-      {count} {descriptor.label.toLowerCase()}
+      {count}
+      {showLabel && ` ${descriptor.label.toLowerCase()}`}
       <DirectionIcon className="size-3" />
     </span>
   );

@@ -104,13 +104,13 @@ function ReviewPage() {
         <ReviewSettingsPopover />
       </PageHeaderActions>
 
-      {/* Stats breakdown */}
-      {history.length > 0 && (
+      {/* Stats breakdown - shown below progress in normal mode */}
+      {history.length > 0 && !isImmersive && (
         <ReviewStatsBreakdown
           stats={directionStats}
           bindings={deckState.bindings}
           variant="inline"
-          className={cn("px-4 pb-1", isImmersive && "hidden")}
+          className="px-4 pb-1"
         />
       )}
       {/* Progress indicator */}
@@ -121,6 +121,16 @@ function ReviewPage() {
         )}
       >
         <Progress value={progress} className="flex-1" />
+        {/* Immersive mode: show inline stats next to count */}
+        {isImmersive && history.length > 0 && (
+          <ReviewStatsBreakdown
+            stats={directionStats}
+            bindings={deckState.bindings}
+            variant="inline"
+            showLabels={false}
+            className="shrink-0"
+          />
+        )}
         <span className="shrink-0">
           {currentIndex + 1}/{count}
         </span>
