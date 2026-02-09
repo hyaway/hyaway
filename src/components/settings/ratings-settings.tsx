@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useMemo } from "react";
-import { IconTallymarks, IconX } from "@tabler/icons-react";
+import { IconTimeline, IconX } from "@tabler/icons-react";
 import type { StarShape } from "@/integrations/hydrus-api/models";
 import { Permission, ServiceType } from "@/integrations/hydrus-api/models";
 import {
@@ -311,7 +311,7 @@ function ServiceSwitch({
     >
       <div className="flex items-center gap-2">
         {type === ServiceType.RATING_INC_DEC ? (
-          <IconTallymarks className="text-muted-foreground size-5 shrink-0" />
+          <IconTimeline className="text-muted-foreground size-5 shrink-0" />
         ) : (
           <FilledIcon className="text-muted-foreground size-5 shrink-0" />
         )}

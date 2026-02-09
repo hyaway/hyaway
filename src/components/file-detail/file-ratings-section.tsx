@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconTallymarks } from "@tabler/icons-react";
+import { IconTimeline } from "@tabler/icons-react";
 
 import type {
   FileMetadata,
@@ -121,7 +121,7 @@ function RatingControl({
     <div className="bg-muted/50 flex flex-wrap items-center gap-2 rounded-lg border p-3 transition-colors">
       <div className="flex min-w-0 items-center gap-2">
         {isIncDecRatingService(service) ? (
-          <IconTallymarks className="text-muted-foreground size-6 shrink-0" />
+          <IconTimeline className="text-muted-foreground size-6 shrink-0" />
         ) : (
           <FilledServiceIcon className="text-muted-foreground size-6 shrink-0" />
         )}

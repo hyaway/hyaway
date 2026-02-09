@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconTallymarks } from "@tabler/icons-react";
+import { IconTimeline } from "@tabler/icons-react";
 
 import { CrossedOutIcon } from "./crossed-out-icon";
 import {
@@ -128,7 +128,7 @@ export function RatingsOverlayBadge({
         isZero && "bg-card/60 text-muted-foreground",
       )}
     >
-      <IconTallymarks
+      <IconTimeline
         className={iconClass}
         style={incDecColors ? { color: incDecColors.brush } : undefined}
       />
