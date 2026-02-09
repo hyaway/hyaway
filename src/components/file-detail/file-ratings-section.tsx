@@ -101,11 +101,11 @@ function RatingControl({
     });
   };
 
-  const iconColor = isIncDecRatingService(service)
-    ? getIncDecPositiveColors(service)?.brush
+  const iconColors = isIncDecRatingService(service)
+    ? getIncDecPositiveColors(service)
     : isNumericalRatingService(service)
-      ? getNumericalFilledColors(service).brush
-      : getLikeColors(service).brush;
+      ? getNumericalFilledColors(service)
+      : getLikeColors(service);
 
   // Format the current rating for display in the title
   const getRatingDisplay = () => {
@@ -130,14 +130,22 @@ function RatingControl({
         {isIncDecRatingService(service) ? (
           <IconSquareFilled
             className="size-6 shrink-0"
-            style={iconColor ? { color: iconColor } : undefined}
+            style={
+              iconColors
+                ? { color: iconColors.brush, stroke: iconColors.pen }
+                : undefined
+            }
+            strokeWidth={1.5}
           />
         ) : (
           <FilledServiceIcon
             className="size-6 shrink-0"
             style={
-              iconColor ? { color: iconColor, stroke: iconColor } : undefined
+              iconColors
+                ? { color: iconColors.brush, stroke: iconColors.pen }
+                : undefined
             }
+            strokeWidth={1.5}
           />
         )}
         <div className="flex min-w-0 flex-col">

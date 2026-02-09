@@ -74,12 +74,12 @@ export function RatingsSettings({
   const ratingServices = useMemo(
     () =>
       ratingServicesRaw.map(([serviceKey, service]) => {
-        const rawColor =
+        const iconColors =
           service.type === ServiceType.RATING_INC_DEC
-            ? getIncDecPositiveColors(service)?.brush
+            ? getIncDecPositiveColors(service)
             : service.type === ServiceType.RATING_NUMERICAL
-              ? getNumericalFilledColors(service).brush
-              : getLikeColors(service).brush;
+              ? getNumericalFilledColors(service)
+              : getLikeColors(service);
         return {
           serviceKey,
           name: service.name,
@@ -87,7 +87,7 @@ export function RatingsSettings({
           starShape: service.star_shape,
           hydrusShowInThumbnail: service.show_in_thumbnail,
           hydrusShowWhenNull: service.show_in_thumbnail_even_when_null,
-          iconColor: rawColor,
+          iconColors,
         };
       }),
     [ratingServicesRaw],
@@ -160,7 +160,7 @@ export function RatingsSettings({
             type,
             starShape,
             hydrusShowInThumbnail,
-            iconColor,
+            iconColors,
           }) => {
             const customSettings = getSettings(serviceKey);
             const checked = isCustomMode
@@ -174,7 +174,7 @@ export function RatingsSettings({
                 name={name}
                 type={type}
                 starShape={starShape}
-                iconColor={iconColor}
+                iconColors={iconColors}
                 checked={checked}
                 onCheckedChange={(value) => setShowInOverlay(serviceKey, value)}
                 disabled={!isCustomMode}
@@ -197,7 +197,7 @@ export function RatingsSettings({
             starShape,
             hydrusShowInThumbnail,
             hydrusShowWhenNull,
-            iconColor,
+            iconColors,
           }) => {
             const customSettings = getSettings(serviceKey);
             const showInOverlay = isCustomMode
@@ -214,7 +214,7 @@ export function RatingsSettings({
                 name={name}
                 type={type}
                 starShape={starShape}
-                iconColor={iconColor}
+                iconColors={iconColors}
                 checked={checked}
                 onCheckedChange={(value) =>
                   setShowInOverlayEvenWhenNull(serviceKey, value)
@@ -237,7 +237,7 @@ export function RatingsSettings({
           }
         >
           {ratingServices.map(
-            ({ serviceKey, name, type, starShape, iconColor }) => (
+            ({ serviceKey, name, type, starShape, iconColors }) => (
               <ServiceSwitch
                 key={serviceKey}
                 id={`${idPrefix}rating-${serviceKey}-review`}
@@ -245,7 +245,7 @@ export function RatingsSettings({
                 name={name}
                 type={type}
                 starShape={starShape}
-                iconColor={iconColor}
+                iconColors={iconColors}
                 checked={getSettings(serviceKey).showInReview && canEditRatings}
                 onCheckedChange={(checked) =>
                   setShowInReview(serviceKey, checked)
@@ -311,7 +311,7 @@ interface ServiceSwitchProps {
   name: string;
   type: ServiceType;
   starShape: StarShape;
-  iconColor?: string;
+  iconColors?: { brush: string; pen: string };
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
@@ -323,7 +323,7 @@ function ServiceSwitch({
   name,
   type,
   starShape,
-  iconColor,
+  iconColors,
   checked,
   onCheckedChange,
   disabled,
@@ -342,14 +342,22 @@ function ServiceSwitch({
         {type === ServiceType.RATING_INC_DEC ? (
           <IconSquareFilled
             className="size-5 shrink-0"
-            style={iconColor ? { color: iconColor } : undefined}
+            style={
+              iconColors
+                ? { color: iconColors.brush, stroke: iconColors.pen }
+                : undefined
+            }
+            strokeWidth={1.5}
           />
         ) : (
           <FilledIcon
             className="size-5 shrink-0"
             style={
-              iconColor ? { color: iconColor, stroke: iconColor } : undefined
+              iconColors
+                ? { color: iconColors.brush, stroke: iconColors.pen }
+                : undefined
             }
+            strokeWidth={1.5}
           />
         )}
         <span className="text-sm">{name}</span>

@@ -48,6 +48,7 @@ import type { StarShape } from "@/integrations/hydrus-api/models";
 export type IconComponent = ComponentType<{
   className?: string;
   style?: CSSProperties;
+  strokeWidth?: number;
 }>;
 
 export interface ShapeIcons {
