@@ -4,6 +4,31 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-02-08
+
+### Added
+
+- **Immersive/Theater mode in review queue** — Hide most UI shell for distraction-free reviewing
+- **Double-tap to zoom in review queue** — Double-tap images in review queue to zoom in for a closer look. Previously you could only zoom in with pinch gesture. This is now similar to behavior in theater mode for full file viewer.
+- **Review completion filmstrip preloading** — Thumbnails in the decision filmstrip are preloaded when they appear in virtualized rendered items instead of when they appear on the screen for smoother scrolling.
+- **Filmstrip scroll restoration** — Decision filmstrips remember horizontal scroll position when returning from file details
+- **Review completion follow-up actions** — New buttons to browse archived files or view recently trashed after finishing a queue
+- **File viewer preloading** — Adjacent image files are preloaded when browsing files for faster navigation
+
+### Changed
+
+- Review completion screen file descriptors reflow better
+- Swipe thresholds use finer steps and allow lower minimums for more precise tuning
+- Settings accordion sections scroll into view when expanded
+- Navigating away via browse pages button in review completion screen no longer clears the queue — only the explicit "Clear" button does
+- Dev builds use distinct PWA name and icons to differentiate from production installs
+
+### Fixed
+
+- Scroll lock no longer persist when navigating pages before completing review
+
+---
+
 ## 2026-02-07
 
 ### Added
