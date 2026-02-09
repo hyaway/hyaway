@@ -265,6 +265,41 @@ export function rgbToString(rgb: RGB): string {
   return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
 }
 
+/**
+ * Adjust a hex color string for the current theme using APCA contrast.
+ * Returns the original color if it is not a hex string.
+ */
+export function getThemeAdjustedColorFromHex(
+  color: string | undefined,
+  theme: "light" | "dark",
+): string | undefined {
+  if (!color) return undefined;
+
+  const rgb = parseHexColor(color);
+  if (!rgb) return color;
+
+  return rgbToString(adjustColorForTheme(rgb, theme));
+}
+
+function parseHexColor(color: string): RGB | null {
+  const normalized = color.trim();
+  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(normalized);
+  if (!match) return null;
+
+  const hex = match[1];
+  if (hex.length === 3) {
+    const r = parseInt(hex[0] + hex[0], 16);
+    const g = parseInt(hex[1] + hex[1], 16);
+    const b = parseInt(hex[2] + hex[2], 16);
+    return [r, g, b];
+  }
+
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  return [r, g, b];
+}
+
 // Base83 character set used by blurhash
 const BASE83_CHARS =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#$%*+,-.:;=?@[]^_{|}~";

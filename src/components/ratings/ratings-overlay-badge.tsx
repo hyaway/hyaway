@@ -18,7 +18,7 @@ import {
   isLikeRatingService,
   isNumericalRatingService,
 } from "@/integrations/hydrus-api/models";
-import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
+import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
 import { useActiveTheme } from "@/stores/theme-store";
 
@@ -113,7 +113,10 @@ export function RatingsOverlayBadge({
   // Inc/Dec
   const numValue = typeof value === "number" ? value : 0;
   const incDecColors = getIncDecPositiveColors(service);
-  const incDecOverlayColor = getThemeAdjustedColor(incDecColors?.brush, theme);
+  const incDecOverlayColor = getThemeAdjustedColorFromHex(
+    incDecColors?.brush,
+    theme,
+  );
   const incDecStyle: CSSProperties | undefined = incDecOverlayColor
     ? { "--badge-overlay": incDecOverlayColor }
     : undefined;
@@ -131,35 +134,4 @@ export function RatingsOverlayBadge({
       <span className={valueClassName}>{numValue}</span>
     </div>
   );
-}
-
-function getThemeAdjustedColor(
-  color: string | undefined,
-  theme: "light" | "dark",
-): string | undefined {
-  if (!color) return undefined;
-
-  const rgb = parseHexColor(color);
-  if (!rgb) return color;
-
-  return rgbToString(adjustColorForTheme(rgb, theme));
-}
-
-function parseHexColor(color: string): [number, number, number] | null {
-  const normalized = color.trim();
-  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(normalized);
-  if (!match) return null;
-
-  const hex = match[1];
-  if (hex.length === 3) {
-    const r = parseInt(hex[0] + hex[0], 16);
-    const g = parseInt(hex[1] + hex[1], 16);
-    const b = parseInt(hex[2] + hex[2], 16);
-    return [r, g, b];
-  }
-
-  const r = parseInt(hex.slice(0, 2), 16);
-  const g = parseInt(hex.slice(2, 4), 16);
-  const b = parseInt(hex.slice(4, 6), 16);
-  return [r, g, b];
 }

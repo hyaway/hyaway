@@ -15,9 +15,11 @@ import {
   DEFAULT_DISLIKE_COLORS,
   DEFAULT_LIKE_COLORS,
   DEFAULT_NUMERICAL_FILLED,
+  getIncDecPositiveColors,
 } from "./rating-colors";
 import type {
   RatingColor,
+  RatingServiceInfo,
   RatingValue,
   StarShape,
 } from "@/integrations/hydrus-api/models";
@@ -31,6 +33,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
+import { useActiveTheme } from "@/stores/theme-store";
 
 /** Rating control size variant */
 export type RatingControlSize = "default" | "compact";
@@ -540,6 +544,7 @@ interface IncDecRatingControlProps {
   value: number;
   onChange: (value: RatingValue) => void;
   disabled?: boolean;
+  service: RatingServiceInfo;
   /** Size variant for the control */
   size?: RatingControlSize;
 }
@@ -548,11 +553,18 @@ export function IncDecRatingControl({
   value,
   onChange,
   disabled,
+  service,
   size = "default",
 }: IncDecRatingControlProps) {
   const compact = size === "compact";
   const buttonSize = compact ? "size-7" : "size-9.5";
   const iconSize = compact ? "size-4" : "size-6";
+  const theme = useActiveTheme();
+  const incDecColors = getIncDecPositiveColors(service);
+  const incDecOverlayColor = getThemeAdjustedColorFromHex(
+    incDecColors?.brush,
+    theme,
+  );
 
   return (
     <div
@@ -572,11 +584,19 @@ export function IncDecRatingControl({
       </Button>
       <span
         className={cn(
-          "bg-muted rounded border text-center tabular-nums",
+          "text-center tabular-nums",
+          incDecOverlayColor
+            ? "bg-background relative isolate overflow-hidden border border-(--badge-overlay)/50 text-(--badge-overlay) before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)]"
+            : "bg-muted border",
           compact
             ? "min-w-8 px-1.5 py-1 text-sm"
             : "min-w-10 px-2 py-1.5 text-base",
         )}
+        style={
+          incDecOverlayColor
+            ? { "--badge-overlay": incDecOverlayColor }
+            : undefined
+        }
         aria-live="polite"
         aria-atomic="true"
       >

@@ -613,6 +613,7 @@ function ServiceRatingControl({
           value={(currentRating as number | null) ?? 0}
           onChange={handleSetRating}
           disabled={isPending}
+          service={service}
         />
       )}
 

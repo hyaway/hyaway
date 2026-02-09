@@ -166,6 +166,7 @@ function RatingControl({
             value={currentRating as number}
             onChange={handleSetRating}
             disabled={disabled || isPending}
+            service={service}
           />
         )}
       </div>
