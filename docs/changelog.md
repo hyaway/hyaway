@@ -12,7 +12,7 @@ All notable changes to hyAway are documented here.
 - **Double-tap to zoom in review queue** — Double-tap images in review queue to zoom in for a closer look. Previously you could only zoom in with pinch gesture. This is now similar to behavior in theater mode for full file viewer.
 - **Review completion filmstrip preloading** — Thumbnails in the decision filmstrip are preloaded when they appear in virtualized rendered items instead of when they appear on the screen for smoother scrolling.
 - **Filmstrip scroll restoration** — Decision filmstrips remember horizontal scroll position when returning from file details
-- **Review completion follow-up actions** — New buttons to browse archived files or view recently trashed after finishing a queue
+- **Review completion follow-up actions** — New buttons to browse inboxed files or random inbox after finishing a queue
 - **File viewer preloading** — Adjacent image files are preloaded when browsing files for faster navigation
 
 ### Changed
