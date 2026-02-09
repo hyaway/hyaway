@@ -13,6 +13,7 @@ import {
   IconMinus,
   IconPlayerTrackNext,
   IconPlus,
+  IconTimeline,
   IconTrash,
 } from "@tabler/icons-react";
 import type {
@@ -46,6 +47,7 @@ import {
   LikeDislikeControl,
   NumericalRatingControl,
 } from "@/components/ratings/rating-controls";
+import { useShapeIcons } from "@/components/ratings/use-shape-icons";
 import {
   getDislikeColors,
   getLikeColors,
@@ -125,6 +127,61 @@ function withRatingAction(
   }
 
   return [...otherActions, { actionType: "rating", ...ratingAction }];
+}
+
+// #endregion
+
+// #region Rating Service Icon Components
+
+interface RatingServiceIconProps {
+  serviceKey: string;
+  service: RatingServiceInfo;
+  className?: string;
+}
+
+/**
+ * Renders the appropriate icon for a rating service based on its type.
+ * Inc/Dec services show IconTimeline, others show their shape icon.
+ */
+function RatingServiceIcon({
+  serviceKey,
+  service,
+  className,
+}: RatingServiceIconProps) {
+  const starShape = isIncDecRatingService(service)
+    ? undefined
+    : service.star_shape;
+  const { filled: FilledIcon } = useShapeIcons(serviceKey, starShape);
+
+  if (isIncDecRatingService(service)) {
+    return <IconTimeline className={className} />;
+  }
+
+  return <FilledIcon className={className} />;
+}
+
+interface RatingServiceMenuItemProps {
+  serviceKey: string;
+  service: RatingServiceInfo;
+}
+
+/**
+ * Dropdown menu item for selecting a rating service, with icon.
+ */
+function RatingServiceMenuItem({
+  serviceKey,
+  service,
+}: RatingServiceMenuItemProps) {
+  return (
+    <DropdownMenuRadioItem value={serviceKey}>
+      <RatingServiceIcon
+        serviceKey={serviceKey}
+        service={service}
+        className="text-muted-foreground size-4 shrink-0"
+      />
+      {service.name}
+    </DropdownMenuRadioItem>
+  );
 }
 
 // #endregion
@@ -529,6 +586,13 @@ function DirectionBindingEditor({
                       size="sm"
                       className="w-full min-w-0 justify-start"
                     >
+                      {selectedService && (
+                        <RatingServiceIcon
+                          serviceKey={selectedServiceKey}
+                          service={selectedService}
+                          className="text-muted-foreground size-4 shrink-0"
+                        />
+                      )}
                       <span className="truncate">
                         {selectedService?.name ?? "Select rating service..."}
                       </span>
@@ -543,9 +607,11 @@ function DirectionBindingEditor({
                     <DropdownMenuRadioItem value="">None</DropdownMenuRadioItem>
                     <DropdownMenuSeparator />
                     {ratingServices.map(([key, service]) => (
-                      <DropdownMenuRadioItem key={key} value={key}>
-                        {service.name}
-                      </DropdownMenuRadioItem>
+                      <RatingServiceMenuItem
+                        key={key}
+                        serviceKey={key}
+                        service={service}
+                      />
                     ))}
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
