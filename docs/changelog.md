@@ -25,7 +25,7 @@ All notable changes to hyAway are documented here.
 
 ### Fixed
 
-- Scroll lock no longer persist when navigating pages before completing review
+- Scroll lock no longer persists when navigating pages before completing review
 
 ---
 
