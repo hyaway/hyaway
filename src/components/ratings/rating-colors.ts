@@ -82,3 +82,16 @@ export function getIncDecPositiveColors(
 ): RatingColor | undefined {
   return service.colours?.like;
 }
+
+/**
+ * Gets the colors for inc/dec rating's zero (mixed) state.
+ * Uses the 'mixed' color when provided by the service.
+ *
+ * @param service - The rating service info
+ * @returns Object with brush (fill) and pen (stroke) colors
+ */
+export function getIncDecMixedColors(
+  service: RatingServiceInfo,
+): RatingColor | undefined {
+  return (service.colours as Record<string, RatingColor> | undefined)?.mixed;
+}

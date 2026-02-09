@@ -1,8 +1,6 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconTimeline } from "@tabler/icons-react";
-
 import { CrossedOutIcon } from "./crossed-out-icon";
 import {
   getDislikeColors,
@@ -11,6 +9,7 @@ import {
   getNumericalFilledColors,
 } from "./rating-colors";
 import { useShapeIcons } from "./use-shape-icons";
+import type { CSSProperties } from "react";
 import type {
   RatingServiceInfo,
   RatingValue,
@@ -19,7 +18,9 @@ import {
   isLikeRatingService,
   isNumericalRatingService,
 } from "@/integrations/hydrus-api/models";
+import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
+import { useActiveTheme } from "@/stores/theme-store";
 
 interface RatingsOverlayBadgeProps {
   serviceKey: string;
@@ -40,6 +41,7 @@ export function RatingsOverlayBadge({
   valueClassName = "tabular-nums leading-none translate-y-px",
   crossedOutBackslashClassName,
 }: RatingsOverlayBadgeProps) {
+  const theme = useActiveTheme();
   const {
     filled: FilledIcon,
     outline: OutlineIcon,
@@ -79,7 +81,7 @@ export function RatingsOverlayBadge({
     }
     // Unset but showing because "show even when null"
     return (
-      <div className={cn(badgeClassName, "bg-card/60 text-muted-foreground")}>
+      <div className={cn(badgeClassName, "text-muted-foreground")}>
         <OutlineIcon className={iconClass} />
       </div>
     );
@@ -92,12 +94,7 @@ export function RatingsOverlayBadge({
     const filledColors = getNumericalFilledColors(service);
 
     return (
-      <div
-        className={cn(
-          badgeClassName,
-          isUnset && "bg-card/60 text-muted-foreground",
-        )}
-      >
+      <div className={cn(badgeClassName, isUnset && "text-muted-foreground")}>
         <FilledIcon
           className={iconClass}
           style={
@@ -115,27 +112,54 @@ export function RatingsOverlayBadge({
 
   // Inc/Dec
   const numValue = typeof value === "number" ? value : 0;
-  const sign = numValue > 0 ? "+" : "";
-  const isZero = numValue === 0;
-  const isPositive = numValue > 0;
-
-  const incDecColors = isPositive ? getIncDecPositiveColors(service) : null;
+  const incDecColors = getIncDecPositiveColors(service);
+  const incDecOverlayColor = getThemeAdjustedColor(incDecColors?.brush, theme);
+  const incDecStyle: CSSProperties | undefined = incDecOverlayColor
+    ? { "--badge-overlay": incDecOverlayColor }
+    : undefined;
+  const useIncDecOverlay = Boolean(incDecOverlayColor);
 
   return (
     <div
       className={cn(
         badgeClassName,
-        isZero && "bg-card/60 text-muted-foreground",
+        useIncDecOverlay &&
+          "bg-background relative isolate overflow-hidden border-0 text-(--badge-overlay) before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)]",
       )}
+      style={incDecStyle}
     >
-      <IconTimeline
-        className={iconClass}
-        style={incDecColors ? { color: incDecColors.brush } : undefined}
-      />
-      <span className={valueClassName}>
-        {sign}
-        {numValue}
-      </span>
+      <span className={valueClassName}>{numValue}</span>
     </div>
   );
+}
+
+function getThemeAdjustedColor(
+  color: string | undefined,
+  theme: "light" | "dark",
+): string | undefined {
+  if (!color) return undefined;
+
+  const rgb = parseHexColor(color);
+  if (!rgb) return color;
+
+  return rgbToString(adjustColorForTheme(rgb, theme));
+}
+
+function parseHexColor(color: string): [number, number, number] | null {
+  const normalized = color.trim();
+  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(normalized);
+  if (!match) return null;
+
+  const hex = match[1];
+  if (hex.length === 3) {
+    const r = parseInt(hex[0] + hex[0], 16);
+    const g = parseInt(hex[1] + hex[1], 16);
+    const b = parseInt(hex[2] + hex[2], 16);
+    return [r, g, b];
+  }
+
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  return [r, g, b];
 }
