@@ -161,7 +161,7 @@ export const SHAPE_ICONS: Record<StarShape, ShapeIcons> = {
   // Custom SVG uses default shape as fallback (actual SVG fetched separately)
   svg: DEFAULT_SHAPE,
   // Virtual shape for inc/dec services (not from Hydrus)
-  tallymarks: {
+  incDecServiceIcon: {
     filled: IconTimeline,
     outline: IconTimeline,
   },
