@@ -28,9 +28,7 @@ import {
   getLikeColors,
   getNumericalFilledColors,
 } from "@/components/ratings/rating-colors";
-import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
-import { useActiveTheme } from "@/stores/theme-store";
 
 export const RATINGS_SETTINGS_TITLE = "Ratings";
 
@@ -61,7 +59,6 @@ export function RatingsSettings({
   const { hasPermission } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
   const canSearch = hasPermission(Permission.SEARCH_FOR_AND_FETCH_FILES);
-  const theme = useActiveTheme();
 
   // Hydrus option available when we can search files AND services have overlay properties
   const canUseHydrusOverlay = canSearch && hasServiceOverlaySettings;
@@ -83,7 +80,6 @@ export function RatingsSettings({
             : service.type === ServiceType.RATING_NUMERICAL
               ? getNumericalFilledColors(service).brush
               : getLikeColors(service).brush;
-        const iconColor = getThemeAdjustedColorFromHex(rawColor, theme);
         return {
           serviceKey,
           name: service.name,
@@ -91,10 +87,10 @@ export function RatingsSettings({
           starShape: service.star_shape,
           hydrusShowInThumbnail: service.show_in_thumbnail,
           hydrusShowWhenNull: service.show_in_thumbnail_even_when_null,
-          iconColor,
+          iconColor: rawColor,
         };
       }),
-    [ratingServicesRaw, theme],
+    [ratingServicesRaw],
   );
 
   // Find orphaned services (in settings but no longer in Hydrus)
