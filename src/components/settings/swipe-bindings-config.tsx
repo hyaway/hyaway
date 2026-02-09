@@ -13,7 +13,7 @@ import {
   IconMinus,
   IconPlayerTrackNext,
   IconPlus,
-  IconTimeline,
+  IconSquareFilled,
   IconTrash,
 } from "@tabler/icons-react";
 import type {
@@ -141,7 +141,7 @@ interface RatingServiceIconProps {
 
 /**
  * Renders the appropriate icon for a rating service based on its type.
- * Inc/Dec services show IconTimeline, others show their shape icon.
+ * Inc/Dec services show IconSquareFilled, others show their shape icon.
  */
 function RatingServiceIcon({
   serviceKey,
@@ -154,7 +154,7 @@ function RatingServiceIcon({
   const { filled: FilledIcon } = useShapeIcons(serviceKey, starShape);
 
   if (isIncDecRatingService(service)) {
-    return <IconTimeline className={className} />;
+    return <IconSquareFilled className={className} />;
   }
 
   return <FilledIcon className={className} />;

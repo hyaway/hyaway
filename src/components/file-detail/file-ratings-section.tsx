@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconTimeline } from "@tabler/icons-react";
+import { IconSquareFilled } from "@tabler/icons-react";
 
 import type {
   FileMetadata,
@@ -128,7 +128,7 @@ function RatingControl({
     <div className="bg-muted/50 flex flex-wrap items-center gap-2 rounded-lg border p-3 transition-colors">
       <div className="flex min-w-0 items-center gap-2">
         {isIncDecRatingService(service) ? (
-          <IconTimeline
+          <IconSquareFilled
             className="size-6 shrink-0"
             style={iconColor ? { color: iconColor } : undefined}
           />

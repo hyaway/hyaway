@@ -35,7 +35,6 @@ import {
   IconSquareFilled,
   IconStar,
   IconStarFilled,
-  IconTimeline,
   IconTriangle,
   IconTriangleFilled,
   IconTriangleInverted,
@@ -162,8 +161,8 @@ export const SHAPE_ICONS: Record<StarShape, ShapeIcons> = {
   svg: DEFAULT_SHAPE,
   // Virtual shape for inc/dec services (not from Hydrus)
   incDecServiceIcon: {
-    filled: IconTimeline,
-    outline: IconTimeline,
+    filled: IconSquareFilled,
+    outline: IconSquareFilled,
   },
 };
 
