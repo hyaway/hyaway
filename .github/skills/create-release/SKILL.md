@@ -15,19 +15,11 @@ Create releases with changelog entry and git tag.
 
 1. **Update changelog** for today's date in `docs/changelog.md`
 2. **Commit** if there are uncommitted changes
-3. **Tag**: `git tag v2026.01.28`
+3. **Push branch first**: `git push` (important: push before tagging!)
+4. **Tag**: `git tag v2026.01.28`
+5. **Push tag**: `git push origin v2026.01.28`
 
-## After Tagging
-
-Push the branch and tag together using `--follow-tags`:
-
-```bash
-git push --follow-tags
-```
-
-This pushes the branch **and** any tags pointing to commits being pushed in one command. Prefer this over separate `git push` + `git push origin <tag>` calls.
-
-> **Tip:** Set `git config --global push.followTags true` to make this the default for `git push`.
+> **Why push before tagging?** `git push --follow-tags` only pushes tags pointing to commits in the push range. If HEAD is already on remote, the tag won't be included. Pushing branch first, then tagging and pushing the tag separately avoids this issue.
 
 Once the tag reaches the remote, it triggers:
 
@@ -37,11 +29,14 @@ Once the tag reaches the remote, it triggers:
 ## Commands
 
 ```bash
+# Push branch first
+git push
+
 # Create release tag
 git tag v2026.01.28
 
-# Push branch + tag together
-git push --follow-tags
+# Push the tag
+git push origin v2026.01.28
 
 # Tag specific commit
 git tag v2026.01.28 <commit-hash>
