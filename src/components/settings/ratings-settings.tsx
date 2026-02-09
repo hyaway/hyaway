@@ -23,7 +23,14 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
+import {
+  getIncDecPositiveColors,
+  getLikeColors,
+  getNumericalFilledColors,
+} from "@/components/ratings/rating-colors";
+import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
+import { useActiveTheme } from "@/stores/theme-store";
 
 export const RATINGS_SETTINGS_TITLE = "Ratings";
 
@@ -54,6 +61,7 @@ export function RatingsSettings({
   const { hasPermission } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
   const canSearch = hasPermission(Permission.SEARCH_FOR_AND_FETCH_FILES);
+  const theme = useActiveTheme();
 
   // Hydrus option available when we can search files AND services have overlay properties
   const canUseHydrusOverlay = canSearch && hasServiceOverlaySettings;
@@ -68,15 +76,25 @@ export function RatingsSettings({
   // Get rating services for settings UI
   const ratingServices = useMemo(
     () =>
-      ratingServicesRaw.map(([serviceKey, service]) => ({
-        serviceKey,
-        name: service.name,
-        type: service.type,
-        starShape: service.star_shape,
-        hydrusShowInThumbnail: service.show_in_thumbnail,
-        hydrusShowWhenNull: service.show_in_thumbnail_even_when_null,
-      })),
-    [ratingServicesRaw],
+      ratingServicesRaw.map(([serviceKey, service]) => {
+        const rawColor =
+          service.type === ServiceType.RATING_INC_DEC
+            ? getIncDecPositiveColors(service)?.brush
+            : service.type === ServiceType.RATING_NUMERICAL
+              ? getNumericalFilledColors(service).brush
+              : getLikeColors(service).brush;
+        const iconColor = getThemeAdjustedColorFromHex(rawColor, theme);
+        return {
+          serviceKey,
+          name: service.name,
+          type: service.type,
+          starShape: service.star_shape,
+          hydrusShowInThumbnail: service.show_in_thumbnail,
+          hydrusShowWhenNull: service.show_in_thumbnail_even_when_null,
+          iconColor,
+        };
+      }),
+    [ratingServicesRaw, theme],
   );
 
   // Find orphaned services (in settings but no longer in Hydrus)
@@ -140,7 +158,14 @@ export function RatingsSettings({
         description="Display rating on gallery thumbnails and in file viewers"
       >
         {ratingServices.map(
-          ({ serviceKey, name, type, starShape, hydrusShowInThumbnail }) => {
+          ({
+            serviceKey,
+            name,
+            type,
+            starShape,
+            hydrusShowInThumbnail,
+            iconColor,
+          }) => {
             const customSettings = getSettings(serviceKey);
             const checked = isCustomMode
               ? customSettings.showInOverlay
@@ -153,6 +178,7 @@ export function RatingsSettings({
                 name={name}
                 type={type}
                 starShape={starShape}
+                iconColor={iconColor}
                 checked={checked}
                 onCheckedChange={(value) => setShowInOverlay(serviceKey, value)}
                 disabled={!isCustomMode}
@@ -175,6 +201,7 @@ export function RatingsSettings({
             starShape,
             hydrusShowInThumbnail,
             hydrusShowWhenNull,
+            iconColor,
           }) => {
             const customSettings = getSettings(serviceKey);
             const showInOverlay = isCustomMode
@@ -191,6 +218,7 @@ export function RatingsSettings({
                 name={name}
                 type={type}
                 starShape={starShape}
+                iconColor={iconColor}
                 checked={checked}
                 onCheckedChange={(value) =>
                   setShowInOverlayEvenWhenNull(serviceKey, value)
@@ -212,21 +240,24 @@ export function RatingsSettings({
               : "Disabled: missing 'Edit file ratings' permission"
           }
         >
-          {ratingServices.map(({ serviceKey, name, type, starShape }) => (
-            <ServiceSwitch
-              key={serviceKey}
-              id={`${idPrefix}rating-${serviceKey}-review`}
-              serviceKey={serviceKey}
-              name={name}
-              type={type}
-              starShape={starShape}
-              checked={getSettings(serviceKey).showInReview && canEditRatings}
-              onCheckedChange={(checked) =>
-                setShowInReview(serviceKey, checked)
-              }
-              disabled={!canEditRatings}
-            />
-          ))}
+          {ratingServices.map(
+            ({ serviceKey, name, type, starShape, iconColor }) => (
+              <ServiceSwitch
+                key={serviceKey}
+                id={`${idPrefix}rating-${serviceKey}-review`}
+                serviceKey={serviceKey}
+                name={name}
+                type={type}
+                starShape={starShape}
+                iconColor={iconColor}
+                checked={getSettings(serviceKey).showInReview && canEditRatings}
+                onCheckedChange={(checked) =>
+                  setShowInReview(serviceKey, checked)
+                }
+                disabled={!canEditRatings}
+              />
+            ),
+          )}
         </SettingGroup>
       )}
 
@@ -284,6 +315,7 @@ interface ServiceSwitchProps {
   name: string;
   type: ServiceType;
   starShape: StarShape;
+  iconColor?: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
@@ -295,6 +327,7 @@ function ServiceSwitch({
   name,
   type,
   starShape,
+  iconColor,
   checked,
   onCheckedChange,
   disabled,
@@ -311,9 +344,17 @@ function ServiceSwitch({
     >
       <div className="flex items-center gap-2">
         {type === ServiceType.RATING_INC_DEC ? (
-          <IconTimeline className="text-muted-foreground size-5 shrink-0" />
+          <IconTimeline
+            className="size-5 shrink-0"
+            style={iconColor ? { color: iconColor } : undefined}
+          />
         ) : (
-          <FilledIcon className="text-muted-foreground size-5 shrink-0" />
+          <FilledIcon
+            className="size-5 shrink-0"
+            style={
+              iconColor ? { color: iconColor, stroke: iconColor } : undefined
+            }
+          />
         )}
         <span className="text-sm">{name}</span>
       </div>

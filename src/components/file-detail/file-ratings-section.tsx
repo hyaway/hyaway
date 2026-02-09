@@ -21,6 +21,7 @@ import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
 import {
   getDislikeColors,
+  getIncDecPositiveColors,
   getLikeColors,
   getNumericalFilledColors,
 } from "@/components/ratings/rating-colors";
@@ -100,6 +101,12 @@ function RatingControl({
     });
   };
 
+  const iconColor = isIncDecRatingService(service)
+    ? getIncDecPositiveColors(service)?.brush
+    : isNumericalRatingService(service)
+      ? getNumericalFilledColors(service).brush
+      : getLikeColors(service).brush;
+
   // Format the current rating for display in the title
   const getRatingDisplay = () => {
     if (isLikeRatingService(service)) {
@@ -121,9 +128,17 @@ function RatingControl({
     <div className="bg-muted/50 flex flex-wrap items-center gap-2 rounded-lg border p-3 transition-colors">
       <div className="flex min-w-0 items-center gap-2">
         {isIncDecRatingService(service) ? (
-          <IconTimeline className="text-muted-foreground size-6 shrink-0" />
+          <IconTimeline
+            className="size-6 shrink-0"
+            style={iconColor ? { color: iconColor } : undefined}
+          />
         ) : (
-          <FilledServiceIcon className="text-muted-foreground size-6 shrink-0" />
+          <FilledServiceIcon
+            className="size-6 shrink-0"
+            style={
+              iconColor ? { color: iconColor, stroke: iconColor } : undefined
+            }
+          />
         )}
         <div className="flex min-w-0 flex-col">
           <div className="flex flex-wrap items-center gap-x-1.5">
