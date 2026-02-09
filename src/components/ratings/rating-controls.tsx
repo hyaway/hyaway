@@ -109,6 +109,7 @@ export function LikeDislikeControl({
               !disabled && "pointer-hover:[button:hover_&]:scale-125",
             )}
             style={{ color: likeColors.brush, stroke: likeColors.pen }}
+            strokeWidth={1.5}
           />
         ) : (
           <OutlineIcon
