@@ -92,7 +92,7 @@ export const DEFAULT_HORIZONTAL_THRESHOLD = 20;
 /** Default threshold as percentage of card dimension for up/down swipe */
 export const DEFAULT_VERTICAL_THRESHOLD = 15;
 /** Minimum threshold percentage for swipe gestures */
-export const MIN_SWIPE_THRESHOLD = 2.5;
+export const MIN_SWIPE_THRESHOLD = 0.5;
 /** Maximum threshold percentage for swipe gestures (from center, so 45% is near edge) */
 export const MAX_SWIPE_THRESHOLD = 45;
 
@@ -192,10 +192,14 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
         },
 
         setThreshold: (direction: SwipeDirection, threshold: number) => {
+          const clamped = Math.min(
+            MAX_SWIPE_THRESHOLD,
+            Math.max(MIN_SWIPE_THRESHOLD, threshold),
+          );
           set((state) => ({
             thresholds: {
               ...state.thresholds,
-              [direction]: threshold,
+              [direction]: clamped,
             },
           }));
         },
@@ -248,7 +252,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
     }),
     {
       name: "hyaway-review-queue", // Keeping this key for backward compatibility
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         shortcutsEnabled: state.shortcutsEnabled,
@@ -300,6 +304,46 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
               bindings: {
                 ...bindings,
                 down: { fileAction: "undo" },
+              },
+            };
+          }
+        }
+
+        // v2 -> v3: thresholds can no longer be 0; clamp persisted values
+        if (version < 3 && state && typeof state === "object") {
+          const thresholds = state.thresholds as SwipeThresholds | undefined;
+          if (thresholds) {
+            state = {
+              ...state,
+              thresholds: {
+                left: Math.min(
+                  MAX_SWIPE_THRESHOLD,
+                  Math.max(
+                    MIN_SWIPE_THRESHOLD,
+                    thresholds.left || MIN_SWIPE_THRESHOLD,
+                  ),
+                ),
+                right: Math.min(
+                  MAX_SWIPE_THRESHOLD,
+                  Math.max(
+                    MIN_SWIPE_THRESHOLD,
+                    thresholds.right || MIN_SWIPE_THRESHOLD,
+                  ),
+                ),
+                up: Math.min(
+                  MAX_SWIPE_THRESHOLD,
+                  Math.max(
+                    MIN_SWIPE_THRESHOLD,
+                    thresholds.up || MIN_SWIPE_THRESHOLD,
+                  ),
+                ),
+                down: Math.min(
+                  MAX_SWIPE_THRESHOLD,
+                  Math.max(
+                    MIN_SWIPE_THRESHOLD,
+                    thresholds.down || MIN_SWIPE_THRESHOLD,
+                  ),
+                ),
               },
             };
           }

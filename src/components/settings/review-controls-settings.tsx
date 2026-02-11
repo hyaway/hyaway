@@ -33,6 +33,36 @@ import {
   useReviewQueueIsEmpty,
 } from "@/stores/review-queue-store";
 
+const REVIEW_THRESHOLD_FINE_STEP = 0.5; // = 1% in UI (display value is v * 2)
+
+function snapReviewSwipeThreshold(value: number) {
+  const clamped = Math.min(
+    MAX_SWIPE_THRESHOLD,
+    Math.max(MIN_SWIPE_THRESHOLD, value),
+  );
+
+  // Allowed values are:
+  // - 1% (0.5)
+  // - then 5% increments (2.5, 5, 7.5, ...)
+  const snapValues: Array<number> = [MIN_SWIPE_THRESHOLD];
+  for (let v = 2.5; v <= MAX_SWIPE_THRESHOLD + 1e-9; v += 2.5) {
+    snapValues.push(Number(v.toFixed(4)));
+  }
+
+  let best = snapValues[0];
+  let bestDist = Math.abs(clamped - best);
+  for (let i = 1; i < snapValues.length; i++) {
+    const candidate = snapValues[i];
+    const dist = Math.abs(clamped - candidate);
+    if (dist < bestDist) {
+      best = candidate;
+      bestDist = dist;
+    }
+  }
+
+  return best;
+}
+
 export const REVIEW_CONTROLS_SETTINGS_TITLE = "Review controls";
 
 export interface ReviewControlsSettingsProps {
@@ -159,8 +189,10 @@ export function ReviewControlsSettings({
               value={thresholds.left}
               min={MIN_SWIPE_THRESHOLD}
               max={MAX_SWIPE_THRESHOLD}
-              step={2.5}
-              onValueChange={(v) => setThreshold("left", v)}
+              step={REVIEW_THRESHOLD_FINE_STEP}
+              onValueChange={(v) =>
+                setThreshold("left", snapReviewSwipeThreshold(v))
+              }
               formatValue={(v) => `${v * 2}%`}
             />
             <SliderField
@@ -169,8 +201,10 @@ export function ReviewControlsSettings({
               value={thresholds.right}
               min={MIN_SWIPE_THRESHOLD}
               max={MAX_SWIPE_THRESHOLD}
-              step={2.5}
-              onValueChange={(v) => setThreshold("right", v)}
+              step={REVIEW_THRESHOLD_FINE_STEP}
+              onValueChange={(v) =>
+                setThreshold("right", snapReviewSwipeThreshold(v))
+              }
               formatValue={(v) => `${v * 2}%`}
             />
             <SliderField
@@ -179,8 +213,10 @@ export function ReviewControlsSettings({
               value={thresholds.up}
               min={MIN_SWIPE_THRESHOLD}
               max={MAX_SWIPE_THRESHOLD}
-              step={2.5}
-              onValueChange={(v) => setThreshold("up", v)}
+              step={REVIEW_THRESHOLD_FINE_STEP}
+              onValueChange={(v) =>
+                setThreshold("up", snapReviewSwipeThreshold(v))
+              }
               formatValue={(v) => `${v * 2}%`}
             />
             <SliderField
@@ -189,8 +225,10 @@ export function ReviewControlsSettings({
               value={thresholds.down}
               min={MIN_SWIPE_THRESHOLD}
               max={MAX_SWIPE_THRESHOLD}
-              step={2.5}
-              onValueChange={(v) => setThreshold("down", v)}
+              step={REVIEW_THRESHOLD_FINE_STEP}
+              onValueChange={(v) =>
+                setThreshold("down", snapReviewSwipeThreshold(v))
+              }
               formatValue={(v) => `${v * 2}%`}
             />
           </SettingsGroup>

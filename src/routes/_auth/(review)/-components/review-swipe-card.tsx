@@ -57,6 +57,8 @@ function getSwipeDirection(
   thresholds: SwipeThresholds,
   cardSize: CardSize,
 ): SwipeDirection | null {
+  if (cardSize.width <= 0 || cardSize.height <= 0) return null;
+
   const absX = Math.abs(xVal);
   const absY = Math.abs(yVal);
 
@@ -111,6 +113,8 @@ function getDirectionOpacity(
   thresholds: SwipeThresholds,
   cardSize: CardSize,
 ): number {
+  if (cardSize.width <= 0 || cardSize.height <= 0) return 0;
+
   // Get thresholds based on which direction the point is in
   const horizontalThresholdPercent =
     xVal < 0 ? thresholds.left : thresholds.right;
@@ -126,15 +130,22 @@ function getDirectionOpacity(
   const absX = Math.abs(xVal);
   const absY = Math.abs(yVal);
 
+  const horizontalRange = horizontalThreshold - horizontalStart;
+  const verticalRange = verticalThreshold - verticalStart;
+
   const horizontalProgress =
     absX <= horizontalStart
       ? 0
-      : (absX - horizontalStart) / (horizontalThreshold - horizontalStart);
+      : horizontalRange <= 0
+        ? 1
+        : (absX - horizontalStart) / horizontalRange;
 
   const verticalProgress =
     absY <= verticalStart
       ? 0
-      : (absY - verticalStart) / (verticalThreshold - verticalStart);
+      : verticalRange <= 0
+        ? 1
+        : (absY - verticalStart) / verticalRange;
 
   // Use same cross-product logic as getSwipeDirection to determine zone
   const halfW = cardSize.width / 2;
