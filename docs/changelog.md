@@ -4,6 +4,21 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-02-10
+
+### Added
+
+- Rating service dropdowns in swipe bindings now show service icons
+
+### Changed
+
+- Review swipe thresholds now allow a 1% minimum and finer adjustment (snaps to 1%, then 5% increments)
+- Ratings overlays and inc/dec controls are styled closer to Hydrus, with improved theme-aware coloring
+
+### Fixed
+
+- Review swipe direction/opacity calculations now safely handle zero-size cards and edge-case threshold ranges
+
 ## 2026-02-08
 
 ### Added
