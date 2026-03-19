@@ -151,9 +151,9 @@ function AuthErrorScreen({
       }
       actions={
         <div className="flex w-full flex-col gap-3">
-          {error instanceof AxiosError && error.config && (
+          {error instanceof AxiosError && (
             <div className="bg-muted text-muted-foreground space-y-1 rounded p-2 text-xs">
-              {error.config.baseURL && error.config.url && (
+              {error.config?.baseURL && error.config.url && (
                 <p>
                   <span className="text-foreground font-medium">
                     {error.response?.status ?? "ERR"}

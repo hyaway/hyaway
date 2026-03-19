@@ -34,9 +34,9 @@ export function PageError({
         {error instanceof Error ? error.message : fallbackMessage}
       </AlertTitle>
       <AlertDescription className="space-y-2">
-        {error instanceof AxiosError && error.config && (
+        {error instanceof AxiosError && (
           <>
-            {error.config.baseURL && error.config.url && (
+            {error.config?.baseURL && error.config.url && (
               <p className="font-mono text-xs">
                 <span className="font-medium">
                   {error.response?.status ?? "ERR"}

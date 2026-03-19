@@ -46,9 +46,9 @@ export function RouteError({ error, reset }: RouteErrorProps) {
 
         <div className="bg-destructive/10 border-destructive/20 rounded-lg border p-4">
           <p className="text-destructive font-mono text-sm">{error.message}</p>
-          {error instanceof AxiosError && error.config && (
+          {error instanceof AxiosError && (
             <div className="text-destructive/80 mt-2 space-y-1 text-xs">
-              {error.config.baseURL && error.config.url && (
+              {error.config?.baseURL && error.config.url && (
                 <p className="font-mono">
                   <span className="font-medium">
                     {error.response?.status ?? "ERR"}
