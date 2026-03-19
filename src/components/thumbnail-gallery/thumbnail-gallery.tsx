@@ -60,7 +60,7 @@ export function ThumbnailGallery({
     return <p>Page is empty.</p>;
   }
 
-  if (!defaultDimensions || itemsQuery.isPending) {
+  if (itemsQuery.isPending) {
     return <ThumbnailGallerySkeleton />;
   }
 
