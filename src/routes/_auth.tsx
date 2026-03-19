@@ -10,6 +10,7 @@ import {
   IconLock,
   IconRefresh,
 } from "@tabler/icons-react";
+import { AxiosError } from "axios";
 
 import {
   useAuthWithSessionKey,
@@ -150,6 +151,22 @@ function AuthErrorScreen({
       }
       actions={
         <div className="flex w-full flex-col gap-3">
+          {error instanceof AxiosError && error.config && (
+            <div className="bg-muted text-muted-foreground space-y-1 rounded p-2 text-xs">
+              {error.config.baseURL && error.config.url && (
+                <p>
+                  <span className="text-foreground font-medium">
+                    {error.response?.status ?? "ERR"}
+                  </span>{" "}
+                  {error.config.baseURL}
+                  {error.config.url}
+                </p>
+              )}
+              {error.response?.data?.error && (
+                <p>{error.response.data.error}</p>
+              )}
+            </div>
+          )}
           <div className="flex w-full gap-2">
             <Button variant="outline" onClick={onRetry} className="flex-1">
               <IconRefresh data-icon="inline-start" />

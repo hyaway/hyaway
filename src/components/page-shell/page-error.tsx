@@ -34,9 +34,22 @@ export function PageError({
         {error instanceof Error ? error.message : fallbackMessage}
       </AlertTitle>
       <AlertDescription className="space-y-2">
-        {error instanceof AxiosError && error.response?.data?.error ? (
-          <p>{error.response.data.error}</p>
-        ) : null}
+        {error instanceof AxiosError && error.config && (
+          <>
+            {error.config.baseURL && error.config.url && (
+              <p className="font-mono text-xs">
+                <span className="font-medium">
+                  {error.response?.status ?? "ERR"}
+                </span>{" "}
+                {error.config.baseURL}
+                {error.config.url}
+              </p>
+            )}
+            {error.response?.data?.error ? (
+              <p>{error.response.data.error}</p>
+            ) : null}
+          </>
+        )}
 
         {stack && (
           <>

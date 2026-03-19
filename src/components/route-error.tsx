@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
+import { AxiosError } from "axios";
 import {
   IconAlertTriangle,
   IconArrowLeft,
@@ -45,6 +46,22 @@ export function RouteError({ error, reset }: RouteErrorProps) {
 
         <div className="bg-destructive/10 border-destructive/20 rounded-lg border p-4">
           <p className="text-destructive font-mono text-sm">{error.message}</p>
+          {error instanceof AxiosError && error.config && (
+            <div className="text-destructive/80 mt-2 space-y-1 text-xs">
+              {error.config.baseURL && error.config.url && (
+                <p className="font-mono">
+                  <span className="font-medium">
+                    {error.response?.status ?? "ERR"}
+                  </span>{" "}
+                  {error.config.baseURL}
+                  {error.config.url}
+                </p>
+              )}
+              {error.response?.data?.error && (
+                <p>{error.response.data.error}</p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
