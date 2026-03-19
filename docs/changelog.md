@@ -4,6 +4,19 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-03-19
+
+### Changed
+
+- Error screens now display the request URL and HTTP status code for easier troubleshooting
+- Updated dependencies
+
+### Fixed
+
+- Thumbnail gallery no longer blocks rendering when thumbnail dimensions can't be loaded from Hydrus
+
+---
+
 ## 2026-02-10
 
 ### Added
