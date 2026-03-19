@@ -38,7 +38,7 @@
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@tabler/icons-react": "^3.40.0",
     "@tanstack/react-devtools": "^0.7.11",
-    "@tanstack/react-form": "^1.28.5",
+    "@tanstack/react-form": "1.28.3",
     "@tanstack/react-query": "^5.91.0",
     "@tanstack/react-query-devtools": "^5.91.3",
     "@tanstack/react-router": "^1.167.5",

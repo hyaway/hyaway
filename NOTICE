@@ -3,7 +3,7 @@
 "@fontsource-variable/jetbrains-mono@5.2.8","OFL-1.1","https://github.com/fontsource/font-files"
 "@tabler/icons-react@3.40.0","MIT","https://github.com/tabler/tabler-icons"
 "@tanstack/react-devtools@0.7.11","MIT","https://github.com/TanStack/devtools"
-"@tanstack/react-form@1.28.5","MIT","https://github.com/TanStack/form"
+"@tanstack/react-form@1.28.3","MIT","https://github.com/TanStack/form"
 "@tanstack/react-query-devtools@5.91.3","MIT","https://github.com/TanStack/query"
 "@tanstack/react-query@5.91.0","MIT","https://github.com/TanStack/query"
 "@tanstack/react-router-devtools@1.166.9","MIT","https://github.com/TanStack/router"
