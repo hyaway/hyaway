@@ -9,6 +9,8 @@ import {
   IconArrowUp,
   IconCheck,
 } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 
 import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import { ReviewDecisionFilmstrip } from "./review-decision-filmstrip";
@@ -59,6 +61,8 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
   const total = stats.left + stats.right + stats.up + stats.down;
   const history = useReviewQueueHistory();
   const { servicesMap } = useRatingServices();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Derive file IDs by direction from history - stable reference via useMemo
   const fileIdsByDirection = useMemo(() => {
@@ -79,6 +83,14 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
     () => DISPLAY_DIRECTIONS.filter((d) => fileIdsByDirection[d].length > 0),
     [fileIdsByDirection],
   );
+
+  const handleNewRandomInbox = async () => {
+    await queryClient.resetQueries({
+      queryKey: ["searchFiles", "randomInbox"],
+    });
+
+    await navigate({ to: "/random-inbox" });
+  };
 
   return (
     <div className="flex w-full flex-col items-center gap-6 pb-16">
@@ -136,9 +148,9 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
           >
             Pages
           </LinkButton>
-          <LinkButton variant="outline" size="xl" to="/random-inbox">
-            Random inbox
-          </LinkButton>
+          <Button variant="outline" size="xl" onClick={handleNewRandomInbox}>
+            New random inbox
+          </Button>
           <LinkButton variant="outline" size="xl" to="/recently-inboxed">
             Recently inboxed
           </LinkButton>
