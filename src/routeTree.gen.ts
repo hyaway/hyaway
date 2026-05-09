@@ -24,6 +24,7 @@ import { Route as AuthgalleriesRandomInboxRouteImport } from "./routes/_auth/(ga
 import { Route as AuthgalleriesMostViewedRouteImport } from "./routes/_auth/(galleries)/most-viewed";
 import { Route as AuthgalleriesLongestViewedRouteImport } from "./routes/_auth/(galleries)/longest-viewed";
 import { Route as AuthgalleriesHistoryRouteImport } from "./routes/_auth/(galleries)/history";
+import { Route as settingsSettingsPinRouteImport } from "./routes/(settings)/settings.pin";
 import { Route as settingsSettingsDataRouteImport } from "./routes/(settings)/settings.data";
 import { Route as settingsSettingsConnectionRouteImport } from "./routes/(settings)/settings.connection";
 import { Route as settingsSettingsAppearanceRouteImport } from "./routes/(settings)/settings.appearance";
@@ -128,6 +129,11 @@ const AuthgalleriesHistoryRoute = AuthgalleriesHistoryRouteImport.update({
   id: "/(galleries)/history",
   path: "/history",
   getParentRoute: () => AuthRoute,
+} as any);
+const settingsSettingsPinRoute = settingsSettingsPinRouteImport.update({
+  id: "/pin",
+  path: "/pin",
+  getParentRoute: () => settingsSettingsRoute,
 } as any);
 const settingsSettingsDataRoute = settingsSettingsDataRouteImport.update({
   id: "/data",
@@ -278,6 +284,7 @@ export interface FileRoutesByFullPath {
   "/settings/appearance": typeof settingsSettingsAppearanceRoute;
   "/settings/connection": typeof settingsSettingsConnectionRoute;
   "/settings/data": typeof settingsSettingsDataRoute;
+  "/settings/pin": typeof settingsSettingsPinRoute;
   "/history": typeof AuthgalleriesHistoryRouteWithChildren;
   "/longest-viewed": typeof AuthgalleriesLongestViewedRouteWithChildren;
   "/most-viewed": typeof AuthgalleriesMostViewedRouteWithChildren;
@@ -317,6 +324,7 @@ export interface FileRoutesByTo {
   "/settings/appearance": typeof settingsSettingsAppearanceRoute;
   "/settings/connection": typeof settingsSettingsConnectionRoute;
   "/settings/data": typeof settingsSettingsDataRoute;
+  "/settings/pin": typeof settingsSettingsPinRoute;
   "/file/$fileId": typeof AuthFileFileIdRoute;
   "/settings": typeof settingsSettingsIndexRoute;
   "/history/$fileId": typeof AuthgalleriesHistoryFileIdRoute;
@@ -348,6 +356,7 @@ export interface FileRoutesById {
   "/(settings)/settings/appearance": typeof settingsSettingsAppearanceRoute;
   "/(settings)/settings/connection": typeof settingsSettingsConnectionRoute;
   "/(settings)/settings/data": typeof settingsSettingsDataRoute;
+  "/(settings)/settings/pin": typeof settingsSettingsPinRoute;
   "/_auth/(galleries)/history": typeof AuthgalleriesHistoryRouteWithChildren;
   "/_auth/(galleries)/longest-viewed": typeof AuthgalleriesLongestViewedRouteWithChildren;
   "/_auth/(galleries)/most-viewed": typeof AuthgalleriesMostViewedRouteWithChildren;
@@ -390,6 +399,7 @@ export interface FileRouteTypes {
     | "/settings/appearance"
     | "/settings/connection"
     | "/settings/data"
+    | "/settings/pin"
     | "/history"
     | "/longest-viewed"
     | "/most-viewed"
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | "/settings/appearance"
     | "/settings/connection"
     | "/settings/data"
+    | "/settings/pin"
     | "/file/$fileId"
     | "/settings"
     | "/history/$fileId"
@@ -459,6 +470,7 @@ export interface FileRouteTypes {
     | "/(settings)/settings/appearance"
     | "/(settings)/settings/connection"
     | "/(settings)/settings/data"
+    | "/(settings)/settings/pin"
     | "/_auth/(galleries)/history"
     | "/_auth/(galleries)/longest-viewed"
     | "/_auth/(galleries)/most-viewed"
@@ -606,6 +618,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/history";
       preLoaderRoute: typeof AuthgalleriesHistoryRouteImport;
       parentRoute: typeof AuthRoute;
+    };
+    "/(settings)/settings/pin": {
+      id: "/(settings)/settings/pin";
+      path: "/pin";
+      fullPath: "/settings/pin";
+      preLoaderRoute: typeof settingsSettingsPinRouteImport;
+      parentRoute: typeof settingsSettingsRoute;
     };
     "/(settings)/settings/data": {
       id: "/(settings)/settings/data";
@@ -989,6 +1008,7 @@ interface settingsSettingsRouteChildren {
   settingsSettingsAppearanceRoute: typeof settingsSettingsAppearanceRoute;
   settingsSettingsConnectionRoute: typeof settingsSettingsConnectionRoute;
   settingsSettingsDataRoute: typeof settingsSettingsDataRoute;
+  settingsSettingsPinRoute: typeof settingsSettingsPinRoute;
   settingsSettingsIndexRoute: typeof settingsSettingsIndexRoute;
 }
 
@@ -996,6 +1016,7 @@ const settingsSettingsRouteChildren: settingsSettingsRouteChildren = {
   settingsSettingsAppearanceRoute: settingsSettingsAppearanceRoute,
   settingsSettingsConnectionRoute: settingsSettingsConnectionRoute,
   settingsSettingsDataRoute: settingsSettingsDataRoute,
+  settingsSettingsPinRoute: settingsSettingsPinRoute,
   settingsSettingsIndexRoute: settingsSettingsIndexRoute,
 };
 

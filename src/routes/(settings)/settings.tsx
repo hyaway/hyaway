@@ -4,6 +4,8 @@
 import { Outlet, createFileRoute, linkOptions } from "@tanstack/react-router";
 import {
   IconDatabase,
+  IconDialpad,
+  IconDialpadFilled,
   IconLayoutDashboard,
   IconLayoutDashboardFilled,
   IconLock,
@@ -68,6 +70,12 @@ const settingsItems = linkOptions([
     to: "/settings/data",
     icon: IconDatabase,
     filledIcon: IconDatabase,
+  },
+  {
+    name: "PIN",
+    to: "/settings/pin",
+    icon: IconDialpad,
+    filledIcon: IconDialpadFilled,
   },
 ]);
 
