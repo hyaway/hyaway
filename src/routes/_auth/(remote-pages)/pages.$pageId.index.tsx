@@ -4,6 +4,7 @@
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconFocusCentered, IconRefreshDot } from "@tabler/icons-react";
+import { usePageGroupMetaByPageKey } from "./-hooks/use-page-group-meta";
 import { useResolvedPage } from "./-hooks/use-resolved-page";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
@@ -22,6 +23,7 @@ import { PageState } from "@/integrations/hydrus-api/models";
 import {
   useFocusPageMutation,
   useGetPageInfoQuery,
+  useGetPagesTreeQuery,
   useRefreshPageMutation,
 } from "@/integrations/hydrus-api/queries/manage-pages";
 
@@ -82,9 +84,12 @@ function PageContent({
     resolvedPageKey,
     true,
   );
+  const { data: pagesTree } = useGetPagesTreeQuery();
   const refreshPageMutation = useRefreshPageMutation();
   const focusPageMutation = useFocusPageMutation();
   const queryClient = useQueryClient();
+  const groupMetaByPageKey = usePageGroupMetaByPageKey(pagesTree ?? null);
+  const groupLabel = groupMetaByPageKey.get(resolvedPageKey)?.label;
 
   // Get file IDs for review queue
   const fileIds = data?.page_info.media.hash_ids ?? [];
@@ -141,7 +146,7 @@ function PageContent({
     const title = `Page: ${resolvedPageName}`;
     return (
       <>
-        <PageLoading title={title} />
+        <PageLoading title={title} eyebrow={groupLabel} />
         <PageHeaderActions>
           <ThumbnailGalleryDisplaySettingsPopover />
         </PageHeaderActions>
@@ -157,7 +162,10 @@ function PageContent({
     return (
       <>
         <>
-          <PageHeading title={`Page: ${resolvedPageName}`} />
+          <PageHeading
+            title={`Page: ${resolvedPageName}`}
+            eyebrow={groupLabel}
+          />
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while fetching pages."
@@ -179,6 +187,7 @@ function PageContent({
       <>
         <PageHeading
           title={`Page: ${data?.page_info.name} (${data?.page_info.media.num_files ?? 0} files)`}
+          eyebrow={groupLabel}
         />
         {data?.page_info.media ? (
           <ThumbnailGalleryProvider fileIds={data.page_info.media.hash_ids}>
