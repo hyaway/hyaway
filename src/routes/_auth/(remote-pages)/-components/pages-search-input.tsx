@@ -29,7 +29,7 @@ export function PagesSearchInput({ variant = "page" }: PagesSearchInputProps) {
   const handleValueChange = (nextValue: string) => {
     void navigate({
       to: PAGES_INDEX_PATH,
-      search: { q: nextValue.trim() ? nextValue : undefined },
+      search: { q: nextValue ? nextValue : undefined }, // Clear on empty string
       replace: true,
     });
   };
