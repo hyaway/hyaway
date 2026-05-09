@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import z from "zod";
@@ -12,6 +12,7 @@ import {
   PagesGridItemSkeleton,
 } from "./-components/pages-grid-item";
 import { PagesIndexRightSidebar } from "./-components/pages-index-right-sidebar";
+import { PagesSearchInput } from "./-components/pages-search-input";
 import { PagesDisplaySettingsPopover } from "./-components/pages-display-settings-popover";
 import { usePageGroupMetaByPageKey } from "./-hooks/use-page-group-meta";
 import { usePagesSearchHighlights } from "./-hooks/use-pages-search-highlights";
@@ -27,7 +28,6 @@ import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ScrollPositionBadge } from "@/components/scroll-position-badge";
-import { Input } from "@/components/ui-primitives/input";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import {
   useGetMediaPagesQuery,
@@ -44,10 +44,7 @@ import {
 } from "@/stores/pages-settings-store";
 
 const PagesSearchSchema = z.object({
-  q: z
-    .string()
-    .optional()
-    .transform((value) => value?.trim() || undefined),
+  q: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
@@ -59,7 +56,6 @@ export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
  * Pages index component - shows virtualized grid of pages grid items
  */
 function PagesIndex() {
-  const navigate = useNavigate({ from: Route.fullPath });
   const { q } = Route.useSearch();
   const {
     data: pages,
@@ -152,16 +148,6 @@ function PagesIndex() {
     />
   );
 
-  const handleQueryChange = (value: string) => {
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        q: value.trim() ? value : undefined,
-      }),
-      replace: true,
-    });
-  };
-
   const emptySearchMessage = "No pages match your search.";
   const emptyPagesMessage =
     "No media pages found. Open some file search pages in Hydrus Client.";
@@ -208,18 +194,12 @@ function PagesIndex() {
       <div ref={containerRef}>
         <PageHeading title={title} />
         <div className="my-3 max-w-md">
-          <Input
-            placeholder="Search pages"
-            value={searchQuery}
-            onChange={(event) => handleQueryChange(event.target.value)}
-          />
+          <PagesSearchInput />
         </div>
 
         {mainContent}
       </div>
       <PagesIndexRightSidebar
-        query={searchQuery}
-        onQueryChange={handleQueryChange}
         tree={pagesTree}
         treeEmptyMessage={treeSidebarEmptyMessage}
       />

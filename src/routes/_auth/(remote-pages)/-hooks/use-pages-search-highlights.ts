@@ -1,7 +1,13 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from "react";
 
 function getTextNode(element: HTMLElement) {
   const child = element.firstChild;
@@ -37,6 +43,10 @@ export function usePagesSearchHighlights({
   highlightName,
 }: PagesSearchHighlightsOptions) {
   const elementMapRef = useRef<Map<string, HTMLElement | null>>(new Map());
+  const [elementVersion, bumpElementVersion] = useReducer(
+    (value: number) => value + 1,
+    0,
+  );
   const supportsCustomHighlight = useMemo(() => {
     return (
       typeof CSS !== "undefined" &&
@@ -47,10 +57,16 @@ export function usePagesSearchHighlights({
 
   const registerLabelRef = useCallback(
     (key: string) => (node: HTMLElement | null) => {
+      const previousNode = elementMapRef.current.get(key) ?? null;
+
       if (node) {
         elementMapRef.current.set(key, node);
       } else {
         elementMapRef.current.delete(key);
+      }
+
+      if (previousNode !== node) {
+        bumpElementVersion();
       }
     },
     [],
@@ -95,7 +111,7 @@ export function usePagesSearchHighlights({
     return () => {
       CSS.highlights.delete(highlightName);
     };
-  }, [highlightName, query, supportsCustomHighlight]);
+  }, [elementVersion, highlightName, query, supportsCustomHighlight]);
 
   return {
     registerLabelRef,
