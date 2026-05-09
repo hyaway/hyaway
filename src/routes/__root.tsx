@@ -9,12 +9,14 @@ import type { QueryClient } from "@tanstack/react-query";
 import TanStackQueryDevtools from "@/integrations/tanstack-query/devtools";
 
 import { AppShell } from "@/components/app-shell/app-shell";
+import { PinLockScreen } from "@/components/app-shell/pin-lock-screen";
 import { GlobalTouchCountProvider } from "@/lib/global-touch-count";
 import {
   useApplyTheme,
   useSystemThemeListener,
   useThemeHydrated,
 } from "@/stores/theme-store";
+import { useAutoLock, useShouldShowLockScreen } from "@/stores/pin-lock-store";
 
 export interface MyRouterContext {
   queryClient: QueryClient;
@@ -27,10 +29,17 @@ function RootComponent() {
   const hasHydrated = useThemeHydrated();
   useApplyTheme();
   useSystemThemeListener();
+  useAutoLock();
+
+  const isLocked = useShouldShowLockScreen();
 
   // Block render until theme is hydrated to prevent flash
   if (!hasHydrated) {
     return null;
+  }
+
+  if (isLocked) {
+    return <PinLockScreen />;
   }
 
   return (
