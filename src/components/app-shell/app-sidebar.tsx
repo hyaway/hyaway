@@ -21,6 +21,7 @@ import {
   IconEyeFilled,
   IconLayoutGrid,
   IconLayoutGridFilled,
+  IconLock,
   IconMail,
   IconMailFilled,
   IconSettings,
@@ -32,6 +33,8 @@ import { SidebarThemeSwitcher } from "./theme-switcher";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import { PERMISSION_LABELS } from "@/integrations/hydrus-api/permissions";
 import { Permission } from "@/integrations/hydrus-api/models";
+import { useIsPinEnabled, usePinLockActions } from "@/stores/pin-lock-store";
+import { Button } from "@/components/ui-primitives/button";
 import { Heading } from "@/components/ui-primitives/heading";
 import { TouchTarget } from "@/components/ui-primitives/touch-target";
 import {
@@ -167,26 +170,29 @@ export function AppSidebar() {
   return (
     <>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuLinkButton
-              size="lg"
-              className="group/logo cursor-pointer"
-              to="/"
-            >
-              <TouchTarget>
-                <div className="border-sidebar-primary text-foreground bg-background group-data-active/logo:bg-sidebar-primary group-data-active/logo:text-sidebar-primary-foreground group-hover/logo:bg-sidebar-primary group-hover/logo:text-sidebar-primary-foreground flex aspect-square size-9 items-end justify-center border-2">
-                  <span className="text-base font-semibold">hA</span>
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <Heading className="truncate font-medium" level={2}>
-                    hyAway
-                  </Heading>
-                </div>
-              </TouchTarget>
-            </SidebarMenuLinkButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex items-center gap-1">
+          <SidebarMenu className="flex-1">
+            <SidebarMenuItem>
+              <SidebarMenuLinkButton
+                size="lg"
+                className="group/logo cursor-pointer"
+                to="/"
+              >
+                <TouchTarget>
+                  <div className="border-sidebar-primary text-foreground bg-background group-data-active/logo:bg-sidebar-primary group-data-active/logo:text-sidebar-primary-foreground group-hover/logo:bg-sidebar-primary group-hover/logo:text-sidebar-primary-foreground flex aspect-square size-9 items-end justify-center border-2">
+                    <span className="text-base font-semibold">hA</span>
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <Heading className="truncate font-medium" level={2}>
+                      hyAway
+                    </Heading>
+                  </div>
+                </TouchTarget>
+              </SidebarMenuLinkButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+          <SidebarLockButton />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -401,5 +407,33 @@ export function AppSidebar() {
       </SidebarFooter>
       <SidebarRail />
     </>
+  );
+}
+
+function SidebarLockButton() {
+  const isPinEnabled = useIsPinEnabled();
+  const { lockSession } = usePinLockActions();
+
+  if (!isPinEnabled) return null;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={lockSession}
+            aria-label="Lock app"
+            className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground size-14.5 shrink-0 rounded-lg group-data-[collapsible=icon]:hidden"
+          >
+            <TouchTarget>
+              <IconLock />
+            </TouchTarget>
+          </Button>
+        }
+      />
+      <TooltipContent side="bottom">Lock app</TooltipContent>
+    </Tooltip>
   );
 }
