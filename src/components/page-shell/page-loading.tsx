@@ -7,13 +7,14 @@ import { ThumbnailGallerySkeleton } from "@/components/thumbnail-gallery/thumbna
 
 interface PageLoadingProps {
   title: string;
+  eyebrow?: string;
   children?: ReactNode;
 }
 
-export function PageLoading({ title, children }: PageLoadingProps) {
+export function PageLoading({ title, eyebrow, children }: PageLoadingProps) {
   return (
     <div className="pb-16">
-      {title && <PageHeading title={title} />}
+      {title && <PageHeading title={title} eyebrow={eyebrow} />}
       {children}
       <ThumbnailGallerySkeleton />
     </div>

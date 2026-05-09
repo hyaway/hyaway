@@ -6,14 +6,18 @@ import { Separator } from "@/components/ui-primitives/separator";
 
 interface PageHeadingProps {
   title: string;
+  eyebrow?: string;
 }
 
-export function PageHeading({ title }: PageHeadingProps) {
+export function PageHeading({ title, eyebrow }: PageHeadingProps) {
   return (
     <>
-      <Heading level={1} className="pt-2">
-        {title}
-      </Heading>
+      <div className="pt-2">
+        {eyebrow ? (
+          <p className="text-muted-foreground -mb-2 text-sm/5">{eyebrow}</p>
+        ) : null}
+        <Heading level={1}>{title}</Heading>
+      </div>
       <Separator className="mb-2" />
     </>
   );
