@@ -92,6 +92,14 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
     await navigate({ to: "/random-inbox" });
   };
 
+  const handleRecentlyInboxed = async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ["searchFiles", "recentlyInboxed"],
+    });
+
+    await navigate({ to: "/recently-inboxed" });
+  };
+
   return (
     <div className="flex w-full flex-col items-center gap-6 pb-16">
       {/* Header section - centered with max width */}
@@ -151,9 +159,9 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
           <Button variant="outline" size="xl" onClick={handleNewRandomInbox}>
             New random inbox
           </Button>
-          <LinkButton variant="outline" size="xl" to="/recently-inboxed">
+          <Button variant="outline" size="xl" onClick={handleRecentlyInboxed}>
             Recently inboxed
-          </LinkButton>
+          </Button>
           <Button variant="outline" onClick={clearQueue} size="xl">
             Clear review queue
           </Button>

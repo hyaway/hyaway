@@ -4,6 +4,22 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-05-09
+
+### Added
+
+- **PIN lock** — Protect the app with a 4-digit PIN required each new session
+- **Auto-lock** — Optionally lock the app after being in the background for a configurable duration
+- Lock button in the sidebar header for quick manual locking
+- "Forgot PIN?" popover on the lock screen that clears the PIN and disconnects from the API
+
+### Changed
+
+- Review completion now offers a "New random inbox" action that fetches a fresh random inbox set when opened
+- Opening "Recently inboxed" from review completion now refreshes that gallery before navigation
+
+---
+
 ## 2026-03-19
 
 ### Changed
