@@ -7,7 +7,7 @@ import { ThumbnailGallerySkeleton } from "@/components/thumbnail-gallery/thumbna
 
 interface PageLoadingProps {
   title: string;
-  eyebrow?: string;
+  eyebrow?: ReactNode;
   children?: ReactNode;
 }
 
