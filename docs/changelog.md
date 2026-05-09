@@ -17,6 +17,7 @@ All notable changes to hyAway are documented here.
 
 - Review completion now offers a "New random inbox" action that fetches a fresh random inbox set when opened
 - Opening "Recently inboxed" from review completion now refreshes that gallery before navigation
+- Opened Hydrus pages now show their parent page path above the page title, matching the hierarchy shown in page cards
 
 ---
 
