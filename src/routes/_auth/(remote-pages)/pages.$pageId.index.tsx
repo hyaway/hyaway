@@ -87,7 +87,11 @@ function PageContent({
   const focusPageMutation = useFocusPageMutation();
   const queryClient = useQueryClient();
   const pagePath = (
-    <PageGroupPathForPage pageKey={resolvedPageKey} size="sidebar" />
+    <PageGroupPathForPage
+      pageKey={resolvedPageKey}
+      size="sidebar"
+      linkSegmentsToPagesSearch
+    />
   );
 
   // Get file IDs for review queue
