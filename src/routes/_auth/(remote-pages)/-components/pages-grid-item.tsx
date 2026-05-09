@@ -2,12 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Link } from "@tanstack/react-router";
-import {
-  IconCaretRightFilled,
-  IconPoint,
-  IconPointFilled,
-} from "@tabler/icons-react";
 import { memo } from "react";
+import { PageGroupPath } from "./page-group-path";
 import { HighlightedText } from "./pages-highlighted-text";
 import { Item, ItemContent, ItemTitle } from "@/components/ui-primitives/item";
 import { ThumbnailImage } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
@@ -69,7 +65,6 @@ export const PagesGridItem = memo(function PagesGridItem({
 }: PagesGridItemProps) {
   const { data, isLoading } = useGetPageInfoQuery(pageKey, true);
   const useFriendlyUrls = usePagesUseFriendlyUrls();
-  const groupSegments = groupLabel ? groupLabel.split(" / ") : [];
   const activeStripeColors = groupStripeColorsByLevel.filter(
     (color): color is string => Boolean(color),
   );
@@ -196,47 +191,14 @@ export const PagesGridItem = memo(function PagesGridItem({
           title={groupLabel ? `${groupLabel} / ${pageName}` : pageName}
         >
           {groupLabel ? (
-            <span className="text-foreground line-clamp-1 flex min-w-0 flex-wrap items-center gap-x-0.5 gap-y-0.5 text-xs/4">
-              {groupSegments.map((segment, segmentIndex) => {
-                const dotColor = groupStripeColorsByLevel[segmentIndex];
-
-                return (
-                  <span
-                    key={`${segment}-${segmentIndex}`}
-                    className="flex items-center gap-0.5"
-                  >
-                    {dotColor ? (
-                      <IconPointFilled
-                        className="mt-0.5 size-3 shrink-0 self-baseline"
-                        style={{ color: dotColor }}
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <IconPoint
-                        className="text-muted-foreground mt-0.5 size-3 shrink-0 self-baseline"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <span
-                      ref={getGroupLabelRef?.(segmentIndex)}
-                      className="min-w-0 break-all"
-                    >
-                      <HighlightedText
-                        text={segment}
-                        query={highlightQuery}
-                        useCustomHighlight={useCustomHighlight}
-                      />
-                    </span>
-                    {segmentIndex < groupSegments.length - 1 ? (
-                      <IconCaretRightFilled
-                        className="text-muted-foreground mt-0.5 size-3 shrink-0 self-baseline"
-                        aria-hidden="true"
-                      />
-                    ) : null}
-                  </span>
-                );
-              })}
-            </span>
+            <PageGroupPath
+              groupLabel={groupLabel}
+              stripeColorsByLevel={groupStripeColorsByLevel}
+              className="text-foreground line-clamp-1"
+              getGroupLabelRef={getGroupLabelRef}
+              highlightQuery={highlightQuery}
+              useCustomHighlight={useCustomHighlight}
+            />
           ) : null}
           <span
             ref={labelRef}
