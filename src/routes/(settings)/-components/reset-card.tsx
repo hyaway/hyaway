@@ -9,14 +9,10 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui-primitives/card";
-import { useAuthActions } from "@/integrations/hydrus-api/hydrus-config-store";
-import { useReviewQueueActions } from "@/stores/review-queue-store";
-import { useWatchHistoryActions } from "@/stores/watch-history-store";
+import { useResetConnection } from "@/hooks/use-reset-connection";
 
 export function ResetCard({ resetKey }: { resetKey: () => void }) {
-  const { reset } = useAuthActions();
-  const { clearQueue } = useReviewQueueActions();
-  const { clearHistory } = useWatchHistoryActions();
+  const resetConnection = useResetConnection();
 
   return (
     <Card>
@@ -31,10 +27,8 @@ export function ResetCard({ resetKey }: { resetKey: () => void }) {
         <Button
           variant="destructive"
           onClick={() => {
-            reset();
+            resetConnection();
             resetKey();
-            clearQueue();
-            clearHistory();
           }}
         >
           Reset API settings
