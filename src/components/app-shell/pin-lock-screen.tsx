@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { IconAlertTriangle, IconLock } from "@tabler/icons-react";
 import {
   InputOTP,
@@ -30,6 +30,10 @@ export function PinLockScreen() {
   const { verifyPin, unlockSession, removePin } = usePinLockActions();
   const resetConnection = useResetConnection();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleComplete = useCallback(
     (value: string) => {
