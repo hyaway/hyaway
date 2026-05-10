@@ -294,10 +294,7 @@ const fieldGroups: Array<DisplayOptionGroup> = [
       {
         name: "hash",
         label: "hash",
-        operators: [
-          { name: "=", label: "is" },
-          { name: "!=", label: "is not" },
-        ],
+        operators: [{ name: "=", label: "is" }],
         defaultValue: "",
       },
       {
