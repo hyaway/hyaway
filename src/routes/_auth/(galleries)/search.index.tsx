@@ -7,7 +7,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import z from "zod";
 import {
   SearchQueryBuilder,
@@ -66,6 +66,7 @@ export const Route = createFileRoute("/_auth/(galleries)/search/")({
 function SearchIndex() {
   const { q, systemOk, sortType, sortAsc } = Route.useSearch();
   const navigate = useNavigate();
+  const [preserveCurrentScroll, setPreserveCurrentScroll] = useState(false);
 
   const searchTags = useMemo(
     () => (q ? queryToHydrusSearch(q as RuleGroupType) : []),
@@ -124,6 +125,7 @@ function SearchIndex() {
       query: RuleGroupType,
       options?: { systemOk?: boolean; sort?: SortConfig },
     ) => {
+      setPreserveCurrentScroll(true);
       void navigate({
         to: "/search",
         search: {
@@ -132,6 +134,8 @@ function SearchIndex() {
           sortType: options?.sort?.sortType,
           sortAsc: options?.sort?.sortAsc,
         },
+        replace: true,
+        resetScroll: false,
       });
     },
     [navigate],
@@ -202,7 +206,11 @@ function SearchIndex() {
         )}
         {!isLoading && !isError && hasFiles && (
           <ThumbnailGalleryProvider fileIds={fileIds}>
-            <ThumbnailGallery fileIds={fileIds} getFileLink={getFileLink} />
+            <ThumbnailGallery
+              fileIds={fileIds}
+              getFileLink={getFileLink}
+              preserveCurrentScroll={preserveCurrentScroll}
+            />
           </ThumbnailGalleryProvider>
         )}
         {!isLoading && !isError && !hasFiles && searchTags.length > 0 && (

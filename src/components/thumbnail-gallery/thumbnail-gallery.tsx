@@ -44,6 +44,11 @@ export interface ThumbnailGalleryProps {
   fileIds: Array<number>;
   /** Custom link builder for contextual navigation */
   getFileLink?: FileLinkBuilder;
+  /**
+   * When true, preserve the current window scroll on mount instead of
+   * restoring a previously saved one.
+   */
+  preserveCurrentScroll?: boolean;
   /** Accessible label for the gallery */
   "aria-label"?: string;
 }
@@ -51,6 +56,7 @@ export interface ThumbnailGalleryProps {
 export function ThumbnailGallery({
   fileIds,
   getFileLink,
+  preserveCurrentScroll,
   "aria-label": ariaLabel = "File gallery",
 }: ThumbnailGalleryProps) {
   const itemsQuery = useInfiniteGetFilesMetadata(fileIds, false);
@@ -83,6 +89,7 @@ export function ThumbnailGallery({
       totalItems={fileIds.length}
       defaultDimensions={defaultDimensions}
       getFileLink={getFileLink}
+      preserveCurrentScroll={preserveCurrentScroll}
       aria-label={ariaLabel}
     />
   );
@@ -93,12 +100,14 @@ export function PureThumbnailGallery({
   totalItems,
   defaultDimensions,
   getFileLink,
+  preserveCurrentScroll,
   "aria-label": ariaLabel,
 }: {
   itemsQuery: ReturnType<typeof useInfiniteGetFilesMetadata>;
   totalItems: number;
   defaultDimensions: { width: number; height: number };
   getFileLink?: FileLinkBuilder;
+  preserveCurrentScroll?: boolean;
   "aria-label"?: string;
 }) {
   const { data, isFetchingNextPage, fetchNextPage, hasNextPage } = itemsQuery;
@@ -171,7 +180,12 @@ export function PureThumbnailGallery({
   const scrollEntry = useElementScrollRestoration({
     getElement: () => window,
   });
-  const initialOffset = scrollEntry?.scrollY;
+  const restoredScrollY = preserveCurrentScroll
+    ? undefined
+    : scrollEntry?.scrollY;
+  const virtualizerInitialOffset = preserveCurrentScroll
+    ? () => (typeof document !== "undefined" ? window.scrollY : 0)
+    : restoredScrollY;
 
   const rowVirtualizer = useWindowVirtualizer({
     count: deferredItems.length,
@@ -185,13 +199,13 @@ export function PureThumbnailGallery({
     gap: deferredVerticalGap,
     lanes: effectiveLanes,
     scrollMargin: parentRef.current?.offsetTop ?? 0,
-    initialOffset,
+    initialOffset: virtualizerInitialOffset,
   });
 
   const totalSize = rowVirtualizer.getTotalSize();
 
   // Handle scroll restoration - scrolls window when totalSize is ready
-  useScrollRestoration(totalSize, initialOffset);
+  useScrollRestoration(totalSize, restoredScrollY);
 
   // Cache virtual items to avoid calling getVirtualItems() multiple times
   const virtualItems = rowVirtualizer.getVirtualItems();
