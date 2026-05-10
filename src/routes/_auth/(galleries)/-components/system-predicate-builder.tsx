@@ -651,25 +651,25 @@ function ruleToSearchTag(rule: RuleType): string | null {
   // Has / does not have fields
   if (HAS_FIELDS.has(field)) {
     const fieldLabels: Record<string, [string, string]> = {
-      audio: ["system:has audio", "system:has no audio"],
-      duration: ["system:has duration", "system:has no duration"],
-      notes: ["system:has notes", "system:has no notes"],
+      audio: ["system:has audio", "system:no audio"],
+      duration: ["system:has duration", "system:no duration"],
+      notes: ["system:has notes", "system:no notes"],
       tags_exist: ["system:has tags", "system:untagged"],
-      transparency: ["system:has transparency", "system:has no transparency"],
-      exif: ["system:has exif", "system:has no exif"],
-      icc_profile: ["system:has icc profile", "system:has no icc profile"],
+      transparency: ["system:has transparency", "system:no transparency"],
+      exif: ["system:has exif", "system:no exif"],
+      icc_profile: ["system:has icc profile", "system:no icc profile"],
       embedded_metadata: [
         "system:has embedded metadata",
-        "system:has no embedded metadata",
+        "system:no embedded metadata",
       ],
       forced_filetype: [
         "system:has forced filetype",
-        "system:has no forced filetype",
+        "system:no forced filetype",
       ],
-      framerate_has: ["system:has framerate", "system:has no framerate"],
-      frames_has: ["system:has frames", "system:has no frames"],
-      urls_has: ["system:has urls", "system:has no urls"],
-      words_has: ["system:has words", "system:has no words"],
+      framerate_has: ["system:has framerate", "system:no framerate"],
+      frames_has: ["system:has frames", "system:no frames"],
+      urls_has: ["system:has urls", "system:no urls"],
+      words_has: ["system:has words", "system:no words"],
     };
 
     const labels = fieldLabels[field];
