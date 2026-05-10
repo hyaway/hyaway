@@ -165,6 +165,7 @@ The app uses a permission-based feature gating system. Features degrade graceful
 | ---------------------------- | ----- | -------- | --------------------------------------------------- |
 | `SEARCH_FOR_AND_FETCH_FILES` | 3     | **Yes**  | Core functionality - file search, metadata, viewing |
 | `IMPORT_AND_DELETE_FILES`    | 1     | No       | Archive, unarchive, trash, restore files            |
+| `EDIT_FILE_TAGS`             | 5     | No       | Tag autocomplete in search                          |
 | `MANAGE_PAGES`               | 4     | No       | View/refresh/focus Hydrus pages                     |
 | `MANAGE_DATABASE`            | 6     | No       | Thumbnail dimensions, namespace colors              |
 | `EDIT_FILE_TIMES`            | 11    | No       | Sync view statistics to Hydrus                      |
@@ -177,6 +178,15 @@ The app uses a permission-based feature gating system. Features degrade graceful
 | `permissions.ts`         | Constants (`ALL_PERMISSIONS`, `PERMISSION_LABELS`) and utilities |
 | `queries/permissions.ts` | `usePermissions()` hook for checking permissions                 |
 | `queries/access.ts`      | `useHasPermission()` hook for single permission checks           |
+
+### Adding a New Permission
+
+When the app starts using a new Hydrus permission:
+
+1. Add it to `OPTIONAL_PERMISSIONS` in `permissions.ts` (this also adds it to `ALL_PERMISSIONS`, which is used when requesting a new access key)
+2. Add a label in `PERMISSION_LABELS` in `permissions.ts`
+3. Update the table above in this doc
+4. Use `useHasPermission()` in query hooks that need it — do **not** add it to route gates unless the page is broken without it (see [Permission Gating](../routing-conventions.md#permission-gating) in routing docs)
 
 ### Checking Permissions
 

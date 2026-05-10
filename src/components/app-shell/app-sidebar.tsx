@@ -24,6 +24,7 @@ import {
   IconLock,
   IconMail,
   IconMailFilled,
+  IconSearch,
   IconSettings,
   IconSettingsFilled,
   IconTrash,
@@ -219,6 +220,21 @@ export function AppSidebar() {
                         className="size-8"
                       />
                       <span>Pages</span>
+                    </TouchTarget>
+                  </SidebarMenuLinkButton>
+                )}
+              </SidebarNavLink>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarNavLink
+                requiredPermissions={[Permission.SEARCH_FOR_AND_FETCH_FILES]}
+                {...navLinkProps}
+              >
+                {(variant) => (
+                  <SidebarMenuLinkButton to="/search" variant={variant}>
+                    <TouchTarget>
+                      <SidebarIcon icon={IconSearch} filledIcon={IconSearch} />
+                      <span>Search</span>
                     </TouchTarget>
                   </SidebarMenuLinkButton>
                 )}

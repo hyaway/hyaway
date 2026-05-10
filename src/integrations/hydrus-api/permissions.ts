@@ -14,6 +14,7 @@ export const MINIMUM_REQUIRED_PERMISSIONS =
 /**
  * Permissions that enhance app functionality (not required but recommended).
  * - IMPORT_AND_DELETE_FILES: Archive/trash file management
+ * - EDIT_FILE_TAGS: Tag autocomplete in search
  * - MANAGE_PAGES: View/manage Hydrus pages
  * - MANAGE_DATABASE: Access thumbnail dimensions, namespace colors
  * - EDIT_FILE_TIMES: Sync view statistics to Hydrus
@@ -21,6 +22,7 @@ export const MINIMUM_REQUIRED_PERMISSIONS =
  */
 export const OPTIONAL_PERMISSIONS = [
   Permission.IMPORT_AND_DELETE_FILES,
+  Permission.EDIT_FILE_TAGS,
   Permission.MANAGE_PAGES,
   Permission.MANAGE_DATABASE,
   Permission.EDIT_FILE_TIMES,

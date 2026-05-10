@@ -174,3 +174,37 @@ function Gallery() {
 
 - `src/routeTree.gen.ts` - Auto-generated route tree (don't edit)
 - `vite.config.ts` - TanStack Router plugin configuration
+
+## Permission Gating
+
+Permissions control access at three levels. Each level serves a different purpose.
+
+### 1. Route layout gates (`PagePermissionGate`)
+
+Layout routes (e.g. `search.tsx`) wrap their `<Outlet>` in `<PagePermissionGate>`. Only list permissions that are **required** for the page to function at all. Do not include permissions for optional or degradable features.
+
+```tsx
+// routes/_auth/(galleries)/search.tsx
+const PAGE_PERMISSIONS = [Permission.SEARCH_FOR_AND_FETCH_FILES];
+// EDIT_FILE_TAGS is NOT listed — tag autocomplete degrades gracefully without it
+```
+
+### 2. Sidebar & homepage nav items (`requiredPermissions`)
+
+The sidebar (`app-sidebar.tsx`) and homepage (`index.tsx`) use `requiredPermissions` arrays on nav items. These must match the route's `PagePermissionGate` — same permissions, nothing extra.
+
+### 3. Query hooks (`useHasPermission`)
+
+Each query hook checks the specific permission it needs via `useHasPermission()` in the `enabled` flag. Queries gracefully disable when their permission is missing. This is where optional permissions are enforced.
+
+```tsx
+// queries/tags.ts — requires EDIT_FILE_TAGS, not gated at route level
+const canTags = useHasPermission(Permission.EDIT_FILE_TAGS);
+enabled: isConfigured && canSearch && canTags && trimmed.length >= 3,
+```
+
+### Rule of thumb
+
+- **Route gate / nav item**: Only permissions without which the page is **completely broken**
+- **Query hook**: The specific permission that query's API endpoint requires
+- Never duplicate a query-level permission up to the route gate unless the page is useless without it
