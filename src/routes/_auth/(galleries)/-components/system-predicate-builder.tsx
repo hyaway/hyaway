@@ -35,10 +35,12 @@ import type {
 } from "@/integrations/hydrus-api/models";
 import {
   Permission,
+  ServiceType,
   isLikeRatingService,
   isNumericalRatingService,
 } from "@/integrations/hydrus-api/models";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
+import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
 import {
@@ -304,6 +306,8 @@ const fieldGroups: Array<DisplayOptionGroup> = [
           { name: "is currently in", label: "is currently in" },
           { name: "is not currently in", label: "is not currently in" },
         ],
+        valueEditorType: "select",
+        values: [],
         defaultValue: "my files",
       },
     ],
@@ -525,6 +529,14 @@ function buildRatingFieldGroups(
     },
   ];
 }
+
+/** File-domain service types shown in the "file service" dropdown. */
+const FILE_SERVICE_TYPES = new Set([
+  ServiceType.LOCAL_FILE_DOMAIN,
+  ServiceType.TRASH,
+  ServiceType.ALL_MY_FILES,
+  ServiceType.FILE_REPOSITORY,
+]);
 
 /** Names of fields that are pure has/does-not-have toggles (no value input ever). */
 const HAS_ONLY_FIELDS = new Set([
@@ -1810,12 +1822,38 @@ export function SearchQueryBuilder({
   const [query, setQuery] = useState<RuleGroupType>(initialQuery ?? emptyQuery);
   const canEditRatings = useHasPermission(Permission.EDIT_FILE_RATINGS);
   const { ratingServices } = useRatingServices();
+  const { data: servicesData } = useGetServicesQuery();
+
+  // Build file service options from API-discovered services
+  const fileServiceValues = useMemo(() => {
+    if (!servicesData) return [];
+    return Object.values(servicesData.services)
+      .filter((s) => FILE_SERVICE_TYPES.has(s.type))
+      .map((s) => ({ name: s.name, label: s.name }));
+  }, [servicesData]);
 
   // Build field groups with rating services when available
   const allFieldGroups = useMemo(() => {
-    if (!canEditRatings || ratingServices.length === 0) return fieldGroups;
-    return [...fieldGroups, ...buildRatingFieldGroups(ratingServices)];
-  }, [canEditRatings, ratingServices]);
+    let groups = fieldGroups;
+
+    // Inject file service values into the file_service field
+    if (fileServiceValues.length > 0) {
+      groups = groups.map((group) => ({
+        ...group,
+        options: group.options.map((field) =>
+          field.name === "file_service"
+            ? { ...field, values: fileServiceValues }
+            : field,
+        ),
+      }));
+    }
+
+    if (canEditRatings && ratingServices.length > 0) {
+      return [...groups, ...buildRatingFieldGroups(ratingServices)];
+    }
+
+    return groups;
+  }, [canEditRatings, ratingServices, fileServiceValues]);
 
   const handleQueryChange = useCallback((q: RuleGroupType) => {
     setQuery(enforceCombinators(q));
