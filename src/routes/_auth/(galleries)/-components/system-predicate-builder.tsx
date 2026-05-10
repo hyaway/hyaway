@@ -1008,7 +1008,7 @@ function QBSelect({
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-2.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 sm:w-auto sm:min-w-40",
+          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-2.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 sm:w-auto sm:min-w-60",
           className,
         )}
         aria-label={title}
@@ -1028,7 +1028,7 @@ function QBSelect({
         align="start"
         side="right"
         alignOffset={-4}
-        sideOffset={-208}
+        sideOffset={-240}
       >
         <Command
           shouldFilter={isSearching}
