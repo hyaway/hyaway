@@ -19,7 +19,7 @@ import {
   useValueSelector,
 } from "react-querybuilder";
 import type {
-  ActionWithRulesProps,
+  ActionProps,
   Field,
   OptionGroup,
   RuleGroupType,
@@ -999,7 +999,9 @@ function QBSelect({
             // Short queries: exact substring match only (no fuzzy).
             // Longer queries: fuzzy with a minimum score threshold.
             if (searchTerm.length < 3) {
-              const haystack = [itemValue, ...(keywords ?? [])].join(" ").toLowerCase();
+              const haystack = [itemValue, ...(keywords ?? [])]
+                .join(" ")
+                .toLowerCase();
               return haystack.includes(searchTerm.toLowerCase()) ? 1 : 0;
             }
             const score = defaultFilter(itemValue, searchTerm, keywords);
@@ -1153,7 +1155,7 @@ function QBActionElement({
   disabledTranslation,
   className,
   level,
-}: ActionWithRulesProps) {
+}: ActionProps) {
   const isRemove =
     typeof label === "string" && (label === "⨯" || title?.includes("Remove"));
   const isAddGroup = typeof label === "string" && label.includes("Group");
