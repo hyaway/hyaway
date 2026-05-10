@@ -994,13 +994,15 @@ function QBSelect({
       >
         <Command
           shouldFilter={isSearching}
-          filter={(value, search, keywords) => {
-            const score = defaultFilter(value, search, keywords);
-            // Short queries produce many low-confidence fuzzy matches;
-            // require a higher score so only strong prefix/word-boundary
-            // matches survive.
-            const threshold = search.length < 3 ? 0.2 : 0.05;
-            return score > threshold ? score : 0;
+          filter={(itemValue, searchTerm, keywords) => {
+            // Short queries: exact substring match only (no fuzzy).
+            // Longer queries: fuzzy with a minimum score threshold.
+            if (searchTerm.length < 3) {
+              const haystack = [itemValue, ...(keywords ?? [])].join(" ").toLowerCase();
+              return haystack.includes(searchTerm.toLowerCase()) ? 1 : 0;
+            }
+            const score = defaultFilter(itemValue, searchTerm, keywords);
+            return score > 0.05 ? score : 0;
           }}
         >
           <CommandInput
