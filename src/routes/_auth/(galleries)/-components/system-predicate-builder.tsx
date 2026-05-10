@@ -1328,6 +1328,7 @@ function QBValueEditor(props: ValueEditorProps) {
       value={value ?? ""}
       disabled={disabled}
       title={title}
+      autoComplete="off"
       onChange={(e) => handleOnChange(e.target.value)}
     />
   );
