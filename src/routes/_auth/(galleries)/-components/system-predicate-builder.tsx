@@ -124,7 +124,7 @@ const ratioOperators = [
 ];
 
 const likeRatingOperators = [
-  { name: "is", label: "is" },
+  { name: "=", label: "is (=)" },
   { name: "has", label: "has rating" },
   { name: "has_not", label: "no rating" },
 ];
@@ -214,6 +214,7 @@ const fieldGroups: Array<DisplayOptionGroup> = [
         name: "width",
         label: "width",
         operators: comparisonOperators,
+        defaultOperator: "=",
         inputType: "number",
         defaultValue: "1920",
       },
@@ -221,6 +222,7 @@ const fieldGroups: Array<DisplayOptionGroup> = [
         name: "height",
         label: "height",
         operators: comparisonOperators,
+        defaultOperator: "=",
         inputType: "number",
         defaultValue: "1080",
       },
@@ -228,6 +230,7 @@ const fieldGroups: Array<DisplayOptionGroup> = [
         name: "ratio",
         label: "ratio",
         operators: ratioOperators,
+        defaultOperator: "=",
         defaultValue: "16:9",
       },
       {
@@ -479,6 +482,7 @@ function buildRatingFieldGroups(
         name: `rating:${service.name}`,
         label: service.name,
         operators: likeRatingOperators,
+        defaultOperator: "=",
         defaultValue: "liked",
         valueEditorType: "select" as const,
         values: [
@@ -496,6 +500,7 @@ function buildRatingFieldGroups(
         name: `rating:${service.name}`,
         label: service.name,
         operators: numericalRatingOperators,
+        defaultOperator: "=",
         inputType: "number" as const,
         defaultValue: String(service.max_stars),
         ratingServiceKey: serviceKey,
@@ -508,6 +513,7 @@ function buildRatingFieldGroups(
       name: `rating:${service.name}`,
       label: service.name,
       operators: numericalRatingOperators,
+      defaultOperator: ">",
       inputType: "number" as const,
       defaultValue: "0",
       ratingServiceKey: serviceKey,
@@ -694,13 +700,12 @@ function ruleToSearchTag(rule: RuleType): string | null {
     if (operator === "has_not") {
       return `system:no rating for ${serviceName}`;
     }
-    // Like/dislike: is/is_not with liked/disliked value
-    if (operator === "is" || operator === "is_not") {
+    // Like/dislike: = with liked/disliked value
+    if (operator === "=") {
       const ratingVal =
         value === "liked" ? "like" : value === "disliked" ? "dislike" : null;
       if (!ratingVal) return null;
-      const tag = `system:rating for ${serviceName} = ${ratingVal}`;
-      return operator === "is_not" ? `-${tag}` : tag;
+      return `system:rating for ${serviceName} = ${ratingVal}`;
     }
     if (!value && value !== 0) return null;
     return `system:rating for ${serviceName} ${operator} ${value}`;
