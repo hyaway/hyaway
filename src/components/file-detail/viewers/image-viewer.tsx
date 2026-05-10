@@ -519,10 +519,11 @@ export function ImageViewer({
       <InlineViewer
         fileUrl={fileUrl}
         fileId={fileId}
-        blurhash={blurhash}
         averageColor={averageColor}
         loaded={loaded}
         isExpanded={inlineExpanded}
+        imageBackground={effectiveImageBackground}
+        fillCanvasBackground={fillCanvasBackground}
         imageStyle={imageStyle}
         imageClassName={imageClassName}
         backgroundStyle={containerStyle}
@@ -685,10 +686,11 @@ export function ImageViewer({
 function InlineViewer({
   fileUrl,
   fileId,
-  blurhash,
   averageColor,
   loaded,
   isExpanded,
+  imageBackground,
+  fillCanvasBackground,
   imageStyle,
   imageClassName,
   backgroundStyle,
@@ -702,10 +704,11 @@ function InlineViewer({
 }: {
   fileUrl: string;
   fileId: number;
-  blurhash?: string;
   averageColor: string | undefined;
   loaded: boolean;
   isExpanded: boolean;
+  imageBackground: ImageBackground;
+  fillCanvasBackground: boolean;
   imageStyle: React.CSSProperties;
   imageClassName: string;
   backgroundStyle: React.CSSProperties;
@@ -786,6 +789,11 @@ function InlineViewer({
     };
   }, []);
 
+  const fillCanvasPlaceholderStyle = useMemo<React.CSSProperties>(
+    () => getFillCanvasPlaceholderStyle(imageBackground, averageColor),
+    [averageColor, imageBackground],
+  );
+
   return (
     <div
       ref={containerRef}
@@ -803,13 +811,14 @@ function InlineViewer({
       }}
       onTouchEnd={handleInlineDoubleTap}
     >
-      {!loaded && blurhash && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div
-            className="bg-muted size-full animate-pulse"
-            style={{ backgroundColor: averageColor || undefined }}
-          />
-        </div>
+      {!loaded && fillCanvasBackground && (
+        <div
+          style={fillCanvasPlaceholderStyle}
+          className={cn(
+            "pointer-events-none absolute inset-0",
+            getFillCanvasPlaceholderClassName(imageBackground),
+          )}
+        />
       )}
 
       <img
@@ -1301,6 +1310,27 @@ function ZoomBadge() {
       </div>
     </div>
   );
+}
+
+function getFillCanvasPlaceholderStyle(
+  imageBackground: ImageBackground,
+  averageColor: string | undefined,
+): React.CSSProperties {
+  if (imageBackground === "average" && averageColor) {
+    return { backgroundColor: averageColor };
+  }
+  return {};
+}
+
+function getFillCanvasPlaceholderClassName(imageBackground: ImageBackground) {
+  switch (imageBackground) {
+    case "checkerboard":
+      return "bg-(image:--checkerboard-bg) bg-size-[20px_20px]";
+    case "solid":
+    case "average":
+    default:
+      return "bg-background";
+  }
 }
 
 function useBackgroundStyles(

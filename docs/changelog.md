@@ -4,6 +4,14 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-05-10
+
+### Fixed
+
+- Image loading now respects the media viewer background preferences, preventing a brief average-color flash when opening images
+
+---
+
 ## 2026-05-09
 
 ### Added
