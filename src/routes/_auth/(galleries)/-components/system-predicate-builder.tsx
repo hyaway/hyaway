@@ -83,8 +83,6 @@ const comparisonOperators = [
   { name: "≠", label: "is not equal to (≠)" },
   { name: ">", label: "is greater than (>)" },
   { name: "<", label: "is less than (<)" },
-  { name: ">=", label: "is at least (≥)" },
-  { name: "<=", label: "is at most (≤)" },
   { name: "≈", label: "is approximately (≈)" },
 ];
 
@@ -121,8 +119,6 @@ const numericalRatingOperators = [
   { name: "=", label: "is equal to (=)" },
   { name: ">", label: "is greater than (>)" },
   { name: "<", label: "is less than (<)" },
-  { name: ">=", label: "is at least (≥)" },
-  { name: "<=", label: "is at most (≤)" },
   { name: "has", label: "has rating" },
   { name: "has_not", label: "no rating" },
 ];
