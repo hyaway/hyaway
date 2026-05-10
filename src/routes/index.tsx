@@ -24,6 +24,7 @@ import {
   IconLock,
   IconMail,
   IconPalette,
+  IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
 import { Heading, Subheading } from "@/components/ui-primitives/heading";
@@ -85,6 +86,7 @@ interface NavItem {
   to:
     | "/"
     | "/pages"
+    | "/search"
     | "/random-inbox"
     | "/review"
     | "/recently-inboxed"
@@ -120,6 +122,13 @@ const NAV_GROUPS: Array<NavGroup> = [
           Permission.SEARCH_FOR_AND_FETCH_FILES,
           Permission.MANAGE_PAGES,
         ],
+      },
+      {
+        title: "Search",
+        description: "Search your library with tags and system predicates",
+        to: "/search",
+        icon: IconSearch,
+        requiredPermissions: [Permission.SEARCH_FOR_AND_FETCH_FILES],
       },
       {
         title: "Random inbox",
