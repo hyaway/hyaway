@@ -672,7 +672,7 @@ function ruleToSearchTag(rule: RuleType): string | null {
     };
 
     const labels = fieldLabels[field];
-    return operator === "has" || operator === "is" ? labels[0] : labels[1];
+    return operator === "has" ? labels[0] : labels[1];
   }
 
   // Has/has_not operator on fields with both toggle and comparison modes
@@ -700,11 +700,9 @@ function ruleToSearchTag(rule: RuleType): string | null {
     if (operator === "has_not") {
       return `system:no rating for ${serviceName}`;
     }
-    // Like/dislike: = with liked/disliked value
-    if (operator === "=") {
-      const ratingVal =
-        value === "liked" ? "like" : value === "disliked" ? "dislike" : null;
-      if (!ratingVal) return null;
+    // Like/dislike ratings use "liked"/"disliked" as values
+    if (value === "liked" || value === "disliked") {
+      const ratingVal = value === "liked" ? "like" : "dislike";
       return `system:rating for ${serviceName} = ${ratingVal}`;
     }
     if (!value && value !== 0) return null;
