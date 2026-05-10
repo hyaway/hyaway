@@ -319,7 +319,7 @@ const fieldGroups: Array<DisplayOptionGroup> = [
         label: "number of tags",
         operators: [
           { name: "has", label: "has tags" },
-          { name: "has_not", label: "untagged" },
+          { name: "has_not", label: "no tags" },
           ...comparisonOperators,
         ],
         defaultOperator: ">",
@@ -553,6 +553,9 @@ const HAS_WITH_VALUE_FIELDS = new Set([
   "url_domain",
 ]);
 
+/** A `["system:has …", "system:no …"]` label pair for has/has_not toggles. */
+type HasNoLabels = [`system:has ${string}`, `system:no ${string}`];
+
 /** Checks if a field+operator combo needs no value input. */
 const isNoValueField = (field: string, operator: string): boolean =>
   HAS_ONLY_FIELDS.has(field) ||
@@ -567,7 +570,7 @@ const FIELD_SEARCH_KEYWORDS: Record<string, Array<string>> = {
   duration_value: ["has duration", "no duration"],
   framerate: ["has framerate", "no framerate"],
   num_frames: ["has frames", "no frames"],
-  num_tags: ["has tags", "untagged"],
+  num_tags: ["has tags", "no tags"],
 
   num_urls: ["has urls", "no urls"],
   num_notes: ["has notes", "no notes"],
@@ -656,7 +659,7 @@ function ruleToSearchTag(rule: RuleType): string | null {
 
   // Has / does not have fields (pure toggles — no value input)
   if (HAS_ONLY_FIELDS.has(field)) {
-    const fieldLabels: Record<string, [string, string]> = {
+    const fieldLabels: Record<string, HasNoLabels> = {
       audio: ["system:has audio", "system:no audio"],
       transparency: ["system:has transparency", "system:no transparency"],
       exif: ["system:has exif", "system:no exif"],
@@ -677,11 +680,11 @@ function ruleToSearchTag(rule: RuleType): string | null {
 
   // Has/has_not operator on fields with both toggle and comparison modes
   if (operator === "has" || operator === "has_not") {
-    const hasLabels: Partial<Record<string, [string, string]>> = {
+    const hasLabels: Partial<Record<string, HasNoLabels>> = {
       duration_value: ["system:has duration", "system:no duration"],
       framerate: ["system:has framerate", "system:no framerate"],
       num_frames: ["system:has frames", "system:no frames"],
-      num_tags: ["system:has tags", "system:untagged"],
+      num_tags: ["system:has tags", "system:no tags"],
 
       num_urls: ["system:has urls", "system:no urls"],
       num_notes: ["system:has notes", "system:no notes"],
