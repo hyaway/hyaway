@@ -14,6 +14,7 @@ import {
   queryToHydrusSearch,
 } from "./-components/system-predicate-builder";
 import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
+import type { SortConfig } from "./-components/system-predicate-builder";
 import type { RuleGroupType } from "react-querybuilder";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -53,6 +54,8 @@ const querySchema = z.object({
 const SearchParamsSchema = z.object({
   q: querySchema.optional().catch(undefined),
   systemOk: z.boolean().optional().catch(undefined),
+  sortType: z.number().optional().catch(undefined),
+  sortAsc: z.boolean().optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/_auth/(galleries)/search/")({
@@ -61,7 +64,7 @@ export const Route = createFileRoute("/_auth/(galleries)/search/")({
 });
 
 function SearchIndex() {
-  const { q, systemOk } = Route.useSearch();
+  const { q, systemOk, sortType, sortAsc } = Route.useSearch();
   const navigate = useNavigate();
 
   const searchTags = useMemo(
@@ -88,10 +91,22 @@ function SearchIndex() {
 
   const searchOptions = useMemo(
     () => ({
-      file_sort_type: HydrusFileSortType.ImportTime as const,
-      file_sort_asc: false as const,
+      file_sort_type: (sortType ??
+        HydrusFileSortType.ImportTime) as HydrusFileSortType,
+      file_sort_asc: sortAsc ?? false,
     }),
-    [],
+    [sortType, sortAsc],
+  );
+
+  const initialSort: SortConfig | undefined = useMemo(
+    () =>
+      sortType != null
+        ? {
+            sortType: sortType as HydrusFileSortType,
+            sortAsc: sortAsc ?? false,
+          }
+        : undefined,
+    [sortType, sortAsc],
   );
 
   const { data, isLoading, isFetching, isError, error } = useSearchFilesQuery(
@@ -105,10 +120,18 @@ function SearchIndex() {
   const reviewActions = useReviewActions({ fileIds });
 
   const handleSearch = useCallback(
-    (query: RuleGroupType, options?: { systemOk?: boolean }) => {
+    (
+      query: RuleGroupType,
+      options?: { systemOk?: boolean; sort?: SortConfig },
+    ) => {
       void navigate({
         to: "/search",
-        search: { q: query, systemOk: options?.systemOk || undefined },
+        search: {
+          q: query,
+          systemOk: options?.systemOk || undefined,
+          sortType: options?.sort?.sortType,
+          sortAsc: options?.sort?.sortAsc,
+        },
       });
     },
     [navigate],
@@ -118,6 +141,10 @@ function SearchIndex() {
     linkOptions({
       to: "/search/$fileId",
       params: { fileId: String(fileId) },
+      search: {
+        sortType,
+        sortAsc,
+      },
     });
 
   const refetchButton = (
@@ -146,6 +173,7 @@ function SearchIndex() {
         <div className="flex flex-col gap-2 pb-2">
           <SearchQueryBuilder
             initialQuery={q as RuleGroupType | undefined}
+            initialSort={initialSort}
             onSearch={handleSearch}
           />
         </div>

@@ -3,13 +3,17 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  IconArrowDown,
   IconArrowLeft,
+  IconArrowUp,
   IconBackslash,
   IconChevronDown,
   IconChevronRight,
   IconMinus,
   IconPlus,
   IconPlusMinus,
+  IconSortAscending2Filled,
+  IconSortDescending2Filled,
   IconTrash,
 } from "@tabler/icons-react";
 import { defaultFilter } from "cmdk";
@@ -34,6 +38,7 @@ import type {
   StarShape,
 } from "@/integrations/hydrus-api/models";
 import {
+  HydrusFileSortType,
   Permission,
   ServiceType,
   isLikeRatingService,
@@ -1024,11 +1029,12 @@ function QBSelect({
         <IconChevronDown className="text-muted-foreground size-3.5 shrink-0" />
       </PopoverTrigger>
       <PopoverContent
-        className="max-h-[90dvh] w-80 p-0"
+        className="max-h-[70dvh] w-80 p-0"
         align="start"
         side="right"
         alignOffset={-4}
         sideOffset={-240}
+        positionMethod="fixed"
       >
         <Command
           shouldFilter={isSearching}
@@ -1810,16 +1816,136 @@ const handleAddRule = (
   return { ...rule, field: "tag", operator: "=", value: "" };
 };
 
+// ---------------------------------------------------------------------------
+// Sort options
+// ---------------------------------------------------------------------------
+
+const SORT_OPTIONS = [
+  { value: HydrusFileSortType.ImportTime, label: "import time" },
+  { value: HydrusFileSortType.ModifiedTime, label: "modified time" },
+  { value: HydrusFileSortType.LastViewedTime, label: "last viewed time" },
+  { value: HydrusFileSortType.ArchiveTimestamp, label: "archive time" },
+  { value: HydrusFileSortType.FileSize, label: "file size" },
+  { value: HydrusFileSortType.FileType, label: "file type" },
+  { value: HydrusFileSortType.Duration, label: "duration" },
+  { value: HydrusFileSortType.Framerate, label: "framerate" },
+  { value: HydrusFileSortType.NumberOfFrames, label: "number of frames" },
+  { value: HydrusFileSortType.Width, label: "width" },
+  { value: HydrusFileSortType.Height, label: "height" },
+  { value: HydrusFileSortType.Ratio, label: "ratio" },
+  { value: HydrusFileSortType.NumberOfPixels, label: "number of pixels" },
+  { value: HydrusFileSortType.NumberOfTags, label: "number of tags" },
+  { value: HydrusFileSortType.NumberOfMediaViews, label: "media views" },
+  { value: HydrusFileSortType.TotalMediaViewtime, label: "total view time" },
+  { value: HydrusFileSortType.ApproximateBitrate, label: "bitrate" },
+  { value: HydrusFileSortType.HasAudio, label: "has audio" },
+  { value: HydrusFileSortType.Random, label: "random" },
+  { value: HydrusFileSortType.HashHex, label: "hash" },
+] as const;
+
+export type SortConfig = {
+  sortType: HydrusFileSortType;
+  sortAsc: boolean;
+};
+
+function SortSelect({
+  value,
+  onChange,
+}: {
+  value: HydrusFileSortType;
+  onChange: (value: HydrusFileSortType) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const selectedLabel =
+    SORT_OPTIONS.find((o) => o.value === value)?.label ?? "import time";
+
+  useEffect(() => {
+    if (!open) {
+      setSearch("");
+    }
+  }, [open]);
+
+  const isSearching = search.length > 0;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        className="border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-2.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 sm:w-auto sm:max-w-96 sm:min-w-60"
+        aria-label="Sort by"
+      >
+        <span className="truncate">{selectedLabel}</span>
+        <IconChevronDown className="text-muted-foreground size-3.5 shrink-0" />
+      </PopoverTrigger>
+      <PopoverContent
+        className="max-h-[70dvh] w-56 p-0"
+        align="start"
+        side="right"
+        positionMethod="fixed"
+        sideOffset={-240}
+      >
+        <Command
+          shouldFilter={isSearching}
+          filter={(itemValue, searchTerm, keywords) => {
+            if (searchTerm.length < 3) {
+              const haystack = [itemValue, ...(keywords ?? [])]
+                .join(" ")
+                .toLowerCase();
+              return haystack.includes(searchTerm.toLowerCase()) ? 1 : 0;
+            }
+            const score = defaultFilter(itemValue, searchTerm, keywords);
+            return score > 0.05 ? score : 0;
+          }}
+        >
+          <CommandInput
+            placeholder="Search sort…"
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CommandList className="max-h-none">
+            <CommandEmpty>No results.</CommandEmpty>
+            <CommandGroup>
+              {SORT_OPTIONS.map((opt) => (
+                <CommandItem
+                  key={opt.value}
+                  value={opt.label}
+                  data-checked={value === opt.value}
+                  onSelect={() => {
+                    onChange(opt.value);
+                    setOpen(false);
+                  }}
+                >
+                  {opt.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 interface SearchQueryBuilderProps {
   initialQuery?: RuleGroupType;
-  onSearch: (query: RuleGroupType, options?: { systemOk?: boolean }) => void;
+  initialSort?: SortConfig;
+  onSearch: (
+    query: RuleGroupType,
+    options?: { systemOk?: boolean; sort?: SortConfig },
+  ) => void;
 }
 
 export function SearchQueryBuilder({
   initialQuery,
+  initialSort,
   onSearch,
 }: SearchQueryBuilderProps) {
   const [query, setQuery] = useState<RuleGroupType>(initialQuery ?? emptyQuery);
+  const [sortType, setSortType] = useState<HydrusFileSortType>(
+    initialSort?.sortType ?? HydrusFileSortType.ImportTime,
+  );
+  const [sortAsc, setSortAsc] = useState(initialSort?.sortAsc ?? false);
   const canEditRatings = useHasPermission(Permission.EDIT_FILE_RATINGS);
   const { ratingServices } = useRatingServices();
   const { data: servicesData } = useGetServicesQuery();
@@ -1885,11 +2011,19 @@ export function SearchQueryBuilder({
     hydrusSearch.length === 0 || (isSystemOnly && !systemOnlyAcknowledged);
 
   const handleSearch = useCallback(() => {
-    onSearch(
-      query,
-      isSystemOnly ? { systemOk: systemOnlyAcknowledged } : undefined,
-    );
-  }, [query, onSearch, isSystemOnly, systemOnlyAcknowledged]);
+    const sort: SortConfig = { sortType, sortAsc };
+    onSearch(query, {
+      ...(isSystemOnly ? { systemOk: systemOnlyAcknowledged } : {}),
+      sort,
+    });
+  }, [
+    query,
+    onSearch,
+    isSystemOnly,
+    systemOnlyAcknowledged,
+    sortType,
+    sortAsc,
+  ]);
 
   const handleReset = useCallback(() => {
     setQuery(initialQuery ?? { ...emptyQuery, rules: [] });
@@ -1923,6 +2057,35 @@ export function SearchQueryBuilder({
           combinatorSelector: QBCombinatorSelect,
         }}
       />
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <span className="text-muted-foreground shrink-0 text-sm font-medium">
+          Sort by
+        </span>
+        <div className="flex items-center gap-2">
+          <SortSelect value={sortType} onChange={setSortType} />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSortAsc((prev) => !prev)}
+            type="button"
+            aria-pressed={sortAsc}
+            aria-label={sortAsc ? "Sort ascending" : "Sort descending"}
+          >
+            {sortAsc ? (
+              <>
+                <IconSortAscending2Filled className="size-6" />
+                <span className="hidden text-sm sm:inline">ascending</span>
+              </>
+            ) : (
+              <>
+                <IconSortDescending2Filled className="size-6" />
+                <span className="hidden text-sm sm:inline">descending</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
 
       {hydrusSearch.length > 0 && (
         <div className="flex flex-col gap-1">
@@ -1959,7 +2122,7 @@ export function SearchQueryBuilder({
               </label>
             </div>
           )}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="default"
               size="sm"

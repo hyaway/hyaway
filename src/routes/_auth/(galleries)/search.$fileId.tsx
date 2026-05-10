@@ -17,6 +17,8 @@ const SearchParamsSchema = z.object({
     .transform((val) => val.split(",").filter(Boolean))
     .or(z.array(z.string()))
     .optional(),
+  sortType: z.number().optional().catch(undefined),
+  sortAsc: z.boolean().optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/_auth/(galleries)/search/$fileId")({
@@ -29,7 +31,7 @@ export const Route = createFileRoute("/_auth/(galleries)/search/$fileId")({
 
 function RouteComponent() {
   const { fileId } = Route.useParams();
-  const { tags: selectedTags } = Route.useSearch();
+  const { tags: selectedTags, sortType, sortAsc } = Route.useSearch();
   const fileIdNum = Number(fileId);
 
   // Tags come directly from URL params (set by the index page's getFileLink)
@@ -40,10 +42,11 @@ function RouteComponent() {
 
   const searchOptions = useMemo(
     () => ({
-      file_sort_type: HydrusFileSortType.ImportTime as const,
-      file_sort_asc: false as const,
+      file_sort_type: (sortType ??
+        HydrusFileSortType.ImportTime) as HydrusFileSortType,
+      file_sort_asc: sortAsc ?? false,
     }),
-    [],
+    [sortType, sortAsc],
   );
 
   const { data, isLoading, isError } = useSearchFilesQuery(
