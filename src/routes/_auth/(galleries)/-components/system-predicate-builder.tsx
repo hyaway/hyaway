@@ -12,6 +12,7 @@ import {
   IconPlusMinus,
   IconTrash,
 } from "@tabler/icons-react";
+import { defaultFilter } from "cmdk";
 import {
   QueryBuilder,
   isOptionGroupArray,
@@ -144,9 +145,21 @@ const fieldGroups: Array<DisplayOptionGroup> = [
         defaultValue: "",
         placeholder: "character:samus aran",
       },
-      { name: "inbox", label: "inbox", operators: [{ name: "is", label: "is" }] },
-      { name: "archive", label: "archive", operators: [{ name: "is", label: "is" }] },
-      { name: "everything", label: "everything", operators: [{ name: "is", label: "is" }] },
+      {
+        name: "inbox",
+        label: "inbox",
+        operators: [{ name: "is", label: "is" }],
+      },
+      {
+        name: "archive",
+        label: "archive",
+        operators: [{ name: "is", label: "is" }],
+      },
+      {
+        name: "everything",
+        label: "everything",
+        operators: [{ name: "is", label: "is" }],
+      },
       {
         name: "limit",
         label: "limit",
@@ -908,7 +921,11 @@ function QBSelect({
   }, [open]);
 
   type OptionItem = { name: string; label: string };
-  type OptionGroupItem = { label: string; inline?: boolean; options: Array<OptionItem> };
+  type OptionGroupItem = {
+    label: string;
+    inline?: boolean;
+    options: Array<OptionItem>;
+  };
 
   const isGrouped = isOptionGroupArray(options);
   const groups = isGrouped ? (options as Array<OptionGroupItem>) : null;
@@ -975,7 +992,17 @@ function QBSelect({
         alignOffset={-4}
         sideOffset={-208}
       >
-        <Command shouldFilter={isSearching}>
+        <Command
+          shouldFilter={isSearching}
+          filter={(value, search, keywords) => {
+            const score = defaultFilter(value, search, keywords);
+            // Short queries produce many low-confidence fuzzy matches;
+            // require a higher score so only strong prefix/word-boundary
+            // matches survive.
+            const threshold = search.length < 3 ? 0.2 : 0.05;
+            return score > threshold ? score : 0;
+          }}
+        >
           <CommandInput
             placeholder={`Search ${title?.toLowerCase() ?? ""}…`}
             value={search}
@@ -1034,9 +1061,7 @@ function QBSelect({
                             onSelect={() => selectField(opt.name)}
                           >
                             <span
-                              style={labelStyle(
-                                getFieldHydrusLabel(opt.name),
-                              )}
+                              style={labelStyle(getFieldHydrusLabel(opt.name))}
                             >
                               {getFieldHydrusLabel(opt.name)}
                             </span>
