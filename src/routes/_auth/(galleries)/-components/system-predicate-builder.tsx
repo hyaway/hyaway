@@ -93,6 +93,13 @@ function hasOps(thing: string): Array<{ name: string; label: string }> {
   ];
 }
 
+/** Comparison operators prepended with has/has_not toggles. */
+function comparisonWithHasOps(
+  thing: string,
+): Array<{ name: string; label: string }> {
+  return [...hasOps(thing), ...comparisonOperators];
+}
+
 const filetypeValues = [
   { name: "image", label: "image" },
   { name: "video", label: "video" },
@@ -170,7 +177,6 @@ const fieldGroups: Array<DisplayOptionGroup> = [
     label: "system:file properties",
     options: [
       { name: "audio", label: "audio", operators: hasOps("audio") },
-      { name: "duration", label: "duration", operators: hasOps("duration") },
       {
         name: "transparency",
         label: "transparency",
@@ -232,29 +238,23 @@ const fieldGroups: Array<DisplayOptionGroup> = [
       {
         name: "duration_value",
         label: "duration",
-        operators: comparisonOperators,
+        operators: comparisonWithHasOps("duration"),
         defaultValue: "5 seconds",
       },
       {
         name: "framerate",
         label: "framerate",
-        operators: comparisonOperators,
+        operators: comparisonWithHasOps("framerate"),
         inputType: "number",
         defaultValue: "30",
       },
       {
         name: "num_frames",
         label: "number of frames",
-        operators: comparisonOperators,
+        operators: comparisonWithHasOps("frames"),
         inputType: "number",
         defaultValue: "0",
       },
-      {
-        name: "framerate_has",
-        label: "has framerate",
-        operators: hasOps("framerate"),
-      },
-      { name: "frames_has", label: "has frames", operators: hasOps("frames") },
     ],
   },
   {
@@ -301,35 +301,19 @@ const fieldGroups: Array<DisplayOptionGroup> = [
     label: "system:number of tags",
     options: [
       {
-        name: "tags_exist",
-        label: "has tags",
+        name: "num_tags",
+        label: "number of tags",
         operators: [
           { name: "has", label: "has tags" },
           { name: "has_not", label: "untagged" },
+          ...comparisonOperators,
         ],
-      },
-      {
-        name: "num_tags",
-        label: "number of tags",
-        operators: comparisonOperators,
         inputType: "number",
         defaultValue: "0",
       },
     ],
   },
-  {
-    label: "system:number of words",
-    options: [
-      { name: "words_has", label: "has words", operators: hasOps("words") },
-      {
-        name: "num_words",
-        label: "number of words",
-        operators: comparisonOperators,
-        inputType: "number",
-        defaultValue: "0",
-      },
-    ],
-  },
+
   {
     label: "system:time",
     options: [
@@ -380,11 +364,10 @@ const fieldGroups: Array<DisplayOptionGroup> = [
         operators: hasOps("matching URL"),
         defaultValue: "",
       },
-      { name: "urls_has", label: "has urls", operators: hasOps("urls") },
       {
         name: "num_urls",
         label: "number of URLs",
-        operators: comparisonOperators,
+        operators: comparisonWithHasOps("urls"),
         inputType: "number",
         defaultValue: "0",
       },
@@ -393,7 +376,6 @@ const fieldGroups: Array<DisplayOptionGroup> = [
   {
     label: "system:notes",
     options: [
-      { name: "notes", label: "has notes", operators: hasOps("notes") },
       {
         name: "note_name",
         label: "note with name",
@@ -403,7 +385,7 @@ const fieldGroups: Array<DisplayOptionGroup> = [
       {
         name: "num_notes",
         label: "number of notes",
-        operators: comparisonOperators,
+        operators: comparisonWithHasOps("notes"),
         inputType: "number",
         defaultValue: "0",
       },
@@ -517,32 +499,49 @@ function buildRatingFieldGroups(
   ];
 }
 
-/** Names of fields that are has/does not have toggles. */
-const HAS_FIELDS = new Set([
+/** Names of fields that are pure has/does-not-have toggles (no value input ever). */
+const HAS_ONLY_FIELDS = new Set([
   "audio",
-  "duration",
-  "notes",
-  "tags_exist",
   "transparency",
   "exif",
   "icc_profile",
   "embedded_metadata",
   "forced_filetype",
-  "framerate_has",
-  "frames_has",
-  "urls_has",
-  "words_has",
 ]);
 
 /** Status fields that are standalone with no value input. */
 const STATUS_FIELDS = new Set(["inbox", "archive", "everything"]);
 
-/** Operators for rating fields that need no value input. */
-const RATING_NO_VALUE_OPERATORS = new Set(["has", "has_not"]);
+/** Operators that need no value input (has/has_not toggles). */
+const NO_VALUE_OPERATORS = new Set(["has", "has_not"]);
 
-/** Checks if a rating field is in a mode that needs no value input. */
-const isRatingNoValueField = (field: string, operator: string): boolean =>
-  field.startsWith("rating:") && RATING_NO_VALUE_OPERATORS.has(operator);
+/** Fields that require a value even when using has/has_not operators. */
+const HAS_WITH_VALUE_FIELDS = new Set([
+  "note_name",
+  "url_exact",
+  "url_regex",
+  "url_domain",
+]);
+
+/** Checks if a field+operator combo needs no value input. */
+const isNoValueField = (field: string, operator: string): boolean =>
+  HAS_ONLY_FIELDS.has(field) ||
+  STATUS_FIELDS.has(field) ||
+  (NO_VALUE_OPERATORS.has(operator) && !HAS_WITH_VALUE_FIELDS.has(field));
+
+/**
+ * Extra search keywords for fields, so e.g. "has tags" matches "number of tags".
+ * Maps field name → array of additional keyword strings.
+ */
+const FIELD_SEARCH_KEYWORDS: Record<string, Array<string>> = {
+  duration_value: ["has duration", "no duration"],
+  framerate: ["has framerate", "no framerate"],
+  num_frames: ["has frames", "no frames"],
+  num_tags: ["has tags", "untagged"],
+
+  num_urls: ["has urls", "no urls"],
+  num_notes: ["has notes", "no notes"],
+};
 
 // ---------------------------------------------------------------------------
 // Conversion: react-querybuilder rule → hydrus search tag string
@@ -558,18 +557,11 @@ const FIELD_HYDRUS_LABEL: Record<string, string> = {
   archive: "system:archive",
   everything: "system:everything",
   audio: "system:has audio",
-  duration: "system:has duration",
-  notes: "system:has notes",
-  tags_exist: "system:has tags",
   transparency: "system:has transparency",
   exif: "system:has exif",
   icc_profile: "system:has icc profile",
   embedded_metadata: "system:has embedded metadata",
   forced_filetype: "system:has forced filetype",
-  framerate_has: "system:has framerate",
-  frames_has: "system:has frames",
-  urls_has: "system:has urls",
-  words_has: "system:has words",
   note_name: "system:has note with name",
   width: "system:width",
   height: "system:height",
@@ -584,7 +576,6 @@ const FIELD_HYDRUS_LABEL: Record<string, string> = {
   file_service: "system:file service",
   num_tags: "system:number of tags",
   num_urls: "system:number of urls",
-  num_words: "system:number of words",
   num_notes: "system:number of notes",
   num_frames: "system:number of frames",
   import_time: "system:import time",
@@ -633,13 +624,10 @@ function ruleToSearchTag(rule: RuleType): string | null {
   if (field === "archive") return "system:archive";
   if (field === "everything") return "system:everything";
 
-  // Has / does not have fields
-  if (HAS_FIELDS.has(field)) {
+  // Has / does not have fields (pure toggles — no value input)
+  if (HAS_ONLY_FIELDS.has(field)) {
     const fieldLabels: Record<string, [string, string]> = {
       audio: ["system:has audio", "system:no audio"],
-      duration: ["system:has duration", "system:no duration"],
-      notes: ["system:has notes", "system:no notes"],
-      tags_exist: ["system:has tags", "system:untagged"],
       transparency: ["system:has transparency", "system:no transparency"],
       exif: ["system:has exif", "system:no exif"],
       icc_profile: ["system:has icc profile", "system:no icc profile"],
@@ -651,14 +639,26 @@ function ruleToSearchTag(rule: RuleType): string | null {
         "system:has forced filetype",
         "system:no forced filetype",
       ],
-      framerate_has: ["system:has framerate", "system:no framerate"],
-      frames_has: ["system:has frames", "system:no frames"],
-      urls_has: ["system:has urls", "system:no urls"],
-      words_has: ["system:has words", "system:no words"],
     };
 
     const labels = fieldLabels[field];
     return operator === "has" || operator === "is" ? labels[0] : labels[1];
+  }
+
+  // Has/has_not operator on fields with both toggle and comparison modes
+  if (operator === "has" || operator === "has_not") {
+    const hasLabels: Record<string, [string, string]> = {
+      duration_value: ["system:has duration", "system:no duration"],
+      framerate: ["system:has framerate", "system:no framerate"],
+      num_frames: ["system:has frames", "system:no frames"],
+      num_tags: ["system:has tags", "system:untagged"],
+
+      num_urls: ["system:has urls", "system:no urls"],
+      num_notes: ["system:has notes", "system:no notes"],
+    };
+
+    const labels = hasLabels[field] as [string, string] | undefined;
+    if (labels) return operator === "has" ? labels[0] : labels[1];
   }
 
   // Rating fields
@@ -710,8 +710,7 @@ function ruleToSearchTag(rule: RuleType): string | null {
       return `system:file service ${operator} ${value}`;
     case "num_urls":
       return `system:number of urls ${operator} ${value}`;
-    case "num_words":
-      return `system:number of words ${operator} ${value}`;
+
     case "num_notes":
       return `system:number of notes ${operator} ${value}`;
     case "num_frames":
@@ -1030,6 +1029,7 @@ function QBSelect({
                           // positives.
                           ...(og.inline ? [] : [og.label]),
                           getFieldHydrusLabel(opt.name),
+                          ...(FIELD_SEARCH_KEYWORDS[opt.name] ?? []),
                         ]}
                         data-checked={val === opt.name}
                         onSelect={() => selectField(opt.name)}
@@ -1107,7 +1107,10 @@ function QBSelect({
                         <CommandItem
                           key={opt.name}
                           value={opt.name}
-                          keywords={[opt.label]}
+                          keywords={[
+                            opt.label,
+                            ...(FIELD_SEARCH_KEYWORDS[opt.name] ?? []),
+                          ]}
                           data-checked={val === opt.name}
                           onSelect={() => selectField(opt.name)}
                         >
@@ -1244,12 +1247,8 @@ function QBValueEditor(props: ValueEditorProps) {
     props;
   const operator = props.rule.operator;
 
-  // Has/does-not-have fields and rating no-value operators need no value input
-  if (
-    HAS_FIELDS.has(field) ||
-    STATUS_FIELDS.has(field) ||
-    isRatingNoValueField(field, operator)
-  ) {
+  // Has/does-not-have fields and no-value operators need no value input
+  if (isNoValueField(field, operator)) {
     return null;
   }
 
