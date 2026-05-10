@@ -21,6 +21,7 @@ type BadgeProps = ComponentProps<typeof Badge> &
 export function TagBadge({
   tag,
   namespace,
+  negated,
   variant,
   children,
   className,
@@ -29,6 +30,7 @@ export function TagBadge({
 }: {
   tag: string;
   namespace?: string;
+  negated?: boolean;
   children?: ReactNode;
 } & BadgeProps) {
   const namespaceColors = useNamespaceColors();
@@ -51,6 +53,7 @@ export function TagBadge({
     >
       <span className="select-all">
         <TouchTarget>
+          {negated ? "-" : ""}
           {namespace ? `${namespace}: ` : ""}
           {tag}
         </TouchTarget>
@@ -94,6 +97,38 @@ export function TagBadgeFromString({
 }: {
   displayTag: string;
 } & Omit<BadgeProps, "tag" | "namespace">) {
-  const { namespace, tag } = parseTag(displayTag);
-  return <TagBadge tag={tag} namespace={namespace} {...props} />;
+  const { namespace, tag, negated } = parseTag(displayTag);
+  return (
+    <TagBadge tag={tag} namespace={namespace} negated={negated} {...props} />
+  );
+}
+
+/**
+ * A badge for displaying an OR group of tags, each with its own namespace color.
+ */
+export function OrTagBadge({ tags }: { tags: Array<string> }) {
+  const namespaceColors = useNamespaceColors();
+  return (
+    <Badge variant="secondary" className="gap-1 select-auto">
+      {tags.map((t, i) => {
+        const { namespace, tag, negated } = parseTag(t);
+        const color =
+          namespaceColors[namespace || "null"] ||
+          namespaceColors["null"] ||
+          "var(--foreground)";
+        return (
+          <span key={i} className="inline-flex items-center gap-1">
+            {i > 0 && (
+              <span className="text-muted-foreground px-1 text-sm">or</span>
+            )}
+            <span style={{ color }} className="select-all">
+              {negated ? "-" : ""}
+              {namespace ? `${namespace}: ` : ""}
+              {tag}
+            </span>
+          </span>
+        );
+      })}
+    </Badge>
+  );
 }

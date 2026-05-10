@@ -7,14 +7,18 @@
 export function parseTag(displayTag: string): {
   namespace: string;
   tag: string;
+  negated: boolean;
 } {
-  const idx = displayTag.indexOf(":");
+  const negated = displayTag.startsWith("-");
+  const normalized = negated ? displayTag.slice(1) : displayTag;
+  const idx = normalized.indexOf(":");
   if (idx === -1) {
-    return { namespace: "", tag: displayTag };
+    return { namespace: "", tag: normalized, negated };
   }
   return {
-    namespace: displayTag.slice(0, idx),
-    tag: displayTag.slice(idx + 1),
+    namespace: normalized.slice(0, idx),
+    tag: normalized.slice(idx + 1),
+    negated,
   };
 }
 
