@@ -11,3 +11,4 @@ count.txt
 .wrangler
 .temp/
 .idea/
+.reference/
