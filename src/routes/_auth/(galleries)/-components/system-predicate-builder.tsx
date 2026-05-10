@@ -399,7 +399,7 @@ const fieldGroups: Array<DisplayOptionGroup> = [
       {
         name: "note_name",
         label: "note with name",
-        operators: hasOps("note named"),
+        operators: hasOps("note with name"),
         defaultValue: "",
       },
       {
