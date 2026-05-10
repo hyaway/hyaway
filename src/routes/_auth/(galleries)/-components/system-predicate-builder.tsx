@@ -125,9 +125,17 @@ const numericalRatingOperators = [
   { name: "has_not", label: "no rating" },
 ];
 
-const fieldGroups: Array<OptionGroup<Field>> = [
+/**
+ * Extended OptionGroup with a display hint.
+ * `inline: true` renders each option at the top level of the field selector
+ * instead of grouping them behind a drill-down category.
+ */
+type DisplayOptionGroup = OptionGroup<Field> & { inline?: boolean };
+
+const fieldGroups: Array<DisplayOptionGroup> = [
   {
-    label: "tags",
+    label: "basics",
+    inline: true,
     options: [
       {
         name: "tag",
@@ -136,25 +144,15 @@ const fieldGroups: Array<OptionGroup<Field>> = [
         defaultValue: "",
         placeholder: "character:samus aran",
       },
-    ],
-  },
-  {
-    label: "system:status",
-    options: [
+      { name: "inbox", label: "inbox", operators: [{ name: "is", label: "is" }] },
+      { name: "archive", label: "archive", operators: [{ name: "is", label: "is" }] },
+      { name: "everything", label: "everything", operators: [{ name: "is", label: "is" }] },
       {
-        name: "status",
-        label: "status",
-        operators: [
-          { name: "is", label: "is" },
-          { name: "is_not", label: "is not" },
-        ],
-        valueEditorType: "select",
-        values: [
-          { name: "inbox", label: "inbox" },
-          { name: "archive", label: "archive" },
-          { name: "everything", label: "everything" },
-        ],
-        defaultValue: "inbox",
+        name: "limit",
+        label: "limit",
+        operators: [{ name: "=", label: "=" }],
+        inputType: "number",
+        defaultValue: "256",
       },
     ],
   },
@@ -286,18 +284,6 @@ const fieldGroups: Array<OptionGroup<Field>> = [
           { name: "is not currently in", label: "is not currently in" },
         ],
         defaultValue: "my files",
-      },
-    ],
-  },
-  {
-    label: "system:limit",
-    options: [
-      {
-        name: "limit",
-        label: "limit",
-        operators: [{ name: "=", label: "=" }],
-        inputType: "number",
-        defaultValue: "256",
       },
     ],
   },
@@ -538,6 +524,9 @@ const HAS_FIELDS = new Set([
   "words_has",
 ]);
 
+/** Status fields that are standalone with no value input. */
+const STATUS_FIELDS = new Set(["inbox", "archive", "everything"]);
+
 /** Operators for rating fields that need no value input. */
 const RATING_NO_VALUE_OPERATORS = new Set(["has", "has_not"]);
 
@@ -555,7 +544,9 @@ const isRatingNoValueField = (field: string, operator: string): boolean =>
  */
 const FIELD_HYDRUS_LABEL: Record<string, string> = {
   tag: "tag",
-  status: "system:inbox / archive",
+  inbox: "system:inbox",
+  archive: "system:archive",
+  everything: "system:everything",
   audio: "system:has audio",
   duration: "system:has duration",
   notes: "system:has notes",
@@ -627,26 +618,10 @@ function ruleToSearchTag(rule: RuleType): string | null {
     return tag;
   }
 
-  // Status field — value determines which system predicate
-  if (field === "status") {
-    const negate = operator === "is_not";
-    switch (value) {
-      case "inbox": {
-        const tag = "system:inbox";
-        return negate ? `-${tag}` : tag;
-      }
-      case "archive": {
-        const tag = "system:archive";
-        return negate ? `-${tag}` : tag;
-      }
-      case "everything": {
-        const tag = "system:everything";
-        return negate ? `-${tag}` : tag;
-      }
-      default:
-        return null;
-    }
-  }
+  // Status fields — standalone, no value needed
+  if (field === "inbox") return "system:inbox";
+  if (field === "archive") return "system:archive";
+  if (field === "everything") return "system:everything";
 
   // Has / does not have fields
   if (HAS_FIELDS.has(field)) {
@@ -933,7 +908,7 @@ function QBSelect({
   }, [open]);
 
   type OptionItem = { name: string; label: string };
-  type OptionGroupItem = { label: string; options: Array<OptionItem> };
+  type OptionGroupItem = { label: string; inline?: boolean; options: Array<OptionItem> };
 
   const isGrouped = isOptionGroupArray(options);
   const groups = isGrouped ? (options as Array<OptionGroupItem>) : null;
@@ -1019,7 +994,13 @@ function QBSelect({
                         value={opt.name}
                         keywords={[
                           opt.label,
-                          og.label,
+                          // Include group label as keyword only for
+                          // non-inline groups so users can search by
+                          // category (e.g. "dimensions" finds "width").
+                          // Inline groups use a generic label like
+                          // "basics" that would cause fuzzy false
+                          // positives.
+                          ...(og.inline ? [] : [og.label]),
                           getFieldHydrusLabel(opt.name),
                         ]}
                         data-checked={val === opt.name}
@@ -1033,32 +1014,34 @@ function QBSelect({
                   </CommandGroup>
                 ))
               ) : activePage === null ? (
-                // Top-level: single-option groups render inline first,
-                // then multi-option groups as drill-down categories
+                // Top-level: inline groups (single-option or marked inline)
+                // render their options directly; others are drill-down categories
                 <CommandGroup>
                   {[...groups]
                     .sort(
                       (a, b) =>
-                        (a.options.length === 1 ? 0 : 1) -
-                        (b.options.length === 1 ? 0 : 1),
+                        (a.inline || a.options.length === 1 ? 0 : 1) -
+                        (b.inline || b.options.length === 1 ? 0 : 1),
                     )
-                    .map((og) =>
-                      og.options.length === 1 ? (
-                        <CommandItem
-                          key={og.options[0].name}
-                          value={og.options[0].name}
-                          keywords={[og.options[0].label, og.label]}
-                          data-checked={val === og.options[0].name}
-                          onSelect={() => selectField(og.options[0].name)}
-                        >
-                          <span
-                            style={labelStyle(
-                              getFieldHydrusLabel(og.options[0].name),
-                            )}
+                    .flatMap((og) =>
+                      og.inline || og.options.length === 1 ? (
+                        og.options.map((opt) => (
+                          <CommandItem
+                            key={opt.name}
+                            value={opt.name}
+                            keywords={[opt.label, og.label]}
+                            data-checked={val === opt.name}
+                            onSelect={() => selectField(opt.name)}
                           >
-                            {getFieldHydrusLabel(og.options[0].name)}
-                          </span>
-                        </CommandItem>
+                            <span
+                              style={labelStyle(
+                                getFieldHydrusLabel(opt.name),
+                              )}
+                            >
+                              {getFieldHydrusLabel(opt.name)}
+                            </span>
+                          </CommandItem>
+                        ))
                       ) : (
                         <CommandItem
                           key={og.label}
@@ -1236,7 +1219,11 @@ function QBValueEditor(props: ValueEditorProps) {
   const operator = props.rule.operator;
 
   // Has/does-not-have fields and rating no-value operators need no value input
-  if (HAS_FIELDS.has(field) || isRatingNoValueField(field, operator)) {
+  if (
+    HAS_FIELDS.has(field) ||
+    STATUS_FIELDS.has(field) ||
+    isRatingNoValueField(field, operator)
+  ) {
     return null;
   }
 
@@ -1749,7 +1736,7 @@ const handleAddRule = (
     return { ...rule, field: "limit", operator: "=", value: 256 };
   }
   if (context?.addSystem) {
-    return { ...rule, field: "status", operator: "is", value: "inbox" };
+    return { ...rule, field: "inbox", operator: "is", value: "" };
   }
   return { ...rule, field: "tag", operator: "=", value: "" };
 };
