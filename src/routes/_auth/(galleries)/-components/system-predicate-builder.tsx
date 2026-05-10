@@ -111,8 +111,7 @@ const filetypeValues = [
 const ratioOperators = [
   { name: "wider than", label: "wider than" },
   { name: "taller than", label: "taller than" },
-  { name: "is", label: "is" },
-  { name: "≠", label: "is not (≠)" },
+  { name: "=", label: "is (=)" },
   { name: "≈", label: "is approximately (≈)" },
 ];
 
@@ -227,8 +226,7 @@ const fieldGroups: Array<DisplayOptionGroup> = [
         name: "num_pixels",
         label: "num pixels",
         operators: comparisonOperators,
-        inputType: "number",
-        defaultValue: "1000000",
+        defaultValue: "1 megapixels",
       },
     ],
   },
@@ -272,10 +270,10 @@ const fieldGroups: Array<DisplayOptionGroup> = [
         defaultValue: "image",
       },
       {
-        name: "size",
-        label: "size",
+        name: "filesize",
+        label: "filesize",
         operators: comparisonOperators,
-        defaultValue: "1MB",
+        defaultValue: "1 MB",
       },
       {
         name: "hash",
@@ -570,7 +568,7 @@ const FIELD_HYDRUS_LABEL: Record<string, string> = {
   duration_value: "system:duration",
   framerate: "system:framerate",
   filetype: "system:filetype",
-  size: "system:size",
+  filesize: "system:filesize",
   limit: "system:limit",
   hash: "system:hash",
   file_service: "system:file service",
@@ -694,10 +692,10 @@ function ruleToSearchTag(rule: RuleType): string | null {
       return `system:ratio ${operator} ${value}`;
     case "num_pixels":
       return `system:num pixels ${operator} ${value}`;
-    case "size":
-      return `system:size ${operator} ${value}`;
+    case "filesize":
+      return `system:filesize ${operator} ${value}`;
     case "limit":
-      return `system:limit=${value}`;
+      return `system:limit = ${value}`;
     case "filetype":
       return `system:filetype ${operator} ${value}`;
     case "num_tags":
