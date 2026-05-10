@@ -901,14 +901,14 @@ function QBOperatorSelect(props: VersatileSelectorProps) {
       <div className="inline-flex items-center gap-1.5 px-1.5">
         <span
           className={cn(
-            "text-xs transition-colors",
+            "text-sm transition-colors",
             !isFirst ? "text-foreground" : "text-muted-foreground",
           )}
         >
           {second.label}
         </span>
         <Switch
-          size="sm"
+          size="default"
           checked={isFirst}
           onCheckedChange={(checked) =>
             props.handleOnChange(checked ? first.name : second.name)
@@ -917,7 +917,7 @@ function QBOperatorSelect(props: VersatileSelectorProps) {
         />
         <span
           className={cn(
-            "text-xs transition-colors",
+            "text-sm transition-colors",
             isFirst ? "text-foreground" : "text-muted-foreground",
           )}
         >
@@ -1015,7 +1015,7 @@ function QBSelect({
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-2.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 lg:w-auto lg:max-w-96 lg:min-w-60",
+          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 lg:w-auto lg:max-w-96 lg:min-w-60",
           className,
         )}
         aria-label={title}
@@ -1028,7 +1028,7 @@ function QBSelect({
         >
           {selectedLabel ?? title ?? "Select…"}
         </span>
-        <IconChevronDown className="text-muted-foreground size-3.5 shrink-0" />
+        <IconChevronDown className="text-muted-foreground size-4 shrink-0" />
       </PopoverTrigger>
       <PopoverContent
         className="max-h-[70dvh] w-80 p-0"
@@ -1213,7 +1213,7 @@ function QBActionElement({
     return (
       <Button
         variant="ghost"
-        size="sm"
+        size="default"
         className={cn(
           "text-muted-foreground hover:text-destructive",
           className,
@@ -1225,7 +1225,7 @@ function QBActionElement({
         disabled={disabled && !disabledTranslation}
         type="button"
       >
-        <IconTrash data-icon="inline-start" className="size-4" />
+        <IconTrash data-icon="inline-start" className="size-5" />
         {title?.includes("group") ? "Remove group" : "Remove"}
       </Button>
     );
@@ -1238,14 +1238,14 @@ function QBActionElement({
     return (
       <Button
         variant="outline"
-        size="sm"
+        size="default"
         className={className}
         title={title}
         onClick={(e) => handleOnClick(e)}
         disabled={disabled}
         type="button"
       >
-        <IconPlus data-icon="inline-start" className="size-4" />
+        <IconPlus data-icon="inline-start" className="size-5" />
         Add OR group
       </Button>
     );
@@ -1256,35 +1256,35 @@ function QBActionElement({
     <>
       <Button
         variant="outline"
-        size="sm"
+        size="default"
         className={className}
         onClick={(e) => handleOnClick(e, { addTag: true })}
         disabled={disabled}
         type="button"
       >
-        <IconPlus data-icon="inline-start" className="size-4" />
+        <IconPlus data-icon="inline-start" className="size-5" />
         Add tag
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size="default"
         className={className}
         onClick={(e) => handleOnClick(e, { addSystem: true })}
         disabled={disabled}
         type="button"
       >
-        <IconPlus data-icon="inline-start" className="size-4" />
+        <IconPlus data-icon="inline-start" className="size-5" />
         Add system
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size="default"
         className={className}
         onClick={(e) => handleOnClick(e, { addLimit: true })}
         disabled={disabled}
         type="button"
       >
-        <IconPlus data-icon="inline-start" className="size-4" />
+        <IconPlus data-icon="inline-start" className="size-5" />
         Add limit
       </Button>
     </>
@@ -1373,7 +1373,7 @@ function QBValueEditor(props: ValueEditorProps) {
   return (
     <Input
       type={fieldData.inputType === "number" ? "number" : "text"}
-      className="h-8 w-full rounded-lg lg:w-auto lg:max-w-96 lg:min-w-40"
+      className="w-full lg:w-auto lg:max-w-96 lg:min-w-40"
       name={`hyaway-spb-${field}`}
       value={value ?? ""}
       disabled={disabled}
@@ -1414,7 +1414,7 @@ function LikeDislikeValueEditor({
       <Button
         variant="ghost"
         size="icon-sm"
-        className={cn("size-8 p-0", value === "liked" && "bg-muted")}
+        className={cn("size-9 p-0", value === "liked" && "bg-muted")}
         onClick={() => onChange("liked")}
         disabled={disabled}
         aria-label="Liked"
@@ -1434,7 +1434,7 @@ function LikeDislikeValueEditor({
       <Button
         variant="ghost"
         size="icon-sm"
-        className={cn("size-8 p-0", value === "disliked" && "bg-muted")}
+        className={cn("size-9 p-0", value === "disliked" && "bg-muted")}
         onClick={() => onChange("disliked")}
         disabled={disabled}
         aria-label="Disliked"
@@ -1536,19 +1536,19 @@ function IncDecValueEditor({
     >
       <Button
         variant="outline"
-        size="sm"
-        className="size-7 p-0"
+        size="default"
+        className="size-9 p-0"
         onClick={() => onChange(String(Math.max(0, numValue - 1)))}
         disabled={disabled || numValue <= 0}
         aria-label="Decrease"
       >
-        <IconMinus aria-hidden className="size-4" />
+        <IconMinus aria-hidden className="size-5" />
       </Button>
       <Input
         type="number"
         min={0}
         className={cn(
-          "h-7 w-14 [appearance:textfield] rounded-sm text-center tabular-nums [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+          "h-9 w-16 [appearance:textfield] rounded-lg text-center tabular-nums [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
           incDecOverlayColor &&
             "border-(--badge-overlay)/50 text-(--badge-overlay)",
         )}
@@ -1567,13 +1567,13 @@ function IncDecValueEditor({
       />
       <Button
         variant="outline"
-        size="sm"
-        className="size-7 p-0"
+        size="default"
+        className="size-9 p-0"
         onClick={() => onChange(String(numValue + 1))}
         disabled={disabled}
         aria-label="Increase"
       >
-        <IconPlus aria-hidden className="size-4" />
+        <IconPlus aria-hidden className="size-5" />
       </Button>
     </div>
   );
@@ -1631,7 +1631,7 @@ function TagValueEditor({
     <>
       <div className="relative w-full lg:w-auto lg:max-w-96 lg:min-w-48 lg:flex-1">
         <Input
-          className="h-8 w-full rounded-lg"
+          className="w-full"
           style={inputColor ? { color: inputColor } : undefined}
           value={inputValue}
           disabled={disabled}
@@ -1666,7 +1666,7 @@ function TagValueEditor({
       </div>
       <Button
         variant="ghost"
-        size="sm"
+        size="default"
         className="shrink-0"
         onClick={() => {
           const toggled = isNegated
@@ -1678,7 +1678,7 @@ function TagValueEditor({
         disabled={disabled}
         type="button"
       >
-        <IconPlusMinus data-icon="inline-start" className="size-4" />
+        <IconPlusMinus data-icon="inline-start" className="size-5" />
         {isNegated ? "Include" : "Exclude"}
       </Button>
     </>
@@ -1875,11 +1875,11 @@ function SortSelect({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        className="border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-2.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 sm:w-auto sm:max-w-96 sm:min-w-60"
+        className="border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 sm:w-auto sm:max-w-96 sm:min-w-60"
         aria-label="Sort by"
       >
         <span className="truncate">{selectedLabel}</span>
-        <IconChevronDown className="text-muted-foreground size-3.5 shrink-0" />
+        <IconChevronDown className="text-muted-foreground size-4 shrink-0" />
       </PopoverTrigger>
       <PopoverContent
         className="max-h-[70dvh] w-56 p-0"
@@ -2057,7 +2057,7 @@ export function SearchQueryBuilder({
           <SortSelect value={sortType} onChange={setSortType} />
           <Button
             variant="ghost"
-            size="sm"
+            size="default"
             onClick={() => setSortAsc((prev) => !prev)}
             type="button"
             aria-pressed={sortAsc}
@@ -2116,7 +2116,7 @@ export function SearchQueryBuilder({
           <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="default"
-              size="sm"
+              size="default"
               onClick={handleSearch}
               disabled={searchDisabled}
               type="button"
@@ -2126,7 +2126,7 @@ export function SearchQueryBuilder({
             {initialQuery && initialQuery.rules.length > 0 && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="default"
                 onClick={handleReset}
                 type="button"
               >
@@ -2135,7 +2135,7 @@ export function SearchQueryBuilder({
             )}
             <Button
               variant="ghost"
-              size="sm"
+              size="default"
               onClick={handleClear}
               type="button"
             >
