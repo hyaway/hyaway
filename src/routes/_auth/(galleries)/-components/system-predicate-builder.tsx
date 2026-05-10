@@ -1008,7 +1008,7 @@ function QBSelect({
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-2.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 lg:w-auto lg:min-w-60 lg:max-w-96",
+          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-2.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 lg:w-auto lg:max-w-96 lg:min-w-60",
           className,
         )}
         aria-label={title}
@@ -1365,7 +1365,7 @@ function QBValueEditor(props: ValueEditorProps) {
   return (
     <Input
       type={fieldData.inputType === "number" ? "number" : "text"}
-      className="h-8 w-full rounded-lg lg:w-auto lg:min-w-40 lg:max-w-96"
+      className="h-8 w-full rounded-lg lg:w-auto lg:max-w-96 lg:min-w-40"
       name={`hyaway-spb-${field}`}
       value={value ?? ""}
       disabled={disabled}
@@ -1621,7 +1621,7 @@ function TagValueEditor({
 
   return (
     <>
-      <div className="relative w-full lg:w-auto lg:min-w-48 lg:max-w-96 lg:flex-1">
+      <div className="relative w-full lg:w-auto lg:max-w-96 lg:min-w-48 lg:flex-1">
         <Input
           className="h-8 w-full rounded-lg"
           style={inputColor ? { color: inputColor } : undefined}
