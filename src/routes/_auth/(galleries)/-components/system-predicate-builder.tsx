@@ -671,13 +671,13 @@ function ruleToSearchTag(rule: RuleType): string | null {
       ],
     };
 
-    const labels = fieldLabels[field];
-    return operator === "has" ? labels[0] : labels[1];
+    const [hasLabel, hasNotLabel] = fieldLabels[field];
+    return operator === "has" ? hasLabel : hasNotLabel;
   }
 
   // Has/has_not operator on fields with both toggle and comparison modes
   if (operator === "has" || operator === "has_not") {
-    const hasLabels: Record<string, [string, string]> = {
+    const hasLabels: Partial<Record<string, [string, string]>> = {
       duration_value: ["system:has duration", "system:no duration"],
       framerate: ["system:has framerate", "system:no framerate"],
       num_frames: ["system:has frames", "system:no frames"],
@@ -687,8 +687,11 @@ function ruleToSearchTag(rule: RuleType): string | null {
       num_notes: ["system:has notes", "system:no notes"],
     };
 
-    const labels = hasLabels[field] as [string, string] | undefined;
-    if (labels) return operator === "has" ? labels[0] : labels[1];
+    const labels = hasLabels[field];
+    if (labels) {
+      const [hasLabel, hasNotLabel] = labels;
+      return operator === "has" ? hasLabel : hasNotLabel;
+    }
   }
 
   // Rating fields
