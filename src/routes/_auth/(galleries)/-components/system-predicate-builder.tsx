@@ -408,7 +408,7 @@ const fieldGroups: Array<DisplayOptionGroup> = [
         operators: comparisonWithHasOps("notes"),
         defaultOperator: ">",
         inputType: "number",
-        defaultValue: "1",
+        defaultValue: "0",
       },
     ],
   },
