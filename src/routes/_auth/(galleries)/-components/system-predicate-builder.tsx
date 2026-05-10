@@ -631,12 +631,18 @@ function ruleToSearchTag(rule: RuleType): string | null {
   if (field === "status") {
     const negate = operator === "is_not";
     switch (value) {
-      case "inbox":
-        return negate ? "system:archive" : "system:inbox";
-      case "archive":
-        return negate ? "system:inbox" : "system:archive";
-      case "everything":
-        return negate ? null : "system:everything";
+      case "inbox": {
+        const tag = "system:inbox";
+        return negate ? `-${tag}` : tag;
+      }
+      case "archive": {
+        const tag = "system:archive";
+        return negate ? `-${tag}` : tag;
+      }
+      case "everything": {
+        const tag = "system:everything";
+        return negate ? `-${tag}` : tag;
+      }
       default:
         return null;
     }
@@ -972,7 +978,7 @@ function QBSelect({
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 min-w-52 cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-2.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50",
+          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-8 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-2.5 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 sm:w-auto sm:min-w-40",
           className,
         )}
         aria-label={title}
@@ -1145,7 +1151,7 @@ function QBActionElement({
     return (
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="sm"
         className={cn(
           "text-muted-foreground hover:text-destructive",
           className,
@@ -1156,9 +1162,9 @@ function QBActionElement({
         onClick={(e) => handleOnClick(e)}
         disabled={disabled && !disabledTranslation}
         type="button"
-        aria-label={title ?? "Remove"}
       >
-        <IconTrash className="size-4" />
+        <IconTrash data-icon="inline-start" className="size-4" />
+        {title?.includes("group") ? "Remove group" : "Remove"}
       </Button>
     );
   }
@@ -1169,7 +1175,7 @@ function QBActionElement({
     if (level > 0) return null;
     return (
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         className={className}
         title={title}
@@ -1185,7 +1191,7 @@ function QBActionElement({
 
   // Add rule: show separate "Add tag" and "Add filter" buttons
   return (
-    <div className="flex gap-1.5">
+    <>
       <Button
         variant="outline"
         size="sm"
@@ -1219,7 +1225,7 @@ function QBActionElement({
         <IconPlus data-icon="inline-start" className="size-4" />
         Add limit
       </Button>
-    </div>
+    </>
   );
 }
 
@@ -1305,7 +1311,7 @@ function QBValueEditor(props: ValueEditorProps) {
   return (
     <Input
       type={fieldData.inputType === "number" ? "number" : "text"}
-      className="h-8 w-64 rounded-lg"
+      className="h-8 w-full rounded-lg sm:w-auto sm:max-w-64 sm:min-w-40"
       value={value ?? ""}
       disabled={disabled}
       title={title}
@@ -1558,27 +1564,46 @@ function TagValueEditor({
   );
 
   return (
-    <div className="relative inline-flex items-center gap-1">
-      <Input
-        className="h-8 w-80 rounded-lg"
-        style={inputColor ? { color: inputColor } : undefined}
-        value={inputValue}
-        disabled={disabled}
-        placeholder="type a tag…"
-        onChange={(e) => {
-          setInputValue(e.target.value);
-          onChange(e.target.value);
-          setOpen(true);
-        }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => {
-          setTimeout(() => setOpen(false), 150);
-        }}
-      />
+    <>
+      <div className="relative w-full sm:w-auto sm:min-w-48 sm:flex-1">
+        <Input
+          className="h-8 w-full rounded-lg"
+          style={inputColor ? { color: inputColor } : undefined}
+          value={inputValue}
+          disabled={disabled}
+          placeholder="type a tag…"
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            onChange(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => {
+            setTimeout(() => setOpen(false), 150);
+          }}
+        />
+        {showDropdown && (
+          <div className="bg-popover border-border ring-foreground/5 absolute top-full left-0 z-50 mt-1 w-full min-w-64 overflow-hidden rounded-lg border shadow-md ring-1">
+            <Command shouldFilter={false}>
+              <CommandList>
+                {suggestions.map((tag) => (
+                  <TagSuggestionItem
+                    key={tag.value}
+                    value={tag.value}
+                    negated={isNegated}
+                    count={tag.count}
+                    onSelect={() => handleSelect(tag.value)}
+                  />
+                ))}
+              </CommandList>
+            </Command>
+          </div>
+        )}
+      </div>
       <Button
         variant="ghost"
-        size="icon-sm"
-        className="size-8 shrink-0 p-0"
+        size="sm"
+        className="shrink-0"
         onClick={() => {
           const toggled = isNegated
             ? inputValue.replace(/^-/, "")
@@ -1587,29 +1612,12 @@ function TagValueEditor({
           onChange(toggled);
         }}
         disabled={disabled}
-        aria-label={isNegated ? "Remove negation" : "Negate tag"}
         type="button"
       >
-        <IconPlusMinus className="size-4" />
+        <IconPlusMinus data-icon="inline-start" className="size-4" />
+        {isNegated ? "Include" : "Exclude"}
       </Button>
-      {showDropdown && (
-        <div className="bg-popover border-border ring-foreground/5 absolute top-full left-0 z-50 mt-1 w-120 overflow-hidden rounded-lg border shadow-md ring-1">
-          <Command shouldFilter={false}>
-            <CommandList>
-              {suggestions.map((tag) => (
-                <TagSuggestionItem
-                  key={tag.value}
-                  value={tag.value}
-                  negated={isNegated}
-                  count={tag.count}
-                  onSelect={() => handleSelect(tag.value)}
-                />
-              ))}
-            </CommandList>
-          </Command>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 
@@ -1671,7 +1679,7 @@ const controlClassnames = {
   queryBuilder: "",
   ruleGroup:
     "qb-group flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2 [&_.qb-group]:ml-1 [&_.qb-group]:rounded-none [&_.qb-group]:border-0 [&_.qb-group]:border-l-4 [&_.qb-group]:border-l-primary",
-  header: "order-last flex items-center gap-2",
+  header: "order-last flex flex-wrap items-center gap-2",
   body: "flex flex-col gap-2",
   rule: "flex flex-wrap items-center gap-2",
   combinators: "",
