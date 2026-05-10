@@ -1325,6 +1325,7 @@ function QBValueEditor(props: ValueEditorProps) {
     <Input
       type={fieldData.inputType === "number" ? "number" : "text"}
       className="h-8 w-full rounded-lg sm:w-auto sm:max-w-64 sm:min-w-40"
+      name={`hyaway-spb-${field}`}
       value={value ?? ""}
       disabled={disabled}
       title={title}
