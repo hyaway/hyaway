@@ -13,7 +13,7 @@ import {
   SearchQueryBuilder,
   queryToHydrusSearch,
 } from "./-components/system-predicate-builder";
-import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
+import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import type { SortConfig } from "./-components/system-predicate-builder";
 import type { RuleGroupType } from "react-querybuilder";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
@@ -29,6 +29,8 @@ import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbna
 import { useReviewActions } from "@/hooks/use-review-actions";
 import { useSearchFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
+
+import { useAllowSystemOnlySearch } from "@/stores/search-settings-store";
 
 import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 
@@ -53,7 +55,6 @@ const querySchema = z.object({
 
 const SearchParamsSchema = z.object({
   q: querySchema.optional().catch(undefined),
-  systemOk: z.boolean().optional().catch(undefined),
   sortType: z.number().optional().catch(undefined),
   sortAsc: z.boolean().optional().catch(undefined),
 });
@@ -64,16 +65,17 @@ export const Route = createFileRoute("/_auth/(galleries)/search/")({
 });
 
 function SearchIndex() {
-  const { q, systemOk, sortType, sortAsc } = Route.useSearch();
+  const { q, sortType, sortAsc } = Route.useSearch();
   const navigate = useNavigate();
   const [preserveCurrentScroll, setPreserveCurrentScroll] = useState(false);
+  const allowSystemOnlySearch = useAllowSystemOnlySearch();
 
   const searchTags = useMemo(
     () => (q ? queryToHydrusSearch(q as RuleGroupType) : []),
     [q],
   );
 
-  // System-only queries (no tag rules) are gated by the `systemOk` query param.
+  // System-only queries (no tag rules) are gated by the store setting.
   const hasTagRule = useMemo(() => {
     if (!q) return false;
     const query = q as RuleGroupType;
@@ -87,8 +89,9 @@ function SearchIndex() {
 
   const isSystemOnlyQuery = searchTags.length > 0 && !hasTagRule;
 
-  // Don't send system-only queries unless the user opted in via the checkbox
-  const effectiveTags = isSystemOnlyQuery && !systemOk ? [] : searchTags;
+  // Don't send system-only queries unless allowed in settings
+  const effectiveTags =
+    isSystemOnlyQuery && !allowSystemOnlySearch ? [] : searchTags;
 
   const searchOptions = useMemo(
     () => ({
@@ -121,16 +124,12 @@ function SearchIndex() {
   const reviewActions = useReviewActions({ fileIds });
 
   const handleSearch = useCallback(
-    (
-      query: RuleGroupType,
-      options?: { systemOk?: boolean; sort?: SortConfig },
-    ) => {
+    (query: RuleGroupType, options?: { sort?: SortConfig }) => {
       setPreserveCurrentScroll(true);
       void navigate({
         to: "/search",
         search: {
           q: query,
-          systemOk: options?.systemOk || undefined,
           sortType: options?.sort?.sortType,
           sortAsc: options?.sort?.sortAsc,
         },
@@ -221,7 +220,7 @@ function SearchIndex() {
         )}
       </>
       <PageHeaderActions>
-        <RecentFilesSettingsPopover />
+        <SearchSettingsPopover />
       </PageHeaderActions>
       <PageFloatingFooter leftContent={refetchButton} actions={reviewActions} />
     </>

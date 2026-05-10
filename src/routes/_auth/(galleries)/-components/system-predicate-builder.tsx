@@ -73,6 +73,10 @@ import { cn } from "@/lib/utils";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { parseTag } from "@/lib/tag-utils";
 import { useActiveTheme } from "@/stores/theme-store";
+import {
+  useAllowSystemOnlySearch,
+  useSearchSettingsActions,
+} from "@/stores/search-settings-store";
 import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
 import { useSearchTagsQuery } from "@/integrations/hydrus-api/queries/tags";
 import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
@@ -1928,10 +1932,7 @@ function SortSelect({
 interface SearchQueryBuilderProps {
   initialQuery?: RuleGroupType;
   initialSort?: SortConfig;
-  onSearch: (
-    query: RuleGroupType,
-    options?: { systemOk?: boolean; sort?: SortConfig },
-  ) => void;
+  onSearch: (query: RuleGroupType, options?: { sort?: SortConfig }) => void;
 }
 
 export function SearchQueryBuilder({
@@ -2003,25 +2004,16 @@ export function SearchQueryBuilder({
   }, [query]);
 
   const isSystemOnly = hasRules && !hasPositiveTagRule;
-  const [systemOnlyAcknowledged, setSystemOnlyAcknowledged] = useState(false);
+  const allowSystemOnlySearch = useAllowSystemOnlySearch();
+  const { setAllowSystemOnlySearch } = useSearchSettingsActions();
 
   const searchDisabled =
-    hydrusSearch.length === 0 || (isSystemOnly && !systemOnlyAcknowledged);
+    hydrusSearch.length === 0 || (isSystemOnly && !allowSystemOnlySearch);
 
   const handleSearch = useCallback(() => {
     const sort: SortConfig = { sortType, sortAsc };
-    onSearch(query, {
-      ...(isSystemOnly ? { systemOk: systemOnlyAcknowledged } : {}),
-      sort,
-    });
-  }, [
-    query,
-    onSearch,
-    isSystemOnly,
-    systemOnlyAcknowledged,
-    sortType,
-    sortAsc,
-  ]);
+    onSearch(query, { sort });
+  }, [query, onSearch, sortType, sortAsc]);
 
   const handleReset = useCallback(() => {
     setQuery(initialQuery ?? { ...emptyQuery, rules: [] });
@@ -2113,10 +2105,10 @@ export function SearchQueryBuilder({
               </span>
               <label className="flex cursor-pointer items-center gap-2">
                 <Switch
-                  checked={systemOnlyAcknowledged}
-                  onCheckedChange={setSystemOnlyAcknowledged}
+                  checked={allowSystemOnlySearch}
+                  onCheckedChange={setAllowSystemOnlySearch}
                 />
-                <span>Allow searches with only system predicates</span>
+                <span>Allow system-only searches</span>
               </label>
             </div>
           )}

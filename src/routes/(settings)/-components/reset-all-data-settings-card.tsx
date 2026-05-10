@@ -11,15 +11,18 @@ import {
 } from "@/components/ui-primitives/card";
 import { useReviewSettingsActions } from "@/stores/review-settings-store";
 import { useSearchLimitsActions } from "@/stores/search-limits-store";
+import { useSearchSettingsActions } from "@/stores/search-settings-store";
 import { useWatchHistoryActions } from "@/stores/watch-history-store";
 
 export function ResetAllDataSettingsCard() {
   const { reset: resetSearchLimits } = useSearchLimitsActions();
+  const { reset: resetSearchSettings } = useSearchSettingsActions();
   const { reset: resetWatchHistory } = useWatchHistoryActions();
   const { resetDataSettings: resetReviewData } = useReviewSettingsActions();
 
   const handleResetAll = () => {
     resetSearchLimits();
+    resetSearchSettings();
     resetWatchHistory();
     resetReviewData();
   };
