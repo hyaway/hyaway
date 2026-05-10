@@ -31,6 +31,7 @@ import type { CSSProperties } from "react";
 import type {
   HydrusTagSearch,
   RatingServiceInfo,
+  StarShape,
 } from "@/integrations/hydrus-api/models";
 import {
   Permission,
@@ -1440,7 +1441,7 @@ function NumericalValueEditor({
   const svc = service as {
     min_stars: number;
     max_stars: number;
-    star_shape: string;
+    star_shape: StarShape;
   };
 
   return (
@@ -1553,7 +1554,7 @@ function TagValueEditor({
     };
   }, [inputValue]);
 
-  const { data, isFetching } = useSearchTagsQuery(
+  const { data } = useSearchTagsQuery(
     debouncedInput.replace(/^-+/, "").replace(/:$/, ""),
   );
   const suggestions = data?.tags.slice(0, 50) ?? [];
