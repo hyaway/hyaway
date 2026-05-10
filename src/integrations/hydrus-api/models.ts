@@ -393,6 +393,29 @@ export const SearchFilesResponseSchema = BaseResponseSchema.extend({
 
 export type SearchFilesResponse = z.infer<typeof SearchFilesResponseSchema>;
 
+// #region Tag Search
+
+export const SearchTagsResultSchema = z.object({
+  value: z.string(),
+  count: z.number(),
+});
+
+export const SearchTagsResponseSchema = BaseResponseSchema.extend({
+  tags: z.array(SearchTagsResultSchema),
+});
+
+export type SearchTagsResponse = z.infer<typeof SearchTagsResponseSchema>;
+export type SearchTagsResult = z.infer<typeof SearchTagsResultSchema>;
+
+export type SearchTagsOptions = {
+  search: string;
+  tag_display_type?: "storage" | "display";
+  tag_service_key?: string;
+  file_service_key?: string;
+};
+
+// #endregion Tag Search
+
 export enum TagStatus {
   CURRENT = "0",
   PENDING = "1",

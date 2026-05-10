@@ -10,6 +10,7 @@ import {
   GetServicesResponseSchema,
   RequestNewPermissionsResponseSchema,
   SearchFilesResponseSchema,
+  SearchTagsResponseSchema,
   VerifyAccessKeyResponseSchema,
 } from "./models";
 
@@ -32,6 +33,8 @@ import type {
   RequestNewPermissionsResponse,
   SearchFilesOptions,
   SearchFilesResponse,
+  SearchTagsOptions,
+  SearchTagsResponse,
   SetRatingOptions,
   VerifyAccessKeyResponse,
 } from "./models";
@@ -118,6 +121,24 @@ export async function searchFiles(
     },
   });
   return SearchFilesResponseSchema.parse(response.data);
+}
+
+/**
+ * Search for tags matching a partial text input (autocomplete).
+ *
+ * @permission Requires: Search Files (3) and Add Tags (2)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_tags_search_tags
+ */
+export async function searchTags(
+  options: SearchTagsOptions,
+): Promise<SearchTagsResponse> {
+  const response = await sessionKeyClient.get("/add_tags/search_tags", {
+    params: {
+      ...options,
+      tag_display_type: options.tag_display_type ?? "display",
+    },
+  });
+  return SearchTagsResponseSchema.parse(response.data);
 }
 
 /**
