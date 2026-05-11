@@ -15,10 +15,7 @@ export function PageHeading({ title, eyebrow }: PageHeadingProps) {
     <>
       <div className="pt-2">
         {eyebrow ? <div className="text-sm/5">{eyebrow}</div> : null}
-        <Heading
-          level={1}
-          className={eyebrow ? "pb-2 text-2xl/10!" : undefined}
-        >
+        <Heading level={1} className="pb-2">
           {title}
         </Heading>
       </div>

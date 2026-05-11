@@ -13,6 +13,7 @@ All notable changes to hyAway are documented here.
 ### Fixed
 
 - Significantly improved speed when loading large collections (100k+ files) — searches and metadata fetching no longer cause the UI to hang
+- Page headings no longer take excessive vertical space when text wraps to multiple lines
 
 ---
 
