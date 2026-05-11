@@ -386,8 +386,17 @@ export type SearchFilesOptions = {
   return_hashes?: boolean;
 };
 
+/**
+ * Lightweight schema for large arrays of file/hash IDs from Hydrus.
+ * Validates that the value is an array without iterating every element,
+ * avoiding O(n) overhead on potentially 100k+ element arrays.
+ */
+const largeNumberArraySchema: z.ZodType<Array<number>> = z
+  .any()
+  .refine((v) => Array.isArray(v), { message: "Expected array" });
+
 export const SearchFilesResponseSchema = BaseResponseSchema.extend({
-  file_ids: z.array(z.number()).optional(),
+  file_ids: largeNumberArraySchema.optional(),
   hashes: z.array(z.string()).optional(),
 });
 
@@ -580,7 +589,7 @@ export type GetPagesResponse = z.infer<typeof GetPagesResponseSchema>;
 
 export const MediaSchema = z.object({
   num_files: z.number(),
-  hash_ids: z.array(z.number()),
+  hash_ids: largeNumberArraySchema,
 });
 
 export const PageInfoSchema = PageBaseSchema.extend({

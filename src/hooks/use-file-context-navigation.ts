@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { toast } from "sonner";
@@ -61,7 +61,17 @@ export function useFileContextNavigation({
   const navigate = useNavigate();
   const getGlobalTouchCount = useGlobalTouchCount();
 
-  const currentIndex = fileIds?.indexOf(fileId) ?? -1;
+  // O(1) lookup instead of O(n) indexOf on every render
+  const indexMap = useMemo(() => {
+    if (!fileIds) return null;
+    const map = new Map<number, number>();
+    for (let i = 0; i < fileIds.length; i++) {
+      map.set(fileIds[i], i);
+    }
+    return map;
+  }, [fileIds]);
+
+  const currentIndex = indexMap?.get(fileId) ?? -1;
   const prevId = currentIndex > 0 ? fileIds![currentIndex - 1] : null;
   const nextId =
     fileIds && currentIndex >= 0 && currentIndex < fileIds.length - 1

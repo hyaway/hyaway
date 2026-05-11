@@ -7,6 +7,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useRef } from "react";
 import {
   archiveFiles,
   deleteFiles,
@@ -66,6 +67,17 @@ export const useGetFilesMetadata = (
   });
 };
 
+/**
+ * Lightweight fingerprint for an array of file IDs.
+ * Avoids putting the full (potentially 100k+) array into a TanStack Query key,
+ * which would force JSON.stringify / deep-compare on every render.
+ */
+function fileIdsFingerprint(
+  ids: Array<number>,
+): [length: number, first: number | undefined, last: number | undefined] {
+  return [ids.length, ids[0], ids[ids.length - 1]];
+}
+
 export const useInfiniteGetFilesMetadata = (
   file_ids: Array<number>,
   only_return_basic_information = false,
@@ -73,15 +85,22 @@ export const useInfiniteGetFilesMetadata = (
   const isConfigured = useIsApiConfigured();
   const BATCH_SIZE = 128;
 
+  // Keep file_ids in a ref so the queryFn always reads the latest array
+  // without needing the full array in the queryKey.
+  const fileIdsRef = useRef(file_ids);
+  fileIdsRef.current = file_ids;
+
   return useInfiniteQuery({
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps -- file_ids accessed via ref intentionally; fingerprint covers invalidation
     queryKey: [
       "infiniteGetFilesMetadata",
-      file_ids,
+      fileIdsFingerprint(file_ids),
       only_return_basic_information,
       BATCH_SIZE,
     ],
     queryFn: async ({ pageParam = 0 }) => {
-      const batchFileIds = file_ids.slice(pageParam, pageParam + BATCH_SIZE);
+      const currentIds = fileIdsRef.current;
+      const batchFileIds = currentIds.slice(pageParam, pageParam + BATCH_SIZE);
       if (batchFileIds.length === 0) {
         return { metadata: [], nextCursor: undefined };
       }
@@ -92,7 +111,7 @@ export const useInfiniteGetFilesMetadata = (
       return {
         metadata: response.metadata,
         nextCursor:
-          pageParam + batchFileIds.length < file_ids.length
+          pageParam + batchFileIds.length < currentIds.length
             ? pageParam + BATCH_SIZE
             : undefined,
       };

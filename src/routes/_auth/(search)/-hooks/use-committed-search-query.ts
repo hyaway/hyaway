@@ -7,6 +7,7 @@ import {
   hasPositiveTagRule,
   queryToHydrusSearch,
 } from "../-lib/query-to-hydrus-search";
+import { committedSearchQueryKey } from "../-lib/search-entry-utils";
 import { searchFiles } from "@/integrations/hydrus-api/api-client";
 import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
 import {
@@ -16,7 +17,6 @@ import {
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useCommittedSearch } from "@/stores/search-queries-store";
 import { useAllowSystemOnlySearch } from "@/stores/search-settings-store";
-import { committedSearchQueryKey } from "../-lib/search-entry-utils";
 
 export { committedSearchQueryKey };
 
@@ -63,9 +63,22 @@ export function useCommittedSearchFilesQuery(entryKey: string) {
     enabled: isConfigured && canSearch && searchTags.length > 0,
   });
 
-  // No committed query → surface as error so file detail falls back
+  // No committed query → surface as error so file detail falls back.
+  // Avoid spreading `result` — it would observe every property on TanStack
+  // Query's tracked proxy and cause re-renders on any status change.
   if (!committed) {
-    return { ...result, isLoading: false, isError: true } as typeof result;
+    return {
+      data: undefined,
+      error: null,
+      isLoading: false,
+      isError: true,
+      isPending: false,
+      isFetching: false,
+      isSuccess: false,
+      status: "error",
+      fetchStatus: "idle",
+      refetch: result.refetch,
+    } as unknown as typeof result;
   }
 
   return result;
