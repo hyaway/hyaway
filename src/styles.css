@@ -33,6 +33,10 @@
 @custom-variant pointer-hover (@media (hover: hover) and (pointer: fine));
 
 :root {
+  /* Subpixel antialiasing for light mode — renders dark-on-light text
+     with fuller weight. Grayscale (antialiased) makes it appear too thin. */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
   --background: oklch(0.9383 0.0042 236.4993);
   --foreground: oklch(0.3211 0 0);
   --card: oklch(1 0 0);
@@ -49,8 +53,8 @@
   --accent-foreground: oklch(0.3791 0.1378 265.5222);
   --destructive: oklch(0.6368 0.2078 25.3313);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.9022 0.0052 247.8822);
-  --input: oklch(0.97 0.0029 264.542);
+  --border: oklch(0.87 0.0052 247.8822);
+  --input: oklch(0.84 0.0029 264.542);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.79 0.1 275);
   --chart-2: oklch(0.68 0.16 277);
@@ -69,6 +73,9 @@
 }
 
 .dark {
+  /* Grayscale antialiasing for dark mode — looks crisper for light-on-dark text. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

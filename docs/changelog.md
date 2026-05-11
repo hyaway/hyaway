@@ -9,6 +9,8 @@ All notable changes to hyAway are documented here.
 ### Fixed
 
 - Image loading now respects the media viewer background preferences, preventing a brief average-color flash when opening images
+- Inputs and form fields are now more visible in light theme with darker borders
+- Light theme text no longer appears thin. It now uses subpixel antialiasing for fuller weight
 
 ---
 
