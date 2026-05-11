@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type { RuleGroupType } from "react-querybuilder";
 import type { SearchQueryEntry, SortConfig } from "@/stores/search-defaults";
-import { DEFAULT_SEARCH_KEY, emptyStaged } from "@/stores/search-defaults";
+import { emptyStaged } from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import { getDefaultQuery } from "@/stores/search-settings-store";
 
@@ -22,9 +22,7 @@ function defaultEntry(): SearchQueryEntry {
 }
 
 function defaultEntries(): Record<string, SearchQueryEntry> {
-  return {
-    [DEFAULT_SEARCH_KEY]: { ...defaultEntry(), displayName: "Draft" },
-  };
+  return {};
 }
 
 const DRAFT_BASE = "Draft";

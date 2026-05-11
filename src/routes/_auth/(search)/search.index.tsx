@@ -14,6 +14,8 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
 import { copySearchCache, generateSearchId } from "./-lib/search-entry-utils";
+import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
+import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import {
@@ -63,7 +65,7 @@ function SearchIndex() {
           className="self-start"
         >
           <IconPlus data-icon="inline-start" className="size-5" />
-          New search
+          New default search
         </Button>
         {searchKeys.length > 0 && (
           <>
@@ -79,6 +81,9 @@ function SearchIndex() {
           </>
         )}
       </div>
+      <PageHeaderActions>
+        <SearchIndexSettingsPopover />
+      </PageHeaderActions>
     </>
   );
 }
