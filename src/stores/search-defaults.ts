@@ -43,7 +43,7 @@ function defaultQuery(): RuleGroupType {
 function defaultSort(): SortConfig {
   return {
     sortType: HydrusFileSortType.ImportTime,
-    sortAsc: true,
+    sortAsc: false,
   };
 }
 
