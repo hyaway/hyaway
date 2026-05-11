@@ -26,16 +26,42 @@ import { SliderField } from "@/components/settings/setting-fields";
 import {
   AUTO_LOCK_OFF,
   useIsPinEnabled,
-  useLockAfterMinutes,
+  useLockAfterSeconds,
   usePinLockActions,
 } from "@/stores/pin-lock-store";
 
 const PIN_LENGTH = 4;
 
+/** Stepped auto-lock durations in seconds. Index 0 = off. */
+const LOCK_STEPS = [
+  AUTO_LOCK_OFF,
+  0,
+  15,
+  30,
+  45,
+  60,
+  120,
+  180,
+  240,
+  300,
+  600,
+  900,
+  1200,
+  1500,
+  1800,
+];
+
+function formatLockDuration(seconds: number): string {
+  if (seconds === AUTO_LOCK_OFF) return "Off";
+  if (seconds === 0) return "0s";
+  if (seconds < 60) return `${seconds}s`;
+  return `${seconds / 60} min`;
+}
+
 export function PinLockSettingsCard() {
   const isPinEnabled = useIsPinEnabled();
-  const lockAfterMinutes = useLockAfterMinutes();
-  const { setPin, removePin, lockSession, setLockAfterMinutes } =
+  const lockAfterSeconds = useLockAfterSeconds();
+  const { setPin, removePin, lockSession, setLockAfterSeconds } =
     usePinLockActions();
 
   const [newPin, setNewPin] = useState("");
@@ -130,14 +156,14 @@ export function PinLockSettingsCard() {
                 <SliderField
                   id="lock-after-slider"
                   label="Lock when in background after"
-                  value={lockAfterMinutes}
-                  min={AUTO_LOCK_OFF}
-                  max={30}
+                  value={LOCK_STEPS.indexOf(lockAfterSeconds)}
+                  min={0}
+                  max={LOCK_STEPS.length - 1}
                   step={1}
-                  onValueChange={setLockAfterMinutes}
-                  formatValue={(v) =>
-                    v === AUTO_LOCK_OFF ? "Off" : `${v} min`
+                  onValueChange={(index) =>
+                    setLockAfterSeconds(LOCK_STEPS[index])
                   }
+                  formatValue={(index) => formatLockDuration(LOCK_STEPS[index])}
                 />
                 <p className="text-muted-foreground text-sm">
                   Lock the app after being in the background (e.g. switching

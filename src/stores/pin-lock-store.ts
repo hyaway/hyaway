@@ -25,8 +25,8 @@ function hashPin(pin: string): string {
 type PinLockState = {
   /** Hash of the PIN, or empty string if no PIN is set */
   pinHash: string;
-  /** Minutes of inactivity before auto-locking. AUTO_LOCK_OFF = off, 0 = always (immediate), 1-30 = minutes. */
-  lockAfterMinutes: number;
+  /** Seconds of inactivity before auto-locking. AUTO_LOCK_OFF = off, 0 = always (immediate). */
+  lockAfterSeconds: number;
   /** Whether the current session has been unlocked (not persisted) */
   isUnlocked: boolean;
   _hasHydrated: boolean;
@@ -36,7 +36,7 @@ type PinLockState = {
     verifyPin: (pin: string) => boolean;
     unlockSession: () => void;
     lockSession: () => void;
-    setLockAfterMinutes: (minutes: number) => void;
+    setLockAfterSeconds: (seconds: number) => void;
     setHasHydrated: (state: boolean) => void;
   };
 };
@@ -45,7 +45,7 @@ export const usePinLockStore = create<PinLockState>()(
   persist(
     (set, get) => ({
       pinHash: "",
-      lockAfterMinutes: AUTO_LOCK_OFF,
+      lockAfterSeconds: AUTO_LOCK_OFF,
       isUnlocked: isSessionUnlockedFromStorage(),
       _hasHydrated: false,
       actions: {
@@ -71,8 +71,8 @@ export const usePinLockStore = create<PinLockState>()(
           sessionStorage.removeItem(SESSION_UNLOCK_KEY);
           set({ isUnlocked: false });
         },
-        setLockAfterMinutes: (minutes: number) => {
-          set({ lockAfterMinutes: minutes });
+        setLockAfterSeconds: (seconds: number) => {
+          set({ lockAfterSeconds: seconds });
         },
         setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
       },
@@ -82,7 +82,7 @@ export const usePinLockStore = create<PinLockState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         pinHash: state.pinHash,
-        lockAfterMinutes: state.lockAfterMinutes,
+        lockAfterSeconds: state.lockAfterSeconds,
       }),
       onRehydrateStorage: () => (state) => {
         state?.actions.setHasHydrated(true);
@@ -97,8 +97,8 @@ export const useIsPinEnabled = () =>
   usePinLockStore((state) => state.pinHash !== "");
 export const usePinLockActions = () =>
   usePinLockStore((state) => state.actions);
-export const useLockAfterMinutes = () =>
-  usePinLockStore((state) => state.lockAfterMinutes);
+export const useLockAfterSeconds = () =>
+  usePinLockStore((state) => state.lockAfterSeconds);
 export const usePinLockHydrated = () =>
   usePinLockStore((state) => state._hasHydrated);
 
@@ -117,28 +117,28 @@ export function useShouldShowLockScreen(): boolean {
   return !isUnlocked;
 }
 
-/** Auto-lock the app after N minutes of being hidden (tab switch, minimize, etc.) */
+/** Auto-lock the app after N seconds of being hidden (tab switch, minimize, etc.) */
 export function useAutoLock() {
   useEffect(() => {
-    let lockTimer: ReturnType<typeof setTimeout>;
+    let hiddenAt: number | null = null;
 
     const handleVisibilityChange = () => {
-      const { lockAfterMinutes, pinHash, actions } = usePinLockStore.getState();
-      if (!pinHash || lockAfterMinutes === AUTO_LOCK_OFF) return;
+      const { lockAfterSeconds, pinHash, actions } = usePinLockStore.getState();
+      if (!pinHash || lockAfterSeconds === AUTO_LOCK_OFF) return;
 
       if (document.hidden) {
-        lockTimer = setTimeout(
-          () => actions.lockSession(),
-          lockAfterMinutes * 60_000,
-        );
-      } else {
-        clearTimeout(lockTimer);
+        hiddenAt = Date.now();
+      } else if (hiddenAt !== null) {
+        const elapsed = Date.now() - hiddenAt;
+        hiddenAt = null;
+        if (elapsed >= lockAfterSeconds * 1_000) {
+          actions.lockSession();
+        }
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
-      clearTimeout(lockTimer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
