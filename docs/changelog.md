@@ -6,6 +6,10 @@ All notable changes to hyAway are documented here.
 
 ## 2026-05-11
 
+### Changed
+
+- "Add to review" actions now show a distinct cards-with-plus icon to differentiate from "New review"
+
 ### Fixed
 
 - Significantly improved speed when loading large collections (100k+ files) — searches and metadata fetching no longer cause the UI to hang
