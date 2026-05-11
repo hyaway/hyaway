@@ -30,10 +30,10 @@ export type SearchQueryEntry = {
 };
 
 /**
- * Well-known entry key for the scratch (unsaved) search page.
+ * Well-known entry key for the scratchpad (unsaved) search page.
  * Always available, never deletable.
  */
-export const SCRATCH_SEARCH_KEY = "scratch";
+export const SCRATCH_SEARCH_KEY = "scratchpad";
 
 // ---------------------------------------------------------------------------
 // Defaults
@@ -207,7 +207,7 @@ export const useSearchQueriesActions = () =>
 export const useSearchQueryCount = () =>
   useSearchQueriesStore((state) => Object.keys(state.entries).length);
 
-/** Get all saved search keys (excludes scratch). */
+/** Get all saved search keys (excludes scratchpad). */
 export const useSavedSearchKeys = () =>
   useSearchQueriesStore(
     useShallow((state) =>

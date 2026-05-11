@@ -23,10 +23,10 @@ import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
-import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
+import { ThumbnailGallerySkeleton } from "@/components/thumbnail-gallery/thumbnail-gallery-skeleton";
 import { useReviewActions } from "@/hooks/use-review-actions";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import {
@@ -122,7 +122,7 @@ function SearchPage() {
     [isScratch, handleSaveAsNew, handleDelete],
   );
 
-  const pageTitle = isScratch ? "Scratch" : `Search ${searchId}`;
+  const pageTitle = isScratch ? "Scratchpad" : `Search ${searchId}`;
 
   const title = isLoading
     ? pageTitle
@@ -155,7 +155,7 @@ function SearchPage() {
             />
           </div>
         )}
-        {isLoading && searchTags.length > 0 && <PageLoading title={title} />}
+        {isLoading && searchTags.length > 0 && <ThumbnailGallerySkeleton />}
         {isError && committed && (
           <PageError
             error={error}

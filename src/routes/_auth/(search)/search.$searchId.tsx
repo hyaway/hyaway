@@ -7,6 +7,6 @@ export const Route = createFileRoute("/_auth/(search)/search/$searchId")({
   component: () => <Outlet />,
   beforeLoad: ({ params }) => ({
     getTitle: () =>
-      params.searchId === "scratch" ? "Search scratch" : `${params.searchId}`,
+      params.searchId === "scratchpad" ? "Scratchpad" : `${params.searchId}`,
   }),
 });
