@@ -16,12 +16,16 @@ export type SortConfig = {
   sortAsc: boolean;
 };
 
+/** Query + sort pair representing a complete search state. */
+export type SearchState = {
+  query: RuleGroupType;
+  sort: SortConfig;
+};
+
 /** A single search entry with staged (being edited) and committed (active) state. */
 export type SearchQueryEntry = {
-  staged: RuleGroupType;
-  stagedSort: SortConfig;
-  committed: RuleGroupType | undefined;
-  committedSort: SortConfig | undefined;
+  staged: SearchState;
+  committed: SearchState | undefined;
 };
 
 /**
@@ -45,12 +49,15 @@ const DEFAULT_SORT: SortConfig = {
   sortAsc: true,
 };
 
+const DEFAULT_STAGED: SearchState = {
+  query: EMPTY_QUERY,
+  sort: DEFAULT_SORT,
+};
+
 function defaultEntry(): SearchQueryEntry {
   return {
-    staged: EMPTY_QUERY,
-    stagedSort: DEFAULT_SORT,
+    staged: DEFAULT_STAGED,
     committed: undefined,
-    committedSort: undefined,
   };
 }
 
@@ -62,11 +69,11 @@ type SearchQueriesState = {
   entries: Record<string, SearchQueryEntry>;
   actions: {
     /** Update the staged query for an entry (creates if missing). */
-    setStaged: (key: string, query: RuleGroupType) => void;
+    setStagedQuery: (key: string, query: RuleGroupType) => void;
     /** Update the staged sort for an entry. */
     setStagedSort: (key: string, sort: SortConfig) => void;
-    /** Commit: copies staged → committed. Returns the committed entry. */
-    commit: (key: string) => SearchQueryEntry | undefined;
+    /** Commit: copies staged → committed. */
+    commit: (key: string) => void;
     /** Reset: copies committed → staged (reverts edits). */
     reset: (key: string) => void;
     /** Clear: resets staged to the default empty query. */
@@ -81,11 +88,17 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
     (set, get) => ({
       entries: {},
       actions: {
-        setStaged: (key, query) => {
+        setStagedQuery: (key, query) => {
           const { entries } = get();
           const entry = entries[key] ?? defaultEntry();
           set({
-            entries: { ...entries, [key]: { ...entry, staged: query } },
+            entries: {
+              ...entries,
+              [key]: {
+                ...entry,
+                staged: { ...entry.staged, query },
+              },
+            },
           });
         },
 
@@ -93,20 +106,25 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const { entries } = get();
           const entry = entries[key] ?? defaultEntry();
           set({
-            entries: { ...entries, [key]: { ...entry, stagedSort: sort } },
+            entries: {
+              ...entries,
+              [key]: {
+                ...entry,
+                staged: { ...entry.staged, sort },
+              },
+            },
           });
         },
 
         commit: (key) => {
           const { entries } = get();
           const entry = entries[key] ?? defaultEntry();
-          const committed: SearchQueryEntry = {
-            ...entry,
-            committed: entry.staged,
-            committedSort: entry.stagedSort,
-          };
-          set({ entries: { ...entries, [key]: committed } });
-          return committed;
+          set({
+            entries: {
+              ...entries,
+              [key]: { ...entry, committed: entry.staged },
+            },
+          });
         },
 
         reset: (key) => {
@@ -117,8 +135,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               ...entries,
               [key]: {
                 ...current,
-                staged: current.committed ?? EMPTY_QUERY,
-                stagedSort: current.committedSort ?? DEFAULT_SORT,
+                staged: current.committed ?? DEFAULT_STAGED,
               },
             },
           });
@@ -130,11 +147,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           set({
             entries: {
               ...entries,
-              [key]: {
-                ...current,
-                staged: EMPTY_QUERY,
-                stagedSort: DEFAULT_SORT,
-              },
+              [key]: { ...current, staged: DEFAULT_STAGED },
             },
           });
         },
@@ -160,9 +173,17 @@ setupCrossTabSync(useSearchQueriesStore);
 // Selector hooks
 // ---------------------------------------------------------------------------
 
+const DEFAULT_ENTRY = defaultEntry();
+
 /** Get a single search entry (returns a stable default when missing). */
 export const useSearchQueryEntry = (key: string): SearchQueryEntry =>
-  useSearchQueriesStore((state) => state.entries[key] ?? defaultEntry());
+  useSearchQueriesStore((state) => state.entries[key] ?? DEFAULT_ENTRY);
+
+/** Get committed state for a search entry. */
+export const useCommittedSearch = (key: string) =>
+  useSearchQueriesStore(
+    (state) => (state.entries[key] as SearchQueryEntry | undefined)?.committed,
+  );
 
 export const useSearchQueriesActions = () =>
   useSearchQueriesStore((state) => state.actions);
