@@ -3,6 +3,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { useShallow } from "zustand/shallow";
 import type { RuleGroupType } from "react-querybuilder";
 import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
@@ -29,11 +30,10 @@ export type SearchQueryEntry = {
 };
 
 /**
- * Well-known entry key for the main search page.
- *
- * Alternatives considered: "new", "default", "main", "scratch".
+ * Well-known entry key for the scratch (unsaved) search page.
+ * Always available, never deletable.
  */
-export const PRIMARY_SEARCH_KEY = "primary";
+export const SCRATCH_SEARCH_KEY = "scratch";
 
 // ---------------------------------------------------------------------------
 // Defaults
@@ -80,6 +80,8 @@ type SearchQueriesState = {
     clear: (key: string) => void;
     /** Remove an entry entirely. */
     remove: (key: string) => void;
+    /** Copy an entry's current state to a new key. */
+    saveAs: (fromKey: string, toKey: string) => void;
   };
 };
 
@@ -157,6 +159,20 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const { [key]: _, ...rest } = entries;
           set({ entries: rest });
         },
+
+        saveAs: (fromKey, toKey) => {
+          const { entries } = get();
+          const source = entries[fromKey] ?? defaultEntry();
+          set({
+            entries: {
+              [toKey]: {
+                staged: source.staged,
+                committed: source.committed ?? source.staged,
+              },
+              ...entries,
+            },
+          });
+        },
       },
     }),
     {
@@ -190,6 +206,23 @@ export const useSearchQueriesActions = () =>
 
 export const useSearchQueryCount = () =>
   useSearchQueriesStore((state) => Object.keys(state.entries).length);
+
+/** Get all saved search keys (excludes scratch). */
+export const useSavedSearchKeys = () =>
+  useSearchQueriesStore(
+    useShallow((state) =>
+      Object.keys(state.entries).filter((k) => k !== SCRATCH_SEARCH_KEY),
+    ),
+  );
+
+/** Generate a unique search page ID (e.g. "2026-05-10_a3f7"). */
+export function generateSearchId(): string {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+  const date = local.toISOString().slice(0, 10);
+  const hash = Math.random().toString(36).slice(2, 6);
+  return `${date}_${hash}`;
+}
 
 /** Delete all search queries (for settings). */
 export const clearSearchQueries = () =>
