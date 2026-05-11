@@ -5,7 +5,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { SearchState } from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
-import { DEFAULT_STAGED } from "@/stores/search-defaults";
+import { defaultStaged } from "@/stores/search-defaults";
 
 type SearchSettingsState = {
   allowSystemOnlySearch: boolean;
@@ -23,12 +23,12 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
   persist(
     (set, _get, store) => ({
       allowSystemOnlySearch: false,
-      defaultQuery: DEFAULT_STAGED,
+      defaultQuery: defaultStaged(),
       actions: {
         setAllowSystemOnlySearch: (allowSystemOnlySearch: boolean) =>
           set({ allowSystemOnlySearch }),
         setDefaultQuery: (defaultQuery: SearchState) => set({ defaultQuery }),
-        resetDefaultQuery: () => set({ defaultQuery: DEFAULT_STAGED }),
+        resetDefaultQuery: () => set({ defaultQuery: defaultStaged() }),
         reset: () => set(store.getInitialState()),
       },
     }),
@@ -46,8 +46,13 @@ export const useAllowSystemOnlySearch = () =>
 export const useDefaultQuery = () =>
   useSearchSettingsStore((state) => state.defaultQuery);
 
-export const getDefaultQuery = () =>
-  useSearchSettingsStore.getState().defaultQuery;
+export const getDefaultQuery = (): SearchState => {
+  const { query, sort } = useSearchSettingsStore.getState().defaultQuery;
+  return {
+    query: { ...query, rules: [...query.rules] },
+    sort: { ...sort },
+  };
+};
 
 export const useSearchSettingsActions = () =>
   useSearchSettingsStore((state) => state.actions);
