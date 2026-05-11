@@ -61,7 +61,10 @@ import { cn } from "@/lib/utils";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { parseTag } from "@/lib/tag-utils";
 import { useActiveTheme } from "@/stores/theme-store";
-import { useSearchTagsQuery } from "@/integrations/hydrus-api/queries/tags";
+import {
+  useFavouriteTagsQuery,
+  useSearchTagsQuery,
+} from "@/integrations/hydrus-api/queries/tags";
 import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
 
 // ---------------------------------------------------------------------------
@@ -819,10 +822,15 @@ function TagValueEditor({
   const { data } = useSearchTagsQuery(
     debouncedInput.replace(/^-+/, "").replace(/:$/, ""),
   );
+  const { data: favouritesData } = useFavouriteTagsQuery();
   const suggestions = data?.tags.slice(0, 50) ?? [];
   const isNegated = inputValue.trimStart().startsWith("-");
   const hasSufficientInput = inputValue.trim().replace(/^-+/, "").length >= 3;
-  const showDropdown = open && hasSufficientInput && suggestions.length > 0;
+  const favouriteTags = favouritesData?.favourite_tags ?? [];
+  const showFavourites =
+    open && !hasSufficientInput && favouriteTags.length > 0;
+  const showDropdown =
+    (open && hasSufficientInput && suggestions.length > 0) || showFavourites;
 
   const namespaceColors = useNamespaceColors();
   const { namespace } = parseTag(inputValue);
@@ -865,15 +873,24 @@ function TagValueEditor({
           <div className="bg-popover border-border ring-foreground/5 absolute top-full left-0 z-50 mt-1 w-full min-w-64 overflow-hidden rounded-lg border shadow-md ring-1">
             <Command shouldFilter={false}>
               <CommandList>
-                {suggestions.map((tag) => (
-                  <TagSuggestionItem
-                    key={tag.value}
-                    value={tag.value}
-                    negated={isNegated}
-                    count={tag.count}
-                    onSelect={() => handleSelect(tag.value)}
-                  />
-                ))}
+                {hasSufficientInput
+                  ? suggestions.map((tag) => (
+                      <TagSuggestionItem
+                        key={tag.value}
+                        value={tag.value}
+                        negated={isNegated}
+                        count={tag.count}
+                        onSelect={() => handleSelect(tag.value)}
+                      />
+                    ))
+                  : favouriteTags.map((tag) => (
+                      <TagSuggestionItem
+                        key={tag}
+                        value={tag}
+                        negated={isNegated}
+                        onSelect={() => handleSelect(tag)}
+                      />
+                    ))}
               </CommandList>
             </Command>
           </div>
@@ -908,7 +925,7 @@ function TagSuggestionItem({
 }: {
   value: string;
   negated?: boolean;
-  count: number;
+  count?: number;
   onSelect: () => void;
 }) {
   const namespaceColors = useNamespaceColors();
@@ -923,9 +940,11 @@ function TagSuggestionItem({
         {negated ? "-" : ""}
         {value}
       </span>
-      <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-        {count.toLocaleString()}
-      </span>
+      {count != null && (
+        <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
+          {count.toLocaleString()}
+        </span>
+      )}
     </CommandItem>
   );
 }

@@ -427,6 +427,14 @@ export type SearchTagsOptions = {
   file_service_key?: string;
 };
 
+export const FavouriteTagsResponseSchema = BaseResponseSchema.extend({
+  favourite_tags: z.array(z.string()),
+});
+
+export type FavouriteTagsResponse = z.infer<
+  typeof FavouriteTagsResponseSchema
+>;
+
 // #endregion Tag Search
 
 export enum TagStatus {

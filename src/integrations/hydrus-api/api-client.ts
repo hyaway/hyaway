@@ -21,6 +21,7 @@ import {
 import type {
   AccessKeyType,
   CanvasType,
+  FavouriteTagsResponse,
   GetClientOptionsResponse,
   GetFileMetadataResponse,
   GetPageInfoResponse,
@@ -142,6 +143,18 @@ export async function searchTags(
   // Skip Zod — tag autocomplete can return thousands of results,
   // each just { value: string, count: number } with no transforms.
   return response.data as SearchTagsResponse;
+}
+
+/**
+ * Get the client's favourite tags.
+ *
+ * @permission Requires: Add Tags (2)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_tags_get_favourite_tags
+ */
+export async function getFavouriteTags(): Promise<FavouriteTagsResponse> {
+  const response = await sessionKeyClient.get("/add_tags/get_favourite_tags");
+  // Skip Zod — response contains tag arrays that can be large.
+  return response.data as FavouriteTagsResponse;
 }
 
 /**
