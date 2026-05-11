@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { TagBadgeFromString } from "@/components/tag/tag-badge";
+import { TagContextMenu, useTagActions } from "@/components/tag/tag-actions";
 import { compareTagStrings } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 
@@ -67,7 +68,7 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
         {tags.map((tag) => {
           const isVisible = !filteredTagsSet || filteredTagsSet.has(tag);
           return (
-            <TagBadgeFromString
+            <InlineTagBadge
               key={tag}
               displayTag={tag}
               className={cn(
@@ -79,6 +80,22 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
         })}
       </div>
     </div>
+  );
+}
+
+function InlineTagBadge({
+  displayTag,
+  className,
+}: {
+  displayTag: string;
+  className?: string;
+}) {
+  const actions = useTagActions(displayTag, undefined);
+
+  return (
+    <TagContextMenu actions={actions}>
+      <TagBadgeFromString displayTag={displayTag} className={className} />
+    </TagContextMenu>
   );
 }
 
