@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
 import {
+  nextUniqueName,
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
@@ -48,8 +49,9 @@ export function useTagActions(
         { field: "limit", operator: "=", value: 256 },
       ],
     };
-    const id = generateSearchId(tag);
-    setStagedQuery(id, query, tag);
+    const displayName = nextUniqueName(tag);
+    const id = generateSearchId(displayName);
+    setStagedQuery(id, query, displayName);
     navigate({ to: "/search/$searchId", params: { searchId: id } });
   }, [tag, navigate, setStagedQuery]);
 

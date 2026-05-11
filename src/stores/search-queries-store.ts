@@ -29,24 +29,33 @@ function defaultEntries(): Record<string, SearchQueryEntry> {
 
 const DRAFT_BASE = "Draft";
 
-/** Get the next available "Draft" / "Draft (N)" name based on existing entries. */
-export function nextDraftName(): string {
+/**
+ * Get the next available unique name for a given base.
+ * If "Base" exists, returns "Base (1)". If "Base (1)" exists, returns "Base (2)", etc.
+ * If no match exists, returns the base as-is.
+ */
+export function nextUniqueName(base: string): string {
   const entries = useSearchQueriesStore.getState().entries;
   let max = -1;
   for (const entry of Object.values(entries)) {
     const name = entry.displayName ?? "";
-    if (name === DRAFT_BASE) {
+    if (name === base) {
       if (0 > max) max = 0;
-    } else if (name.startsWith(`${DRAFT_BASE} (`)) {
-      const inner = name.slice(DRAFT_BASE.length + 2, -1);
+    } else if (name.startsWith(`${base} (`)) {
+      const inner = name.slice(base.length + 2, -1);
       if (/^\d+$/.test(inner)) {
         const n = Number(inner);
         if (n > max) max = n;
       }
     }
   }
-  if (max === -1) return DRAFT_BASE;
-  return `${DRAFT_BASE} (${max + 1})`;
+  if (max === -1) return base;
+  return `${base} (${max + 1})`;
+}
+
+/** Get the next available "Draft" / "Draft (N)" name based on existing entries. */
+export function nextDraftName(): string {
+  return nextUniqueName(DRAFT_BASE);
 }
 
 // ---------------------------------------------------------------------------

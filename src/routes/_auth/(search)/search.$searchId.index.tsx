@@ -159,25 +159,24 @@ function SearchPage() {
     handleDelete,
   ]);
 
-  const pageTitle = displayName;
+  const fileCount = data?.file_ids?.length ?? 0;
 
-  const title = isLoading
-    ? pageTitle
-    : isError
-      ? pageTitle
-      : `${pageTitle} (${data?.file_ids?.length ?? 0} files)`;
+  const activeLabel =
+    isLoading || isError
+      ? "Active search"
+      : `Active search (found ${fileCount} files)`;
 
   return (
     <>
       <>
-        <PageHeading title={title} />
+        <PageHeading title={displayName} />
         <div className="flex flex-col gap-2 pb-2">
           <SearchQueryBuilder entryKey={searchId} onCommit={handleCommit} />
         </div>
         {searchTags.length > 0 && (
           <div className="flex flex-col gap-1.5 pt-3 pb-3">
             <span className="text-muted-foreground text-sm font-medium">
-              Active search
+              {activeLabel}
             </span>
             <SearchTagList
               tags={searchTags}
