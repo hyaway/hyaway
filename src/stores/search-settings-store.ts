@@ -8,11 +8,9 @@ import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import { defaultStaged } from "@/stores/search-defaults";
 
 type SearchSettingsState = {
-  allowSystemOnlySearch: boolean;
   /** Default query+sort for new search entries and clear/reset. */
   defaultQuery: SearchState;
   actions: {
-    setAllowSystemOnlySearch: (allow: boolean) => void;
     setDefaultQuery: (state: SearchState) => void;
     resetDefaultQuery: () => void;
     reset: () => void;
@@ -22,11 +20,8 @@ type SearchSettingsState = {
 const useSearchSettingsStore = create<SearchSettingsState>()(
   persist(
     (set, _get, store) => ({
-      allowSystemOnlySearch: false,
       defaultQuery: defaultStaged(),
       actions: {
-        setAllowSystemOnlySearch: (allowSystemOnlySearch: boolean) =>
-          set({ allowSystemOnlySearch }),
         setDefaultQuery: (defaultQuery: SearchState) => set({ defaultQuery }),
         resetDefaultQuery: () => set({ defaultQuery: defaultStaged() }),
         reset: () => set(store.getInitialState()),
@@ -39,9 +34,6 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
     },
   ),
 );
-
-export const useAllowSystemOnlySearch = () =>
-  useSearchSettingsStore((state) => state.allowSystemOnlySearch);
 
 export const useDefaultQuery = () =>
   useSearchSettingsStore((state) => state.defaultQuery);

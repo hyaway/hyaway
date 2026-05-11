@@ -4,19 +4,6 @@
 import type { RuleGroupType, RuleType } from "react-querybuilder";
 import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
 
-/** Check if a query has at least one non-negated tag rule. */
-export function hasPositiveTagRule(query: RuleGroupType): boolean {
-  return query.rules.some((r) => {
-    if ("rules" in r) return hasPositiveTagRule(r);
-    return (
-      r.field === "tag" &&
-      typeof r.value === "string" &&
-      r.value.trim().length > 0 &&
-      !r.value.trimStart().startsWith("-")
-    );
-  });
-}
-
 /** Names of fields that are pure has/does-not-have toggles (no value input ever). */
 export const HAS_ONLY_FIELDS = new Set([
   "audio",

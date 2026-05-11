@@ -3,10 +3,7 @@
 
 import { useCallback, useMemo } from "react";
 import { QueryBuilder } from "react-querybuilder";
-import {
-  hasPositiveTagRule,
-  queryToHydrusSearch,
-} from "../-lib/query-to-hydrus-search";
+import { queryToHydrusSearch } from "../-lib/query-to-hydrus-search";
 import {
   FILE_SERVICE_TYPES,
   buildRatingFieldGroups,
@@ -23,7 +20,6 @@ import {
 } from "./query-builder-controls";
 import { SearchActions } from "./search-builder-actions";
 import { SortSection } from "./sort-select";
-import { SystemOnlyWarning } from "./system-only-warning";
 import type { RuleGroupType, RuleType } from "react-querybuilder";
 import type { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 import { Permission } from "@/integrations/hydrus-api/models";
@@ -31,10 +27,7 @@ import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { SearchTagList } from "@/components/tag/tag-badge";
-import {
-  useAllowSystemOnlySearch,
-  useSearchSettingsActions,
-} from "@/stores/search-settings-store";
+import {} from "@/stores/search-settings-store";
 import {
   useSearchQueriesActions,
   useSearchQueryEntry,
@@ -167,12 +160,7 @@ export function SearchQueryBuilder({
   const hydrusSearch = useMemo(() => queryToHydrusSearch(query), [query]);
   const hasRules = query.rules.length > 0;
 
-  const isSystemOnly = hasRules && !hasPositiveTagRule(query);
-  const allowSystemOnlySearch = useAllowSystemOnlySearch();
-  const { setAllowSystemOnlySearch } = useSearchSettingsActions();
-
-  const searchDisabled =
-    hydrusSearch.length === 0 || (isSystemOnly && !allowSystemOnlySearch);
+  const searchDisabled = hydrusSearch.length === 0;
 
   const handleSearch = useCallback(() => {
     commit(entryKey);
@@ -233,12 +221,6 @@ export function SearchQueryBuilder({
 
       {hasRules && (
         <div className="flex flex-col gap-2">
-          {isSystemOnly && (
-            <SystemOnlyWarning
-              allowSystemOnlySearch={allowSystemOnlySearch}
-              onAllowChange={setAllowSystemOnlySearch}
-            />
-          )}
           <SearchActions
             onSearch={handleSearch}
             onReset={handleReset}
