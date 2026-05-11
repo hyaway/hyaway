@@ -21,6 +21,11 @@ import {
 } from "./-hooks/use-committed-search-query";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
+import {
+  copySearchCache,
+  generateCloneId,
+  generateSearchId,
+} from "./-lib/search-entry-utils";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -37,7 +42,6 @@ import { useReviewActions } from "@/hooks/use-review-actions";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import {
   SCRATCH_SEARCH_KEY,
-  generateSearchId,
   useCommittedSearch,
   useSearchQueriesActions,
 } from "@/stores/search-queries-store";
@@ -89,20 +93,11 @@ function SearchPage() {
   );
 
   const handleSaveAsNew = useCallback(() => {
-    const newId = generateSearchId();
+    const newId = isScratch ? generateSearchId() : generateCloneId(searchId);
     saveAs(searchId, newId);
-    for (const [key, cachedData] of queryClient.getQueriesData({
-      queryKey: committedSearchQueryKey(searchId),
-    })) {
-      const baseKeyLength = committedSearchQueryKey(searchId).length;
-      const newKey = [
-        ...committedSearchQueryKey(newId),
-        ...key.slice(baseKeyLength),
-      ];
-      queryClient.setQueryData(newKey, cachedData);
-    }
+    copySearchCache(queryClient, searchId, newId);
     navigate({ to: "/search/$searchId", params: { searchId: newId } });
-  }, [searchId, saveAs, navigate, queryClient]);
+  }, [searchId, isScratch, saveAs, navigate, queryClient]);
 
   const handleDelete = useCallback(() => {
     remove(searchId);

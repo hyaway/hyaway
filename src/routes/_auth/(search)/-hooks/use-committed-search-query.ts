@@ -16,9 +16,9 @@ import {
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useCommittedSearch } from "@/stores/search-queries-store";
 import { useAllowSystemOnlySearch } from "@/stores/search-settings-store";
+import { committedSearchQueryKey } from "../-lib/search-entry-utils";
 
-export const committedSearchQueryKey = (entryKey: string) =>
-  ["searchFiles", "searchPage", entryKey] as const;
+export { committedSearchQueryKey };
 
 /**
  * Fetches search results for a committed search entry from the store.

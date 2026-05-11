@@ -2,19 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
+  IconCheck,
   IconCopy,
   IconCopyPlus,
   IconEraser,
   IconInfoCircle,
+  IconPencil,
   IconPlus,
   IconTrash,
+  IconX,
 } from "@tabler/icons-react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
-import { committedSearchQueryKey } from "./-hooks/use-committed-search-query";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
+import {
+  copySearchCache,
+  generateCloneId,
+  generateSearchId,
+} from "./-lib/search-entry-utils";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import {
@@ -26,7 +33,6 @@ import { Button } from "@/components/ui-primitives/button";
 import { Input } from "@/components/ui-primitives/input";
 import {
   SCRATCH_SEARCH_KEY,
-  generateSearchId,
   useSavedSearchKeys,
   useSearchQueriesActions,
   useSearchQueryEntry,
@@ -117,7 +123,7 @@ function SearchEntryCard({
 }) {
   const entry = useSearchQueryEntry(searchId);
   const committed = entry.committed;
-  const { saveAs, remove } = useSearchQueriesActions();
+  const { saveAs, remove, rename } = useSearchQueriesActions();
   const queryClient = useQueryClient();
 
   const searchTags = useMemo(
@@ -129,24 +135,16 @@ function SearchEntryCard({
     ? getSortLabel(committed.sort.sortType, committed.sort.sortAsc)
     : undefined;
 
-  const displayName = label ?? `Search ${searchId}`;
+  const displayName = label ?? searchId;
+  const [isRenaming, setIsRenaming] = useState(false);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      const newId = generateSearchId();
+      const newId = generateCloneId(searchId);
       saveAs(searchId, newId);
-      for (const query of queryClient.getQueriesData({
-        queryKey: committedSearchQueryKey(searchId),
-      })) {
-        const [key, data] = query;
-        const baseKeyLength = committedSearchQueryKey(searchId).length;
-        const newKey = [
-          ...committedSearchQueryKey(newId),
-          ...key.slice(baseKeyLength),
-        ];
-        queryClient.setQueryData(newKey, data);
-      }
+      copySearchCache(queryClient, searchId, newId);
     },
     [searchId, saveAs, queryClient],
   );
@@ -159,14 +157,89 @@ function SearchEntryCard({
     [searchId, remove],
   );
 
+  const handleStartRename = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsRenaming(true);
+    requestAnimationFrame(() => renameInputRef.current?.focus());
+  }, []);
+
+  const handleRename = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const newName = (formData.get("newname") as string).trim();
+      const newId = encodeURIComponent(newName);
+      if (!newId || newId === searchId) {
+        setIsRenaming(false);
+        return;
+      }
+      rename(searchId, newId);
+      copySearchCache(queryClient, searchId, newId, true);
+      setIsRenaming(false);
+    },
+    [searchId, rename, queryClient],
+  );
+
+  const handleCancelRename = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsRenaming(false);
+  }, []);
+
   return (
     <Link
       to="/search/$searchId"
       params={{ searchId }}
+      disabled={isRenaming}
       className="border-border hover:bg-muted/50 flex items-center gap-4 rounded-xl border p-5 transition-colors"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <span className="text-base font-medium">{displayName}</span>
+        {isRenaming ? (
+          <form
+            onSubmit={handleRename}
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-2"
+          >
+            <Input
+              ref={renameInputRef}
+              name="newname"
+              defaultValue={decodeURIComponent(searchId)}
+              className="h-10 w-48 sm:w-72"
+              autoComplete="off"
+            />
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              type="submit"
+              title="Confirm"
+            >
+              <IconCheck className="size-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              type="button"
+              title="Cancel"
+              onClick={handleCancelRename}
+            >
+              <IconX className="size-5" />
+            </Button>
+          </form>
+        ) : (
+          <span className="flex items-center gap-1 text-base font-medium">
+            {displayName}
+            {actionType === "delete" && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleStartRename}
+                type="button"
+                title="Rename"
+              >
+                <IconPencil className="size-5" />
+              </Button>
+            )}
+          </span>
+        )}
         {searchTags.length > 0 ? (
           <SearchTagList tags={searchTags} sortLabel={sortLabel} />
         ) : (

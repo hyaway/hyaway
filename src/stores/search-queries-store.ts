@@ -82,6 +82,8 @@ type SearchQueriesState = {
     remove: (key: string) => void;
     /** Copy an entry's current state to a new key. */
     saveAs: (fromKey: string, toKey: string) => void;
+    /** Move an entry to a new key (rename). */
+    rename: (fromKey: string, toKey: string) => void;
   };
 };
 
@@ -173,6 +175,23 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             },
           });
         },
+
+        rename: (fromKey, toKey) => {
+          const { entries } = get();
+          const source = entries[fromKey] ?? defaultEntry();
+          const newEntries: typeof entries = {};
+          for (const key of Object.keys(entries)) {
+            if (key === fromKey) {
+              newEntries[toKey] = {
+                staged: source.staged,
+                committed: source.committed,
+              };
+            } else {
+              newEntries[key] = entries[key];
+            }
+          }
+          set({ entries: newEntries });
+        },
       },
     }),
     {
@@ -214,15 +233,6 @@ export const useSavedSearchKeys = () =>
       Object.keys(state.entries).filter((k) => k !== SCRATCH_SEARCH_KEY),
     ),
   );
-
-/** Generate a unique search page ID (e.g. "2026-05-10_a3f7"). */
-export function generateSearchId(): string {
-  const now = new Date();
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
-  const date = local.toISOString().slice(0, 10);
-  const hash = Math.random().toString(36).slice(2, 6);
-  return `${date}_${hash}`;
-}
 
 /** Delete all search queries (for settings). */
 export const clearSearchQueries = () =>
