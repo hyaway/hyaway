@@ -80,6 +80,10 @@ import {
 import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
 import { useSearchTagsQuery } from "@/integrations/hydrus-api/queries/tags";
 import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
+import {
+  useSearchQueriesActions,
+  useSearchQueryEntry,
+} from "@/stores/search-queries-store";
 
 // ---------------------------------------------------------------------------
 // Field & operator definitions
@@ -1761,11 +1765,6 @@ const controlClassnames = {
 // Main component
 // ---------------------------------------------------------------------------
 
-const emptyQuery: RuleGroupType = {
-  combinator: "and",
-  rules: [{ field: "tag", operator: "=", value: "" }],
-};
-
 // Force sub-groups to always use OR combinator (only creates new objects when needed)
 function enforceCombinators(query: RuleGroupType): RuleGroupType {
   // Remove empty sub-groups (no rules left)
@@ -1846,10 +1845,7 @@ const SORT_OPTIONS = [
   { value: HydrusFileSortType.HashHex, label: "hash" },
 ] as const;
 
-export type SortConfig = {
-  sortType: HydrusFileSortType;
-  sortAsc: boolean;
-};
+export type { SortConfig } from "@/stores/search-queries-store";
 
 function SortSelect({
   value,
@@ -1931,21 +1927,23 @@ function SortSelect({
 }
 
 interface SearchQueryBuilderProps {
-  initialQuery?: RuleGroupType;
-  initialSort?: SortConfig;
-  onSearch: (query: RuleGroupType, options?: { sort?: SortConfig }) => void;
+  /** Store entry key to read/write staged state from. */
+  entryKey: string;
+  /** Called after committing the search (e.g. to navigate or update URL). */
+  onCommit?: () => void;
 }
 
 export function SearchQueryBuilder({
-  initialQuery,
-  initialSort,
-  onSearch,
+  entryKey,
+  onCommit,
 }: SearchQueryBuilderProps) {
-  const [query, setQuery] = useState<RuleGroupType>(initialQuery ?? emptyQuery);
-  const [sortType, setSortType] = useState<HydrusFileSortType>(
-    initialSort?.sortType ?? HydrusFileSortType.ImportTime,
-  );
-  const [sortAsc, setSortAsc] = useState(initialSort?.sortAsc ?? false);
+  const entry = useSearchQueryEntry(entryKey);
+  const { setStagedQuery, setStagedSort, commit, reset, clear } =
+    useSearchQueriesActions();
+
+  const query = entry.staged.query;
+  const sortType = entry.staged.sort.sortType;
+  const sortAsc = entry.staged.sort.sortAsc;
   const canEditRatings = useHasPermission(Permission.EDIT_FILE_RATINGS);
   const { ratingServices } = useRatingServices();
   const { data: servicesData } = useGetServicesQuery();
@@ -1981,9 +1979,23 @@ export function SearchQueryBuilder({
     return groups;
   }, [canEditRatings, ratingServices, fileServiceValues]);
 
-  const handleQueryChange = useCallback((q: RuleGroupType) => {
-    setQuery(enforceCombinators(q));
-  }, []);
+  const handleQueryChange = useCallback(
+    (q: RuleGroupType) => {
+      setStagedQuery(entryKey, enforceCombinators(q));
+    },
+    [entryKey, setStagedQuery],
+  );
+
+  const handleSortTypeChange = useCallback(
+    (value: HydrusFileSortType) => {
+      setStagedSort(entryKey, { sortType: value, sortAsc });
+    },
+    [entryKey, setStagedSort, sortAsc],
+  );
+
+  const handleSortAscToggle = useCallback(() => {
+    setStagedSort(entryKey, { sortType, sortAsc: !sortAsc });
+  }, [entryKey, setStagedSort, sortType, sortAsc]);
 
   const hydrusSearch = useMemo(() => queryToHydrusSearch(query), [query]);
   const hasRules = query.rules.length > 0;
@@ -2012,17 +2024,17 @@ export function SearchQueryBuilder({
     hydrusSearch.length === 0 || (isSystemOnly && !allowSystemOnlySearch);
 
   const handleSearch = useCallback(() => {
-    const sort: SortConfig = { sortType, sortAsc };
-    onSearch(query, { sort });
-  }, [query, onSearch, sortType, sortAsc]);
+    commit(entryKey);
+    onCommit?.();
+  }, [entryKey, commit, onCommit]);
 
   const handleReset = useCallback(() => {
-    setQuery(initialQuery ?? { ...emptyQuery, rules: [] });
-  }, [initialQuery]);
+    reset(entryKey);
+  }, [entryKey, reset]);
 
   const handleClear = useCallback(() => {
-    setQuery(emptyQuery);
-  }, []);
+    clear(entryKey);
+  }, [entryKey, clear]);
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border p-3">
@@ -2054,11 +2066,11 @@ export function SearchQueryBuilder({
           Sort by
         </span>
         <div className="flex items-center gap-2">
-          <SortSelect value={sortType} onChange={setSortType} />
+          <SortSelect value={sortType} onChange={handleSortTypeChange} />
           <Button
             variant="ghost"
             size="default"
-            onClick={() => setSortAsc((prev) => !prev)}
+            onClick={handleSortAscToggle}
             type="button"
             aria-pressed={sortAsc}
             aria-label={sortAsc ? "Sort ascending" : "Sort descending"}
@@ -2084,11 +2096,11 @@ export function SearchQueryBuilder({
             New search query
           </span>
           <div className="flex flex-wrap gap-1.5">
-            {hydrusSearch.map((entry, i) =>
-              Array.isArray(entry) ? (
-                <OrTagBadge key={i} tags={entry} />
+            {hydrusSearch.map((tag, i) =>
+              Array.isArray(tag) ? (
+                <OrTagBadge key={i} tags={tag} />
               ) : (
-                <TagBadgeFromString key={i} displayTag={entry} />
+                <TagBadgeFromString key={i} displayTag={tag} />
               ),
             )}
           </div>
@@ -2123,7 +2135,7 @@ export function SearchQueryBuilder({
             >
               Search
             </Button>
-            {initialQuery && initialQuery.rules.length > 0 && (
+            {entry.committed && entry.committed.query.rules.length > 0 && (
               <Button
                 variant="ghost"
                 size="default"
