@@ -3,6 +3,7 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
+import { useMatch } from "@tanstack/react-router";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import type { TagsSortMode } from "@/stores/tags-settings-store";
 import {
@@ -21,6 +22,11 @@ import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagBadge } from "@/components/tag/tag-badge";
+import {
+  TagActionsDropdown,
+  TagContextMenu,
+  useTagActions,
+} from "@/components/tag/tag-actions";
 import { compareTags, parseTag } from "@/lib/tag-utils";
 import {
   ToggleGroup,
@@ -34,6 +40,11 @@ interface TagItem {
   namespace: string;
 }
 
+/** Reconstruct the full display tag string from namespace + tag. */
+function fullTag(item: TagItem): string {
+  return item.namespace ? `${item.namespace}:${item.tag}` : item.tag;
+}
+
 export const TagsSidebar = memo(function TagsSidebar({
   items,
 }: {
@@ -44,6 +55,13 @@ export const TagsSidebar = memo(function TagsSidebar({
   const [search, setSearch] = useState("");
   const sortMode = useTagsSortMode();
   const { setSortMode } = useTagsSettingsActions();
+
+  // Detect search context from route
+  const searchMatch = useMatch({
+    from: "/_auth/(search)/search/$searchId",
+    shouldThrow: false,
+  });
+  const searchId = searchMatch?.params.searchId;
 
   // Defer heavy computation so UI stays responsive
   const deferredItems = useDeferredValue(items);
@@ -193,6 +211,7 @@ export const TagsSidebar = memo(function TagsSidebar({
                     tagItem={filteredTags[virtualRow.index]}
                     index={virtualRow.index}
                     showCount={deferredItems.length > 1}
+                    searchId={searchId}
                   />
                 </li>
               ))}
@@ -218,11 +237,16 @@ const TagRowContent = memo(function TagRowContent({
   tagItem,
   index,
   showCount,
+  searchId,
 }: {
   tagItem: TagItem;
   index: number;
   showCount: boolean;
+  searchId: string | undefined;
 }) {
+  const tag = fullTag(tagItem);
+  const actions = useTagActions(tag, searchId);
+
   return (
     <div className="flex min-w-0 flex-row flex-nowrap items-center justify-start gap-1 font-mono">
       <span
@@ -231,15 +255,18 @@ const TagRowContent = memo(function TagRowContent({
       >
         {index + 1}.
       </span>
-      <TagBadge
-        tag={tagItem.tag}
-        namespace={tagItem.namespace}
-        className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-1 text-left break-normal wrap-anywhere whitespace-normal"
-      >
-        {showCount && (
-          <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
-        )}
-      </TagBadge>
+      <TagContextMenu actions={actions}>
+        <TagBadge
+          tag={tagItem.tag}
+          namespace={tagItem.namespace}
+          className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-1 text-left break-normal wrap-anywhere whitespace-normal"
+        >
+          {showCount && (
+            <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
+          )}
+        </TagBadge>
+      </TagContextMenu>
+      <TagActionsDropdown actions={actions} />
     </div>
   );
 });
