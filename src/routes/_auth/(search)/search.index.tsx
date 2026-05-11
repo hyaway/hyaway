@@ -23,6 +23,7 @@ import {
   AlertTitle,
 } from "@/components/ui-primitives/alert";
 import { Button } from "@/components/ui-primitives/button";
+import { Input } from "@/components/ui-primitives/input";
 import {
   SCRATCH_SEARCH_KEY,
   generateSearchId,
@@ -40,15 +41,19 @@ function SearchIndex() {
   const savedKeys = useSavedSearchKeys();
   const navigate = useNavigate();
 
-  const handleAddNew = () => {
-    const newId = generateSearchId();
-    navigate({ to: "/search/$searchId", params: { searchId: newId } });
+  const handleAddNew = (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const name = (formData.get("pagename") as string).trim();
+    const searchId = encodeURIComponent(name) || generateSearchId();
+    e.currentTarget.reset();
+    navigate({ to: "/search/$searchId", params: { searchId } });
   };
 
   return (
     <>
       <PageHeading title="Search" />
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 pt-2">
         <SearchEntryCard
           searchId={SCRATCH_SEARCH_KEY}
           label="Scratchpad"
@@ -56,30 +61,45 @@ function SearchIndex() {
         />
         {savedKeys.length > 0 && (
           <>
-            <Separator className="my-2" />
+            <Separator />
             {savedKeys.map((key) => (
               <SearchEntryCard key={key} searchId={key} actionType="delete" />
             ))}
           </>
         )}
-        <Button
-          variant="outline"
-          size="default"
-          onClick={handleAddNew}
-          type="button"
-          className="self-start"
+        <Separator />
+        <form
+          onSubmit={handleAddNew}
+          className="flex flex-col gap-2 sm:flex-row sm:items-center sm:self-start"
         >
-          <IconPlus data-icon="inline-start" className="size-5" />
-          New saved search
-        </Button>
+          <Input
+            name="pagename"
+            placeholder="Name (optional)"
+            className="h-11 sm:w-72"
+            autoComplete="off"
+          />
+          <Button
+            variant="outline"
+            size="default"
+            type="submit"
+            className="self-start"
+          >
+            <IconPlus data-icon="inline-start" className="size-5" />
+            New saved search
+          </Button>
+        </form>
         {savedKeys.length > 0 && (
-          <Alert>
-            <IconInfoCircle />
-            <AlertTitle>Viewing a saved search often?</AlertTitle>
-            <AlertDescription>
-              Creating a matching page in hydrus will make it load much faster.
-            </AlertDescription>
-          </Alert>
+          <>
+            <Separator />
+            <Alert>
+              <IconInfoCircle />
+              <AlertTitle>Viewing a saved search often?</AlertTitle>
+              <AlertDescription>
+                Creating a matching page in hydrus will make it load much
+                faster.
+              </AlertDescription>
+            </Alert>
+          </>
         )}
       </div>
     </>
