@@ -45,21 +45,24 @@ function SearchIndex() {
   const navigate = useNavigate();
   const { setDisplayName, createFromTag } = useSearchQueriesActions();
 
-  const handleAddNew = () => {
+  const handleAddNew = useCallback(() => {
     const displayName = nextDraftName();
     const searchId = generateSearchId(displayName);
     setDisplayName(searchId, displayName);
     navigate({ to: "/search/$searchId", params: { searchId } });
-  };
+  }, [setDisplayName, navigate]);
 
   const handleQuickSearch = useCallback(
     (tag: string) => {
       const trimmed = tag.trim();
-      if (!trimmed) return;
+      if (!trimmed) {
+        handleAddNew();
+        return;
+      }
       const searchId = createFromTag(trimmed);
       navigate({ to: "/search/$searchId", params: { searchId } });
     },
-    [createFromTag, navigate],
+    [createFromTag, navigate, handleAddNew],
   );
 
   return (
@@ -248,8 +251,7 @@ function QuickTagSearch({ onSearch }: { onSearch: (tag: string) => void }) {
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const trimmed = inputRef.current.trim();
-      if (trimmed) onSearch(trimmed);
+      onSearch(inputRef.current);
     },
     [onSearch],
   );
