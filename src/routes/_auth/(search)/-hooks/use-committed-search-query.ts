@@ -4,7 +4,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { queryToHydrusSearch } from "../-lib/query-to-hydrus-search";
-import { committedSearchQueryKey } from "../-lib/search-entry-utils";
+import { committedSearchQueryKey } from "@/lib/search-entry-utils";
 import { searchFiles } from "@/integrations/hydrus-api/api-client";
 import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
 import {

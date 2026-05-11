@@ -16,10 +16,10 @@ import {
 } from "./-hooks/use-committed-search-query";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
-import { copySearchCache, generateSearchId } from "./-lib/search-entry-utils";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
+import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";

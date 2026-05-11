@@ -9,6 +9,7 @@ import type { SearchQueryEntry, SortConfig } from "@/stores/search-defaults";
 import { emptyStaged } from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import { getDefaultQuery } from "@/stores/search-settings-store";
+import { generateSearchId } from "@/lib/search-entry-utils";
 
 // ---------------------------------------------------------------------------
 // Defaults
@@ -85,6 +86,8 @@ type SearchQueriesState = {
     saveAs: (fromKey: string, toKey: string) => void;
     /** Move an entry to a new key (rename). */
     rename: (fromKey: string, toKey: string, displayName: string) => void;
+    /** Create a new search from a tag string, commit it, and return its ID. */
+    createFromTag: (tag: string) => string;
   };
 };
 
@@ -227,6 +230,36 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             }
           }
           set({ entries: newEntries });
+        },
+
+        createFromTag: (tag) => {
+          const displayName = nextUniqueName(tag);
+          const searchId = generateSearchId(displayName);
+
+          const base = getDefaultQuery();
+          const query: RuleGroupType = {
+            combinator: "and",
+            rules: [
+              { field: "tag", operator: "=", value: tag },
+              ...base.query.rules.filter(
+                (r) => "field" in r && r.field === "limit",
+              ),
+            ],
+          };
+          const state = { query, sort: base.sort };
+
+          const { entries } = get();
+          set({
+            entries: {
+              [searchId]: {
+                staged: state,
+                committed: state,
+                displayName,
+              },
+              ...entries,
+            },
+          });
+          return searchId;
         },
       },
     }),

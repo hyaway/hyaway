@@ -24,7 +24,7 @@ import {
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
-import { generateSearchId } from "@/routes/_auth/(search)/-lib/search-entry-utils";
+import { generateSearchId } from "@/lib/search-entry-utils";
 
 export interface TagAction {
   id: string;
