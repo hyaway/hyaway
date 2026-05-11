@@ -4,12 +4,10 @@
 import {
   BaseResponseSchema,
   GetClientOptionsResponseSchema,
-  GetFileMetadataResponseSchema,
   GetPageInfoResponseSchema,
   GetPagesResponseSchema,
   GetServicesResponseSchema,
   RequestNewPermissionsResponseSchema,
-  SearchFilesResponseSchema,
   SearchTagsResponseSchema,
   VerifyAccessKeyResponseSchema,
 } from "./models";
@@ -120,7 +118,9 @@ export async function searchFiles(
       ...rest,
     },
   });
-  return SearchFilesResponseSchema.parse(response.data);
+  // Skip Zod — response is just { file_ids?: number[], hashes?: string[] }
+  // with no transforms. Parsing 100k+ element arrays was a major bottleneck.
+  return response.data as SearchFilesResponse;
 }
 
 /**
@@ -164,7 +164,16 @@ export async function getFileMetadata(
       include_file_viewing_statistics: !only_return_basic_information,
     },
   });
-  return GetFileMetadataResponseSchema.parse(response.data);
+  // Skip Zod — validating 128 files × 20+ fields per batch was expensive.
+  // Only apply the width/height null→200 defaults that the schema transforms did.
+  const data = response.data as GetFileMetadataResponse;
+  for (const file of data.metadata) {
+    // Raw API sends null for files without dimensions (e.g. audio).
+    // The cast above erases nullability, so use bracket access to bypass the type.
+    (file as Record<string, unknown>).width ??= 200;
+    (file as Record<string, unknown>).height ??= 200;
+  }
+  return data;
 }
 
 /**

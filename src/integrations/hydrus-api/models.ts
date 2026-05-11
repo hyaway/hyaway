@@ -395,9 +395,13 @@ const largeNumberArraySchema: z.ZodType<Array<number>> = z
   .any()
   .refine((v) => Array.isArray(v), { message: "Expected array" });
 
+const largeStringArraySchema: z.ZodType<Array<string>> = z
+  .any()
+  .refine((v) => Array.isArray(v), { message: "Expected array" });
+
 export const SearchFilesResponseSchema = BaseResponseSchema.extend({
   file_ids: largeNumberArraySchema.optional(),
-  hashes: z.array(z.string()).optional(),
+  hashes: largeStringArraySchema.optional(),
 });
 
 export type SearchFilesResponse = z.infer<typeof SearchFilesResponseSchema>;
@@ -483,15 +487,15 @@ export const FileMetadataSchema = z.object({
   is_local: z.boolean().optional(),
   is_trashed: z.boolean().optional(),
   is_deleted: z.boolean().optional(),
+  // Bypass deep Zod validation for tags — this is the largest field per file
+  // (nested records of service keys → tag statuses → string arrays) and is
+  // validated 128× per metadata batch. The Hydrus API shape is trusted.
   tags: z
     .record(
       z.string(),
-      z.object({
-        display_tags: z.record(
-          z.enum(TagStatus),
-          z.array(z.string()).optional(),
-        ),
-      }),
+      z.any() as z.ZodType<{
+        display_tags: Partial<Record<TagStatus, Array<string>>>;
+      }>,
     )
     .optional(),
   /**
