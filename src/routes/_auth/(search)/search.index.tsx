@@ -13,11 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
-import {
-  copySearchCache,
-  generateCloneId,
-  generateSearchIdFromName,
-} from "./-lib/search-entry-utils";
+import { copySearchCache, generateSearchId } from "./-lib/search-entry-utils";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import {
@@ -51,7 +47,7 @@ function SearchIndex() {
     const formData = new FormData(e.currentTarget);
     const name = (formData.get("pagename") as string).trim();
     const displayName = name || nextDraftName();
-    const searchId = generateSearchIdFromName(name);
+    const searchId = generateSearchId(displayName);
     setDisplayName(searchId, displayName);
     e.currentTarget.reset();
     navigate({ to: "/search/$searchId", params: { searchId } });
@@ -135,7 +131,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   const handleSave = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      const newId = generateCloneId(searchId);
+      const newId = generateSearchId(displayName);
       saveAs(searchId, newId);
       copySearchCache(queryClient, searchId, newId);
     },

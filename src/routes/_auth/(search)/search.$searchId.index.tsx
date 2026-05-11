@@ -16,7 +16,7 @@ import {
 } from "./-hooks/use-committed-search-query";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
-import { copySearchCache, generateCloneId } from "./-lib/search-entry-utils";
+import { copySearchCache, generateSearchId } from "./-lib/search-entry-utils";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -88,7 +88,7 @@ function SearchPage() {
   );
 
   const handleSaveAsNew = useCallback(() => {
-    const newId = generateCloneId(searchId);
+    const newId = generateSearchId(displayName);
     saveAs(searchId, newId);
     copySearchCache(queryClient, searchId, newId);
     navigate({ to: "/search/$searchId", params: { searchId: newId } });

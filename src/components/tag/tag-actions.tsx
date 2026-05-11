@@ -23,7 +23,7 @@ import {
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
-import { generateSearchIdFromTag } from "@/routes/_auth/(search)/-lib/search-entry-utils";
+import { generateSearchId } from "@/routes/_auth/(search)/-lib/search-entry-utils";
 
 export interface TagAction {
   id: string;
@@ -48,7 +48,7 @@ export function useTagActions(
         { field: "limit", operator: "=", value: 256 },
       ],
     };
-    const id = generateSearchIdFromTag(tag);
+    const id = generateSearchId(tag);
     setStagedQuery(id, query, tag);
     navigate({ to: "/search/$searchId", params: { searchId: id } });
   }, [tag, navigate, setStagedQuery]);

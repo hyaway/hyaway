@@ -7,52 +7,20 @@ export const committedSearchQueryKey = (entryKey: string) =>
   ["searchFiles", "searchPage", entryKey] as const;
 
 function randomHash(): string {
-  return Math.random().toString(36).slice(2, 6);
+  return Math.random().toString(36).slice(2, 10);
 }
 
-/** Generate a unique search page ID (e.g. "2026-05-10_a3f7"). */
-export function generateSearchId(): string {
-  const now = new Date();
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
-  const date = local.toISOString().slice(0, 10);
-  return `${date}_${randomHash()}`;
-}
-
-/**
- * Sanitize a string for use as a search ID segment.
- * Replaces colons and URL-unsafe characters with hyphens, collapses runs,
- * and trims leading/trailing hyphens.
- */
-function sanitizeForId(value: string): string {
+function sanitize(value: string): string {
   return value
     .replace(/[^a-zA-Z0-9-]/g, "-")
     .replace(/-{2,}/g, "-")
     .replace(/^-|-$/g, "");
 }
 
-/**
- * Generate a clone ID from an existing search ID.
- * Strips a trailing `_xxxx` hash (if present) and appends a fresh one.
- */
-export function generateCloneId(sourceId: string): string {
-  const base = sourceId.replace(/_[a-z0-9]{4}$/, "");
-  return `${base}_${randomHash()}`;
-}
-
-/**
- * Generate a search ID from a tag value (e.g. "series:my tag" → "series-my-tag_a3f7").
- */
-export function generateSearchIdFromTag(tag: string): string {
-  const base = sanitizeForId(tag);
-  return base ? `${base}_${randomHash()}` : generateSearchId();
-}
-
-/**
- * Generate a search ID from a user-provided name.
- * Preserves the name via encodeURIComponent, falls back to a date-based ID if empty.
- */
-export function generateSearchIdFromName(name: string): string {
-  return encodeURIComponent(name.trim()) || generateSearchId();
+/** Generate a unique search entry ID, optionally prefixed with a readable name. */
+export function generateSearchId(name?: string): string {
+  const base = name ? sanitize(name) : "";
+  return base ? `${base}_${randomHash()}` : randomHash();
 }
 
 /**
