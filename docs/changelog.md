@@ -4,6 +4,14 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-05-11
+
+### Fixed
+
+- Significantly improved speed when loading large collections (100k+ files) — searches and metadata fetching no longer cause the UI to hang
+
+---
+
 ## 2026-05-10
 
 ### Fixed
