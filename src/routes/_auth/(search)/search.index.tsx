@@ -24,7 +24,6 @@ import {
 import { Button } from "@/components/ui-primitives/button";
 import { Input } from "@/components/ui-primitives/input";
 import {
-  clearSearchQueries,
   nextDraftName,
   useSearchDisplayName,
   useSearchKeys,
@@ -42,14 +41,10 @@ function SearchIndex() {
   const navigate = useNavigate();
   const { setDisplayName } = useSearchQueriesActions();
 
-  const handleAddNew = (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const name = (formData.get("pagename") as string).trim();
-    const displayName = name || nextDraftName();
+  const handleAddNew = () => {
+    const displayName = nextDraftName();
     const searchId = generateSearchId(displayName);
     setDisplayName(searchId, displayName);
-    e.currentTarget.reset();
     navigate({ to: "/search/$searchId", params: { searchId } });
   };
 
@@ -61,37 +56,15 @@ function SearchIndex() {
           <SearchEntryCard key={key} searchId={key} />
         ))}
         <Separator />
-        <form
-          onSubmit={handleAddNew}
-          className="flex flex-col gap-2 sm:flex-row sm:items-center sm:self-start"
+        <Button
+          variant="outline"
+          size="default"
+          onClick={handleAddNew}
+          className="self-start"
         >
-          <Input
-            name="pagename"
-            placeholder="Name (optional)"
-            className="h-11 sm:w-72"
-            autoComplete="off"
-          />
-          <Button
-            variant="outline"
-            size="default"
-            type="submit"
-            className="self-start"
-          >
-            <IconPlus data-icon="inline-start" className="size-5" />
-            New search
-          </Button>
-        </form>
-        {searchKeys.length > 1 && (
-          <Button
-            variant="ghost"
-            size="default"
-            onClick={clearSearchQueries}
-            className="text-destructive self-start"
-          >
-            <IconTrash data-icon="inline-start" className="size-5" />
-            Delete all
-          </Button>
-        )}
+          <IconPlus data-icon="inline-start" className="size-5" />
+          New search
+        </Button>
         {searchKeys.length > 0 && (
           <>
             <Separator />
