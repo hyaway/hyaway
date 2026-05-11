@@ -10,6 +10,7 @@ import {
   useCommittedSearchFilesQuery,
 } from "./-hooks/use-committed-search-query";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
+import { getSortLabel } from "./-lib/query-builder-fields";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -94,7 +95,17 @@ function SearchIndex() {
             <span className="text-muted-foreground text-sm font-medium">
               Active search
             </span>
-            <SearchTagList tags={searchTags} />
+            <SearchTagList
+              tags={searchTags}
+              sortLabel={
+                committed
+                  ? getSortLabel(
+                      committed.sort.sortType,
+                      committed.sort.sortAsc,
+                    )
+                  : undefined
+              }
+            />
           </div>
         )}
         {isLoading && searchTags.length > 0 && <PageLoading title={title} />}

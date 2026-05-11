@@ -117,7 +117,7 @@ export function OrTagBadge({ tags }: { tags: Array<string> }) {
         return (
           <>
             {i > 0 && (
-              <span className="text-muted-foreground border-foreground/50 -mx-1.5 inline-flex h-11 items-center border-y-2 px-1.5 text-sm font-medium">
+              <span className="text-muted-foreground border-foreground/40 -mx-1.5 inline-flex h-11 items-center border-y-2 px-1.5 text-sm font-medium">
                 or
               </span>
             )}
@@ -125,7 +125,7 @@ export function OrTagBadge({ tags }: { tags: Array<string> }) {
               key={i}
               displayTag={t}
               className={cn(
-                "border-foreground/50 rounded-b-none border-y-2",
+                "border-foreground/40 rounded-b-none border-y-2",
                 isFirst && "border-l-2",
                 isLast && "border-r-2",
               )}
@@ -140,8 +140,15 @@ export function OrTagBadge({ tags }: { tags: Array<string> }) {
 /**
  * Renders a list of hydrus search tags as badges.
  * Handles both plain tags and OR groups.
+ * Optionally displays a sort label as an additional badge.
  */
-export function SearchTagList({ tags }: { tags: HydrusTagSearch }) {
+export function SearchTagList({
+  tags,
+  sortLabel,
+}: {
+  tags: HydrusTagSearch;
+  sortLabel?: string;
+}) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {tags.map((entry, i) =>
@@ -151,6 +158,7 @@ export function SearchTagList({ tags }: { tags: HydrusTagSearch }) {
           <TagBadgeFromString key={i} displayTag={entry} />
         ),
       )}
+      {sortLabel && <TagBadgeFromString displayTag={sortLabel} />}
     </div>
   );
 }

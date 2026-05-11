@@ -593,3 +593,13 @@ export const SORT_OPTIONS = [
   { value: HydrusFileSortType.Random, label: "random" },
   { value: HydrusFileSortType.HashHex, label: "hash" },
 ] as const;
+
+/** Build a display string like "system:sort by import time ▲" for a sort config. */
+export function getSortLabel(
+  sortType: HydrusFileSortType,
+  sortAsc: boolean,
+): string {
+  const label =
+    SORT_OPTIONS.find((o) => o.value === sortType)?.label ?? "import time";
+  return `Sort by ${label} ${sortAsc ? "asc" : "desc"}`;
+}

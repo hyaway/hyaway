@@ -11,6 +11,7 @@ import {
   FILE_SERVICE_TYPES,
   buildRatingFieldGroups,
   fieldGroups,
+  getSortLabel,
 } from "../-lib/query-builder-fields";
 import {
   QBActionElement,
@@ -223,7 +224,10 @@ export function SearchQueryBuilder({
           <span className="text-muted-foreground text-sm font-medium">
             New search query
           </span>
-          <SearchTagList tags={hydrusSearch} />
+          <SearchTagList
+            tags={hydrusSearch}
+            sortLabel={getSortLabel(sortType, sortAsc)}
+          />
         </div>
       )}
 
