@@ -6,7 +6,6 @@ import { Outlet, createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/_auth/(search)/search/$searchId")({
   component: () => <Outlet />,
   beforeLoad: ({ params }) => ({
-    getTitle: () =>
-      params.searchId === "scratchpad" ? "Scratchpad" : `${params.searchId}`,
+    getTitle: () => params.searchId,
   }),
 });

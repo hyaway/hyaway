@@ -1,12 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  IconCopy,
-  IconCopyPlus,
-  IconEraser,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconCopy, IconEraser, IconTrash } from "@tabler/icons-react";
 import {
   createFileRoute,
   linkOptions,
@@ -21,11 +16,7 @@ import {
 } from "./-hooks/use-committed-search-query";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
-import {
-  copySearchCache,
-  generateCloneId,
-  generateSearchId,
-} from "./-lib/search-entry-utils";
+import { copySearchCache, generateCloneId } from "./-lib/search-entry-utils";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -41,7 +32,6 @@ import { ThumbnailGallerySkeleton } from "@/components/thumbnail-gallery/thumbna
 import { useReviewActions } from "@/hooks/use-review-actions";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import {
-  SCRATCH_SEARCH_KEY,
   useCommittedSearch,
   useSearchQueriesActions,
 } from "@/stores/search-queries-store";
@@ -52,7 +42,6 @@ export const Route = createFileRoute("/_auth/(search)/search/$searchId/")({
 
 function SearchPage() {
   const { searchId } = Route.useParams();
-  const isScratch = searchId === SCRATCH_SEARCH_KEY;
   const committed = useCommittedSearch(searchId);
   const { saveAs, remove } = useSearchQueriesActions();
   const navigate = useNavigate();
@@ -93,11 +82,11 @@ function SearchPage() {
   );
 
   const handleSaveAsNew = useCallback(() => {
-    const newId = isScratch ? generateSearchId() : generateCloneId(searchId);
+    const newId = generateCloneId(searchId);
     saveAs(searchId, newId);
     copySearchCache(queryClient, searchId, newId);
     navigate({ to: "/search/$searchId", params: { searchId: newId } });
-  }, [searchId, isScratch, saveAs, navigate, queryClient]);
+  }, [searchId, saveAs, navigate, queryClient]);
 
   const handleDelete = useCallback(() => {
     remove(searchId);
@@ -109,22 +98,6 @@ function SearchPage() {
   }, [searchId, remove]);
 
   const searchActions = useMemo((): Array<FloatingFooterAction> => {
-    if (isScratch) {
-      return [
-        {
-          id: "save-as-new",
-          label: "Save as new",
-          icon: IconCopyPlus,
-          onClick: handleSaveAsNew,
-        },
-        {
-          id: "erase-scratchpad",
-          label: "Erase",
-          icon: IconEraser,
-          onClick: handleErase,
-        },
-      ];
-    }
     return [
       {
         id: "clone-search",
@@ -149,9 +122,9 @@ function SearchPage() {
         overflowOnly: true,
       },
     ];
-  }, [isScratch, handleSaveAsNew, handleErase, handleDelete]);
+  }, [handleSaveAsNew, handleErase, handleDelete]);
 
-  const pageTitle = isScratch ? "Scratchpad" : `Search ${searchId}`;
+  const pageTitle = `Search ${searchId}`;
 
   const title = isLoading
     ? pageTitle

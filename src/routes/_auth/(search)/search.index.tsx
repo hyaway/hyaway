@@ -3,8 +3,6 @@
 
 import {
   IconCopy,
-  IconCopyPlus,
-  IconEraser,
   IconInfoCircle,
   IconPencil,
   IconPlus,
@@ -30,8 +28,7 @@ import {
 import { Button } from "@/components/ui-primitives/button";
 import { Input } from "@/components/ui-primitives/input";
 import {
-  SCRATCH_SEARCH_KEY,
-  useSavedSearchKeys,
+  useSearchKeys,
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
@@ -42,7 +39,7 @@ export const Route = createFileRoute("/_auth/(search)/search/")({
 });
 
 function SearchIndex() {
-  const savedKeys = useSavedSearchKeys();
+  const searchKeys = useSearchKeys();
   const navigate = useNavigate();
 
   const handleAddNew = (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -58,19 +55,9 @@ function SearchIndex() {
     <>
       <PageHeading title="Search" />
       <div className="flex flex-col gap-4 pt-2">
-        <SearchEntryCard
-          searchId={SCRATCH_SEARCH_KEY}
-          label="Scratchpad"
-          actionType="save"
-        />
-        {savedKeys.length > 0 && (
-          <>
-            <Separator />
-            {savedKeys.map((key) => (
-              <SearchEntryCard key={key} searchId={key} actionType="delete" />
-            ))}
-          </>
-        )}
+        {searchKeys.map((key) => (
+          <SearchEntryCard key={key} searchId={key} />
+        ))}
         <Separator />
         <form
           onSubmit={handleAddNew}
@@ -89,10 +76,10 @@ function SearchIndex() {
             className="self-start"
           >
             <IconPlus data-icon="inline-start" className="size-5" />
-            New saved search
+            New search
           </Button>
         </form>
-        {savedKeys.length > 0 && (
+        {searchKeys.length > 0 && (
           <>
             <Separator />
             <Alert>
@@ -113,11 +100,9 @@ function SearchIndex() {
 function SearchEntryCard({
   searchId,
   label,
-  actionType,
 }: {
   searchId: string;
   label?: string;
-  actionType: "save" | "delete";
 }) {
   const entry = useSearchQueryEntry(searchId);
   const committed = entry.committed;
@@ -206,17 +191,15 @@ function SearchEntryCard({
         ) : (
           <span className="flex items-center gap-1 text-base font-medium">
             {displayName}
-            {actionType === "delete" && (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleStartRename}
-                type="button"
-                title="Rename"
-              >
-                <IconPencil className="size-5" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={handleStartRename}
+              type="button"
+              title="Rename"
+            >
+              <IconPencil className="size-5" />
+            </Button>
           </span>
         )}
         {searchTags.length > 0 ? (
@@ -226,53 +209,26 @@ function SearchEntryCard({
         )}
       </div>
       <div className="flex items-center gap-1 self-end sm:self-center">
-        {actionType === "save" ? (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSave}
-              type="button"
-              title="Save as new"
-              className="size-10 shrink-0"
-            >
-              <IconCopyPlus className="size-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDelete}
-              type="button"
-              title="Erase"
-              className="size-10 shrink-0"
-            >
-              <IconEraser className="size-5" />
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSave}
-              type="button"
-              title="Clone"
-              className="size-10 shrink-0"
-            >
-              <IconCopy className="size-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDelete}
-              type="button"
-              title="Delete"
-              className="text-destructive size-10 shrink-0"
-            >
-              <IconTrash className="size-5" />
-            </Button>
-          </>
-        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleSave}
+          type="button"
+          title="Clone"
+          className="size-10 shrink-0"
+        >
+          <IconCopy className="size-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleDelete}
+          type="button"
+          title="Delete"
+          className="text-destructive size-10 shrink-0"
+        >
+          <IconTrash className="size-5" />
+        </Button>
       </div>
     </Link>
   );
