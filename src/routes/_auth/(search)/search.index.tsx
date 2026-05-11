@@ -1,33 +1,22 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { createFileRoute, linkOptions } from "@tanstack/react-router";
+import { IconDeviceFloppy, IconPlus, IconTrash } from "@tabler/icons-react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { SearchQueryBuilder } from "./-components/system-predicate-builder";
-import {
-  committedSearchQueryKey,
-  useCommittedSearchFilesQuery,
-} from "./-hooks/use-committed-search-query";
+import { useCallback, useMemo } from "react";
+import { committedSearchQueryKey } from "./-hooks/use-committed-search-query";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
-import { SearchSettingsPopover } from "./-components/search-settings-popover";
-import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
-import { EmptyState } from "@/components/page-shell/empty-state";
-import { PageError } from "@/components/page-shell/page-error";
-import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
-import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
-import { PageLoading } from "@/components/page-shell/page-loading";
-import { RefetchButton } from "@/components/page-shell/refetch-button";
-import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
-import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
-import { useReviewActions } from "@/hooks/use-review-actions";
 import { SearchTagList } from "@/components/tag/tag-badge";
-
+import { Button } from "@/components/ui-primitives/button";
 import {
-  PRIMARY_SEARCH_KEY,
-  useCommittedSearch,
+  SCRATCH_SEARCH_KEY,
+  generateSearchId,
+  useSavedSearchKeys,
+  useSearchQueriesActions,
+  useSearchQueryEntry,
 } from "@/stores/search-queries-store";
 
 export const Route = createFileRoute("/_auth/(search)/search/")({
@@ -35,106 +24,131 @@ export const Route = createFileRoute("/_auth/(search)/search/")({
 });
 
 function SearchIndex() {
-  const committed = useCommittedSearch(PRIMARY_SEARCH_KEY);
-  const [preserveCurrentScroll, setPreserveCurrentScroll] = useState(false);
+  const savedKeys = useSavedSearchKeys();
+  const navigate = useNavigate();
+
+  const handleAddNew = () => {
+    const newId = generateSearchId();
+    navigate({ to: "/search/$searchId", params: { searchId: newId } });
+  };
+
+  return (
+    <>
+      <PageHeading title="Search" />
+      <div className="flex flex-col gap-4">
+        <SearchEntryCard
+          searchId={SCRATCH_SEARCH_KEY}
+          label="Scratch"
+          actionType="save"
+        />
+        {savedKeys.map((key) => (
+          <SearchEntryCard key={key} searchId={key} actionType="delete" />
+        ))}
+        <Button
+          variant="outline"
+          size="default"
+          onClick={handleAddNew}
+          type="button"
+          className="self-start"
+        >
+          <IconPlus data-icon="inline-start" className="size-5" />
+          Add new search
+        </Button>
+      </div>
+    </>
+  );
+}
+
+function SearchEntryCard({
+  searchId,
+  label,
+  actionType,
+}: {
+  searchId: string;
+  label?: string;
+  actionType: "save" | "delete";
+}) {
+  const entry = useSearchQueryEntry(searchId);
+  const committed = entry.committed;
+  const { saveAs, remove } = useSearchQueriesActions();
+  const queryClient = useQueryClient();
 
   const searchTags = useMemo(
     () => (committed ? queryToHydrusSearch(committed.query) : []),
     [committed],
   );
 
-  const { data, isLoading, isFetching, isError, error } =
-    useCommittedSearchFilesQuery(PRIMARY_SEARCH_KEY);
-  const queryClient = useQueryClient();
+  const sortLabel = committed
+    ? getSortLabel(committed.sort.sortType, committed.sort.sortAsc)
+    : undefined;
 
-  const fileIds = data?.file_ids ?? [];
-  const hasFiles = fileIds.length > 0;
-  const reviewActions = useReviewActions({ fileIds });
+  const displayName = label ?? `Search ${searchId}`;
 
-  const handleCommit = () => {
-    setPreserveCurrentScroll(true);
-  };
-
-  const getFileLink: FileLinkBuilder = (fileId) =>
-    linkOptions({
-      to: "/search/$fileId",
-      params: { fileId: String(fileId) },
-    });
-
-  const refetchButton = (
-    <RefetchButton
-      isFetching={isFetching}
-      onRefetch={() =>
-        queryClient.invalidateQueries({
-          queryKey: committedSearchQueryKey(PRIMARY_SEARCH_KEY),
-        })
+  const handleSave = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const newId = generateSearchId();
+      saveAs(searchId, newId);
+      for (const query of queryClient.getQueriesData({
+        queryKey: committedSearchQueryKey(searchId),
+      })) {
+        const [key, data] = query;
+        const baseKeyLength = committedSearchQueryKey(searchId).length;
+        const newKey = [
+          ...committedSearchQueryKey(newId),
+          ...key.slice(baseKeyLength),
+        ];
+        queryClient.setQueryData(newKey, data);
       }
-    />
+    },
+    [searchId, saveAs, queryClient],
   );
 
-  const pageTitle = "Search";
-
-  const title = isLoading
-    ? pageTitle
-    : isError
-      ? pageTitle
-      : `${pageTitle} (${data?.file_ids?.length ?? 0} files)`;
+  const handleDelete = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      remove(searchId);
+    },
+    [searchId, remove],
+  );
 
   return (
-    <>
-      <>
-        <PageHeading title={title} />
-        <div className="flex flex-col gap-2 pb-2">
-          <SearchQueryBuilder
-            entryKey={PRIMARY_SEARCH_KEY}
-            onCommit={handleCommit}
-          />
-        </div>
-        {searchTags.length > 0 && (
-          <div className="flex flex-col gap-1.5 pt-3 pb-3">
-            <span className="text-muted-foreground text-sm font-medium">
-              Active search
-            </span>
-            <SearchTagList
-              tags={searchTags}
-              sortLabel={
-                committed
-                  ? getSortLabel(
-                      committed.sort.sortType,
-                      committed.sort.sortAsc,
-                    )
-                  : undefined
-              }
-            />
-          </div>
+    <Link
+      to="/search/$searchId"
+      params={{ searchId }}
+      className="border-border hover:bg-muted/50 flex items-center gap-4 rounded-xl border p-5 transition-colors"
+    >
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <span className="text-base font-medium">{displayName}</span>
+        {searchTags.length > 0 ? (
+          <SearchTagList tags={searchTags} sortLabel={sortLabel} />
+        ) : (
+          <span className="text-muted-foreground text-sm">No active query</span>
         )}
-        {isLoading && searchTags.length > 0 && <PageLoading title={title} />}
-        {isError && committed && (
-          <PageError
-            error={error}
-            fallbackMessage="An unknown error occurred while searching."
-          />
-        )}
-        {!isLoading && !isError && hasFiles && (
-          <ThumbnailGalleryProvider fileIds={fileIds}>
-            <ThumbnailGallery
-              fileIds={fileIds}
-              getFileLink={getFileLink}
-              preserveCurrentScroll={preserveCurrentScroll}
-            />
-          </ThumbnailGalleryProvider>
-        )}
-        {!isLoading && !isError && !hasFiles && searchTags.length > 0 && (
-          <EmptyState message="No files found for the current search." />
-        )}
-        {!isLoading && !isError && !hasFiles && searchTags.length === 0 && (
-          <EmptyState message="Add filters above and click Search." />
-        )}
-      </>
-      <PageHeaderActions>
-        <SearchSettingsPopover />
-      </PageHeaderActions>
-      <PageFloatingFooter leftContent={refetchButton} actions={reviewActions} />
-    </>
+      </div>
+      {actionType === "save" ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleSave}
+          type="button"
+          title="Save as new"
+          className="size-10 shrink-0"
+        >
+          <IconDeviceFloppy className="size-5" />
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleDelete}
+          type="button"
+          title="Delete"
+          className="text-destructive size-10 shrink-0"
+        >
+          <IconTrash className="size-5" />
+        </Button>
+      )}
+    </Link>
   );
 }
