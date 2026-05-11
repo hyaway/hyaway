@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-  IconCheck,
   IconCopy,
   IconCopyPlus,
   IconEraser,
@@ -10,7 +9,6 @@ import {
   IconPencil,
   IconPlus,
   IconTrash,
-  IconX,
 } from "@tabler/icons-react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -164,10 +162,9 @@ function SearchEntryCard({
   }, []);
 
   const handleRename = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
+    (e: React.FormEvent) => {
       e.preventDefault();
-      const formData = new FormData(e.currentTarget);
-      const newName = (formData.get("newname") as string).trim();
+      const newName = renameInputRef.current?.value.trim() ?? "";
       const newId = encodeURIComponent(newName);
       if (!newId || newId === searchId) {
         setIsRenaming(false);
@@ -180,49 +177,31 @@ function SearchEntryCard({
     [searchId, rename, queryClient],
   );
 
-  const handleCancelRename = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsRenaming(false);
-  }, []);
-
   return (
     <Link
       to="/search/$searchId"
       params={{ searchId }}
       disabled={isRenaming}
-      className="border-border hover:bg-muted/50 flex items-center gap-4 rounded-xl border p-5 transition-colors"
+      className="border-border hover:bg-muted/50 flex flex-col gap-3 rounded-xl border p-5 transition-colors sm:flex-row sm:items-center sm:gap-4"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         {isRenaming ? (
-          <form
-            onSubmit={handleRename}
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2"
-          >
+          <form onSubmit={handleRename} onClick={(e) => e.stopPropagation()}>
             <Input
               ref={renameInputRef}
               name="newname"
               defaultValue={decodeURIComponent(searchId)}
-              className="h-10 w-48 sm:w-72"
+              onBlur={(e) =>
+                handleRename(e as unknown as React.FormEvent<HTMLFormElement>)
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setIsRenaming(false);
+                }
+              }}
+              className="h-10 w-full sm:w-72"
               autoComplete="off"
             />
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              type="submit"
-              title="Confirm"
-            >
-              <IconCheck className="size-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              type="button"
-              title="Cancel"
-              onClick={handleCancelRename}
-            >
-              <IconX className="size-5" />
-            </Button>
           </form>
         ) : (
           <span className="flex items-center gap-1 text-base font-medium">
@@ -246,53 +225,55 @@ function SearchEntryCard({
           <span className="text-muted-foreground text-sm">No active query</span>
         )}
       </div>
-      {actionType === "save" ? (
-        <>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleSave}
-            type="button"
-            title="Save as new"
-            className="size-10 shrink-0"
-          >
-            <IconCopyPlus className="size-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleDelete}
-            type="button"
-            title="Erase"
-            className="size-10 shrink-0"
-          >
-            <IconEraser className="size-5" />
-          </Button>
-        </>
-      ) : (
-        <>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleSave}
-            type="button"
-            title="Clone"
-            className="size-10 shrink-0"
-          >
-            <IconCopy className="size-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleDelete}
-            type="button"
-            title="Delete"
-            className="text-destructive size-10 shrink-0"
-          >
-            <IconTrash className="size-5" />
-          </Button>
-        </>
-      )}
+      <div className="flex items-center gap-1 self-end sm:self-center">
+        {actionType === "save" ? (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSave}
+              type="button"
+              title="Save as new"
+              className="size-10 shrink-0"
+            >
+              <IconCopyPlus className="size-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDelete}
+              type="button"
+              title="Erase"
+              className="size-10 shrink-0"
+            >
+              <IconEraser className="size-5" />
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSave}
+              type="button"
+              title="Clone"
+              className="size-10 shrink-0"
+            >
+              <IconCopy className="size-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDelete}
+              type="button"
+              title="Delete"
+              className="text-destructive size-10 shrink-0"
+            >
+              <IconTrash className="size-5" />
+            </Button>
+          </>
+        )}
+      </div>
     </Link>
   );
 }
