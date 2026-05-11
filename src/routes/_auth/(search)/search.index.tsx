@@ -1,7 +1,12 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconDeviceFloppy, IconPlus, IconTrash } from "@tabler/icons-react";
+import {
+  IconDeviceFloppy,
+  IconInfoCircle,
+  IconPlus,
+  IconTrash,
+} from "@tabler/icons-react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
@@ -10,6 +15,11 @@ import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { SearchTagList } from "@/components/tag/tag-badge";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui-primitives/alert";
 import { Button } from "@/components/ui-primitives/button";
 import {
   SCRATCH_SEARCH_KEY,
@@ -18,6 +28,7 @@ import {
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
+import { Separator } from "@/components/ui-primitives/separator";
 
 export const Route = createFileRoute("/_auth/(search)/search/")({
   component: SearchIndex,
@@ -41,9 +52,14 @@ function SearchIndex() {
           label="Scratch"
           actionType="save"
         />
-        {savedKeys.map((key) => (
-          <SearchEntryCard key={key} searchId={key} actionType="delete" />
-        ))}
+        {savedKeys.length > 0 && (
+          <>
+            <Separator className="my-2" />
+            {savedKeys.map((key) => (
+              <SearchEntryCard key={key} searchId={key} actionType="delete" />
+            ))}
+          </>
+        )}
         <Button
           variant="outline"
           size="default"
@@ -54,6 +70,15 @@ function SearchIndex() {
           <IconPlus data-icon="inline-start" className="size-5" />
           Add new search
         </Button>
+        {savedKeys.length > 0 && (
+          <Alert>
+            <IconInfoCircle />
+            <AlertTitle>Viewing a saved search often?</AlertTitle>
+            <AlertDescription>
+              Creating a matching page in hydrus will make it load much faster.
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
     </>
   );
