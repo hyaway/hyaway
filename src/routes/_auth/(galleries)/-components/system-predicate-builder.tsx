@@ -20,6 +20,11 @@ import {
   isOptionGroupArray,
   useValueSelector,
 } from "react-querybuilder";
+import {
+  HAS_ONLY_FIELDS,
+  hasPositiveTagRule,
+  queryToHydrusSearch,
+} from "../-lib/query-to-hydrus-search";
 import type {
   ActionProps,
   Field,
@@ -31,7 +36,6 @@ import type {
 } from "react-querybuilder";
 import type { CSSProperties } from "react";
 import type {
-  HydrusTagSearch,
   RatingServiceInfo,
   StarShape,
 } from "@/integrations/hydrus-api/models";
@@ -549,16 +553,6 @@ const FILE_SERVICE_TYPES = new Set([
   ServiceType.FILE_REPOSITORY,
 ]);
 
-/** Names of fields that are pure has/does-not-have toggles (no value input ever). */
-const HAS_ONLY_FIELDS = new Set([
-  "audio",
-  "transparency",
-  "exif",
-  "icc_profile",
-  "embedded_metadata",
-  "forced_filetype",
-]);
-
 /** Status fields that are standalone with no value input. */
 const STATUS_FIELDS = new Set(["inbox", "archive", "everything"]);
 
@@ -572,9 +566,6 @@ const HAS_WITH_VALUE_FIELDS = new Set([
   "url_regex",
   "url_domain",
 ]);
-
-/** A `["system:has …", "system:no …"]` label pair for has/has_not toggles. */
-type HasNoLabels = [`system:has ${string}`, `system:no ${string}`];
 
 /** Checks if a field+operator combo needs no value input. */
 const isNoValueField = (field: string, operator: string): boolean =>
@@ -652,227 +643,6 @@ function getFieldHydrusLabel(fieldName: string): string {
   if (fieldName.startsWith("rating:"))
     return `system:rating for ${fieldName.slice("rating:".length)}`;
   return fieldName;
-}
-
-/** Convert a react-querybuilder query tree to hydrus search tags. */
-export { queryToHydrusSearch };
-
-function ruleToSearchTag(rule: RuleType): string | null {
-  const { field, operator, value } = rule;
-
-  // Tag field — value is the raw tag string (prefix with - to negate)
-  if (field === "tag") {
-    if (typeof value !== "string" || value.trim().length === 0) return null;
-    let tag = value.trim();
-    // Bare namespace (e.g. "series:" or "-series:") → wildcard
-    if (tag.endsWith(":")) tag += "*";
-    else if (tag.includes(":") && tag.endsWith(":-")) {
-      // handle edge case like "-series:" parsed oddly — shouldn't happen but safe
-    }
-    return tag;
-  }
-
-  // Status fields — standalone, no value needed
-  if (field === "inbox") return "system:inbox";
-  if (field === "archive") return "system:archive";
-  if (field === "everything") return "system:everything";
-
-  // Has / does not have fields (pure toggles — no value input)
-  if (HAS_ONLY_FIELDS.has(field)) {
-    const fieldLabels: Record<string, HasNoLabels> = {
-      audio: ["system:has audio", "system:no audio"],
-      transparency: ["system:has transparency", "system:no transparency"],
-      exif: ["system:has exif", "system:no exif"],
-      icc_profile: ["system:has icc profile", "system:no icc profile"],
-      embedded_metadata: [
-        "system:has embedded metadata",
-        "system:no embedded metadata",
-      ],
-      forced_filetype: [
-        "system:has forced filetype",
-        "system:no forced filetype",
-      ],
-    };
-
-    const [hasLabel, hasNotLabel] = fieldLabels[field];
-    return operator === "has" ? hasLabel : hasNotLabel;
-  }
-
-  // Has/has_not operator on fields with both toggle and comparison modes
-  if (operator === "has" || operator === "has_not") {
-    const hasLabels: Partial<Record<string, HasNoLabels>> = {
-      duration_value: ["system:has duration", "system:no duration"],
-      framerate: ["system:has framerate", "system:no framerate"],
-      num_frames: ["system:has frames", "system:no frames"],
-      num_tags: ["system:has tags", "system:no tags"],
-
-      num_urls: ["system:has urls", "system:no urls"],
-      num_notes: ["system:has notes", "system:no notes"],
-    };
-
-    const labels = hasLabels[field];
-    if (labels) {
-      const [hasLabel, hasNotLabel] = labels;
-      return operator === "has" ? hasLabel : hasNotLabel;
-    }
-  }
-
-  // Rating fields
-  if (field.startsWith("rating:")) {
-    const serviceName = field.slice("rating:".length);
-    if (operator === "has") {
-      return `system:has rating for ${serviceName}`;
-    }
-    if (operator === "has_not") {
-      return `system:no rating for ${serviceName}`;
-    }
-    // Like/dislike ratings use "liked"/"disliked" as values
-    if (value === "liked" || value === "disliked") {
-      const ratingVal = value === "liked" ? "like" : "dislike";
-      return `system:rating for ${serviceName} = ${ratingVal}`;
-    }
-    if (!value && value !== 0) return null;
-    return `system:rating for ${serviceName} ${operator} ${value}`;
-  }
-
-  // Comparison / value fields
-  if (!value && value !== 0) return null;
-
-  switch (field) {
-    case "width":
-      return `system:width ${operator} ${value}`;
-    case "height":
-      return `system:height ${operator} ${value}`;
-    case "ratio":
-      return `system:ratio ${operator} ${value}`;
-    case "num_pixels":
-      return `system:num pixels ${operator} ${value}`;
-    case "filesize":
-      return `system:filesize ${operator} ${value}`;
-    case "limit":
-      return `system:limit = ${value}`;
-    case "filetype":
-      return `system:filetype ${operator} ${value}`;
-    case "num_tags":
-      return `system:number of tags ${operator} ${value}`;
-    case "duration_value":
-      return `system:duration ${operator} ${value}`;
-    case "framerate":
-      return `system:framerate ${operator} ${value}`;
-    case "file_service":
-      return `system:file service ${operator} ${value}`;
-    case "num_urls":
-      return `system:number of urls ${operator} ${value}`;
-
-    case "num_notes":
-      return `system:number of notes ${operator} ${value}`;
-    case "num_frames":
-      return `system:number of frames ${operator} ${value}`;
-    case "import_time":
-      return `system:import time ${operator} ${value}`;
-    case "modified_time":
-      return `system:modified time ${operator} ${value}`;
-    case "archived_time":
-      return `system:archived time ${operator} ${value}`;
-    case "last_viewed_time":
-      return `system:last viewed time ${operator} ${value}`;
-    case "hash":
-      return `system:hash ${operator} ${value}`;
-    case "media_views":
-      return `system:media views ${operator} ${value}`;
-    case "preview_views":
-      return `system:preview views ${operator} ${value}`;
-    case "all_views":
-      return `system:all views ${operator} ${value}`;
-    case "media_viewtime":
-      return `system:media viewtime ${operator} ${value}`;
-    case "preview_viewtime":
-      return `system:preview viewtime ${operator} ${value}`;
-    case "all_viewtime":
-      return `system:all viewtime ${operator} ${value}`;
-    case "url_exact":
-      return operator === "has"
-        ? `system:has url ${value}`
-        : `system:does not have url ${value}`;
-    case "url_regex":
-      return operator === "has"
-        ? `system:has url matching regex ${value}`
-        : `system:does not have url matching regex ${value}`;
-    case "url_domain":
-      return operator === "has"
-        ? `system:has url with domain ${value}`
-        : `system:does not have url with domain ${value}`;
-    case "note_name":
-      return operator === "has"
-        ? `system:has note with name "${value}"`
-        : `system:does not have note with name "${value}"`;
-    default:
-      return null;
-  }
-}
-
-/**
- * Convert a react-querybuilder tree into HydrusTagSearch.
- *
- * Hydrus search format: `Array<string | Array<string>>`
- * - Top-level entries are ANDed
- * - Inner arrays are ORed
- *
- * So an AND group's rules become separate top-level entries,
- * and an OR group's rules become a single inner array.
- */
-function queryToHydrusSearch(query: RuleGroupType): HydrusTagSearch {
-  const result: HydrusTagSearch = [];
-
-  for (const ruleOrGroup of query.rules) {
-    if ("rules" in ruleOrGroup) {
-      // Nested group
-      const nested = ruleOrGroup;
-      if (nested.combinator === "or") {
-        // OR group → collect all tags into a single inner array
-        const orTags: Array<string> = [];
-        collectTags(nested, orTags);
-        if (orTags.length > 0) {
-          result.push(orTags.length === 1 ? orTags[0] : orTags);
-        }
-      } else {
-        // AND sub-group → flatten into top-level AND entries
-        const subResult = queryToHydrusSearch(nested);
-        result.push(...subResult);
-      }
-    } else {
-      const tag = ruleToSearchTag(ruleOrGroup);
-      if (tag) result.push(tag);
-    }
-  }
-
-  // Handle top-level OR: if the root itself is OR, wrap everything
-  if (query.combinator === "or" && result.length > 1) {
-    // All tags at this level should be ORed
-    const flat: Array<string> = [];
-    for (const entry of result) {
-      if (Array.isArray(entry)) {
-        flat.push(...entry);
-      } else {
-        flat.push(entry);
-      }
-    }
-    return [flat];
-  }
-
-  return result;
-}
-
-/** Recursively collect all tags from a group (flattened). */
-function collectTags(group: RuleGroupType, out: Array<string>): void {
-  for (const ruleOrGroup of group.rules) {
-    if ("rules" in ruleOrGroup) {
-      collectTags(ruleOrGroup, out);
-    } else {
-      const tag = ruleToSearchTag(ruleOrGroup);
-      if (tag) out.push(tag);
-    }
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -2002,21 +1772,7 @@ export function SearchQueryBuilder({
 
   // Check if query contains at least one non-negated tag rule.
   // Negated tags and system-only searches scan the full file set.
-  const hasPositiveTagRule = useMemo(() => {
-    const checkRules = (rules: RuleGroupType["rules"]): boolean =>
-      rules.some((r) => {
-        if ("rules" in r) return checkRules(r.rules);
-        return (
-          r.field === "tag" &&
-          typeof r.value === "string" &&
-          r.value.trim().length > 0 &&
-          !r.value.trimStart().startsWith("-")
-        );
-      });
-    return checkRules(query.rules);
-  }, [query]);
-
-  const isSystemOnly = hasRules && !hasPositiveTagRule;
+  const isSystemOnly = hasRules && !hasPositiveTagRule(query);
   const allowSystemOnlySearch = useAllowSystemOnlySearch();
   const { setAllowSystemOnlySearch } = useSearchSettingsActions();
 

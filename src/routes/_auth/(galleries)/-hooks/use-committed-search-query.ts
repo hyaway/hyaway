@@ -1,26 +1,24 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { queryToHydrusSearch } from "../-components/system-predicate-builder";
-import type { RuleGroupType } from "react-querybuilder";
-import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
-import { useSearchFilesQuery } from "@/integrations/hydrus-api/queries/search";
+import {
+  hasPositiveTagRule,
+  queryToHydrusSearch,
+} from "../-lib/query-to-hydrus-search";
+import { searchFiles } from "@/integrations/hydrus-api/api-client";
+import { useIsApiConfigured } from "@/integrations/hydrus-api/hydrus-config-store";
+import {
+  HydrusFileSortType,
+  Permission,
+} from "@/integrations/hydrus-api/models";
+import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useCommittedSearch } from "@/stores/search-queries-store";
 import { useAllowSystemOnlySearch } from "@/stores/search-settings-store";
 
-/** Check if a query has at least one non-negated tag rule. */
-function hasPositiveTagRule(query: RuleGroupType): boolean {
-  return query.rules.some((r) => {
-    if ("rules" in r) return hasPositiveTagRule(r);
-    return (
-      r.field === "tag" &&
-      typeof r.value === "string" &&
-      r.value.trim().length > 0 &&
-      !r.value.trimStart().startsWith("-")
-    );
-  });
-}
+export const committedSearchQueryKey = (entryKey: string) =>
+  ["searchFiles", "searchPage", entryKey] as const;
 
 /**
  * Fetches search results for a committed search entry from the store.
@@ -34,6 +32,8 @@ function hasPositiveTagRule(query: RuleGroupType): boolean {
 export function useCommittedSearchFilesQuery(entryKey: string) {
   const committed = useCommittedSearch(entryKey);
   const allowSystemOnly = useAllowSystemOnlySearch();
+  const isConfigured = useIsApiConfigured();
+  const canSearch = useHasPermission(Permission.SEARCH_FOR_AND_FETCH_FILES);
 
   const searchTags = useMemo(() => {
     if (!committed) return [];
@@ -57,7 +57,11 @@ export function useCommittedSearchFilesQuery(entryKey: string) {
     [committed],
   );
 
-  const result = useSearchFilesQuery(searchTags, searchOptions);
+  const result = useQuery({
+    queryKey: [...committedSearchQueryKey(entryKey), searchTags, searchOptions],
+    queryFn: () => searchFiles({ tags: searchTags, ...searchOptions }),
+    enabled: isConfigured && canSearch && searchTags.length > 0,
+  });
 
   // No committed query → surface as error so file detail falls back
   if (!committed) {

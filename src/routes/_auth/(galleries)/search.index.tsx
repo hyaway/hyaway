@@ -4,11 +4,12 @@
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { SearchQueryBuilder } from "./-components/system-predicate-builder";
 import {
-  SearchQueryBuilder,
-  queryToHydrusSearch,
-} from "./-components/system-predicate-builder";
-import { useCommittedSearchFilesQuery } from "./-hooks/use-committed-search-query";
+  committedSearchQueryKey,
+  useCommittedSearchFilesQuery,
+} from "./-hooks/use-committed-search-query";
+import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -64,7 +65,7 @@ function SearchIndex() {
       isFetching={isFetching}
       onRefetch={() =>
         queryClient.invalidateQueries({
-          queryKey: ["searchFiles"],
+          queryKey: committedSearchQueryKey(PRIMARY_SEARCH_KEY),
         })
       }
     />
