@@ -9,7 +9,7 @@ export interface PageGroupMeta {
   stripeColorsByLevel: Array<string | null>;
 }
 
-function buildPageGroupMetaByPageKey(root: PagesTreeNode | null) {
+export function buildPageGroupMetaByPageKey(root: PagesTreeNode | null) {
   const map = new Map<string, PageGroupMeta>();
 
   if (!root?.pages?.length) {

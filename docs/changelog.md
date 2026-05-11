@@ -9,6 +9,7 @@ All notable changes to hyAway are documented here.
 ### Changed
 
 - "Add to review" actions now show a distinct cards-with-plus icon to differentiate from "New review"
+- Page breadcrumbs now show the actual page name and parent group path instead of the URL slug
 
 ### Fixed
 
