@@ -6,9 +6,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCommittedSearchFilesQuery } from "./-hooks/use-committed-search-query";
 import { FileDetail } from "@/components/file-detail/file-detail";
 import { useFileContextNavigation } from "@/hooks/use-file-context-navigation";
-import { PRIMARY_SEARCH_KEY } from "@/stores/search-queries-store";
 
-export const Route = createFileRoute("/_auth/(search)/search/$fileId")({
+export const Route = createFileRoute(
+  "/_auth/(search)/search/$searchId/$fileId",
+)({
   component: RouteComponent,
   beforeLoad: ({ params }) => ({
     getTitle: () => `File ${params.fileId}`,
@@ -16,22 +17,24 @@ export const Route = createFileRoute("/_auth/(search)/search/$fileId")({
 });
 
 function RouteComponent() {
-  const { fileId } = Route.useParams();
+  const { searchId, fileId } = Route.useParams();
   const fileIdNum = Number(fileId);
 
-  const { data, isLoading, isError } =
-    useCommittedSearchFilesQuery(PRIMARY_SEARCH_KEY);
+  const { data, isLoading, isError } = useCommittedSearchFilesQuery(searchId);
 
   const fileIds = data?.file_ids;
 
-  const buildParams = (fid: number) => ({ fileId: String(fid) });
+  const buildParams = (fid: number) => ({
+    searchId,
+    fileId: String(fid),
+  });
 
   const { navActions, shouldFallback } = useFileContextNavigation({
     fileId: fileIdNum,
     fileIds,
     isLoading,
     isError,
-    contextRoute: "/search/$fileId",
+    contextRoute: "/search/$searchId/$fileId",
     buildParams,
   });
 
