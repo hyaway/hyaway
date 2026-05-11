@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconCopy, IconEraser, IconTrash } from "@tabler/icons-react";
+import { IconCopy, IconEraser, IconPin, IconTrash } from "@tabler/icons-react";
 import {
   createFileRoute,
   linkOptions,
@@ -35,7 +35,9 @@ import {
   useCommittedSearch,
   useSearchDisplayName,
   useSearchQueriesActions,
+  useSearchQueryEntry,
 } from "@/stores/search-queries-store";
+import { useSearchSettingsActions } from "@/stores/search-settings-store";
 
 export const Route = createFileRoute("/_auth/(search)/search/$searchId/")({
   component: SearchPage,
@@ -45,7 +47,9 @@ function SearchPage() {
   const { searchId } = Route.useParams();
   const displayName = useSearchDisplayName(searchId);
   const committed = useCommittedSearch(searchId);
-  const { saveAs, remove } = useSearchQueriesActions();
+  const { saveAs, remove, clear } = useSearchQueriesActions();
+  const entry = useSearchQueryEntry(searchId);
+  const { setDefaultQuery } = useSearchSettingsActions();
   const navigate = useNavigate();
   const [preserveCurrentScroll, setPreserveCurrentScroll] = useState(false);
 
@@ -96,11 +100,34 @@ function SearchPage() {
   }, [searchId, remove, navigate]);
 
   const handleErase = useCallback(() => {
-    remove(searchId);
-  }, [searchId, remove]);
+    clear(searchId);
+  }, [searchId, clear]);
+
+  const handleSavePendingAsDefault = useCallback(() => {
+    setDefaultQuery(entry.staged);
+  }, [entry.staged, setDefaultQuery]);
+
+  const handleSaveActiveAsDefault = useCallback(() => {
+    if (committed) setDefaultQuery(committed);
+  }, [committed, setDefaultQuery]);
 
   const searchActions = useMemo((): Array<FloatingFooterAction> => {
     return [
+      {
+        id: "save-pending-as-default",
+        label: "Save pending as default",
+        icon: IconPin,
+        onClick: handleSavePendingAsDefault,
+        overflowOnly: true,
+      },
+      {
+        id: "save-active-as-default",
+        label: "Save active as default",
+        icon: IconPin,
+        onClick: handleSaveActiveAsDefault,
+        disabled: !committed,
+        overflowOnly: true,
+      },
       {
         id: "clone-search",
         label: "Clone",
@@ -124,7 +151,13 @@ function SearchPage() {
         overflowOnly: true,
       },
     ];
-  }, [handleSaveAsNew, handleErase, handleDelete]);
+  }, [
+    handleSavePendingAsDefault,
+    handleSaveActiveAsDefault,
+    handleSaveAsNew,
+    handleErase,
+    handleDelete,
+  ]);
 
   const pageTitle = displayName;
 

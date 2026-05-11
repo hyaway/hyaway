@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type { RuleGroupType } from "react-querybuilder";
 import type { SearchQueryEntry, SortConfig } from "@/stores/search-defaults";
-import { DEFAULT_SEARCH_KEY } from "@/stores/search-defaults";
+import { DEFAULT_SEARCH_KEY, EMPTY_STAGED } from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import { getDefaultQuery } from "@/stores/search-settings-store";
 
@@ -161,7 +161,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               ...entries,
               [key]: {
                 ...current,
-                staged: getDefaultQuery(),
+                staged: EMPTY_STAGED,
               },
             },
           });

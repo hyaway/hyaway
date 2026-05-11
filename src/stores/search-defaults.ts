@@ -25,6 +25,11 @@ export type SearchState = {
 
 const EMPTY_QUERY: RuleGroupType = {
   combinator: "and",
+  rules: [{ field: "tag", operator: "=", value: "" }],
+};
+
+const DEFAULT_QUERY: RuleGroupType = {
+  combinator: "and",
   rules: [
     { field: "tag", operator: "=", value: "" },
     { field: "limit", operator: "=", value: 256 },
@@ -36,8 +41,15 @@ const DEFAULT_SORT: SortConfig = {
   sortAsc: true,
 };
 
-export const DEFAULT_STAGED: SearchState = {
+/** Empty staged state used by erase — bare query with no limit. */
+export const EMPTY_STAGED: SearchState = {
   query: EMPTY_QUERY,
+  sort: DEFAULT_SORT,
+};
+
+/** Default staged state for new entries — includes limit 256. */
+export const DEFAULT_STAGED: SearchState = {
+  query: DEFAULT_QUERY,
   sort: DEFAULT_SORT,
 };
 
