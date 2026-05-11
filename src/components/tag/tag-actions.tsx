@@ -49,7 +49,7 @@ export function useTagActions(
       ],
     };
     const id = generateSearchIdFromTag(tag);
-    setStagedQuery(id, query);
+    setStagedQuery(id, query, tag);
     navigate({ to: "/search/$searchId", params: { searchId: id } });
   }, [tag, navigate, setStagedQuery]);
 

@@ -28,6 +28,7 @@ import {
 import { Button } from "@/components/ui-primitives/button";
 import { Input } from "@/components/ui-primitives/input";
 import {
+  useSearchDisplayName,
   useSearchKeys,
   useSearchQueriesActions,
   useSearchQueryEntry,
@@ -41,12 +42,16 @@ export const Route = createFileRoute("/_auth/(search)/search/")({
 function SearchIndex() {
   const searchKeys = useSearchKeys();
   const navigate = useNavigate();
+  const { setDisplayName } = useSearchQueriesActions();
 
   const handleAddNew = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = (formData.get("pagename") as string).trim();
     const searchId = generateSearchIdFromName(name);
+    if (name) {
+      setDisplayName(searchId, name);
+    }
     e.currentTarget.reset();
     navigate({ to: "/search/$searchId", params: { searchId } });
   };
@@ -97,14 +102,9 @@ function SearchIndex() {
   );
 }
 
-function SearchEntryCard({
-  searchId,
-  label,
-}: {
-  searchId: string;
-  label?: string;
-}) {
+function SearchEntryCard({ searchId }: { searchId: string }) {
   const entry = useSearchQueryEntry(searchId);
+  const displayName = useSearchDisplayName(searchId);
   const committed = entry.committed;
   const { saveAs, remove, rename } = useSearchQueriesActions();
   const queryClient = useQueryClient();
@@ -117,8 +117,6 @@ function SearchEntryCard({
   const sortLabel = committed
     ? getSortLabel(committed.sort.sortType, committed.sort.sortAsc)
     : undefined;
-
-  const displayName = label ?? searchId;
   const [isRenaming, setIsRenaming] = useState(false);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
@@ -150,12 +148,18 @@ function SearchEntryCard({
     (e: React.SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       const newName = renameInputRef.current?.value.trim() ?? "";
-      const newId = encodeURIComponent(newName);
-      if (!newId || newId === searchId) {
+      if (!newName) {
         setIsRenaming(false);
         return;
       }
-      rename(searchId, newId);
+      const newId = encodeURIComponent(newName);
+      if (newId === searchId) {
+        // Same ID — just update display name
+        rename(searchId, searchId, newName);
+        setIsRenaming(false);
+        return;
+      }
+      rename(searchId, newId, newName);
       copySearchCache(queryClient, searchId, newId, true);
       setIsRenaming(false);
     },
@@ -175,7 +179,7 @@ function SearchEntryCard({
             <Input
               ref={renameInputRef}
               name="newname"
-              defaultValue={decodeURIComponent(searchId)}
+              defaultValue={displayName}
               onBlur={(e) =>
                 handleRename(e as unknown as React.SubmitEvent<HTMLFormElement>)
               }

@@ -33,6 +33,7 @@ import { useReviewActions } from "@/hooks/use-review-actions";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import {
   useCommittedSearch,
+  useSearchDisplayName,
   useSearchQueriesActions,
 } from "@/stores/search-queries-store";
 
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/_auth/(search)/search/$searchId/")({
 
 function SearchPage() {
   const { searchId } = Route.useParams();
+  const displayName = useSearchDisplayName(searchId);
   const committed = useCommittedSearch(searchId);
   const { saveAs, remove } = useSearchQueriesActions();
   const navigate = useNavigate();
@@ -124,7 +126,7 @@ function SearchPage() {
     ];
   }, [handleSaveAsNew, handleErase, handleDelete]);
 
-  const pageTitle = `Search ${searchId}`;
+  const pageTitle = displayName;
 
   const title = isLoading
     ? pageTitle
