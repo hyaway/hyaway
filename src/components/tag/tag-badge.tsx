@@ -108,7 +108,15 @@ export function TagBadgeFromString({
  * Renders an OR group as individual tag badges separated by "or" labels,
  * each with a bottom border that connects into one continuous line.
  */
-export function OrTagBadge({ tags }: { tags: Array<string> }) {
+export function OrTagBadge({
+  tags,
+  className,
+  size,
+}: {
+  tags: Array<string>;
+  className?: string;
+  size?: "default" | "default-wrap";
+}) {
   return (
     <>
       {tags.map((t, i) => {
@@ -124,10 +132,12 @@ export function OrTagBadge({ tags }: { tags: Array<string> }) {
             <TagBadgeFromString
               key={i}
               displayTag={t}
+              size={size}
               className={cn(
                 "border-foreground/40 rounded-b-none border-y-2",
                 isFirst && "border-l-2",
                 isLast && "border-r-2",
+                className,
               )}
             />
           </>
@@ -153,12 +163,14 @@ export function SearchTagList({
     <div className="flex flex-wrap gap-1.5">
       {tags.map((entry, i) =>
         Array.isArray(entry) ? (
-          <OrTagBadge key={i} tags={entry} />
+          <OrTagBadge key={i} tags={entry} size="default-wrap" />
         ) : (
-          <TagBadgeFromString key={i} displayTag={entry} />
+          <TagBadgeFromString key={i} displayTag={entry} size="default-wrap" />
         ),
       )}
-      {sortLabel && <TagBadgeFromString displayTag={sortLabel} />}
+      {sortLabel && (
+        <TagBadgeFromString displayTag={sortLabel} size="default-wrap" />
+      )}
     </div>
   );
 }

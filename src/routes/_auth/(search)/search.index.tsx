@@ -182,7 +182,7 @@ function SearchEntryCard({
       to="/search/$searchId"
       params={{ searchId }}
       disabled={isRenaming}
-      className="border-border hover:bg-muted/50 flex flex-col gap-3 rounded-xl border p-5 transition-colors sm:flex-row sm:items-center sm:gap-4"
+      className="border-border hover:bg-muted/50 flex flex-col gap-3 rounded-xl border p-5 transition-colors sm:flex-row sm:items-start sm:gap-4"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         {isRenaming ? (
@@ -192,7 +192,7 @@ function SearchEntryCard({
               name="newname"
               defaultValue={decodeURIComponent(searchId)}
               onBlur={(e) =>
-                handleRename(e as unknown as React.FormEvent<HTMLFormElement>)
+                handleRename(e as unknown as React.SubmitEvent<HTMLFormElement>)
               }
               onKeyDown={(e) => {
                 if (e.key === "Escape") {
