@@ -8,7 +8,7 @@ import { FileDetail } from "@/components/file-detail/file-detail";
 import { useFileContextNavigation } from "@/hooks/use-file-context-navigation";
 import { PRIMARY_SEARCH_KEY } from "@/stores/search-queries-store";
 
-export const Route = createFileRoute("/_auth/(galleries)/search/$fileId")({
+export const Route = createFileRoute("/_auth/(search)/search/$fileId")({
   component: RouteComponent,
   beforeLoad: ({ params }) => ({
     getTitle: () => `File ${params.fileId}`,

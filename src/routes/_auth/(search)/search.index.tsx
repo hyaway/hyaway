@@ -30,7 +30,7 @@ import {
   useCommittedSearch,
 } from "@/stores/search-queries-store";
 
-export const Route = createFileRoute("/_auth/(galleries)/search/")({
+export const Route = createFileRoute("/_auth/(search)/search/")({
   component: SearchIndex,
 });
 

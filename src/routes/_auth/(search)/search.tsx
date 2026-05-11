@@ -5,7 +5,7 @@ import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { PagePermissionGate } from "@/components/page-shell/page-permission-gate";
 import { Permission } from "@/integrations/hydrus-api/models";
 
-export const Route = createFileRoute("/_auth/(galleries)/search")({
+export const Route = createFileRoute("/_auth/(search)/search")({
   component: RouteComponent,
   beforeLoad: () => ({
     getTitle: () => "Search",

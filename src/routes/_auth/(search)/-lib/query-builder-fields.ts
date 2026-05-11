@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { HAS_ONLY_FIELDS } from "../-lib/query-to-hydrus-search";
+import { HAS_ONLY_FIELDS } from "./query-to-hydrus-search";
 import type { Field, OptionGroup } from "react-querybuilder";
 import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
 import {
