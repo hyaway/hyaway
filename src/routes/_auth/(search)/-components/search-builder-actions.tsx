@@ -29,11 +29,11 @@ export function SearchActions({
       </Button>
       {hasCommitted && (
         <Button variant="ghost" size="default" onClick={onReset} type="button">
-          Reset
+          Reset to active
         </Button>
       )}
       <Button variant="ghost" size="default" onClick={onClear} type="button">
-        Clear
+        Erase pending
       </Button>
     </div>
   );
