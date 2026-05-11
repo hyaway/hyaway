@@ -28,6 +28,8 @@ import {
 import { Button } from "@/components/ui-primitives/button";
 import { Input } from "@/components/ui-primitives/input";
 import {
+  clearSearchQueries,
+  nextDraftName,
   useSearchDisplayName,
   useSearchKeys,
   useSearchQueriesActions,
@@ -48,10 +50,9 @@ function SearchIndex() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = (formData.get("pagename") as string).trim();
+    const displayName = name || nextDraftName();
     const searchId = generateSearchIdFromName(name);
-    if (name) {
-      setDisplayName(searchId, name);
-    }
+    setDisplayName(searchId, displayName);
     e.currentTarget.reset();
     navigate({ to: "/search/$searchId", params: { searchId } });
   };
@@ -84,6 +85,17 @@ function SearchIndex() {
             New search
           </Button>
         </form>
+        {searchKeys.length > 1 && (
+          <Button
+            variant="ghost"
+            size="default"
+            onClick={clearSearchQueries}
+            className="text-destructive self-start"
+          >
+            <IconTrash data-icon="inline-start" className="size-5" />
+            Delete all
+          </Button>
+        )}
         {searchKeys.length > 0 && (
           <>
             <Separator />
