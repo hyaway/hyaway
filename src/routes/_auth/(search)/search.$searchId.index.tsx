@@ -1,7 +1,12 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconDeviceFloppy, IconTrash } from "@tabler/icons-react";
+import {
+  IconCopy,
+  IconCopyPlus,
+  IconEraser,
+  IconTrash,
+} from "@tabler/icons-react";
 import {
   createFileRoute,
   linkOptions,
@@ -18,6 +23,7 @@ import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
+import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
@@ -103,24 +109,52 @@ function SearchPage() {
     navigate({ to: "/search" });
   }, [searchId, remove, navigate]);
 
-  const searchAction = useMemo(
-    () =>
-      isScratch
-        ? {
-            id: "save-as-new",
-            label: "Save as new",
-            icon: IconDeviceFloppy,
-            onClick: handleSaveAsNew,
-          }
-        : {
-            id: "delete-search",
-            label: "Delete",
-            icon: IconTrash,
-            onClick: handleDelete,
-            variant: "destructive" as const,
-          },
-    [isScratch, handleSaveAsNew, handleDelete],
-  );
+  const handleErase = useCallback(() => {
+    remove(searchId);
+  }, [searchId, remove]);
+
+  const searchActions = useMemo((): Array<FloatingFooterAction> => {
+    if (isScratch) {
+      return [
+        {
+          id: "save-as-new",
+          label: "Save as new",
+          icon: IconCopyPlus,
+          onClick: handleSaveAsNew,
+        },
+        {
+          id: "erase-scratchpad",
+          label: "Erase",
+          icon: IconEraser,
+          onClick: handleErase,
+        },
+      ];
+    }
+    return [
+      {
+        id: "clone-search",
+        label: "Clone",
+        icon: IconCopy,
+        onClick: handleSaveAsNew,
+        overflowOnly: true,
+      },
+      {
+        id: "erase-search",
+        label: "Erase",
+        icon: IconEraser,
+        onClick: handleErase,
+        overflowOnly: true,
+      },
+      {
+        id: "delete-search",
+        label: "Delete",
+        icon: IconTrash,
+        onClick: handleDelete,
+        variant: "destructive" as const,
+        overflowOnly: true,
+      },
+    ];
+  }, [isScratch, handleSaveAsNew, handleErase, handleDelete]);
 
   const pageTitle = isScratch ? "Scratchpad" : `Search ${searchId}`;
 
@@ -183,7 +217,7 @@ function SearchPage() {
       </PageHeaderActions>
       <PageFloatingFooter
         leftContent={refetchButton}
-        actions={[searchAction, ...reviewActions]}
+        actions={[...reviewActions, ...searchActions]}
       />
     </>
   );

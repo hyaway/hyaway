@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-  IconDeviceFloppy,
+  IconCopy,
+  IconCopyPlus,
+  IconEraser,
   IconInfoCircle,
   IconPlus,
   IconTrash,
@@ -49,7 +51,7 @@ function SearchIndex() {
       <div className="flex flex-col gap-4">
         <SearchEntryCard
           searchId={SCRATCH_SEARCH_KEY}
-          label="Scratch"
+          label="Scratchpad"
           actionType="save"
         />
         {savedKeys.length > 0 && (
@@ -68,7 +70,7 @@ function SearchIndex() {
           className="self-start"
         >
           <IconPlus data-icon="inline-start" className="size-5" />
-          Add new search
+          New saved search
         </Button>
         {savedKeys.length > 0 && (
           <Alert>
@@ -152,27 +154,51 @@ function SearchEntryCard({
         )}
       </div>
       {actionType === "save" ? (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleSave}
-          type="button"
-          title="Save as new"
-          className="size-10 shrink-0"
-        >
-          <IconDeviceFloppy className="size-5" />
-        </Button>
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleSave}
+            type="button"
+            title="Save as new"
+            className="size-10 shrink-0"
+          >
+            <IconCopyPlus className="size-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDelete}
+            type="button"
+            title="Erase"
+            className="size-10 shrink-0"
+          >
+            <IconEraser className="size-5" />
+          </Button>
+        </>
       ) : (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleDelete}
-          type="button"
-          title="Delete"
-          className="text-destructive size-10 shrink-0"
-        >
-          <IconTrash className="size-5" />
-        </Button>
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleSave}
+            type="button"
+            title="Clone"
+            className="size-10 shrink-0"
+          >
+            <IconCopy className="size-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDelete}
+            type="button"
+            title="Delete"
+            className="text-destructive size-10 shrink-0"
+          >
+            <IconTrash className="size-5" />
+          </Button>
+        </>
       )}
     </Link>
   );
