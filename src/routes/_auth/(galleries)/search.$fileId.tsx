@@ -3,7 +3,7 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 
-import { useCommittedSearchFilesQuery } from "./-components/use-committed-search-query";
+import { useCommittedSearchFilesQuery } from "./-hooks/use-committed-search-query";
 import { FileDetail } from "@/components/file-detail/file-detail";
 import { useFileContextNavigation } from "@/hooks/use-file-context-navigation";
 import { PRIMARY_SEARCH_KEY } from "@/stores/search-queries-store";

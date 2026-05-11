@@ -1,21 +1,15 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  createFileRoute,
-  linkOptions,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
-import z from "zod";
+import { useMemo, useState } from "react";
 import {
   SearchQueryBuilder,
   queryToHydrusSearch,
 } from "./-components/system-predicate-builder";
+import { useCommittedSearchFilesQuery } from "./-hooks/use-committed-search-query";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
-import type { SortConfig } from "./-components/system-predicate-builder";
-import type { RuleGroupType } from "react-querybuilder";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
@@ -27,127 +21,42 @@ import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { useReviewActions } from "@/hooks/use-review-actions";
-import { useSearchFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
 
-import { useAllowSystemOnlySearch } from "@/stores/search-settings-store";
-
-import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
-
-const ruleSchema: z.ZodType<unknown> = z.lazy(() =>
-  z.union([
-    z.object({
-      combinator: z.string(),
-      rules: z.array(ruleSchema),
-    }),
-    z.object({
-      field: z.string(),
-      operator: z.string(),
-      value: z.unknown(),
-    }),
-  ]),
-);
-
-const querySchema = z.object({
-  combinator: z.string(),
-  rules: z.array(ruleSchema),
-});
-
-const SearchParamsSchema = z.object({
-  q: querySchema.optional().catch(undefined),
-  sortType: z.number().optional().catch(undefined),
-  sortAsc: z.boolean().optional().catch(undefined),
-});
+import {
+  PRIMARY_SEARCH_KEY,
+  useCommittedSearch,
+} from "@/stores/search-queries-store";
 
 export const Route = createFileRoute("/_auth/(galleries)/search/")({
-  validateSearch: (search) => SearchParamsSchema.parse(search),
   component: SearchIndex,
 });
 
 function SearchIndex() {
-  const { q, sortType, sortAsc } = Route.useSearch();
-  const navigate = useNavigate();
+  const committed = useCommittedSearch(PRIMARY_SEARCH_KEY);
   const [preserveCurrentScroll, setPreserveCurrentScroll] = useState(false);
-  const allowSystemOnlySearch = useAllowSystemOnlySearch();
 
   const searchTags = useMemo(
-    () => (q ? queryToHydrusSearch(q as RuleGroupType) : []),
-    [q],
+    () => (committed ? queryToHydrusSearch(committed.query) : []),
+    [committed],
   );
 
-  // System-only queries (no tag rules) are gated by the store setting.
-  const hasTagRule = useMemo(() => {
-    if (!q) return false;
-    const query = q as RuleGroupType;
-    const check = (rules: RuleGroupType["rules"]): boolean =>
-      rules.some((r) => {
-        if ("rules" in r) return check(r.rules);
-        return r.field === "tag";
-      });
-    return check(query.rules);
-  }, [q]);
-
-  const isSystemOnlyQuery = searchTags.length > 0 && !hasTagRule;
-
-  // Don't send system-only queries unless allowed in settings
-  const effectiveTags =
-    isSystemOnlyQuery && !allowSystemOnlySearch ? [] : searchTags;
-
-  const searchOptions = useMemo(
-    () => ({
-      file_sort_type: (sortType ??
-        HydrusFileSortType.ImportTime) as HydrusFileSortType,
-      file_sort_asc: sortAsc ?? false,
-    }),
-    [sortType, sortAsc],
-  );
-
-  const initialSort: SortConfig | undefined = useMemo(
-    () =>
-      sortType != null
-        ? {
-            sortType: sortType as HydrusFileSortType,
-            sortAsc: sortAsc ?? false,
-          }
-        : undefined,
-    [sortType, sortAsc],
-  );
-
-  const { data, isLoading, isFetching, isError, error } = useSearchFilesQuery(
-    effectiveTags,
-    searchOptions,
-  );
+  const { data, isLoading, isFetching, isError, error } =
+    useCommittedSearchFilesQuery(PRIMARY_SEARCH_KEY);
   const queryClient = useQueryClient();
 
   const fileIds = data?.file_ids ?? [];
   const hasFiles = fileIds.length > 0;
   const reviewActions = useReviewActions({ fileIds });
 
-  const handleSearch = useCallback(
-    (query: RuleGroupType, options?: { sort?: SortConfig }) => {
-      setPreserveCurrentScroll(true);
-      void navigate({
-        to: "/search",
-        search: {
-          q: query,
-          sortType: options?.sort?.sortType,
-          sortAsc: options?.sort?.sortAsc,
-        },
-        replace: true,
-        resetScroll: false,
-      });
-    },
-    [navigate],
-  );
+  const handleCommit = () => {
+    setPreserveCurrentScroll(true);
+  };
 
   const getFileLink: FileLinkBuilder = (fileId) =>
     linkOptions({
       to: "/search/$fileId",
       params: { fileId: String(fileId) },
-      search: {
-        sortType,
-        sortAsc,
-      },
     });
 
   const refetchButton = (
@@ -175,9 +84,8 @@ function SearchIndex() {
         <PageHeading title={title} />
         <div className="flex flex-col gap-2 pb-2">
           <SearchQueryBuilder
-            initialQuery={q as RuleGroupType | undefined}
-            initialSort={initialSort}
-            onSearch={handleSearch}
+            entryKey={PRIMARY_SEARCH_KEY}
+            onCommit={handleCommit}
           />
         </div>
         {searchTags.length > 0 && (
@@ -197,7 +105,7 @@ function SearchIndex() {
           </div>
         )}
         {isLoading && searchTags.length > 0 && <PageLoading title={title} />}
-        {isError && (
+        {isError && committed && (
           <PageError
             error={error}
             fallbackMessage="An unknown error occurred while searching."
