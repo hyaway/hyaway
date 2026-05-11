@@ -120,7 +120,13 @@ export function ThumbnailGalleryItemContextMenu({
           </ContextMenuItem>
           {queueRemaining > 0 && (
             <ContextMenuItem onClick={handleAddToReview}>
-              <IconCards />
+              <span className="inline-flex items-center">
+                <IconCards />
+                <span className="-ml-1.5 text-xl font-normal [-webkit-text-stroke:3px_var(--color-muted)]">
+                  +
+                </span>
+                <span className="-ml-[1ch] text-xl font-normal">+</span>
+              </span>
               {fileIdsFromHere.length > 1
                 ? "Add to review from here"
                 : "Add to review"}

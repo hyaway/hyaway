@@ -1,13 +1,38 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { createElement } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { IconCards } from "@tabler/icons-react";
+import type { ComponentType, SVGProps } from "react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import {
   useReviewQueueActions,
   useReviewQueueRemaining,
 } from "@/stores/review-queue-store";
+
+/** Cards icon with a plus badge overlapping the front card */
+const IconCardsPlus: ComponentType<SVGProps<SVGSVGElement>> = (props) =>
+  createElement(
+    "span",
+    { className: "inline-flex items-center" },
+    createElement(IconCards, props),
+    createElement(
+      "span",
+      {
+        className:
+          "-ml-1.5 text-xl font-normal [-webkit-text-stroke:3px_var(--color-muted)]",
+      },
+      "+",
+    ),
+    createElement(
+      "span",
+      {
+        className: "-ml-[1ch] text-xl font-normal",
+      },
+      "+",
+    ),
+  );
 
 interface UseReviewActionsOptions {
   /** File IDs to add to review queue */
@@ -54,7 +79,7 @@ export function useReviewActions({
       {
         id: "review-add",
         label: "Add to review",
-        icon: IconCards,
+        icon: IconCardsPlus,
         onClick: handleAddToQueue,
       },
     ];
