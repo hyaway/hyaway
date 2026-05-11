@@ -8,7 +8,6 @@ import {
   GetPagesResponseSchema,
   GetServicesResponseSchema,
   RequestNewPermissionsResponseSchema,
-  SearchTagsResponseSchema,
   VerifyAccessKeyResponseSchema,
 } from "./models";
 
@@ -138,7 +137,9 @@ export async function searchTags(
       tag_display_type: options.tag_display_type ?? "display",
     },
   });
-  return SearchTagsResponseSchema.parse(response.data);
+  // Skip Zod — tag autocomplete can return thousands of results,
+  // each just { value: string, count: number } with no transforms.
+  return response.data as SearchTagsResponse;
 }
 
 /**
