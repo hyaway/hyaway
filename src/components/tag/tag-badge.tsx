@@ -6,6 +6,7 @@ import type { badgeVariants } from "@/components/ui-primitives/badge";
 import type { VariantProps } from "class-variance-authority";
 import type { CSSProperties, ComponentProps, ReactNode } from "react";
 
+import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
 import { Badge } from "@/components/ui-primitives/badge";
 import { parseTag } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
@@ -133,5 +134,23 @@ export function OrTagBadge({ tags }: { tags: Array<string> }) {
         );
       })}
     </>
+  );
+}
+
+/**
+ * Renders a list of hydrus search tags as badges.
+ * Handles both plain tags and OR groups.
+ */
+export function SearchTagList({ tags }: { tags: HydrusTagSearch }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {tags.map((entry, i) =>
+        Array.isArray(entry) ? (
+          <OrTagBadge key={i} tags={entry} />
+        ) : (
+          <TagBadgeFromString key={i} displayTag={entry} />
+        ),
+      )}
+    </div>
   );
 }

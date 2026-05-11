@@ -22,7 +22,7 @@ import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { useReviewActions } from "@/hooks/use-review-actions";
-import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
+import { SearchTagList } from "@/components/tag/tag-badge";
 
 import {
   PRIMARY_SEARCH_KEY,
@@ -94,15 +94,7 @@ function SearchIndex() {
             <span className="text-muted-foreground text-sm font-medium">
               Active search
             </span>
-            <div className="flex flex-wrap gap-1.5">
-              {searchTags.map((entry, i) =>
-                Array.isArray(entry) ? (
-                  <OrTagBadge key={i} tags={entry} />
-                ) : (
-                  <TagBadgeFromString key={i} displayTag={entry} />
-                ),
-              )}
-            </div>
+            <SearchTagList tags={searchTags} />
           </div>
         )}
         {isLoading && searchTags.length > 0 && <PageLoading title={title} />}

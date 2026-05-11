@@ -29,7 +29,7 @@ import { Permission } from "@/integrations/hydrus-api/models";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
-import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
+import { SearchTagList } from "@/components/tag/tag-badge";
 import {
   useAllowSystemOnlySearch,
   useSearchSettingsActions,
@@ -223,15 +223,7 @@ export function SearchQueryBuilder({
           <span className="text-muted-foreground text-sm font-medium">
             New search query
           </span>
-          <div className="flex flex-wrap gap-1.5">
-            {hydrusSearch.map((tag, i) =>
-              Array.isArray(tag) ? (
-                <OrTagBadge key={i} tags={tag} />
-              ) : (
-                <TagBadgeFromString key={i} displayTag={tag} />
-              ),
-            )}
-          </div>
+          <SearchTagList tags={hydrusSearch} />
         </div>
       )}
 
