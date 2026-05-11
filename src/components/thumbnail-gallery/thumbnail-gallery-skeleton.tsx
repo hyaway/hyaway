@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { RightSidebarPortal } from "../app-shell/right-sidebar-portal";
 import { TagsSidebarSkeleton } from "@/components/tag/tags-sidebar-skeleton";
@@ -28,27 +28,50 @@ export function ThumbnailGallerySkeleton({
     [itemCount],
   );
 
+  const [showMessage, setShowMessage] = useState(false);
+  const [remaining, setRemaining] = useState(30);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowMessage(true), 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="flex w-full flex-row">
-      <div
-        className="w-full columns-(--thumbnail-width) gap-2"
-        style={
-          {
-            "--thumbnail-width": `${DEFAULT_THUMBNAIL_SIZE}px`,
-          } as React.CSSProperties
-        }
-      >
-        {heights.map((height, i) => (
-          <Skeleton
-            key={i}
-            className="mb-2 w-full break-inside-avoid"
-            style={{ height: `${height}px` }}
-          />
-        ))}
+    <div className="flex w-full flex-col">
+      {showMessage && (
+        <p className="text-muted-foreground mb-4 text-sm">
+          Still loading… Large searches can take a while.{" "}
+          <span className="tabular-nums">{remaining}s until timeout</span>
+        </p>
+      )}
+      <div className="flex w-full flex-row">
+        <div
+          className="w-full columns-(--thumbnail-width) gap-2"
+          style={
+            {
+              "--thumbnail-width": `${DEFAULT_THUMBNAIL_SIZE}px`,
+            } as React.CSSProperties
+          }
+        >
+          {heights.map((height, i) => (
+            <Skeleton
+              key={i}
+              className="mb-2 w-full break-inside-avoid"
+              style={{ height: `${height}px` }}
+            />
+          ))}
+        </div>
+        <RightSidebarPortal>
+          <TagsSidebarSkeleton />
+        </RightSidebarPortal>
       </div>
-      <RightSidebarPortal>
-        <TagsSidebarSkeleton />
-      </RightSidebarPortal>
     </div>
   );
 }

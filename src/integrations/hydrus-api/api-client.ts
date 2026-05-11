@@ -116,6 +116,8 @@ export async function searchFiles(
       tags: JSON.stringify(tags),
       ...rest,
     },
+    // Searches on large libraries can take much longer than typical API calls
+    timeout: 30000,
   });
   // Skip Zod — response is just { file_ids?: number[], hashes?: string[] }
   // with no transforms. Parsing 100k+ element arrays was a major bottleneck.
