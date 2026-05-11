@@ -848,7 +848,7 @@ function TagValueEditor({
           style={inputColor ? { color: inputColor } : undefined}
           value={inputValue}
           disabled={disabled}
-          placeholder="type a tag…"
+          placeholder="e.g. cat or -cat"
           onChange={(e) => {
             setInputValue(e.target.value);
             onChange(e.target.value);
@@ -858,6 +858,8 @@ function TagValueEditor({
           onBlur={() => {
             setTimeout(() => setOpen(false), 150);
           }}
+          name={`hyaway-spb-tag`}
+          autoComplete="off"
         />
         {showDropdown && (
           <div className="bg-popover border-border ring-foreground/5 absolute top-full left-0 z-50 mt-1 w-full min-w-64 overflow-hidden rounded-lg border shadow-md ring-1">
