@@ -5,61 +5,48 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type { RuleGroupType } from "react-querybuilder";
-import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
+import type { SearchQueryEntry, SortConfig } from "@/stores/search-defaults";
+import { DEFAULT_SEARCH_KEY } from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type SortConfig = {
-  sortType: HydrusFileSortType;
-  sortAsc: boolean;
-};
-
-/** Query + sort pair representing a complete search state. */
-export type SearchState = {
-  query: RuleGroupType;
-  sort: SortConfig;
-};
-
-/** A single search entry with staged (being edited) and committed (active) state. */
-export type SearchQueryEntry = {
-  staged: SearchState;
-  committed: SearchState | undefined;
-  /** User-facing name. Falls back to the entry key when absent. */
-  displayName?: string;
-};
-
-/**
- * Default search entry key, pre-created on first use.
- */
-export const DEFAULT_SEARCH_KEY = "search";
+import { getDefaultQuery } from "@/stores/search-settings-store";
 
 // ---------------------------------------------------------------------------
 // Defaults
 // ---------------------------------------------------------------------------
 
-const EMPTY_QUERY: RuleGroupType = {
-  combinator: "and",
-  rules: [{ field: "tag", operator: "=", value: "" }],
-};
-
-const DEFAULT_SORT: SortConfig = {
-  sortType: HydrusFileSortType.ImportTime,
-  sortAsc: true,
-};
-
-const DEFAULT_STAGED: SearchState = {
-  query: EMPTY_QUERY,
-  sort: DEFAULT_SORT,
-};
-
 function defaultEntry(): SearchQueryEntry {
   return {
-    staged: DEFAULT_STAGED,
+    staged: getDefaultQuery(),
     committed: undefined,
   };
+}
+
+function defaultEntries(): Record<string, SearchQueryEntry> {
+  return {
+    [DEFAULT_SEARCH_KEY]: { ...defaultEntry(), displayName: "Draft" },
+  };
+}
+
+const DRAFT_BASE = "Draft";
+
+/** Get the next available "Draft" / "Draft (N)" name based on existing entries. */
+export function nextDraftName(): string {
+  const entries = useSearchQueriesStore.getState().entries;
+  let max = -1;
+  for (const entry of Object.values(entries)) {
+    const name = entry.displayName ?? "";
+    if (name === DRAFT_BASE) {
+      if (0 > max) max = 0;
+    } else if (name.startsWith(`${DRAFT_BASE} (`)) {
+      const inner = name.slice(DRAFT_BASE.length + 2, -1);
+      if (/^\d+$/.test(inner)) {
+        const n = Number(inner);
+        if (n > max) max = n;
+      }
+    }
+  }
+  if (max === -1) return DRAFT_BASE;
+  return `${DRAFT_BASE} (${max + 1})`;
 }
 
 // ---------------------------------------------------------------------------
@@ -97,31 +84,33 @@ type SearchQueriesState = {
 const useSearchQueriesStore = create<SearchQueriesState>()(
   persist(
     (set, get) => ({
-      entries: { [DEFAULT_SEARCH_KEY]: defaultEntry() },
+      entries: defaultEntries(),
       actions: {
         setStagedQuery: (key, query, displayName) => {
           const { entries } = get();
+          const existing = key in entries;
           const entry = entries[key] ?? defaultEntry();
+          const updated = {
+            ...entry,
+            staged: { ...entry.staged, query },
+            ...(displayName != null && { displayName }),
+          };
           set({
-            entries: {
-              ...entries,
-              [key]: {
-                ...entry,
-                staged: { ...entry.staged, query },
-                ...(displayName != null && { displayName }),
-              },
-            },
+            entries: existing
+              ? { ...entries, [key]: updated }
+              : { [key]: updated, ...entries },
           });
         },
 
         setDisplayName: (key, displayName) => {
           const { entries } = get();
+          const existing = key in entries;
           const entry = entries[key] ?? defaultEntry();
+          const updated = { ...entry, displayName };
           set({
-            entries: {
-              ...entries,
-              [key]: { ...entry, displayName },
-            },
+            entries: existing
+              ? { ...entries, [key]: updated }
+              : { [key]: updated, ...entries },
           });
         },
 
@@ -158,7 +147,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               ...entries,
               [key]: {
                 ...current,
-                staged: current.committed ?? DEFAULT_STAGED,
+                staged: current.committed ?? getDefaultQuery(),
               },
             },
           });
@@ -170,7 +159,10 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           set({
             entries: {
               ...entries,
-              [key]: { ...current, staged: DEFAULT_STAGED },
+              [key]: {
+                ...current,
+                staged: getDefaultQuery(),
+              },
             },
           });
         },
@@ -178,7 +170,9 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
         remove: (key) => {
           const { entries } = get();
           const { [key]: _, ...rest } = entries;
-          set({ entries: rest });
+          set({
+            entries: Object.keys(rest).length > 0 ? rest : defaultEntries(),
+          });
         },
 
         saveAs: (fromKey, toKey) => {
@@ -267,12 +261,19 @@ export const useSearchKeys = () =>
 
 /** Get display name for a search entry (falls back to key). */
 export const useSearchDisplayName = (key: string) =>
-  useSearchQueriesStore((state) => state.entries[key]?.displayName ?? key);
+  useSearchQueriesStore(
+    (state) =>
+      (state.entries[key] as SearchQueryEntry | undefined)?.displayName ?? key,
+  );
 
 /** Get display name outside of React (falls back to key). */
-export const getSearchDisplayName = (key: string) =>
-  useSearchQueriesStore.getState().entries[key]?.displayName ?? key;
+export const getSearchDisplayName = (key: string) => {
+  const entry = useSearchQueriesStore.getState().entries[key] as
+    | SearchQueryEntry
+    | undefined;
+  return entry?.displayName ?? key;
+};
 
-/** Delete all search queries (for settings). */
+/** Delete all search queries and reset to default state. */
 export const clearSearchQueries = () =>
-  useSearchQueriesStore.setState({ entries: {} });
+  useSearchQueriesStore.setState({ entries: defaultEntries() });

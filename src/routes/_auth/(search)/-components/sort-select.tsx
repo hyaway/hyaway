@@ -25,7 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui-primitives/popover";
 
-export type { SortConfig } from "@/stores/search-queries-store";
+export type { SortConfig } from "@/stores/search-defaults";
 
 export function SortSection({
   sortType,
