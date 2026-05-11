@@ -15,6 +15,7 @@ import {
 } from "@/integrations/hydrus-api/queries/tags";
 import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
 import { parseTag } from "@/lib/tag-utils";
+import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
 // TagAutocompleteInput
@@ -28,6 +29,7 @@ export function TagAutocompleteInput({
   name,
   disabled,
   className,
+  inputClassName,
   colorizeInput,
 }: {
   /** Controlled value (optional — uncontrolled by default). */
@@ -40,6 +42,8 @@ export function TagAutocompleteInput({
   name?: string;
   disabled?: boolean;
   className?: string;
+  /** Additional classes for the input element. */
+  inputClassName?: string;
   /** Apply namespace color to the input text. */
   colorizeInput?: boolean;
 }) {
@@ -93,7 +97,7 @@ export function TagAutocompleteInput({
   return (
     <div className={className ?? "relative w-full"}>
       <Input
-        className="w-full"
+        className={cn("w-full", inputClassName)}
         style={inputColor ? { color: inputColor } : undefined}
         value={inputValue}
         disabled={disabled}

@@ -260,6 +260,7 @@ function QuickTagSearch({ onSearch }: { onSearch: (tag: string) => void }) {
     <form onSubmit={handleSubmit} className="flex w-full gap-2">
       <TagAutocompleteInput
         className="relative min-w-0 flex-1"
+        inputClassName="h-11"
         placeholder="Search tags…"
         name="hyaway-quick-tag-search"
         onChange={(val) => {
