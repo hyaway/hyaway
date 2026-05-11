@@ -19,12 +19,40 @@ export function generateSearchId(): string {
 }
 
 /**
+ * Sanitize a string for use as a search ID segment.
+ * Replaces colons and URL-unsafe characters with hyphens, collapses runs,
+ * and trims leading/trailing hyphens.
+ */
+function sanitizeForId(value: string): string {
+  return value
+    .replace(/[^a-zA-Z0-9-]/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+/**
  * Generate a clone ID from an existing search ID.
  * Strips a trailing `_xxxx` hash (if present) and appends a fresh one.
  */
 export function generateCloneId(sourceId: string): string {
   const base = sourceId.replace(/_[a-z0-9]{4}$/, "");
   return `${base}_${randomHash()}`;
+}
+
+/**
+ * Generate a search ID from a tag value (e.g. "series:my tag" → "series-my-tag_a3f7").
+ */
+export function generateSearchIdFromTag(tag: string): string {
+  const base = sanitizeForId(tag);
+  return base ? `${base}_${randomHash()}` : generateSearchId();
+}
+
+/**
+ * Generate a search ID from a user-provided name.
+ * Preserves the name via encodeURIComponent, falls back to a date-based ID if empty.
+ */
+export function generateSearchIdFromName(name: string): string {
+  return encodeURIComponent(name.trim()) || generateSearchId();
 }
 
 /**

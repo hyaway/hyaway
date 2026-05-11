@@ -18,7 +18,7 @@ import { getSortLabel } from "./-lib/query-builder-fields";
 import {
   copySearchCache,
   generateCloneId,
-  generateSearchId,
+  generateSearchIdFromName,
 } from "./-lib/search-entry-utils";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { SearchTagList } from "@/components/tag/tag-badge";
@@ -49,7 +49,7 @@ function SearchIndex() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = (formData.get("pagename") as string).trim();
-    const searchId = encodeURIComponent(name) || generateSearchId();
+    const searchId = generateSearchIdFromName(name);
     e.currentTarget.reset();
     navigate({ to: "/search/$searchId", params: { searchId } });
   };
@@ -162,7 +162,7 @@ function SearchEntryCard({
   }, []);
 
   const handleRename = useCallback(
-    (e: React.FormEvent) => {
+    (e: React.SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       const newName = renameInputRef.current?.value.trim() ?? "";
       const newId = encodeURIComponent(newName);
