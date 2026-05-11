@@ -104,31 +104,34 @@ export function TagBadgeFromString({
 }
 
 /**
- * A badge for displaying an OR group of tags, each with its own namespace color.
+ * Renders an OR group as individual tag badges separated by "or" labels,
+ * each with a bottom border that connects into one continuous line.
  */
 export function OrTagBadge({ tags }: { tags: Array<string> }) {
-  const namespaceColors = useNamespaceColors();
   return (
-    <Badge variant="secondary" className="gap-1 select-auto">
+    <>
       {tags.map((t, i) => {
-        const { namespace, tag, negated } = parseTag(t);
-        const color =
-          namespaceColors[namespace || "null"] ||
-          namespaceColors["null"] ||
-          "var(--foreground)";
+        const isFirst = i === 0;
+        const isLast = i === tags.length - 1;
         return (
-          <span key={i} className="inline-flex items-center gap-1">
+          <>
             {i > 0 && (
-              <span className="text-muted-foreground px-1 text-sm">or</span>
+              <span className="text-muted-foreground border-foreground/50 -mx-1.5 inline-flex h-11 items-center border-y-2 px-1.5 text-sm font-medium">
+                or
+              </span>
             )}
-            <span style={{ color }} className="select-all">
-              {negated ? "-" : ""}
-              {namespace ? `${namespace}: ` : ""}
-              {tag}
-            </span>
-          </span>
+            <TagBadgeFromString
+              key={i}
+              displayTag={t}
+              className={cn(
+                "border-foreground/50 rounded-b-none border-y-2",
+                isFirst && "border-l-2",
+                isLast && "border-r-2",
+              )}
+            />
+          </>
         );
       })}
-    </Badge>
+    </>
   );
 }
