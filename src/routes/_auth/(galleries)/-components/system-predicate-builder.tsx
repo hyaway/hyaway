@@ -20,15 +20,15 @@ import {
   QBValueEditor,
   controlClassnames,
 } from "./query-builder-controls";
+import { SearchActions } from "./search-builder-actions";
 import { SortSection } from "./sort-select";
+import { SystemOnlyWarning } from "./system-only-warning";
 import type { RuleGroupType, RuleType } from "react-querybuilder";
 import type { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 import { Permission } from "@/integrations/hydrus-api/models";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
-import { Button } from "@/components/ui-primitives/button";
-import { Switch } from "@/components/ui-primitives/switch";
 import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
 import {
   useAllowSystemOnlySearch,
@@ -238,50 +238,20 @@ export function SearchQueryBuilder({
       {hasRules && (
         <div className="flex flex-col gap-2">
           {isSystemOnly && (
-            <div className="bg-warning/10 text-warning-foreground border-warning/30 flex flex-col gap-2 rounded-lg border p-3 text-sm">
-              <span>
-                This query will likely scan the full file set, which can be
-                extremely slow and may hang hydrus on large databases. <br />
-                Add a non-negated tag to narrow the search.
-              </span>
-              <label className="flex cursor-pointer items-center gap-2">
-                <Switch
-                  checked={allowSystemOnlySearch}
-                  onCheckedChange={setAllowSystemOnlySearch}
-                />
-                <span>Allow system-only searches</span>
-              </label>
-            </div>
+            <SystemOnlyWarning
+              allowSystemOnlySearch={allowSystemOnlySearch}
+              onAllowChange={setAllowSystemOnlySearch}
+            />
           )}
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="default"
-              size="default"
-              onClick={handleSearch}
-              disabled={searchDisabled}
-              type="button"
-            >
-              Search
-            </Button>
-            {entry.committed && entry.committed.query.rules.length > 0 && (
-              <Button
-                variant="ghost"
-                size="default"
-                onClick={handleReset}
-                type="button"
-              >
-                Reset
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="default"
-              onClick={handleClear}
-              type="button"
-            >
-              Clear
-            </Button>
-          </div>
+          <SearchActions
+            onSearch={handleSearch}
+            onReset={handleReset}
+            onClear={handleClear}
+            searchDisabled={searchDisabled}
+            hasCommitted={
+              !!entry.committed && entry.committed.query.rules.length > 0
+            }
+          />
         </div>
       )}
     </div>
