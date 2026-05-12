@@ -6,6 +6,7 @@ import {
   memo,
   useCallback,
   useContext,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -275,19 +276,19 @@ function TagActionMenuItems({
   );
 }
 
-/**
- * Provides a single shared dropdown menu for a list of tag triggers.
- * Wrap a group of `TagActionTrigger` elements inside this provider.
- * Only one menu instance is created regardless of how many tags exist.
- */
-export const TagActionMenu = memo(function TagActionMenu({
+interface TagActionMenuPopupHandle {
+  open: (tag: string, anchor: HTMLElement) => void;
+}
+
+/** Inner component that holds menu state — re-renders here don't affect children. */
+const TagActionMenuPopup = memo(function TagActionMenuPopup({
   searchId,
-  children,
-  side = "bottom",
+  side,
+  handleRef,
 }: {
   searchId?: string;
-  children: ReactNode;
-  side?: "top" | "right" | "bottom" | "left";
+  side: "top" | "right" | "bottom" | "left";
+  handleRef: React.RefObject<TagActionMenuPopupHandle | null>;
 }) {
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -299,17 +300,18 @@ export const TagActionMenu = memo(function TagActionMenu({
   const actions = useTagActions(activeTag ?? "", searchId);
   const favouriteAction = useFavouriteTagAction(activeTag ?? "");
 
-  const openMenu = useCallback((tag: string, anchor: HTMLElement) => {
-    // If this anchor just closed the menu, don't reopen (toggle behavior)
-    const last = lastCloseRef.current;
-    if (last && last.anchor === anchor && Date.now() - last.time < 300) {
-      lastCloseRef.current = null;
-      return;
-    }
-    anchorRef.current = anchor;
-    setActiveTag(tag);
-    setOpen(true);
-  }, []);
+  useImperativeHandle(handleRef, () => ({
+    open(tag: string, anchor: HTMLElement) {
+      const last = lastCloseRef.current;
+      if (last && last.anchor === anchor && Date.now() - last.time < 300) {
+        lastCloseRef.current = null;
+        return;
+      }
+      anchorRef.current = anchor;
+      setActiveTag(tag);
+      setOpen(true);
+    },
+  }));
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean, details: { reason: string }) => {
@@ -329,22 +331,51 @@ export const TagActionMenu = memo(function TagActionMenu({
     [],
   );
 
+  return (
+      <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
+      <DropdownMenuAnchoredContent anchor={anchorRef.current} side={side}>
+        {activeTag && (
+          <TagActionMenuItems
+            tag={activeTag}
+            actions={actions}
+            favouriteAction={favouriteAction}
+          />
+        )}
+      </DropdownMenuAnchoredContent>
+    </DropdownMenu>
+  );
+});
+
+/**
+ * Provides a single shared dropdown menu for a list of tag triggers.
+ * Wrap a group of `TagActionTrigger` elements inside this provider.
+ * Only one menu instance is created regardless of how many tags exist.
+ */
+export const TagActionMenu = memo(function TagActionMenu({
+  searchId,
+  children,
+  side = "bottom",
+}: {
+  searchId?: string;
+  children: ReactNode;
+  side?: "top" | "right" | "bottom" | "left";
+}) {
+  const popupRef = useRef<TagActionMenuPopupHandle>(null);
+
+  const openMenu = useCallback((tag: string, anchor: HTMLElement) => {
+    popupRef.current?.open(tag, anchor);
+  }, []);
+
   const ctx = useMemo(() => ({ openMenu }), [openMenu]);
 
   return (
     <TagActionMenuContext.Provider value={ctx}>
       {children}
-      <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
-        <DropdownMenuAnchoredContent anchor={anchorRef.current} side={side}>
-          {activeTag && (
-            <TagActionMenuItems
-              tag={activeTag}
-              actions={actions}
-              favouriteAction={favouriteAction}
-            />
-          )}
-        </DropdownMenuAnchoredContent>
-      </DropdownMenu>
+      <TagActionMenuPopup
+        handleRef={popupRef}
+        searchId={searchId}
+        side={side}
+      />
     </TagActionMenuContext.Provider>
   );
 });
