@@ -82,7 +82,7 @@ function SearchIndex() {
           className="self-start"
         >
           <IconPlus data-icon="inline-start" className="size-5" />
-          New default search
+          New from default
         </Button>
         {searchKeys.length > 0 && (
           <>

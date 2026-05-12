@@ -47,7 +47,7 @@ function SearchPage() {
   const { searchId } = Route.useParams();
   const displayName = useSearchDisplayName(searchId);
   const committed = useCommittedSearch(searchId);
-  const { saveAs, remove, clear } = useSearchQueriesActions();
+  const { saveAs, remove } = useSearchQueriesActions();
   const entry = useSearchQueryEntry(searchId);
   const { setDefaultQuery } = useSearchSettingsActions();
   const navigate = useNavigate();
@@ -99,10 +99,6 @@ function SearchPage() {
     navigate({ to: "/search" });
   }, [searchId, remove, navigate]);
 
-  const handleErase = useCallback(() => {
-    clear(searchId);
-  }, [searchId, clear]);
-
   const handleSavePendingAsDefault = useCallback(() => {
     setDefaultQuery(entry.staged);
   }, [entry.staged, setDefaultQuery]);
@@ -115,14 +111,14 @@ function SearchPage() {
     return [
       {
         id: "save-pending-as-default",
-        label: "Save pending as default",
+        label: "Save next as default",
         icon: IconPin,
         onClick: handleSavePendingAsDefault,
         overflowOnly: true,
       },
       {
         id: "save-active-as-default",
-        label: "Save active as default",
+        label: "Save current as default",
         icon: IconPin,
         onClick: handleSaveActiveAsDefault,
         disabled: !committed,
@@ -133,13 +129,6 @@ function SearchPage() {
         label: "Clone",
         icon: IconCopy,
         onClick: handleSaveAsNew,
-        overflowOnly: true,
-      },
-      {
-        id: "erase-search",
-        label: "Erase",
-        icon: IconEraser,
-        onClick: handleErase,
         overflowOnly: true,
       },
       {
@@ -155,16 +144,16 @@ function SearchPage() {
     handleSavePendingAsDefault,
     handleSaveActiveAsDefault,
     handleSaveAsNew,
-    handleErase,
     handleDelete,
   ]);
 
   const fileCount = data?.file_ids?.length ?? 0;
 
-  const activeLabel =
-    isLoading || isError
-      ? "Active search"
-      : `Active search (found ${fileCount} files)`;
+  const activeLabel = isLoading
+    ? "Current search (loading)"
+    : isError
+      ? "Current search"
+      : `Current search (found ${fileCount} files)`;
 
   return (
     <>

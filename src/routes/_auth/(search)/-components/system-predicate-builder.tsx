@@ -210,7 +210,7 @@ export function SearchQueryBuilder({
       {hydrusSearch.length > 0 && (
         <div className="flex flex-col gap-1">
           <span className="text-muted-foreground text-sm font-medium">
-            Pending search query
+            Next search will be
           </span>
           <SearchTagList
             tags={hydrusSearch}
