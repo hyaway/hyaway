@@ -16,8 +16,8 @@ import {
   IconMinus,
   IconPlus,
   IconSearch,
-  IconStar,
-  IconStarOff,
+  IconTagOff,
+  IconTagStarred,
   IconTrash,
 } from "@tabler/icons-react";
 import type { ComponentType, ReactNode, SVGProps } from "react";
@@ -45,6 +45,18 @@ import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { Permission } from "@/integrations/hydrus-api/models";
 import { TagBadgeFromString } from "@/components/tag/tag-badge";
 import { useSidebarStoreActions } from "@/stores/sidebar-store";
+
+function IconTagUnstarred(props: SVGProps<SVGSVGElement>) {
+  return (
+    <span className="relative inline-flex">
+      <IconTagStarred {...props} />
+      <IconTagOff
+        {...props}
+        className={cn("absolute inset-0", props.className)}
+      />
+    </span>
+  );
+}
 
 /** Returns true if the tag belongs to the system namespace (e.g. system:inbox). */
 export function isSystemTag(tag: string): boolean {
@@ -195,22 +207,23 @@ export function useFavouriteTagAction(tag: string): TagAction | null {
   const canTags = useHasPermission(Permission.EDIT_FILE_TAGS);
   const favourites = useFavouriteTagsLookup();
   const { mutate } = useSetFavouriteTagsMutation();
-  const isFavourite = favourites.has(tag);
+  const bareTag = tag.startsWith("-") ? tag.slice(1) : tag;
+  const isFavourite = favourites.has(bareTag);
 
   const handleToggle = useCallback(() => {
     if (isFavourite) {
-      mutate({ remove: [tag] });
+      mutate({ remove: [bareTag] });
     } else {
-      mutate({ add: [tag] });
+      mutate({ add: [bareTag] });
     }
-  }, [tag, isFavourite, mutate]);
+  }, [bareTag, isFavourite, mutate]);
 
   if (!canTags) return null;
 
   return {
     id: "favourite",
     label: isFavourite ? "Remove from favourites" : "Add to favourites",
-    icon: isFavourite ? IconStarOff : IconStar,
+    icon: isFavourite ? IconTagUnstarred : IconTagStarred,
     onClick: handleToggle,
   };
 }
