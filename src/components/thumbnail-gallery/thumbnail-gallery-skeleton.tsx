@@ -39,7 +39,7 @@ export function ThumbnailGallerySkeleton({
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowMessage(true), 5000);
+    const timer = setTimeout(() => setShowMessage(true), 10000);
     return () => clearTimeout(timer);
   }, []);
 
