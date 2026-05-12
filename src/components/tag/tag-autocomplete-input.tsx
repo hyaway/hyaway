@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { IconTagStarred } from "@tabler/icons-react";
 import type { CSSProperties } from "react";
 import {
   Command,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui-primitives/command";
 import { Input } from "@/components/ui-primitives/input";
 import {
+  useFavouriteTagsLookup,
   useFavouriteTagsQuery,
   useSearchTagsQuery,
 } from "@/integrations/hydrus-api/queries/tags";
@@ -71,12 +73,17 @@ export function TagAutocompleteInput({
   const { data } = useSearchTagsQuery(
     debouncedInput.replace(/^-+/, "").replace(/:$/, ""),
   );
-  const { data: favouritesData } = useFavouriteTagsQuery();
+  const { data: favouriteTags } = useFavouriteTagsQuery();
   const suggestions = data?.tags.slice(0, 50) ?? [];
   const hasSufficientInput = inputValue.trim().replace(/^-+/, "").length >= 3;
-  const favouriteTags = favouritesData?.favourite_tags ?? [];
+  const searchText = inputValue.trim().replace(/^-+/, "").toLowerCase();
+  const filteredFavourites = searchText
+    ? [...(favouriteTags ?? [])].filter((tag) =>
+        tag.toLowerCase().includes(searchText),
+      )
+    : [...(favouriteTags ?? [])];
   const showFavourites =
-    open && !hasSufficientInput && favouriteTags.length > 0;
+    open && !hasSufficientInput && filteredFavourites.length > 0;
   const showDropdown =
     (open && hasSufficientInput && suggestions.length > 0) || showFavourites;
 
@@ -131,12 +138,20 @@ export function TagAutocompleteInput({
                   />
                 ))
               ) : (
-                <CommandGroup heading="Favourite tags">
-                  {favouriteTags.map((tag) => (
+                <CommandGroup
+                  heading={
+                    <span className="inline-flex items-center gap-1 text-sm">
+                      <IconTagStarred className="size-5" />
+                      Favourite tags
+                    </span>
+                  }
+                >
+                  {filteredFavourites.map((tag) => (
                     <TagSuggestionItem
                       key={tag}
                       value={tag}
                       prefix={isNegative ? "-" : undefined}
+                      showFavourite={false}
                       onSelect={() => handleSelect(tag)}
                     />
                   ))}
@@ -158,17 +173,21 @@ export function TagSuggestionItem({
   value,
   prefix,
   count,
+  showFavourite = true,
   onSelect,
 }: {
   value: string;
   prefix?: string;
   count?: number;
+  showFavourite?: boolean;
   onSelect: () => void;
 }) {
   const namespaceColors = useNamespaceColors();
+  const favourites = useFavouriteTagsLookup();
   const { namespace } = parseTag(value);
   const color = namespaceColors[namespace] ?? namespaceColors["null"];
   const style: CSSProperties | undefined = color ? { color } : undefined;
+  const isFavourite = showFavourite && favourites.has(value);
 
   return (
     <CommandItem value={value} onSelect={onSelect}>
@@ -176,6 +195,9 @@ export function TagSuggestionItem({
         {prefix}
         {value}
       </span>
+      {isFavourite && (
+        <IconTagStarred className="size-5 shrink-0" style={style} />
+      )}
       {count != null && (
         <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
           {count.toLocaleString()}

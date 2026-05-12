@@ -1,13 +1,11 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFavouriteTags, searchTags, setFavouriteTags } from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
 import { Permission } from "../models";
 import { useHasPermission } from "./access";
-import type { FavouriteTagsResponse } from "../models";
 
 /**
  * Search for tag autocomplete suggestions.
@@ -35,8 +33,10 @@ export const useSearchTagsQuery = (search: string) => {
   });
 };
 
+const emptySet: ReadonlySet<string> = new Set<string>();
+
 /**
- * Fetch the user's favourite tags from the hydrus client.
+ * Fetch the user's favourite tags as a Set.
  *
  * Requires Add Tags permission. Results are cached for 5 minutes.
  */
@@ -53,17 +53,12 @@ export const useFavouriteTagsQuery = () => {
 };
 
 /**
- * Efficient Set-based lookup for favourite tags.
- *
- * Returns a stable `Set<string>` that is rebuilt only when the
- * underlying query data changes.
+ * Convenience hook returning favourite tags as a guaranteed non-undefined Set.
+ * Uses `useFavouriteTagsQuery` internally — no duplicate query.
  */
-export const useFavouriteTagsLookup = () => {
+export const useFavouriteTagsLookup = (): ReadonlySet<string> => {
   const { data } = useFavouriteTagsQuery();
-  return useMemo(
-    () => new Set(data?.favourite_tags ?? []),
-    [data?.favourite_tags],
-  );
+  return data ?? emptySet;
 };
 
 /**
@@ -78,26 +73,22 @@ export const useSetFavouriteTagsMutation = () => {
     mutationFn: setFavouriteTags,
     onMutate: async (params) => {
       await queryClient.cancelQueries({ queryKey: ["favouriteTags"] });
-      const previous = queryClient.getQueryData<FavouriteTagsResponse>([
+      const previous = queryClient.getQueryData<ReadonlySet<string>>([
         "favouriteTags",
       ]);
 
-      queryClient.setQueryData<FavouriteTagsResponse>(
+      queryClient.setQueryData<ReadonlySet<string>>(
         ["favouriteTags"],
         (old) => {
           if (!old) return old;
-          let tags = [...old.favourite_tags];
+          const tags = new Set(old);
           if (params.remove) {
-            const removeSet = new Set(params.remove);
-            tags = tags.filter((t) => !removeSet.has(t));
+            for (const t of params.remove) tags.delete(t);
           }
           if (params.add) {
-            const existing = new Set(tags);
-            for (const t of params.add) {
-              if (!existing.has(t)) tags.push(t);
-            }
+            for (const t of params.add) tags.add(t);
           }
-          return { ...old, favourite_tags: tags };
+          return tags;
         },
       );
       return { previous };

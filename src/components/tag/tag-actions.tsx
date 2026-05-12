@@ -332,7 +332,7 @@ const TagActionMenuPopup = memo(function TagActionMenuPopup({
   );
 
   return (
-      <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
       <DropdownMenuAnchoredContent anchor={anchorRef.current} side={side}>
         {activeTag && (
           <TagActionMenuItems

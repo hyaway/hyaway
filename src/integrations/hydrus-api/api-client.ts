@@ -151,10 +151,11 @@ export async function searchTags(
  * @permission Requires: Add Tags (2)
  * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_tags_get_favourite_tags
  */
-export async function getFavouriteTags(): Promise<FavouriteTagsResponse> {
+export async function getFavouriteTags(): Promise<ReadonlySet<string>> {
   const response = await sessionKeyClient.get("/add_tags/get_favourite_tags");
   // Skip Zod — response contains tag arrays that can be large.
-  return response.data as FavouriteTagsResponse;
+  const data = response.data as FavouriteTagsResponse;
+  return new Set(data.favourite_tags);
 }
 
 /**

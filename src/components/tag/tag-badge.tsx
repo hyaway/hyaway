@@ -1,6 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { IconTagStarred } from "@tabler/icons-react";
 import { TouchTarget } from "../ui-primitives/touch-target";
 import type { badgeVariants } from "@/components/ui-primitives/badge";
 import type { VariantProps } from "class-variance-authority";
@@ -8,6 +9,7 @@ import type { CSSProperties, ComponentProps, ReactNode } from "react";
 
 import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
 import { Badge } from "@/components/ui-primitives/badge";
+import { useFavouriteTagsLookup } from "@/integrations/hydrus-api/queries/tags";
 import { parseTag } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
@@ -47,6 +49,10 @@ export function TagBadge({
     ...style,
   };
 
+  const favourites = useFavouriteTagsLookup();
+  const fullTag = namespace ? `${namespace}:${tag}` : tag;
+  const isFavourite = favourites.has(fullTag);
+
   return (
     <Badge
       variant={"overlay"}
@@ -59,6 +65,7 @@ export function TagBadge({
         {namespace ? `${namespace}: ` : ""}
         {tag}
       </TouchTarget>
+      {isFavourite && <IconTagStarred className="size-5! shrink-0" />}
       {children}
     </Badge>
   );
@@ -181,7 +188,12 @@ export function SearchTagList({
     <div className={cn("flex flex-wrap gap-1.5", className)}>
       {tags.map((entry, i) =>
         Array.isArray(entry) ? (
-          <OrTagBadge key={i} tags={entry} interactive={interactive} size="default-wrap" />
+          <OrTagBadge
+            key={i}
+            tags={entry}
+            interactive={interactive}
+            size="default-wrap"
+          />
         ) : interactive ? (
           <TagActionTrigger key={i} tag={entry}>
             <TagBadgeFromString displayTag={entry} size="default-wrap" />
