@@ -17,7 +17,9 @@ import type { RuleGroupType } from "react-querybuilder";
 import {
   ContextMenu,
   ContextMenuContent,
+  ContextMenuGroup,
   ContextMenuItem,
+  ContextMenuLabel,
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui-primitives/context-menu";
@@ -247,11 +249,13 @@ export const TagListContextMenu = memo(function TagListContextMenu({
   children,
   className,
   render,
+  side,
 }: {
   searchId?: string;
   children: ReactNode;
   className?: string;
   render?: React.JSX.Element;
+  side?: "top" | "right" | "bottom" | "left";
 }) {
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const actions = useTagActions(activeTag ?? "", searchId);
@@ -271,12 +275,20 @@ export const TagListContextMenu = memo(function TagListContextMenu({
       >
         {children}
       </ContextMenuTrigger>
-      <ContextMenuContent>
+      <ContextMenuContent side={side}>
         {activeTag && (
-          <TagActionContextItems
-            actions={actions}
-            favouriteAction={favouriteAction}
-          />
+          <>
+            <ContextMenuGroup>
+              <ContextMenuLabel className="font-mono">
+                {activeTag}
+              </ContextMenuLabel>
+            </ContextMenuGroup>
+            <ContextMenuSeparator />
+            <TagActionContextItems
+              actions={actions}
+              favouriteAction={favouriteAction}
+            />
+          </>
         )}
       </ContextMenuContent>
     </ContextMenu>
