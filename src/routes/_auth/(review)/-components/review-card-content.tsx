@@ -65,12 +65,8 @@ export const ReviewCardContent = memo(function ReviewCardContent({
   // URL for video/audio (images handle their own URLs internally)
   const { url: mediaUrl, onLoad, onError } = useFullFileIdUrl(fileId);
 
-  // Track file view in local watch history (only for top card with valid fileId)
+  // Track file view — only for top card with valid fileId
   const shouldTrack = isTop && trackWatchHistory && fileId > 0;
-  useLocalWatchHistoryTracker(fileId, shouldTrack);
-
-  // Track view time and sync to Hydrus (only for top card with valid fileId)
-  useRemoteFileViewTimeTracker(fileId, shouldTrack);
 
   // Player refs for controlling playback when becoming top card
   const videoPlayerRef = useRef<MediaPlayerInstance>(null);
@@ -126,7 +122,8 @@ export const ReviewCardContent = memo(function ReviewCardContent({
         isVideo && "bg-[oklch(0.145_0_0)]",
       )}
     >
-      {/* Media content */}
+      {/* Isolated trackers — re-renders here don't affect the card */}
+      <ReviewCardTrackers fileId={fileId} shouldTrack={shouldTrack} />
       {isImage && (
         <ReviewImageViewer
           fileId={fileId}
@@ -233,3 +230,19 @@ export const ReviewCardContent = memo(function ReviewCardContent({
     </div>
   );
 });
+
+/**
+ * Isolates watch history tracking hooks so their store/query subscriptions
+ * don't cause re-renders in the review card content.
+ */
+function ReviewCardTrackers({
+  fileId,
+  shouldTrack,
+}: {
+  fileId: number;
+  shouldTrack: boolean;
+}) {
+  useLocalWatchHistoryTracker(fileId, shouldTrack);
+  useRemoteFileViewTimeTracker(fileId, shouldTrack);
+  return null;
+}

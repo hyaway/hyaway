@@ -111,35 +111,14 @@ function FileDetailContent({
   prependActions?: Array<FloatingFooterAction>;
   trackLocalWatchHistory: boolean;
 }) {
-  const queryClient = useQueryClient();
-
-  // Track file view in local watch history when component mounts
-  // Respects both the page-level trackLocalWatchHistory prop and global enabled setting
-  useLocalWatchHistoryTracker(fileId, trackLocalWatchHistory);
-
-  // Track view time and sync to Hydrus (respects user settings internally)
-  useRemoteFileViewTimeTracker(fileId);
-
-  const handleRefetch = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: ["getSingleFileMetadata", fileId],
-    });
-  }, [queryClient, fileId]);
-
-  const actionGroups = useFileActions(data, {
-    includeExternal: true,
-    includeThumbnail: false,
-    onRefetch: handleRefetch,
-  });
-  const allActions = actionGroups.flatMap((g) => g.actions);
-
-  // Combine prepended actions with file actions
-  const combinedActions = prependActions
-    ? [...prependActions, ...allActions]
-    : allActions;
-
   return (
     <>
+      {/* Isolated side-effect trackers — re-renders here don't affect the rest */}
+      <FileDetailTrackers
+        fileId={fileId}
+        trackLocalWatchHistory={trackLocalWatchHistory}
+      />
+
       <div className="flex min-w-0 flex-1 flex-col gap-2 pb-12 sm:pb-16">
         <div className="relative -mx-4 sm:-mx-6">
           <FileViewer data={data} />
@@ -184,7 +163,63 @@ function FileDetailContent({
       <PageHeaderActions>
         <FileViewerSettingsPopover mimeType={data.mime} />
       </PageHeaderActions>
-      <PageFloatingFooter actions={combinedActions} />
+      {/* Isolated footer — mutation isPending re-renders stay here */}
+      <FileDetailFooter
+        data={data}
+        fileId={fileId}
+        prependActions={prependActions}
+      />
     </>
   );
+}
+
+/**
+ * Isolates watch history tracking hooks so their store/query subscriptions
+ * don't cause re-renders in the main content tree.
+ */
+function FileDetailTrackers({
+  fileId,
+  trackLocalWatchHistory,
+}: {
+  fileId: number;
+  trackLocalWatchHistory: boolean;
+}) {
+  useLocalWatchHistoryTracker(fileId, trackLocalWatchHistory);
+  useRemoteFileViewTimeTracker(fileId);
+  return null;
+}
+
+/**
+ * Isolates file action hooks (mutations, permissions, refetch) so that
+ * isPending state changes only re-render the footer, not the entire page.
+ */
+function FileDetailFooter({
+  data,
+  fileId,
+  prependActions,
+}: {
+  data: FileMetadata;
+  fileId: number;
+  prependActions?: Array<FloatingFooterAction>;
+}) {
+  const queryClient = useQueryClient();
+
+  const handleRefetch = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: ["getSingleFileMetadata", fileId],
+    });
+  }, [queryClient, fileId]);
+
+  const actionGroups = useFileActions(data, {
+    includeExternal: true,
+    includeThumbnail: false,
+    onRefetch: handleRefetch,
+  });
+  const allActions = actionGroups.flatMap((g) => g.actions);
+
+  const combinedActions = prependActions
+    ? [...prependActions, ...allActions]
+    : allActions;
+
+  return <PageFloatingFooter actions={combinedActions} />;
 }
