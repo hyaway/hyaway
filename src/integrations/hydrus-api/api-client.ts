@@ -158,6 +158,23 @@ export async function getFavouriteTags(): Promise<FavouriteTagsResponse> {
 }
 
 /**
+ * Add or remove tags from the client's favourite tags list.
+ *
+ * @permission Requires: Add Tags (2)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_tags_set_favourite_tags
+ */
+export async function setFavouriteTags(params: {
+  add?: Array<string>;
+  remove?: Array<string>;
+}): Promise<FavouriteTagsResponse> {
+  const response = await sessionKeyClient.post(
+    "/add_tags/set_favourite_tags",
+    params,
+  );
+  return response.data as FavouriteTagsResponse;
+}
+
+/**
  * Get metadata for the specified file IDs.
  *
  * @permission Requires: Search Files (3)

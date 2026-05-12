@@ -11,7 +11,11 @@ import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { TagBadgeFromString } from "@/components/tag/tag-badge";
-import { TagContextMenu, useTagActions } from "@/components/tag/tag-actions";
+import {
+  TagContextMenu,
+  useFavouriteTagAction,
+  useTagActions,
+} from "@/components/tag/tag-actions";
 import { compareTagStrings } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 
@@ -91,9 +95,10 @@ function InlineTagBadge({
   className?: string;
 }) {
   const actions = useTagActions(displayTag, undefined);
+  const favouriteAction = useFavouriteTagAction(displayTag);
 
   return (
-    <TagContextMenu actions={actions}>
+    <TagContextMenu actions={actions} favouriteAction={favouriteAction}>
       <TagBadgeFromString displayTag={displayTag} className={className} />
     </TagContextMenu>
   );

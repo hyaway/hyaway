@@ -25,6 +25,7 @@ import { TagBadge } from "@/components/tag/tag-badge";
 import {
   TagActionsDropdown,
   TagContextMenu,
+  useFavouriteTagAction,
   useTagActions,
 } from "@/components/tag/tag-actions";
 import { compareTags, parseTag } from "@/lib/tag-utils";
@@ -246,6 +247,7 @@ const TagRowContent = memo(function TagRowContent({
 }) {
   const tag = fullTag(tagItem);
   const actions = useTagActions(tag, searchId);
+  const favouriteAction = useFavouriteTagAction(tag);
 
   return (
     <div className="flex min-w-0 flex-row flex-nowrap items-center justify-start gap-1 font-mono">
@@ -255,7 +257,7 @@ const TagRowContent = memo(function TagRowContent({
       >
         {index + 1}.
       </span>
-      <TagContextMenu actions={actions}>
+      <TagContextMenu actions={actions} favouriteAction={favouriteAction}>
         <TagBadge
           tag={tagItem.tag}
           namespace={tagItem.namespace}
@@ -266,7 +268,7 @@ const TagRowContent = memo(function TagRowContent({
           )}
         </TagBadge>
       </TagContextMenu>
-      <TagActionsDropdown actions={actions} />
+      <TagActionsDropdown actions={actions} favouriteAction={favouriteAction} />
     </div>
   );
 });
