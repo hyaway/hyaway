@@ -292,11 +292,20 @@ export const TagActionMenu = memo(function TagActionMenu({
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLElement | null>(null);
+  const lastCloseRef = useRef<{ anchor: HTMLElement; time: number } | null>(
+    null,
+  );
 
   const actions = useTagActions(activeTag ?? "", searchId);
   const favouriteAction = useFavouriteTagAction(activeTag ?? "");
 
   const openMenu = useCallback((tag: string, anchor: HTMLElement) => {
+    // If this anchor just closed the menu, don't reopen (toggle behavior)
+    const last = lastCloseRef.current;
+    if (last && last.anchor === anchor && Date.now() - last.time < 300) {
+      lastCloseRef.current = null;
+      return;
+    }
     anchorRef.current = anchor;
     setActiveTag(tag);
     setOpen(true);
@@ -309,6 +318,10 @@ export const TagActionMenu = memo(function TagActionMenu({
           details.reason !== "focus-out" &&
           details.reason !== "trigger-hover"
         ) {
+          lastCloseRef.current = {
+            anchor: anchorRef.current!,
+            time: Date.now(),
+          };
           setOpen(false);
         }
       }
