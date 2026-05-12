@@ -67,6 +67,7 @@ export function TagAutocompleteInput({
     };
   }, [inputValue]);
 
+  const isNegative = debouncedInput.startsWith("-");
   const { data } = useSearchTagsQuery(
     debouncedInput.replace(/^-+/, "").replace(/:$/, ""),
   );
@@ -124,6 +125,7 @@ export function TagAutocompleteInput({
                   <TagSuggestionItem
                     key={tag.value}
                     value={tag.value}
+                    prefix={isNegative ? "-" : undefined}
                     count={tag.count}
                     onSelect={() => handleSelect(tag.value)}
                   />
@@ -134,6 +136,7 @@ export function TagAutocompleteInput({
                     <TagSuggestionItem
                       key={tag}
                       value={tag}
+                      prefix={isNegative ? "-" : undefined}
                       onSelect={() => handleSelect(tag)}
                     />
                   ))}
