@@ -4,7 +4,6 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  IconCopy,
   IconMinus,
   IconPlus,
   IconSearch,
@@ -109,10 +108,6 @@ export function useTagActions(
     [searchId, entry.staged.query, setStagedQuery],
   );
 
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(tag);
-  }, [tag]);
-
   // Check if the tag or its negation already exist in the root-level rules
   const isIncluded = searchId
     ? entry.staged.query.rules.some(
@@ -127,12 +122,6 @@ export function useTagActions(
 
   return useMemo(() => {
     const actions: Array<TagAction> = [
-      {
-        id: "copy",
-        label: "Copy tag",
-        icon: IconCopy,
-        onClick: handleCopy,
-      },
       {
         id: "search",
         label: "Search for this tag",
@@ -178,7 +167,6 @@ export function useTagActions(
     isIncluded,
     isExcluded,
     tag,
-    handleCopy,
     handleSearch,
     handleInclude,
     handleExclude,
