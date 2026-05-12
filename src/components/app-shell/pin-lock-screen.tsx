@@ -33,6 +33,18 @@ export function PinLockScreen() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    // Dispatch a synthetic click to open the virtual keyboard on mobile.
+    // autoFocus alone sets DOM focus but mobile browsers require a user
+    // gesture (or a trusted click) to show the keyboard.
+    if (inputRef.current) {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      });
+      inputRef.current.dispatchEvent(event);
+    }
   }, []);
 
   const handleComplete = useCallback(
