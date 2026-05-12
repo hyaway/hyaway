@@ -36,6 +36,7 @@ import {
 } from "@/integrations/hydrus-api/queries/tags";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { Permission } from "@/integrations/hydrus-api/models";
+import { TagBadgeFromString } from "@/components/tag/tag-badge";
 
 export interface TagAction {
   id: string;
@@ -279,8 +280,11 @@ export const TagListContextMenu = memo(function TagListContextMenu({
         {activeTag && (
           <>
             <ContextMenuGroup>
-              <ContextMenuLabel className="font-mono">
-                {activeTag}
+              <ContextMenuLabel className="p-1">
+                <TagBadgeFromString
+                  displayTag={activeTag}
+                  className="w-full justify-center"
+                />
               </ContextMenuLabel>
             </ContextMenuGroup>
             <ContextMenuSeparator />
