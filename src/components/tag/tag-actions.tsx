@@ -241,16 +241,20 @@ function TagActionMenuItems({
   return (
     <>
       <DropdownMenuGroup>
-        <DropdownMenuLabel>
+        <DropdownMenuLabel className={"p-0"}>
           <TagBadgeFromString
             displayTag={tag}
-            className="h-auto w-full justify-center px-2 py-1.5 break-normal wrap-anywhere whitespace-normal"
+            className="h-auto w-full justify-center px-2 py-3 break-normal wrap-anywhere whitespace-normal"
           />
         </DropdownMenuLabel>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       {actions.map((action) => (
-        <DropdownMenuItem key={action.id} onClick={action.onClick}>
+        <DropdownMenuItem
+          key={action.id}
+          onClick={action.onClick}
+          className={"cursor-pointer"}
+        >
           <action.icon />
           {action.label}
         </DropdownMenuItem>
@@ -258,7 +262,10 @@ function TagActionMenuItems({
       {favouriteAction && (
         <>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={favouriteAction.onClick}>
+          <DropdownMenuItem
+            onClick={favouriteAction.onClick}
+            className={"cursor-pointer"}
+          >
             <favouriteAction.icon />
             {favouriteAction.label}
           </DropdownMenuItem>
@@ -313,10 +320,7 @@ export const TagActionMenu = memo(function TagActionMenu({
     <TagActionMenuContext.Provider value={ctx}>
       {children}
       <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-        <DropdownMenuAnchoredContent
-          anchor={anchorRef.current}
-          side={side}
-        >
+        <DropdownMenuAnchoredContent anchor={anchorRef.current} side={side}>
           {activeTag && (
             <TagActionMenuItems
               tag={activeTag}
