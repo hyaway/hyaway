@@ -54,6 +54,46 @@ function DropdownMenuContent({
   );
 }
 
+/**
+ * A dropdown menu content variant that positions relative to an external anchor element.
+ * Use when the menu is shared across multiple triggers (detached trigger pattern).
+ */
+function DropdownMenuAnchoredContent({
+  anchor,
+  align = "start",
+  side = "bottom",
+  sideOffset = 4,
+  className,
+  ...props
+}: MenuPrimitive.Popup.Props &
+  Pick<
+    MenuPrimitive.Positioner.Props,
+    "align" | "side" | "sideOffset" | "anchor"
+  >) {
+  return (
+    <MenuPrimitive.Portal>
+      <MenuPrimitive.Positioner
+        className="isolate z-50 outline-none"
+        anchor={anchor}
+        align={align}
+        side={side}
+        sideOffset={sideOffset}
+        collisionAvoidance={{ side: "flip", align: "shift" }}
+        collisionPadding={8}
+      >
+        <MenuPrimitive.Popup
+          data-slot="dropdown-menu-content"
+          className={cn(
+            "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ring-foreground/5 bg-popover text-popover-foreground z-50 max-h-(--available-height) max-w-(--available-width) min-w-48 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-2xl p-1 shadow-2xl ring-1 duration-100 outline-none data-closed:overflow-hidden",
+            className,
+          )}
+          {...props}
+        />
+      </MenuPrimitive.Positioner>
+    </MenuPrimitive.Portal>
+  );
+}
+
 function DropdownMenuGroup({ ...props }: MenuPrimitive.Group.Props) {
   return <MenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />;
 }
@@ -252,6 +292,7 @@ export {
   DropdownMenuPortal,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuAnchoredContent,
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuItem,

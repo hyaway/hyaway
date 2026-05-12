@@ -11,7 +11,6 @@ import {
   useState,
 } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import {
   IconMinus,
   IconPlus,
@@ -22,6 +21,14 @@ import {
 } from "@tabler/icons-react";
 import type { ComponentType, ReactNode, SVGProps } from "react";
 import type { RuleGroupType } from "react-querybuilder";
+import {
+  DropdownMenu,
+  DropdownMenuAnchoredContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui-primitives/dropdown-menu";
 import {
   nextUniqueName,
   useSearchQueriesActions,
@@ -233,35 +240,28 @@ function TagActionMenuItems({
 }) {
   return (
     <>
-      <MenuPrimitive.Group>
-        <MenuPrimitive.GroupLabel className="text-muted-foreground p-1">
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>
           <TagBadgeFromString
             displayTag={tag}
             className="h-auto w-full justify-center px-2 py-1.5 break-normal wrap-anywhere whitespace-normal"
           />
-        </MenuPrimitive.GroupLabel>
-      </MenuPrimitive.Group>
-      <MenuPrimitive.Separator className="bg-border/50 -mx-1 my-1 h-px" />
+        </DropdownMenuLabel>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
       {actions.map((action) => (
-        <MenuPrimitive.Item
-          key={action.id}
-          className="focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground group/dropdown-menu-item relative flex cursor-default items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-6"
-          onClick={action.onClick}
-        >
+        <DropdownMenuItem key={action.id} onClick={action.onClick}>
           <action.icon />
           {action.label}
-        </MenuPrimitive.Item>
+        </DropdownMenuItem>
       ))}
       {favouriteAction && (
         <>
-          <MenuPrimitive.Separator className="bg-border/50 -mx-1 my-1 h-px" />
-          <MenuPrimitive.Item
-            className="focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground group/dropdown-menu-item relative flex cursor-default items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-6"
-            onClick={favouriteAction.onClick}
-          >
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={favouriteAction.onClick}>
             <favouriteAction.icon />
             {favouriteAction.label}
-          </MenuPrimitive.Item>
+          </DropdownMenuItem>
         </>
       )}
     </>
@@ -295,43 +295,37 @@ export const TagActionMenu = memo(function TagActionMenu({
     setOpen(true);
   }, []);
 
-  const handleOpenChange = useCallback((nextOpen: boolean) => {
-    if (!nextOpen) {
-      setOpen(false);
-    }
-  }, []);
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean, details: { reason: string }) => {
+      if (!nextOpen) {
+        // Only close on intentional dismissal, not focus-out from pointer leaving
+        if (details.reason !== "focus-out") {
+          setOpen(false);
+        }
+      }
+    },
+    [],
+  );
 
   const ctx = useMemo(() => ({ openMenu }), [openMenu]);
 
   return (
     <TagActionMenuContext.Provider value={ctx}>
       {children}
-      <MenuPrimitive.Root open={open} onOpenChange={handleOpenChange}>
-        <MenuPrimitive.Portal>
-          <MenuPrimitive.Backdrop className="fixed inset-0 z-50" />
-          <MenuPrimitive.Positioner
-            className="isolate z-50 outline-none"
-            side={side}
-            sideOffset={4}
-            align="start"
-            anchor={anchorRef.current}
-            collisionAvoidance={{ side: "flip", align: "shift" }}
-            collisionPadding={8}
-          >
-            <MenuPrimitive.Popup
-              className="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ring-foreground/5 bg-popover text-popover-foreground z-50 max-h-(--available-height) max-w-(--available-width) min-w-48 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-2xl p-1 shadow-2xl ring-1 duration-100 outline-none data-closed:overflow-hidden"
-            >
-              {activeTag && (
-                <TagActionMenuItems
-                  tag={activeTag}
-                  actions={actions}
-                  favouriteAction={favouriteAction}
-                />
-              )}
-            </MenuPrimitive.Popup>
-          </MenuPrimitive.Positioner>
-        </MenuPrimitive.Portal>
-      </MenuPrimitive.Root>
+      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+        <DropdownMenuAnchoredContent
+          anchor={anchorRef.current}
+          side={side}
+        >
+          {activeTag && (
+            <TagActionMenuItems
+              tag={activeTag}
+              actions={actions}
+              favouriteAction={favouriteAction}
+            />
+          )}
+        </DropdownMenuAnchoredContent>
+      </DropdownMenu>
     </TagActionMenuContext.Provider>
   );
 });
