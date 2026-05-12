@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import {
   Command,
+  CommandGroup,
   CommandItem,
   CommandList,
 } from "@/components/ui-primitives/command";
@@ -118,22 +119,26 @@ export function TagAutocompleteInput({
         <div className="bg-popover border-border ring-foreground/5 absolute top-full left-0 z-50 mt-1 w-full min-w-64 overflow-hidden rounded-lg border shadow-md ring-1">
           <Command shouldFilter={false}>
             <CommandList>
-              {hasSufficientInput
-                ? suggestions.map((tag) => (
-                    <TagSuggestionItem
-                      key={tag.value}
-                      value={tag.value}
-                      count={tag.count}
-                      onSelect={() => handleSelect(tag.value)}
-                    />
-                  ))
-                : favouriteTags.map((tag) => (
+              {hasSufficientInput ? (
+                suggestions.map((tag) => (
+                  <TagSuggestionItem
+                    key={tag.value}
+                    value={tag.value}
+                    count={tag.count}
+                    onSelect={() => handleSelect(tag.value)}
+                  />
+                ))
+              ) : (
+                <CommandGroup heading="Favourite tags">
+                  {favouriteTags.map((tag) => (
                     <TagSuggestionItem
                       key={tag}
                       value={tag}
                       onSelect={() => handleSelect(tag)}
                     />
                   ))}
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </div>
