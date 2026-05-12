@@ -209,6 +209,7 @@ export const TagsSidebar = memo(function TagsSidebar({
           <SidebarGroup>
             <TagListContextMenu
               searchId={searchId}
+              side="left"
               render={
                 <ol
                   style={{
