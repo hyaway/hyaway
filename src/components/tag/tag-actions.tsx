@@ -305,8 +305,10 @@ export const TagActionMenu = memo(function TagActionMenu({
   const handleOpenChange = useCallback(
     (nextOpen: boolean, details: { reason: string }) => {
       if (!nextOpen) {
-        // Only close on intentional dismissal, not focus-out from pointer leaving
-        if (details.reason !== "focus-out") {
+        if (
+          details.reason !== "focus-out" &&
+          details.reason !== "trigger-hover"
+        ) {
           setOpen(false);
         }
       }
@@ -319,7 +321,7 @@ export const TagActionMenu = memo(function TagActionMenu({
   return (
     <TagActionMenuContext.Provider value={ctx}>
       {children}
-      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+      <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
         <DropdownMenuAnchoredContent anchor={anchorRef.current} side={side}>
           {activeTag && (
             <TagActionMenuItems
