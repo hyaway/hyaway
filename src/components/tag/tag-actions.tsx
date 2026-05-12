@@ -37,6 +37,7 @@ import {
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { Permission } from "@/integrations/hydrus-api/models";
 import { TagBadgeFromString } from "@/components/tag/tag-badge";
+import { useSidebarStoreActions } from "@/stores/sidebar-store";
 
 export interface TagAction {
   id: string;
@@ -51,6 +52,7 @@ export function useTagActions(
 ): Array<TagAction> {
   const navigate = useNavigate();
   const { setStagedQuery } = useSearchQueriesActions();
+  const { setDesktopOpen, setMobileOpen } = useSidebarStoreActions();
   const entry = useSearchQueryEntry(searchId ?? "");
 
   const handleSearch = useCallback(() => {
@@ -64,8 +66,10 @@ export function useTagActions(
     const displayName = nextUniqueName(tag);
     const id = generateSearchId(displayName);
     setStagedQuery(id, query, displayName);
+    setDesktopOpen("right", false);
+    setMobileOpen("right", false);
     navigate({ to: "/search/$searchId", params: { searchId: id } });
-  }, [tag, navigate, setStagedQuery]);
+  }, [tag, navigate, setStagedQuery, setDesktopOpen, setMobileOpen]);
 
   const handleInclude = useCallback(() => {
     if (!searchId) return;
