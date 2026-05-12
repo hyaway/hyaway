@@ -22,10 +22,7 @@ import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagBadge } from "@/components/tag/tag-badge";
-import {
-  TagDropdownButton,
-  TagListContextMenu,
-} from "@/components/tag/tag-actions";
+import { TagListContextMenu } from "@/components/tag/tag-actions";
 import { compareTags, parseTag } from "@/lib/tag-utils";
 import {
   ToggleGroup,
@@ -195,6 +192,7 @@ export const TagsSidebar = memo(function TagsSidebar({
             <TagListContextMenu
               searchId={searchId}
               side="left"
+              clickOpens
               render={
                 <ol
                   style={{
@@ -221,7 +219,6 @@ export const TagsSidebar = memo(function TagsSidebar({
                       tagItem={tagItem}
                       index={virtualRow.index}
                       showCount={deferredItems.length > 1}
-                      searchId={searchId}
                     />
                   </li>
                 );
@@ -248,15 +245,11 @@ const TagRowContent = memo(function TagRowContent({
   tagItem,
   index,
   showCount,
-  searchId,
 }: {
   tagItem: TagItem;
   index: number;
   showCount: boolean;
-  searchId: string | undefined;
 }) {
-  const tag = fullTag(tagItem);
-
   return (
     <div className="flex min-w-0 flex-row flex-nowrap items-center justify-start gap-1 font-mono">
       <span
@@ -268,13 +261,12 @@ const TagRowContent = memo(function TagRowContent({
       <TagBadge
         tag={tagItem.tag}
         namespace={tagItem.namespace}
-        className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-1 text-left break-normal wrap-anywhere whitespace-normal"
+        className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-1.5 text-left break-normal wrap-anywhere whitespace-normal"
       >
         {showCount && (
           <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
         )}
       </TagBadge>
-      <TagDropdownButton tag={tag} searchId={searchId} side="left" />
     </div>
   );
 });
