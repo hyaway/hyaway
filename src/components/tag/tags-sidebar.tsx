@@ -4,6 +4,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
 import { useMatch } from "@tanstack/react-router";
+import { IconDots } from "@tabler/icons-react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import type { TagsSortMode } from "@/stores/tags-settings-store";
 import {
@@ -23,8 +24,7 @@ import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagBadge } from "@/components/tag/tag-badge";
 import {
-  TagActionsDropdown,
-  TagContextMenu,
+  TagListContextMenu,
   useFavouriteTagAction,
   useTagActions,
 } from "@/components/tag/tag-actions";
@@ -34,6 +34,14 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui-primitives/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui-primitives/dropdown-menu";
 
 interface TagItem {
   tag: string;
@@ -160,6 +168,11 @@ export const TagsSidebar = memo(function TagsSidebar({
   // Cache virtual items
   const virtualItems = rowVirtualizer.getVirtualItems();
 
+  // Shared dropdown state — only one tag needs hooks at a time
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const actions = useTagActions(activeTag ?? "", searchId);
+  const favouriteAction = useFavouriteTagAction(activeTag ?? "");
+
   return (
     <>
       <SidebarHeader className="gap-4">
@@ -194,29 +207,48 @@ export const TagsSidebar = memo(function TagsSidebar({
       <SidebarContent className="min-h-0 flex-1 pe-1">
         <ScrollArea viewportClassName="h-full max-h-svh pe-2.5" ref={parentRef}>
           <SidebarGroup>
-            <ol
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-              }}
-              className="relative"
+            <TagListContextMenu
+              searchId={searchId}
+              render={
+                <ol
+                  style={{
+                    height: `${rowVirtualizer.getTotalSize()}px`,
+                  }}
+                  className="relative"
+                />
+              }
             >
-              {virtualItems.map((virtualRow) => (
-                <li
-                  key={virtualRow.index}
-                  ref={rowVirtualizer.measureElement}
-                  data-index={virtualRow.index}
-                  style={{ transform: `translateY(${virtualRow.start}px)` }}
-                  className="absolute top-0 left-0 w-full"
-                >
-                  <TagRowContent
-                    tagItem={filteredTags[virtualRow.index]}
-                    index={virtualRow.index}
-                    showCount={deferredItems.length > 1}
-                    searchId={searchId}
-                  />
-                </li>
-              ))}
-            </ol>
+              {virtualItems.map((virtualRow) => {
+                const tagItem = filteredTags[virtualRow.index];
+                return (
+                  <li
+                    key={virtualRow.index}
+                    ref={rowVirtualizer.measureElement}
+                    data-index={virtualRow.index}
+                    data-tag={fullTag(tagItem)}
+                    style={{
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                    className="absolute top-0 left-0 w-full"
+                  >
+                    <TagRowContent
+                      tagItem={tagItem}
+                      index={virtualRow.index}
+                      showCount={deferredItems.length > 1}
+                      onDropdownOpen={setActiveTag}
+                      actions={
+                        activeTag === fullTag(tagItem) ? actions : undefined
+                      }
+                      favouriteAction={
+                        activeTag === fullTag(tagItem)
+                          ? favouriteAction
+                          : undefined
+                      }
+                    />
+                  </li>
+                );
+              })}
+            </TagListContextMenu>
           </SidebarGroup>
         </ScrollArea>
       </SidebarContent>
@@ -238,16 +270,18 @@ const TagRowContent = memo(function TagRowContent({
   tagItem,
   index,
   showCount,
-  searchId,
+  onDropdownOpen,
+  actions,
+  favouriteAction,
 }: {
   tagItem: TagItem;
   index: number;
   showCount: boolean;
-  searchId: string | undefined;
+  onDropdownOpen: (tag: string) => void;
+  actions?: Array<import("@/components/tag/tag-actions").TagAction>;
+  favouriteAction?: import("@/components/tag/tag-actions").TagAction | null;
 }) {
   const tag = fullTag(tagItem);
-  const actions = useTagActions(tag, searchId);
-  const favouriteAction = useFavouriteTagAction(tag);
 
   return (
     <div className="flex min-w-0 flex-row flex-nowrap items-center justify-start gap-1 font-mono">
@@ -257,18 +291,45 @@ const TagRowContent = memo(function TagRowContent({
       >
         {index + 1}.
       </span>
-      <TagContextMenu actions={actions} favouriteAction={favouriteAction}>
-        <TagBadge
-          tag={tagItem.tag}
-          namespace={tagItem.namespace}
-          className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-1 text-left break-normal wrap-anywhere whitespace-normal"
-        >
-          {showCount && (
-            <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
+      <TagBadge
+        tag={tagItem.tag}
+        namespace={tagItem.namespace}
+        className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-1 text-left break-normal wrap-anywhere whitespace-normal"
+      >
+        {showCount && (
+          <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
+        )}
+      </TagBadge>
+      <DropdownMenu onOpenChange={(open) => open && onDropdownOpen(tag)}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              className="text-muted-foreground shrink-0 rounded-xs"
+            >
+              <IconDots className="size-4" />
+            </Button>
+          }
+        />
+        <DropdownMenuContent side="right" align="start">
+          {actions?.map((action) => (
+            <DropdownMenuItem key={action.id} onClick={action.onClick}>
+              <action.icon />
+              {action.label}
+            </DropdownMenuItem>
+          ))}
+          {favouriteAction && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={favouriteAction.onClick}>
+                <favouriteAction.icon />
+                {favouriteAction.label}
+              </DropdownMenuItem>
+            </>
           )}
-        </TagBadge>
-      </TagContextMenu>
-      <TagActionsDropdown actions={actions} favouriteAction={favouriteAction} />
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 });

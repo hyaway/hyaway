@@ -11,11 +11,7 @@ import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { TagBadgeFromString } from "@/components/tag/tag-badge";
-import {
-  TagContextMenu,
-  useFavouriteTagAction,
-  useTagActions,
-} from "@/components/tag/tag-actions";
+import { TagListContextMenu } from "@/components/tag/tag-actions";
 import { compareTagStrings } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 
@@ -68,39 +64,25 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
           />
         }
       />
-      <div className="flex flex-wrap gap-0.5">
-        {tags.map((tag) => {
-          const isVisible = !filteredTagsSet || filteredTagsSet.has(tag);
-          return (
-            <InlineTagBadge
-              key={tag}
-              displayTag={tag}
-              className={cn(
-                "transition-opacity",
-                !isVisible && "pointer-events-none opacity-10",
-              )}
-            />
-          );
-        })}
-      </div>
+      <TagListContextMenu>
+        <div className="flex flex-wrap gap-0.5">
+          {tags.map((tag) => {
+            const isVisible = !filteredTagsSet || filteredTagsSet.has(tag);
+            return (
+              <span key={tag} data-tag={tag}>
+                <TagBadgeFromString
+                  displayTag={tag}
+                  className={cn(
+                    "transition-opacity",
+                    !isVisible && "pointer-events-none opacity-10",
+                  )}
+                />
+              </span>
+            );
+          })}
+        </div>
+      </TagListContextMenu>
     </div>
-  );
-}
-
-function InlineTagBadge({
-  displayTag,
-  className,
-}: {
-  displayTag: string;
-  className?: string;
-}) {
-  const actions = useTagActions(displayTag, undefined);
-  const favouriteAction = useFavouriteTagAction(displayTag);
-
-  return (
-    <TagContextMenu actions={actions} favouriteAction={favouriteAction}>
-      <TagBadgeFromString displayTag={displayTag} className={className} />
-    </TagContextMenu>
   );
 }
 

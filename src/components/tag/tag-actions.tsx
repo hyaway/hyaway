@@ -1,11 +1,10 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   IconCopy,
-  IconDots,
   IconMinus,
   IconPlus,
   IconSearch,
@@ -14,8 +13,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import type { ComponentType, ReactNode, SVGProps } from "react";
-import type { RuleGroupType, RuleType } from "react-querybuilder";
-import { Button } from "@/components/ui-primitives/button";
+import type { RuleGroupType } from "react-querybuilder";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -24,18 +22,12 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui-primitives/context-menu";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui-primitives/dropdown-menu";
-import {
   nextUniqueName,
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
 import { generateSearchId } from "@/lib/search-entry-utils";
+import { cn } from "@/lib/utils";
 import {
   useFavouriteTagsLookup,
   useSetFavouriteTagsMutation,
@@ -215,34 +207,6 @@ export function useFavouriteTagAction(tag: string): TagAction | null {
   };
 }
 
-function TagActionMenuItems({
-  actions,
-  favouriteAction,
-}: {
-  actions: Array<TagAction>;
-  favouriteAction?: TagAction | null;
-}) {
-  return (
-    <>
-      {actions.map((action) => (
-        <DropdownMenuItem key={action.id} onClick={action.onClick}>
-          <action.icon />
-          {action.label}
-        </DropdownMenuItem>
-      ))}
-      {favouriteAction && (
-        <>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={favouriteAction.onClick}>
-            <favouriteAction.icon />
-            {favouriteAction.label}
-          </DropdownMenuItem>
-        </>
-      )}
-    </>
-  );
-}
-
 function TagActionContextItems({
   actions,
   favouriteAction,
@@ -271,58 +235,50 @@ function TagActionContextItems({
   );
 }
 
-/** Wraps children in a context menu with tag actions. */
-export const TagContextMenu = memo(function TagContextMenu({
-  actions,
-  favouriteAction,
+/**
+ * Wraps a list of tag elements in a single shared context menu.
+ *
+ * Tag elements must have a `data-tag` attribute with the full tag string.
+ * Right-clicking any element with `data-tag` will open the context menu
+ * with actions for that tag.
+ */
+export const TagListContextMenu = memo(function TagListContextMenu({
+  searchId,
   children,
+  className,
+  render,
 }: {
-  actions: Array<TagAction>;
-  favouriteAction?: TagAction | null;
+  searchId?: string;
   children: ReactNode;
+  className?: string;
+  render?: React.JSX.Element;
 }) {
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const actions = useTagActions(activeTag ?? "", searchId);
+  const favouriteAction = useFavouriteTagAction(activeTag ?? "");
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    const row = (e.target as HTMLElement).closest<HTMLElement>("[data-tag]");
+    if (row) setActiveTag(row.dataset.tag!);
+  }, []);
+
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="min-w-0 [&_*]:select-none">
+      <ContextMenuTrigger
+        className={cn("min-w-0 **:select-none", className)}
+        onContextMenu={handleContextMenu}
+        render={render}
+      >
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <TagActionContextItems
-          actions={actions}
-          favouriteAction={favouriteAction}
-        />
+        {activeTag && (
+          <TagActionContextItems
+            actions={actions}
+            favouriteAction={favouriteAction}
+          />
+        )}
       </ContextMenuContent>
     </ContextMenu>
-  );
-});
-
-/** Dropdown button that opens tag actions menu. */
-export const TagActionsDropdown = memo(function TagActionsDropdown({
-  actions,
-  favouriteAction,
-}: {
-  actions: Array<TagAction>;
-  favouriteAction?: TagAction | null;
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            className="text-muted-foreground shrink-0 rounded-xs"
-          >
-            <IconDots className="size-4" />
-          </Button>
-        }
-      />
-      <DropdownMenuContent side="right" align="start">
-        <TagActionMenuItems
-          actions={actions}
-          favouriteAction={favouriteAction}
-        />
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 });
