@@ -260,7 +260,6 @@ const TagRowContent = memo(function TagRowContent({
       <TagBadge
         tag={tagItem.tag}
         namespace={tagItem.namespace}
-        selectable={false}
         className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-1.5 text-left break-normal wrap-anywhere whitespace-normal"
       >
         {showCount && (

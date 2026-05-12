@@ -113,13 +113,11 @@ export function OrTagBadge({
   className,
   size,
   interactive,
-  selectable,
 }: {
   tags: Array<string>;
   className?: string;
   size?: "default" | "default-wrap";
   interactive?: boolean;
-  selectable?: boolean | null;
 }) {
   return (
     <>
@@ -130,7 +128,6 @@ export function OrTagBadge({
           <TagBadgeFromString
             displayTag={t}
             size={size}
-            selectable={interactive ? false : selectable}
             className={cn(
               "border-foreground/40 rounded-b-none border-y-2",
               isFirst && "border-l-2",
@@ -172,30 +169,29 @@ export function SearchTagList({
   tags,
   sortLabel,
   interactive = true,
-  selectable,
+  className,
 }: {
   tags: HydrusTagSearch;
   sortLabel?: string;
   /** When false, tags are plain text with no menu. Useful inside links. */
   interactive?: boolean;
-  /** Controls text selectability of badges. Defaults to true when not interactive. */
-  selectable?: boolean | null;
+  className?: string;
 }) {
   const content = (
-    <div className="flex flex-wrap gap-1.5">
+    <div className={cn("flex flex-wrap gap-1.5", className)}>
       {tags.map((entry, i) =>
         Array.isArray(entry) ? (
-          <OrTagBadge key={i} tags={entry} interactive={interactive} selectable={selectable} size="default-wrap" />
+          <OrTagBadge key={i} tags={entry} interactive={interactive} size="default-wrap" />
         ) : interactive ? (
           <TagActionTrigger key={i} tag={entry}>
-            <TagBadgeFromString displayTag={entry} size="default-wrap" selectable={false} />
+            <TagBadgeFromString displayTag={entry} size="default-wrap" />
           </TagActionTrigger>
         ) : (
-          <TagBadgeFromString key={i} displayTag={entry} size="default-wrap" selectable={selectable} />
+          <TagBadgeFromString key={i} displayTag={entry} size="default-wrap" />
         ),
       )}
       {sortLabel && (
-        <TagBadgeFromString displayTag={sortLabel} size="default-wrap" selectable={selectable} />
+        <TagBadgeFromString displayTag={sortLabel} size="default-wrap" />
       )}
     </div>
   );

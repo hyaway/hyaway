@@ -72,7 +72,6 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
               <TagActionTrigger key={tag} tag={tag}>
                 <TagBadgeFromString
                   displayTag={tag}
-                  selectable={false}
                   className={cn(
                     "transition-opacity",
                     !isVisible && "pointer-events-none opacity-10",

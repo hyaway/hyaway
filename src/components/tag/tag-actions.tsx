@@ -38,6 +38,11 @@ import { Permission } from "@/integrations/hydrus-api/models";
 import { TagBadgeFromString } from "@/components/tag/tag-badge";
 import { useSidebarStoreActions } from "@/stores/sidebar-store";
 
+/** Returns true if the tag belongs to the system namespace (e.g. system:inbox). */
+export function isSystemTag(tag: string): boolean {
+  return tag.startsWith("system:") || tag.startsWith("-system:");
+}
+
 export interface TagAction {
   id: string;
   label: string;
@@ -334,6 +339,7 @@ export const TagActionMenu = memo(function TagActionMenu({
 /**
  * A button that opens the shared TagActionMenu for a specific tag.
  * Must be rendered inside a `TagActionMenu` provider.
+ * System namespace tags are rendered as plain spans (no menu).
  */
 export function TagActionTrigger({
   tag,
@@ -353,12 +359,17 @@ export function TagActionTrigger({
     }
   }, [ctx, tag]);
 
+  // System namespace tags don't get action menus
+  if (tag.startsWith("system:") || tag.startsWith("-system:")) {
+    return <span className={className}>{children}</span>;
+  }
+
   return (
     <button
       ref={ref}
       type="button"
       onClick={handleClick}
-      className={cn("cursor-pointer select-none", className)}
+      className={cn("cursor-pointer select-none **:select-none", className)}
     >
       {children}
     </button>
