@@ -124,7 +124,7 @@ export function useTagActions(
     const actions: Array<TagAction> = [
       {
         id: "search",
-        label: "Search for this tag",
+        label: "New search",
         icon: IconSearch,
         onClick: handleSearch,
       },

@@ -12,6 +12,8 @@ import { parseTag } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
 
+import { TagListContextMenu } from "@/components/tag/tag-actions";
+
 type BadgeProps = ComponentProps<typeof Badge> &
   VariantProps<typeof badgeVariants>;
 
@@ -129,17 +131,18 @@ export function OrTagBadge({
                 or
               </span>
             )}
-            <TagBadgeFromString
-              key={i}
-              displayTag={t}
-              size={size}
-              className={cn(
-                "border-foreground/40 rounded-b-none border-y-2",
-                isFirst && "border-l-2",
-                isLast && "border-r-2",
-                className,
-              )}
-            />
+            <span key={i} data-tag={t} className="inline-flex">
+              <TagBadgeFromString
+                displayTag={t}
+                size={size}
+                className={cn(
+                  "border-foreground/40 rounded-b-none border-y-2",
+                  isFirst && "border-l-2",
+                  isLast && "border-r-2",
+                  className,
+                )}
+              />
+            </span>
           </>
         );
       })}
@@ -151,6 +154,7 @@ export function OrTagBadge({
  * Renders a list of hydrus search tags as badges.
  * Handles both plain tags and OR groups.
  * Optionally displays a sort label as an additional badge.
+ * Wraps in a context menu with "New search" and favourite actions.
  */
 export function SearchTagList({
   tags,
@@ -159,13 +163,15 @@ export function SearchTagList({
   tags: HydrusTagSearch;
   sortLabel?: string;
 }) {
-  return (
+  const content = (
     <div className="flex flex-wrap gap-1.5">
       {tags.map((entry, i) =>
         Array.isArray(entry) ? (
           <OrTagBadge key={i} tags={entry} size="default-wrap" />
         ) : (
-          <TagBadgeFromString key={i} displayTag={entry} size="default-wrap" />
+          <span key={i} data-tag={entry}>
+            <TagBadgeFromString displayTag={entry} size="default-wrap" />
+          </span>
         ),
       )}
       {sortLabel && (
@@ -173,4 +179,6 @@ export function SearchTagList({
       )}
     </div>
   );
+
+  return <TagListContextMenu>{content}</TagListContextMenu>;
 }
