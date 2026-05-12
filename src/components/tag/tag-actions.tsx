@@ -11,9 +11,10 @@ import {
   IconSearch,
   IconStar,
   IconStarOff,
+  IconTrash,
 } from "@tabler/icons-react";
 import type { ComponentType, ReactNode, SVGProps } from "react";
-import type { RuleGroupType } from "react-querybuilder";
+import type { RuleGroupType, RuleType } from "react-querybuilder";
 import { Button } from "@/components/ui-primitives/button";
 import {
   ContextMenu,
@@ -95,9 +96,35 @@ export function useTagActions(
     });
   }, [tag, searchId, entry.staged.query, setStagedQuery]);
 
+  const handleRemove = useCallback(
+    (value: string) => {
+      if (!searchId) return;
+      const currentQuery = entry.staged.query;
+      setStagedQuery(searchId, {
+        ...currentQuery,
+        rules: currentQuery.rules.filter(
+          (r) => !("field" in r && r.field === "tag" && r.value === value),
+        ),
+      });
+    },
+    [searchId, entry.staged.query, setStagedQuery],
+  );
+
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(tag);
   }, [tag]);
+
+  // Check if the tag or its negation already exist in the root-level rules
+  const isIncluded = searchId
+    ? entry.staged.query.rules.some(
+        (r) => "field" in r && r.field === "tag" && r.value === tag,
+      )
+    : false;
+  const isExcluded = searchId
+    ? entry.staged.query.rules.some(
+        (r) => "field" in r && r.field === "tag" && r.value === `-${tag}`,
+      )
+    : false;
 
   return useMemo(() => {
     const actions: Array<TagAction> = [
@@ -115,23 +142,49 @@ export function useTagActions(
       },
     ];
     if (searchId) {
-      actions.push(
-        {
+      if (isIncluded) {
+        actions.push({
+          id: "remove-include",
+          label: "Remove from search",
+          icon: IconTrash,
+          onClick: () => handleRemove(tag),
+        });
+      } else {
+        actions.push({
           id: "include",
-          label: "Add to search",
+          label: "Include in search",
           icon: IconPlus,
           onClick: handleInclude,
-        },
-        {
+        });
+      }
+      if (isExcluded) {
+        actions.push({
+          id: "remove-exclude",
+          label: "Remove exclusion",
+          icon: IconTrash,
+          onClick: () => handleRemove(`-${tag}`),
+        });
+      } else {
+        actions.push({
           id: "exclude",
           label: "Exclude from search",
           icon: IconMinus,
           onClick: handleExclude,
-        },
-      );
+        });
+      }
     }
     return actions;
-  }, [searchId, handleCopy, handleSearch, handleInclude, handleExclude]);
+  }, [
+    searchId,
+    isIncluded,
+    isExcluded,
+    tag,
+    handleCopy,
+    handleSearch,
+    handleInclude,
+    handleExclude,
+    handleRemove,
+  ]);
 }
 
 /**
