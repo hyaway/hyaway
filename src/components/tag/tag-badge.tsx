@@ -12,7 +12,7 @@ import { parseTag } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
 
-import { TagListContextMenu } from "@/components/tag/tag-actions";
+import { TagActionMenu, TagActionTrigger } from "@/components/tag/tag-actions";
 
 type BadgeProps = ComponentProps<typeof Badge> &
   VariantProps<typeof badgeVariants>;
@@ -50,17 +50,15 @@ export function TagBadge({
   return (
     <Badge
       variant={"overlay"}
-      className={cn("select-auto", className)}
+      className={className}
       style={combinedStyle}
       {...props}
     >
-      <span className="select-all">
-        <TouchTarget>
-          {negated ? "-" : ""}
-          {namespace ? `${namespace}: ` : ""}
-          {tag}
-        </TouchTarget>
-      </span>
+      <TouchTarget>
+        {negated ? "-" : ""}
+        {namespace ? `${namespace}: ` : ""}
+        {tag}
+      </TouchTarget>
       {children}
     </Badge>
   );
@@ -79,7 +77,7 @@ function TagBadgeCount({
       variant="overlay"
       size="xs"
       className={cn(
-        "ms-1 -me-0.5 shrink-0 border border-(--badge-overlay)/30 px-1.5 select-all",
+        "ms-1 -me-0.5 shrink-0 border border-(--badge-overlay)/30 px-1.5",
         className,
       )}
       {...props}
@@ -114,16 +112,33 @@ export function OrTagBadge({
   tags,
   className,
   size,
+  interactive,
+  selectable,
 }: {
   tags: Array<string>;
   className?: string;
   size?: "default" | "default-wrap";
+  interactive?: boolean;
+  selectable?: boolean | null;
 }) {
   return (
     <>
       {tags.map((t, i) => {
         const isFirst = i === 0;
         const isLast = i === tags.length - 1;
+        const badge = (
+          <TagBadgeFromString
+            displayTag={t}
+            size={size}
+            selectable={interactive ? false : selectable}
+            className={cn(
+              "border-foreground/40 rounded-b-none border-y-2",
+              isFirst && "border-l-2",
+              isLast && "border-r-2",
+              className,
+            )}
+          />
+        );
         return (
           <>
             {i > 0 && (
@@ -131,18 +146,15 @@ export function OrTagBadge({
                 or
               </span>
             )}
-            <span key={i} data-tag={t} className="inline-flex">
-              <TagBadgeFromString
-                displayTag={t}
-                size={size}
-                className={cn(
-                  "border-foreground/40 rounded-b-none border-y-2",
-                  isFirst && "border-l-2",
-                  isLast && "border-r-2",
-                  className,
-                )}
-              />
-            </span>
+            {interactive ? (
+              <TagActionTrigger key={i} tag={t} className="inline-flex">
+                {badge}
+              </TagActionTrigger>
+            ) : (
+              <span key={i} className="inline-flex">
+                {badge}
+              </span>
+            )}
           </>
         );
       })}
@@ -154,31 +166,41 @@ export function OrTagBadge({
  * Renders a list of hydrus search tags as badges.
  * Handles both plain tags and OR groups.
  * Optionally displays a sort label as an additional badge.
- * Wraps in a context menu with "New search" and favourite actions.
+ * When `interactive` is true, each tag is a button that opens an action menu.
  */
 export function SearchTagList({
   tags,
   sortLabel,
+  interactive = true,
+  selectable,
 }: {
   tags: HydrusTagSearch;
   sortLabel?: string;
+  /** When false, tags are plain text with no menu. Useful inside links. */
+  interactive?: boolean;
+  /** Controls text selectability of badges. Defaults to true when not interactive. */
+  selectable?: boolean | null;
 }) {
   const content = (
     <div className="flex flex-wrap gap-1.5">
       {tags.map((entry, i) =>
         Array.isArray(entry) ? (
-          <OrTagBadge key={i} tags={entry} size="default-wrap" />
+          <OrTagBadge key={i} tags={entry} interactive={interactive} selectable={selectable} size="default-wrap" />
+        ) : interactive ? (
+          <TagActionTrigger key={i} tag={entry}>
+            <TagBadgeFromString displayTag={entry} size="default-wrap" selectable={false} />
+          </TagActionTrigger>
         ) : (
-          <span key={i} data-tag={entry}>
-            <TagBadgeFromString displayTag={entry} size="default-wrap" />
-          </span>
+          <TagBadgeFromString key={i} displayTag={entry} size="default-wrap" selectable={selectable} />
         ),
       )}
       {sortLabel && (
-        <TagBadgeFromString displayTag={sortLabel} size="default-wrap" />
+        <TagBadgeFromString displayTag={sortLabel} size="default-wrap" selectable={selectable} />
       )}
     </div>
   );
 
-  return <TagListContextMenu>{content}</TagListContextMenu>;
+  if (!interactive) return content;
+
+  return <TagActionMenu>{content}</TagActionMenu>;
 }

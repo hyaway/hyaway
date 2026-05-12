@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { TagBadgeFromString } from "@/components/tag/tag-badge";
-import { TagListContextMenu } from "@/components/tag/tag-actions";
+import { TagActionMenu, TagActionTrigger } from "@/components/tag/tag-actions";
 import { compareTagStrings } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 
@@ -64,24 +64,25 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
           />
         }
       />
-      <TagListContextMenu>
+      <TagActionMenu>
         <div className="flex flex-wrap gap-0.5">
           {tags.map((tag) => {
             const isVisible = !filteredTagsSet || filteredTagsSet.has(tag);
             return (
-              <span key={tag} data-tag={tag}>
+              <TagActionTrigger key={tag} tag={tag}>
                 <TagBadgeFromString
                   displayTag={tag}
+                  selectable={false}
                   className={cn(
                     "transition-opacity",
                     !isVisible && "pointer-events-none opacity-10",
                   )}
                 />
-              </span>
+              </TagActionTrigger>
             );
           })}
         </div>
-      </TagListContextMenu>
+      </TagActionMenu>
     </div>
   );
 }

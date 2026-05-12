@@ -210,7 +210,12 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
           </span>
         )}
         {searchTags.length > 0 ? (
-          <SearchTagList tags={searchTags} sortLabel={sortLabel} />
+          <SearchTagList
+            tags={searchTags}
+            sortLabel={sortLabel}
+            interactive={false}
+            selectable={false}
+          />
         ) : (
           <span className="text-muted-foreground text-sm">No active query</span>
         )}

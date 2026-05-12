@@ -22,7 +22,7 @@ import { Heading } from "@/components/ui-primitives/heading";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagBadge } from "@/components/tag/tag-badge";
-import { TagListContextMenu } from "@/components/tag/tag-actions";
+import { TagActionMenu, TagActionTrigger } from "@/components/tag/tag-actions";
 import { compareTags, parseTag } from "@/lib/tag-utils";
 import {
   ToggleGroup,
@@ -189,41 +189,40 @@ export const TagsSidebar = memo(function TagsSidebar({
       <SidebarContent className="min-h-0 flex-1 pe-1">
         <ScrollArea viewportClassName="h-full max-h-svh pe-2.5" ref={parentRef}>
           <SidebarGroup>
-            <TagListContextMenu
-              searchId={searchId}
-              side="left"
-              clickOpens
-              render={
-                <ol
-                  style={{
-                    height: `${rowVirtualizer.getTotalSize()}px`,
-                  }}
-                  className="relative"
-                />
-              }
-            >
-              {virtualItems.map((virtualRow) => {
-                const tagItem = filteredTags[virtualRow.index];
-                return (
-                  <li
-                    key={virtualRow.index}
-                    ref={rowVirtualizer.measureElement}
-                    data-index={virtualRow.index}
-                    data-tag={fullTag(tagItem)}
-                    style={{
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                    className="absolute top-0 left-0 w-full"
-                  >
-                    <TagRowContent
-                      tagItem={tagItem}
-                      index={virtualRow.index}
-                      showCount={deferredItems.length > 1}
-                    />
-                  </li>
-                );
-              })}
-            </TagListContextMenu>
+            <TagActionMenu searchId={searchId} side="left">
+              <ol
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                }}
+                className="relative"
+              >
+                {virtualItems.map((virtualRow) => {
+                  const tagItem = filteredTags[virtualRow.index];
+                  return (
+                    <li
+                      key={virtualRow.index}
+                      ref={rowVirtualizer.measureElement}
+                      data-index={virtualRow.index}
+                      style={{
+                        transform: `translateY(${virtualRow.start}px)`,
+                      }}
+                      className="absolute top-0 left-0 w-full"
+                    >
+                      <TagActionTrigger
+                        tag={fullTag(tagItem)}
+                        className="w-full text-left"
+                      >
+                        <TagRowContent
+                          tagItem={tagItem}
+                          index={virtualRow.index}
+                          showCount={deferredItems.length > 1}
+                        />
+                      </TagActionTrigger>
+                    </li>
+                  );
+                })}
+              </ol>
+            </TagActionMenu>
           </SidebarGroup>
         </ScrollArea>
       </SidebarContent>
@@ -261,6 +260,7 @@ const TagRowContent = memo(function TagRowContent({
       <TagBadge
         tag={tagItem.tag}
         namespace={tagItem.namespace}
+        selectable={false}
         className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-1.5 text-left break-normal wrap-anywhere whitespace-normal"
       >
         {showCount && (

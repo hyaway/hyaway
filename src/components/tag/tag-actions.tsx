@@ -1,8 +1,17 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { memo, useCallback, useMemo, useState } from "react";
+import {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import {
   IconMinus,
   IconPlus,
@@ -13,15 +22,6 @@ import {
 } from "@tabler/icons-react";
 import type { ComponentType, ReactNode, SVGProps } from "react";
 import type { RuleGroupType } from "react-querybuilder";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuGroup,
-  ContextMenuItem,
-  ContextMenuLabel,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui-primitives/context-menu";
 import {
   nextUniqueName,
   useSearchQueriesActions,
@@ -202,8 +202,22 @@ export function useFavouriteTagAction(tag: string): TagAction | null {
   };
 }
 
-/** Renders tag action items for a ContextMenu. */
-function TagActionContextItems({
+// --- Tag Action Menu (shared single-instance dropdown) ---
+
+interface TagActionMenuContextValue {
+  openMenu: (tag: string, anchor: HTMLElement) => void;
+}
+
+const TagActionMenuContext = createContext<TagActionMenuContextValue | null>(
+  null,
+);
+
+export function useTagActionMenu() {
+  return useContext(TagActionMenuContext);
+}
+
+/** Menu item content rendered inside the shared popup. */
+function TagActionMenuItems({
   tag,
   actions,
   favouriteAction,
@@ -214,28 +228,35 @@ function TagActionContextItems({
 }) {
   return (
     <>
-      <ContextMenuGroup>
-        <ContextMenuLabel className="p-1">
+      <MenuPrimitive.Group>
+        <MenuPrimitive.GroupLabel className="text-muted-foreground p-1">
           <TagBadgeFromString
             displayTag={tag}
             className="h-auto w-full justify-center px-2 py-1.5 break-normal wrap-anywhere whitespace-normal"
           />
-        </ContextMenuLabel>
-      </ContextMenuGroup>
-      <ContextMenuSeparator />
+        </MenuPrimitive.GroupLabel>
+      </MenuPrimitive.Group>
+      <MenuPrimitive.Separator className="bg-border/50 -mx-1 my-1 h-px" />
       {actions.map((action) => (
-        <ContextMenuItem key={action.id} onClick={action.onClick}>
+        <MenuPrimitive.Item
+          key={action.id}
+          className="focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground group/dropdown-menu-item relative flex cursor-default items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-6"
+          onClick={action.onClick}
+        >
           <action.icon />
           {action.label}
-        </ContextMenuItem>
+        </MenuPrimitive.Item>
       ))}
       {favouriteAction && (
         <>
-          <ContextMenuSeparator />
-          <ContextMenuItem onClick={favouriteAction.onClick}>
+          <MenuPrimitive.Separator className="bg-border/50 -mx-1 my-1 h-px" />
+          <MenuPrimitive.Item
+            className="focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground group/dropdown-menu-item relative flex cursor-default items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-6"
+            onClick={favouriteAction.onClick}
+          >
             <favouriteAction.icon />
             {favouriteAction.label}
-          </ContextMenuItem>
+          </MenuPrimitive.Item>
         </>
       )}
     </>
@@ -243,79 +264,103 @@ function TagActionContextItems({
 }
 
 /**
- * Wraps a list of tag elements in a single shared context menu.
- *
- * Tag elements must have a `data-tag` attribute with the full tag string.
- * Right-clicking (or long-pressing) any `[data-tag]` element opens the
- * context menu with actions for that tag.
- *
- * When `clickOpens` is true, left-clicking a `[data-tag]` element also
- * opens the context menu by dispatching a synthetic `contextmenu` event.
+ * Provides a single shared dropdown menu for a list of tag triggers.
+ * Wrap a group of `TagActionTrigger` elements inside this provider.
+ * Only one menu instance is created regardless of how many tags exist.
  */
-export const TagListContextMenu = memo(function TagListContextMenu({
+export const TagActionMenu = memo(function TagActionMenu({
   searchId,
   children,
-  className,
-  render,
-  side,
-  clickOpens,
+  side = "bottom",
 }: {
   searchId?: string;
   children: ReactNode;
-  className?: string;
-  render?: React.JSX.Element;
   side?: "top" | "right" | "bottom" | "left";
-  clickOpens?: boolean;
 }) {
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef<HTMLElement | null>(null);
+
   const actions = useTagActions(activeTag ?? "", searchId);
   const favouriteAction = useFavouriteTagAction(activeTag ?? "");
 
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    const row = (e.target as HTMLElement).closest<HTMLElement>("[data-tag]");
-    if (row) setActiveTag(row.dataset.tag!);
+  const openMenu = useCallback((tag: string, anchor: HTMLElement) => {
+    anchorRef.current = anchor;
+    setActiveTag(tag);
+    setOpen(true);
   }, []);
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (!clickOpens) return;
-      const row = (e.target as HTMLElement).closest<HTMLElement>("[data-tag]");
-      if (!row) return;
-      e.preventDefault();
-      row.dispatchEvent(
-        new MouseEvent("contextmenu", {
-          bubbles: true,
-          clientX: e.clientX,
-          clientY: e.clientY,
-        }),
-      );
-    },
-    [clickOpens],
-  );
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
+    if (!nextOpen) {
+      setOpen(false);
+    }
+  }, []);
+
+  const ctx = useMemo(() => ({ openMenu }), [openMenu]);
 
   return (
-    <ContextMenu>
-      <ContextMenuTrigger
-        className={cn(
-          "min-w-0 **:select-none",
-          clickOpens && "cursor-context-menu",
-          className,
-        )}
-        onContextMenu={handleContextMenu}
-        onClick={handleClick}
-        render={render}
-      >
-        {children}
-      </ContextMenuTrigger>
-      <ContextMenuContent side={side}>
-        {activeTag && (
-          <TagActionContextItems
-            tag={activeTag}
-            actions={actions}
-            favouriteAction={favouriteAction}
-          />
-        )}
-      </ContextMenuContent>
-    </ContextMenu>
+    <TagActionMenuContext.Provider value={ctx}>
+      {children}
+      <MenuPrimitive.Root open={open} onOpenChange={handleOpenChange}>
+        <MenuPrimitive.Portal>
+          <MenuPrimitive.Backdrop className="fixed inset-0 z-50" />
+          <MenuPrimitive.Positioner
+            className="isolate z-50 outline-none"
+            side={side}
+            sideOffset={4}
+            align="start"
+            anchor={anchorRef.current}
+            collisionAvoidance={{ side: "flip", align: "shift" }}
+            collisionPadding={8}
+          >
+            <MenuPrimitive.Popup
+              className="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ring-foreground/5 bg-popover text-popover-foreground z-50 max-h-(--available-height) max-w-(--available-width) min-w-48 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-2xl p-1 shadow-2xl ring-1 duration-100 outline-none data-closed:overflow-hidden"
+            >
+              {activeTag && (
+                <TagActionMenuItems
+                  tag={activeTag}
+                  actions={actions}
+                  favouriteAction={favouriteAction}
+                />
+              )}
+            </MenuPrimitive.Popup>
+          </MenuPrimitive.Positioner>
+        </MenuPrimitive.Portal>
+      </MenuPrimitive.Root>
+    </TagActionMenuContext.Provider>
   );
 });
+
+/**
+ * A button that opens the shared TagActionMenu for a specific tag.
+ * Must be rendered inside a `TagActionMenu` provider.
+ */
+export function TagActionTrigger({
+  tag,
+  children,
+  className,
+}: {
+  tag: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  const ctx = useContext(TagActionMenuContext);
+  const ref = useRef<HTMLButtonElement>(null);
+
+  const handleClick = useCallback(() => {
+    if (ctx && ref.current) {
+      ctx.openMenu(tag, ref.current);
+    }
+  }, [ctx, tag]);
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      onClick={handleClick}
+      className={cn("cursor-pointer select-none", className)}
+    >
+      {children}
+    </button>
+  );
+}
