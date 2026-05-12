@@ -1,10 +1,11 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   IconCopy,
+  IconDots,
   IconMinus,
   IconPlus,
   IconSearch,
@@ -23,6 +24,16 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui-primitives/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui-primitives/dropdown-menu";
+import { Button } from "@/components/ui-primitives/button";
 import {
   nextUniqueName,
   useSearchQueriesActions,
@@ -210,15 +221,27 @@ export function useFavouriteTagAction(tag: string): TagAction | null {
   };
 }
 
+/** Renders tag action items for a ContextMenu. */
 function TagActionContextItems({
+  tag,
   actions,
   favouriteAction,
 }: {
+  tag: string;
   actions: Array<TagAction>;
   favouriteAction?: TagAction | null;
 }) {
   return (
     <>
+      <ContextMenuGroup>
+        <ContextMenuLabel className="p-1">
+          <TagBadgeFromString
+            displayTag={tag}
+            className="h-auto w-full justify-center break-normal wrap-anywhere whitespace-normal"
+          />
+        </ContextMenuLabel>
+      </ContextMenuGroup>
+      <ContextMenuSeparator />
       {actions.map((action) => (
         <ContextMenuItem key={action.id} onClick={action.onClick}>
           <action.icon />
@@ -238,12 +261,56 @@ function TagActionContextItems({
   );
 }
 
+/** Renders tag action items for a DropdownMenu. */
+function TagActionDropdownItems({
+  tag,
+  actions,
+  favouriteAction,
+}: {
+  tag: string;
+  actions: Array<TagAction>;
+  favouriteAction?: TagAction | null;
+}) {
+  return (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel className="p-1">
+          <TagBadgeFromString
+            displayTag={tag}
+            className="h-auto w-full justify-center break-normal wrap-anywhere whitespace-normal"
+          />
+        </DropdownMenuLabel>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      {actions.map((action) => (
+        <DropdownMenuItem key={action.id} onClick={action.onClick}>
+          <action.icon />
+          {action.label}
+        </DropdownMenuItem>
+      ))}
+      {favouriteAction && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={favouriteAction.onClick}>
+            <favouriteAction.icon />
+            {favouriteAction.label}
+          </DropdownMenuItem>
+        </>
+      )}
+    </>
+  );
+}
+
 /**
- * Wraps a list of tag elements in a single shared context menu.
+ * Wraps a list of tag elements in a single shared context menu and
+ * an optional shared dropdown menu.
  *
  * Tag elements must have a `data-tag` attribute with the full tag string.
- * Right-clicking any element with `data-tag` will open the context menu
- * with actions for that tag.
+ * Right-clicking any element with `data-tag` opens the context menu.
+ *
+ * When `showDropdown` is true, a shared dropdown trigger button is rendered
+ * per-row by placing a `<TagDropdownTrigger>` inside each row. Clicking
+ * any trigger opens the same shared dropdown with actions for that tag.
  */
 export const TagListContextMenu = memo(function TagListContextMenu({
   searchId,
@@ -278,23 +345,65 @@ export const TagListContextMenu = memo(function TagListContextMenu({
       </ContextMenuTrigger>
       <ContextMenuContent side={side}>
         {activeTag && (
-          <>
-            <ContextMenuGroup>
-              <ContextMenuLabel className="p-1">
-                <TagBadgeFromString
-                  displayTag={activeTag}
-                  className="w-full justify-center"
-                />
-              </ContextMenuLabel>
-            </ContextMenuGroup>
-            <ContextMenuSeparator />
-            <TagActionContextItems
-              actions={actions}
-              favouriteAction={favouriteAction}
-            />
-          </>
+          <TagActionContextItems
+            tag={activeTag}
+            actions={actions}
+            favouriteAction={favouriteAction}
+          />
         )}
       </ContextMenuContent>
     </ContextMenu>
   );
 });
+
+/**
+ * A dots button that opens a shared dropdown with tag actions.
+ * Must be placed inside an element with a `data-tag` attribute.
+ */
+export function TagDropdownButton({
+  tag,
+  searchId,
+  side = "right",
+}: {
+  tag: string;
+  searchId?: string;
+  side?: "top" | "right" | "bottom" | "left";
+}) {
+  const [open, setOpen] = useState(false);
+  const actions = useTagActions(open ? tag : "", searchId);
+  const favouriteAction = useFavouriteTagAction(open ? tag : "");
+
+  // Close the dropdown when a context menu opens so right-clicking
+  // another tag row isn't swallowed by the dropdown's backdrop.
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    document.addEventListener("contextmenu", close, true);
+    return () => document.removeEventListener("contextmenu", close, true);
+  }, [open]);
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            className="text-muted-foreground shrink-0 rounded-xs"
+          >
+            <IconDots className="size-4" />
+          </Button>
+        }
+      />
+      <DropdownMenuContent side={side} align="start" className="w-max">
+        {open && (
+          <TagActionDropdownItems
+            tag={tag}
+            actions={actions}
+            favouriteAction={favouriteAction}
+          />
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

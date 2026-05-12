@@ -4,7 +4,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
 import { useMatch } from "@tanstack/react-router";
-import { IconDots } from "@tabler/icons-react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import type { TagsSortMode } from "@/stores/tags-settings-store";
 import {
@@ -24,9 +23,8 @@ import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagBadge } from "@/components/tag/tag-badge";
 import {
+  TagDropdownButton,
   TagListContextMenu,
-  useFavouriteTagAction,
-  useTagActions,
 } from "@/components/tag/tag-actions";
 import { compareTags, parseTag } from "@/lib/tag-utils";
 import {
@@ -34,14 +32,6 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Button } from "@/components/ui-primitives/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui-primitives/dropdown-menu";
 
 interface TagItem {
   tag: string;
@@ -168,11 +158,6 @@ export const TagsSidebar = memo(function TagsSidebar({
   // Cache virtual items
   const virtualItems = rowVirtualizer.getVirtualItems();
 
-  // Shared dropdown state — only one tag needs hooks at a time
-  const [activeTag, setActiveTag] = useState<string | null>(null);
-  const actions = useTagActions(activeTag ?? "", searchId);
-  const favouriteAction = useFavouriteTagAction(activeTag ?? "");
-
   return (
     <>
       <SidebarHeader className="gap-4">
@@ -236,15 +221,7 @@ export const TagsSidebar = memo(function TagsSidebar({
                       tagItem={tagItem}
                       index={virtualRow.index}
                       showCount={deferredItems.length > 1}
-                      onDropdownOpen={setActiveTag}
-                      actions={
-                        activeTag === fullTag(tagItem) ? actions : undefined
-                      }
-                      favouriteAction={
-                        activeTag === fullTag(tagItem)
-                          ? favouriteAction
-                          : undefined
-                      }
+                      searchId={searchId}
                     />
                   </li>
                 );
@@ -271,16 +248,12 @@ const TagRowContent = memo(function TagRowContent({
   tagItem,
   index,
   showCount,
-  onDropdownOpen,
-  actions,
-  favouriteAction,
+  searchId,
 }: {
   tagItem: TagItem;
   index: number;
   showCount: boolean;
-  onDropdownOpen: (tag: string) => void;
-  actions?: Array<import("@/components/tag/tag-actions").TagAction>;
-  favouriteAction?: import("@/components/tag/tag-actions").TagAction | null;
+  searchId: string | undefined;
 }) {
   const tag = fullTag(tagItem);
 
@@ -301,36 +274,7 @@ const TagRowContent = memo(function TagRowContent({
           <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
         )}
       </TagBadge>
-      <DropdownMenu onOpenChange={(open) => open && onDropdownOpen(tag)}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              className="text-muted-foreground shrink-0 rounded-xs"
-            >
-              <IconDots className="size-4" />
-            </Button>
-          }
-        />
-        <DropdownMenuContent side="right" align="start">
-          {actions?.map((action) => (
-            <DropdownMenuItem key={action.id} onClick={action.onClick}>
-              <action.icon />
-              {action.label}
-            </DropdownMenuItem>
-          ))}
-          {favouriteAction && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={favouriteAction.onClick}>
-                <favouriteAction.icon />
-                {favouriteAction.label}
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <TagDropdownButton tag={tag} searchId={searchId} side="left" />
     </div>
   );
 });
