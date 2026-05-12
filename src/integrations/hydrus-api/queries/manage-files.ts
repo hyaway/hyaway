@@ -7,6 +7,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useLocation } from "@tanstack/react-router";
 import { useRef } from "react";
 import {
   archiveFiles,
@@ -83,6 +84,7 @@ export const useInfiniteGetFilesMetadata = (
   only_return_basic_information = false,
 ) => {
   const isConfigured = useIsApiConfigured();
+  const { pathname } = useLocation();
   const BATCH_SIZE = 128;
 
   // Keep file_ids in a ref so the queryFn always reads the latest array
@@ -94,6 +96,7 @@ export const useInfiniteGetFilesMetadata = (
     // eslint-disable-next-line @tanstack/query/exhaustive-deps -- file_ids accessed via ref intentionally; fingerprint covers invalidation
     queryKey: [
       "infiniteGetFilesMetadata",
+      pathname,
       fileIdsFingerprint(file_ids),
       only_return_basic_information,
       BATCH_SIZE,
@@ -134,6 +137,35 @@ const getFileIdsFromIdentifiers = (
   if ("file_id" in identifiers) return [identifiers.file_id];
   return undefined; // Can't update by hash easily
 };
+
+type InfiniteData = {
+  pages: Array<{ metadata: Array<FileMetadata>; nextCursor?: number }>;
+  pageParams: Array<number>;
+};
+
+/** Creates an updater for infinite query data that only clones batches containing affected files. */
+function infiniteUpdater(
+  fileIdSet: Set<number>,
+  updater: (metadata: FileMetadata) => FileMetadata,
+) {
+  return (oldData: InfiniteData | undefined) => {
+    if (!oldData) return oldData;
+    let batches: typeof oldData.pages | undefined;
+    for (let i = 0; i < oldData.pages.length; i++) {
+      const batch = oldData.pages[i];
+      if (batch.metadata.some((meta) => fileIdSet.has(meta.file_id))) {
+        if (!batches) batches = [...oldData.pages];
+        batches[i] = {
+          ...batch,
+          metadata: batch.metadata.map((meta) =>
+            fileIdSet.has(meta.file_id) ? updater(meta) : meta,
+          ),
+        };
+      }
+    }
+    return batches ? { ...oldData, pages: batches } : oldData;
+  };
+}
 
 /**
  * Helper to update file metadata flags in all relevant caches
@@ -182,32 +214,14 @@ const updateFileMetadataFlags = (
     },
   );
 
-  // Update infinite query caches
-  queryClient.setQueriesData<{
-    pages: Array<{ metadata: Array<FileMetadata>; nextCursor?: number }>;
-    pageParams: Array<number>;
-  }>(
+  // Update infinite query caches (gallery metadata loaded in batches).
+  // Only update active (non-stale) queries — inactive ones will refetch on mount.
+  queryClient.setQueriesData<InfiniteData>(
     {
-      predicate: (query) => {
-        const key = query.queryKey;
-        if (key[0] !== "infiniteGetFilesMetadata") return false;
-        const queryFileIds = key[1] as Array<number> | undefined;
-        if (!queryFileIds) return false;
-        return queryFileIds.some((id) => fileIdSet.has(id));
-      },
+      predicate: (query) =>
+        query.queryKey[0] === "infiniteGetFilesMetadata" && query.isActive(),
     },
-    (oldData) => {
-      if (!oldData) return oldData;
-      return {
-        ...oldData,
-        pages: oldData.pages.map((page) => ({
-          ...page,
-          metadata: page.metadata.map((meta) =>
-            fileIdSet.has(meta.file_id) ? updater(meta) : meta,
-          ),
-        })),
-      };
-    },
+    infiniteUpdater(fileIdSet, updater),
   );
 };
 
