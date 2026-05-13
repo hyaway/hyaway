@@ -13,7 +13,7 @@ import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
-import { getSortLabel } from "./-lib/query-builder-fields";
+import { SYSTEM_TAGS, getSortLabel } from "./-lib/query-builder-fields";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
@@ -112,14 +112,11 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   const { saveAs, remove, rename } = useSearchQueriesActions();
   const queryClient = useQueryClient();
 
-  const searchTags = useMemo(
-    () => (committed ? queryToHydrusSearch(committed.query) : []),
-    [committed],
-  );
+  const active = committed ?? entry.staged;
 
-  const sortLabel = committed
-    ? getSortLabel(committed.sort.sortType, committed.sort.sortAsc)
-    : undefined;
+  const searchTags = useMemo(() => queryToHydrusSearch(active.query), [active]);
+
+  const sortLabel = getSortLabel(active.sort.sortType, active.sort.sortAsc);
   const [isRenaming, setIsRenaming] = useState(false);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
@@ -217,7 +214,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             className="pointer-events-none select-none **:select-none"
           />
         ) : (
-          <span className="text-muted-foreground text-sm">No active query</span>
+          <span className="text-muted-foreground text-sm">No query</span>
         )}
       </div>
       <div className="flex items-center gap-1 self-end sm:self-center">
@@ -254,7 +251,7 @@ function QuickTagSearch({ onSearch }: { onSearch: (tag: string) => void }) {
   const inputRef = useRef<string>("");
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
+    (e: React.SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       onSearch(inputRef.current);
     },
@@ -268,6 +265,7 @@ function QuickTagSearch({ onSearch }: { onSearch: (tag: string) => void }) {
         inputClassName="h-11"
         placeholder="Search tags…"
         name="hyaway-quick-tag-search"
+        staticSuggestions={SYSTEM_TAGS}
         onChange={(val) => {
           inputRef.current = val;
         }}
