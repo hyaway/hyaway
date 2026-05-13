@@ -326,6 +326,17 @@ export const useCommittedSearch = (key: string) =>
     (state) => (state.entries[key] as SearchQueryEntry | undefined)?.committed,
   );
 
+/** True when staged differs from the last committed snapshot. */
+export const useSearchDirty = (key: string) =>
+  useSearchQueriesStore((state) => {
+    const entry = state.entries[key] as SearchQueryEntry | undefined;
+    if (!entry?.committed) return false;
+    return (
+      entry.staged.query !== entry.committed.query ||
+      entry.staged.sort !== entry.committed.sort
+    );
+  });
+
 export const useSearchQueriesActions = () =>
   useSearchQueriesStore((state) => state.actions);
 
