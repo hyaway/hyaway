@@ -36,8 +36,9 @@ import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services"
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
-import {} from "@/stores/search-settings-store";
+import { cn } from "@/lib/utils";
 import {
+  useSearchDirty,
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
@@ -236,8 +237,15 @@ export function SearchQueryBuilder({
     clear(entryKey);
   }, [entryKey, clear]);
 
+  const isDirty = useSearchDirty(entryKey);
+
   return (
-    <div className="flex flex-col gap-3 rounded-lg border p-3">
+    <div
+      className={cn(
+        "flex flex-col gap-3 rounded-lg border p-3",
+        isDirty && "ring-ring ring-1",
+      )}
+    >
       <QueryBuilder
         fields={allFieldGroups}
         query={query}
@@ -260,14 +268,12 @@ export function SearchQueryBuilder({
           ruleGroupBodyElements: QBRuleGroupBody,
         }}
       />
-
       <SortSection
         sortType={sortType}
         sortAsc={sortAsc}
         onSortTypeChange={handleSortTypeChange}
         onSortAscToggle={handleSortAscToggle}
       />
-
       {hydrusSearch.length > 0 && (
         <div className="flex flex-col gap-1">
           <span className="text-muted-foreground text-sm font-medium">
@@ -279,7 +285,6 @@ export function SearchQueryBuilder({
           />
         </div>
       )}
-
       {hasRules && (
         <div className="flex flex-col gap-2">
           <SearchActions
