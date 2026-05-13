@@ -37,6 +37,21 @@ function stripEmptyRules(query: RuleGroupType): RuleGroupType {
   return { ...query, rules };
 }
 
+function areSearchStatesEquivalent(
+  staged: SearchQueryEntry["staged"],
+  committed: SearchQueryEntry["committed"],
+): boolean {
+  if (!committed) return false;
+  if (staged === committed) return true;
+
+  return (
+    staged.sort.sortType === committed.sort.sortType &&
+    staged.sort.sortAsc === committed.sort.sortAsc &&
+    JSON.stringify(stripEmptyRules(staged.query)) ===
+      JSON.stringify(committed.query)
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Defaults
 // ---------------------------------------------------------------------------
@@ -171,14 +186,14 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const { entries } = get();
           const entry = entries[key] ?? defaultEntry();
           const cleanedQuery = stripEmptyRules(entry.staged.query);
-          const staged =
+          const committed =
             cleanedQuery !== entry.staged.query
               ? { ...entry.staged, query: cleanedQuery }
               : entry.staged;
           set({
             entries: {
               ...entries,
-              [key]: { ...entry, staged, committed: staged },
+              [key]: { ...entry, committed },
             },
           });
         },
@@ -352,7 +367,7 @@ export const useSearchDirty = (key: string) =>
   useSearchQueriesStore((state) => {
     const entry = state.entries[key] as SearchQueryEntry | undefined;
     if (!entry) return false;
-    return entry.staged !== entry.committed;
+    return !areSearchStatesEquivalent(entry.staged, entry.committed);
   });
 
 export const useSearchQueriesActions = () =>
