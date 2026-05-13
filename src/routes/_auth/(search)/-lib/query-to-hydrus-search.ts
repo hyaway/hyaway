@@ -24,6 +24,7 @@ function ruleToSearchTag(rule: RuleType): string | null {
   if (field === "tag") {
     if (typeof value !== "string" || value.trim().length === 0) return null;
     let tag = value.trim();
+    if (tag.replace(/^-+/, "") === "") return null;
     // Bare namespace (e.g. "series:" or "-series:") → wildcard
     if (tag.endsWith(":")) tag += "*";
     else if (tag.includes(":") && tag.endsWith(":-")) {
