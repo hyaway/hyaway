@@ -24,7 +24,7 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
   persist(
     (set, _get, store) => ({
       defaultQuery: defaultStaged(),
-      createSearchesInstant: false,
+      createSearchesInstant: true,
       actions: {
         setDefaultQuery: (defaultQuery: SearchState) => set({ defaultQuery }),
         setCreateSearchesInstant: (createSearchesInstant: boolean) =>
