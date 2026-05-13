@@ -2,15 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useMemo } from "react";
-import { QueryBuilder } from "react-querybuilder";
+import { QueryBuilder, RuleGroupBodyComponents } from "react-querybuilder";
 import { queryToHydrusSearch } from "../-lib/query-to-hydrus-search";
 import {
   FILE_SERVICE_TYPES,
+  SYSTEM_TAGS,
   buildRatingFieldGroups,
   fieldGroups,
   getSortLabel,
+  systemTagToRule,
 } from "../-lib/query-builder-fields";
 import {
+  CombinatorSeparator,
   QBActionElement,
   QBCombinatorSelect,
   QBFieldSelect,
@@ -20,13 +23,19 @@ import {
 } from "./query-builder-controls";
 import { SearchActions } from "./search-builder-actions";
 import { SortSection } from "./sort-select";
-import type { RuleGroupType, RuleType } from "react-querybuilder";
+import type {
+  RuleGroupProps,
+  RuleGroupType,
+  RuleType,
+  UseRuleGroup,
+} from "react-querybuilder";
 import type { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 import { Permission } from "@/integrations/hydrus-api/models";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { SearchTagList } from "@/components/tag/tag-badge";
+import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import {} from "@/stores/search-settings-store";
 import {
   useSearchQueriesActions,
@@ -41,23 +50,18 @@ export type { SortConfig } from "./sort-select";
 
 /** Force sub-groups to always use OR combinator (only creates new objects when needed) */
 function enforceCombinators(query: RuleGroupType): RuleGroupType {
-  const filtered = query.rules.filter(
-    (rule) => !("rules" in rule) || rule.rules.length > 0,
-  );
-
-  const needsFilter = filtered.length !== query.rules.length;
   const needsCombinatorFix =
     query.combinator !== "and" ||
-    filtered.some((rule) => "rules" in rule && rule.combinator !== "or");
+    query.rules.some((rule) => "rules" in rule && rule.combinator !== "or");
 
-  if (!needsFilter && !needsCombinatorFix) {
+  if (!needsCombinatorFix) {
     return query;
   }
 
   return {
     ...query,
     combinator: "and",
-    rules: filtered.map((rule) => {
+    rules: query.rules.map((rule) => {
       if ("rules" in rule && rule.combinator !== "or") {
         return { ...rule, combinator: "or" as const };
       }
@@ -76,16 +80,73 @@ const handleAddRule = (
   rule: RuleType,
   _parentPath: Array<number>,
   _query: RuleGroupType,
-  context?: { addSystem?: boolean; addLimit?: boolean },
+  context?: {
+    addSystem?: boolean;
+    inlineTag?: string;
+    systemField?: string;
+  },
 ): RuleType => {
-  if (context?.addLimit) {
-    return { ...rule, field: "limit", operator: "=", value: 256 };
+  if (context?.inlineTag) {
+    const systemRule = systemTagToRule(context.inlineTag);
+    if (systemRule) return { ...rule, ...systemRule };
+    return { ...rule, field: "tag", operator: "=", value: context.inlineTag };
   }
-  if (context?.addSystem) {
-    return { ...rule, field: "inbox", operator: "is", value: "" };
+  if (context?.addSystem && context.systemField) {
+    for (const group of fieldGroups) {
+      const field = group.options.find((f) => f.name === context.systemField);
+      if (field) {
+        return {
+          ...rule,
+          field: context.systemField,
+          operator:
+            (field as { defaultOperator?: string }).defaultOperator ?? "=",
+          value: field.defaultValue ?? "",
+        };
+      }
+    }
+    return { ...rule, field: context.systemField, operator: "=", value: "" };
   }
   return { ...rule, field: "tag", operator: "=", value: "" };
 };
+
+// ---------------------------------------------------------------------------
+// Inline tag input rendered at the bottom of each rule group body
+// ---------------------------------------------------------------------------
+
+function QBRuleGroupBody(props: RuleGroupProps & UseRuleGroup) {
+  const handleInlineSelect = useCallback(
+    (tag: string) => {
+      props.addRule(undefined, { inlineTag: tag });
+    },
+    [props.addRule],
+  );
+
+  const combinator = props.ruleGroup.combinator ?? "and";
+  const hasRules =
+    "rules" in props.ruleGroup && props.ruleGroup.rules.length > 0;
+
+  return (
+    <>
+      <RuleGroupBodyComponents {...props} />
+      {hasRules && (
+        <div className="pt-2 pb-3 md:pt-1 md:pb-2">
+          <CombinatorSeparator text={combinator} />
+        </div>
+      )}
+      <TagAutocompleteInput
+        className="relative w-full"
+        inputClassName="h-9"
+        placeholder="Add tag or system:…"
+        name={`hyaway-qb-inline-${props.path.join("-")}`}
+        staticSuggestions={SYSTEM_TAGS}
+        onSelect={handleInlineSelect}
+        onSubmit={handleInlineSelect}
+        onBlur={handleInlineSelect}
+        clearOnSelect
+      />
+    </>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Main component
@@ -184,7 +245,6 @@ export function SearchQueryBuilder({
         controlClassnames={controlClassnames}
         suppressStandardClassnames
         showCombinatorsBetweenRules
-        addRuleToNewGroups
         parseNumbers
         onAddRule={handleAddRule}
         onAddGroup={handleAddGroup}
@@ -197,6 +257,7 @@ export function SearchQueryBuilder({
           addGroupAction: QBActionElement,
           removeGroupAction: QBActionElement,
           combinatorSelector: QBCombinatorSelect,
+          ruleGroupBodyElements: QBRuleGroupBody,
         }}
       />
 

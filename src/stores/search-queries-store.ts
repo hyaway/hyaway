@@ -13,6 +13,28 @@ import { generateSearchId } from "@/lib/search-entry-utils";
 import { systemTagToRule } from "@/routes/_auth/(search)/-lib/query-builder-fields";
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Remove tag rules with empty values and empty sub-groups (recursively). */
+function stripEmptyRules(query: RuleGroupType): RuleGroupType {
+  const rules = query.rules
+    .map((rule) => {
+      if ("rules" in rule) return stripEmptyRules(rule);
+      return rule;
+    })
+    .filter(
+      (rule) =>
+        ("rules" in rule && rule.rules.length > 0) ||
+        (!("rules" in rule) &&
+          (rule.field !== "tag" || String(rule.value).trim() !== "")),
+    );
+
+  if (rules.length === query.rules.length) return query;
+  return { ...query, rules };
+}
+
+// ---------------------------------------------------------------------------
 // Defaults
 // ---------------------------------------------------------------------------
 
@@ -142,10 +164,15 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
         commit: (key) => {
           const { entries } = get();
           const entry = entries[key] ?? defaultEntry();
+          const cleanedQuery = stripEmptyRules(entry.staged.query);
+          const staged =
+            cleanedQuery !== entry.staged.query
+              ? { ...entry.staged, query: cleanedQuery }
+              : entry.staged;
           set({
             entries: {
               ...entries,
-              [key]: { ...entry, committed: entry.staged },
+              [key]: { ...entry, staged, committed: staged },
             },
           });
         },
