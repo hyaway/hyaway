@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   IconArrowLeft,
   IconBackslash,
@@ -677,16 +677,26 @@ function TextValueEditor({
   name: string;
 }) {
   const [inputValue, setInputValue] = useState(value);
+  const inputValueRef = useRef(value);
 
   useEffect(() => {
     setInputValue(value);
+    inputValueRef.current = value;
   }, [value]);
 
-  const commitValue = useCallback(() => {
-    if (inputValue !== value) {
-      onChange(inputValue);
-    }
-  }, [inputValue, onChange, value]);
+  const commitValue = useCallback(
+    (nextValue = inputValueRef.current) => {
+      if (nextValue !== value) {
+        onChange(nextValue);
+      }
+    },
+    [onChange, value],
+  );
+
+  const handleChange = useCallback((nextValue: string) => {
+    inputValueRef.current = nextValue;
+    setInputValue(nextValue);
+  }, []);
 
   return (
     <Input
@@ -697,15 +707,14 @@ function TextValueEditor({
       disabled={disabled}
       title={title}
       autoComplete="off"
-      onChange={(e) => setInputValue(e.target.value)}
-      onBlur={commitValue}
+      onChange={(e) => handleChange(e.target.value)}
+      onBlur={() => commitValue()}
       onKeyDown={(e) => {
         if (e.key === "Enter") {
           e.preventDefault();
           const nextValue = e.currentTarget.value;
-          if (nextValue !== value) {
-            onChange(nextValue);
-          }
+          inputValueRef.current = nextValue;
+          commitValue(nextValue);
           e.currentTarget.blur();
         }
       }}
@@ -941,33 +950,58 @@ function TagValueEditor({
   disabled?: boolean;
 }) {
   const [inputValue, setInputValue] = useState(value);
-  const isNegated = inputValue.trimStart().startsWith("-");
+  const inputValueRef = useRef(value);
 
   useEffect(() => {
     setInputValue(value);
+    inputValueRef.current = value;
   }, [value]);
 
   const commitValue = useCallback(
-    (val: string) => {
-      if (val !== value) {
-        onChange(val);
+    (nextValue = inputValueRef.current) => {
+      if (nextValue !== value) {
+        onChange(nextValue);
       }
     },
     [onChange, value],
   );
 
-  const handleChange = useCallback((val: string) => {
-    setInputValue(val);
+  const handleChange = useCallback((nextValue: string) => {
+    inputValueRef.current = nextValue;
+    setInputValue(nextValue);
   }, []);
+
+  const handleCommit = useCallback(
+    (nextValue: string) => {
+      inputValueRef.current = nextValue;
+      setInputValue(nextValue);
+      commitValue(nextValue);
+    },
+    [commitValue],
+  );
 
   const handleSelect = useCallback(
     (tag: string) => {
-      const selected = isNegated ? `-${tag}` : tag;
+      const selected = inputValueRef.current.trimStart().startsWith("-")
+        ? `-${tag}`
+        : tag;
       setInputValue(selected);
-      commitValue(selected);
+      handleCommit(selected);
     },
-    [commitValue, isNegated],
+    [handleCommit],
   );
+
+  const handleToggleNegation = useCallback(() => {
+    const currentValue = inputValueRef.current;
+    const toggled = currentValue.trimStart().startsWith("-")
+      ? currentValue.replace(/^-/, "")
+      : `-${currentValue}`;
+
+    setInputValue(toggled);
+    handleCommit(toggled);
+  }, [handleCommit]);
+
+  const isNegated = inputValue.trimStart().startsWith("-");
 
   return (
     <>
@@ -982,8 +1016,8 @@ function TagValueEditor({
             handleSelect(tag);
           }
         }}
-        onSubmit={(tag) => commitValue(tag)}
-        onBlur={(tag) => commitValue(tag)}
+        onSubmit={(tag) => handleCommit(tag)}
+        onBlur={(tag) => handleCommit(tag)}
         disabled={disabled}
         placeholder="e.g. cat or system:…"
         name="hyaway-spb-tag"
@@ -996,13 +1030,7 @@ function TagValueEditor({
         variant="ghost"
         size="default"
         className="shrink-0"
-        onClick={() => {
-          const toggled = isNegated
-            ? inputValue.replace(/^-/, "")
-            : `-${inputValue}`;
-          setInputValue(toggled);
-          commitValue(toggled);
-        }}
+        onClick={handleToggleNegation}
         disabled={disabled}
         type="button"
       >
