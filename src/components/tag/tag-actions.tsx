@@ -161,7 +161,7 @@ export function useTagActions(
       if (isExcluded) {
         actions.push({
           id: "remove-exclude",
-          label: "Remove exclusion",
+          label: "Remove exclusion from search",
           icon: IconTrash,
           onClick: () => handleRemove(`-${tag}`),
         });
