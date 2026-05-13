@@ -120,9 +120,17 @@ export function TagAutocompleteInput({
     (open && filteredStatic.length > 0);
 
   const namespaceColors = useNamespaceColors();
+  const favourites = useFavouriteTagsLookup();
+  const normalizedInputValue = inputValue.trim().replace(/^-+/, "");
+  const isFavouriteInput = normalizedInputValue
+    ? favourites.has(normalizedInputValue)
+    : false;
   const inputColor = colorizeInput
     ? (namespaceColors[parseTag(inputValue).namespace] ??
       namespaceColors["null"])
+    : undefined;
+  const colorizedInputStyle: CSSProperties | undefined = inputColor
+    ? ({ "--badge-overlay": inputColor } as CSSProperties)
     : undefined;
 
   const handleSelect = useCallback(
@@ -143,8 +151,14 @@ export function TagAutocompleteInput({
   return (
     <div className={className ?? "relative w-full"}>
       <Input
-        className={cn("w-full", inputClassName)}
-        style={inputColor ? { color: inputColor } : undefined}
+        className={cn(
+          "w-full",
+          inputColor &&
+            "border-(--badge-overlay)/30 bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] text-(--badge-overlay) placeholder:text-(--badge-overlay)/60 hover:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
+          isFavouriteInput && "pe-10",
+          inputClassName,
+        )}
+        style={colorizedInputStyle}
         value={inputValue}
         disabled={disabled}
         placeholder={placeholder}
@@ -186,6 +200,16 @@ export function TagAutocompleteInput({
         name={name}
         autoComplete="off"
       />
+      {isFavouriteInput && (
+        <IconTagStarred
+          className={cn(
+            "pointer-events-none absolute top-1/2 right-3 size-5 -translate-y-1/2",
+            inputColor ? "text-(--badge-overlay)" : "text-muted-foreground",
+          )}
+          style={colorizedInputStyle}
+          aria-hidden
+        />
+      )}
       {showDropdown && (
         <div
           className="bg-popover border-border ring-foreground/5 absolute top-full left-0 z-50 mt-1 w-full min-w-64 overflow-hidden rounded-lg border shadow-md ring-1"

@@ -9,7 +9,6 @@ import {
   SYSTEM_TAGS,
   buildRatingFieldGroups,
   fieldGroups,
-  getSortLabel,
   systemTagToRule,
 } from "../-lib/query-builder-fields";
 import {
@@ -34,7 +33,6 @@ import { Permission } from "@/integrations/hydrus-api/models";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
-import { SearchTagList } from "@/components/tag/tag-badge";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import { cn } from "@/lib/utils";
 import {
@@ -254,6 +252,11 @@ export function SearchQueryBuilder({
         showDirtyRing && "ring-ring ring-1",
       )}
     >
+      {!instantSearch && (
+        <span className="text-muted-foreground text-sm font-medium">
+          Draft search
+        </span>
+      )}
       <QueryBuilder
         fields={allFieldGroups}
         query={query}
@@ -282,17 +285,6 @@ export function SearchQueryBuilder({
         onSortTypeChange={handleSortTypeChange}
         onSortAscToggle={handleSortAscToggle}
       />
-      {!instantSearch && (
-        <div className="flex flex-col gap-1">
-          <span className="text-muted-foreground text-sm font-medium">
-            Draft search
-          </span>
-          <SearchTagList
-            tags={hydrusSearch}
-            sortLabel={getSortLabel(sortType, sortAsc)}
-          />
-        </div>
-      )}
       {!instantSearch && (
         <div className="flex flex-col gap-2">
           <SearchActions

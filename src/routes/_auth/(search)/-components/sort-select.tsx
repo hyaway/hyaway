@@ -39,11 +39,11 @@ export function SortSection({
   onSortAscToggle: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="@container flex flex-wrap items-center gap-2">
       <span className="text-muted-foreground shrink-0 text-sm font-medium">
         Sort by
       </span>
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-full items-center gap-2 @sm:min-w-0 @sm:flex-none">
         <SortSelect value={sortType} onChange={onSortTypeChange} />
         <Button
           variant="ghost"
@@ -56,12 +56,12 @@ export function SortSection({
           {sortAsc ? (
             <>
               <IconSortAscending2Filled className="size-6" />
-              <span className="hidden text-sm sm:inline">ascending</span>
+              <span className="hidden text-sm @sm:inline">ascending</span>
             </>
           ) : (
             <>
               <IconSortDescending2Filled className="size-6" />
-              <span className="hidden text-sm sm:inline">descending</span>
+              <span className="hidden text-sm @sm:inline">descending</span>
             </>
           )}
         </Button>
@@ -94,7 +94,7 @@ export function SortSelect({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        className="border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 sm:w-auto sm:max-w-96 sm:min-w-60"
+        className="border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 @sm:w-auto @sm:max-w-96 @sm:min-w-60"
         aria-label="Sort by"
       >
         <span className="truncate">{selectedLabel}</span>

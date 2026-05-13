@@ -174,10 +174,10 @@ function SearchPage() {
   const fileCount = data?.file_ids?.length ?? 0;
 
   const activeLabel = isLoading
-    ? "Current search (loading)"
+    ? "Loading files for:"
     : isError
-      ? "Current search"
-      : `Current search (found ${fileCount} files)`;
+      ? "Error for query:"
+      : `${fileCount} ${fileCount === 1 ? "file" : "files"} found for:`;
 
   return (
     <>

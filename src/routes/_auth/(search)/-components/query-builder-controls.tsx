@@ -390,11 +390,11 @@ export function QBSelect({
   const flatOptions = !isGrouped ? (options as Array<OptionItem>) : null;
   const namespaceColors = useNamespaceColors();
 
-  const labelStyle = (label: string): CSSProperties | undefined => {
+  const overlayStyle = (label: string): CSSProperties | undefined => {
     const { namespace } = parseTag(label);
     const color =
       namespaceColors[namespace || "null"] ?? namespaceColors["null"];
-    return color ? { color } : undefined;
+    return color ? ({ "--badge-overlay": color } as CSSProperties) : undefined;
   };
 
   const selectedLabel = useMemo(() => {
@@ -409,6 +409,9 @@ export function QBSelect({
     }
     return null;
   }, [options, groups, flatOptions, val]);
+  const displayedLabel = displayValue ?? selectedLabel;
+  const selectedOverlayStyle =
+    colorLabels && displayedLabel ? overlayStyle(displayedLabel) : undefined;
 
   const handleSelect = (name: string) => {
     if (name.startsWith("system:") && rule?.id) {
@@ -435,21 +438,22 @@ export function QBSelect({
         disabled={disabled}
         className={cn(
           "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 lg:w-auto lg:max-w-96 lg:min-w-60",
+          selectedOverlayStyle &&
+            "border-(--badge-overlay)/30 bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] text-(--badge-overlay) hover:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
           className,
         )}
+        style={selectedOverlayStyle}
         aria-label={title}
       >
-        <span
-          className="truncate"
-          style={
-            colorLabels && (displayValue ?? selectedLabel)
-              ? labelStyle(displayValue ?? selectedLabel ?? "")
-              : undefined
-          }
-        >
-          {displayValue ?? selectedLabel ?? title ?? "Select…"}
-        </span>
-        <IconChevronDown className="text-muted-foreground size-4 shrink-0" />
+        <span className="truncate">{displayedLabel ?? title ?? "Select…"}</span>
+        <IconChevronDown
+          className={cn(
+            "size-4 shrink-0",
+            selectedOverlayStyle
+              ? "text-(--badge-overlay)"
+              : "text-muted-foreground",
+          )}
+        />
       </PopoverTrigger>
       <PopoverContent
         className="max-h-[70dvh] w-80 p-0"
