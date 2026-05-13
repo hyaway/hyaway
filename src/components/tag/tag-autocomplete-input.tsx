@@ -39,6 +39,8 @@ export function TagAutocompleteInput({
   colorizeInput,
   staticSuggestions,
   clearOnSelect,
+  submitEmptyOnBlur,
+  submitEmptyOnEnter,
 }: {
   /** Controlled value (optional — uncontrolled by default). */
   value?: string;
@@ -62,6 +64,10 @@ export function TagAutocompleteInput({
   staticSuggestions?: Array<string>;
   /** Clear the input after a suggestion is selected. */
   clearOnSelect?: boolean;
+  /** Call onBlur with an empty string when the input is cleared. */
+  submitEmptyOnBlur?: boolean;
+  /** Call onSubmit with an empty string when Enter is pressed in a cleared input. */
+  submitEmptyOnEnter?: boolean;
 }) {
   const [inputValue, setInputValue] = useState(value);
   const [debouncedInput, setDebouncedInput] = useState(value);
@@ -152,7 +158,7 @@ export function TagAutocompleteInput({
           setOpen(false);
           if (onBlur) {
             const trimmed = inputValue.trim();
-            if (trimmed) {
+            if (trimmed || submitEmptyOnBlur) {
               onBlur(trimmed);
               if (clearOnSelect) {
                 setInputValue("");
@@ -162,7 +168,11 @@ export function TagAutocompleteInput({
           }
         }}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && onSubmit && inputValue.trim()) {
+          if (
+            e.key === "Enter" &&
+            onSubmit &&
+            (inputValue.trim() || submitEmptyOnEnter)
+          ) {
             e.preventDefault();
             const trimmed = inputValue.trim();
             onSubmit(trimmed);

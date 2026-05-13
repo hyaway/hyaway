@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   IconArrowLeft,
   IconBackslash,
@@ -650,15 +650,65 @@ export function QBValueEditor(props: ValueEditorProps) {
   }
 
   return (
-    <Input
+    <TextValueEditor
       type={fieldData.inputType === "number" ? "number" : "text"}
-      className="w-full lg:w-auto lg:max-w-96 lg:min-w-40"
-      name={`hyaway-spb-${field}`}
       value={value ?? ""}
+      onChange={handleOnChange}
+      disabled={disabled}
+      title={title}
+      name={`hyaway-spb-${field}`}
+    />
+  );
+}
+
+function TextValueEditor({
+  type,
+  value,
+  onChange,
+  disabled,
+  title,
+  name,
+}: {
+  type: "number" | "text";
+  value: string;
+  onChange: (val: string) => void;
+  disabled?: boolean;
+  title?: string;
+  name: string;
+}) {
+  const [inputValue, setInputValue] = useState(value);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  const commitValue = useCallback(() => {
+    if (inputValue !== value) {
+      onChange(inputValue);
+    }
+  }, [inputValue, onChange, value]);
+
+  return (
+    <Input
+      type={type}
+      className="w-full lg:w-auto lg:max-w-96 lg:min-w-40"
+      name={name}
+      value={inputValue}
       disabled={disabled}
       title={title}
       autoComplete="off"
-      onChange={(e) => handleOnChange(e.target.value)}
+      onChange={(e) => setInputValue(e.target.value)}
+      onBlur={commitValue}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const nextValue = e.currentTarget.value;
+          if (nextValue !== value) {
+            onChange(nextValue);
+          }
+          e.currentTarget.blur();
+        }
+      }}
     />
   );
 }
@@ -893,21 +943,30 @@ function TagValueEditor({
   const [inputValue, setInputValue] = useState(value);
   const isNegated = inputValue.trimStart().startsWith("-");
 
-  const handleChange = useCallback(
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  const commitValue = useCallback(
     (val: string) => {
-      setInputValue(val);
-      onChange(val);
+      if (val !== value) {
+        onChange(val);
+      }
     },
-    [onChange],
+    [onChange, value],
   );
+
+  const handleChange = useCallback((val: string) => {
+    setInputValue(val);
+  }, []);
 
   const handleSelect = useCallback(
     (tag: string) => {
       const selected = isNegated ? `-${tag}` : tag;
       setInputValue(selected);
-      onChange(selected);
+      commitValue(selected);
     },
-    [onChange, isNegated],
+    [commitValue, isNegated],
   );
 
   return (
@@ -923,11 +982,15 @@ function TagValueEditor({
             handleSelect(tag);
           }
         }}
+        onSubmit={(tag) => commitValue(tag)}
+        onBlur={(tag) => commitValue(tag)}
         disabled={disabled}
         placeholder="e.g. cat or system:…"
         name="hyaway-spb-tag"
         colorizeInput
         staticSuggestions={SYSTEM_TAGS}
+        submitEmptyOnBlur
+        submitEmptyOnEnter
       />
       <Button
         variant="ghost"
@@ -938,7 +1001,7 @@ function TagValueEditor({
             ? inputValue.replace(/^-/, "")
             : `-${inputValue}`;
           setInputValue(toggled);
-          onChange(toggled);
+          commitValue(toggled);
         }}
         disabled={disabled}
         type="button"
