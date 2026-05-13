@@ -3,6 +3,7 @@
 
 import { IconTrashX } from "@tabler/icons-react";
 import { DefaultQuerySettings } from "@/components/settings/default-query-settings";
+import { SearchBehaviorSettings } from "@/components/settings/search-behavior-settings";
 import {
   SettingsCardTitle,
   SettingsResetButton,
@@ -36,6 +37,7 @@ export function SearchSettingsCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        <SearchBehaviorSettings />
         <DefaultQuerySettings />
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">

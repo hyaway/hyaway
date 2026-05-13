@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { QueryBuilder, RuleGroupBodyComponents } from "react-querybuilder";
 import { queryToHydrusSearch } from "../-lib/query-to-hydrus-search";
 import {
@@ -165,6 +165,7 @@ export function SearchQueryBuilder({
   const entry = useSearchQueryEntry(entryKey);
   const { setStagedQuery, setStagedSort, commit, reset, clear } =
     useSearchQueriesActions();
+  const instantSearch = entry.instantSearch;
 
   const query = entry.staged.query;
   const sortType = entry.staged.sort.sortType;
@@ -238,12 +239,20 @@ export function SearchQueryBuilder({
   }, [entryKey, clear]);
 
   const isDirty = useSearchDirty(entryKey);
+  const showDirtyRing = isDirty && !instantSearch;
+
+  useEffect(() => {
+    if (!instantSearch || !isDirty) return;
+
+    commit(entryKey);
+    onCommit?.();
+  }, [entryKey, instantSearch, isDirty, commit, onCommit]);
 
   return (
     <div
       className={cn(
         "flex flex-col gap-3 rounded-lg border p-3",
-        isDirty && "ring-ring ring-1",
+        showDirtyRing && "ring-ring ring-1",
       )}
     >
       <QueryBuilder
@@ -274,7 +283,7 @@ export function SearchQueryBuilder({
         onSortTypeChange={handleSortTypeChange}
         onSortAscToggle={handleSortAscToggle}
       />
-      {hydrusSearch.length > 0 && (
+      {!instantSearch && hydrusSearch.length > 0 && (
         <div className="flex flex-col gap-1">
           <span className="text-muted-foreground text-sm font-medium">
             Next search will be
@@ -295,6 +304,7 @@ export function SearchQueryBuilder({
             hasCommitted={
               !!entry.committed && entry.committed.query.rules.length > 0
             }
+            instantSearch={instantSearch}
           />
         </div>
       )}

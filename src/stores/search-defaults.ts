@@ -58,6 +58,8 @@ export function defaultStaged(): SearchState {
 export type SearchQueryEntry = {
   staged: SearchState;
   committed: SearchState | undefined;
+  /** Whether this search commits staged edits immediately. */
+  instantSearch: boolean;
   /** User-facing name. Falls back to the entry key when absent. */
   displayName?: string;
 };

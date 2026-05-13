@@ -10,8 +10,11 @@ import { defaultStaged } from "@/stores/search-defaults";
 type SearchSettingsState = {
   /** Default query+sort for new search entries and clear/reset. */
   defaultQuery: SearchState;
+  /** Whether newly created searches should commit staged edits immediately. */
+  createSearchesInstant: boolean;
   actions: {
     setDefaultQuery: (state: SearchState) => void;
+    setCreateSearchesInstant: (enabled: boolean) => void;
     resetDefaultQuery: () => void;
     reset: () => void;
   };
@@ -21,8 +24,11 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
   persist(
     (set, _get, store) => ({
       defaultQuery: defaultStaged(),
+      createSearchesInstant: false,
       actions: {
         setDefaultQuery: (defaultQuery: SearchState) => set({ defaultQuery }),
+        setCreateSearchesInstant: (createSearchesInstant: boolean) =>
+          set({ createSearchesInstant }),
         resetDefaultQuery: () => set({ defaultQuery: defaultStaged() }),
         reset: () => set(store.getInitialState()),
       },
@@ -37,6 +43,12 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
 
 export const useDefaultQuery = () =>
   useSearchSettingsStore((state) => state.defaultQuery);
+
+export const useCreateSearchesInstant = () =>
+  useSearchSettingsStore((state) => state.createSearchesInstant);
+
+export const getCreateSearchesInstant = () =>
+  useSearchSettingsStore.getState().createSearchesInstant;
 
 export const getDefaultQuery = (): SearchState => {
   const { query, sort } = useSearchSettingsStore.getState().defaultQuery;

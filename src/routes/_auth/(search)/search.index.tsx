@@ -14,10 +14,12 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { SYSTEM_TAGS, getSortLabel } from "./-lib/query-builder-fields";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
+import { InstantSearchSwitch } from "./-components/instant-search-switch";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { SearchTagList } from "@/components/tag/tag-badge";
+import { Badge } from "@/components/ui-primitives/badge";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import {
   Alert,
@@ -181,18 +183,26 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             />
           </form>
         ) : (
-          <span className="flex items-center gap-1 text-base font-medium">
-            {displayName}
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={handleStartRename}
-              type="button"
-              title="Rename"
-            >
-              <IconPencil className="size-5" />
-            </Button>
-          </span>
+          <div className="flex flex-col items-start gap-1">
+            <span className="flex items-center gap-1 text-lg leading-tight font-semibold">
+              {displayName}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleStartRename}
+                type="button"
+                title="Rename"
+                className="size-9"
+              >
+                <IconPencil className="size-5" />
+              </Button>
+            </span>
+            <InstantSearchSwitch
+              searchId={searchId}
+              className="text-muted-foreground"
+              size="default"
+            />
+          </div>
         )}
         {searchTags.length > 0 ? (
           <SearchTagList
@@ -202,30 +212,34 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             className="pointer-events-none select-none **:select-none"
           />
         ) : (
-          <span className="text-muted-foreground text-sm">No query</span>
+          <Badge variant="outline" size="default-wrap" className="select-none">
+            No query yet
+          </Badge>
         )}
       </div>
       <div className="flex items-center gap-1 self-end sm:self-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleSave}
-          type="button"
-          title="Clone"
-          className="size-10 shrink-0"
-        >
-          <IconCopy className="size-5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleDelete}
-          type="button"
-          title="Delete"
-          className="text-destructive size-10 shrink-0"
-        >
-          <IconTrash className="size-5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleSave}
+            type="button"
+            title="Clone"
+            className="size-11 shrink-0"
+          >
+            <IconCopy className="size-5.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDelete}
+            type="button"
+            title="Delete"
+            className="text-destructive size-11 shrink-0"
+          >
+            <IconTrash className="size-5.5" />
+          </Button>
+        </div>
       </div>
     </Link>
   );

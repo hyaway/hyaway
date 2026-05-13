@@ -8,7 +8,10 @@ import type { RuleGroupType } from "react-querybuilder";
 import type { SearchQueryEntry, SortConfig } from "@/stores/search-defaults";
 import { emptyStaged } from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
-import { getDefaultQuery } from "@/stores/search-settings-store";
+import {
+  getCreateSearchesInstant,
+  getDefaultQuery,
+} from "@/stores/search-settings-store";
 import { generateSearchId } from "@/lib/search-entry-utils";
 import { systemTagToRule } from "@/routes/_auth/(search)/-lib/query-builder-fields";
 
@@ -42,6 +45,7 @@ function defaultEntry(): SearchQueryEntry {
   return {
     staged: getDefaultQuery(),
     committed: undefined,
+    instantSearch: getCreateSearchesInstant(),
   };
 }
 
@@ -99,6 +103,8 @@ type SearchQueriesState = {
     setStagedSort: (key: string, sort: SortConfig) => void;
     /** Commit: copies staged → committed. */
     commit: (key: string) => void;
+    /** Set whether an entry commits staged edits immediately. */
+    setInstantSearch: (key: string, enabled: boolean) => void;
     /** Reset: copies committed → staged (reverts edits). */
     reset: (key: string) => void;
     /** Clear: resets staged to the default empty query. */
@@ -177,6 +183,17 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
+        setInstantSearch: (key, instantSearch) => {
+          const { entries } = get();
+          const entry = entries[key] ?? defaultEntry();
+          set({
+            entries: {
+              ...entries,
+              [key]: { ...entry, instantSearch },
+            },
+          });
+        },
+
         reset: (key) => {
           const { entries } = get();
           const current = entries[key] ?? defaultEntry();
@@ -226,6 +243,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               [toKey]: {
                 staged: source.staged,
                 committed: source.committed ?? source.staged,
+                instantSearch: source.instantSearch,
                 displayName: cloneName,
               },
               ...entries,
@@ -251,6 +269,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               newEntries[toKey] = {
                 staged: source.staged,
                 committed: source.committed,
+                instantSearch: source.instantSearch,
                 displayName: newDisplayName,
               };
             } else {
@@ -291,6 +310,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               [searchId]: {
                 staged: state,
                 committed: systemRule ? undefined : state,
+                instantSearch: getCreateSearchesInstant(),
                 displayName,
               },
               ...entries,
@@ -326,15 +346,12 @@ export const useCommittedSearch = (key: string) =>
     (state) => (state.entries[key] as SearchQueryEntry | undefined)?.committed,
   );
 
-/** True when staged differs from the last committed snapshot. */
+/** True when staged and committed are not the same snapshot. */
 export const useSearchDirty = (key: string) =>
   useSearchQueriesStore((state) => {
     const entry = state.entries[key] as SearchQueryEntry | undefined;
-    if (!entry?.committed) return false;
-    return (
-      entry.staged.query !== entry.committed.query ||
-      entry.staged.sort !== entry.committed.sort
-    );
+    if (!entry) return false;
+    return entry.staged !== entry.committed;
   });
 
 export const useSearchQueriesActions = () =>

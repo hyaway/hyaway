@@ -17,6 +17,7 @@ import {
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortLabel } from "./-lib/query-builder-fields";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
+import { InstantSearchSwitch } from "./-components/instant-search-switch";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
@@ -158,7 +159,10 @@ function SearchPage() {
   return (
     <>
       <>
-        <PageHeading title={displayName} />
+        <PageHeading
+          title={displayName}
+          actions={<InstantSearchSwitch searchId={searchId} />}
+        />
         <div className="flex flex-col gap-2 pb-2">
           <SearchQueryBuilder entryKey={searchId} onCommit={handleCommit} />
         </div>
@@ -204,7 +208,7 @@ function SearchPage() {
         )}
       </>
       <PageHeaderActions>
-        <SearchSettingsPopover />
+        <SearchSettingsPopover searchId={searchId} />
       </PageHeaderActions>
       <PageFloatingFooter
         leftContent={refetchButton}
