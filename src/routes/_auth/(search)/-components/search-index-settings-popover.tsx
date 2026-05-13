@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { IconTrashX } from "@tabler/icons-react";
+import { DefaultQuerySettings } from "@/components/settings/default-query-settings";
 import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   SettingsHeader,
@@ -21,6 +22,7 @@ export function SearchIndexSettingsPopover() {
       <SettingsHeader>
         <SettingsTitle>Search</SettingsTitle>
       </SettingsHeader>
+      <DefaultQuerySettings />
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium">Clear saved searches</span>

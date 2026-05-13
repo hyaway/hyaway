@@ -271,16 +271,17 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             operator: "=",
             value: tag,
           };
+          // Keep default rules that don't exactly match the tag at root level
+          // (positive "tag" and negative "-tag" are treated as distinct values)
+          const filteredRules = base.query.rules.filter(
+            (r) =>
+              !("field" in r) ||
+              r.field !== primaryRule.field ||
+              r.value !== primaryRule.value,
+          );
           const query: RuleGroupType = {
             combinator: "and",
-            rules: [
-              primaryRule,
-              ...(primaryRule.field === "limit"
-                ? []
-                : base.query.rules.filter(
-                    (r) => "field" in r && r.field === "limit",
-                  )),
-            ],
+            rules: [primaryRule, ...filteredRules],
           };
           const state = { query, sort: base.sort };
 

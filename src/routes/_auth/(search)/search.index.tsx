@@ -5,7 +5,6 @@ import {
   IconCopy,
   IconInfoCircle,
   IconPencil,
-  IconPlus,
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
@@ -74,16 +73,6 @@ function SearchIndex() {
         {searchKeys.map((key) => (
           <SearchEntryCard key={key} searchId={key} />
         ))}
-        <Separator />
-        <Button
-          variant="outline"
-          size="default"
-          onClick={handleAddNew}
-          className="self-start"
-        >
-          <IconPlus data-icon="inline-start" className="size-5" />
-          New from default
-        </Button>
         {searchKeys.length > 0 && (
           <>
             <Separator />

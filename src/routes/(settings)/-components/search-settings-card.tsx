@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { IconTrashX } from "@tabler/icons-react";
-import { SettingsCardTitle } from "@/components/settings/settings-ui";
+import { DefaultQuerySettings } from "@/components/settings/default-query-settings";
+import {
+  SettingsCardTitle,
+  SettingsResetButton,
+} from "@/components/settings/settings-ui";
 import { Button } from "@/components/ui-primitives/button";
 import {
   Card,
@@ -14,19 +18,25 @@ import {
   clearSearchQueries,
   useSearchQueryCount,
 } from "@/stores/search-queries-store";
+import { useSearchSettingsActions } from "@/stores/search-settings-store";
 
 export function SearchSettingsCard() {
   const queryCount = useSearchQueryCount();
+  const { reset } = useSearchSettingsActions();
 
   return (
     <Card>
       <CardHeader>
-        <SettingsCardTitle>Search</SettingsCardTitle>
+        <div className="flex items-start justify-between gap-2">
+          <SettingsCardTitle>Search</SettingsCardTitle>
+          <SettingsResetButton onReset={reset} />
+        </div>
         <CardDescription>
           Configure search behavior for the query builder.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        <DefaultQuerySettings />
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium">Clear saved searches</span>

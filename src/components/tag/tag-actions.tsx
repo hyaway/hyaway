@@ -21,7 +21,6 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import type { ComponentType, ReactNode, SVGProps } from "react";
-import type { RuleGroupType } from "react-querybuilder";
 import {
   DropdownMenu,
   DropdownMenuAnchoredContent,
@@ -31,11 +30,9 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui-primitives/dropdown-menu";
 import {
-  nextUniqueName,
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
-import { generateSearchId } from "@/lib/search-entry-utils";
 import { cn } from "@/lib/utils";
 import {
   useFavouriteTagsLookup,
@@ -75,25 +72,16 @@ export function useTagActions(
   searchId: string | undefined,
 ): Array<TagAction> {
   const navigate = useNavigate();
-  const { setStagedQuery } = useSearchQueriesActions();
+  const { setStagedQuery, createFromTag } = useSearchQueriesActions();
   const { setDesktopOpen, setMobileOpen } = useSidebarStoreActions();
   const entry = useSearchQueryEntry(searchId ?? "");
 
   const handleSearch = useCallback(() => {
-    const query: RuleGroupType = {
-      combinator: "and",
-      rules: [
-        { field: "tag", operator: "=", value: tag },
-        { field: "limit", operator: "=", value: 256 },
-      ],
-    };
-    const displayName = nextUniqueName(tag);
-    const id = generateSearchId(displayName);
-    setStagedQuery(id, query, displayName);
+    const id = createFromTag(tag);
     setDesktopOpen("right", false);
     setMobileOpen("right", false);
     navigate({ to: "/search/$searchId", params: { searchId: id } });
-  }, [tag, navigate, setStagedQuery, setDesktopOpen, setMobileOpen]);
+  }, [tag, navigate, createFromTag, setDesktopOpen, setMobileOpen]);
 
   const handleInclude = useCallback(() => {
     if (!searchId) return;
