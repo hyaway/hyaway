@@ -12,6 +12,12 @@ export const HAS_ONLY_FIELDS = new Set([
   "icc_profile",
   "embedded_metadata",
   "forced_filetype",
+  "duration_presence",
+  "framerate_presence",
+  "frames_presence",
+  "tags_presence",
+  "urls_presence",
+  "notes_presence",
 ]);
 
 /** A `["system:has …", "system:no …"]` label pair for has/has_not toggles. */
@@ -53,29 +59,16 @@ function ruleToSearchTag(rule: RuleType): string | null {
         "system:has forced filetype",
         "system:no forced filetype",
       ],
+      duration_presence: ["system:has duration", "system:no duration"],
+      framerate_presence: ["system:has framerate", "system:no framerate"],
+      frames_presence: ["system:has frames", "system:no frames"],
+      tags_presence: ["system:has tags", "system:no tags"],
+      urls_presence: ["system:has urls", "system:no urls"],
+      notes_presence: ["system:has notes", "system:no notes"],
     };
 
     const [hasLabel, hasNotLabel] = fieldLabels[field];
     return operator === "has" ? hasLabel : hasNotLabel;
-  }
-
-  // Has/has_not operator on fields with both toggle and comparison modes
-  if (operator === "has" || operator === "has_not") {
-    const hasLabels: Partial<Record<string, HasNoLabels>> = {
-      duration_value: ["system:has duration", "system:no duration"],
-      framerate: ["system:has framerate", "system:no framerate"],
-      num_frames: ["system:has frames", "system:no frames"],
-      num_tags: ["system:has tags", "system:no tags"],
-
-      num_urls: ["system:has urls", "system:no urls"],
-      num_notes: ["system:has notes", "system:no notes"],
-    };
-
-    const labels = hasLabels[field];
-    if (labels) {
-      const [hasLabel, hasNotLabel] = labels;
-      return operator === "has" ? hasLabel : hasNotLabel;
-    }
   }
 
   // Rating fields

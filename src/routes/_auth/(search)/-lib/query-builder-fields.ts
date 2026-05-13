@@ -32,13 +32,6 @@ function hasOps(thing: string): Array<{ name: string; label: string }> {
   ];
 }
 
-/** Comparison operators with has/has_not prepended. */
-function comparisonWithHasOps(
-  thing: string,
-): Array<{ name: string; label: string }> {
-  return [...hasOps(thing), ...comparisonOperators];
-}
-
 const filetypeValues = [
   { name: "image", label: "image" },
   { name: "video", label: "video" },
@@ -189,24 +182,39 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
     label: "system:duration",
     options: [
       {
+        name: "duration_presence",
+        label: "duration",
+        operators: hasOps("duration"),
+      },
+      {
         name: "duration_value",
         label: "duration",
-        operators: comparisonWithHasOps("duration"),
+        operators: comparisonOperators,
         defaultOperator: ">",
         defaultValue: "5 seconds",
       },
       {
+        name: "framerate_presence",
+        label: "framerate",
+        operators: hasOps("framerate"),
+      },
+      {
         name: "framerate",
         label: "framerate",
-        operators: comparisonWithHasOps("framerate"),
+        operators: comparisonOperators,
         defaultOperator: "≈",
         inputType: "number",
         defaultValue: "60",
       },
       {
+        name: "frames_presence",
+        label: "frames",
+        operators: hasOps("frames"),
+      },
+      {
         name: "num_frames",
         label: "number of frames",
-        operators: comparisonWithHasOps("frames"),
+        operators: comparisonOperators,
         defaultOperator: ">",
         inputType: "number",
         defaultValue: "600",
@@ -254,16 +262,13 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
     ],
   },
   {
-    label: "system:number of tags",
+    label: "system:tags",
     options: [
+      { name: "tags_presence", label: "tags", operators: hasOps("tags") },
       {
         name: "num_tags",
         label: "number of tags",
-        operators: [
-          { name: "has", label: "has tags" },
-          { name: "has_not", label: "no tags" },
-          ...comparisonOperators,
-        ],
+        operators: comparisonOperators,
         defaultOperator: ">",
         inputType: "number",
         defaultValue: "4",
@@ -324,10 +329,11 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
         operators: hasOps("matching URL"),
         defaultValue: "",
       },
+      { name: "urls_presence", label: "URLs", operators: hasOps("urls") },
       {
         name: "num_urls",
         label: "number of URLs",
-        operators: comparisonWithHasOps("urls"),
+        operators: comparisonOperators,
         defaultOperator: ">",
         inputType: "number",
         defaultValue: "1",
@@ -344,9 +350,14 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
         defaultValue: "",
       },
       {
+        name: "notes_presence",
+        label: "notes",
+        operators: hasOps("notes"),
+      },
+      {
         name: "num_notes",
         label: "number of notes",
-        operators: comparisonWithHasOps("notes"),
+        operators: comparisonOperators,
         defaultOperator: ">",
         inputType: "number",
         defaultValue: "0",
@@ -504,14 +515,7 @@ export const isNoValueField = (field: string, operator: string): boolean =>
  * Extra search keywords for fields, so e.g. "has tags" matches "number of tags".
  * Maps field name → array of additional keyword strings.
  */
-export const FIELD_SEARCH_KEYWORDS: Record<string, Array<string>> = {
-  duration_value: ["has duration", "no duration"],
-  framerate: ["has framerate", "no framerate"],
-  num_frames: ["has frames", "no frames"],
-  num_tags: ["has tags", "no tags"],
-  num_urls: ["has urls", "no urls"],
-  num_notes: ["has notes", "no notes"],
-};
+export const FIELD_SEARCH_KEYWORDS: Record<string, Array<string>> = {};
 
 /**
  * Map field names to their hydrus display prefix.
@@ -533,15 +537,21 @@ export const FIELD_HYDRUS_LABEL: Record<string, string> = {
   height: "system:height",
   ratio: "system:ratio",
   num_pixels: "system:num pixels",
+  duration_presence: "system:has duration",
   duration_value: "system:duration",
+  framerate_presence: "system:has framerate",
   framerate: "system:framerate",
+  frames_presence: "system:has frames",
   filetype: "system:filetype",
   filesize: "system:filesize",
   limit: "system:limit",
   hash: "system:hash",
   file_service: "system:file service",
+  tags_presence: "system:has tags",
   num_tags: "system:number of tags",
+  urls_presence: "system:has urls",
   num_urls: "system:number of urls",
+  notes_presence: "system:has notes",
   num_notes: "system:number of notes",
   num_frames: "system:number of frames",
   import_time: "system:import time",
@@ -559,10 +569,68 @@ export const FIELD_HYDRUS_LABEL: Record<string, string> = {
   url_domain: "system:has url with domain",
 };
 
-/** All unique `system:*` tag values from the field map. */
+const SYSTEM_TAG_RULE_ENTRIES: Array<
+  [string, { field: string; operator: string; value?: string }]
+> = [
+  ["system:has audio", { field: "audio", operator: "has" }],
+  ["system:no audio", { field: "audio", operator: "has_not" }],
+  ["system:has transparency", { field: "transparency", operator: "has" }],
+  ["system:no transparency", { field: "transparency", operator: "has_not" }],
+  ["system:has exif", { field: "exif", operator: "has" }],
+  ["system:no exif", { field: "exif", operator: "has_not" }],
+  ["system:has icc profile", { field: "icc_profile", operator: "has" }],
+  ["system:no icc profile", { field: "icc_profile", operator: "has_not" }],
+  [
+    "system:has embedded metadata",
+    { field: "embedded_metadata", operator: "has" },
+  ],
+  [
+    "system:no embedded metadata",
+    { field: "embedded_metadata", operator: "has_not" },
+  ],
+  ["system:has forced filetype", { field: "forced_filetype", operator: "has" }],
+  [
+    "system:no forced filetype",
+    { field: "forced_filetype", operator: "has_not" },
+  ],
+  ["system:has duration", { field: "duration_presence", operator: "has" }],
+  ["system:no duration", { field: "duration_presence", operator: "has_not" }],
+  ["system:has framerate", { field: "framerate_presence", operator: "has" }],
+  ["system:no framerate", { field: "framerate_presence", operator: "has_not" }],
+  ["system:has frames", { field: "frames_presence", operator: "has" }],
+  ["system:no frames", { field: "frames_presence", operator: "has_not" }],
+  ["system:has tags", { field: "tags_presence", operator: "has" }],
+  ["system:no tags", { field: "tags_presence", operator: "has_not" }],
+  ["system:has urls", { field: "urls_presence", operator: "has" }],
+  ["system:no urls", { field: "urls_presence", operator: "has_not" }],
+  ["system:has notes", { field: "notes_presence", operator: "has" }],
+  ["system:no notes", { field: "notes_presence", operator: "has_not" }],
+  ["system:has url", { field: "url_exact", operator: "has" }],
+  ["system:does not have url", { field: "url_exact", operator: "has_not" }],
+  ["system:has url matching regex", { field: "url_regex", operator: "has" }],
+  [
+    "system:does not have url matching regex",
+    { field: "url_regex", operator: "has_not" },
+  ],
+  ["system:has url with domain", { field: "url_domain", operator: "has" }],
+  [
+    "system:does not have url with domain",
+    { field: "url_domain", operator: "has_not" },
+  ],
+  ["system:has note with name", { field: "note_name", operator: "has" }],
+  [
+    "system:does not have note with name",
+    { field: "note_name", operator: "has_not" },
+  ],
+];
+
+/** All unique `system:*` tag values used in tag suggestions. */
 export const SYSTEM_TAGS: Array<string> = [
   ...new Set(
-    Object.values(FIELD_HYDRUS_LABEL).filter((v) => v.startsWith("system:")),
+    [
+      ...Object.values(FIELD_HYDRUS_LABEL),
+      ...SYSTEM_TAG_RULE_ENTRIES.map(([tag]) => tag),
+    ].filter((v) => v.startsWith("system:")),
   ),
 ];
 
@@ -573,6 +641,10 @@ const SYSTEM_TAG_TO_FIELD: Record<string, string> = Object.fromEntries(
     .map(([k, v]) => [v, k]),
 );
 
+const SYSTEM_TAG_TO_RULE: Partial<
+  Record<string, { field: string; operator: string; value?: string }>
+> = Object.fromEntries(SYSTEM_TAG_RULE_ENTRIES);
+
 /**
  * Resolve a system tag string (e.g. `"system:inbox"`) to a query builder rule.
  * Returns `undefined` if the tag is not a known system tag.
@@ -580,6 +652,15 @@ const SYSTEM_TAG_TO_FIELD: Record<string, string> = Object.fromEntries(
 export function systemTagToRule(
   systemTag: string,
 ): { field: string; operator: string; value: string } | undefined {
+  const explicitRule = SYSTEM_TAG_TO_RULE[systemTag];
+  if (explicitRule) {
+    return {
+      field: explicitRule.field,
+      operator: explicitRule.operator,
+      value: String(explicitRule.value ?? ""),
+    };
+  }
+
   const fieldName = SYSTEM_TAG_TO_FIELD[systemTag];
   if (!fieldName) return undefined;
 

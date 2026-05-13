@@ -49,7 +49,6 @@ import {
 } from "@/components/ratings/rating-colors";
 import { NumericalRatingControl } from "@/components/ratings/rating-controls";
 import { Button, buttonVariants } from "@/components/ui-primitives/button";
-import { Switch } from "@/components/ui-primitives/switch";
 import {
   Command,
   CommandEmpty,
@@ -80,12 +79,30 @@ import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
  */
 export function QBFieldSelect(props: VersatileSelectorProps) {
   if (props.value === "tag") return null;
+
+  const currentOperator = props.rule?.operator;
+  const selectedSystemTag = SYSTEM_TAGS.find((tag) => {
+    const rule = systemTagToRule(tag);
+    return rule?.field === props.value && rule?.operator === currentOperator;
+  });
+
   const filtered = useMemo(() => {
     if (!isOptionGroupArray(props.options)) return props.options;
     return (props.options as Array<OptionGroup<Field>>)
       .map((group) => ({
         ...group,
-        options: group.options.filter((o) => o.name !== "tag"),
+        options: group.options
+          .filter((o) => o.name !== "tag")
+          .flatMap((o) => {
+            const systemPredicateOptions = SYSTEM_TAGS.filter((tag) => {
+              const rule = systemTagToRule(tag);
+              return rule?.field === o.name;
+            }).map((tag) => ({ ...o, name: tag, label: tag }));
+
+            return systemPredicateOptions.length > 1
+              ? systemPredicateOptions
+              : [o];
+          }),
       }))
       .filter((group) => group.options.length > 0);
   }, [props.options]);
@@ -93,6 +110,7 @@ export function QBFieldSelect(props: VersatileSelectorProps) {
     <QBSelect
       {...props}
       options={filtered as typeof props.options}
+      displayValue={selectedSystemTag}
       colorLabels
     />
   );
@@ -102,7 +120,7 @@ export function QBFieldSelect(props: VersatileSelectorProps) {
 // Operator selector
 // ---------------------------------------------------------------------------
 
-/** Operator selector — hides for 1 option, switch for 2, combobox for 3+ */
+/** Operator selector — hides for 1 option, negate button for 2, combobox for 3+ */
 export function QBOperatorSelect(props: VersatileSelectorProps) {
   const flatOptions = isOptionGroupArray(props.options)
     ? (props.options as Array<{ options: Array<unknown> }>).flatMap(
@@ -112,39 +130,41 @@ export function QBOperatorSelect(props: VersatileSelectorProps) {
 
   if (flatOptions.length <= 1) return null;
 
-  // Two options → toggle switch with labels
+  // Two options -> show the selected predicate and a negate action.
   if (flatOptions.length === 2) {
     const [first, second] = flatOptions as Array<{
       name: string;
       label: string;
     }>;
-    const isFirst = props.value === first.name;
+    const selected = props.value === second.name ? second : first;
+    const next = props.value === second.name ? first : second;
+    const hasSystemPredicateChoices =
+      typeof props.rule?.field === "string" &&
+      first.name === "has" &&
+      second.name === "has_not" &&
+      SYSTEM_TAGS.filter(
+        (tag) => systemTagToRule(tag)?.field === props.rule?.field,
+      ).length > 1;
+
     return (
-      <div className="inline-flex items-center gap-1.5 px-1.5">
-        <span
-          className={cn(
-            "text-sm transition-colors",
-            !isFirst ? "text-foreground" : "text-muted-foreground",
-          )}
-        >
-          {second.label}
-        </span>
-        <Switch
-          size="default"
-          checked={isFirst}
-          onCheckedChange={(checked) =>
-            props.handleOnChange(checked ? first.name : second.name)
-          }
+      <div className="inline-flex min-w-0 items-center gap-1.5">
+        {!hasSystemPredicateChoices && (
+          <span className="min-w-0 truncate px-1.5 text-sm">
+            {selected.label}
+          </span>
+        )}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="shrink-0"
+          onClick={() => props.handleOnChange(next.name)}
           disabled={props.disabled}
-        />
-        <span
-          className={cn(
-            "text-sm transition-colors",
-            isFirst ? "text-foreground" : "text-muted-foreground",
-          )}
+          type="button"
+          title={`Change to ${next.label}`}
+          aria-label={`Negate: change to ${next.label}`}
         >
-          {first.label}
-        </span>
+          <IconPlusMinus className="size-5" />
+        </Button>
       </div>
     );
   }
@@ -192,6 +212,11 @@ function DrillDownCommandContent({
     return color ? { color } : undefined;
   };
 
+  const optionLabel = (option: OptionItem) =>
+    option.name.startsWith("system:")
+      ? option.label
+      : getFieldHydrusLabel(option.name);
+
   const isSearching = search.length > 0;
 
   return (
@@ -224,7 +249,7 @@ function DrillDownCommandContent({
                     key={opt.name}
                     value={opt.name}
                     keywords={[
-                      opt.label,
+                      optionLabel(opt),
                       ...(og.inline ? [] : [og.label]),
                       getFieldHydrusLabel(opt.name),
                       ...(FIELD_SEARCH_KEYWORDS[opt.name] ?? []),
@@ -232,8 +257,8 @@ function DrillDownCommandContent({
                     data-checked={selectedValue === opt.name || undefined}
                     onSelect={() => onSelect(opt.name)}
                   >
-                    <span style={labelStyle(getFieldHydrusLabel(opt.name))}>
-                      {getFieldHydrusLabel(opt.name)}
+                    <span style={labelStyle(optionLabel(opt))}>
+                      {optionLabel(opt)}
                     </span>
                   </CommandItem>
                 ))}
@@ -253,12 +278,12 @@ function DrillDownCommandContent({
                       <CommandItem
                         key={opt.name}
                         value={opt.name}
-                        keywords={[opt.label, og.label]}
+                        keywords={[optionLabel(opt), og.label]}
                         data-checked={selectedValue === opt.name || undefined}
                         onSelect={() => onSelect(opt.name)}
                       >
-                        <span style={labelStyle(getFieldHydrusLabel(opt.name))}>
-                          {getFieldHydrusLabel(opt.name)}
+                        <span style={labelStyle(optionLabel(opt))}>
+                          {optionLabel(opt)}
                         </span>
                       </CommandItem>
                     ))
@@ -302,14 +327,14 @@ function DrillDownCommandContent({
                       key={opt.name}
                       value={opt.name}
                       keywords={[
-                        opt.label,
+                        optionLabel(opt),
                         ...(FIELD_SEARCH_KEYWORDS[opt.name] ?? []),
                       ]}
                       data-checked={selectedValue === opt.name || undefined}
                       onSelect={() => onSelect(opt.name)}
                     >
-                      <span style={labelStyle(getFieldHydrusLabel(opt.name))}>
-                        {getFieldHydrusLabel(opt.name)}
+                      <span style={labelStyle(optionLabel(opt))}>
+                        {optionLabel(opt)}
                       </span>
                     </CommandItem>
                   ))}
@@ -343,11 +368,14 @@ export function QBSelect({
   handleOnChange,
   options,
   value,
+  displayValue,
   title,
   disabled,
   className,
   colorLabels,
-}: VersatileSelectorProps & { colorLabels?: boolean }) {
+  rule,
+  schema,
+}: VersatileSelectorProps & { colorLabels?: boolean; displayValue?: string }) {
   const [open, setOpen] = useState(false);
 
   const { onChange, val } = useValueSelector({
@@ -383,6 +411,20 @@ export function QBSelect({
   }, [options, groups, flatOptions, val]);
 
   const handleSelect = (name: string) => {
+    if (name.startsWith("system:") && rule?.id) {
+      const resolved = systemTagToRule(name);
+      if (resolved) {
+        const query = schema.getQuery();
+        const updated = updateRuleById(query, rule.id, {
+          ...rule,
+          ...resolved,
+        });
+        schema.dispatchQuery(updated);
+        setOpen(false);
+        return;
+      }
+    }
+
     onChange(name);
     setOpen(false);
   };
@@ -400,10 +442,12 @@ export function QBSelect({
         <span
           className="truncate"
           style={
-            colorLabels && selectedLabel ? labelStyle(selectedLabel) : undefined
+            colorLabels && (displayValue ?? selectedLabel)
+              ? labelStyle(displayValue ?? selectedLabel ?? "")
+              : undefined
           }
         >
-          {selectedLabel ?? title ?? "Select…"}
+          {displayValue ?? selectedLabel ?? title ?? "Select…"}
         </span>
         <IconChevronDown className="text-muted-foreground size-4 shrink-0" />
       </PopoverTrigger>
@@ -449,20 +493,20 @@ export function QBActionElement({
     return (
       <Button
         variant="ghost"
-        size="default"
+        size="icon-sm"
         className={cn(
-          "text-muted-foreground hover:text-destructive",
+          "text-muted-foreground hover:text-destructive shrink-0",
           className,
         )}
         title={
           disabledTranslation && disabled ? disabledTranslation.title : title
         }
+        aria-label={title?.includes("group") ? "Remove group" : "Remove"}
         onClick={(e) => handleOnClick(e)}
         disabled={disabled && !disabledTranslation}
         type="button"
       >
-        <IconTrash data-icon="inline-start" className="size-5" />
-        {title?.includes("group") ? "Remove group" : "Remove"}
+        <IconTrash className="size-5" />
       </Button>
     );
   }
@@ -493,7 +537,7 @@ export function QBActionElement({
       className={className}
       disabled={disabled}
       onSelect={(fieldName) =>
-        handleOnClick(undefined, { addSystem: true, systemField: fieldName })
+        handleOnClick(undefined, { inlineTag: fieldName })
       }
     />
   );
@@ -506,7 +550,17 @@ const systemFieldOptions: Array<OptionGroupItem> = fieldGroups
     inline: (group as { inline?: boolean }).inline,
     options: group.options
       .filter((o) => o.name !== "tag")
-      .map((o) => ({ name: o.name, label: o.label })),
+      .flatMap((o) => {
+        const systemTags = SYSTEM_TAGS.filter(
+          (tag) => systemTagToRule(tag)?.field === o.name,
+        );
+
+        if (systemTags.length === 0) {
+          return [{ name: getFieldHydrusLabel(o.name), label: o.label }];
+        }
+
+        return systemTags.map((tag) => ({ name: tag, label: tag }));
+      }),
   }))
   .filter((group) => group.options.length > 0);
 
@@ -1028,14 +1082,15 @@ function TagValueEditor({
       />
       <Button
         variant="ghost"
-        size="default"
+        size="icon-sm"
         className="shrink-0"
         onClick={handleToggleNegation}
         disabled={disabled}
         type="button"
+        title={isNegated ? "Include tag" : "Exclude tag"}
+        aria-label={isNegated ? "Include tag" : "Exclude tag"}
       >
-        <IconPlusMinus data-icon="inline-start" className="size-5" />
-        {isNegated ? "Include" : "Exclude"}
+        <IconPlusMinus className="size-5" />
       </Button>
     </>
   );
