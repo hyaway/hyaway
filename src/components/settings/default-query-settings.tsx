@@ -76,7 +76,7 @@ function DefaultQueryMenuItems({
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={onRemove} className="cursor-pointer">
         <IconEraser />
-        Erase from default
+        Remove from default
       </DropdownMenuItem>
       {showFavourite && (
         <>
@@ -247,8 +247,8 @@ export function DefaultQuerySettings() {
           size="icon-sm"
           onClick={resetDefaultQuery}
           disabled={!isModified}
-          aria-label="Erase default query"
-          title="Erase default query"
+          aria-label="Clear default query"
+          title="Clear default query"
         >
           <IconEraser className="size-5" />
         </Button>

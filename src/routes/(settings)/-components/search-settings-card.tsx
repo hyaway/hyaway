@@ -41,7 +41,7 @@ export function SearchSettingsCard() {
         <DefaultQuerySettings />
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium">Clear saved searches</span>
+            <span className="text-sm font-medium">Remove saved searches</span>
             <span className="text-muted-foreground text-xs">
               {queryCount} {queryCount === 1 ? "search" : "searches"} saved
             </span>
@@ -53,7 +53,7 @@ export function SearchSettingsCard() {
             disabled={queryCount === 0}
           >
             <IconTrashX data-icon="inline-start" />
-            Clear
+            Remove
           </Button>
         </div>
       </CardContent>
