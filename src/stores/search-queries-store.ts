@@ -233,6 +233,9 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
         saveAs: (fromKey, toKey) => {
           const { entries } = get();
           const source = entries[fromKey] ?? defaultEntry();
+          const committed = source.instantSearch
+            ? (source.committed ?? source.staged)
+            : undefined;
           const baseName = source.displayName ?? fromKey;
           const match = baseName.match(/^(.*?)\s*\((\d+)\)$/);
           const cloneName = match
@@ -242,7 +245,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             entries: {
               [toKey]: {
                 staged: source.staged,
-                committed: source.committed ?? source.staged,
+                committed,
                 instantSearch: source.instantSearch,
                 displayName: cloneName,
               },
@@ -303,14 +306,15 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             rules: [primaryRule, ...filteredRules],
           };
           const state = { query, sort: base.sort };
+          const instantSearch = getCreateSearchesInstant();
 
           const { entries } = get();
           set({
             entries: {
               [searchId]: {
                 staged: state,
-                committed: systemRule ? undefined : state,
-                instantSearch: getCreateSearchesInstant(),
+                committed: instantSearch ? state : undefined,
+                instantSearch,
                 displayName,
               },
               ...entries,
