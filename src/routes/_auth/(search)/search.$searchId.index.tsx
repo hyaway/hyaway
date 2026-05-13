@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconCopy, IconEraser, IconPin, IconTrash } from "@tabler/icons-react";
+import { IconCopy, IconPin, IconTrash } from "@tabler/icons-react";
 import {
   createFileRoute,
   linkOptions,
