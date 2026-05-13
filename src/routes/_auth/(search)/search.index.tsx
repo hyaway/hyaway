@@ -97,15 +97,14 @@ function SearchIndex() {
 function SearchEntryCard({ searchId }: { searchId: string }) {
   const entry = useSearchQueryEntry(searchId);
   const displayName = useSearchDisplayName(searchId);
-  const committed = entry.committed;
   const { saveAs, remove, rename } = useSearchQueriesActions();
   const queryClient = useQueryClient();
 
-  const active = committed ?? entry.staged;
+  const { staged } = entry;
 
-  const searchTags = useMemo(() => queryToHydrusSearch(active.query), [active]);
+  const searchTags = useMemo(() => queryToHydrusSearch(staged.query), [staged]);
 
-  const sortLabel = getSortLabel(active.sort.sortType, active.sort.sortAsc);
+  const sortLabel = getSortLabel(staged.sort.sortType, staged.sort.sortAsc);
   const [isRenaming, setIsRenaming] = useState(false);
   const renameInputRef = useRef<HTMLInputElement>(null);
 

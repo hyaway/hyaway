@@ -343,6 +343,10 @@ export const useSearchDisplayName = (key: string) =>
       (state.entries[key] as SearchQueryEntry | undefined)?.displayName ?? key,
   );
 
+/** Commit a search entry outside of React. */
+export const commitSearch = (key: string) =>
+  useSearchQueriesStore.getState().actions.commit(key);
+
 /** Get display name outside of React (falls back to key). */
 export const getSearchDisplayName = (key: string) => {
   const entry = useSearchQueriesStore.getState().entries[key] as
