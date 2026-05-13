@@ -31,11 +31,11 @@ export function SearchActions({
       </Button>
       {hasCommitted && !instantSearch && (
         <Button variant="ghost" size="default" onClick={onReset} type="button">
-          Reset to current
+          Reset draft
         </Button>
       )}
       <Button variant="ghost" size="default" onClick={onClear} type="button">
-        {instantSearch ? "Clear" : "Clear next"}
+        {instantSearch ? "Clear search" : "Clear draft"}
       </Button>
     </div>
   );

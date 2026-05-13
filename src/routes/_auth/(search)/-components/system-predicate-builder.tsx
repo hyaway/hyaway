@@ -286,7 +286,7 @@ export function SearchQueryBuilder({
       {!instantSearch && (
         <div className="flex flex-col gap-1">
           <span className="text-muted-foreground text-sm font-medium">
-            Next search will be
+            Draft search
           </span>
           <SearchTagList
             tags={hydrusSearch}

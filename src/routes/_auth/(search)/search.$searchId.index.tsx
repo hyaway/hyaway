@@ -34,6 +34,7 @@ import { useReviewActions } from "@/hooks/use-review-actions";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import {
   useCommittedSearch,
+  useSearchDirty,
   useSearchDisplayName,
   useSearchQueriesActions,
   useSearchQueryEntry,
@@ -48,6 +49,7 @@ function SearchPage() {
   const { searchId } = Route.useParams();
   const displayName = useSearchDisplayName(searchId);
   const committed = useCommittedSearch(searchId);
+  const isDirty = useSearchDirty(searchId);
   const { saveAs, remove } = useSearchQueriesActions();
   const entry = useSearchQueryEntry(searchId);
   const { setDefaultQuery } = useSearchSettingsActions();
@@ -113,7 +115,8 @@ function SearchPage() {
   }, [committed, entry.staged, setDefaultQuery]);
 
   const searchActions = useMemo((): Array<FloatingFooterAction> => {
-    const defaultActions: Array<FloatingFooterAction> = entry.instantSearch
+    const showDraftDefaultActions = !entry.instantSearch && isDirty;
+    const defaultActions: Array<FloatingFooterAction> = !showDraftDefaultActions
       ? [
           {
             id: "save-search-as-default",
@@ -126,7 +129,7 @@ function SearchPage() {
       : [
           {
             id: "save-pending-as-default",
-            label: "Save next as default",
+            label: "Save draft as default",
             icon: IconPin,
             onClick: handleSavePendingAsDefault,
             overflowOnly: true,
@@ -161,6 +164,7 @@ function SearchPage() {
     ];
   }, [
     entry.instantSearch,
+    isDirty,
     handleSavePendingAsDefault,
     handleSaveActiveAsDefault,
     handleSaveSearchAsDefault,
