@@ -26,17 +26,14 @@ export type SearchState = {
 function emptyQuery(): RuleGroupType {
   return {
     combinator: "and",
-    rules: [{ field: "tag", operator: "=", value: "" }],
+    rules: [],
   };
 }
 
 function defaultQuery(): RuleGroupType {
   return {
     combinator: "and",
-    rules: [
-      { field: "tag", operator: "=", value: "" },
-      { field: "limit", operator: "=", value: 256 },
-    ],
+    rules: [{ field: "limit", operator: "=", value: 256 }],
   };
 }
 
