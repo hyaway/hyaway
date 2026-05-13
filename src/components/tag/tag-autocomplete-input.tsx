@@ -149,19 +149,17 @@ export function TagAutocompleteInput({
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => {
-          setTimeout(() => {
-            setOpen(false);
-            if (onBlur) {
-              const trimmed = inputValue.trim();
-              if (trimmed) {
-                onBlur(trimmed);
-                if (clearOnSelect) {
-                  setInputValue("");
-                  onChange?.("");
-                }
+          setOpen(false);
+          if (onBlur) {
+            const trimmed = inputValue.trim();
+            if (trimmed) {
+              onBlur(trimmed);
+              if (clearOnSelect) {
+                setInputValue("");
+                onChange?.("");
               }
             }
-          }, 150);
+          }
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter" && onSubmit && inputValue.trim()) {
@@ -179,7 +177,10 @@ export function TagAutocompleteInput({
         autoComplete="off"
       />
       {showDropdown && (
-        <div className="bg-popover border-border ring-foreground/5 absolute top-full left-0 z-50 mt-1 w-full min-w-64 overflow-hidden rounded-lg border shadow-md ring-1">
+        <div
+          className="bg-popover border-border ring-foreground/5 absolute top-full left-0 z-50 mt-1 w-full min-w-64 overflow-hidden rounded-lg border shadow-md ring-1"
+          onPointerDown={(e) => e.preventDefault()}
+        >
           <Command shouldFilter={false}>
             <CommandList>
               {hasSufficientInput ? (
