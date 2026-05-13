@@ -294,16 +294,14 @@ export function SearchQueryBuilder({
           />
         </div>
       )}
-      {hasRules && (
+      {(hasRules || isDirty) && (
         <div className="flex flex-col gap-2">
           <SearchActions
             onSearch={handleSearch}
             onReset={handleReset}
             onClear={handleClear}
             searchDisabled={searchDisabled}
-            hasCommitted={
-              !!entry.committed && entry.committed.query.rules.length > 0
-            }
+            hasCommitted={!!entry.committed}
             instantSearch={instantSearch}
           />
         </div>

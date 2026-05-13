@@ -108,23 +108,41 @@ function SearchPage() {
     if (committed) setDefaultQuery(committed);
   }, [committed, setDefaultQuery]);
 
+  const handleSaveSearchAsDefault = useCallback(() => {
+    setDefaultQuery(committed ?? entry.staged);
+  }, [committed, entry.staged, setDefaultQuery]);
+
   const searchActions = useMemo((): Array<FloatingFooterAction> => {
+    const defaultActions: Array<FloatingFooterAction> = entry.instantSearch
+      ? [
+          {
+            id: "save-search-as-default",
+            label: "Save as default",
+            icon: IconPin,
+            onClick: handleSaveSearchAsDefault,
+            overflowOnly: true,
+          },
+        ]
+      : [
+          {
+            id: "save-pending-as-default",
+            label: "Save next as default",
+            icon: IconPin,
+            onClick: handleSavePendingAsDefault,
+            overflowOnly: true,
+          },
+          {
+            id: "save-active-as-default",
+            label: "Save current as default",
+            icon: IconPin,
+            onClick: handleSaveActiveAsDefault,
+            disabled: !committed,
+            overflowOnly: true,
+          },
+        ];
+
     return [
-      {
-        id: "save-pending-as-default",
-        label: "Save next as default",
-        icon: IconPin,
-        onClick: handleSavePendingAsDefault,
-        overflowOnly: true,
-      },
-      {
-        id: "save-active-as-default",
-        label: "Save current as default",
-        icon: IconPin,
-        onClick: handleSaveActiveAsDefault,
-        disabled: !committed,
-        overflowOnly: true,
-      },
+      ...defaultActions,
       {
         id: "clone-search",
         label: "Clone",
@@ -142,8 +160,10 @@ function SearchPage() {
       },
     ];
   }, [
+    entry.instantSearch,
     handleSavePendingAsDefault,
     handleSaveActiveAsDefault,
+    handleSaveSearchAsDefault,
     handleSaveAsNew,
     handleDelete,
   ]);
@@ -204,7 +224,13 @@ function SearchPage() {
           <EmptyState message="No files found for the current search." />
         )}
         {!isLoading && !isError && !hasFiles && searchTags.length === 0 && (
-          <EmptyState message="Add filters above and click Search." />
+          <EmptyState
+            message={
+              entry.instantSearch
+                ? "Add filters above to search."
+                : "Add filters above and click Search."
+            }
+          />
         )}
       </>
       <PageHeaderActions>

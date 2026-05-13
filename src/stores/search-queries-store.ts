@@ -233,9 +233,6 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
         saveAs: (fromKey, toKey) => {
           const { entries } = get();
           const source = entries[fromKey] ?? defaultEntry();
-          const committed = source.instantSearch
-            ? (source.committed ?? source.staged)
-            : undefined;
           const baseName = source.displayName ?? fromKey;
           const match = baseName.match(/^(.*?)\s*\((\d+)\)$/);
           const cloneName = match
@@ -245,7 +242,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             entries: {
               [toKey]: {
                 staged: source.staged,
-                committed,
+                committed: source.committed ?? source.staged,
                 instantSearch: source.instantSearch,
                 displayName: cloneName,
               },
