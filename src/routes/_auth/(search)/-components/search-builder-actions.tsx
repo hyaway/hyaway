@@ -9,14 +9,12 @@ export function SearchActions({
   onClear,
   searchDisabled,
   hasCommitted,
-  instantSearch = false,
 }: {
   onSearch: () => void;
   onReset: () => void;
   onClear: () => void;
   searchDisabled: boolean;
   hasCommitted: boolean;
-  instantSearch?: boolean;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -29,13 +27,13 @@ export function SearchActions({
       >
         Search
       </Button>
-      {hasCommitted && !instantSearch && (
+      {hasCommitted && (
         <Button variant="ghost" size="default" onClick={onReset} type="button">
           Reset draft
         </Button>
       )}
       <Button variant="ghost" size="default" onClick={onClear} type="button">
-        {instantSearch ? "Clear search" : "Clear draft"}
+        Clear draft
       </Button>
     </div>
   );

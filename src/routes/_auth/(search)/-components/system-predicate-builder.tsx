@@ -221,7 +221,6 @@ export function SearchQueryBuilder({
   }, [entryKey, setStagedSort, sortType, sortAsc]);
 
   const hydrusSearch = useMemo(() => queryToHydrusSearch(query), [query]);
-  const hasRules = query.rules.length > 0;
 
   const searchDisabled = hydrusSearch.length === 0;
 
@@ -294,7 +293,7 @@ export function SearchQueryBuilder({
           />
         </div>
       )}
-      {(!instantSearch || hasRules || isDirty) && (
+      {!instantSearch && (
         <div className="flex flex-col gap-2">
           <SearchActions
             onSearch={handleSearch}
@@ -302,7 +301,6 @@ export function SearchQueryBuilder({
             onClear={handleClear}
             searchDisabled={searchDisabled}
             hasCommitted={!!entry.committed}
-            instantSearch={instantSearch}
           />
         </div>
       )}
