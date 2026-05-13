@@ -20,17 +20,15 @@ export function SearchActions({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {!instantSearch && (
-        <Button
-          variant="default"
-          size="default"
-          onClick={onSearch}
-          disabled={searchDisabled}
-          type="button"
-        >
-          Search
-        </Button>
-      )}
+      <Button
+        variant="default"
+        size="default"
+        onClick={onSearch}
+        disabled={searchDisabled}
+        type="button"
+      >
+        Search
+      </Button>
       {hasCommitted && !instantSearch && (
         <Button variant="ghost" size="default" onClick={onReset} type="button">
           Reset to current

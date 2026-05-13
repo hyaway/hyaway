@@ -283,7 +283,7 @@ export function SearchQueryBuilder({
         onSortTypeChange={handleSortTypeChange}
         onSortAscToggle={handleSortAscToggle}
       />
-      {!instantSearch && hydrusSearch.length > 0 && (
+      {!instantSearch && (
         <div className="flex flex-col gap-1">
           <span className="text-muted-foreground text-sm font-medium">
             Next search will be
@@ -294,7 +294,7 @@ export function SearchQueryBuilder({
           />
         </div>
       )}
-      {(hasRules || isDirty) && (
+      {(!instantSearch || hasRules || isDirty) && (
         <div className="flex flex-col gap-2">
           <SearchActions
             onSearch={handleSearch}
