@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   IconArrowLeft,
   IconBackslash,
@@ -16,11 +16,18 @@ import { defaultFilter } from "cmdk";
 import { isOptionGroupArray, useValueSelector } from "react-querybuilder";
 import {
   FIELD_SEARCH_KEYWORDS,
+  SYSTEM_TAGS,
+  fieldGroups,
   getFieldHydrusLabel,
   isNoValueField,
+  systemTagToRule,
 } from "../-lib/query-builder-fields";
 import type {
   ActionProps,
+  Field,
+  OptionGroup,
+  RuleGroupTypeAny,
+  RuleType,
   ValueEditorProps,
   VersatileSelectorProps,
 } from "react-querybuilder";
@@ -41,7 +48,7 @@ import {
   getNumericalFilledColors,
 } from "@/components/ratings/rating-colors";
 import { NumericalRatingControl } from "@/components/ratings/rating-controls";
-import { Button } from "@/components/ui-primitives/button";
+import { Button, buttonVariants } from "@/components/ui-primitives/button";
 import { Switch } from "@/components/ui-primitives/switch";
 import {
   Command,
@@ -68,9 +75,27 @@ import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
 // Field selector
 // ---------------------------------------------------------------------------
 
-/** Field selector — QBSelect with namespace colors enabled. */
+/** Field selector — QBSelect with namespace colors enabled.
+ *  Hides entirely for tag rules (added via "Add tag" button).
+ */
 export function QBFieldSelect(props: VersatileSelectorProps) {
-  return <QBSelect {...props} colorLabels />;
+  if (props.value === "tag") return null;
+  const filtered = useMemo(() => {
+    if (!isOptionGroupArray(props.options)) return props.options;
+    return (props.options as Array<OptionGroup<Field>>)
+      .map((group) => ({
+        ...group,
+        options: group.options.filter((o) => o.name !== "tag"),
+      }))
+      .filter((group) => group.options.length > 0);
+  }, [props.options]);
+  return (
+    <QBSelect
+      {...props}
+      options={filtered as typeof props.options}
+      colorLabels
+    />
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -131,6 +156,184 @@ export function QBOperatorSelect(props: VersatileSelectorProps) {
 // Main select combobox
 // ---------------------------------------------------------------------------
 
+type OptionItem = { name: string; label: string };
+type OptionGroupItem = {
+  label: string;
+  inline?: boolean;
+  options: Array<OptionItem>;
+};
+
+/**
+ * Shared drill-down Command content used by both QBSelect and
+ * SystemFieldCombobox. Renders grouped options with category drill-down,
+ * fuzzy search, and namespace-colored labels.
+ */
+function DrillDownCommandContent({
+  groups,
+  flatOptions,
+  selectedValue,
+  searchPlaceholder,
+  onSelect,
+}: {
+  groups: Array<OptionGroupItem> | null;
+  flatOptions: Array<OptionItem> | null;
+  selectedValue?: string;
+  searchPlaceholder?: string;
+  onSelect: (name: string) => void;
+}) {
+  const [activePage, setActivePage] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const namespaceColors = useNamespaceColors();
+
+  const labelStyle = (label: string): CSSProperties | undefined => {
+    const { namespace } = parseTag(label);
+    const color =
+      namespaceColors[namespace || "null"] ?? namespaceColors["null"];
+    return color ? { color } : undefined;
+  };
+
+  const isSearching = search.length > 0;
+
+  return (
+    <Command
+      shouldFilter={isSearching}
+      filter={(itemValue, searchTerm, keywords) => {
+        if (searchTerm.length < 3) {
+          const haystack = [itemValue, ...(keywords ?? [])]
+            .join(" ")
+            .toLowerCase();
+          return haystack.includes(searchTerm.toLowerCase()) ? 1 : 0;
+        }
+        const score = defaultFilter(itemValue, searchTerm, keywords);
+        return score > 0.05 ? score : 0;
+      }}
+    >
+      <CommandInput
+        placeholder={searchPlaceholder ?? "Search…"}
+        value={search}
+        onValueChange={setSearch}
+      />
+      <CommandList className="max-h-none">
+        <CommandEmpty>No results.</CommandEmpty>
+        {groups ? (
+          isSearching ? (
+            groups.map((og) => (
+              <CommandGroup key={og.label} heading={og.label}>
+                {og.options.map((opt) => (
+                  <CommandItem
+                    key={opt.name}
+                    value={opt.name}
+                    keywords={[
+                      opt.label,
+                      ...(og.inline ? [] : [og.label]),
+                      getFieldHydrusLabel(opt.name),
+                      ...(FIELD_SEARCH_KEYWORDS[opt.name] ?? []),
+                    ]}
+                    data-checked={selectedValue === opt.name || undefined}
+                    onSelect={() => onSelect(opt.name)}
+                  >
+                    <span style={labelStyle(getFieldHydrusLabel(opt.name))}>
+                      {getFieldHydrusLabel(opt.name)}
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ))
+          ) : activePage === null ? (
+            <CommandGroup>
+              {[...groups]
+                .sort(
+                  (a, b) =>
+                    (a.inline || a.options.length === 1 ? 0 : 1) -
+                    (b.inline || b.options.length === 1 ? 0 : 1),
+                )
+                .flatMap((og) =>
+                  og.inline || og.options.length === 1 ? (
+                    og.options.map((opt) => (
+                      <CommandItem
+                        key={opt.name}
+                        value={opt.name}
+                        keywords={[opt.label, og.label]}
+                        data-checked={selectedValue === opt.name || undefined}
+                        onSelect={() => onSelect(opt.name)}
+                      >
+                        <span style={labelStyle(getFieldHydrusLabel(opt.name))}>
+                          {getFieldHydrusLabel(opt.name)}
+                        </span>
+                      </CommandItem>
+                    ))
+                  ) : (
+                    <CommandItem
+                      key={og.label}
+                      value={og.label}
+                      data-checked={
+                        og.options.some((o) => o.name === selectedValue) ||
+                        undefined
+                      }
+                      onSelect={() => setActivePage(og.label)}
+                    >
+                      <span className="flex-1" style={labelStyle(og.label)}>
+                        {og.label}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        {og.options.length}
+                      </span>
+                      <IconChevronRight className="text-muted-foreground size-3.5" />
+                    </CommandItem>
+                  ),
+                )}
+            </CommandGroup>
+          ) : (
+            <>
+              <CommandGroup>
+                <CommandItem
+                  value="__back"
+                  onSelect={() => setActivePage(null)}
+                >
+                  <IconArrowLeft className="text-muted-foreground size-3.5" />
+                  <span className="text-muted-foreground">{activePage}</span>
+                </CommandItem>
+              </CommandGroup>
+              <CommandGroup>
+                {groups
+                  .find((og) => og.label === activePage)
+                  ?.options.map((opt) => (
+                    <CommandItem
+                      key={opt.name}
+                      value={opt.name}
+                      keywords={[
+                        opt.label,
+                        ...(FIELD_SEARCH_KEYWORDS[opt.name] ?? []),
+                      ]}
+                      data-checked={selectedValue === opt.name || undefined}
+                      onSelect={() => onSelect(opt.name)}
+                    >
+                      <span style={labelStyle(getFieldHydrusLabel(opt.name))}>
+                        {getFieldHydrusLabel(opt.name)}
+                      </span>
+                    </CommandItem>
+                  ))}
+              </CommandGroup>
+            </>
+          )
+        ) : flatOptions ? (
+          flatOptions.map((opt) => (
+            <CommandItem
+              key={opt.name}
+              value={opt.name}
+              keywords={[opt.label]}
+              data-checked={selectedValue === opt.name || undefined}
+              onSelect={() => onSelect(opt.name)}
+            >
+              {opt.label}
+            </CommandItem>
+          ))
+        ) : null}
+      </CommandList>
+    </Command>
+  );
+}
+
 /** Combobox using Popover + Command — used for field + operator.
  *  For grouped options (field selector): shows categories first, drill into a
  *  category to see its fields. Typing in search searches everything flat.
@@ -146,10 +349,6 @@ export function QBSelect({
   colorLabels,
 }: VersatileSelectorProps & { colorLabels?: boolean }) {
   const [open, setOpen] = useState(false);
-  /** The currently drilled-into group label, or null for the top-level view. */
-  const [activePage, setActivePage] = useState<string | null>(null);
-  /** Track whether the user has typed anything in the search input. */
-  const [search, setSearch] = useState("");
 
   const { onChange, val } = useValueSelector({
     handleOnChange,
@@ -158,26 +357,11 @@ export function QBSelect({
     value,
   });
 
-  // Reset drill-down state when popover closes
-  useEffect(() => {
-    if (!open) {
-      setActivePage(null);
-      setSearch("");
-    }
-  }, [open]);
-
-  type OptionItem = { name: string; label: string };
-  type OptionGroupItem = {
-    label: string;
-    inline?: boolean;
-    options: Array<OptionItem>;
-  };
-
   const isGrouped = isOptionGroupArray(options);
   const groups = isGrouped ? (options as Array<OptionGroupItem>) : null;
+  const flatOptions = !isGrouped ? (options as Array<OptionItem>) : null;
   const namespaceColors = useNamespaceColors();
 
-  /** Get inline color style for a label based on its namespace. */
   const labelStyle = (label: string): CSSProperties | undefined => {
     const { namespace } = parseTag(label);
     const color =
@@ -185,31 +369,23 @@ export function QBSelect({
     return color ? { color } : undefined;
   };
 
-  // Resolve the display label for the current value
   const selectedLabel = useMemo(() => {
     if (groups) {
       for (const og of groups) {
         const found = og.options.find((o) => o.name === val);
-        if (found) {
-          return getFieldHydrusLabel(found.name);
-        }
+        if (found) return getFieldHydrusLabel(found.name);
       }
-    } else {
-      const found = (options as Array<OptionItem>).find((o) => o.name === val);
+    } else if (flatOptions) {
+      const found = flatOptions.find((o) => o.name === val);
       if (found) return found.label;
     }
     return null;
-  }, [options, groups, val]);
+  }, [options, groups, flatOptions, val]);
 
-  const selectField = (name: string) => {
+  const handleSelect = (name: string) => {
     onChange(name);
     setOpen(false);
   };
-
-  // When typing, show flat search across all fields.
-  // When not typing and on top-level, show group headings as selectable items.
-  // When drilled into a page, show that page's options.
-  const isSearching = search.length > 0;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -239,158 +415,13 @@ export function QBSelect({
         sideOffset={-240}
         positionMethod="fixed"
       >
-        <Command
-          shouldFilter={isSearching}
-          filter={(itemValue, searchTerm, keywords) => {
-            // Short queries: exact substring match only (no fuzzy).
-            // Longer queries: fuzzy with a minimum score threshold.
-            if (searchTerm.length < 3) {
-              const haystack = [itemValue, ...(keywords ?? [])]
-                .join(" ")
-                .toLowerCase();
-              return haystack.includes(searchTerm.toLowerCase()) ? 1 : 0;
-            }
-            const score = defaultFilter(itemValue, searchTerm, keywords);
-            return score > 0.05 ? score : 0;
-          }}
-        >
-          <CommandInput
-            placeholder={`Search ${title?.toLowerCase() ?? ""}…`}
-            value={search}
-            onValueChange={setSearch}
-          />
-          <CommandList className="max-h-none">
-            <CommandEmpty>No results.</CommandEmpty>
-            {groups ? (
-              isSearching ? (
-                // Flat search across all groups
-                groups.map((og) => (
-                  <CommandGroup key={og.label} heading={og.label}>
-                    {og.options.map((opt) => (
-                      <CommandItem
-                        key={opt.name}
-                        value={opt.name}
-                        keywords={[
-                          opt.label,
-                          // Include group label as keyword only for
-                          // non-inline groups so users can search by
-                          // category (e.g. "dimensions" finds "width").
-                          // Inline groups use a generic label like
-                          // "basics" that would cause fuzzy false
-                          // positives.
-                          ...(og.inline ? [] : [og.label]),
-                          getFieldHydrusLabel(opt.name),
-                          ...(FIELD_SEARCH_KEYWORDS[opt.name] ?? []),
-                        ]}
-                        data-checked={val === opt.name}
-                        onSelect={() => selectField(opt.name)}
-                      >
-                        <span style={labelStyle(getFieldHydrusLabel(opt.name))}>
-                          {getFieldHydrusLabel(opt.name)}
-                        </span>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                ))
-              ) : activePage === null ? (
-                // Top-level: inline groups (single-option or marked inline)
-                // render their options directly; others are drill-down categories
-                <CommandGroup>
-                  {[...groups]
-                    .sort(
-                      (a, b) =>
-                        (a.inline || a.options.length === 1 ? 0 : 1) -
-                        (b.inline || b.options.length === 1 ? 0 : 1),
-                    )
-                    .flatMap((og) =>
-                      og.inline || og.options.length === 1 ? (
-                        og.options.map((opt) => (
-                          <CommandItem
-                            key={opt.name}
-                            value={opt.name}
-                            keywords={[opt.label, og.label]}
-                            data-checked={val === opt.name}
-                            onSelect={() => selectField(opt.name)}
-                          >
-                            <span
-                              style={labelStyle(getFieldHydrusLabel(opt.name))}
-                            >
-                              {getFieldHydrusLabel(opt.name)}
-                            </span>
-                          </CommandItem>
-                        ))
-                      ) : (
-                        <CommandItem
-                          key={og.label}
-                          value={og.label}
-                          data-checked={og.options.some((o) => o.name === val)}
-                          onSelect={() => setActivePage(og.label)}
-                        >
-                          <span className="flex-1" style={labelStyle(og.label)}>
-                            {og.label}
-                          </span>
-                          <span className="text-muted-foreground text-xs">
-                            {og.options.length}
-                          </span>
-                          <IconChevronRight className="text-muted-foreground size-3.5" />
-                        </CommandItem>
-                      ),
-                    )}
-                </CommandGroup>
-              ) : (
-                // Drilled into a specific group
-                <>
-                  <CommandGroup>
-                    <CommandItem
-                      value="__back"
-                      onSelect={() => setActivePage(null)}
-                    >
-                      <IconArrowLeft className="text-muted-foreground size-3.5" />
-                      <span className="text-muted-foreground">
-                        {activePage}
-                      </span>
-                    </CommandItem>
-                  </CommandGroup>
-                  <CommandGroup>
-                    {groups
-                      .find((og) => og.label === activePage)
-                      ?.options.map((opt) => (
-                        <CommandItem
-                          key={opt.name}
-                          value={opt.name}
-                          keywords={[
-                            opt.label,
-                            ...(FIELD_SEARCH_KEYWORDS[opt.name] ?? []),
-                          ]}
-                          data-checked={val === opt.name}
-                          onSelect={() => selectField(opt.name)}
-                        >
-                          <span
-                            style={labelStyle(getFieldHydrusLabel(opt.name))}
-                          >
-                            {getFieldHydrusLabel(opt.name)}
-                          </span>
-                        </CommandItem>
-                      ))}
-                  </CommandGroup>
-                </>
-              )
-            ) : (
-              // Flat options (operator selector)
-              (options as Array<OptionItem>).map((opt) => (
-                <CommandItem
-                  key={opt.name}
-                  value={opt.name}
-                  keywords={[opt.label]}
-                  data-checked={val === opt.name}
-                  onSelect={() => selectField(opt.name)}
-                >
-                  {opt.label}
-                </CommandItem>
-              ))
-            )}
-          </CommandList>
-        </Command>
+        <DrillDownCommandContent
+          groups={groups}
+          flatOptions={flatOptions}
+          selectedValue={val as string}
+          searchPlaceholder={`Search ${title?.toLowerCase() ?? ""}…`}
+          onSelect={handleSelect}
+        />
       </PopoverContent>
     </Popover>
   );
@@ -456,43 +487,72 @@ export function QBActionElement({
     );
   }
 
-  // Add rule: show separate "Add tag" and "Add filter" buttons
+  // Add rule: "Add system" combobox
   return (
-    <>
-      <Button
-        variant="outline"
-        size="default"
-        className={className}
-        onClick={(e) => handleOnClick(e, { addTag: true })}
+    <SystemFieldCombobox
+      className={className}
+      disabled={disabled}
+      onSelect={(fieldName) =>
+        handleOnClick(undefined, { addSystem: true, systemField: fieldName })
+      }
+    />
+  );
+}
+
+/** All non-tag system fields grouped for the "Add system" action. */
+const systemFieldOptions: Array<OptionGroupItem> = fieldGroups
+  .map((group) => ({
+    label: group.label,
+    inline: (group as { inline?: boolean }).inline,
+    options: group.options
+      .filter((o) => o.name !== "tag")
+      .map((o) => ({ name: o.name, label: o.label })),
+  }))
+  .filter((group) => group.options.length > 0);
+
+function SystemFieldCombobox({
+  className,
+  disabled,
+  onSelect,
+}: {
+  className?: string;
+  disabled?: boolean;
+  onSelect: (fieldName: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const handleSelect = (name: string) => {
+    onSelect(name);
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
         disabled={disabled}
-        type="button"
-      >
-        <IconPlus data-icon="inline-start" className="size-5" />
-        Add tag
-      </Button>
-      <Button
-        variant="outline"
-        size="default"
-        className={className}
-        onClick={(e) => handleOnClick(e, { addSystem: true })}
-        disabled={disabled}
-        type="button"
+        className={cn(
+          buttonVariants({ variant: "outline", size: "default" }),
+          "cursor-pointer",
+          className,
+        )}
       >
         <IconPlus data-icon="inline-start" className="size-5" />
         Add system
-      </Button>
-      <Button
-        variant="outline"
-        size="default"
-        className={className}
-        onClick={(e) => handleOnClick(e, { addLimit: true })}
-        disabled={disabled}
-        type="button"
+        <IconChevronDown data-icon="inline-end" className="size-4" />
+      </PopoverTrigger>
+      <PopoverContent
+        className="max-h-[70dvh] w-80 p-0"
+        align="start"
+        positionMethod="fixed"
       >
-        <IconPlus data-icon="inline-start" className="size-5" />
-        Add limit
-      </Button>
-    </>
+        <DrillDownCommandContent
+          groups={systemFieldOptions}
+          flatOptions={null}
+          searchPlaceholder="Search system fields…"
+          onSelect={handleSelect}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -558,6 +618,16 @@ export function QBValueEditor(props: ValueEditorProps) {
         value={value ?? ""}
         onChange={handleOnChange}
         disabled={disabled}
+        onSystemSelect={(systemTag) => {
+          const resolved = systemTagToRule(systemTag);
+          if (!resolved) return;
+          const query = props.schema.getQuery();
+          const updated = updateRuleById(query, props.rule.id!, {
+            ...props.rule,
+            ...resolved,
+          });
+          props.schema.dispatchQuery(updated);
+        }}
       />
     );
   }
@@ -792,14 +862,32 @@ function IncDecValueEditor({
 // Tag value editor
 // ---------------------------------------------------------------------------
 
-/** Tag value editor with autocomplete from the hydrus API */
+/** Walk the query tree and replace the rule matching the given id. */
+function updateRuleById(
+  query: RuleGroupTypeAny,
+  ruleId: string,
+  newRule: RuleType,
+): RuleGroupTypeAny {
+  const rules = (query as { rules: Array<RuleType | RuleGroupTypeAny> }).rules;
+  return {
+    ...query,
+    rules: rules.map((r) => {
+      if ((r as RuleType).id === ruleId) return newRule;
+      if ("rules" in r) return updateRuleById(r, ruleId, newRule);
+      return r;
+    }),
+  } as RuleGroupTypeAny;
+}
+
 function TagValueEditor({
   value,
   onChange,
+  onSystemSelect,
   disabled,
 }: {
   value: string;
   onChange: (val: string) => void;
+  onSystemSelect?: (systemTag: string) => void;
   disabled?: boolean;
 }) {
   const [inputValue, setInputValue] = useState(value);
@@ -825,14 +913,21 @@ function TagValueEditor({
   return (
     <>
       <TagAutocompleteInput
-        className="relative w-full lg:w-auto lg:max-w-96 lg:min-w-48 lg:flex-1"
+        className="relative w-full lg:w-auto lg:max-w-lg lg:min-w-48 lg:flex-1"
         value={inputValue}
         onChange={handleChange}
-        onSelect={handleSelect}
+        onSelect={(tag) => {
+          if (onSystemSelect && tag.startsWith("system:")) {
+            onSystemSelect(tag);
+          } else {
+            handleSelect(tag);
+          }
+        }}
         disabled={disabled}
-        placeholder="e.g. cat or -cat"
+        placeholder="e.g. cat or system:…"
         name="hyaway-spb-tag"
         colorizeInput
+        staticSuggestions={SYSTEM_TAGS}
       />
       <Button
         variant="ghost"
@@ -859,20 +954,22 @@ function TagValueEditor({
 // Combinator selector
 // ---------------------------------------------------------------------------
 
+/** Combinator label with separator lines below lg breakpoint. */
+export function CombinatorSeparator({ text }: { text: string }) {
+  return (
+    <div className="flex w-full items-center lg:w-auto lg:px-1">
+      <div className="bg-border h-px flex-1 lg:hidden" />
+      <span className="text-muted-foreground px-3 text-sm font-medium lg:px-0">
+        {text}
+      </span>
+      <div className="bg-border h-px flex-1 lg:hidden" />
+    </div>
+  );
+}
+
 export function QBCombinatorSelect(props: VersatileSelectorProps) {
   const { level } = props;
-  // Root level is always AND, sub-groups are always OR — no toggle needed.
-  // Show a static label so the user sees the relationship.
-  if (level === 0) {
-    return (
-      <span className="text-muted-foreground px-1 text-sm font-medium">
-        and
-      </span>
-    );
-  }
-  return (
-    <span className="text-muted-foreground px-1 text-sm font-medium">or</span>
-  );
+  return <CombinatorSeparator text={level === 0 ? "and" : "or"} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -887,7 +984,7 @@ export const controlClassnames = {
   body: "flex flex-col gap-0",
   rule: "flex flex-wrap items-center gap-2",
   combinators: "",
-  betweenRules: "my-2 md:my-1 self-center lg:self-start",
+  betweenRules: "my-2 md:my-1 lg:self-start",
   dragHandle: "hidden",
   notToggle: "hidden",
   lock: "hidden",
