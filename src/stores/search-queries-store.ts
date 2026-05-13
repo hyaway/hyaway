@@ -10,6 +10,7 @@ import { emptyStaged } from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import { getDefaultQuery } from "@/stores/search-settings-store";
 import { generateSearchId } from "@/lib/search-entry-utils";
+import { systemTagToRule } from "@/routes/_auth/(search)/-lib/query-builder-fields";
 
 // ---------------------------------------------------------------------------
 // Defaults
@@ -237,13 +238,21 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const searchId = generateSearchId(displayName);
 
           const base = getDefaultQuery();
+          const systemRule = systemTagToRule(tag);
+          const primaryRule = systemRule ?? {
+            field: "tag",
+            operator: "=",
+            value: tag,
+          };
           const query: RuleGroupType = {
             combinator: "and",
             rules: [
-              { field: "tag", operator: "=", value: tag },
-              ...base.query.rules.filter(
-                (r) => "field" in r && r.field === "limit",
-              ),
+              primaryRule,
+              ...(primaryRule.field === "limit"
+                ? []
+                : base.query.rules.filter(
+                    (r) => "field" in r && r.field === "limit",
+                  )),
             ],
           };
           const state = { query, sort: base.sort };
@@ -253,7 +262,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             entries: {
               [searchId]: {
                 staged: state,
-                committed: state,
+                committed: systemRule ? undefined : state,
                 displayName,
               },
               ...entries,

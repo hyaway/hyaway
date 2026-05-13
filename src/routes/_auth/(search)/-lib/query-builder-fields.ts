@@ -517,7 +517,7 @@ export const FIELD_SEARCH_KEYWORDS: Record<string, Array<string>> = {
  * Map field names to their hydrus display prefix.
  * Used in the field selector to show how the field appears in the hydrus query.
  */
-const FIELD_HYDRUS_LABEL: Record<string, string> = {
+export const FIELD_HYDRUS_LABEL: Record<string, string> = {
   tag: "tag",
   inbox: "system:inbox",
   archive: "system:archive",
@@ -558,6 +558,45 @@ const FIELD_HYDRUS_LABEL: Record<string, string> = {
   url_regex: "system:has url matching regex",
   url_domain: "system:has url with domain",
 };
+
+/** All unique `system:*` tag values from the field map. */
+export const SYSTEM_TAGS: Array<string> = [
+  ...new Set(
+    Object.values(FIELD_HYDRUS_LABEL).filter((v) => v.startsWith("system:")),
+  ),
+];
+
+/** Reverse map: system tag string → field name. */
+const SYSTEM_TAG_TO_FIELD: Record<string, string> = Object.fromEntries(
+  Object.entries(FIELD_HYDRUS_LABEL)
+    .filter(([, v]) => v.startsWith("system:"))
+    .map(([k, v]) => [v, k]),
+);
+
+/**
+ * Resolve a system tag string (e.g. `"system:inbox"`) to a query builder rule.
+ * Returns `undefined` if the tag is not a known system tag.
+ */
+export function systemTagToRule(
+  systemTag: string,
+): { field: string; operator: string; value: string } | undefined {
+  const fieldName = SYSTEM_TAG_TO_FIELD[systemTag];
+  if (!fieldName) return undefined;
+
+  // Look up the field definition for its default operator/value
+  for (const group of fieldGroups) {
+    const field = group.options.find((f) => f.name === fieldName);
+    if (field) {
+      return {
+        field: fieldName,
+        operator:
+          (field as { defaultOperator?: string }).defaultOperator ?? "=",
+        value: String(field.defaultValue ?? ""),
+      };
+    }
+  }
+  return { field: fieldName, operator: "=", value: "" };
+}
 
 /** Get hydrus-style display label for a field, with fallback. */
 export function getFieldHydrusLabel(fieldName: string): string {
