@@ -214,7 +214,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             tags={searchTags}
             sortLabel={sortLabel}
             interactive={false}
-            className="select-none **:select-none"
+            className="pointer-events-none select-none **:select-none"
           />
         ) : (
           <span className="text-muted-foreground text-sm">No active query</span>
