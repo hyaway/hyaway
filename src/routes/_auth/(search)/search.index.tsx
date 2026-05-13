@@ -199,7 +199,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             </span>
             <InstantSearchSwitch
               searchId={searchId}
-              className="text-muted-foreground"
+              className="text-muted-foreground pt-1 pb-2"
               size="default"
             />
           </div>
