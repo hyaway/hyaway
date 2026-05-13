@@ -1,8 +1,9 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconTagStarred } from "@tabler/icons-react";
+import { defaultFilter } from "cmdk";
 import type { CSSProperties } from "react";
 import {
   Command,
@@ -28,12 +29,16 @@ export function TagAutocompleteInput({
   value = "",
   onChange,
   onSelect,
+  onSubmit,
+  onBlur,
   placeholder = "Search tags…",
   name,
   disabled,
   className,
   inputClassName,
   colorizeInput,
+  staticSuggestions,
+  clearOnSelect,
 }: {
   /** Controlled value (optional — uncontrolled by default). */
   value?: string;
@@ -41,6 +46,10 @@ export function TagAutocompleteInput({
   onChange?: (value: string) => void;
   /** Called when the user selects a suggestion from the dropdown. */
   onSelect?: (tag: string) => void;
+  /** Called when the user presses Enter with typed text (no dropdown selection). */
+  onSubmit?: (tag: string) => void;
+  /** Called when the input loses focus with non-empty text. */
+  onBlur?: (tag: string) => void;
   placeholder?: string;
   name?: string;
   disabled?: boolean;
@@ -49,6 +58,10 @@ export function TagAutocompleteInput({
   inputClassName?: string;
   /** Apply namespace color to the input text. */
   colorizeInput?: boolean;
+  /** Static tags filtered locally and shown above API results when matching. */
+  staticSuggestions?: Array<string>;
+  /** Clear the input after a suggestion is selected. */
+  clearOnSelect?: boolean;
 }) {
   const [inputValue, setInputValue] = useState(value);
   const [debouncedInput, setDebouncedInput] = useState(value);
@@ -82,10 +95,23 @@ export function TagAutocompleteInput({
         tag.toLowerCase().includes(searchText),
       )
     : [...(favouriteTags ?? [])];
+  const filteredStatic = useMemo(() => {
+    const normalized = searchText.replace(/\s+/g, "");
+    if (!normalized.startsWith("system:") || !staticSuggestions?.length)
+      return [];
+    if (normalized === "system:") return staticSuggestions;
+    return staticSuggestions
+      .map((tag) => ({ tag, score: defaultFilter(tag, normalized) }))
+      .filter((entry) => entry.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map((entry) => entry.tag);
+  }, [searchText, staticSuggestions]);
   const showFavourites =
     open && !hasSufficientInput && filteredFavourites.length > 0;
   const showDropdown =
-    (open && hasSufficientInput && suggestions.length > 0) || showFavourites;
+    (open && hasSufficientInput && suggestions.length > 0) ||
+    showFavourites ||
+    (open && filteredStatic.length > 0);
 
   const namespaceColors = useNamespaceColors();
   const inputColor = colorizeInput
@@ -95,12 +121,17 @@ export function TagAutocompleteInput({
 
   const handleSelect = useCallback(
     (tag: string) => {
-      setInputValue(tag);
-      onChange?.(tag);
+      if (clearOnSelect) {
+        setInputValue("");
+        onChange?.("");
+      } else {
+        setInputValue(tag);
+        onChange?.(tag);
+      }
       onSelect?.(tag);
       setOpen(false);
     },
-    [onChange, onSelect],
+    [clearOnSelect, onChange, onSelect],
   );
 
   return (
@@ -118,7 +149,31 @@ export function TagAutocompleteInput({
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => {
-          setTimeout(() => setOpen(false), 150);
+          setTimeout(() => {
+            setOpen(false);
+            if (onBlur) {
+              const trimmed = inputValue.trim();
+              if (trimmed) {
+                onBlur(trimmed);
+                if (clearOnSelect) {
+                  setInputValue("");
+                  onChange?.("");
+                }
+              }
+            }
+          }, 150);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && onSubmit && inputValue.trim()) {
+            e.preventDefault();
+            const trimmed = inputValue.trim();
+            onSubmit(trimmed);
+            if (clearOnSelect) {
+              setInputValue("");
+              onChange?.("");
+            }
+            setOpen(false);
+          }
         }}
         name={name}
         autoComplete="off"
@@ -128,25 +183,8 @@ export function TagAutocompleteInput({
           <Command shouldFilter={false}>
             <CommandList>
               {hasSufficientInput ? (
-                suggestions.map((tag) => (
-                  <TagSuggestionItem
-                    key={tag.value}
-                    value={tag.value}
-                    prefix={isNegative ? "-" : undefined}
-                    count={tag.count}
-                    onSelect={() => handleSelect(tag.value)}
-                  />
-                ))
-              ) : (
-                <CommandGroup
-                  heading={
-                    <span className="inline-flex items-center gap-1 text-sm">
-                      <IconTagStarred className="size-5" />
-                      Favourite tags
-                    </span>
-                  }
-                >
-                  {filteredFavourites.map((tag) => (
+                <>
+                  {filteredStatic.map((tag) => (
                     <TagSuggestionItem
                       key={tag}
                       value={tag}
@@ -155,7 +193,48 @@ export function TagAutocompleteInput({
                       onSelect={() => handleSelect(tag)}
                     />
                   ))}
-                </CommandGroup>
+                  {suggestions.map((tag) => (
+                    <TagSuggestionItem
+                      key={tag.value}
+                      value={tag.value}
+                      prefix={isNegative ? "-" : undefined}
+                      count={tag.count}
+                      onSelect={() => handleSelect(tag.value)}
+                    />
+                  ))}
+                </>
+              ) : (
+                <>
+                  {filteredStatic.map((tag) => (
+                    <TagSuggestionItem
+                      key={tag}
+                      value={tag}
+                      prefix={isNegative ? "-" : undefined}
+                      showFavourite={false}
+                      onSelect={() => handleSelect(tag)}
+                    />
+                  ))}
+                  {filteredFavourites.length > 0 && (
+                    <CommandGroup
+                      heading={
+                        <span className="inline-flex items-center gap-1 text-sm">
+                          <IconTagStarred className="size-5" />
+                          Favourite tags
+                        </span>
+                      }
+                    >
+                      {filteredFavourites.map((tag) => (
+                        <TagSuggestionItem
+                          key={tag}
+                          value={tag}
+                          prefix={isNegative ? "-" : undefined}
+                          showFavourite={false}
+                          onSelect={() => handleSelect(tag)}
+                        />
+                      ))}
+                    </CommandGroup>
+                  )}
+                </>
               )}
             </CommandList>
           </Command>
