@@ -39,11 +39,11 @@ export function SortSection({
   onSortAscToggle: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-2">
       <span className="text-muted-foreground shrink-0 text-sm font-medium">
         Sort by
       </span>
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <SortSelect value={sortType} onChange={onSortTypeChange} />
         <Button
           variant="ghost"
