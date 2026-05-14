@@ -13,13 +13,14 @@ import {
   getDefaultQuery,
 } from "@/stores/search-settings-store";
 import { generateSearchId } from "@/lib/search-entry-utils";
+import { isIgnorableTagRuleValue } from "@/lib/search-rule-utils";
 import { systemTagToRule } from "@/routes/_auth/(search)/-lib/query-builder-fields";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Remove tag rules with empty values and empty sub-groups (recursively). */
+/** Remove ignorable tag rules and empty sub-groups (recursively). */
 function stripEmptyRules(query: RuleGroupType): RuleGroupType {
   const rules = query.rules
     .map((rule) => {
@@ -30,7 +31,7 @@ function stripEmptyRules(query: RuleGroupType): RuleGroupType {
       (rule) =>
         ("rules" in rule && rule.rules.length > 0) ||
         (!("rules" in rule) &&
-          (rule.field !== "tag" || String(rule.value).trim() !== "")),
+          (rule.field !== "tag" || !isIgnorableTagRuleValue(rule.value))),
     );
 
   if (rules.length === query.rules.length) return query;

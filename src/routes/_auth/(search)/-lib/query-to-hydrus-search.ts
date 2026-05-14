@@ -3,6 +3,7 @@
 
 import type { RuleGroupType, RuleType } from "react-querybuilder";
 import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
+import { isIgnorableTagRuleValue } from "@/lib/search-rule-utils";
 
 /** Names of fields that are pure has/does-not-have toggles (no value input ever). */
 export const HAS_ONLY_FIELDS = new Set([
@@ -28,7 +29,9 @@ function ruleToSearchTag(rule: RuleType): string | null {
 
   // Tag field — value is the raw tag string (prefix with - to negate)
   if (field === "tag") {
-    if (typeof value !== "string" || value.trim().length === 0) return null;
+    if (typeof value !== "string" || isIgnorableTagRuleValue(value)) {
+      return null;
+    }
     let tag = value.trim();
     if (tag.replace(/^-+/, "") === "") return null;
     // Bare namespace (e.g. "series:" or "-series:") → wildcard
