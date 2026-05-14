@@ -20,7 +20,7 @@ export function SearchActions({
     <div className="flex flex-wrap items-center gap-2">
       <Button
         variant="default"
-        size="default"
+        size="sm"
         onClick={onSearch}
         disabled={searchDisabled}
         type="button"
@@ -28,11 +28,11 @@ export function SearchActions({
         Search
       </Button>
       {hasCommitted && (
-        <Button variant="ghost" size="default" onClick={onReset} type="button">
+        <Button variant="ghost" size="sm" onClick={onReset} type="button">
           Reset draft
         </Button>
       )}
-      <Button variant="ghost" size="default" onClick={onClear} type="button">
+      <Button variant="ghost" size="sm" onClick={onClear} type="button">
         Clear draft
       </Button>
     </div>

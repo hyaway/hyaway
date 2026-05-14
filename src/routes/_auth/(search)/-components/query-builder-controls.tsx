@@ -69,6 +69,9 @@ import { useActiveTheme } from "@/stores/theme-store";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import { useTagColor } from "@/integrations/hydrus-api/queries/options";
 
+const QUERY_BUILDER_CONTROL_HEIGHT = "h-9";
+const QUERY_BUILDER_ICON_BUTTON_SIZE = "size-9";
+
 // ---------------------------------------------------------------------------
 // Field selector
 // ---------------------------------------------------------------------------
@@ -435,7 +438,8 @@ export function QBSelect({
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 lg:w-auto lg:max-w-96 lg:min-w-60",
+          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 lg:w-auto lg:max-w-96 lg:min-w-60",
+          QUERY_BUILDER_CONTROL_HEIGHT,
           selectedOverlayStyle &&
             "border-(--badge-overlay)/30 bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] text-(--badge-overlay) hover:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
           className,
@@ -495,8 +499,8 @@ export function QBActionElement({
     return (
       <Button
         variant="ghost"
-        size="icon"
-        className={cn("text-destructive size-11 shrink-0", className)}
+        size="icon-sm"
+        className={cn("text-destructive shrink-0", className)}
         title={
           disabledTranslation && disabled ? disabledTranslation.title : title
         }
@@ -505,7 +509,7 @@ export function QBActionElement({
         disabled={disabled && !disabledTranslation}
         type="button"
       >
-        <IconTrash className="size-5.5" />
+        <IconTrash className="size-5" />
       </Button>
     );
   }
@@ -517,7 +521,7 @@ export function QBActionElement({
     return (
       <Button
         variant="outline"
-        size="default"
+        size="sm"
         className={className}
         title={title}
         onClick={(e) => handleOnClick(e)}
@@ -584,7 +588,7 @@ function SystemFieldCombobox({
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          buttonVariants({ variant: "outline", size: "default" }),
+          buttonVariants({ variant: "outline", size: "sm" }),
           "cursor-pointer",
           className,
         )}
@@ -927,8 +931,8 @@ function IncDecValueEditor({
     >
       <Button
         variant="outline"
-        size="default"
-        className="size-9 p-0"
+        size="icon-sm"
+        className="p-0"
         onClick={() => onChange(String(Math.max(0, numValue - 1)))}
         disabled={disabled || numValue <= 0}
         aria-label="Decrease"
@@ -958,8 +962,8 @@ function IncDecValueEditor({
       />
       <Button
         variant="outline"
-        size="default"
-        className="size-9 p-0"
+        size="icon-sm"
+        className="p-0"
         onClick={() => onChange(String(numValue + 1))}
         disabled={disabled}
         aria-label="Increase"
@@ -1082,7 +1086,7 @@ function TagValueEditor({
       <Button
         variant="ghost"
         size="icon-sm"
-        className="shrink-0"
+        className={cn(QUERY_BUILDER_ICON_BUTTON_SIZE, "shrink-0")}
         onClick={handleToggleNegation}
         disabled={disabled}
         type="button"

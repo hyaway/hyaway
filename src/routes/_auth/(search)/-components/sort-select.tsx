@@ -51,7 +51,7 @@ export function SortSection({
         <SortSelect value={sortType} onChange={onSortTypeChange} />
         <Button
           variant="ghost"
-          size="default"
+          size="sm"
           onClick={onSortAscToggle}
           type="button"
           aria-pressed={sortAsc}
@@ -59,12 +59,12 @@ export function SortSection({
         >
           {sortAsc ? (
             <>
-              <IconSortAscending2Filled className="size-6" />
+              <IconSortAscending2Filled className="size-5" />
               <span className="hidden text-sm @sm:inline">ascending</span>
             </>
           ) : (
             <>
-              <IconSortDescending2Filled className="size-6" />
+              <IconSortDescending2Filled className="size-5" />
               <span className="hidden text-sm @sm:inline">descending</span>
             </>
           )}
@@ -102,7 +102,7 @@ export function SortSelect({
       <PopoverTrigger
         className={cn(
           badgeVariants({ variant: "overlay", size: "default" }),
-          "w-full cursor-pointer justify-between outline-none disabled:opacity-50 @sm:w-auto @sm:max-w-96 @sm:min-w-60",
+          "h-9 w-full cursor-pointer justify-between gap-1.5 px-3 text-sm outline-none disabled:opacity-50 @sm:w-auto @sm:max-w-96 @sm:min-w-60",
         )}
         style={combinedStyle}
         aria-label="Sort by"
