@@ -1102,7 +1102,6 @@ function TagValueEditor({
         placeholder="(empty)"
         name="hyaway-spb-tag"
         colorizeInput
-        staticSuggestions={SYSTEM_TAGS}
         submitEmptyOnBlur
         submitEmptyOnEnter
       />

@@ -21,8 +21,11 @@ export const HAS_ONLY_FIELDS = new Set([
   "notes_presence",
 ]);
 
-/** A `["system:has …", "system:no …"]` label pair for has/has_not toggles. */
-type HasNoLabels = [`system:has ${string}`, `system:no ${string}`];
+/** A `["system:has ...", "system:..."]` label pair for has/has_not toggles. */
+type HasNoLabels = [
+  `system:has ${string}`,
+  `system:no ${string}` | `system:untagged`,
+];
 
 function invariant(condition: boolean, message: string): asserts condition {
   if (!condition) throw new Error(message);
@@ -69,7 +72,7 @@ export function ruleToSearchTag(rule: RuleType): string | null {
       duration_presence: ["system:has duration", "system:no duration"],
       framerate_presence: ["system:has framerate", "system:no framerate"],
       frames_presence: ["system:has frames", "system:no frames"],
-      tags_presence: ["system:has tags", "system:no tags"],
+      tags_presence: ["system:has tags", "system:untagged"],
       urls_presence: ["system:has urls", "system:no urls"],
       notes_presence: ["system:has notes", "system:no notes"],
     };

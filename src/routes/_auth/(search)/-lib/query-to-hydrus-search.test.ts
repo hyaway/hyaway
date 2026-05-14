@@ -61,7 +61,7 @@ describe("ruleToSearchTag", () => {
     ["duration_presence", "system:has duration", "system:no duration"],
     ["framerate_presence", "system:has framerate", "system:no framerate"],
     ["frames_presence", "system:has frames", "system:no frames"],
-    ["tags_presence", "system:has tags", "system:no tags"],
+    ["tags_presence", "system:has tags", "system:untagged"],
     ["urls_presence", "system:has urls", "system:no urls"],
     ["notes_presence", "system:has notes", "system:no notes"],
   ])("converts has-only field %s", (field, hasLabel, hasNotLabel) => {

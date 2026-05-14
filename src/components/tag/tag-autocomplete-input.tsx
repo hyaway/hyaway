@@ -19,6 +19,7 @@ import {
 } from "@/integrations/hydrus-api/queries/tags";
 import { useTagColor } from "@/integrations/hydrus-api/queries/options";
 import { cn } from "@/lib/utils";
+import { SYSTEM_TAG_SUGGESTIONS } from "@/routes/_auth/(search)/-lib/query-builder-fields";
 
 // ---------------------------------------------------------------------------
 // TagAutocompleteInput
@@ -36,7 +37,6 @@ export function TagAutocompleteInput({
   className,
   inputClassName,
   colorizeInput,
-  staticSuggestions,
   clearOnSelect,
   submitEmptyOnBlur,
   submitEmptyOnEnter,
@@ -59,8 +59,6 @@ export function TagAutocompleteInput({
   inputClassName?: string;
   /** Apply namespace color to the input text. */
   colorizeInput?: boolean;
-  /** Static tags filtered locally and shown above API results when matching. */
-  staticSuggestions?: Array<string>;
   /** Clear the input after a suggestion is selected. */
   clearOnSelect?: boolean;
   /** Call onBlur with an empty string when the input is cleared. */
@@ -101,16 +99,25 @@ export function TagAutocompleteInput({
       )
     : [...(favouriteTags ?? [])];
   const filteredStatic = useMemo(() => {
-    const normalized = searchText.replace(/\s+/g, "");
-    if (!normalized.startsWith("system:") || !staticSuggestions?.length)
+    if (!searchText || SYSTEM_TAG_SUGGESTIONS.length === 0) return [];
+    if (!searchText.startsWith("system:") && searchText.length < 2) {
       return [];
-    if (normalized === "system:") return staticSuggestions;
-    return staticSuggestions
-      .map((tag) => ({ tag, score: defaultFilter(tag, normalized) }))
+    }
+
+    const isSystemSearch = searchText.startsWith("system:");
+
+    if (searchText === "system:") return SYSTEM_TAG_SUGGESTIONS;
+
+    const matches = SYSTEM_TAG_SUGGESTIONS.map((suggestion) => ({
+      suggestion,
+      score: defaultFilter(suggestion.value, searchText, suggestion.keywords),
+    }))
       .filter((entry) => entry.score > 0)
       .sort((a, b) => b.score - a.score)
-      .map((entry) => entry.tag);
-  }, [searchText, staticSuggestions]);
+      .map((entry) => entry.suggestion);
+
+    return isSystemSearch ? matches : matches.slice(0, 2);
+  }, [searchText]);
   const showFavourites =
     open && !hasSufficientInput && filteredFavourites.length > 0;
   const showDropdown =
@@ -208,13 +215,13 @@ export function TagAutocompleteInput({
             <CommandList>
               {hasSufficientInput ? (
                 <>
-                  {filteredStatic.map((tag) => (
+                  {filteredStatic.map((suggestion) => (
                     <TagSuggestionItem
-                      key={tag}
-                      value={tag}
+                      key={suggestion.value}
+                      value={suggestion.value}
                       prefix={isNegative ? "-" : undefined}
                       showFavouriteIcon={false}
-                      onSelect={() => handleSelect(tag)}
+                      onSelect={() => handleSelect(suggestion.value)}
                     />
                   ))}
                   {suggestions.map((tag) => (
@@ -229,13 +236,13 @@ export function TagAutocompleteInput({
                 </>
               ) : (
                 <>
-                  {filteredStatic.map((tag) => (
+                  {filteredStatic.map((suggestion) => (
                     <TagSuggestionItem
-                      key={tag}
-                      value={tag}
+                      key={suggestion.value}
+                      value={suggestion.value}
                       prefix={isNegative ? "-" : undefined}
                       showFavouriteIcon={false}
-                      onSelect={() => handleSelect(tag)}
+                      onSelect={() => handleSelect(suggestion.value)}
                     />
                   ))}
                   {filteredFavourites.length > 0 && (

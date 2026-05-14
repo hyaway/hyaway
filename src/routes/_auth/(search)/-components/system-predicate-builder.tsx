@@ -6,7 +6,6 @@ import { QueryBuilder, RuleGroupBodyComponents } from "react-querybuilder";
 import { queryToHydrusSearch } from "../-lib/query-to-hydrus-search";
 import {
   FILE_SERVICE_TYPES,
-  SYSTEM_TAGS,
   buildRatingFieldGroups,
   fieldGroups,
   getDefaultSortAsc,
@@ -138,7 +137,6 @@ function QBRuleGroupBody(props: RuleGroupProps & UseRuleGroup) {
         inputClassName={cn("h-9", "max-w-2xl min-w-0 @md:min-w-48")}
         placeholder="Add tag or system:_"
         name={`hyaway-qb-inline-${props.path.join("-")}`}
-        staticSuggestions={SYSTEM_TAGS}
         onSelect={handleInlineSelect}
         onSubmit={handleInlineSelect}
         onBlur={handleInlineSelect}

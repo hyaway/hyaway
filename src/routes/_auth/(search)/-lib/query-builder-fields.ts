@@ -511,11 +511,333 @@ export const isNoValueField = (field: string, operator: string): boolean =>
   STATUS_FIELDS.has(field) ||
   (NO_VALUE_OPERATORS.has(operator) && !HAS_WITH_VALUE_FIELDS.has(field));
 
+const SYSTEM_TAG_SEARCH_KEYWORDS: Record<string, Array<string>> = {
+  "system:inbox": ["new", "unprocessed", "unarchived", "to review"],
+  "system:archive": ["archived", "processed", "not inbox"],
+  "system:everything": ["all", "all files"],
+  "system:limit": ["max", "maximum", "result count", "results"],
+
+  "system:has audio": ["sound", "has sound", "with audio", "music"],
+  "system:no audio": ["silent", "mute", "muted", "no sound", "without audio"],
+  "system:has transparency": [
+    "transparent",
+    "transparency",
+    "alpha",
+    "has alpha",
+    "alpha channel",
+  ],
+  "system:no transparency": [
+    "opaque",
+    "no alpha",
+    "without alpha",
+    "without transparency",
+  ],
+  "system:has exif": ["metadata", "camera metadata", "photo metadata"],
+  "system:no exif": ["no metadata", "without exif"],
+  "system:has icc profile": ["icc", "color profile", "profile"],
+  "system:no icc profile": ["no icc", "no color profile"],
+  "system:has embedded metadata": [
+    "embedded metadata",
+    "human readable embedded metadata",
+    "human-readable embedded metadata",
+    "metadata",
+  ],
+  "system:no embedded metadata": [
+    "no embedded metadata",
+    "no human readable embedded metadata",
+    "no human-readable embedded metadata",
+    "without metadata",
+  ],
+  "system:has forced filetype": ["filetype override", "forced type"],
+  "system:no forced filetype": ["no filetype override", "normal filetype"],
+
+  "system:width": ["wide", "horizontal", "resolution"],
+  "system:height": ["tall", "vertical", "resolution"],
+  "system:ratio": [
+    "aspect",
+    "aspect ratio",
+    "wider than",
+    "taller than",
+    "landscape",
+    "portrait",
+    "square",
+  ],
+  "system:num pixels": [
+    "pixels",
+    "number of pixels",
+    "number pixels",
+    "num of pixels",
+    "megapixels",
+    "kilopixels",
+    "resolution",
+    "large image",
+    "small image",
+  ],
+
+  "system:has duration": [
+    "video",
+    "animation",
+    "animated",
+    "has length",
+    "duration has duration",
+  ],
+  "system:no duration": ["still", "image", "no length", "duration no duration"],
+  "system:duration": [
+    "length",
+    "long video",
+    "short video",
+    "runtime",
+    "seconds",
+    "minutes",
+    "milliseconds",
+  ],
+  "system:has framerate": ["fps", "frame rate", "framerate has framerate"],
+  "system:no framerate": ["no fps", "no frame rate", "framerate no framerate"],
+  "system:framerate": ["fps", "frame rate"],
+  "system:has frames": [
+    "frame count",
+    "has frames",
+    "number of frames has frames",
+  ],
+  "system:no frames": [
+    "no frames",
+    "without frames",
+    "number of frames no frames",
+  ],
+  "system:number of frames": [
+    "frames",
+    "frame count",
+    "num frames",
+    "number frames",
+    "num of frames",
+  ],
+
+  "system:filetype": [
+    "mime",
+    "type",
+    "extension",
+    "file type",
+    "image",
+    "video",
+    "gif",
+    "static gif",
+    "animated gif",
+    "webm",
+    "jpg",
+    "png",
+  ],
+  "system:filesize": [
+    "size",
+    "file size",
+    "large file",
+    "small file",
+    "bytes",
+    "mb",
+    "kb",
+    "kilobytes",
+    "megabytes",
+    "gigabytes",
+  ],
+  "system:hash": ["sha256", "md5", "sha1", "sha512", "file hash"],
+  "system:file service": [
+    "service",
+    "local files",
+    "trash",
+    "repository",
+    "currently in",
+    "not currently in",
+    "pending to",
+    "not pending to",
+  ],
+
+  "system:has tags": ["tagged", "with tags", "number of tags has tags"],
+  "system:untagged": [
+    "no tags",
+    "without tags",
+    "missing tags",
+    "number of tags no tags",
+  ],
+  "system:number of tags": [
+    "tag count",
+    "many tags",
+    "few tags",
+    "num tags",
+    "number tags",
+    "num of tags",
+  ],
+
+  "system:has urls": [
+    "url",
+    "source",
+    "source url",
+    "has source",
+    "has urls",
+    "number of urls has urls",
+    "num urls > 0",
+  ],
+  "system:no urls": [
+    "no url",
+    "no source",
+    "missing source",
+    "without urls",
+    "number of urls no urls",
+    "num urls = 0",
+  ],
+  "system:number of urls": [
+    "url count",
+    "source count",
+    "num urls",
+    "number urls",
+    "num of urls",
+  ],
+  "system:has url": ["exact url", "source url", "has_url"],
+  "system:does not have url": [
+    "no exact url",
+    "without url",
+    "doesn't have url",
+    "does not have url",
+  ],
+  "system:has url matching regex": [
+    "regex",
+    "url regex",
+    "matches url",
+    "has a url matching regex",
+  ],
+  "system:does not have url matching regex": [
+    "no regex match",
+    "url not matching regex",
+    "doesn't have url matching regex",
+    "does not have a url matching regex",
+  ],
+  "system:has url with domain": [
+    "domain",
+    "has domain",
+    "site",
+    "website",
+    "source domain",
+    "source site",
+    "url with domain",
+  ],
+  "system:does not have url with domain": [
+    "not domain",
+    "not site",
+    "without domain",
+    "doesn't have domain",
+    "does not have domain",
+  ],
+
+  "system:has notes": [
+    "notes",
+    "with notes",
+    "number of notes has notes",
+    "num notes > 0",
+  ],
+  "system:no notes": [
+    "no notes",
+    "missing notes",
+    "without notes",
+    "number of notes no notes",
+    "num notes = 0",
+  ],
+  "system:number of notes": [
+    "note count",
+    "num notes",
+    "number notes",
+    "num of notes",
+  ],
+  "system:has note with name": [
+    "note name",
+    "named note",
+    "note named",
+    "has a note with name",
+    "has note named",
+  ],
+  "system:does not have note with name": [
+    "no note name",
+    "missing note",
+    "no note with name",
+    "doesn't have note with name",
+    "does not have a note with name",
+  ],
+
+  "system:import time": [
+    "imported",
+    "added",
+    "recent",
+    "new files",
+    "old files",
+    "import date",
+    "imported date",
+    "imported time",
+    "time imported",
+    "date imported",
+  ],
+  "system:modified time": [
+    "modified",
+    "changed",
+    "edited",
+    "modified date",
+    "date modified",
+    "time modified",
+  ],
+  "system:archived time": [
+    "archive date",
+    "archive time",
+    "archived",
+    "archived date",
+    "date archived",
+    "time archived",
+  ],
+  "system:last viewed time": [
+    "viewed",
+    "last seen",
+    "recently viewed",
+    "last view date",
+    "last view time",
+    "last viewed date",
+    "date last viewed",
+    "time last viewed",
+  ],
+
+  "system:media views": [
+    "views",
+    "watched",
+    "opened",
+    "media view count",
+    "views in media",
+  ],
+  "system:preview views": [
+    "preview",
+    "thumbnail views",
+    "preview count",
+    "views in preview",
+  ],
+  "system:all views": ["total views", "view count", "views in media preview"],
+  "system:media viewtime": [
+    "watch time",
+    "view time",
+    "time watched",
+    "viewtime in media",
+  ],
+  "system:preview viewtime": [
+    "preview time",
+    "thumbnail time",
+    "viewtime in preview",
+  ],
+  "system:all viewtime": [
+    "total view time",
+    "all watch time",
+    "viewtime in media preview",
+  ],
+};
+
 /**
- * Extra search keywords for fields, so e.g. "has tags" matches "number of tags".
- * Maps field name → array of additional keyword strings.
+ * Extra search keywords for fields and system predicates.
+ * Maps field or predicate name -> array of additional keyword strings.
  */
-export const FIELD_SEARCH_KEYWORDS: Record<string, Array<string>> = {};
+export const FIELD_SEARCH_KEYWORDS: Record<string, Array<string>> = {
+  ...SYSTEM_TAG_SEARCH_KEYWORDS,
+};
 
 /**
  * Map field names to their hydrus display prefix.
@@ -600,7 +922,7 @@ const SYSTEM_TAG_RULE_ENTRIES: Array<
   ["system:has frames", { field: "frames_presence", operator: "has" }],
   ["system:no frames", { field: "frames_presence", operator: "has_not" }],
   ["system:has tags", { field: "tags_presence", operator: "has" }],
-  ["system:no tags", { field: "tags_presence", operator: "has_not" }],
+  ["system:untagged", { field: "tags_presence", operator: "has_not" }],
   ["system:has urls", { field: "urls_presence", operator: "has" }],
   ["system:no urls", { field: "urls_presence", operator: "has_not" }],
   ["system:has notes", { field: "notes_presence", operator: "has" }],
@@ -633,6 +955,17 @@ export const SYSTEM_TAGS: Array<string> = [
     ].filter((v) => v.startsWith("system:")),
   ),
 ];
+
+export type SystemTagSuggestion = {
+  value: string;
+  keywords?: Array<string>;
+};
+
+export const SYSTEM_TAG_SUGGESTIONS: Array<SystemTagSuggestion> =
+  SYSTEM_TAGS.map((value) => ({
+    value,
+    keywords: SYSTEM_TAG_SEARCH_KEYWORDS[value],
+  }));
 
 /** Reverse map: system tag string → field name. */
 const SYSTEM_TAG_TO_FIELD: Record<string, string> = Object.fromEntries(
