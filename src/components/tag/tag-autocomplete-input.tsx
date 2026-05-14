@@ -13,8 +13,8 @@ import {
 } from "@/components/ui-primitives/command";
 import { Input } from "@/components/ui-primitives/input";
 import {
-  useFavouriteTagsLookup,
   useFavouriteTagsQuery,
+  useIsFavouriteTag,
   useSearchTagsQuery,
 } from "@/integrations/hydrus-api/queries/tags";
 import { useTagColor } from "@/integrations/hydrus-api/queries/options";
@@ -118,11 +118,7 @@ export function TagAutocompleteInput({
     showFavourites ||
     (open && filteredStatic.length > 0);
 
-  const favourites = useFavouriteTagsLookup();
-  const normalizedInputValue = inputValue.trim().replace(/^-+/, "");
-  const isFavouriteInput = normalizedInputValue
-    ? favourites.has(normalizedInputValue)
-    : false;
+  const isFavouriteInput = useIsFavouriteTag(inputValue);
   const inputColor = useTagColor(inputValue);
   const colorizedInputStyle: CSSProperties = { "--badge-overlay": inputColor };
 
@@ -289,10 +285,10 @@ export function TagSuggestionItem({
   showFavourite?: boolean;
   onSelect: () => void;
 }) {
-  const favourites = useFavouriteTagsLookup();
   const color = useTagColor(value);
   const style: CSSProperties = { color };
-  const isFavourite = showFavourite && favourites.has(value);
+  const isFavouriteTag = useIsFavouriteTag(value);
+  const isFavourite = showFavourite && isFavouriteTag;
 
   return (
     <CommandItem value={value} onSelect={onSelect}>

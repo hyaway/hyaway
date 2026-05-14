@@ -62,6 +62,16 @@ export const useFavouriteTagsLookup = (): ReadonlySet<string> => {
 };
 
 /**
+ * Convenience hook for checking whether a display tag is favourited.
+ * Leading search negation markers are ignored.
+ */
+export const useIsFavouriteTag = (displayTag: string): boolean => {
+  const favourites = useFavouriteTagsLookup();
+  const tag = displayTag.trim().replace(/^-+/, "");
+  return tag ? favourites.has(tag) : false;
+};
+
+/**
  * Mutation to add or remove a single tag from favourites.
  *
  * Optimistically updates the cache and rolls back on error.

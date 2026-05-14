@@ -10,7 +10,7 @@ import type { ComponentProps, ReactNode } from "react";
 import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
 import { Badge } from "@/components/ui-primitives/badge";
 import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
-import { useFavouriteTagsLookup } from "@/integrations/hydrus-api/queries/tags";
+import { useIsFavouriteTag } from "@/integrations/hydrus-api/queries/tags";
 import { parseTag } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 
@@ -41,9 +41,8 @@ export function TagBadge({
   const color = useNamespaceColor(namespace);
   const combinedStyle = { "--badge-overlay": color, ...style };
 
-  const favourites = useFavouriteTagsLookup();
   const fullTag = namespace ? `${namespace}:${tag}` : tag;
-  const isFavourite = favourites.has(fullTag);
+  const isFavourite = useIsFavouriteTag(fullTag);
 
   return (
     <Badge

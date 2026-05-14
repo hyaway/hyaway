@@ -35,7 +35,7 @@ import {
 } from "@/stores/search-queries-store";
 import { cn } from "@/lib/utils";
 import {
-  useFavouriteTagsLookup,
+  useIsFavouriteTag,
   useSetFavouriteTagsMutation,
 } from "@/integrations/hydrus-api/queries/tags";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
@@ -193,10 +193,9 @@ export function useTagActions(
  */
 export function useFavouriteTagAction(tag: string): TagAction | null {
   const canTags = useHasPermission(Permission.EDIT_FILE_TAGS);
-  const favourites = useFavouriteTagsLookup();
   const { mutate } = useSetFavouriteTagsMutation();
   const bareTag = tag.startsWith("-") ? tag.slice(1) : tag;
-  const isFavourite = favourites.has(bareTag);
+  const isFavourite = useIsFavouriteTag(bareTag);
 
   const handleToggle = useCallback(() => {
     if (isFavourite) {
