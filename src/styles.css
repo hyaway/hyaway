@@ -229,6 +229,16 @@
     @apply font-sans;
   }
 
+  input,
+  textarea,
+  select,
+  [contenteditable="true"] {
+    font-variant-ligatures: none;
+    font-feature-settings:
+      "liga" 0,
+      "calt" 0;
+  }
+
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
