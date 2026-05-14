@@ -17,7 +17,6 @@ import {
 } from "../-lib/query-builder-fields";
 import type { CSSProperties } from "react";
 import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
-import { badgeVariants } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";
 import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
 import {
@@ -188,13 +187,15 @@ export function SortSelect({
   const [search, setSearch] = useState("");
   const [activePage, setActivePage] = useState<string | null>(null);
   const theme = useActiveTheme();
-  const defaultColor = useNamespaceColor("");
+  const namespaceColor = useNamespaceColor("");
   const selectedSortColor = getThemeAdjustedColorFromHex(
     getSortColorHex(value, sortAsc),
     theme,
   );
-  const color = selectedSortColor ?? defaultColor;
-  const combinedStyle: CSSProperties = { "--badge-overlay": color };
+  const selectedColor = selectedSortColor ?? namespaceColor;
+  const selectedOverlayStyle = {
+    "--badge-overlay": selectedColor,
+  } as CSSProperties;
 
   const selectedLabel = getSortOption(value).label;
 
@@ -211,21 +212,22 @@ export function SortSelect({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         className={cn(
-          badgeVariants({ variant: "overlay", size: "default" }),
-          "h-9 max-w-2xl min-w-40 flex-1 basis-40 cursor-pointer justify-between gap-1.5 px-3 text-sm outline-none disabled:opacity-50",
+          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 max-w-2xl min-w-40 flex-1 basis-40 cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50",
+          "border-(--badge-overlay)/30 bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] text-(--badge-overlay) hover:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
         )}
-        style={combinedStyle}
+        style={selectedOverlayStyle}
         aria-label="Sort by"
       >
         <span className="truncate">{selectedLabel}</span>
-        <IconChevronDown className="text-muted-foreground size-4 shrink-0" />
+        <IconChevronDown
+          className={cn("size-4 shrink-0", "text-(--badge-overlay)")}
+        />
       </PopoverTrigger>
       <PopoverContent
-        className="max-h-[70dvh] w-56 p-0"
-        align="start"
-        side="right"
+        className="max-h-[60dvh] w-80 max-w-[calc(100dvw-1rem)] p-0"
+        align="end"
+        side="bottom"
         positionMethod="fixed"
-        sideOffset={-240}
       >
         <Command
           shouldFilter={isSearching}

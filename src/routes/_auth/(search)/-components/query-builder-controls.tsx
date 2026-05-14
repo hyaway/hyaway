@@ -458,11 +458,9 @@ export function QBSelect({
         />
       </PopoverTrigger>
       <PopoverContent
-        className="max-h-[70dvh] w-80 p-0"
-        align="start"
-        side="right"
-        alignOffset={-4}
-        sideOffset={-240}
+        className="max-h-[60dvh] w-96 max-w-[calc(100dvw-1rem)] p-0"
+        align="end"
+        side="bottom"
         positionMethod="fixed"
       >
         <DrillDownCommandContent
@@ -623,7 +621,7 @@ function SystemFieldCombobox({
         <IconChevronDown data-icon="inline-end" className="size-4" />
       </PopoverTrigger>
       <PopoverContent
-        className="max-h-[70dvh] w-80 p-0"
+        className="max-h-[70dvh] w-80 max-w-[calc(100dvw-1rem)] p-0"
         align="start"
         positionMethod="fixed"
       >
