@@ -12,11 +12,7 @@ import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
-import {
-  SYSTEM_TAGS,
-  getSortColorHex,
-  getSortLabel,
-} from "./-lib/query-builder-fields";
+import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
 import { InstantSearchSwitch } from "./-components/instant-search-switch";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
@@ -281,15 +277,19 @@ function QuickTagSearch({ onSearch }: { onSearch: (tag: string) => void }) {
         inputClassName="h-11"
         placeholder="Search tags…"
         name="hyaway-quick-tag-search"
-        staticSuggestions={SYSTEM_TAGS}
         onChange={(val) => {
           inputRef.current = val;
         }}
         onSelect={onSearch}
       />
-      <Button type="submit" size="default" aria-label="Search">
+      <Button
+        type="submit"
+        size="default"
+        aria-label="Search"
+        className="size-11 shrink-0 sm:w-auto"
+      >
         <IconSearch data-icon="inline-start" className="size-5" />
-        Search
+        <span className="hidden sm:inline">Search</span>
       </Button>
     </form>
   );
