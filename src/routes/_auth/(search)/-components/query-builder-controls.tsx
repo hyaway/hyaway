@@ -1133,18 +1133,26 @@ export function CombinatorSeparator({ text }: { text: string }) {
   const isOrGroupCombinator = text === "or";
 
   return (
-    <div className={cn("flex items-center", QUERY_BUILDER_LINE_WIDTH)}>
-      <div
-        className={cn(
-          "flex w-full max-w-2xl items-center",
-          isOrGroupCombinator && "-translate-x-4",
-        )}
-      >
-        <div className="bg-border h-px flex-1" />
+    <div
+      className={cn(
+        "flex items-center",
+        QUERY_BUILDER_LINE_WIDTH,
+        isOrGroupCombinator && "max-w-[calc(var(--container-5xl)-1rem)]",
+      )}
+    >
+      <div className={cn("flex w-full max-w-2xl items-center")}>
+        <div
+          className={cn(
+            "bg-border h-px flex-1",
+            isOrGroupCombinator
+              ? "max-w-[calc(var(--container-2xl)/2-2.25rem)]"
+              : "max-w-[calc(var(--container-2xl)/2)]",
+          )}
+        />
         <span className="text-muted-foreground px-3 text-sm font-medium">
           {text}
         </span>
-        <div className="bg-border h-px flex-1" />
+        <div className={cn("bg-border h-px flex-1")} />
       </div>
       <div className="bg-border h-px flex-1" />
     </div>
