@@ -24,7 +24,11 @@ export const HAS_ONLY_FIELDS = new Set([
 /** A `["system:has …", "system:no …"]` label pair for has/has_not toggles. */
 type HasNoLabels = [`system:has ${string}`, `system:no ${string}`];
 
-function ruleToSearchTag(rule: RuleType): string | null {
+function invariant(condition: boolean, message: string): asserts condition {
+  if (!condition) throw new Error(message);
+}
+
+export function ruleToSearchTag(rule: RuleType): string | null {
   const { field, operator, value } = rule;
 
   // Tag field — value is the raw tag string (prefix with - to negate)
@@ -174,46 +178,34 @@ function ruleToSearchTag(rule: RuleType): string | null {
  * - Top-level entries are ANDed
  * - Inner arrays are ORed
  *
- * So an AND group's rules become separate top-level entries,
- * and an OR group's rules become a single inner array.
+ * Query builder invariant: root group is AND, nested groups are OR, and groups
+ * are only nested one level deep.
  */
 export function queryToHydrusSearch(query: RuleGroupType): HydrusTagSearch {
+  invariant(
+    query.combinator === "and",
+    "Search query root group must use AND combinator.",
+  );
+
   const result: HydrusTagSearch = [];
 
   for (const ruleOrGroup of query.rules) {
     if ("rules" in ruleOrGroup) {
-      // Nested group
       const nested = ruleOrGroup;
-      if (nested.combinator === "or") {
-        // OR group → collect all tags into a single inner array
-        const orTags: Array<string> = [];
-        collectTags(nested, orTags);
-        if (orTags.length > 0) {
-          result.push(orTags.length === 1 ? orTags[0] : orTags);
-        }
-      } else {
-        // AND sub-group → flatten into top-level AND entries
-        const subResult = queryToHydrusSearch(nested);
-        result.push(...subResult);
+      invariant(
+        nested.combinator === "or",
+        "Search query nested groups must use OR combinator.",
+      );
+
+      const orTags: Array<string> = [];
+      collectTags(nested, orTags);
+      if (orTags.length > 0) {
+        result.push(orTags.length === 1 ? orTags[0] : orTags);
       }
     } else {
       const tag = ruleToSearchTag(ruleOrGroup);
       if (tag) result.push(tag);
     }
-  }
-
-  // Handle top-level OR: if the root itself is OR, wrap everything
-  if (query.combinator === "or" && result.length > 1) {
-    // All tags at this level should be ORed
-    const flat: Array<string> = [];
-    for (const entry of result) {
-      if (Array.isArray(entry)) {
-        flat.push(...entry);
-      } else {
-        flat.push(entry);
-      }
-    }
-    return [flat];
   }
 
   return result;
@@ -222,11 +214,12 @@ export function queryToHydrusSearch(query: RuleGroupType): HydrusTagSearch {
 /** Recursively collect all tags from a group (flattened). */
 function collectTags(group: RuleGroupType, out: Array<string>): void {
   for (const ruleOrGroup of group.rules) {
-    if ("rules" in ruleOrGroup) {
-      collectTags(ruleOrGroup, out);
-    } else {
-      const tag = ruleToSearchTag(ruleOrGroup);
-      if (tag) out.push(tag);
-    }
+    invariant(
+      !("rules" in ruleOrGroup),
+      "Search query OR groups cannot contain nested groups.",
+    );
+
+    const tag = ruleToSearchTag(ruleOrGroup);
+    if (tag) out.push(tag);
   }
 }

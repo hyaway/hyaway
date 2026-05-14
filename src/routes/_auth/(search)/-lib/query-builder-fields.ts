@@ -90,7 +90,7 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
         label: "tag",
         operators: tagOperators,
         defaultValue: "",
-        placeholder: "character:samus aran",
+        placeholder: "tag",
       },
       {
         name: "inbox",
