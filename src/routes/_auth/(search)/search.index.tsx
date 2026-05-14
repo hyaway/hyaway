@@ -10,6 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
@@ -74,9 +75,7 @@ function SearchIndex() {
       <div className="flex flex-col gap-4 pt-2">
         <QuickTagSearch onSearch={handleQuickSearch} />
         <Separator />
-        {searchKeys.map((key) => (
-          <SearchEntryCard key={key} searchId={key} />
-        ))}
+        <SearchEntryList searchKeys={searchKeys} />
         {searchKeys.length > 0 && (
           <>
             <Separator />
@@ -95,6 +94,51 @@ function SearchIndex() {
         <SearchIndexSettingsPopover />
       </PageHeaderActions>
     </>
+  );
+}
+
+function SearchEntryList({ searchKeys }: { searchKeys: Array<string> }) {
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useWindowVirtualizer({
+    count: searchKeys.length,
+    estimateSize: () => 168,
+    overscan: 4,
+    gap: 16,
+    scrollMargin: listRef.current?.offsetTop ?? 0,
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
+  if (searchKeys.length === 0) {
+    return null;
+  }
+
+  return (
+    <div ref={listRef} className="relative w-full">
+      <div
+        style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+        className="relative w-full"
+      >
+        {virtualItems.map((virtualRow) => {
+          const searchId = searchKeys[virtualRow.index];
+
+          return (
+            <div
+              key={searchId}
+              ref={rowVirtualizer.measureElement}
+              data-index={virtualRow.index}
+              className="absolute top-0 left-0 w-full"
+              style={{
+                transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`,
+              }}
+            >
+              <SearchEntryCard searchId={searchId} />
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
