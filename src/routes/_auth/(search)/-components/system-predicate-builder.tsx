@@ -128,13 +128,13 @@ function QBRuleGroupBody(props: RuleGroupProps & UseRuleGroup) {
     <>
       <RuleGroupBodyComponents {...props} />
       {hasRules && (
-        <div className="pt-2 pb-3 md:pt-1 md:pb-2">
+        <div className="pt-2 pb-3 @md:pt-1 @md:pb-2">
           <CombinatorSeparator text={combinator} />
         </div>
       )}
       <TagAutocompleteInput
-        className="relative w-full"
-        inputClassName="h-9"
+        className={cn("relative", "w-full max-w-2xl")}
+        inputClassName={cn("h-9", "max-w-2xl min-w-48")}
         placeholder="Add tag or system:…"
         name={`hyaway-qb-inline-${props.path.join("-")}`}
         staticSuggestions={SYSTEM_TAGS}

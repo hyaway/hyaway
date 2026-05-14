@@ -69,8 +69,8 @@ import { useActiveTheme } from "@/stores/theme-store";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import { useTagColor } from "@/integrations/hydrus-api/queries/options";
 
-const QUERY_BUILDER_CONTROL_HEIGHT = "h-9";
-const QUERY_BUILDER_ICON_BUTTON_SIZE = "size-9";
+const QUERY_BUILDER_VALUE_WIDTH = cn("max-w-2xl min-w-40 flex-1 basis-40");
+const QUERY_BUILDER_LINE_WIDTH = cn("w-full max-w-5xl");
 
 // ---------------------------------------------------------------------------
 // Field selector
@@ -438,8 +438,8 @@ export function QBSelect({
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 lg:w-auto lg:max-w-96 lg:min-w-60",
-          QUERY_BUILDER_CONTROL_HEIGHT,
+          "border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex max-w-2xl min-w-40 flex-1 basis-40 cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50",
+          cn("h-9"),
           selectedOverlayStyle &&
             "border-(--badge-overlay)/30 bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] text-(--badge-overlay) hover:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
           className,
@@ -758,7 +758,7 @@ function TextValueEditor({
   return (
     <Input
       type={type}
-      className="w-full lg:w-auto lg:max-w-96 lg:min-w-40"
+      className={QUERY_BUILDER_VALUE_WIDTH}
       name={name}
       value={inputValue}
       disabled={disabled}
@@ -1063,7 +1063,7 @@ function TagValueEditor({
   return (
     <>
       <TagAutocompleteInput
-        className="relative w-full lg:w-auto lg:max-w-lg lg:min-w-48 lg:flex-1"
+        className="relative max-w-2xl min-w-48 flex-1 basis-48"
         value={inputValue}
         onChange={handleChange}
         onSelect={(tag) => {
@@ -1086,7 +1086,7 @@ function TagValueEditor({
       <Button
         variant="ghost"
         size="icon-sm"
-        className={cn(QUERY_BUILDER_ICON_BUTTON_SIZE, "shrink-0")}
+        className={cn("size-9", "shrink-0")}
         onClick={handleToggleNegation}
         disabled={disabled}
         type="button"
@@ -1103,15 +1103,25 @@ function TagValueEditor({
 // Combinator selector
 // ---------------------------------------------------------------------------
 
-/** Combinator label with separator lines below lg breakpoint. */
+/** Combinator label with separator lines. */
 export function CombinatorSeparator({ text }: { text: string }) {
+  const isOrGroupCombinator = text === "or";
+
   return (
-    <div className="flex w-full items-center lg:w-auto lg:px-1">
-      <div className="bg-border h-px flex-1 lg:hidden" />
-      <span className="text-muted-foreground px-3 text-sm font-medium lg:px-0">
-        {text}
-      </span>
-      <div className="bg-border h-px flex-1 lg:hidden" />
+    <div className={cn("flex items-center", QUERY_BUILDER_LINE_WIDTH)}>
+      <div
+        className={cn(
+          "flex w-full max-w-2xl items-center",
+          isOrGroupCombinator && "-translate-x-4",
+        )}
+      >
+        <div className="bg-border h-px flex-1" />
+        <span className="text-muted-foreground px-3 text-sm font-medium">
+          {text}
+        </span>
+        <div className="bg-border h-px flex-1" />
+      </div>
+      <div className="bg-border h-px flex-1" />
     </div>
   );
 }
@@ -1126,14 +1136,14 @@ export function QBCombinatorSelect(props: VersatileSelectorProps) {
 // ---------------------------------------------------------------------------
 
 export const controlClassnames = {
-  queryBuilder: "",
+  queryBuilder: "@container",
   ruleGroup:
     "qb-group flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2 [&_.qb-group]:ml-1 [&_.qb-group]:rounded-none [&_.qb-group]:border-0 [&_.qb-group]:border-l-4 [&_.qb-group]:border-l-primary",
   header: "order-last flex flex-wrap items-center gap-2",
   body: "flex flex-col gap-0",
-  rule: "flex flex-wrap items-center gap-2",
+  rule: cn("flex flex-wrap items-center gap-2", QUERY_BUILDER_LINE_WIDTH),
   combinators: "",
-  betweenRules: "my-2 md:my-1 lg:self-start",
+  betweenRules: cn("my-2 @md:my-1", QUERY_BUILDER_LINE_WIDTH),
   dragHandle: "hidden",
   notToggle: "hidden",
   lock: "hidden",
@@ -1141,4 +1151,6 @@ export const controlClassnames = {
   cloneRule: "hidden",
   shiftActions: "hidden",
   valueSource: "hidden",
+  value: QUERY_BUILDER_VALUE_WIDTH,
+  removeRule: "shrink-0",
 };

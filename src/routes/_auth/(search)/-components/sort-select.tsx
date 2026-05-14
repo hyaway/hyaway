@@ -43,11 +43,16 @@ export function SortSection({
   onSortAscToggle: () => void;
 }) {
   return (
-    <div className="@container flex flex-wrap items-center gap-2">
+    <div className="@container flex max-w-2xl flex-wrap items-center gap-2">
       <span className="text-muted-foreground shrink-0 text-sm font-medium">
         Sort by
       </span>
-      <div className="flex min-w-full items-center gap-2 @sm:min-w-0 @sm:flex-none">
+      <div
+        className={cn(
+          "flex min-w-full flex-1 flex-wrap items-center gap-2 @sm:min-w-0",
+          "w-full max-w-5xl",
+        )}
+      >
         <SortSelect value={sortType} onChange={onSortTypeChange} />
         <Button
           variant="ghost"
@@ -60,12 +65,12 @@ export function SortSection({
           {sortAsc ? (
             <>
               <IconSortAscending2Filled className="size-5" />
-              <span className="hidden text-sm @sm:inline">ascending</span>
+              <span className="text-sm @xs:hidden @lg:inline">ascending</span>
             </>
           ) : (
             <>
               <IconSortDescending2Filled className="size-5" />
-              <span className="hidden text-sm @sm:inline">descending</span>
+              <span className="text-sm @2xs:hidden @lg:inline">descending</span>
             </>
           )}
         </Button>
@@ -102,7 +107,7 @@ export function SortSelect({
       <PopoverTrigger
         className={cn(
           badgeVariants({ variant: "overlay", size: "default" }),
-          "h-9 w-full cursor-pointer justify-between gap-1.5 px-3 text-sm outline-none disabled:opacity-50 @sm:w-auto @sm:max-w-96 @sm:min-w-60",
+          "h-9 max-w-2xl min-w-40 flex-1 basis-40 cursor-pointer justify-between gap-1.5 px-3 text-sm outline-none disabled:opacity-50",
         )}
         style={combinedStyle}
         aria-label="Sort by"
