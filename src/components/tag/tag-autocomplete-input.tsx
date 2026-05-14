@@ -25,13 +25,15 @@ import { SYSTEM_TAG_SUGGESTIONS } from "@/routes/_auth/(search)/-lib/query-build
 // TagAutocompleteInput
 // ---------------------------------------------------------------------------
 
+const MAX_TAG_SUGGESTIONS = 20;
+
 export function TagAutocompleteInput({
   value = "",
   onChange,
   onSelect,
   onSubmit,
   onBlur,
-  placeholder = "Search tags…",
+  placeholder = "Add tag or system predicate",
   name,
   disabled,
   className,
@@ -90,7 +92,7 @@ export function TagAutocompleteInput({
     debouncedInput.replace(/^-+/, "").replace(/:$/, ""),
   );
   const { data: favouriteTags } = useFavouriteTagsQuery();
-  const suggestions = data?.tags.slice(0, 50) ?? [];
+  const suggestions = data?.tags.slice(0, MAX_TAG_SUGGESTIONS) ?? [];
   const hasSufficientInput = inputValue.trim().replace(/^-+/, "").length >= 3;
   const searchText = inputValue.trim().replace(/^-+/, "").toLowerCase();
   const filteredFavourites = searchText
