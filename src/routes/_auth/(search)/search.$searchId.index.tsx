@@ -15,11 +15,12 @@ import {
   useCommittedSearchFilesQuery,
 } from "./-hooks/use-committed-search-query";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
-import { getSortLabel } from "./-lib/query-builder-fields";
+import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
+import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
@@ -39,6 +40,7 @@ import {
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
 import { useSearchSettingsActions } from "@/stores/search-settings-store";
+import { useActiveTheme } from "@/stores/theme-store";
 
 export const Route = createFileRoute("/_auth/(search)/search/$searchId/")({
   component: SearchPage,
@@ -48,6 +50,7 @@ function SearchPage() {
   const { searchId } = Route.useParams();
   const displayName = useSearchDisplayName(searchId);
   const committed = useCommittedSearch(searchId);
+  const theme = useActiveTheme();
   const isDirty = useSearchDirty(searchId);
   const { saveAs, remove } = useSearchQueriesActions();
   const entry = useSearchQueryEntry(searchId);
@@ -198,6 +201,17 @@ function SearchPage() {
                   ? getSortLabel(
                       committed.sort.sortType,
                       committed.sort.sortAsc,
+                    )
+                  : undefined
+              }
+              sortColor={
+                committed
+                  ? getThemeAdjustedColorFromHex(
+                      getSortColorHex(
+                        committed.sort.sortType,
+                        committed.sort.sortAsc,
+                      ),
+                      theme,
                     )
                   : undefined
               }

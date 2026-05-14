@@ -166,15 +166,23 @@ export function OrTagBadge({
 export function SearchTagList({
   tags,
   sortLabel,
+  sortColor,
   interactive = true,
   className,
 }: {
   tags: HydrusTagSearch;
   sortLabel?: string;
+  sortColor?: string;
   /** When false, tags are plain text with no menu. Useful inside links. */
   interactive?: boolean;
   className?: string;
 }) {
+  const sortStyle = sortColor
+    ? ({ "--badge-overlay": sortColor } as ComponentProps<
+        typeof Badge
+      >["style"])
+    : undefined;
+
   const content = (
     <div className={cn("flex flex-wrap gap-1.5", className)}>
       {tags.map((entry, i) =>
@@ -194,7 +202,11 @@ export function SearchTagList({
         ),
       )}
       {sortLabel && (
-        <TagBadgeFromString displayTag={sortLabel} size="default-wrap" />
+        <TagBadgeFromString
+          displayTag={sortLabel}
+          size="default-wrap"
+          style={sortStyle}
+        />
       )}
     </div>
   );

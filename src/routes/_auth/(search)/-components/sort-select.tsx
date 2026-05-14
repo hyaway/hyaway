@@ -10,7 +10,11 @@ import {
   IconSortDescending,
 } from "@tabler/icons-react";
 import { defaultFilter } from "cmdk";
-import { getSortOption, getSortOrderLabel } from "../-lib/query-builder-fields";
+import {
+  getSortColorHex,
+  getSortOption,
+  getSortOrderLabel,
+} from "../-lib/query-builder-fields";
 import type { CSSProperties } from "react";
 import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 import { badgeVariants } from "@/components/ui-primitives/badge";
@@ -29,7 +33,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui-primitives/popover";
+import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
+import { useActiveTheme } from "@/stores/theme-store";
 
 const SORT_GROUPS = [
   {
@@ -115,6 +121,14 @@ export function SortSection({
   onSortAscToggle: () => void;
 }) {
   const sortOrderLabel = getSortOrderLabel(sortType, sortAsc);
+  const theme = useActiveTheme();
+  const sortColor = getThemeAdjustedColorFromHex(
+    getSortColorHex(sortType, sortAsc),
+    theme,
+  );
+  const sortColorStyle = sortColor
+    ? ({ "--badge-overlay": sortColor } as CSSProperties)
+    : undefined;
 
   return (
     <div className="@container flex max-w-2xl flex-wrap items-center gap-2">
@@ -127,7 +141,11 @@ export function SortSection({
           "w-full max-w-5xl",
         )}
       >
-        <SortSelect value={sortType} onChange={onSortTypeChange} />
+        <SortSelect
+          value={sortType}
+          sortAsc={sortAsc}
+          onChange={onSortTypeChange}
+        />
         {sortOrderLabel && (
           <Button
             variant="ghost"
@@ -136,6 +154,11 @@ export function SortSection({
             type="button"
             aria-pressed={sortAsc}
             aria-label={`Sort ${sortOrderLabel}`}
+            className={cn(
+              sortColor &&
+                "text-(--badge-overlay) hover:bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] hover:text-(--badge-overlay)",
+            )}
+            style={sortColorStyle}
           >
             {sortAsc ? (
               <IconSortAscending className="size-5" />
@@ -154,15 +177,23 @@ export function SortSection({
 
 export function SortSelect({
   value,
+  sortAsc,
   onChange,
 }: {
   value: HydrusFileSortType;
+  sortAsc: boolean;
   onChange: (value: HydrusFileSortType) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [activePage, setActivePage] = useState<string | null>(null);
-  const color = useNamespaceColor("");
+  const theme = useActiveTheme();
+  const defaultColor = useNamespaceColor("");
+  const selectedSortColor = getThemeAdjustedColorFromHex(
+    getSortColorHex(value, sortAsc),
+    theme,
+  );
+  const color = selectedSortColor ?? defaultColor;
   const combinedStyle: CSSProperties = { "--badge-overlay": color };
 
   const selectedLabel = getSortOption(value).label;
@@ -233,7 +264,7 @@ export function SortSelect({
                           setOpen(false);
                         }}
                       >
-                        {opt.label}
+                        <SortOptionLabel sortType={opt.value} />
                       </CommandItem>
                     );
                   })}
@@ -257,7 +288,7 @@ export function SortSelect({
                             setOpen(false);
                           }}
                         >
-                          {opt.label}
+                          <SortOptionLabel sortType={opt.value} />
                         </CommandItem>
                       );
                     })
@@ -308,7 +339,7 @@ export function SortSelect({
                           setOpen(false);
                         }}
                       >
-                        {opt.label}
+                        <SortOptionLabel sortType={opt.value} />
                       </CommandItem>
                     );
                   })}
@@ -319,5 +350,23 @@ export function SortSelect({
         </Command>
       </PopoverContent>
     </Popover>
+  );
+}
+
+function SortOptionLabel({ sortType }: { sortType: HydrusFileSortType }) {
+  const theme = useActiveTheme();
+  const option = getSortOption(sortType);
+  const color = getThemeAdjustedColorFromHex(getSortColorHex(sortType), theme);
+
+  if (!color) return option.label;
+
+  return (
+    <span
+      className="inline-flex items-center gap-2 text-(--badge-overlay)"
+      style={{ "--badge-overlay": color } as CSSProperties}
+    >
+      <span className="size-2.5 rounded-full bg-(--badge-overlay)" />
+      {option.label}
+    </span>
   );
 }

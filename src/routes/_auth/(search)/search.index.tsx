@@ -12,10 +12,15 @@ import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
-import { SYSTEM_TAGS, getSortLabel } from "./-lib/query-builder-fields";
+import {
+  SYSTEM_TAGS,
+  getSortColorHex,
+  getSortLabel,
+} from "./-lib/query-builder-fields";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
 import { InstantSearchSwitch } from "./-components/instant-search-switch";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
+import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { SearchTagList } from "@/components/tag/tag-badge";
@@ -35,6 +40,7 @@ import {
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
+import { useActiveTheme } from "@/stores/theme-store";
 import { Separator } from "@/components/ui-primitives/separator";
 
 export const Route = createFileRoute("/_auth/(search)/search/")({
@@ -103,10 +109,15 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   const queryClient = useQueryClient();
 
   const { staged } = entry;
+  const theme = useActiveTheme();
 
   const searchTags = useMemo(() => queryToHydrusSearch(staged.query), [staged]);
 
   const sortLabel = getSortLabel(staged.sort.sortType, staged.sort.sortAsc);
+  const sortColor = getThemeAdjustedColorFromHex(
+    getSortColorHex(staged.sort.sortType, staged.sort.sortAsc),
+    theme,
+  );
   const [isRenaming, setIsRenaming] = useState(false);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
@@ -210,6 +221,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
           <SearchTagList
             tags={searchTags}
             sortLabel={sortLabel}
+            sortColor={sortColor}
             interactive={false}
             className="pointer-events-none select-none **:select-none"
           />

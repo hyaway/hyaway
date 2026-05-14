@@ -847,6 +847,8 @@ export const SORT_OPTIONS = [
     ascLabel: "darkest first",
     descLabel: "lightest first",
     defaultAsc: false,
+    ascColorHex: "#404040",
+    descColorHex: "#d4d4d4",
   },
   {
     value: HydrusFileSortType.AverageColourChromaticMagnitude,
@@ -854,6 +856,8 @@ export const SORT_OPTIONS = [
     ascLabel: "greys first",
     descLabel: "colours first",
     defaultAsc: false,
+    ascColorHex: "#737373",
+    descColorHex: "#a855f7",
   },
   {
     value: HydrusFileSortType.AverageColourGreenRedAxis,
@@ -861,6 +865,8 @@ export const SORT_OPTIONS = [
     ascLabel: "greens first",
     descLabel: "reds first",
     defaultAsc: true,
+    ascColorHex: "#16a34a",
+    descColorHex: "#dc2626",
   },
   {
     value: HydrusFileSortType.AverageColourBlueYellowAxis,
@@ -868,6 +874,8 @@ export const SORT_OPTIONS = [
     ascLabel: "blues first",
     descLabel: "yellows first",
     defaultAsc: true,
+    ascColorHex: "#2563eb",
+    descColorHex: "#eab308",
   },
   {
     value: HydrusFileSortType.AverageColourHue,
@@ -875,6 +883,8 @@ export const SORT_OPTIONS = [
     ascLabel: "red first",
     descLabel: "purple first",
     defaultAsc: true,
+    ascColorHex: "#dc2626",
+    descColorHex: "#9333ea",
   },
 ] as const;
 
@@ -894,6 +904,18 @@ export function getSortOrderLabel(
   const option = getSortOption(sortType);
   if (!("ascLabel" in option) || !("descLabel" in option)) return undefined;
   return sortAsc ? option.ascLabel : option.descLabel;
+}
+
+export function getSortColorHex(
+  sortType: HydrusFileSortType,
+  sortAsc = getDefaultSortAsc(sortType),
+): string | undefined {
+  const option = getSortOption(sortType);
+  if (!("ascColorHex" in option) || !("descColorHex" in option)) {
+    return undefined;
+  }
+
+  return sortAsc ? option.ascColorHex : option.descColorHex;
 }
 
 /** Build a display string like "system:sort by import time ▲" for a sort config. */
