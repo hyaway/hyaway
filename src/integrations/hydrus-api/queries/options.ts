@@ -11,6 +11,7 @@ import type { GetClientOptionsResponse } from "../models";
 import type { GalleryBaseWidthMode } from "@/stores/gallery-settings-store";
 import { useActiveTheme } from "@/stores/theme-store";
 import { adjustColorForTheme, rgbToString } from "@/lib/color-utils";
+import { parseTag } from "@/lib/tag-utils";
 import {
   DEFAULT_THUMBNAIL_SIZE,
   MAX_GALLERY_BASE_WIDTH,
@@ -107,6 +108,14 @@ export const useNamespaceColors = (): Record<string, string> => {
 export const useNamespaceColor = (namespace?: string): string => {
   const colors = useNamespaceColors();
   return colors[namespace ?? ""] || colors["null"] || "var(--foreground)";
+};
+
+/**
+ * Hook to get the display color for a full tag string.
+ */
+export const useTagColor = (displayTag: string): string => {
+  const { namespace } = parseTag(displayTag);
+  return useNamespaceColor(namespace);
 };
 
 /**

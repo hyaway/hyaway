@@ -17,8 +17,7 @@ import {
   useFavouriteTagsQuery,
   useSearchTagsQuery,
 } from "@/integrations/hydrus-api/queries/tags";
-import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
-import { parseTag } from "@/lib/tag-utils";
+import { useTagColor } from "@/integrations/hydrus-api/queries/options";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -124,7 +123,7 @@ export function TagAutocompleteInput({
   const isFavouriteInput = normalizedInputValue
     ? favourites.has(normalizedInputValue)
     : false;
-  const inputColor = useNamespaceColor(parseTag(inputValue).namespace);
+  const inputColor = useTagColor(inputValue);
   const colorizedInputStyle: CSSProperties = { "--badge-overlay": inputColor };
 
   const handleSelect = useCallback(
@@ -291,8 +290,7 @@ export function TagSuggestionItem({
   onSelect: () => void;
 }) {
   const favourites = useFavouriteTagsLookup();
-  const { namespace } = parseTag(value);
-  const color = useNamespaceColor(namespace);
+  const color = useTagColor(value);
   const style: CSSProperties = { color };
   const isFavourite = showFavourite && favourites.has(value);
 

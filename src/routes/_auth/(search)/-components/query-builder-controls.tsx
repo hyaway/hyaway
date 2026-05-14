@@ -65,10 +65,9 @@ import {
 } from "@/components/ui-primitives/popover";
 import { cn } from "@/lib/utils";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
-import { parseTag } from "@/lib/tag-utils";
 import { useActiveTheme } from "@/stores/theme-store";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
-import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
+import { useTagColor } from "@/integrations/hydrus-api/queries/options";
 
 // ---------------------------------------------------------------------------
 // Field selector
@@ -285,7 +284,10 @@ function DrillDownCommandContent({
                       }
                       onSelect={() => setActivePage(og.label)}
                     >
-                      <NamespaceColoredLabel label={og.label} className="flex-1" />
+                      <NamespaceColoredLabel
+                        label={og.label}
+                        className="flex-1"
+                      />
                       <span className="text-muted-foreground text-xs">
                         {og.options.length}
                       </span>
@@ -350,8 +352,7 @@ function NamespaceColoredLabel({
   label: string;
   className?: string;
 }) {
-  const { namespace } = parseTag(label);
-  const color = useNamespaceColor(namespace);
+  const color = useTagColor(label);
 
   return (
     <span className={className} style={{ color }}>
@@ -403,9 +404,7 @@ export function QBSelect({
     return null;
   }, [options, groups, flatOptions, val]);
   const displayedLabel = displayValue ?? selectedLabel;
-  const selectedColor = useNamespaceColor(
-    displayedLabel ? parseTag(displayedLabel).namespace : undefined,
-  );
+  const selectedColor = useTagColor(displayedLabel ?? "");
   const selectedBadgeStyle: CSSProperties = {
     "--badge-overlay": selectedColor,
   };
