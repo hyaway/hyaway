@@ -3,8 +3,8 @@
 
 import {
   IconCopy,
+  IconEdit,
   IconInfoCircle,
-  IconPencil,
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
@@ -164,26 +164,28 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
       className="border-border hover:bg-muted/50 flex flex-col gap-3 rounded-xl border p-5 transition-colors sm:flex-row sm:items-start sm:gap-4"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        {isRenaming ? (
-          <form onSubmit={handleRename} onClick={(e) => e.stopPropagation()}>
-            <Input
-              ref={renameInputRef}
-              name="newname"
-              defaultValue={displayName}
-              onBlur={(e) =>
-                handleRename(e as unknown as React.SubmitEvent<HTMLFormElement>)
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Escape") {
-                  setIsRenaming(false);
+        <div className="flex flex-col items-start gap-1">
+          {isRenaming ? (
+            <form onSubmit={handleRename} onClick={(e) => e.stopPropagation()}>
+              <Input
+                ref={renameInputRef}
+                name="newname"
+                defaultValue={displayName}
+                onBlur={(e) =>
+                  handleRename(
+                    e as unknown as React.SubmitEvent<HTMLFormElement>,
+                  )
                 }
-              }}
-              className="h-10 w-full sm:w-72"
-              autoComplete="off"
-            />
-          </form>
-        ) : (
-          <div className="flex flex-col items-start gap-1">
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setIsRenaming(false);
+                  }
+                }}
+                className="h-10 w-full sm:w-72"
+                autoComplete="off"
+              />
+            </form>
+          ) : (
             <span className="flex items-center gap-1 text-lg leading-tight font-semibold">
               {displayName}
               <Button
@@ -194,16 +196,16 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
                 title="Rename"
                 className="size-9"
               >
-                <IconPencil className="size-5" />
+                <IconEdit className="size-5.5 -translate-y-px" />
               </Button>
             </span>
-            <InstantSearchSwitch
-              searchId={searchId}
-              className="text-muted-foreground pt-1 pb-2"
-              size="default"
-            />
-          </div>
-        )}
+          )}
+          <InstantSearchSwitch
+            searchId={searchId}
+            className="text-muted-foreground pt-1 pb-2"
+            size="default"
+          />
+        </div>
         {searchTags.length > 0 ? (
           <SearchTagList
             tags={searchTags}

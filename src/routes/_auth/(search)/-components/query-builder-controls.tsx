@@ -497,11 +497,8 @@ export function QBActionElement({
     return (
       <Button
         variant="ghost"
-        size="icon-sm"
-        className={cn(
-          "text-muted-foreground hover:text-destructive shrink-0",
-          className,
-        )}
+        size="icon"
+        className={cn("text-destructive size-11 shrink-0", className)}
         title={
           disabledTranslation && disabled ? disabledTranslation.title : title
         }
@@ -510,7 +507,7 @@ export function QBActionElement({
         disabled={disabled && !disabledTranslation}
         type="button"
       >
-        <IconTrash className="size-5" />
+        <IconTrash className="size-5.5" />
       </Button>
     );
   }
