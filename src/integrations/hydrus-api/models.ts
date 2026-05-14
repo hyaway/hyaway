@@ -361,6 +361,7 @@ export enum HydrusFileSortType {
   ModifiedTime = 14,
   Framerate = 15,
   NumberOfFrames = 16,
+  NumberOfCollectionFiles = 17,
   LastViewedTime = 18,
   ArchiveTimestamp = 19,
   HashHex = 20,
@@ -431,9 +432,7 @@ export const FavouriteTagsResponseSchema = BaseResponseSchema.extend({
   favourite_tags: z.array(z.string()),
 });
 
-export type FavouriteTagsResponse = z.infer<
-  typeof FavouriteTagsResponseSchema
->;
+export type FavouriteTagsResponse = z.infer<typeof FavouriteTagsResponseSchema>;
 
 // #endregion Tag Search
 

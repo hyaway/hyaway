@@ -9,6 +9,7 @@ import {
   SYSTEM_TAGS,
   buildRatingFieldGroups,
   fieldGroups,
+  getDefaultSortAsc,
   systemTagToRule,
 } from "../-lib/query-builder-fields";
 import {
@@ -209,9 +210,12 @@ export function SearchQueryBuilder({
 
   const handleSortTypeChange = useCallback(
     (value: HydrusFileSortType) => {
-      setStagedSort(entryKey, { sortType: value, sortAsc });
+      setStagedSort(entryKey, {
+        sortType: value,
+        sortAsc: getDefaultSortAsc(value),
+      });
     },
-    [entryKey, setStagedSort, sortAsc],
+    [entryKey, setStagedSort],
   );
 
   const handleSortAscToggle = useCallback(() => {

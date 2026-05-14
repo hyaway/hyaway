@@ -3,14 +3,16 @@
 
 import { useEffect, useState } from "react";
 import {
+  IconArrowLeft,
   IconChevronDown,
-  IconSortAscending2Filled,
-  IconSortDescending2Filled,
+  IconChevronRight,
+  IconSortAscending,
+  IconSortDescending,
 } from "@tabler/icons-react";
 import { defaultFilter } from "cmdk";
-import { SORT_OPTIONS } from "../-lib/query-builder-fields";
-import type { HydrusFileSortType } from "@/integrations/hydrus-api/models";
+import { getSortOption, getSortOrderLabel } from "../-lib/query-builder-fields";
 import type { CSSProperties } from "react";
+import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 import { badgeVariants } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";
 import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
@@ -29,6 +31,76 @@ import {
 } from "@/components/ui-primitives/popover";
 import { cn } from "@/lib/utils";
 
+const SORT_GROUPS = [
+  {
+    label: "time",
+    options: [
+      HydrusFileSortType.ImportTime,
+      HydrusFileSortType.ModifiedTime,
+      HydrusFileSortType.LastViewedTime,
+      HydrusFileSortType.ArchiveTimestamp,
+    ],
+  },
+  {
+    label: "file",
+    options: [
+      HydrusFileSortType.FileSize,
+      HydrusFileSortType.FileType,
+      HydrusFileSortType.ApproximateBitrate,
+      HydrusFileSortType.HasAudio,
+      HydrusFileSortType.HashHex,
+      HydrusFileSortType.PixelHashHex,
+      HydrusFileSortType.Blurhash,
+    ],
+  },
+  {
+    label: "dimensions",
+    options: [
+      HydrusFileSortType.Width,
+      HydrusFileSortType.Height,
+      HydrusFileSortType.Ratio,
+      HydrusFileSortType.NumberOfPixels,
+    ],
+  },
+  {
+    label: "duration",
+    options: [
+      HydrusFileSortType.Duration,
+      HydrusFileSortType.Framerate,
+      HydrusFileSortType.NumberOfFrames,
+    ],
+  },
+  {
+    label: "average colour",
+    options: [
+      HydrusFileSortType.AverageColourLightness,
+      HydrusFileSortType.AverageColourChromaticMagnitude,
+      HydrusFileSortType.AverageColourGreenRedAxis,
+      HydrusFileSortType.AverageColourBlueYellowAxis,
+      HydrusFileSortType.AverageColourHue,
+    ],
+  },
+  {
+    label: "tags",
+    options: [HydrusFileSortType.NumberOfTags],
+  },
+  {
+    label: "views",
+    options: [
+      HydrusFileSortType.NumberOfMediaViews,
+      HydrusFileSortType.TotalMediaViewtime,
+    ],
+  },
+  {
+    label: "collections",
+    options: [HydrusFileSortType.NumberOfCollectionFiles],
+  },
+  {
+    label: "random",
+    options: [HydrusFileSortType.Random],
+  },
+] as const;
+
 export type { SortConfig } from "@/stores/search-defaults";
 
 export function SortSection({
@@ -42,6 +114,8 @@ export function SortSection({
   onSortTypeChange: (value: HydrusFileSortType) => void;
   onSortAscToggle: () => void;
 }) {
+  const sortOrderLabel = getSortOrderLabel(sortType, sortAsc);
+
   return (
     <div className="@container flex max-w-2xl flex-wrap items-center gap-2">
       <span className="text-muted-foreground shrink-0 text-sm font-medium">
@@ -54,26 +128,25 @@ export function SortSection({
         )}
       >
         <SortSelect value={sortType} onChange={onSortTypeChange} />
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onSortAscToggle}
-          type="button"
-          aria-pressed={sortAsc}
-          aria-label={sortAsc ? "Sort ascending" : "Sort descending"}
-        >
-          {sortAsc ? (
-            <>
-              <IconSortAscending2Filled className="size-5" />
-              <span className="text-sm @xs:hidden @lg:inline">ascending</span>
-            </>
-          ) : (
-            <>
-              <IconSortDescending2Filled className="size-5" />
-              <span className="text-sm @2xs:hidden @lg:inline">descending</span>
-            </>
-          )}
-        </Button>
+        {sortOrderLabel && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onSortAscToggle}
+            type="button"
+            aria-pressed={sortAsc}
+            aria-label={`Sort ${sortOrderLabel}`}
+          >
+            {sortAsc ? (
+              <IconSortAscending className="size-5" />
+            ) : (
+              <IconSortDescending className="size-5" />
+            )}
+            <span className="text-sm @2xs:hidden @lg:inline">
+              {sortOrderLabel}
+            </span>
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -88,15 +161,16 @@ export function SortSelect({
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [activePage, setActivePage] = useState<string | null>(null);
   const color = useNamespaceColor("");
   const combinedStyle: CSSProperties = { "--badge-overlay": color };
 
-  const selectedLabel =
-    SORT_OPTIONS.find((o) => o.value === value)?.label ?? "import time";
+  const selectedLabel = getSortOption(value).label;
 
   useEffect(() => {
     if (!open) {
       setSearch("");
+      setActivePage(null);
     }
   }, [open]);
 
@@ -142,21 +216,105 @@ export function SortSelect({
           />
           <CommandList className="max-h-none">
             <CommandEmpty>No results.</CommandEmpty>
-            <CommandGroup>
-              {SORT_OPTIONS.map((opt) => (
-                <CommandItem
-                  key={opt.value}
-                  value={opt.label}
-                  data-checked={value === opt.value}
-                  onSelect={() => {
-                    onChange(opt.value);
-                    setOpen(false);
-                  }}
-                >
-                  {opt.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {isSearching ? (
+              SORT_GROUPS.map((group) => (
+                <CommandGroup key={group.label} heading={group.label}>
+                  {group.options.map((sortType) => {
+                    const opt = getSortOption(sortType);
+
+                    return (
+                      <CommandItem
+                        key={opt.value}
+                        value={opt.label}
+                        keywords={[group.label, opt.label]}
+                        data-checked={value === opt.value || undefined}
+                        onSelect={() => {
+                          onChange(opt.value);
+                          setOpen(false);
+                        }}
+                      >
+                        {opt.label}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              ))
+            ) : activePage === null ? (
+              <CommandGroup>
+                {SORT_GROUPS.flatMap((group) =>
+                  group.options.length === 1 ? (
+                    group.options.map((sortType) => {
+                      const opt = getSortOption(sortType);
+
+                      return (
+                        <CommandItem
+                          key={opt.value}
+                          value={opt.label}
+                          keywords={[group.label, opt.label]}
+                          data-checked={value === opt.value || undefined}
+                          onSelect={() => {
+                            onChange(opt.value);
+                            setOpen(false);
+                          }}
+                        >
+                          {opt.label}
+                        </CommandItem>
+                      );
+                    })
+                  ) : (
+                    <CommandItem
+                      key={group.label}
+                      value={group.label}
+                      data-checked={
+                        group.options.some((option) => option === value) ||
+                        undefined
+                      }
+                      onSelect={() => setActivePage(group.label)}
+                    >
+                      <span className="flex-1">{group.label}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {group.options.length}
+                      </span>
+                      <IconChevronRight className="text-muted-foreground size-3.5" />
+                    </CommandItem>
+                  ),
+                )}
+              </CommandGroup>
+            ) : (
+              <>
+                <CommandGroup>
+                  <CommandItem
+                    value="__back"
+                    onSelect={() => setActivePage(null)}
+                  >
+                    <IconArrowLeft className="text-muted-foreground size-3.5" />
+                    <span className="text-muted-foreground">{activePage}</span>
+                  </CommandItem>
+                </CommandGroup>
+                <CommandGroup>
+                  {SORT_GROUPS.find(
+                    (group) => group.label === activePage,
+                  )?.options.map((sortType) => {
+                    const opt = getSortOption(sortType);
+
+                    return (
+                      <CommandItem
+                        key={opt.value}
+                        value={opt.label}
+                        keywords={[activePage, opt.label]}
+                        data-checked={value === opt.value || undefined}
+                        onSelect={() => {
+                          onChange(opt.value);
+                          setOpen(false);
+                        }}
+                      >
+                        {opt.label}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

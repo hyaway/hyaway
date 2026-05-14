@@ -692,34 +692,218 @@ export function getFieldHydrusLabel(fieldName: string): string {
 // ---------------------------------------------------------------------------
 
 export const SORT_OPTIONS = [
-  { value: HydrusFileSortType.ImportTime, label: "import time" },
-  { value: HydrusFileSortType.ModifiedTime, label: "modified time" },
-  { value: HydrusFileSortType.LastViewedTime, label: "last viewed time" },
-  { value: HydrusFileSortType.ArchiveTimestamp, label: "archive time" },
-  { value: HydrusFileSortType.FileSize, label: "file size" },
+  {
+    value: HydrusFileSortType.ImportTime,
+    label: "import time",
+    ascLabel: "oldest first",
+    descLabel: "newest first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.ModifiedTime,
+    label: "modified time",
+    ascLabel: "oldest first",
+    descLabel: "newest first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.LastViewedTime,
+    label: "last viewed time",
+    ascLabel: "oldest first",
+    descLabel: "newest first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.ArchiveTimestamp,
+    label: "archived time",
+    ascLabel: "oldest first",
+    descLabel: "newest first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.FileSize,
+    label: "file size",
+    ascLabel: "smallest first",
+    descLabel: "largest first",
+    defaultAsc: false,
+  },
   { value: HydrusFileSortType.FileType, label: "file type" },
-  { value: HydrusFileSortType.Duration, label: "duration" },
-  { value: HydrusFileSortType.Framerate, label: "framerate" },
-  { value: HydrusFileSortType.NumberOfFrames, label: "number of frames" },
-  { value: HydrusFileSortType.Width, label: "width" },
-  { value: HydrusFileSortType.Height, label: "height" },
-  { value: HydrusFileSortType.Ratio, label: "ratio" },
-  { value: HydrusFileSortType.NumberOfPixels, label: "number of pixels" },
-  { value: HydrusFileSortType.NumberOfTags, label: "number of tags" },
-  { value: HydrusFileSortType.NumberOfMediaViews, label: "media views" },
-  { value: HydrusFileSortType.TotalMediaViewtime, label: "total view time" },
-  { value: HydrusFileSortType.ApproximateBitrate, label: "bitrate" },
-  { value: HydrusFileSortType.HasAudio, label: "has audio" },
+  {
+    value: HydrusFileSortType.Duration,
+    label: "duration",
+    ascLabel: "shortest first",
+    descLabel: "longest first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.Framerate,
+    label: "framerate",
+    ascLabel: "slowest first",
+    descLabel: "fastest first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.NumberOfFrames,
+    label: "number of frames",
+    ascLabel: "smallest first",
+    descLabel: "largest first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.NumberOfCollectionFiles,
+    label: "files in collection",
+    ascLabel: "fewest first",
+    descLabel: "most first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.Width,
+    label: "width",
+    ascLabel: "slimmest first",
+    descLabel: "widest first",
+    defaultAsc: true,
+  },
+  {
+    value: HydrusFileSortType.Height,
+    label: "height",
+    ascLabel: "shortest first",
+    descLabel: "tallest first",
+    defaultAsc: true,
+  },
+  {
+    value: HydrusFileSortType.Ratio,
+    label: "resolution ratio",
+    ascLabel: "tallest first",
+    descLabel: "widest first",
+    defaultAsc: true,
+  },
+  {
+    value: HydrusFileSortType.NumberOfPixels,
+    label: "number of pixels",
+    ascLabel: "fewest first",
+    descLabel: "most first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.NumberOfTags,
+    label: "number of tags",
+    ascLabel: "fewest first",
+    descLabel: "most first",
+    defaultAsc: true,
+  },
+  {
+    value: HydrusFileSortType.NumberOfMediaViews,
+    label: "views",
+    ascLabel: "fewest first",
+    descLabel: "most first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.TotalMediaViewtime,
+    label: "view time",
+    ascLabel: "shortest first",
+    descLabel: "longest first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.ApproximateBitrate,
+    label: "approximate bitrate",
+    ascLabel: "smallest first",
+    descLabel: "largest first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.HasAudio,
+    label: "has audio",
+    ascLabel: "audio first",
+    descLabel: "silent first",
+    defaultAsc: true,
+  },
   { value: HydrusFileSortType.Random, label: "random" },
-  { value: HydrusFileSortType.HashHex, label: "hash" },
+  {
+    value: HydrusFileSortType.HashHex,
+    label: "hash (SHA-256)",
+    ascLabel: "lexicographic",
+    descLabel: "reverse lexicographic",
+    defaultAsc: true,
+  },
+  {
+    value: HydrusFileSortType.PixelHashHex,
+    label: "pixel hash",
+    ascLabel: "lexicographic",
+    descLabel: "reverse lexicographic",
+    defaultAsc: true,
+  },
+  {
+    value: HydrusFileSortType.Blurhash,
+    label: "blurhash",
+    ascLabel: "lexicographic",
+    descLabel: "reverse lexicographic",
+    defaultAsc: true,
+  },
+  {
+    value: HydrusFileSortType.AverageColourLightness,
+    label: "lightness",
+    ascLabel: "darkest first",
+    descLabel: "lightest first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.AverageColourChromaticMagnitude,
+    label: "chromatic magnitude",
+    ascLabel: "greys first",
+    descLabel: "colours first",
+    defaultAsc: false,
+  },
+  {
+    value: HydrusFileSortType.AverageColourGreenRedAxis,
+    label: "green-red balance",
+    ascLabel: "greens first",
+    descLabel: "reds first",
+    defaultAsc: true,
+  },
+  {
+    value: HydrusFileSortType.AverageColourBlueYellowAxis,
+    label: "blue-yellow balance",
+    ascLabel: "blues first",
+    descLabel: "yellows first",
+    defaultAsc: true,
+  },
+  {
+    value: HydrusFileSortType.AverageColourHue,
+    label: "hue",
+    ascLabel: "red first",
+    descLabel: "purple first",
+    defaultAsc: true,
+  },
 ] as const;
+
+export function getSortOption(sortType: HydrusFileSortType) {
+  return SORT_OPTIONS.find((o) => o.value === sortType) ?? SORT_OPTIONS[0];
+}
+
+export function getDefaultSortAsc(sortType: HydrusFileSortType): boolean {
+  const option = getSortOption(sortType);
+  return "defaultAsc" in option ? option.defaultAsc : false;
+}
+
+export function getSortOrderLabel(
+  sortType: HydrusFileSortType,
+  sortAsc: boolean,
+): string | undefined {
+  const option = getSortOption(sortType);
+  if (!("ascLabel" in option) || !("descLabel" in option)) return undefined;
+  return sortAsc ? option.ascLabel : option.descLabel;
+}
 
 /** Build a display string like "system:sort by import time ▲" for a sort config. */
 export function getSortLabel(
   sortType: HydrusFileSortType,
   sortAsc: boolean,
 ): string {
-  const label =
-    SORT_OPTIONS.find((o) => o.value === sortType)?.label ?? "import time";
-  return `Sort by ${label} ${sortAsc ? "asc" : "desc"}`;
+  const option = getSortOption(sortType);
+  const orderLabel = getSortOrderLabel(sortType, sortAsc);
+  return orderLabel
+    ? `Sort by ${option.label} (${orderLabel})`
+    : `Sort by ${option.label}`;
 }
