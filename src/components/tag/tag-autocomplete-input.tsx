@@ -163,6 +163,7 @@ export function TagAutocompleteInput({
           onChange?.(e.target.value);
           setOpen(true);
         }}
+        onPointerDown={() => setOpen(true)}
         onFocus={() => setOpen(true)}
         onBlur={() => {
           setOpen(false);
