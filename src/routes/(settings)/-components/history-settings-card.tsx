@@ -40,7 +40,7 @@ export function HistorySettingsCard() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <HistorySettings />
-        <div className="flex items-center justify-between gap-4">
+        <div className="border-border flex items-center justify-between gap-4 border-t pt-4">
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium">
               Clear local watch history

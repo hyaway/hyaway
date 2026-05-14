@@ -39,7 +39,7 @@ export function SearchSettingsCard() {
       <CardContent className="flex flex-col gap-4">
         <SearchBehaviorSettings />
         <DefaultQuerySettings />
-        <div className="flex items-center justify-between gap-4">
+        <div className="border-border flex items-center justify-between gap-4 border-t pt-4">
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium">Remove saved searches</span>
             <span className="text-muted-foreground text-xs">
