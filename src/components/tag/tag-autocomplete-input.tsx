@@ -291,17 +291,23 @@ export function TagSuggestionItem({
   const showStar = showFavouriteIcon && isFavouriteTag;
 
   return (
-    <CommandItem value={value} onSelect={onSelect}>
+    <CommandItem
+      value={value}
+      onSelect={onSelect}
+      className="[&>svg:last-child]:hidden"
+    >
       <span className="min-w-0 flex-1 truncate" style={style}>
         {prefix}
         {value}
       </span>
-      {showStar && <IconTagStarred className="size-5 shrink-0" style={style} />}
-      {count != null && (
-        <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-          {count.toLocaleString()}
-        </span>
-      )}
+      <span className="ms-auto inline-flex shrink-0 items-center gap-2">
+        {showStar && <IconTagStarred className="size-5" style={style} />}
+        {count != null && (
+          <span className="text-muted-foreground text-xs tabular-nums">
+            {count.toLocaleString()}
+          </span>
+        )}
+      </span>
     </CommandItem>
   );
 }

@@ -1063,7 +1063,7 @@ function TagValueEditor({
   return (
     <>
       <TagAutocompleteInput
-        className="relative max-w-2xl min-w-48 flex-1 basis-48"
+        className="relative max-w-2xl min-w-0 flex-1 basis-full @md:min-w-48 @md:basis-48"
         value={inputValue}
         onChange={handleChange}
         onSelect={(tag) => {

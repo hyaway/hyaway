@@ -47,7 +47,7 @@ export function TagBadge({
   return (
     <Badge
       variant={"overlay"}
-      className={className}
+      className={cn("select-auto", className)}
       style={combinedStyle}
       {...props}
     >
