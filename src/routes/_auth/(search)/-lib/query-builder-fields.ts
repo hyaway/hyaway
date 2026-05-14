@@ -1092,7 +1092,7 @@ export const SORT_OPTIONS = [
   {
     value: HydrusFileSortType.Width,
     label: "width",
-    ascLabel: "slimmest first",
+    ascLabel: "thinnest first",
     descLabel: "widest first",
     defaultAsc: true,
   },
