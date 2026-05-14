@@ -213,7 +213,7 @@ export function TagAutocompleteInput({
                       key={tag}
                       value={tag}
                       prefix={isNegative ? "-" : undefined}
-                      showFavourite={false}
+                      showFavouriteIcon={false}
                       onSelect={() => handleSelect(tag)}
                     />
                   ))}
@@ -234,7 +234,7 @@ export function TagAutocompleteInput({
                       key={tag}
                       value={tag}
                       prefix={isNegative ? "-" : undefined}
-                      showFavourite={false}
+                      showFavouriteIcon={false}
                       onSelect={() => handleSelect(tag)}
                     />
                   ))}
@@ -252,7 +252,7 @@ export function TagAutocompleteInput({
                           key={tag}
                           value={tag}
                           prefix={isNegative ? "-" : undefined}
-                          showFavourite={false}
+                          showFavouriteIcon={false}
                           onSelect={() => handleSelect(tag)}
                         />
                       ))}
@@ -276,19 +276,19 @@ export function TagSuggestionItem({
   value,
   prefix,
   count,
-  showFavourite = true,
+  showFavouriteIcon = true,
   onSelect,
 }: {
   value: string;
   prefix?: string;
   count?: number;
-  showFavourite?: boolean;
+  showFavouriteIcon?: boolean;
   onSelect: () => void;
 }) {
   const color = useTagColor(value);
   const style: CSSProperties = { color };
   const isFavouriteTag = useIsFavouriteTag(value);
-  const isFavourite = showFavourite && isFavouriteTag;
+  const showStar = showFavouriteIcon && isFavouriteTag;
 
   return (
     <CommandItem value={value} onSelect={onSelect}>
@@ -296,9 +296,7 @@ export function TagSuggestionItem({
         {prefix}
         {value}
       </span>
-      {isFavourite && (
-        <IconTagStarred className="size-5 shrink-0" style={style} />
-      )}
+      {showStar && <IconTagStarred className="size-5 shrink-0" style={style} />}
       {count != null && (
         <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
           {count.toLocaleString()}
