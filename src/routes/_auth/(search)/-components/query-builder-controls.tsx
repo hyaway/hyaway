@@ -484,18 +484,18 @@ export function QBSelect({
 /** Action button using our Button primitive */
 export function QBActionElement({
   handleOnClick,
-  label,
   title,
+  testID,
   disabled,
   disabledTranslation,
   className,
   level,
 }: ActionProps) {
-  const isRemove =
-    typeof label === "string" && (label === "⨯" || title?.includes("Remove"));
-  const isAddGroup = typeof label === "string" && label.includes("Group");
+  const isRemoveRule = testID === "remove-rule";
+  const isRemoveGroup = testID === "remove-group";
+  const isAddGroup = testID === "add-group";
 
-  if (isRemove) {
+  if (isRemoveRule) {
     return (
       <Button
         variant="ghost"
@@ -514,6 +514,28 @@ export function QBActionElement({
     );
   }
 
+  if (isRemoveGroup) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className={cn("text-destructive w-auto shrink-0 px-2.5", className)}
+        title={
+          disabledTranslation && disabled ? disabledTranslation.title : title
+        }
+        aria-label="Remove group"
+        onClick={(e) => handleOnClick(e)}
+        disabled={disabled && !disabledTranslation}
+        type="button"
+      >
+        <IconTrash data-icon="inline-start" className="size-5" />
+        <span className="hidden @sm:inline">Remove</span>
+        <span>OR</span>
+        <span className="hidden @xs:inline">group</span>
+      </Button>
+    );
+  }
+
   if (isAddGroup) {
     // Only allow adding OR groups at root level (level 0).
     // Sub-groups (level >= 1) cannot have nested groups.
@@ -522,14 +544,16 @@ export function QBActionElement({
       <Button
         variant="outline"
         size="sm"
-        className={className}
+        className={cn("w-auto shrink-0 px-2.5", className)}
         title={title}
         onClick={(e) => handleOnClick(e)}
         disabled={disabled}
         type="button"
       >
         <IconPlus data-icon="inline-start" className="size-5" />
-        Add OR group
+        <span className="hidden @sm:inline">Add</span>
+        <span>OR</span>
+        <span className="hidden @xs:inline">group</span>
       </Button>
     );
   }
@@ -589,12 +613,13 @@ function SystemFieldCombobox({
         disabled={disabled}
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
-          "cursor-pointer",
+          "w-auto shrink-0 cursor-pointer px-2.5",
           className,
         )}
       >
         <IconPlus data-icon="inline-start" className="size-5" />
-        Add system
+        <span className="hidden @sm:inline">Add</span>
+        <span>system</span>
         <IconChevronDown data-icon="inline-end" className="size-4" />
       </PopoverTrigger>
       <PopoverContent
@@ -1140,6 +1165,8 @@ export const controlClassnames = {
   ruleGroup:
     "qb-group flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2 [&_.qb-group]:ml-1 [&_.qb-group]:rounded-none [&_.qb-group]:border-0 [&_.qb-group]:border-l-4 [&_.qb-group]:border-l-primary",
   header: "order-last flex flex-wrap items-center gap-2",
+  addRule: "inline-flex w-auto shrink-0",
+  addGroup: "inline-flex w-auto shrink-0",
   body: "flex flex-col gap-0",
   rule: cn("flex flex-wrap items-center gap-2", QUERY_BUILDER_LINE_WIDTH),
   combinators: "",
