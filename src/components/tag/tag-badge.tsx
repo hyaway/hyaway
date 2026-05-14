@@ -5,14 +5,14 @@ import { IconTagStarred } from "@tabler/icons-react";
 import { TouchTarget } from "../ui-primitives/touch-target";
 import type { badgeVariants } from "@/components/ui-primitives/badge";
 import type { VariantProps } from "class-variance-authority";
-import type { CSSProperties, ComponentProps, ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
 import { Badge } from "@/components/ui-primitives/badge";
+import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
 import { useFavouriteTagsLookup } from "@/integrations/hydrus-api/queries/tags";
 import { parseTag } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
-import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
 
 import { TagActionMenu, TagActionTrigger } from "@/components/tag/tag-actions";
 
@@ -38,16 +38,8 @@ export function TagBadge({
   negated?: boolean;
   children?: ReactNode;
 } & BadgeProps) {
-  const namespaceColors = useNamespaceColors();
-  const color =
-    namespaceColors[namespace ?? ""] ||
-    namespaceColors["null"] ||
-    "var(--foreground)";
-
-  const combinedStyle: CSSProperties = {
-    "--badge-overlay": color,
-    ...style,
-  };
+  const color = useNamespaceColor(namespace);
+  const combinedStyle = { "--badge-overlay": color, ...style };
 
   const favourites = useFavouriteTagsLookup();
   const fullTag = namespace ? `${namespace}:${tag}` : tag;

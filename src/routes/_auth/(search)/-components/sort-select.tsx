@@ -10,7 +10,10 @@ import {
 import { defaultFilter } from "cmdk";
 import { SORT_OPTIONS } from "../-lib/query-builder-fields";
 import type { HydrusFileSortType } from "@/integrations/hydrus-api/models";
+import type { CSSProperties } from "react";
+import { badgeVariants } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";
+import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
 import {
   Command,
   CommandEmpty,
@@ -24,6 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui-primitives/popover";
+import { cn } from "@/lib/utils";
 
 export type { SortConfig } from "@/stores/search-defaults";
 
@@ -79,6 +83,8 @@ export function SortSelect({
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const color = useNamespaceColor("");
+  const combinedStyle: CSSProperties = { "--badge-overlay": color };
 
   const selectedLabel =
     SORT_OPTIONS.find((o) => o.value === value)?.label ?? "import time";
@@ -94,7 +100,11 @@ export function SortSelect({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        className="border-input bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex h-9 w-full cursor-pointer items-center justify-between gap-1.5 rounded-lg border px-3 text-sm transition-colors outline-none focus-visible:ring-[3px] disabled:opacity-50 @sm:w-auto @sm:max-w-96 @sm:min-w-60"
+        className={cn(
+          badgeVariants({ variant: "overlay", size: "default" }),
+          "w-full cursor-pointer justify-between outline-none disabled:opacity-50 @sm:w-auto @sm:max-w-96 @sm:min-w-60",
+        )}
+        style={combinedStyle}
         aria-label="Sort by"
       >
         <span className="truncate">{selectedLabel}</span>

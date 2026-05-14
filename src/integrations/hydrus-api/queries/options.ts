@@ -100,12 +100,13 @@ export const useNamespaceColors = (): Record<string, string> => {
 };
 
 /**
- * Hook to get the color for a specific namespace.
- * Pass empty string for unnamespaced tags.
+ * Hook to get the display color for a specific namespace.
+ * Pass empty string for unnamespaced tags. Falls back to Hydrus' null namespace
+ * color, then the current foreground color.
  */
-export const useNamespaceColor = (namespace: string): string | undefined => {
+export const useNamespaceColor = (namespace?: string): string => {
   const colors = useNamespaceColors();
-  return colors[namespace];
+  return colors[namespace ?? ""] || colors["null"] || "var(--foreground)";
 };
 
 /**

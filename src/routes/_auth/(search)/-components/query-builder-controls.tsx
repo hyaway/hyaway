@@ -68,7 +68,7 @@ import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { parseTag } from "@/lib/tag-utils";
 import { useActiveTheme } from "@/stores/theme-store";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
-import { useNamespaceColors } from "@/integrations/hydrus-api/queries/options";
+import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
 
 // ---------------------------------------------------------------------------
 // Field selector
@@ -203,14 +203,6 @@ function DrillDownCommandContent({
 }) {
   const [activePage, setActivePage] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const namespaceColors = useNamespaceColors();
-
-  const labelStyle = (label: string): CSSProperties | undefined => {
-    const { namespace } = parseTag(label);
-    const color =
-      namespaceColors[namespace || "null"] ?? namespaceColors["null"];
-    return color ? { color } : undefined;
-  };
 
   const optionLabel = (option: OptionItem) =>
     option.name.startsWith("system:")
@@ -257,9 +249,7 @@ function DrillDownCommandContent({
                     data-checked={selectedValue === opt.name || undefined}
                     onSelect={() => onSelect(opt.name)}
                   >
-                    <span style={labelStyle(optionLabel(opt))}>
-                      {optionLabel(opt)}
-                    </span>
+                    <NamespaceColoredLabel label={optionLabel(opt)} />
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -282,9 +272,7 @@ function DrillDownCommandContent({
                         data-checked={selectedValue === opt.name || undefined}
                         onSelect={() => onSelect(opt.name)}
                       >
-                        <span style={labelStyle(optionLabel(opt))}>
-                          {optionLabel(opt)}
-                        </span>
+                        <NamespaceColoredLabel label={optionLabel(opt)} />
                       </CommandItem>
                     ))
                   ) : (
@@ -297,9 +285,7 @@ function DrillDownCommandContent({
                       }
                       onSelect={() => setActivePage(og.label)}
                     >
-                      <span className="flex-1" style={labelStyle(og.label)}>
-                        {og.label}
-                      </span>
+                      <NamespaceColoredLabel label={og.label} className="flex-1" />
                       <span className="text-muted-foreground text-xs">
                         {og.options.length}
                       </span>
@@ -333,9 +319,7 @@ function DrillDownCommandContent({
                       data-checked={selectedValue === opt.name || undefined}
                       onSelect={() => onSelect(opt.name)}
                     >
-                      <span style={labelStyle(optionLabel(opt))}>
-                        {optionLabel(opt)}
-                      </span>
+                      <NamespaceColoredLabel label={optionLabel(opt)} />
                     </CommandItem>
                   ))}
               </CommandGroup>
@@ -356,6 +340,23 @@ function DrillDownCommandContent({
         ) : null}
       </CommandList>
     </Command>
+  );
+}
+
+function NamespaceColoredLabel({
+  label,
+  className,
+}: {
+  label: string;
+  className?: string;
+}) {
+  const { namespace } = parseTag(label);
+  const color = useNamespaceColor(namespace);
+
+  return (
+    <span className={className} style={{ color }}>
+      {label}
+    </span>
   );
 }
 
@@ -388,14 +389,6 @@ export function QBSelect({
   const isGrouped = isOptionGroupArray(options);
   const groups = isGrouped ? (options as Array<OptionGroupItem>) : null;
   const flatOptions = !isGrouped ? (options as Array<OptionItem>) : null;
-  const namespaceColors = useNamespaceColors();
-
-  const overlayStyle = (label: string): CSSProperties | undefined => {
-    const { namespace } = parseTag(label);
-    const color =
-      namespaceColors[namespace || "null"] ?? namespaceColors["null"];
-    return color ? ({ "--badge-overlay": color } as CSSProperties) : undefined;
-  };
 
   const selectedLabel = useMemo(() => {
     if (groups) {
@@ -410,8 +403,14 @@ export function QBSelect({
     return null;
   }, [options, groups, flatOptions, val]);
   const displayedLabel = displayValue ?? selectedLabel;
+  const selectedColor = useNamespaceColor(
+    displayedLabel ? parseTag(displayedLabel).namespace : undefined,
+  );
+  const selectedBadgeStyle: CSSProperties = {
+    "--badge-overlay": selectedColor,
+  };
   const selectedOverlayStyle =
-    colorLabels && displayedLabel ? overlayStyle(displayedLabel) : undefined;
+    colorLabels && displayedLabel ? selectedBadgeStyle : undefined;
 
   const handleSelect = (name: string) => {
     if (name.startsWith("system:") && rule?.id) {
