@@ -135,7 +135,7 @@ function QBRuleGroupBody(props: RuleGroupProps & UseRuleGroup) {
       <TagAutocompleteInput
         className={cn("relative", "w-full max-w-2xl")}
         inputClassName={cn("h-9", "max-w-2xl min-w-0 @md:min-w-48")}
-        placeholder="Add tag or system:…"
+        placeholder="Add tag or system:_"
         name={`hyaway-qb-inline-${props.path.join("-")}`}
         staticSuggestions={SYSTEM_TAGS}
         onSelect={handleInlineSelect}

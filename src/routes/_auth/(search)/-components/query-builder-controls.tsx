@@ -1101,7 +1101,7 @@ function TagValueEditor({
         onSubmit={(tag) => handleCommit(tag)}
         onBlur={(tag) => handleCommit(tag)}
         disabled={disabled}
-        placeholder="e.g. cat or system:…"
+        placeholder="(empty)"
         name="hyaway-spb-tag"
         colorizeInput
         staticSuggestions={SYSTEM_TAGS}
