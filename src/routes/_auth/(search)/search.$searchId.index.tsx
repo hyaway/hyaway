@@ -9,11 +9,13 @@ import {
 } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
+import z from "zod";
 import { SearchQueryBuilder } from "./-components/system-predicate-builder";
 import {
   committedSearchQueryKey,
   useCommittedSearchFilesQuery,
 } from "./-hooks/use-committed-search-query";
+import { useSearchPageState } from "./-hooks/use-search-page-state";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
@@ -43,12 +45,17 @@ import {
 import { useSearchSettingsActions } from "@/stores/search-settings-store";
 import { useActiveTheme } from "@/stores/theme-store";
 
+const SearchResultsSearchSchema = z.object({
+  instant: z.boolean().optional(),
+});
+
 export const Route = createFileRoute("/_auth/(search)/search/$searchId/")({
+  validateSearch: (search) => SearchResultsSearchSchema.parse(search),
   component: SearchPage,
 });
 
 function SearchPage() {
-  const { searchId } = Route.useParams();
+  const { searchId, instant, instantSearch } = useSearchPageState();
   const displayName = useSearchDisplayName(searchId);
   const committed = useCommittedSearch(searchId);
   const theme = useActiveTheme();
@@ -97,8 +104,12 @@ function SearchPage() {
     const newId = generateSearchId(displayName);
     saveAs(searchId, newId);
     copySearchCache(queryClient, searchId, newId);
-    navigate({ to: "/search/$searchId", params: { searchId: newId } });
-  }, [searchId, saveAs, navigate, queryClient]);
+    navigate({
+      to: "/search/$searchId",
+      params: { searchId: newId },
+      search: { instant },
+    });
+  }, [displayName, instant, searchId, saveAs, navigate, queryClient]);
 
   const handleDelete = useCallback(() => {
     remove(searchId);
@@ -118,7 +129,7 @@ function SearchPage() {
   }, [committed, entry.staged, setDefaultQuery]);
 
   const searchActions = useMemo((): Array<FloatingFooterAction> => {
-    const showDraftDefaultActions = !entry.instantSearch && isDirty;
+    const showDraftDefaultActions = !instantSearch && isDirty;
     const defaultActions: Array<FloatingFooterAction> = !showDraftDefaultActions
       ? [
           {
@@ -166,7 +177,7 @@ function SearchPage() {
       },
     ];
   }, [
-    entry.instantSearch,
+    instantSearch,
     isDirty,
     handleSavePendingAsDefault,
     handleSaveActiveAsDefault,
@@ -183,14 +194,14 @@ function SearchPage() {
       ? "Error for query:"
       : `${fileCount} ${fileCount === 1 ? "file" : "files"} found for:`;
   const showActiveSearchTags =
-    !entry.instantSearch && isDirty && searchTags.length > 0;
+    !instantSearch && isDirty && searchTags.length > 0;
 
   return (
     <>
       <>
         <PageHeading title={displayName} />
         <div className="flex flex-col gap-2 pb-2">
-          <SearchQueryBuilder entryKey={searchId} onCommit={handleCommit} />
+          <SearchQueryBuilder onCommit={handleCommit} />
         </div>
         {showActiveSearchTags && (
           <div className="flex flex-col gap-1.5 pt-3 pb-3">
@@ -238,7 +249,7 @@ function SearchPage() {
         {!isLoading && !isError && !hasFiles && searchTags.length === 0 && (
           <EmptyState
             message={
-              entry.instantSearch
+              instantSearch
                 ? "Add filters above to search."
                 : "Add filters above and click Search."
             }
@@ -246,7 +257,7 @@ function SearchPage() {
         )}
       </>
       <PageHeaderActions>
-        <SearchSettingsPopover searchId={searchId} />
+        <SearchSettingsPopover />
       </PageHeaderActions>
       <PageFloatingFooter
         leftContent={refetchButton}

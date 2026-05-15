@@ -1,34 +1,20 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback } from "react";
+import { useSearchPageState } from "../-hooks/use-search-page-state";
 import { Label } from "@/components/ui-primitives/label";
 import { Switch } from "@/components/ui-primitives/switch";
-import {
-  useSearchQueriesActions,
-  useSearchQueryEntry,
-} from "@/stores/search-queries-store";
 import { cn } from "@/lib/utils";
 
 export function InstantSearchSwitch({
-  searchId,
   className,
   size = "sm",
 }: {
-  searchId: string;
   className?: string;
   size?: "sm" | "default";
 }) {
-  const entry = useSearchQueryEntry(searchId);
-  const { setInstantSearch } = useSearchQueriesActions();
+  const { searchId, instantSearch, setInstantSearch } = useSearchPageState();
   const id = `instant-search-${searchId}`;
-
-  const handleCheckedChange = useCallback(
-    (checked: boolean) => {
-      setInstantSearch(searchId, checked);
-    },
-    [searchId, setInstantSearch],
-  );
 
   return (
     <div
@@ -42,8 +28,8 @@ export function InstantSearchSwitch({
       <Switch
         id={id}
         size={size}
-        checked={entry.instantSearch}
-        onCheckedChange={handleCheckedChange}
+        checked={instantSearch}
+        onCheckedChange={setInstantSearch}
       />
     </div>
   );

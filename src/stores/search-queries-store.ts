@@ -9,8 +9,8 @@ import type { SearchQueryEntry, SortConfig } from "@/stores/search-defaults";
 import { emptyStaged } from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import {
-  getCreateSearchesInstant,
   getDefaultQuery,
+  getSearchResultsInstantDefault,
 } from "@/stores/search-settings-store";
 import { generateSearchId } from "@/lib/search-entry-utils";
 import { isIgnorableTagRuleValue } from "@/lib/search-rule-utils";
@@ -61,7 +61,6 @@ function defaultEntry(): SearchQueryEntry {
   return {
     staged: getDefaultQuery(),
     committed: undefined,
-    instantSearch: getCreateSearchesInstant(),
   };
 }
 
@@ -119,8 +118,6 @@ type SearchQueriesState = {
     setStagedSort: (key: string, sort: SortConfig) => void;
     /** Commit: copies staged → committed. */
     commit: (key: string) => void;
-    /** Set whether an entry commits staged edits immediately. */
-    setInstantSearch: (key: string, enabled: boolean) => void;
     /** Reset: copies committed → staged (reverts edits). */
     reset: (key: string) => void;
     /** Clear: resets staged to the default empty query. */
@@ -199,17 +196,6 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        setInstantSearch: (key, instantSearch) => {
-          const { entries } = get();
-          const entry = entries[key] ?? defaultEntry();
-          set({
-            entries: {
-              ...entries,
-              [key]: { ...entry, instantSearch },
-            },
-          });
-        },
-
         reset: (key) => {
           const { entries } = get();
           const current = entries[key] ?? defaultEntry();
@@ -259,7 +245,6 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               [toKey]: {
                 staged: source.staged,
                 committed: source.committed ?? source.staged,
-                instantSearch: source.instantSearch,
                 displayName: cloneName,
               },
               ...entries,
@@ -285,7 +270,6 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               newEntries[toKey] = {
                 staged: source.staged,
                 committed: source.committed,
-                instantSearch: source.instantSearch,
                 displayName: newDisplayName,
               };
             } else {
@@ -319,7 +303,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             rules: [primaryRule, ...filteredRules],
           };
           const state = { query, sort: base.sort };
-          const instantSearch = getCreateSearchesInstant();
+          const instantSearch = getSearchResultsInstantDefault();
 
           const { entries } = get();
           set({
@@ -327,7 +311,6 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               [searchId]: {
                 staged: state,
                 committed: instantSearch ? state : undefined,
-                instantSearch,
                 displayName,
               },
               ...entries,

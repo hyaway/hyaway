@@ -16,6 +16,7 @@ import {
   getSortColorHex,
   getSortLabel,
 } from "../-lib/query-builder-fields";
+import { useSearchPageState } from "../-hooks/use-search-page-state";
 import {
   enforceCombinators,
   getFocusedRootBodyProps,
@@ -92,8 +93,8 @@ const PICKED_STAGED_TAG_CLASSNAME = cn(
 const STAGED_OR_GROUP_BUTTON_CLASSNAME = cn(
   "group/staged-or inline-flex flex-wrap gap-1.5 rounded-4xl",
   "border-0 bg-transparent text-inherit outline-none",
-  "focus-visible:ring-[3px] focus-visible:ring-primary/80",
-  "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+  "focus-visible:ring-primary/80 focus-visible:ring-[3px]",
+  "focus-visible:ring-offset-background focus-visible:ring-offset-2",
 );
 
 const STAGED_OR_GROUP_BADGE_CLASSNAME = cn(
@@ -164,18 +165,14 @@ function QBRuleGroupHeader(props: RuleGroupProps & UseRuleGroup) {
 // ---------------------------------------------------------------------------
 
 interface SearchQueryBuilderProps {
-  entryKey: string;
   onCommit?: () => void;
 }
 
-export function SearchQueryBuilder({
-  entryKey,
-  onCommit,
-}: SearchQueryBuilderProps) {
+export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
+  const { searchId: entryKey, instantSearch } = useSearchPageState();
   const entry = useSearchQueryEntry(entryKey);
   const { setStagedQuery, setStagedSort, commit, reset, clear } =
     useSearchQueriesActions();
-  const instantSearch = entry.instantSearch;
   const [isOpen, setIsOpen] = useState(false);
   const [pickedSection, setPickedSection] = useState<PickedSearchSection>(null);
   const theme = useActiveTheme();
@@ -394,7 +391,6 @@ export function SearchQueryBuilder({
     >
       <div className="flex min-h-9 flex-wrap items-center justify-between gap-2">
         <InstantSearchSwitch
-          searchId={entryKey}
           className="text-muted-foreground shrink-0 pt-1 pb-2"
           size="default"
         />

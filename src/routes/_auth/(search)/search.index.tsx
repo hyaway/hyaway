@@ -15,7 +15,6 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
-import { InstantSearchSwitch } from "./-components/instant-search-switch";
 import { SearchSortTag } from "./-components/search-sort-tag";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
@@ -257,11 +256,6 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
               </Button>
             </span>
           )}
-          <InstantSearchSwitch
-            searchId={searchId}
-            className="text-muted-foreground pt-1 pb-2"
-            size="default"
-          />
         </div>
         {searchTags.length > 0 ? (
           <div className="pointer-events-none select-none **:select-none">

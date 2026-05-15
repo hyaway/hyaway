@@ -3,21 +3,21 @@
 
 import { SwitchField } from "@/components/settings/setting-fields";
 import {
-  useCreateSearchesInstant,
+  useSearchResultsInstantDefault,
   useSearchSettingsActions,
 } from "@/stores/search-settings-store";
 
 export function SearchBehaviorSettings() {
-  const createSearchesInstant = useCreateSearchesInstant();
-  const { setCreateSearchesInstant } = useSearchSettingsActions();
+  const searchResultsInstantDefault = useSearchResultsInstantDefault();
+  const { setSearchResultsInstantDefault } = useSearchSettingsActions();
 
   return (
     <SwitchField
-      id="create-searches-instant-switch"
-      label="Create searches as instant"
-      description="New searches will run as soon as their query or sort changes."
-      checked={createSearchesInstant}
-      onCheckedChange={setCreateSearchesInstant}
+      id="search-results-instant-default-switch"
+      label="Instant search by default"
+      description="Search result pages run as soon as their query or sort changes unless the page URL overrides it."
+      checked={searchResultsInstantDefault}
+      onCheckedChange={setSearchResultsInstantDefault}
     />
   );
 }
