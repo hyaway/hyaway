@@ -98,7 +98,7 @@ Once configured, you'll see these success messages in each card:
 
 At this point, hyAway should be connected to your Hydrus client and you can start browsing.
 
-Try visiting [Pages](https://hyaway.com/pages) to see your Hydrus pages.
+Try visiting [Search](https://hyaway.com/search) to build a query, [Pages](https://hyaway.com/pages) to see your Hydrus pages, or [Review queue](https://hyaway.com/review) to start sorting inbox files.
 
 ---
 
@@ -106,14 +106,15 @@ Try visiting [Pages](https://hyaway.com/pages) to see your Hydrus pages.
 
 hyAway requests these permissions from the [Hydrus Client API](https://hydrusnetwork.github.io/hydrus/client_api.html):
 
-| Permission                 | Required | Purpose                                          |
-| -------------------------- | -------- | ------------------------------------------------ |
-| Search for and fetch files | ✓ Yes    | Core functionality — browsing and viewing files  |
-| Import and delete files    | Optional | Archive/trash file management                    |
-| Manage pages               | Optional | View and interact with Hydrus pages              |
-| Manage database            | Optional | Access thumbnail dimensions and namespace colors |
-| Edit file times            | Optional | Sync view statistics to Hydrus                   |
-| Edit file ratings          | Optional | Set file ratings                                 |
+| Permission                 | Required | Purpose                                                     |
+| -------------------------- | -------- | ----------------------------------------------------------- |
+| Search for and fetch files | ✓ Yes    | Core functionality — searching, browsing, and viewing files |
+| Import and delete files    | Optional | Archive/trash file management                               |
+| Manage pages               | Optional | View and interact with Hydrus pages                         |
+| Manage database            | Optional | Access thumbnail dimensions and namespace colors            |
+| Edit file times            | Optional | Sync view statistics to Hydrus                              |
+| Edit file ratings          | Optional | Set file ratings                                            |
+| Edit file tags             | Optional | Save and remove favourite tags                              |
 
 You can grant all permissions or only the ones you need.
 

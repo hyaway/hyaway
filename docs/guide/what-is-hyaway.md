@@ -12,6 +12,7 @@ hyAway gives you a responsive, touch-friendly way to:
 - **Browse your library** with a masonry gallery layout
 - **View files** with support for images, video, and audio
 - **Access your pages** to see what you've been working on
+- **Search your library** with tags, OR groups, system predicates, sorting
 
 All without installing anything on your phone or tablet. [See screenshots →](../screenshots)
 
