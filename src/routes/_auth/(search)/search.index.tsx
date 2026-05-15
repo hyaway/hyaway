@@ -99,9 +99,14 @@ function SearchIndex() {
 
 function SearchEntryList({ searchKeys }: { searchKeys: Array<string> }) {
   const listRef = useRef<HTMLDivElement>(null);
+  const getItemKey = useCallback(
+    (index: number) => searchKeys[index] ?? index,
+    [searchKeys],
+  );
 
   const rowVirtualizer = useWindowVirtualizer({
     count: searchKeys.length,
+    getItemKey,
     estimateSize: () => 168,
     overscan: 4,
     gap: 16,
