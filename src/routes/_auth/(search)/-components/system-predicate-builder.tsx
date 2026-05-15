@@ -417,7 +417,13 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
           onAddGroup={handleAddRootGroup}
         />
       )}
-      <CollapsibleContent className="flex flex-col gap-2.5">
+      <CollapsibleContent
+        className={cn(
+          "flex flex-col gap-2.5",
+          !isOpen && pickedSection !== null && "pt-1",
+          !isOpen && sortSectionPicked && "pb-1",
+        )}
+      >
         {showQueryBuilderContent && (
           <QueryBuilder
             fields={allFieldGroups}
