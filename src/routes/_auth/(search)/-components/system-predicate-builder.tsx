@@ -385,6 +385,51 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     setPickedSection(null);
   }, [pickedSection, rootSearchEntries]);
 
+  const builderContent = (
+    <CollapsibleContent
+      className={cn(
+        "flex flex-col gap-2.5",
+        !isOpen && pickedSection !== null && "pt-1",
+        !isOpen && sortSectionPicked && "pb-1",
+      )}
+    >
+      {showQueryBuilderContent && (
+        <QueryBuilder
+          fields={allFieldGroups}
+          query={query}
+          onQueryChange={handleQueryChange}
+          controlClassnames={queryBuilderClassnames}
+          suppressStandardClassnames
+          showCombinatorsBetweenRules
+          parseNumbers
+          context={queryBuilderContext}
+          onAddRule={handleAddRule}
+          onAddGroup={handleAddGroup}
+          controlElements={queryBuilderControlElements}
+        />
+      )}
+      {(isOpen || sortSectionPicked) && (
+        <SortSection
+          sortType={sortType}
+          sortAsc={sortAsc}
+          onSortTypeChange={handleSortTypeChange}
+          onSortAscToggle={handleSortAscToggle}
+        />
+      )}
+      {!instantSearch && isOpen && (
+        <div className="flex flex-col gap-2 pt-0.5">
+          <SearchActions
+            onSearch={handleSearch}
+            onReset={handleReset}
+            onClear={handleClear}
+            searchDisabled={searchDisabled}
+            showReset={isDirty}
+          />
+        </div>
+      )}
+    </CollapsibleContent>
+  );
+
   return (
     <Collapsible
       open={builderContentOpen}
@@ -418,48 +463,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
           onAddGroup={handleAddRootGroup}
         />
       )}
-      <CollapsibleContent
-        className={cn(
-          "flex flex-col gap-2.5",
-          !isOpen && pickedSection !== null && "pt-1",
-          !isOpen && sortSectionPicked && "pb-1",
-        )}
-      >
-        {showQueryBuilderContent && (
-          <QueryBuilder
-            fields={allFieldGroups}
-            query={query}
-            onQueryChange={handleQueryChange}
-            controlClassnames={queryBuilderClassnames}
-            suppressStandardClassnames
-            showCombinatorsBetweenRules
-            parseNumbers
-            context={queryBuilderContext}
-            onAddRule={handleAddRule}
-            onAddGroup={handleAddGroup}
-            controlElements={queryBuilderControlElements}
-          />
-        )}
-        {(isOpen || sortSectionPicked) && (
-          <SortSection
-            sortType={sortType}
-            sortAsc={sortAsc}
-            onSortTypeChange={handleSortTypeChange}
-            onSortAscToggle={handleSortAscToggle}
-          />
-        )}
-        {!instantSearch && isOpen && (
-          <div className="flex flex-col gap-2 pt-0.5">
-            <SearchActions
-              onSearch={handleSearch}
-              onReset={handleReset}
-              onClear={handleClear}
-              searchDisabled={searchDisabled}
-              showReset={isDirty}
-            />
-          </div>
-        )}
-      </CollapsibleContent>
+      {isOpen && builderContent}
       {!isOpen && (
         <StagedSearchTagList
           entries={rootSearchEntries}
@@ -472,6 +476,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
           onOpenBuilder={handleOpenRootBuilder}
         />
       )}
+      {!isOpen && builderContent}
       {!instantSearch && !isOpen && (
         <div className="flex flex-col gap-2 pt-0.5">
           <SearchActions
