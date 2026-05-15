@@ -8,13 +8,13 @@ export function SearchActions({
   onReset,
   onClear,
   searchDisabled,
-  hasCommitted,
+  showReset,
 }: {
   onSearch: () => void;
   onReset: () => void;
   onClear: () => void;
   searchDisabled: boolean;
-  hasCommitted: boolean;
+  showReset: boolean;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -27,7 +27,7 @@ export function SearchActions({
       >
         Search
       </Button>
-      {hasCommitted && (
+      {showReset && (
         <Button variant="ghost" size="sm" onClick={onReset} type="button">
           Reset draft
         </Button>
