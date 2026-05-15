@@ -39,7 +39,7 @@ import { InstantSearchSwitch } from "./instant-search-switch";
 import { SearchActions } from "./search-builder-actions";
 import { SearchSortTag } from "./search-sort-tag";
 import { SortSection } from "./sort-select";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import type {
   AddRuleContext,
   PickedSearchSection,
@@ -83,12 +83,10 @@ const FOCUSED_ROOT_QUERY_BUILDER_CLASSNAME = cn(
   "*:data-[level='0']:p-0",
 );
 
-const PICKED_STAGED_TAG_CLASSNAME = cn(
-  "ring-[3px]",
-  "ring-primary/80",
-  "ring-offset-2",
-  "ring-offset-background",
-);
+const PRIMARY_BADGE_OVERLAY_HEX = "#6468f0";
+
+const PICKED_STAGED_TAG_CLASSNAME =
+  "shadow-[inset_0_0_0_2px_var(--badge-overlay)]";
 
 const STAGED_OR_GROUP_BUTTON_CLASSNAME = cn(
   "group/staged-or inline-flex flex-wrap gap-1.5 rounded-4xl",
@@ -99,6 +97,11 @@ const STAGED_OR_GROUP_BUTTON_CLASSNAME = cn(
 
 const STAGED_OR_GROUP_BADGE_CLASSNAME = cn(
   "group-hover/staged-or:before:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
+);
+
+const PICKED_STAGED_OR_GROUP_BADGE_CLASSNAME = cn(
+  STAGED_OR_GROUP_BADGE_CLASSNAME,
+  "border-(--badge-overlay)",
 );
 
 // ---------------------------------------------------------------------------
@@ -242,6 +245,16 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     () =>
       getThemeAdjustedColorFromHex(getSortColorHex(sortType, sortAsc), theme),
     [sortType, sortAsc, theme],
+  );
+  const pickedStagedTagStyle = useMemo(
+    () =>
+      ({
+        "--badge-overlay": getThemeAdjustedColorFromHex(
+          PRIMARY_BADGE_OVERLAY_HEX,
+          theme,
+        ),
+      }) as ComponentProps<typeof TagBadgeFromString>["style"],
+    [theme],
   );
 
   const searchDisabled = hydrusSearch.length === 0;
@@ -471,6 +484,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
           sortColor={stagedSortColor}
           selectedRootKey={selectedRootSectionKey}
           sortPicked={sortSectionPicked}
+          pickedStagedTagStyle={pickedStagedTagStyle}
           onRootEntrySelect={handleRootEntrySelect}
           onSortSelect={handleSortSelect}
           onOpenBuilder={handleOpenRootBuilder}
@@ -545,6 +559,7 @@ function StagedSearchTagList({
   sortColor,
   selectedRootKey,
   sortPicked,
+  pickedStagedTagStyle,
   onRootEntrySelect,
   onSortSelect,
   onOpenBuilder,
@@ -554,6 +569,7 @@ function StagedSearchTagList({
   sortColor?: string;
   selectedRootKey: string | null;
   sortPicked: boolean;
+  pickedStagedTagStyle: ComponentProps<typeof TagBadgeFromString>["style"];
   onRootEntrySelect: (key: string) => void;
   onSortSelect: () => void;
   onOpenBuilder: () => void;
@@ -579,14 +595,7 @@ function StagedSearchTagList({
           <StagedSearchTagButton
             key={key}
             isPicked={isPicked}
-            className={
-              isOrGroup
-                ? cn(
-                    STAGED_OR_GROUP_BUTTON_CLASSNAME,
-                    stagedTagClassName,
-                  )
-                : undefined
-            }
+            className={isOrGroup ? STAGED_OR_GROUP_BUTTON_CLASSNAME : undefined}
             onClick={() => onRootEntrySelect(key)}
             onDoubleClick={onOpenBuilder}
           >
@@ -595,13 +604,19 @@ function StagedSearchTagList({
                 tags={entry}
                 interactive={false}
                 size="default-wrap"
-                className={STAGED_OR_GROUP_BADGE_CLASSNAME}
+                className={
+                  isPicked
+                    ? PICKED_STAGED_OR_GROUP_BADGE_CLASSNAME
+                    : STAGED_OR_GROUP_BADGE_CLASSNAME
+                }
+                style={isPicked ? pickedStagedTagStyle : undefined}
               />
             ) : (
               <TagBadgeFromString
                 displayTag={entry}
                 size="default-wrap"
                 className={stagedTagClassName}
+                style={isPicked ? pickedStagedTagStyle : undefined}
               />
             )}
           </StagedSearchTagButton>
@@ -616,6 +631,7 @@ function StagedSearchTagList({
           label={sortLabel}
           color={sortColor}
           className={sortPicked ? PICKED_STAGED_TAG_CLASSNAME : undefined}
+          style={sortPicked ? pickedStagedTagStyle : undefined}
         />
       </StagedSearchTagButton>
     </div>

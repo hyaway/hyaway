@@ -109,11 +109,13 @@ export function TagBadgeFromString({
 export function OrTagBadge({
   tags,
   className,
+  style,
   size,
   interactive,
 }: {
   tags: Array<string>;
   className?: string;
+  style?: ComponentProps<typeof TagBadgeFromString>["style"];
   size?: "default" | "default-wrap";
   interactive?: boolean;
 }) {
@@ -126,6 +128,7 @@ export function OrTagBadge({
           <TagBadgeFromString
             displayTag={t}
             size={size}
+            style={style}
             className={cn(
               "border-foreground/40 rounded-b-none border-y-2",
               isFirst && "border-l-2",
@@ -137,7 +140,13 @@ export function OrTagBadge({
         return (
           <>
             {i > 0 && (
-              <span className="text-muted-foreground border-foreground/40 -mx-1.5 inline-flex h-11 items-center border-y-2 px-1.5 text-sm font-medium">
+              <span
+                style={style}
+                className={cn(
+                  "text-muted-foreground border-foreground/40 -mx-1.5 inline-flex h-11 items-center border-y-2 px-1.5 text-sm font-medium",
+                  style && "border-(--badge-overlay)",
+                )}
+              >
                 or
               </span>
             )}
