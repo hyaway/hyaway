@@ -4,34 +4,20 @@ All notable changes to hyAway are documented here.
 
 ---
 
-## 2026-05-11
-
-### Changed
-
-- "Add to review" actions now show a distinct cards-with-plus icon to differentiate from "New review"
-- Page breadcrumbs now show the actual page name and parent group path instead of the URL slug
-
-### Fixed
-
-- Significantly improved speed when loading large collections (100k+ files) — searches and metadata fetching no longer cause the UI to hang
-- Page headings no longer take excessive vertical space when text wraps to multiple lines
-
----
-
-## 2026-05-10
-
-### Fixed
-
-- Image loading now respects the media viewer background preferences, preventing a brief average-color flash when opening images
-- Inputs and form fields are now more visible in light theme with darker borders
-- Light theme text no longer appears thin. It now uses subpixel antialiasing for fuller weight
-
----
-
-## 2026-05-09
+## 2026-05-14
 
 ### Added
 
+- **Search page** — New dedicated search experience accessible from the homepage and sidebar, with persistent search tabs that survive navigation
+- **Query builder** — Visual query builder for constructing complex searches with tag rules, OR groups, and negation
+- **System predicates** — Build searches using system predicates for file properties, dimensions, duration, file type, tags, time, URLs, notes, ratings, and file viewing statistics
+- **Sort controls** — Sort search results by import time, file size, dimensions, duration, number of tags, views, random, hash, and color properties with ascending/descending direction
+- **Instant search** — Toggle per-search-tab instant mode that automatically re-fetches results as rules change, without needing to press a search button
+- **Tag autocomplete** — Autocomplete input for tags powered by the Hydrus tag search API, with support for namespace colors
+- **Tag actions** — Right-click (or long-press) any tag badge to start a new search, include/exclude it from the current search, or add/remove it from favourites
+- **Favourite tags** — Save tags as favourites via the Hydrus API; favourite tags now show a special icon
+- **Default query** — Save a default set of tags and system predicates that pre-populate every new search tab
+- **Auto-generated search names** — New search tabs get readable auto-generated names based on their query rules
 - **PIN lock** — Protect the app with a 4-digit PIN required each new session
 - **Auto-lock** — Optionally lock the app after being in the background for a configurable duration
 - Lock button in the sidebar header for quick manual locking
@@ -39,6 +25,9 @@ All notable changes to hyAway are documented here.
 
 ### Changed
 
+- "Add to review" actions now show a distinct cards-with-plus icon to differentiate from "New review"
+- Page breadcrumbs now show the actual page name and parent group path instead of the URL slug
+- Reset connection settings card now offers two separate actions: reset API values only, or reset and clear all saved data (searches, review queue, watch history)
 - Review completion now offers a "New random inbox" action that fetches a fresh random inbox set when opened
 - Opening "Recently inboxed" from review completion now refreshes that gallery before navigation
 - Opened Hydrus pages now show their parent page path above the title with matching hierarchy styling and quick links back to filtered pages
@@ -46,6 +35,12 @@ All notable changes to hyAway are documented here.
 
 ### Fixed
 
+- Image viewer background now correctly matches the fill-canvas placeholder to the configured background preference
+- Image loading now respects the media viewer background preferences, preventing a brief average-color flash when opening images
+- Significantly improved speed when loading large collections (100k+ files) — searches and metadata fetching no longer cause the UI to hang
+- Page headings no longer take excessive vertical space when text wraps to multiple lines
+- Inputs and form fields are now more visible in light theme with darker borders
+- Light theme text no longer appears thin. It now uses subpixel antialiasing for fuller weight
 - Pages search inputs now preserve typed spaces while still trimming searches and highlights correctly
 
 ---
