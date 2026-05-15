@@ -17,6 +17,7 @@ import {
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
+import { SearchSortTag } from "./-components/search-sort-tag";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
@@ -196,28 +197,23 @@ function SearchPage() {
             <span className="text-muted-foreground text-sm font-medium">
               {activeLabel}
             </span>
-            <SearchTagList
-              tags={searchTags}
-              sortLabel={
-                committed
-                  ? getSortLabel(
+            <SearchTagList tags={searchTags}>
+              {committed && (
+                <SearchSortTag
+                  label={getSortLabel(
+                    committed.sort.sortType,
+                    committed.sort.sortAsc,
+                  )}
+                  color={getThemeAdjustedColorFromHex(
+                    getSortColorHex(
                       committed.sort.sortType,
                       committed.sort.sortAsc,
-                    )
-                  : undefined
-              }
-              sortColor={
-                committed
-                  ? getThemeAdjustedColorFromHex(
-                      getSortColorHex(
-                        committed.sort.sortType,
-                        committed.sort.sortAsc,
-                      ),
-                      theme,
-                    )
-                  : undefined
-              }
-            />
+                    ),
+                    theme,
+                  )}
+                />
+              )}
+            </SearchTagList>
           </div>
         )}
         {isLoading && searchTags.length > 0 && <ThumbnailGallerySkeleton />}

@@ -26,6 +26,7 @@ import {
 } from "./query-builder-controls";
 import { InstantSearchSwitch } from "./instant-search-switch";
 import { SearchActions } from "./search-builder-actions";
+import { SearchSortTag } from "./search-sort-tag";
 import { SortSection } from "./sort-select";
 import type {
   RuleGroupProps,
@@ -43,6 +44,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui-primitives/collapsible";
+import { Badge } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
@@ -476,13 +478,17 @@ function StagedSearchTagList({
 }) {
   const hasTags = tags.length > 0;
   const content = (
-    <SearchTagList
-      tags={hasTags ? tags : ["(empty)"]}
-      sortLabel={hasTags ? sortLabel : undefined}
-      sortColor={hasTags ? sortColor : undefined}
-      interactive={false}
-      className="select-none **:select-none"
-    />
+    <div className="select-none **:select-none">
+      {hasTags ? (
+        <SearchTagList tags={tags} interactive={false}>
+          <SearchSortTag label={sortLabel} color={sortColor} />
+        </SearchTagList>
+      ) : (
+        <Badge variant="outline" size="default-wrap" className="select-none">
+          No query yet
+        </Badge>
+      )}
+    </div>
   );
 
   if (!onOpenBuilder) return content;

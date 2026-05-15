@@ -160,29 +160,20 @@ export function OrTagBadge({
 /**
  * Renders a list of hydrus search tags as badges.
  * Handles both plain tags and OR groups.
- * Optionally displays a sort label as an additional badge.
  * When `interactive` is true, each tag is a button that opens an action menu.
  */
 export function SearchTagList({
   tags,
-  sortLabel,
-  sortColor,
+  children,
   interactive = true,
   className,
 }: {
   tags: HydrusTagSearch;
-  sortLabel?: string;
-  sortColor?: string;
+  children?: ReactNode;
   /** When false, tags are plain text with no menu. Useful inside links. */
   interactive?: boolean;
   className?: string;
 }) {
-  const sortStyle = sortColor
-    ? ({ "--badge-overlay": sortColor } as ComponentProps<
-        typeof Badge
-      >["style"])
-    : undefined;
-
   const content = (
     <div className={cn("flex flex-wrap gap-1.5", className)}>
       {tags.map((entry, i) =>
@@ -201,13 +192,7 @@ export function SearchTagList({
           <TagBadgeFromString key={i} displayTag={entry} size="default-wrap" />
         ),
       )}
-      {sortLabel && (
-        <TagBadgeFromString
-          displayTag={sortLabel}
-          size="default-wrap"
-          style={sortStyle}
-        />
-      )}
+      {children}
     </div>
   );
 

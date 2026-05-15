@@ -16,6 +16,7 @@ import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
 import { InstantSearchSwitch } from "./-components/instant-search-switch";
+import { SearchSortTag } from "./-components/search-sort-tag";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
@@ -263,13 +264,11 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
           />
         </div>
         {searchTags.length > 0 ? (
-          <SearchTagList
-            tags={searchTags}
-            sortLabel={sortLabel}
-            sortColor={sortColor}
-            interactive={false}
-            className="pointer-events-none select-none **:select-none"
-          />
+          <div className="pointer-events-none select-none **:select-none">
+            <SearchTagList tags={searchTags} interactive={false}>
+              <SearchSortTag label={sortLabel} color={sortColor} />
+            </SearchTagList>
+          </div>
         ) : (
           <Badge variant="outline" size="default-wrap" className="select-none">
             No query yet
