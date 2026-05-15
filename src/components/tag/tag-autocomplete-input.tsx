@@ -38,7 +38,6 @@ export function TagAutocompleteInput({
   disabled,
   className,
   inputClassName,
-  colorizeInput,
   clearOnSelect,
   submitEmptyOnBlur,
   submitEmptyOnEnter,
@@ -59,8 +58,6 @@ export function TagAutocompleteInput({
   className?: string;
   /** Additional classes for the input element. */
   inputClassName?: string;
-  /** Apply namespace color to the input text. */
-  colorizeInput?: boolean;
   /** Clear the input after a suggestion is selected. */
   clearOnSelect?: boolean;
   /** Call onBlur with an empty string when the input is cleared. */
@@ -129,7 +126,7 @@ export function TagAutocompleteInput({
 
   const isFavouriteInput = useIsFavouriteTag(inputValue);
   const inputColor = useTagColor(inputValue);
-  const hasColorizedInput = colorizeInput && inputValue.trim().length > 0;
+  const hasColorizedInput = inputValue.trim().length > 0;
   const colorizedInputStyle: CSSProperties | undefined = hasColorizedInput
     ? { "--badge-overlay": inputColor }
     : undefined;

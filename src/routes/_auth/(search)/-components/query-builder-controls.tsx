@@ -1101,7 +1101,6 @@ function TagValueEditor({
         disabled={disabled}
         placeholder="(empty)"
         name="hyaway-spb-tag"
-        colorizeInput
         submitEmptyOnBlur
         submitEmptyOnEnter
       />
