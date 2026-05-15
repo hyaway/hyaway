@@ -181,6 +181,8 @@ function SearchPage() {
     : isError
       ? "Error for query:"
       : `${fileCount} ${fileCount === 1 ? "file" : "files"} found for:`;
+  const showActiveSearchTags =
+    !entry.instantSearch && isDirty && searchTags.length > 0;
 
   return (
     <>
@@ -189,7 +191,7 @@ function SearchPage() {
         <div className="flex flex-col gap-2 pb-2">
           <SearchQueryBuilder entryKey={searchId} onCommit={handleCommit} />
         </div>
-        {searchTags.length > 0 && (
+        {showActiveSearchTags && (
           <div className="flex flex-col gap-1.5 pt-3 pb-3">
             <span className="text-muted-foreground text-sm font-medium">
               {activeLabel}
