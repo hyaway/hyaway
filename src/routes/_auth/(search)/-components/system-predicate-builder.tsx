@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  IconChevronDown,
-  IconChevronUp,
-  IconPlus,
-} from "@tabler/icons-react";
+import { IconChevronDown, IconChevronUp, IconPlus } from "@tabler/icons-react";
 import {
   QueryBuilder,
   RuleGroupBodyComponents,
@@ -67,10 +63,7 @@ import {
 } from "@/components/ui-primitives/collapsible";
 import { Badge } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";
-import {
-  OrTagBadge,
-  TagBadgeFromString,
-} from "@/components/tag/tag-badge";
+import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
@@ -89,6 +82,24 @@ const FOCUSED_ROOT_QUERY_BUILDER_CLASSNAME = cn(
   "*:data-[level='0']:p-0",
 );
 
+const PICKED_STAGED_TAG_CLASSNAME = cn(
+  "ring-[3px]",
+  "ring-primary/80",
+  "ring-offset-2",
+  "ring-offset-background",
+);
+
+const STAGED_OR_GROUP_BUTTON_CLASSNAME = cn(
+  "group/staged-or inline-flex flex-wrap gap-1.5 rounded-4xl",
+  "border-0 bg-transparent text-inherit outline-none",
+  "focus-visible:ring-[3px] focus-visible:ring-primary/80",
+  "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+);
+
+const STAGED_OR_GROUP_BADGE_CLASSNAME = cn(
+  "group-hover/staged-or:before:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
+);
+
 // ---------------------------------------------------------------------------
 // Inline tag input rendered at the bottom of each rule group body
 // ---------------------------------------------------------------------------
@@ -96,7 +107,8 @@ const FOCUSED_ROOT_QUERY_BUILDER_CLASSNAME = cn(
 function QBRuleGroupBody(props: RuleGroupProps & UseRuleGroup) {
   const rootContext = getQueryBuilderRootContext(props.context);
   const isRootGroup = props.path.length === 0;
-  const showInlineInput = !isRootGroup || rootContext?.rootBuilderOpen !== false;
+  const showInlineInput =
+    !isRootGroup || rootContext?.rootBuilderOpen !== false;
   const bodyProps = useMemo(
     () => getFocusedRootBodyProps(props, rootContext),
     [props, rootContext],
@@ -165,8 +177,7 @@ export function SearchQueryBuilder({
     useSearchQueriesActions();
   const instantSearch = entry.instantSearch;
   const [isOpen, setIsOpen] = useState(false);
-  const [pickedSection, setPickedSection] =
-    useState<PickedSearchSection>(null);
+  const [pickedSection, setPickedSection] = useState<PickedSearchSection>(null);
   const theme = useActiveTheme();
 
   const query = entry.staged.query;
@@ -255,6 +266,20 @@ export function SearchQueryBuilder({
     setIsOpen(true);
   }, []);
 
+  const handleRootEntrySelect = useCallback((key: string) => {
+    setPickedSection((current) =>
+      current?.kind === "root" && current.key === key
+        ? null
+        : { kind: "root", key },
+    );
+  }, []);
+
+  const handleSortSelect = useCallback(() => {
+    setPickedSection((current) =>
+      current?.kind === "sort" ? null : { kind: "sort" },
+    );
+  }, []);
+
   const queryBuilderContext = useMemo<QueryBuilderRootContext>(
     () => ({
       rootBuilderOpen: isOpen,
@@ -283,7 +308,9 @@ export function SearchQueryBuilder({
       ...controlClassnames,
       queryBuilder: cn(
         controlClassnames.queryBuilder,
-        !isOpen && selectedRootSectionKey && FOCUSED_ROOT_QUERY_BUILDER_CLASSNAME,
+        !isOpen &&
+          selectedRootSectionKey &&
+          FOCUSED_ROOT_QUERY_BUILDER_CLASSNAME,
       ),
     }),
     [isOpen, selectedRootSectionKey],
@@ -374,7 +401,7 @@ export function SearchQueryBuilder({
         <CollapsibleTrigger
           className={cn(
             "text-muted-foreground hover:bg-muted ms-auto inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 pt-1 pb-2 text-sm transition-colors",
-            "outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+            "focus-visible:ring-ring/50 outline-none focus-visible:ring-3",
           )}
           onClick={handleToggleRootBuilder}
         >
@@ -435,8 +462,10 @@ export function SearchQueryBuilder({
           entries={rootSearchEntries}
           sortLabel={stagedSortLabel}
           sortColor={stagedSortColor}
-          onRootEntrySelect={(key) => setPickedSection({ kind: "root", key })}
-          onSortSelect={() => setPickedSection({ kind: "sort" })}
+          selectedRootKey={selectedRootSectionKey}
+          sortPicked={sortSectionPicked}
+          onRootEntrySelect={handleRootEntrySelect}
+          onSortSelect={handleSortSelect}
           onOpenBuilder={handleOpenRootBuilder}
         />
       )}
@@ -506,6 +535,8 @@ function StagedSearchTagList({
   entries,
   sortLabel,
   sortColor,
+  selectedRootKey,
+  sortPicked,
   onRootEntrySelect,
   onSortSelect,
   onOpenBuilder,
@@ -513,6 +544,8 @@ function StagedSearchTagList({
   entries: Array<StagedSearchEntry>;
   sortLabel: string;
   sortColor?: string;
+  selectedRootKey: string | null;
+  sortPicked: boolean;
   onRootEntrySelect: (key: string) => void;
   onSortSelect: () => void;
   onOpenBuilder: () => void;
@@ -529,24 +562,52 @@ function StagedSearchTagList({
 
   return (
     <div className="flex flex-wrap gap-1.5 select-none **:select-none">
-      {entries.map(({ key, entry }) => (
-        <StagedSearchTagButton
-          key={key}
-          onClick={() => onRootEntrySelect(key)}
-          onDoubleClick={onOpenBuilder}
-        >
-          {Array.isArray(entry) ? (
-            <OrTagBadge tags={entry} interactive={false} size="default-wrap" />
-          ) : (
-            <TagBadgeFromString displayTag={entry} size="default-wrap" />
-          )}
-        </StagedSearchTagButton>
-      ))}
+      {entries.map(({ key, entry }) => {
+        const isPicked = selectedRootKey === key;
+        const isOrGroup = Array.isArray(entry);
+
+        return (
+          <StagedSearchTagButton
+            key={key}
+            isPicked={isPicked}
+            className={
+              isOrGroup
+                ? cn(
+                    STAGED_OR_GROUP_BUTTON_CLASSNAME,
+                    isPicked && PICKED_STAGED_TAG_CLASSNAME,
+                  )
+                : undefined
+            }
+            onClick={() => onRootEntrySelect(key)}
+            onDoubleClick={onOpenBuilder}
+          >
+            {isOrGroup ? (
+              <OrTagBadge
+                tags={entry}
+                interactive={false}
+                size="default-wrap"
+                className={STAGED_OR_GROUP_BADGE_CLASSNAME}
+              />
+            ) : (
+              <TagBadgeFromString
+                displayTag={entry}
+                size="default-wrap"
+                className={isPicked ? PICKED_STAGED_TAG_CLASSNAME : undefined}
+              />
+            )}
+          </StagedSearchTagButton>
+        );
+      })}
       <StagedSearchTagButton
+        isPicked={sortPicked}
         onClick={onSortSelect}
         onDoubleClick={onOpenBuilder}
       >
-        <SearchSortTag label={sortLabel} color={sortColor} />
+        <SearchSortTag
+          label={sortLabel}
+          color={sortColor}
+          className={sortPicked ? PICKED_STAGED_TAG_CLASSNAME : undefined}
+        />
       </StagedSearchTagButton>
     </div>
   );
@@ -554,17 +615,22 @@ function StagedSearchTagList({
 
 function StagedSearchTagButton({
   children,
+  className,
+  isPicked = false,
   onClick,
   onDoubleClick,
 }: {
   children: ReactNode;
+  className?: string;
+  isPicked?: boolean;
   onClick: () => void;
   onDoubleClick: () => void;
 }) {
   return (
     <button
       type="button"
-      className="contents **:cursor-pointer"
+      aria-pressed={isPicked}
+      className={cn(className ?? "contents", "**:cursor-pointer")}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
     >
