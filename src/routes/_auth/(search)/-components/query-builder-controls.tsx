@@ -589,7 +589,7 @@ const systemFieldOptions: Array<OptionGroupItem> = fieldGroups
   }))
   .filter((group) => group.options.length > 0);
 
-function SystemFieldCombobox({
+export function SystemFieldCombobox({
   className,
   disabled,
   onSelect,
@@ -616,7 +616,9 @@ function SystemFieldCombobox({
         )}
       >
         <IconPlus data-icon="inline-start" className="size-5" />
-        <span className="hidden @sm:inline">Add</span>
+        <span data-label="add" className="hidden @sm:inline">
+          Add
+        </span>
         <span>system</span>
         <IconChevronDown data-icon="inline-end" className="size-4" />
       </PopoverTrigger>
