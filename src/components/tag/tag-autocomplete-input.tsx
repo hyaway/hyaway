@@ -129,7 +129,10 @@ export function TagAutocompleteInput({
 
   const isFavouriteInput = useIsFavouriteTag(inputValue);
   const inputColor = useTagColor(inputValue);
-  const colorizedInputStyle: CSSProperties = { "--badge-overlay": inputColor };
+  const hasColorizedInput = colorizeInput && inputValue.trim().length > 0;
+  const colorizedInputStyle: CSSProperties | undefined = hasColorizedInput
+    ? { "--badge-overlay": inputColor }
+    : undefined;
 
   const handleSelect = useCallback(
     (tag: string) => {
@@ -151,12 +154,12 @@ export function TagAutocompleteInput({
       <Input
         className={cn(
           "w-full",
-          colorizeInput &&
+          hasColorizedInput &&
             "border-(--badge-overlay)/30 bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] text-(--badge-overlay) placeholder:text-(--badge-overlay)/60 hover:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
           isFavouriteInput && "pe-10",
           inputClassName,
         )}
-        style={colorizeInput ? colorizedInputStyle : undefined}
+        style={colorizedInputStyle}
         value={inputValue}
         disabled={disabled}
         placeholder={placeholder}
@@ -203,9 +206,11 @@ export function TagAutocompleteInput({
         <IconTagStarred
           className={cn(
             "pointer-events-none absolute top-1/2 right-3 size-5 -translate-y-1/2",
-            colorizeInput ? "text-(--badge-overlay)" : "text-muted-foreground",
+            hasColorizedInput
+              ? "text-(--badge-overlay)"
+              : "text-muted-foreground",
           )}
-          style={colorizeInput ? colorizedInputStyle : undefined}
+          style={colorizedInputStyle}
           aria-hidden
         />
       )}
