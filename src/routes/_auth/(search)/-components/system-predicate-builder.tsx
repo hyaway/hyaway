@@ -228,7 +228,10 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
 
   const rootSearchEntries = useMemo(() => getRootSearchEntries(query), [query]);
   const hydrusSearch = useMemo(
-    () => rootSearchEntries.map(({ entry: searchEntry }) => searchEntry),
+    () =>
+      rootSearchEntries.flatMap(({ searchEntry }) =>
+        searchEntry ? [searchEntry] : [],
+      ),
     [rootSearchEntries],
   );
   const stagedSortLabel = useMemo(
@@ -351,8 +354,6 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
         rules: [...query.rules, { combinator: "or", rules: [] }],
       }),
     );
-    setPickedSection(null);
-    setIsOpen(true);
   }, [entryKey, query, setStagedQuery]);
 
   const handleSearch = useCallback(() => {
@@ -567,6 +568,7 @@ function StagedSearchTagList({
       {entries.map(({ key, entry }) => {
         const isPicked = selectedRootKey === key;
         const isOrGroup = Array.isArray(entry);
+        const stagedTagClassName = cn(isPicked && PICKED_STAGED_TAG_CLASSNAME);
 
         return (
           <StagedSearchTagButton
@@ -576,7 +578,7 @@ function StagedSearchTagList({
               isOrGroup
                 ? cn(
                     STAGED_OR_GROUP_BUTTON_CLASSNAME,
-                    isPicked && PICKED_STAGED_TAG_CLASSNAME,
+                    stagedTagClassName,
                   )
                 : undefined
             }
@@ -594,7 +596,7 @@ function StagedSearchTagList({
               <TagBadgeFromString
                 displayTag={entry}
                 size="default-wrap"
-                className={isPicked ? PICKED_STAGED_TAG_CLASSNAME : undefined}
+                className={stagedTagClassName}
               />
             )}
           </StagedSearchTagButton>

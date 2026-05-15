@@ -31,16 +31,109 @@ function invariant(condition: boolean, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
-export function ruleToSearchTag(rule: RuleType): string | null {
+type RuleToSearchTagOptions = {
+  allowIncomplete?: boolean;
+};
+
+const hasRuleValue = (value: unknown) => Boolean(value || value === 0);
+const EMPTY_VALUE_LABEL = "(empty)";
+
+function incompleteRuleToSearchTag(rule: RuleType): string {
+  const { field, operator } = rule;
+
+  if (field === "tag") return EMPTY_VALUE_LABEL;
+  if (field.startsWith("rating:")) {
+    const serviceName = field.slice("rating:".length);
+    return `system:rating for ${serviceName} ${operator} ${EMPTY_VALUE_LABEL}`;
+  }
+
+  switch (field) {
+    case "width":
+      return `system:width ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "height":
+      return `system:height ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "ratio":
+      return `system:ratio ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "num_pixels":
+      return `system:num pixels ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "filesize":
+      return `system:filesize ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "limit":
+      return `system:limit = ${EMPTY_VALUE_LABEL}`;
+    case "filetype":
+      return `system:filetype ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "num_tags":
+      return `system:number of tags ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "duration_value":
+      return `system:duration ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "framerate":
+      return `system:framerate ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "file_service":
+      return `system:file service ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "num_urls":
+      return `system:number of urls ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "num_notes":
+      return `system:number of notes ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "num_frames":
+      return `system:number of frames ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "import_time":
+      return `system:import time ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "modified_time":
+      return `system:modified time ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "archived_time":
+      return `system:archived time ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "last_viewed_time":
+      return `system:last viewed time ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "hash":
+      return `system:hash ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "media_views":
+      return `system:media views ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "preview_views":
+      return `system:preview views ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "all_views":
+      return `system:all views ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "media_viewtime":
+      return `system:media viewtime ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "preview_viewtime":
+      return `system:preview viewtime ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "all_viewtime":
+      return `system:all viewtime ${operator} ${EMPTY_VALUE_LABEL}`;
+    case "url_exact":
+      return operator === "has"
+        ? `system:has url ${EMPTY_VALUE_LABEL}`
+        : `system:does not have url ${EMPTY_VALUE_LABEL}`;
+    case "url_regex":
+      return operator === "has"
+        ? `system:has url matching regex ${EMPTY_VALUE_LABEL}`
+        : `system:does not have url matching regex ${EMPTY_VALUE_LABEL}`;
+    case "url_domain":
+      return operator === "has"
+        ? `system:has url with domain ${EMPTY_VALUE_LABEL}`
+        : `system:does not have url with domain ${EMPTY_VALUE_LABEL}`;
+    case "note_name":
+      return operator === "has"
+        ? `system:has note with name ${EMPTY_VALUE_LABEL}`
+        : `system:does not have note with name ${EMPTY_VALUE_LABEL}`;
+    default:
+      return EMPTY_VALUE_LABEL;
+  }
+}
+
+export function ruleToSearchTag(
+  rule: RuleType,
+  options: RuleToSearchTagOptions = {},
+): string | null {
   const { field, operator, value } = rule;
 
   // Tag field — value is the raw tag string (prefix with - to negate)
   if (field === "tag") {
     if (typeof value !== "string" || isIgnorableTagRuleValue(value)) {
-      return null;
+      return options.allowIncomplete ? incompleteRuleToSearchTag(rule) : null;
     }
     let tag = value.trim();
-    if (tag.replace(/^-+/, "") === "") return null;
+    if (tag.replace(/^-+/, "") === "") {
+      return options.allowIncomplete ? incompleteRuleToSearchTag(rule) : null;
+    }
     // Bare namespace (e.g. "series:" or "-series:") → wildcard
     if (tag.endsWith(":")) tag += "*";
     else if (tag.includes(":") && tag.endsWith(":-")) {
@@ -95,12 +188,16 @@ export function ruleToSearchTag(rule: RuleType): string | null {
       const ratingVal = value === "liked" ? "like" : "dislike";
       return `system:rating for ${serviceName} = ${ratingVal}`;
     }
-    if (!value && value !== 0) return null;
+    if (!hasRuleValue(value)) {
+      return options.allowIncomplete ? incompleteRuleToSearchTag(rule) : null;
+    }
     return `system:rating for ${serviceName} ${operator} ${value}`;
   }
 
   // Comparison / value fields
-  if (!value && value !== 0) return null;
+  if (!hasRuleValue(value)) {
+    return options.allowIncomplete ? incompleteRuleToSearchTag(rule) : null;
+  }
 
   switch (field) {
     case "width":

@@ -17,6 +17,8 @@ export type HydrusSearchEntry = HydrusTagSearch[number];
 export type StagedSearchEntry = {
   key: string;
   entry: HydrusSearchEntry;
+  searchEntry: HydrusSearchEntry | null;
+  isEmpty: boolean;
 };
 
 export type PickedSearchSection =
@@ -111,38 +113,74 @@ export function getRootSectionKey(
   return `path:${path[0] ?? 0}`;
 }
 
-function rootRuleOrGroupToSearchEntry(
+function rootRuleOrGroupToStagedEntry(
   ruleOrGroup: RuleType | RuleGroupTypeAny,
-): HydrusSearchEntry | null {
+): Pick<StagedSearchEntry, "entry" | "searchEntry" | "isEmpty"> {
   if ("rules" in ruleOrGroup) {
-    const tags: Array<string> = [];
+    const displayTags: Array<string> = [];
+    const searchTags: Array<string> = [];
+    let hasEmptyRule = false;
 
     for (const nestedRuleOrGroup of ruleOrGroup.rules) {
       if (typeof nestedRuleOrGroup === "string") continue;
       if ("rules" in nestedRuleOrGroup) continue;
 
       const tag = ruleToSearchTag(nestedRuleOrGroup);
-      if (tag) tags.push(tag);
+      if (tag) {
+        displayTags.push(tag);
+        searchTags.push(tag);
+      } else {
+        displayTags.push(
+          ruleToSearchTag(nestedRuleOrGroup, { allowIncomplete: true }) ??
+            "Empty rule",
+        );
+        hasEmptyRule = true;
+      }
     }
 
-    if (tags.length === 0) return null;
-    return tags.length === 1 ? tags[0] : tags;
+    if (displayTags.length === 0) {
+      return {
+        entry: "(empty OR group)",
+        searchEntry: null,
+        isEmpty: true,
+      };
+    }
+
+    return {
+      entry: displayTags.length === 1 ? displayTags[0] : displayTags,
+      searchEntry:
+        searchTags.length === 0
+          ? null
+          : searchTags.length === 1
+            ? searchTags[0]
+            : searchTags,
+      isEmpty: hasEmptyRule,
+    };
   }
 
-  return ruleToSearchTag(ruleOrGroup);
+  const tag = ruleToSearchTag(ruleOrGroup);
+
+  return {
+    entry:
+      tag ??
+      ruleToSearchTag(ruleOrGroup, { allowIncomplete: true }) ??
+      "(empty)",
+    searchEntry: tag,
+    isEmpty: !tag,
+  };
 }
 
 export function getRootSearchEntries(
   query: RuleGroupType,
 ): Array<StagedSearchEntry> {
   return query.rules.flatMap((ruleOrGroup, index) => {
-    const entry = rootRuleOrGroupToSearchEntry(ruleOrGroup);
-    if (!entry) return [];
+    if (typeof ruleOrGroup === "string") return [];
+    const entry = rootRuleOrGroupToStagedEntry(ruleOrGroup);
 
     return [
       {
         key: getRootSectionKey([index], ruleOrGroup),
-        entry,
+        ...entry,
       },
     ];
   });
