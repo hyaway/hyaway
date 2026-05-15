@@ -46,6 +46,7 @@ import { useSearchSettingsActions } from "@/stores/search-settings-store";
 import { useActiveTheme } from "@/stores/theme-store";
 
 const SearchResultsSearchSchema = z.object({
+  builder: z.boolean().optional(),
   instant: z.boolean().optional(),
 });
 
@@ -55,7 +56,8 @@ export const Route = createFileRoute("/_auth/(search)/search/$searchId/")({
 });
 
 function SearchPage() {
-  const { searchId, instant, instantSearch } = useSearchPageState();
+  const { searchId, builderOpen, instant, instantSearch } =
+    useSearchPageState();
   const displayName = useSearchDisplayName(searchId);
   const committed = useCommittedSearch(searchId);
   const theme = useActiveTheme();
@@ -107,9 +109,17 @@ function SearchPage() {
     navigate({
       to: "/search/$searchId",
       params: { searchId: newId },
-      search: { instant },
+      search: { builder: builderOpen, instant },
     });
-  }, [displayName, instant, searchId, saveAs, navigate, queryClient]);
+  }, [
+    builderOpen,
+    displayName,
+    instant,
+    searchId,
+    saveAs,
+    navigate,
+    queryClient,
+  ]);
 
   const handleDelete = useCallback(() => {
     remove(searchId);

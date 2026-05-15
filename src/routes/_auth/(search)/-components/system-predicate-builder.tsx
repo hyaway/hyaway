@@ -172,11 +172,15 @@ interface SearchQueryBuilderProps {
 }
 
 export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
-  const { searchId: entryKey, instantSearch } = useSearchPageState();
+  const {
+    searchId: entryKey,
+    builderOpen: isOpen,
+    instantSearch,
+    setBuilderOpen,
+  } = useSearchPageState();
   const entry = useSearchQueryEntry(entryKey);
   const { setStagedQuery, setStagedSort, commit, reset, clear } =
     useSearchQueriesActions();
-  const [isOpen, setIsOpen] = useState(false);
   const [pickedSection, setPickedSection] = useState<PickedSearchSection>(null);
   const theme = useActiveTheme();
 
@@ -266,18 +270,18 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
 
   const handleToggleRootBuilder = useCallback(() => {
     if (isOpen) {
-      setIsOpen(false);
+      setBuilderOpen(false);
       setPickedSection(null);
       return;
     }
 
-    setIsOpen(true);
-  }, [isOpen]);
+    setBuilderOpen(true);
+  }, [isOpen, setBuilderOpen]);
 
   const handleOpenRootBuilder = useCallback(() => {
     setPickedSection(null);
-    setIsOpen(true);
-  }, []);
+    setBuilderOpen(true);
+  }, [setBuilderOpen]);
 
   const handleRootEntrySelect = useCallback((key: string) => {
     setPickedSection((current) =>

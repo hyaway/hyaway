@@ -9,7 +9,9 @@ const SEARCH_RESULTS_ROUTE_FULL_PATH = "/_auth/(search)/search/$searchId/";
 
 export function useSearchPageState() {
   const { searchId } = useParams({ from: SEARCH_RESULTS_ROUTE_FULL_PATH });
-  const { instant } = useSearch({ from: SEARCH_RESULTS_ROUTE_FULL_PATH });
+  const { builder, instant } = useSearch({
+    from: SEARCH_RESULTS_ROUTE_FULL_PATH,
+  });
   const instantDefault = useSearchResultsInstantDefault();
   const navigate = useNavigate();
 
@@ -18,7 +20,19 @@ export function useSearchPageState() {
       navigate({
         to: "/search/$searchId",
         params: { searchId },
-        search: { instant: checked },
+        search: (current) => ({ ...current, instant: checked }),
+        replace: true,
+      });
+    },
+    [navigate, searchId],
+  );
+
+  const setBuilderOpen = useCallback(
+    (checked: boolean) => {
+      navigate({
+        to: "/search/$searchId",
+        params: { searchId },
+        search: (current) => ({ ...current, builder: checked }),
         replace: true,
       });
     },
@@ -27,8 +41,10 @@ export function useSearchPageState() {
 
   return {
     searchId,
+    builderOpen: builder ?? false,
     instant,
     instantSearch: instant ?? instantDefault,
+    setBuilderOpen,
     setInstantSearch,
   };
 }
