@@ -330,6 +330,7 @@ function QuickTagSearch({ onSearch }: { onSearch: (tag: string) => void }) {
           inputRef.current = val;
         }}
         onSelect={onSearch}
+        colorizeInput
       />
       <Button
         type="submit"

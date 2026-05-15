@@ -140,6 +140,7 @@ function QBRuleGroupBody(props: RuleGroupProps & UseRuleGroup) {
         onSelect={handleInlineSelect}
         onSubmit={handleInlineSelect}
         onBlur={handleInlineSelect}
+        colorizeInput
         clearOnSelect
       />
     </>
