@@ -250,13 +250,14 @@ export function SearchQueryBuilder({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-lg border p-3",
-        showDirtyRing && "ring-ring ring-1",
+        "flex flex-col gap-3 rounded-lg border-b pb-3",
+        showDirtyRing &&
+          "ring-ring ring-offset-background ring-1 ring-offset-8",
       )}
     >
       {!instantSearch && (
         <span className="text-muted-foreground text-sm font-medium">
-          Draft search
+          Draft search {isDirty && "(changed)"}
         </span>
       )}
       <QueryBuilder
