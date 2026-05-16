@@ -8,6 +8,7 @@ type SearchSortTagProps = {
   label: string;
   color?: string;
   className?: string;
+  size?: ComponentProps<typeof TagBadgeFromString>["size"];
   style?: ComponentProps<typeof TagBadgeFromString>["style"];
 };
 
@@ -15,6 +16,7 @@ export function SearchSortTag({
   label,
   color,
   className,
+  size = "default-wrap",
   style,
 }: SearchSortTagProps) {
   const sortStyle = color
@@ -27,7 +29,7 @@ export function SearchSortTag({
   return (
     <TagBadgeFromString
       displayTag={label}
-      size="default-wrap"
+      size={size}
       className={className}
       style={combinedStyle}
     />

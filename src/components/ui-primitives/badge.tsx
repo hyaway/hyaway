@@ -31,6 +31,8 @@ const badgeVariants = cva(
           "h-11 gap-2 px-4 text-sm has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&>svg]:size-6",
         "default-wrap":
           "h-auto min-h-11 gap-2 px-4 py-1.5 text-sm has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&>svg]:size-6 shrink overflow-visible whitespace-normal break-normal wrap-anywhere",
+        "compact-mobile-wrap":
+          "h-auto min-h-11 gap-2 px-4 py-1.5 text-sm has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&>svg]:size-6 shrink overflow-visible whitespace-normal break-normal wrap-anywhere max-sm:min-h-9 max-sm:gap-1.5 max-sm:px-3 max-sm:py-1 max-sm:[&>svg]:size-5",
         xs: "h-7 gap-1 px-2 text-xs has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-4",
         sm: "h-9 gap-1.5 px-2.5 text-xs has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&>svg]:size-5",
         lg: "h-12 gap-2 px-5 text-sm has-data-[icon=inline-end]:pr-4 has-data-[icon=inline-start]:pl-4 [&>svg]:size-6",

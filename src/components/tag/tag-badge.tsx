@@ -18,6 +18,7 @@ import { TagActionMenu, TagActionTrigger } from "@/components/tag/tag-actions";
 
 type BadgeProps = ComponentProps<typeof Badge> &
   VariantProps<typeof badgeVariants>;
+type BadgeSize = NonNullable<BadgeProps["size"]>;
 
 /**
  * A badge component for displaying a tag with optional namespace.
@@ -109,14 +110,16 @@ export function TagBadgeFromString({
 export function OrTagBadge({
   tags,
   className,
+  separatorClassName,
   style,
   size,
   interactive,
 }: {
   tags: Array<string>;
   className?: string;
+  separatorClassName?: string;
   style?: ComponentProps<typeof TagBadgeFromString>["style"];
-  size?: "default" | "default-wrap";
+  size?: BadgeSize;
   interactive?: boolean;
 }) {
   return (
@@ -145,6 +148,9 @@ export function OrTagBadge({
                 className={cn(
                   "text-muted-foreground border-foreground/40 -mx-1.5 inline-flex h-11 items-center border-y-2 px-1.5 text-sm font-medium",
                   style && "border-(--badge-overlay)",
+                  size === "compact-mobile-wrap" &&
+                    "max-sm:h-9 max-sm:px-1 max-sm:text-xs",
+                  separatorClassName,
                 )}
               >
                 or
@@ -176,12 +182,18 @@ export function SearchTagList({
   children,
   interactive = true,
   className,
+  badgeClassName,
+  orSeparatorClassName,
+  badgeSize = "compact-mobile-wrap",
 }: {
   tags: HydrusTagSearch;
   children?: ReactNode;
   /** When false, tags are plain text with no menu. Useful inside links. */
   interactive?: boolean;
   className?: string;
+  badgeClassName?: string;
+  orSeparatorClassName?: string;
+  badgeSize?: BadgeSize;
 }) {
   const content = (
     <div className={cn("flex flex-wrap gap-1.5", className)}>
@@ -191,14 +203,25 @@ export function SearchTagList({
             key={i}
             tags={entry}
             interactive={interactive}
-            size="default-wrap"
+            size={badgeSize}
+            className={badgeClassName}
+            separatorClassName={orSeparatorClassName}
           />
         ) : interactive ? (
           <TagActionTrigger key={i} tag={entry}>
-            <TagBadgeFromString displayTag={entry} size="default-wrap" />
+            <TagBadgeFromString
+              displayTag={entry}
+              size={badgeSize}
+              className={badgeClassName}
+            />
           </TagActionTrigger>
         ) : (
-          <TagBadgeFromString key={i} displayTag={entry} size="default-wrap" />
+          <TagBadgeFromString
+            key={i}
+            displayTag={entry}
+            size={badgeSize}
+            className={badgeClassName}
+          />
         ),
       )}
       {children}

@@ -259,12 +259,24 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
         </div>
         {searchTags.length > 0 ? (
           <div className="pointer-events-none select-none **:select-none">
-            <SearchTagList tags={searchTags} interactive={false}>
-              <SearchSortTag label={sortLabel} color={sortColor} />
+            <SearchTagList
+              tags={searchTags}
+              interactive={false}
+              badgeSize="compact-mobile-wrap"
+            >
+              <SearchSortTag
+                label={sortLabel}
+                color={sortColor}
+                size="compact-mobile-wrap"
+              />
             </SearchTagList>
           </div>
         ) : (
-          <Badge variant="outline" size="default-wrap" className="select-none">
+          <Badge
+            variant="outline"
+            size="compact-mobile-wrap"
+            className="select-none"
+          >
             No query yet
           </Badge>
         )}

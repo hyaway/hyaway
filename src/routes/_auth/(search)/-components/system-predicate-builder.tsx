@@ -600,14 +600,18 @@ function StagedSearchTagList({
 
   if (!hasTags) {
     return (
-      <Badge variant="outline" size="default-wrap" className="select-none">
+      <Badge
+        variant="outline"
+        size="compact-mobile-wrap"
+        className="select-none"
+      >
         No query yet
       </Badge>
     );
   }
 
   return (
-    <div className="flex flex-wrap gap-1.5 select-none **:select-none">
+    <div className="flex flex-wrap gap-1.5 select-none **:select-none max-sm:gap-1">
       {entries.map(({ key, sectionId, entry }) => {
         const isPicked = selectedRootSectionId === sectionId;
         const isOrGroup = Array.isArray(entry);
@@ -625,7 +629,7 @@ function StagedSearchTagList({
               <OrTagBadge
                 tags={entry}
                 interactive={false}
-                size="default-wrap"
+                size="compact-mobile-wrap"
                 className={
                   isPicked
                     ? PICKED_STAGED_OR_GROUP_BADGE_CLASSNAME
@@ -636,7 +640,7 @@ function StagedSearchTagList({
             ) : (
               <TagBadgeFromString
                 displayTag={entry}
-                size="default-wrap"
+                size="compact-mobile-wrap"
                 className={stagedTagClassName}
                 style={isPicked ? pickedStagedTagStyle : undefined}
               />
@@ -652,7 +656,8 @@ function StagedSearchTagList({
         <SearchSortTag
           label={sortLabel}
           color={sortColor}
-          className={sortPicked ? PICKED_STAGED_TAG_CLASSNAME : undefined}
+          size="compact-mobile-wrap"
+          className={cn(sortPicked && PICKED_STAGED_TAG_CLASSNAME)}
           style={sortPicked ? pickedStagedTagStyle : undefined}
         />
       </StagedSearchTagButton>

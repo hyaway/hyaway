@@ -218,13 +218,14 @@ function SearchPage() {
             <span className="text-muted-foreground text-sm font-medium">
               {activeLabel}
             </span>
-            <SearchTagList tags={searchTags}>
+            <SearchTagList tags={searchTags} badgeSize="compact-mobile-wrap">
               {committed && (
                 <SearchSortTag
                   label={getSortLabel(
                     committed.sort.sortType,
                     committed.sort.sortAsc,
                   )}
+                  size="compact-mobile-wrap"
                   color={getThemeAdjustedColorFromHex(
                     getSortColorHex(
                       committed.sort.sortType,
