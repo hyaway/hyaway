@@ -3,7 +3,25 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { setRating } from "../api-client";
+import { updateFileMetadataCaches } from "./file-metadata-cache";
 import type { FileMetadata, RatingValue, SetRatingOptions } from "../models";
+
+/** Returns the original metadata object when the rating is already current. */
+const updateRating = (
+  meta: FileMetadata,
+  serviceKey: string,
+  rating: RatingValue,
+) => {
+  if (meta.ratings?.[serviceKey] === rating) return meta;
+
+  return {
+    ...meta,
+    ratings: {
+      ...(meta.ratings ?? {}),
+      [serviceKey]: rating,
+    },
+  };
+};
 
 /**
  * Helper to update file metadata ratings in all relevant caches
@@ -16,77 +34,8 @@ const updateFileMetadataRating = (
 ) => {
   if (!fileIds) return;
 
-  const fileIdSet = new Set(fileIds);
-
-  const updateRating = (meta: FileMetadata): FileMetadata => ({
-    ...meta,
-    ratings: {
-      ...(meta.ratings ?? {}),
-      [serviceKey]: rating,
-    },
-  });
-
-  // Update single file metadata queries directly for immediate UI update
-  for (const fileId of fileIds) {
-    queryClient.setQueriesData<FileMetadata>(
-      {
-        predicate: (query) => {
-          const key = query.queryKey;
-          return key[0] === "getSingleFileMetadata" && key[1] === fileId;
-        },
-      },
-      (oldData) => (oldData ? updateRating(oldData) : oldData),
-    );
-  }
-
-  // Update batch metadata queries that contain any of the affected file IDs
-  queryClient.setQueriesData<{ metadata: Array<FileMetadata> }>(
-    {
-      predicate: (query) => {
-        const key = query.queryKey;
-        if (key[0] !== "getFilesMetadata") return false;
-        const queryFileIds = key[1] as Array<number> | undefined;
-        if (!queryFileIds) return false;
-        return queryFileIds.some((id) => fileIdSet.has(id));
-      },
-    },
-    (oldData) => {
-      if (!oldData) return oldData;
-      return {
-        ...oldData,
-        metadata: oldData.metadata.map((meta) =>
-          fileIdSet.has(meta.file_id) ? updateRating(meta) : meta,
-        ),
-      };
-    },
-  );
-
-  // Update infinite query caches
-  queryClient.setQueriesData<{
-    pages: Array<{ metadata: Array<FileMetadata>; nextCursor?: number }>;
-    pageParams: Array<number>;
-  }>(
-    {
-      predicate: (query) => {
-        const key = query.queryKey;
-        if (key[0] !== "infiniteGetFilesMetadata") return false;
-        const queryFileIds = key[1] as Array<number> | undefined;
-        if (!queryFileIds) return false;
-        return queryFileIds.some((id) => fileIdSet.has(id));
-      },
-    },
-    (oldData) => {
-      if (!oldData) return oldData;
-      return {
-        ...oldData,
-        pages: oldData.pages.map((page) => ({
-          ...page,
-          metadata: page.metadata.map((meta) =>
-            fileIdSet.has(meta.file_id) ? updateRating(meta) : meta,
-          ),
-        })),
-      };
-    },
+  updateFileMetadataCaches(queryClient, fileIds, (meta) =>
+    updateRating(meta, serviceKey, rating),
   );
 };
 

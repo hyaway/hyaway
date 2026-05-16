@@ -19,13 +19,14 @@ import {
 } from "../api-client";
 import { CanvasType } from "../models";
 import { useIsApiConfigured } from "../hydrus-config-store";
+import { updateFileMetadataCaches } from "./file-metadata-cache";
 
 import type {
   DeleteFilesOptions,
   FileIdentifiers,
   UndeleteFilesOptions,
 } from "../api-client";
-import type { FileMetadata } from "../models";
+import type { FileMetadata, FileViewingStatistics } from "../models";
 
 export const useGetSingleFileMetadata = (fileId: number) => {
   const isConfigured = useIsApiConfigured();
@@ -138,92 +139,19 @@ const getFileIdsFromIdentifiers = (
   return undefined; // Can't update by hash easily
 };
 
-type InfiniteData = {
-  pages: Array<{ metadata: Array<FileMetadata>; nextCursor?: number }>;
-  pageParams: Array<number>;
-};
-
-/** Creates an updater for infinite query data that only clones batches containing affected files. */
-function infiniteUpdater(
-  fileIdSet: Set<number>,
-  updater: (metadata: FileMetadata) => FileMetadata,
-) {
-  return (oldData: InfiniteData | undefined) => {
-    if (!oldData) return oldData;
-    let batches: typeof oldData.pages | undefined;
-    for (let i = 0; i < oldData.pages.length; i++) {
-      const batch = oldData.pages[i];
-      if (batch.metadata.some((meta) => fileIdSet.has(meta.file_id))) {
-        if (!batches) batches = [...oldData.pages];
-        batches[i] = {
-          ...batch,
-          metadata: batch.metadata.map((meta) =>
-            fileIdSet.has(meta.file_id) ? updater(meta) : meta,
-          ),
-        };
-      }
-    }
-    return batches ? { ...oldData, pages: batches } : oldData;
-  };
-}
-
-/**
- * Helper to update file metadata flags in all relevant caches
- */
-const updateFileMetadataFlags = (
-  queryClient: ReturnType<typeof useQueryClient>,
-  fileIds: Array<number> | undefined,
-  updater: (metadata: FileMetadata) => FileMetadata,
+const updateMetadataFields = (
+  meta: FileMetadata,
+  fields: Partial<FileMetadata>,
 ) => {
-  if (!fileIds) return;
-
-  const fileIdSet = new Set(fileIds);
-
-  // Update single file metadata queries directly for immediate UI update
-  for (const fileId of fileIds) {
-    queryClient.setQueriesData<FileMetadata>(
-      {
-        predicate: (query) => {
-          const key = query.queryKey;
-          return key[0] === "getSingleFileMetadata" && key[1] === fileId;
-        },
-      },
-      (oldData) => (oldData ? updater(oldData) : oldData),
-    );
+  for (const key of Object.keys(fields) as Array<keyof FileMetadata>) {
+    if (meta[key] !== fields[key]) return { ...meta, ...fields };
   }
-
-  // Update batch metadata queries that contain any of the affected file IDs
-  queryClient.setQueriesData<{ metadata: Array<FileMetadata> }>(
-    {
-      predicate: (query) => {
-        const key = query.queryKey;
-        if (key[0] !== "getFilesMetadata") return false;
-        const queryFileIds = key[1] as Array<number> | undefined;
-        if (!queryFileIds) return false;
-        return queryFileIds.some((id) => fileIdSet.has(id));
-      },
-    },
-    (oldData) => {
-      if (!oldData) return oldData;
-      return {
-        ...oldData,
-        metadata: oldData.metadata.map((meta) =>
-          fileIdSet.has(meta.file_id) ? updater(meta) : meta,
-        ),
-      };
-    },
-  );
-
-  // Update infinite query caches (gallery metadata loaded in batches).
-  // Only update active (non-stale) queries — inactive ones will refetch on mount.
-  queryClient.setQueriesData<InfiniteData>(
-    {
-      predicate: (query) =>
-        query.queryKey[0] === "infiniteGetFilesMetadata" && query.isActive(),
-    },
-    infiniteUpdater(fileIdSet, updater),
-  );
+  return meta;
 };
+
+/** Marks metadata as trashed without cloning if it is already trashed. */
+const markTrashed = (meta: FileMetadata) =>
+  updateMetadataFields(meta, { is_deleted: true, is_trashed: true });
 
 /**
  * Mutation to delete files (send to trash)
@@ -235,11 +163,7 @@ export const useDeleteFilesMutation = () => {
     mutationFn: (options: DeleteFilesOptions) => deleteFiles(options),
     onSuccess: (_data, variables) => {
       const fileIds = getFileIdsFromIdentifiers(variables);
-      updateFileMetadataFlags(queryClient, fileIds, (meta) => ({
-        ...meta,
-        is_trashed: true,
-        is_deleted: true,
-      }));
+      updateFileMetadataCaches(queryClient, fileIds, markTrashed);
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyTrashed"],
         refetchType: "none",
@@ -248,6 +172,10 @@ export const useDeleteFilesMutation = () => {
     mutationKey: ["deleteFiles"],
   });
 };
+
+/** Marks metadata as restored without cloning if it is already restored. */
+const markUndeleted = (meta: FileMetadata) =>
+  updateMetadataFields(meta, { is_deleted: false, is_trashed: false });
 
 /**
  * Mutation to undelete files (restore from trash)
@@ -259,11 +187,7 @@ export const useUndeleteFilesMutation = () => {
     mutationFn: (options: UndeleteFilesOptions) => undeleteFiles(options),
     onSuccess: (_data, variables) => {
       const fileIds = getFileIdsFromIdentifiers(variables);
-      updateFileMetadataFlags(queryClient, fileIds, (meta) => ({
-        ...meta,
-        is_trashed: false,
-        is_deleted: false,
-      }));
+      updateFileMetadataCaches(queryClient, fileIds, markUndeleted);
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyTrashed"],
         refetchType: "none",
@@ -272,6 +196,10 @@ export const useUndeleteFilesMutation = () => {
     mutationKey: ["undeleteFiles"],
   });
 };
+
+/** Marks metadata as archived without cloning if it is already archived. */
+const markArchived = (meta: FileMetadata) =>
+  updateMetadataFields(meta, { is_inbox: false });
 
 /**
  * Mutation to archive files (remove from inbox)
@@ -283,10 +211,7 @@ export const useArchiveFilesMutation = () => {
     mutationFn: (options: FileIdentifiers) => archiveFiles(options),
     onSuccess: (_data, variables) => {
       const fileIds = getFileIdsFromIdentifiers(variables);
-      updateFileMetadataFlags(queryClient, fileIds, (meta) => ({
-        ...meta,
-        is_inbox: false,
-      }));
+      updateFileMetadataCaches(queryClient, fileIds, markArchived);
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyArchived"],
         refetchType: "none",
@@ -300,6 +225,10 @@ export const useArchiveFilesMutation = () => {
   });
 };
 
+/** Marks metadata as inboxed without cloning if it is already inboxed. */
+const markInboxed = (meta: FileMetadata) =>
+  updateMetadataFields(meta, { is_inbox: true });
+
 /**
  * Mutation to unarchive files (put back in inbox)
  */
@@ -310,10 +239,7 @@ export const useUnarchiveFilesMutation = () => {
     mutationFn: (options: FileIdentifiers) => unarchiveFiles(options),
     onSuccess: (_data, variables) => {
       const fileIds = getFileIdsFromIdentifiers(variables);
-      updateFileMetadataFlags(queryClient, fileIds, (meta) => ({
-        ...meta,
-        is_inbox: true,
-      }));
+      updateFileMetadataCaches(queryClient, fileIds, markInboxed);
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyArchived"],
         refetchType: "none",
@@ -330,6 +256,36 @@ export const useUnarchiveFilesMutation = () => {
 // #endregion File Management Mutations
 
 // #region File Viewing Statistics Mutations
+
+/** Updates matching viewing stats while preserving unchanged stat references. */
+const updateFileViewingStatistic = (
+  meta: FileMetadata,
+  updater: (stat: FileViewingStatistics) => FileViewingStatistics,
+) => {
+  if (!meta.file_viewing_statistics) return meta;
+
+  let file_viewing_statistics: Array<FileViewingStatistics> | undefined;
+  for (let i = 0; i < meta.file_viewing_statistics.length; i++) {
+    const stat = meta.file_viewing_statistics[i];
+    const nextStat = updater(stat);
+    if (nextStat !== stat) {
+      if (!file_viewing_statistics) {
+        file_viewing_statistics = [...meta.file_viewing_statistics];
+      }
+      file_viewing_statistics[i] = nextStat;
+    }
+  }
+
+  return file_viewing_statistics ? { ...meta, file_viewing_statistics } : meta;
+};
+
+/** Clears Client API viewtime without cloning if it is already clear. */
+const clearClientApiViewtime = (meta: FileMetadata) =>
+  updateFileViewingStatistic(meta, (stat) =>
+    stat.canvas_type === CanvasType.CLIENT_API && stat.viewtime !== 0
+      ? { ...stat, viewtime: 0 }
+      : stat,
+  );
 
 interface ClearFileViewtimeParams {
   fileId: number;
@@ -353,14 +309,7 @@ export const useClearFileViewtimeMutation = () => {
         viewtime: 0,
       }),
     onSuccess: (_data, { fileId }) => {
-      updateFileMetadataFlags(queryClient, [fileId], (meta) => ({
-        ...meta,
-        file_viewing_statistics: meta.file_viewing_statistics?.map((stat) =>
-          stat.canvas_type === CanvasType.CLIENT_API
-            ? { ...stat, viewtime: 0 }
-            : stat,
-        ),
-      }));
+      updateFileMetadataCaches(queryClient, [fileId], clearClientApiViewtime);
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "longestViewed"],
         refetchType: "none",
@@ -375,6 +324,14 @@ interface ClearFileViewsParams {
   /** Current viewtime to preserve */
   currentViewtime: number;
 }
+
+/** Clears Client API views without cloning if they are already clear. */
+const clearClientApiViews = (meta: FileMetadata) =>
+  updateFileViewingStatistic(meta, (stat) =>
+    stat.canvas_type === CanvasType.CLIENT_API && stat.views !== 0
+      ? { ...stat, views: 0 }
+      : stat,
+  );
 
 /**
  * Mutation to clear file views (set to 0) for the Client API canvas type
@@ -392,14 +349,7 @@ export const useClearFileViewsMutation = () => {
         viewtime: currentViewtime,
       }),
     onSuccess: (_data, { fileId }) => {
-      updateFileMetadataFlags(queryClient, [fileId], (meta) => ({
-        ...meta,
-        file_viewing_statistics: meta.file_viewing_statistics?.map((stat) =>
-          stat.canvas_type === CanvasType.CLIENT_API
-            ? { ...stat, views: 0 }
-            : stat,
-        ),
-      }));
+      updateFileMetadataCaches(queryClient, [fileId], clearClientApiViews);
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "mostViewed"],
         refetchType: "none",
