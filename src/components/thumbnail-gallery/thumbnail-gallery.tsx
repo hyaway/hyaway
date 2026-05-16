@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import React, { useDeferredValue, useEffect, useMemo, useRef } from "react";
+import React, {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { RightSidebarPortal } from "../app-shell/right-sidebar-portal";
 import {
   ITEM_FOOTER_HEIGHT,
@@ -186,9 +192,14 @@ export function PureThumbnailGallery({
   const virtualizerInitialOffset = preserveCurrentScroll
     ? () => (typeof document !== "undefined" ? window.scrollY : 0)
     : restoredScrollY;
+  const getItemKey = useCallback(
+    (index: number) => deferredItems[index].file_id,
+    [deferredItems],
+  );
 
   const rowVirtualizer = useWindowVirtualizer({
     count: deferredItems.length,
+    getItemKey,
     estimateSize: (i) => {
       const item = deferredItems[i];
       return getItemHeight(item);
@@ -311,7 +322,7 @@ export function PureThumbnailGallery({
 
               return (
                 <ThumbnailGalleryItem
-                  key={item.file_id}
+                  key={virtualRow.key}
                   virtualRow={virtualRow}
                   lanes={effectiveLanes}
                   totalItemsCount={deferredItems.length}

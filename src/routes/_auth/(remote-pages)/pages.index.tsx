@@ -4,7 +4,7 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import z from "zod";
 
 import {
@@ -239,9 +239,14 @@ function PagesGrid({
     horizontalGap,
     verticalGap,
   } = gridConfig;
+  const getItemKey = useCallback(
+    (index: number) => pages[index].page_key,
+    [pages],
+  );
 
   const rowVirtualizer = useWindowVirtualizer({
     count: pages.length,
+    getItemKey,
     estimateSize: () => effectiveCardHeight,
     overscan: 4,
     gap: verticalGap,
@@ -290,7 +295,7 @@ function PagesGrid({
 
             return (
               <li
-                key={page.page_key}
+                key={virtualRow.key}
                 className="absolute top-0 left-0"
                 style={{
                   width: `${effectiveCardWidth}px`,
