@@ -22,6 +22,7 @@ import {
   getFocusedRootBodyProps,
   getQueryBuilderRootContext,
   getRootSearchEntries,
+  getRootSectionKey,
   handleAddGroup,
   handleAddRule,
 } from "../-lib/system-predicate-builder-helpers";
@@ -385,13 +386,17 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
   );
 
   const handleAddRootGroup = useCallback(() => {
+    const nextGroup = { combinator: "or" as const, rules: [] };
+    const nextGroupKey = getRootSectionKey([query.rules.length], nextGroup);
+
     setStagedQuery(
       entryKey,
       enforceCombinators({
         ...query,
-        rules: [...query.rules, { combinator: "or", rules: [] }],
+        rules: [...query.rules, nextGroup],
       }),
     );
+    setPickedSection({ kind: "root", key: nextGroupKey });
   }, [entryKey, query, setStagedQuery]);
 
   const handleSearch = useCallback(() => {
