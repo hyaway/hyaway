@@ -22,7 +22,10 @@ import {
   useDefaultQuery,
   useSearchSettingsActions,
 } from "@/stores/search-settings-store";
-import { defaultStaged } from "@/stores/search-defaults";
+import {
+  defaultStaged,
+  serializeSearchQueryForComparison,
+} from "@/stores/search-defaults";
 
 export const DEFAULT_QUERY_SETTINGS_TITLE = "Default query";
 
@@ -204,7 +207,10 @@ export function DefaultQuerySettings() {
 
   const isModified = useMemo(() => {
     const base = defaultStaged();
-    return JSON.stringify(defaultQuery.query) !== JSON.stringify(base.query);
+    return (
+      serializeSearchQueryForComparison(defaultQuery.query) !==
+      serializeSearchQueryForComparison(base.query)
+    );
   }, [defaultQuery.query]);
 
   const displayRules = useMemo(() => {

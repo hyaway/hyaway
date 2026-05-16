@@ -5,7 +5,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { SearchState } from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
-import { defaultStaged } from "@/stores/search-defaults";
+import { defaultStaged, ensureSearchQueryIds } from "@/stores/search-defaults";
 
 type SearchSettingsState = {
   /** Default query+sort for new search entries and clear/reset. */
@@ -26,7 +26,13 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
       defaultQuery: defaultStaged(),
       searchResultsInstantDefault: true,
       actions: {
-        setDefaultQuery: (defaultQuery: SearchState) => set({ defaultQuery }),
+        setDefaultQuery: (defaultQuery: SearchState) =>
+          set({
+            defaultQuery: {
+              ...defaultQuery,
+              query: ensureSearchQueryIds(defaultQuery.query),
+            },
+          }),
         setSearchResultsInstantDefault: (
           searchResultsInstantDefault: boolean,
         ) => set({ searchResultsInstantDefault }),
@@ -53,8 +59,9 @@ export const getSearchResultsInstantDefault = () =>
 
 export const getDefaultQuery = (): SearchState => {
   const { query, sort } = useSearchSettingsStore.getState().defaultQuery;
+  const queryWithIds = ensureSearchQueryIds(query);
   return {
-    query: { ...query, rules: [...query.rules] },
+    query: { ...queryWithIds, rules: [...queryWithIds.rules] },
     sort: { ...sort },
   };
 };

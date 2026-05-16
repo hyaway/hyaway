@@ -1,7 +1,8 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { RuleGroupType } from "react-querybuilder";
+import { generateID } from "@react-querybuilder/core";
+import type { RuleGroupType, RuleType } from "react-querybuilder";
 import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 
 // ---------------------------------------------------------------------------
@@ -23,6 +24,50 @@ export type SearchState = {
 // Defaults
 // ---------------------------------------------------------------------------
 
+export function createSearchRule(rule: Omit<RuleType, "id">): RuleType {
+  return { id: generateID(), ...rule } as RuleType;
+}
+
+function ensureSearchRuleId(rule: RuleType): RuleType {
+  const id = rule.id;
+  if (id != null && String(id).length > 0) return rule;
+
+  return { ...rule, id: generateID() } as RuleType;
+}
+
+export function ensureSearchQueryIds(query: RuleGroupType): RuleGroupType {
+  const rules = query.rules.map((ruleOrGroup) => {
+    if ("rules" in ruleOrGroup) {
+      const nestedGroup = ensureSearchQueryIds(ruleOrGroup);
+      const id = nestedGroup.id;
+      if (id != null && String(id).length > 0) return nestedGroup;
+      return { ...nestedGroup, id: generateID() } as RuleGroupType;
+    }
+
+    return ensureSearchRuleId(ruleOrGroup);
+  });
+
+  return { ...query, rules };
+}
+
+export function serializeSearchQueryForComparison(
+  query: RuleGroupType,
+): string {
+  const queryWithoutId: Record<string, unknown> = { ...query };
+  delete queryWithoutId.id;
+  queryWithoutId.rules = query.rules.map((ruleOrGroup) => {
+    if ("rules" in ruleOrGroup) {
+      return JSON.parse(serializeSearchQueryForComparison(ruleOrGroup));
+    }
+
+    const ruleWithoutId: Record<string, unknown> = { ...ruleOrGroup };
+    delete ruleWithoutId.id;
+    return ruleWithoutId;
+  });
+
+  return JSON.stringify(queryWithoutId);
+}
+
 function emptyQuery(): RuleGroupType {
   return {
     combinator: "and",
@@ -33,7 +78,14 @@ function emptyQuery(): RuleGroupType {
 function defaultQuery(): RuleGroupType {
   return {
     combinator: "and",
-    rules: [{ field: "limit", operator: "=", value: 256 }],
+    rules: [
+      {
+        id: generateID(),
+        field: "limit",
+        operator: "=",
+        value: 256,
+      },
+    ],
   };
 }
 

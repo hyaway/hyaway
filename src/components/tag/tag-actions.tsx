@@ -33,6 +33,7 @@ import {
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
+import { createSearchRule } from "@/stores/search-defaults";
 import { cn } from "@/lib/utils";
 import {
   useIsFavouriteTag,
@@ -90,7 +91,7 @@ export function useTagActions(
       ...currentQuery,
       rules: [
         ...currentQuery.rules,
-        { field: "tag", operator: "=", value: tag },
+        createSearchRule({ field: "tag", operator: "=", value: tag }),
       ],
     });
   }, [tag, searchId, entry.staged.query, setStagedQuery]);
@@ -102,7 +103,7 @@ export function useTagActions(
       ...currentQuery,
       rules: [
         ...currentQuery.rules,
-        { field: "tag", operator: "=", value: `-${tag}` },
+        createSearchRule({ field: "tag", operator: "=", value: `-${tag}` }),
       ],
     });
   }, [tag, searchId, entry.staged.query, setStagedQuery]);

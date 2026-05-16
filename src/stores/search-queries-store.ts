@@ -6,7 +6,11 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type { RuleGroupType } from "react-querybuilder";
 import type { SearchQueryEntry, SortConfig } from "@/stores/search-defaults";
-import { emptyStaged } from "@/stores/search-defaults";
+import {
+  createSearchRule,
+  emptyStaged,
+  serializeSearchQueryForComparison,
+} from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import {
   getDefaultQuery,
@@ -48,8 +52,8 @@ function areSearchStatesEquivalent(
   return (
     staged.sort.sortType === committed.sort.sortType &&
     staged.sort.sortAsc === committed.sort.sortAsc &&
-    JSON.stringify(stripEmptyRules(staged.query)) ===
-      JSON.stringify(committed.query)
+    serializeSearchQueryForComparison(stripEmptyRules(staged.query)) ===
+      serializeSearchQueryForComparison(committed.query)
   );
 }
 
@@ -285,11 +289,13 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
 
           const base = getDefaultQuery();
           const systemRule = systemTagToRule(tag);
-          const primaryRule = systemRule ?? {
-            field: "tag",
-            operator: "=",
-            value: tag,
-          };
+          const primaryRule = createSearchRule(
+            systemRule ?? {
+              field: "tag",
+              operator: "=",
+              value: tag,
+            },
+          );
           // Keep default rules that don't exactly match the tag at root level
           // (positive "tag" and negative "-tag" are treated as distinct values)
           const filteredRules = base.query.rules.filter(

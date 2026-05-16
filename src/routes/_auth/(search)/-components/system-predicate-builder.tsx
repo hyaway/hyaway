@@ -23,7 +23,7 @@ import {
   getFocusedRootBodyProps,
   getQueryBuilderRootContext,
   getRootSearchEntries,
-  getRootSectionKey,
+  getRootSectionId,
   handleAddGroup,
   handleAddRule,
 } from "../-lib/system-predicate-builder-helpers";
@@ -47,6 +47,7 @@ import type {
   AddRuleContext,
   PickedSearchSection,
   QueryBuilderRootContext,
+  RootSearchSectionId,
   StagedSearchEntry,
 } from "../-lib/system-predicate-builder-helpers";
 import type {
@@ -285,11 +286,11 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
   );
 
   const searchDisabled = hydrusSearch.length === 0;
-  const selectedRootSectionKey =
-    pickedSection?.kind === "root" ? pickedSection.key : null;
+  const selectedRootSectionId =
+    pickedSection?.kind === "root" ? pickedSection.id : null;
   const sortSectionPicked = pickedSection?.kind === "sort";
   const builderContentOpen = isOpen || pickedSection !== null;
-  const showQueryBuilderContent = isOpen || selectedRootSectionKey !== null;
+  const showQueryBuilderContent = isOpen || selectedRootSectionId !== null;
 
   const handleToggleRootBuilder = useCallback(() => {
     if (isOpen) {
@@ -306,11 +307,11 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     setBuilderOpen(true);
   }, [setBuilderOpen]);
 
-  const handleRootEntrySelect = useCallback((key: string) => {
+  const handleRootEntrySelect = useCallback((id: RootSearchSectionId) => {
     setPickedSection((current) =>
-      current?.kind === "root" && current.key === key
+      current?.kind === "root" && current.id === id
         ? null
-        : { kind: "root", key },
+        : { kind: "root", id },
     );
   }, []);
 
@@ -323,9 +324,9 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
   const queryBuilderContext = useMemo<QueryBuilderRootContext>(
     () => ({
       rootBuilderOpen: isOpen,
-      selectedRootSectionKey,
+      selectedRootSectionId,
     }),
-    [isOpen, selectedRootSectionKey],
+    [isOpen, selectedRootSectionId],
   );
 
   const queryBuilderControlElements = useMemo(
@@ -349,11 +350,11 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       queryBuilder: cn(
         controlClassnames.queryBuilder,
         !isOpen &&
-          selectedRootSectionKey &&
+          selectedRootSectionId &&
           FOCUSED_ROOT_QUERY_BUILDER_CLASSNAME,
       ),
     }),
-    [isOpen, selectedRootSectionKey],
+    [isOpen, selectedRootSectionId],
   );
 
   const handleQueryChange = useCallback(
@@ -397,7 +398,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       combinator: "or" as const,
       rules: [],
     };
-    const nextGroupKey = getRootSectionKey([query.rules.length], nextGroup);
+    const nextGroupId = getRootSectionId(nextGroup);
 
     setStagedQuery(
       entryKey,
@@ -406,7 +407,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
         rules: [...query.rules, nextGroup],
       }),
     );
-    setPickedSection({ kind: "root", key: nextGroupKey });
+    setPickedSection({ kind: "root", id: nextGroupId });
   }, [entryKey, query, setStagedQuery]);
 
   const handleSearch = useCallback(() => {
@@ -433,7 +434,11 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
 
   useEffect(() => {
     if (pickedSection?.kind !== "root") return;
-    if (rootSearchEntries.some(({ key }) => key === pickedSection.key)) return;
+    if (
+      rootSearchEntries.some(({ sectionId }) => sectionId === pickedSection.id)
+    ) {
+      return;
+    }
 
     setPickedSection(null);
   }, [pickedSection, rootSearchEntries]);
@@ -522,7 +527,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
           entries={rootSearchEntries}
           sortLabel={stagedSortLabel}
           sortColor={stagedSortColor}
-          selectedRootKey={selectedRootSectionKey}
+          selectedRootSectionId={selectedRootSectionId}
           sortPicked={sortSectionPicked}
           pickedStagedTagStyle={pickedStagedTagStyle}
           onRootEntrySelect={handleRootEntrySelect}
@@ -574,7 +579,7 @@ function StagedSearchTagList({
   entries,
   sortLabel,
   sortColor,
-  selectedRootKey,
+  selectedRootSectionId,
   sortPicked,
   pickedStagedTagStyle,
   onRootEntrySelect,
@@ -584,10 +589,10 @@ function StagedSearchTagList({
   entries: Array<StagedSearchEntry>;
   sortLabel: string;
   sortColor?: string;
-  selectedRootKey: string | null;
+  selectedRootSectionId: RootSearchSectionId | null;
   sortPicked: boolean;
   pickedStagedTagStyle: ComponentProps<typeof TagBadgeFromString>["style"];
-  onRootEntrySelect: (key: string) => void;
+  onRootEntrySelect: (id: RootSearchSectionId) => void;
   onSortSelect: () => void;
   onOpenBuilder: () => void;
 }) {
@@ -603,8 +608,8 @@ function StagedSearchTagList({
 
   return (
     <div className="flex flex-wrap gap-1.5 select-none **:select-none">
-      {entries.map(({ key, entry }) => {
-        const isPicked = selectedRootKey === key;
+      {entries.map(({ key, sectionId, entry }) => {
+        const isPicked = selectedRootSectionId === sectionId;
         const isOrGroup = Array.isArray(entry);
         const stagedTagClassName = cn(isPicked && PICKED_STAGED_TAG_CLASSNAME);
 
@@ -613,7 +618,7 @@ function StagedSearchTagList({
             key={key}
             isPicked={isPicked}
             className={isOrGroup ? STAGED_OR_GROUP_BUTTON_CLASSNAME : undefined}
-            onClick={() => onRootEntrySelect(key)}
+            onClick={() => onRootEntrySelect(sectionId)}
             onDoubleClick={onOpenBuilder}
           >
             {isOrGroup ? (

@@ -14,21 +14,24 @@ import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
 
 export type HydrusSearchEntry = HydrusTagSearch[number];
 
+export type RootSearchSectionId = string;
+
 export type StagedSearchEntry = {
   key: string;
+  sectionId: RootSearchSectionId;
   entry: HydrusSearchEntry;
   searchEntry: HydrusSearchEntry | null;
   isEmpty: boolean;
 };
 
 export type PickedSearchSection =
-  | { kind: "root"; key: string }
+  | { kind: "root"; id: RootSearchSectionId }
   | { kind: "sort" }
   | null;
 
 export type QueryBuilderRootContext = {
   rootBuilderOpen: boolean;
-  selectedRootSectionKey: string | null;
+  selectedRootSectionId: RootSearchSectionId | null;
 };
 
 export type AddRuleContext = Parameters<typeof handleAddRule>[3];
@@ -104,13 +107,14 @@ export function getQueryBuilderRootContext(
   return context as QueryBuilderRootContext;
 }
 
-export function getRootSectionKey(
-  path: Array<number>,
+export function getRootSectionId(
   ruleOrGroup: RuleType | RuleGroupTypeAny,
-): string {
+): RootSearchSectionId {
   const id = "id" in ruleOrGroup ? ruleOrGroup.id : undefined;
-  if (id != null && String(id).length > 0) return `id:${String(id)}`;
-  return `path:${path[0] ?? 0}`;
+  if (id != null && String(id).length > 0) {
+    return String(id);
+  }
+  throw new Error("Query builder root entries must have ids.");
 }
 
 function rootRuleOrGroupToStagedEntry(
@@ -173,13 +177,15 @@ function rootRuleOrGroupToStagedEntry(
 export function getRootSearchEntries(
   query: RuleGroupType,
 ): Array<StagedSearchEntry> {
-  return query.rules.flatMap((ruleOrGroup, index) => {
+  return query.rules.flatMap((ruleOrGroup) => {
     if (typeof ruleOrGroup === "string") return [];
     const entry = rootRuleOrGroupToStagedEntry(ruleOrGroup);
+    const sectionId = getRootSectionId(ruleOrGroup);
 
     return [
       {
-        key: getRootSectionKey([index], ruleOrGroup),
+        key: `id:${sectionId}`,
+        sectionId,
         ...entry,
       },
     ];
@@ -193,22 +199,17 @@ export function getFocusedRootBodyProps(
   if (
     props.path.length !== 0 ||
     rootContext?.rootBuilderOpen !== false ||
-    !rootContext.selectedRootSectionKey
+    !rootContext.selectedRootSectionId
   ) {
     return props;
   }
 
-  const selectedIndex = props.ruleGroup.rules.findIndex(
-    (ruleOrGroup, index) => {
-      if (typeof ruleOrGroup === "string") return false;
-      return (
-        getRootSectionKey(
-          props.pathsMemo[index]?.path ?? [index],
-          ruleOrGroup,
-        ) === rootContext.selectedRootSectionKey
-      );
-    },
-  );
+  const selectedRootSectionId = rootContext.selectedRootSectionId;
+
+  const selectedIndex = props.ruleGroup.rules.findIndex((ruleOrGroup) => {
+    if (typeof ruleOrGroup === "string") return false;
+    return getRootSectionId(ruleOrGroup) === selectedRootSectionId;
+  });
 
   if (selectedIndex < 0) {
     return {
