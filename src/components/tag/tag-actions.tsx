@@ -83,24 +83,48 @@ export function useTagActions(
   const handleInclude = useCallback(() => {
     if (!searchId) return;
     const currentQuery = entry.staged.query;
+    const excludedTag = `-${tag}`;
+    const hasExcludedTag = currentQuery.rules.some(
+      (r) => "field" in r && r.field === "tag" && r.value === excludedTag,
+    );
     setStagedQuery(searchId, {
       ...currentQuery,
-      rules: [
-        ...currentQuery.rules,
-        createSearchRule({ field: "tag", operator: "=", value: tag }),
-      ],
+      rules: hasExcludedTag
+        ? currentQuery.rules.map((r) =>
+            "field" in r && r.field === "tag" && r.value === excludedTag
+              ? { ...r, value: tag }
+              : r,
+          )
+        : [
+            ...currentQuery.rules,
+            createSearchRule({ field: "tag", operator: "=", value: tag }),
+          ],
     });
   }, [tag, searchId, entry.staged.query, setStagedQuery]);
 
   const handleExclude = useCallback(() => {
     if (!searchId) return;
     const currentQuery = entry.staged.query;
+    const excludedTag = `-${tag}`;
+    const hasIncludedTag = currentQuery.rules.some(
+      (r) => "field" in r && r.field === "tag" && r.value === tag,
+    );
     setStagedQuery(searchId, {
       ...currentQuery,
-      rules: [
-        ...currentQuery.rules,
-        createSearchRule({ field: "tag", operator: "=", value: `-${tag}` }),
-      ],
+      rules: hasIncludedTag
+        ? currentQuery.rules.map((r) =>
+            "field" in r && r.field === "tag" && r.value === tag
+              ? { ...r, value: excludedTag }
+              : r,
+          )
+        : [
+            ...currentQuery.rules,
+            createSearchRule({
+              field: "tag",
+              operator: "=",
+              value: excludedTag,
+            }),
+          ],
     });
   }, [tag, searchId, entry.staged.query, setStagedQuery]);
 
