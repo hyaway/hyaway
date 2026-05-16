@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import { generateID } from "@react-querybuilder/core";
 import {
   QueryBuilder,
   RuleGroupBodyComponents,
@@ -365,7 +366,12 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
   const addRootRule = useCallback(
     (context?: AddRuleContext) => {
       const nextRule = handleAddRule(
-        { field: "tag", operator: "=", value: "" } as RuleType,
+        {
+          id: generateID(),
+          field: "tag",
+          operator: "=",
+          value: "",
+        } as RuleType,
         [],
         query,
         context,
@@ -386,7 +392,11 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
   );
 
   const handleAddRootGroup = useCallback(() => {
-    const nextGroup = { combinator: "or" as const, rules: [] };
+    const nextGroup = {
+      id: generateID(),
+      combinator: "or" as const,
+      rules: [],
+    };
     const nextGroupKey = getRootSectionKey([query.rules.length], nextGroup);
 
     setStagedQuery(
