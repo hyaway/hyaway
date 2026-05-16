@@ -484,11 +484,13 @@ export function AddOrGroupButton({
   title,
   onClick,
   disabled,
+  ariaLabel = "Add OR group",
 }: {
   className?: string;
   title?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
+  ariaLabel?: string;
 }) {
   return (
     <Button
@@ -499,6 +501,7 @@ export function AddOrGroupButton({
       onClick={onClick}
       disabled={disabled}
       type="button"
+      aria-label={ariaLabel}
     >
       <IconPlus data-icon="inline-start" className="size-5" />
       <span data-label="add" className="hidden @sm:inline">
@@ -622,10 +625,12 @@ export function SystemFieldCombobox({
   className,
   disabled,
   onSelect,
+  ariaLabel = "Add system predicate",
 }: {
   className?: string;
   disabled?: boolean;
   onSelect: (fieldName: string) => void;
+  ariaLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -638,6 +643,7 @@ export function SystemFieldCombobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         disabled={disabled}
+        aria-label={ariaLabel}
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
           "w-auto shrink-0 cursor-pointer px-2.5",
