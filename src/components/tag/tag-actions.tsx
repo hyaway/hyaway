@@ -16,11 +16,8 @@ import {
   IconFilterMinus,
   IconFilterPlus,
   IconFilterX,
-  IconMinus,
-  IconPlus,
   IconSearch,
   IconTagStarred,
-  IconTrash,
 } from "@tabler/icons-react";
 import type { ComponentType, ReactNode, SVGProps } from "react";
 import {
@@ -66,6 +63,7 @@ export interface TagAction {
   label: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   onClick: () => void;
+  closeOnClick?: boolean;
 }
 
 export interface TagActionSection {
@@ -92,6 +90,7 @@ function useNewSearchTagAction(tag: string): TagAction {
       label: "New search",
       icon: IconSearch,
       onClick: handleSearch,
+      closeOnClick: true,
     }),
     [handleSearch],
   );
@@ -332,6 +331,7 @@ function TagActionMenuItems({
             <DropdownMenuItem
               key={action.id}
               onClick={action.onClick}
+              closeOnClick={action.closeOnClick ?? false}
               className={"cursor-pointer"}
             >
               <action.icon />
@@ -345,6 +345,7 @@ function TagActionMenuItems({
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={favouriteAction.onClick}
+            closeOnClick={favouriteAction.closeOnClick ?? false}
             className={"cursor-pointer"}
           >
             <favouriteAction.icon />
