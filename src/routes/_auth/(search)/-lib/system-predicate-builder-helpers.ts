@@ -151,7 +151,8 @@ function rootRuleOrGroupToStagedEntry(
     }
 
     return {
-      entry: displayTags.length === 1 ? displayTags[0] : displayTags,
+      entry:
+        displayTags.length === 1 ? [displayTags[0], "(empty)"] : displayTags,
       searchEntry:
         searchTags.length === 0
           ? null
