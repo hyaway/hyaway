@@ -6,6 +6,7 @@ import {
   memo,
   useCallback,
   useContext,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -13,13 +14,15 @@ import {
 } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import {
+  IconCheck,
+  IconCopy,
   IconFilterMinus,
   IconFilterPlus,
   IconFilterX,
   IconSearch,
   IconTagStarred,
 } from "@tabler/icons-react";
-import type { ComponentType, ReactNode, SVGProps } from "react";
+import type { CSSProperties, ComponentType, ReactNode, SVGProps } from "react";
 import {
   DropdownMenu,
   DropdownMenuAnchoredContent,
@@ -41,14 +44,19 @@ import {
 } from "@/integrations/hydrus-api/queries/tags";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { Permission } from "@/integrations/hydrus-api/models";
-import { TagBadgeFromString } from "@/components/tag/tag-badge";
 import { useSidebarStoreActions } from "@/stores/sidebar-store";
 import { CrossedOutIcon } from "@/components/ratings/crossed-out-icon";
+import { parseTag } from "@/lib/tag-utils";
+import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
 
 function IconTagUnstarred(props: SVGProps<SVGSVGElement>) {
   return (
-    <CrossedOutIcon {...props} strokeBackgroundColor="text-popover">
-      <IconTagStarred />
+    <CrossedOutIcon
+      {...props}
+      className={cn("inline-grid size-6 place-items-center", props.className)}
+      strokeBackgroundColor="text-popover"
+    >
+      <IconTagStarred className="size-6" />
     </CrossedOutIcon>
   );
 }
@@ -299,6 +307,55 @@ export function useTagActionMenu() {
   return useContext(TagActionMenuContext);
 }
 
+function CopyTagMenuItem({ tag }: { tag: string }) {
+  const [copied, setCopied] = useState(false);
+  const { namespace, tag: tagText, negated } = parseTag(tag);
+  const color = useNamespaceColor(namespace);
+  const favouriteTag = namespace ? `${namespace}:${tagText}` : tagText;
+  const isFavourite = useIsFavouriteTag(favouriteTag);
+  const tagStyle = { "--badge-overlay": color } as CSSProperties;
+
+  const handleCopy = useCallback(() => {
+    void navigator.clipboard.writeText(tag);
+    setCopied(true);
+  }, [tag]);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timeout = window.setTimeout(() => setCopied(false), 1200);
+    return () => window.clearTimeout(timeout);
+  }, [copied]);
+
+  return (
+    <DropdownMenuItem
+      onClick={handleCopy}
+      closeOnClick={false}
+      style={tagStyle}
+      className="cursor-pointer focus:bg-[color-mix(in_srgb,var(--badge-overlay)_12%,transparent)]"
+    >
+      <span className="relative flex items-center justify-center">
+        <IconCopy
+          className={cn("transition-all", copied ? "scale-0" : "scale-100")}
+        />
+        <IconCheck
+          className={cn(
+            "absolute transition-all",
+            copied ? "scale-100" : "scale-0",
+          )}
+        />
+      </span>
+      <span className="min-w-0 flex-1 wrap-anywhere text-(--badge-overlay)">
+        {negated ? "-" : ""}
+        {namespace ? `${namespace}: ` : ""}
+        {tagText}
+      </span>
+      {isFavourite && (
+        <IconTagStarred className="size-6 shrink-0 text-(--badge-overlay)" />
+      )}
+    </DropdownMenuItem>
+  );
+}
+
 /** Menu item content rendered inside the shared popup. */
 function TagActionMenuItems({
   tag,
@@ -312,13 +369,7 @@ function TagActionMenuItems({
   return (
     <>
       <DropdownMenuGroup>
-        <DropdownMenuLabel className={"p-0"}>
-          <TagBadgeFromString
-            displayTag={tag}
-            className="h-auto w-full"
-            size="compact-mobile-wrap"
-          />
-        </DropdownMenuLabel>
+        <CopyTagMenuItem tag={tag} />
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       {sections.map((section, sectionIndex) => (
