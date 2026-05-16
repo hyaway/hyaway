@@ -31,7 +31,7 @@ import type {
   ValueEditorProps,
   VersatileSelectorProps,
 } from "react-querybuilder";
-import type { CSSProperties } from "react";
+import type { CSSProperties, MouseEventHandler } from "react";
 import type {
   RatingServiceInfo,
   StarShape,
@@ -479,6 +479,39 @@ export function QBSelect({
 // Action button
 // ---------------------------------------------------------------------------
 
+export function AddOrGroupButton({
+  className,
+  title,
+  onClick,
+  disabled,
+}: {
+  className?: string;
+  title?: string;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
+}) {
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className={cn("w-auto shrink-0 px-2.5", className)}
+      title={title}
+      onClick={onClick}
+      disabled={disabled}
+      type="button"
+    >
+      <IconPlus data-icon="inline-start" className="size-5" />
+      <span data-label="add" className="hidden @sm:inline">
+        Add
+      </span>
+      <span>OR</span>
+      <span data-label="group" className="hidden @xs:inline">
+        group
+      </span>
+    </Button>
+  );
+}
+
 /** Action button using our Button primitive */
 export function QBActionElement({
   handleOnClick,
@@ -492,6 +525,7 @@ export function QBActionElement({
   const isRemoveRule = testID === "remove-rule";
   const isRemoveGroup = testID === "remove-group";
   const isAddGroup = testID === "add-group";
+  const isAddRule = testID === "add-rule";
 
   if (isRemoveRule) {
     return (
@@ -539,33 +573,28 @@ export function QBActionElement({
     // Sub-groups (level >= 1) cannot have nested groups.
     if (level > 0) return null;
     return (
-      <Button
-        variant="outline"
-        size="sm"
-        className={cn("w-auto shrink-0 px-2.5", className)}
+      <AddOrGroupButton
+        className={className}
         title={title}
         onClick={(e) => handleOnClick(e)}
         disabled={disabled}
-        type="button"
-      >
-        <IconPlus data-icon="inline-start" className="size-5" />
-        <span className="hidden @sm:inline">Add</span>
-        <span>OR</span>
-        <span className="hidden @xs:inline">group</span>
-      </Button>
+      />
     );
   }
 
-  // Add rule: "Add system" combobox
-  return (
-    <SystemFieldCombobox
-      className={className}
-      disabled={disabled}
-      onSelect={(fieldName) =>
-        handleOnClick(undefined, { inlineTag: fieldName })
-      }
-    />
-  );
+  if (isAddRule) {
+    return (
+      <SystemFieldCombobox
+        className={className}
+        disabled={disabled}
+        onSelect={(fieldName) =>
+          handleOnClick(undefined, { inlineTag: fieldName })
+        }
+      />
+    );
+  }
+
+  return null;
 }
 
 /** All non-tag system fields grouped for the "Add system" action. */
