@@ -18,6 +18,7 @@ export type SortConfig = {
 export type SearchState = {
   query: RuleGroupType;
   sort: SortConfig;
+  fileServiceKey: string | null;
 };
 
 // ---------------------------------------------------------------------------
@@ -98,12 +99,12 @@ function defaultSort(): SortConfig {
 
 /** Empty staged state used by erase — bare query with no limit. */
 export function emptyStaged(): SearchState {
-  return { query: emptyQuery(), sort: defaultSort() };
+  return { query: emptyQuery(), sort: defaultSort(), fileServiceKey: null };
 }
 
 /** Default staged state for new entries — includes limit 256. */
 export function defaultStaged(): SearchState {
-  return { query: defaultQuery(), sort: defaultSort() };
+  return { query: defaultQuery(), sort: defaultSort(), fileServiceKey: null };
 }
 
 /** A single search entry with staged (being edited) and committed (active) state. */

@@ -67,6 +67,13 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui-primitives/collapsible";
 import { Badge } from "@/components/ui-primitives/badge";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui-primitives/select";
 import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
@@ -203,23 +210,34 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     setBuilderOpen,
   } = useSearchPageState();
   const entry = useSearchQueryEntry(entryKey);
-  const { setStagedQuery, setStagedSort, commit, reset, clear } =
-    useSearchQueriesActions();
+  const {
+    setStagedQuery,
+    setStagedSort,
+    setStagedFileServiceKey,
+    commit,
+    reset,
+    clear,
+  } = useSearchQueriesActions();
   const [pickedSection, setPickedSection] = useState<PickedSearchSection>(null);
   const theme = useActiveTheme();
 
   const query = entry.staged.query;
   const sortType = entry.staged.sort.sortType;
   const sortAsc = entry.staged.sort.sortAsc;
+  const fileServiceKey = entry.staged.fileServiceKey;
   const canEditRatings = useHasPermission(Permission.EDIT_FILE_RATINGS);
   const { ratingServices } = useRatingServices();
   const { data: servicesData } = useGetServicesQuery();
 
   const fileServiceValues = useMemo(() => {
     if (!servicesData) return [];
-    return Object.values(servicesData.services)
-      .filter((s) => FILE_SERVICE_TYPES.has(s.type))
-      .map((s) => ({ name: s.name, label: s.name }));
+    return Object.entries(servicesData.services)
+      .filter(([, service]) => FILE_SERVICE_TYPES.has(service.type))
+      .map(([serviceKey, service]) => ({
+        serviceKey,
+        name: service.name,
+        label: service.name,
+      }));
   }, [servicesData]);
 
   const allFieldGroups = useMemo(() => {
@@ -257,6 +275,13 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     setStagedSort(entryKey, { sortType, sortAsc: !sortAsc });
   }, [entryKey, setStagedSort, sortType, sortAsc]);
 
+  const handleFileServiceChange = useCallback(
+    (value: string | null) => {
+      setStagedFileServiceKey(entryKey, value);
+    },
+    [entryKey, setStagedFileServiceKey],
+  );
+
   const rootSearchEntries = useMemo(() => getRootSearchEntries(query), [query]);
   const hydrusSearch = useMemo(
     () =>
@@ -269,6 +294,16 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     () => getSortLabel(sortType, sortAsc),
     [sortType, sortAsc],
   );
+  const selectedFileService = useMemo(
+    () =>
+      fileServiceValues.find(
+        (service) => service.serviceKey === fileServiceKey,
+      ),
+    [fileServiceKey, fileServiceValues],
+  );
+  const stagedFileServiceLabel = selectedFileService
+    ? `File domain: ${selectedFileService.name}`
+    : undefined;
   const stagedSortColor = useMemo(
     () =>
       getThemeAdjustedColorFromHex(getSortColorHex(sortType, sortAsc), theme),
@@ -289,6 +324,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
   const selectedRootSectionId =
     pickedSection?.kind === "root" ? pickedSection.id : null;
   const sortSectionPicked = pickedSection?.kind === "sort";
+  const fileServiceSectionPicked = pickedSection?.kind === "fileService";
   const builderContentOpen = isOpen || pickedSection !== null;
   const showQueryBuilderContent = isOpen || selectedRootSectionId !== null;
 
@@ -302,11 +338,6 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     setBuilderOpen(true);
   }, [isOpen, setBuilderOpen]);
 
-  const handleOpenRootBuilder = useCallback(() => {
-    setPickedSection(null);
-    setBuilderOpen(true);
-  }, [setBuilderOpen]);
-
   const handleRootEntrySelect = useCallback((id: RootSearchSectionId) => {
     setPickedSection((current) =>
       current?.kind === "root" && current.id === id
@@ -318,6 +349,12 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
   const handleSortSelect = useCallback(() => {
     setPickedSection((current) =>
       current?.kind === "sort" ? null : { kind: "sort" },
+    );
+  }, []);
+
+  const handleFileServiceSelect = useCallback(() => {
+    setPickedSection((current) =>
+      current?.kind === "fileService" ? null : { kind: "fileService" },
     );
   }, []);
 
@@ -448,7 +485,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       className={cn(
         "flex flex-col gap-2.5",
         !isOpen && pickedSection !== null && "pt-1",
-        !isOpen && sortSectionPicked && "pb-1",
+        !isOpen && (sortSectionPicked || fileServiceSectionPicked) && "pb-1",
       )}
     >
       {showQueryBuilderContent && (
@@ -472,6 +509,13 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
           sortAsc={sortAsc}
           onSortTypeChange={handleSortTypeChange}
           onSortAscToggle={handleSortAscToggle}
+        />
+      )}
+      {(isOpen || fileServiceSectionPicked) && (
+        <FileDomainSection
+          value={fileServiceKey}
+          services={fileServiceValues}
+          onChange={handleFileServiceChange}
         />
       )}
       {!instantSearch && isOpen && (
@@ -527,12 +571,14 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
           entries={rootSearchEntries}
           sortLabel={stagedSortLabel}
           sortColor={stagedSortColor}
+          fileServiceLabel={stagedFileServiceLabel}
           selectedRootSectionId={selectedRootSectionId}
           sortPicked={sortSectionPicked}
+          fileServicePicked={fileServiceSectionPicked}
           pickedStagedTagStyle={pickedStagedTagStyle}
           onRootEntrySelect={handleRootEntrySelect}
           onSortSelect={handleSortSelect}
-          onOpenBuilder={handleOpenRootBuilder}
+          onFileServiceSelect={handleFileServiceSelect}
         />
       )}
       {!isOpen && builderContent}
@@ -579,26 +625,30 @@ function StagedSearchTagList({
   entries,
   sortLabel,
   sortColor,
+  fileServiceLabel,
   selectedRootSectionId,
   sortPicked,
+  fileServicePicked,
   pickedStagedTagStyle,
   onRootEntrySelect,
   onSortSelect,
-  onOpenBuilder,
+  onFileServiceSelect,
 }: {
   entries: Array<StagedSearchEntry>;
   sortLabel: string;
   sortColor?: string;
+  fileServiceLabel?: string;
   selectedRootSectionId: RootSearchSectionId | null;
   sortPicked: boolean;
+  fileServicePicked: boolean;
   pickedStagedTagStyle: ComponentProps<typeof TagBadgeFromString>["style"];
   onRootEntrySelect: (id: RootSearchSectionId) => void;
   onSortSelect: () => void;
-  onOpenBuilder: () => void;
+  onFileServiceSelect: () => void;
 }) {
   const hasTags = entries.length > 0;
 
-  if (!hasTags) {
+  if (!hasTags && !fileServiceLabel) {
     return (
       <Badge
         variant="outline"
@@ -623,7 +673,6 @@ function StagedSearchTagList({
             isPicked={isPicked}
             className={isOrGroup ? STAGED_OR_GROUP_BUTTON_CLASSNAME : undefined}
             onClick={() => onRootEntrySelect(sectionId)}
-            onDoubleClick={onOpenBuilder}
           >
             {isOrGroup ? (
               <OrTagBadge
@@ -648,11 +697,7 @@ function StagedSearchTagList({
           </StagedSearchTagButton>
         );
       })}
-      <StagedSearchTagButton
-        isPicked={sortPicked}
-        onClick={onSortSelect}
-        onDoubleClick={onOpenBuilder}
-      >
+      <StagedSearchTagButton isPicked={sortPicked} onClick={onSortSelect}>
         <SearchSortTag
           label={sortLabel}
           color={sortColor}
@@ -661,6 +706,73 @@ function StagedSearchTagList({
           style={sortPicked ? pickedStagedTagStyle : undefined}
         />
       </StagedSearchTagButton>
+      {fileServiceLabel && (
+        <StagedSearchTagButton
+          isPicked={fileServicePicked}
+          onClick={onFileServiceSelect}
+        >
+          <TagBadgeFromString
+            displayTag={fileServiceLabel}
+            size="compact-mobile-wrap"
+            className={cn(fileServicePicked && PICKED_STAGED_TAG_CLASSNAME)}
+            style={fileServicePicked ? pickedStagedTagStyle : undefined}
+          />
+        </StagedSearchTagButton>
+      )}
+    </div>
+  );
+}
+
+type FileServiceOption = {
+  serviceKey: string;
+  name: string;
+  label: string;
+};
+
+function FileDomainSection({
+  value,
+  services,
+  onChange,
+}: {
+  value: string | null;
+  services: Array<FileServiceOption>;
+  onChange: (value: string | null) => void;
+}) {
+  const selectValue = value ?? "__all__";
+  const selectedLabel =
+    services.find((service) => service.serviceKey === value)?.label ??
+    "(default)";
+
+  return (
+    <div className="@container flex max-w-2xl flex-wrap items-center gap-2">
+      <span className="text-muted-foreground shrink-0 text-sm font-medium">
+        File domain
+      </span>
+      <div className="flex min-w-full flex-1 flex-wrap items-center gap-2 @sm:min-w-0">
+        <Select
+          value={selectValue}
+          onValueChange={(nextValue) =>
+            onChange(nextValue === "__all__" ? null : nextValue)
+          }
+        >
+          <SelectTrigger
+            aria-label="File domain"
+            className="min-w-40 flex-1 basis-40 rounded-lg"
+          >
+            <span className="truncate">{selectedLabel}</span>
+          </SelectTrigger>
+          <SelectContent align="start" className="max-h-[60dvh]">
+            <SelectGroup>
+              <SelectItem value="__all__">(default)</SelectItem>
+              {services.map((service) => (
+                <SelectItem key={service.serviceKey} value={service.serviceKey}>
+                  {service.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 }
@@ -670,13 +782,11 @@ function StagedSearchTagButton({
   className,
   isPicked = false,
   onClick,
-  onDoubleClick,
 }: {
   children: ReactNode;
   className?: string;
   isPicked?: boolean;
   onClick: () => void;
-  onDoubleClick: () => void;
 }) {
   return (
     <button
@@ -684,7 +794,6 @@ function StagedSearchTagButton({
       aria-pressed={isPicked}
       className={cn(className ?? "contents", "**:cursor-pointer")}
       onClick={onClick}
-      onDoubleClick={onDoubleClick}
     >
       {children}
     </button>

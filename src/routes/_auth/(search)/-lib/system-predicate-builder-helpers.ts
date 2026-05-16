@@ -27,6 +27,7 @@ export type StagedSearchEntry = {
 export type PickedSearchSection =
   | { kind: "root"; id: RootSearchSectionId }
   | { kind: "sort" }
+  | { kind: "fileService" }
   | null;
 
 export type QueryBuilderRootContext = {

@@ -36,6 +36,7 @@ export function useCommittedSearchFilesQuery(entryKey: string) {
     () => ({
       file_sort_type: committed?.sort.sortType ?? HydrusFileSortType.ImportTime,
       file_sort_asc: committed?.sort.sortAsc ?? true,
+      file_service_key: committed?.fileServiceKey ?? undefined,
     }),
     [committed],
   );

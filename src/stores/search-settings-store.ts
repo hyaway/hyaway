@@ -58,11 +58,13 @@ export const getSearchResultsInstantDefault = () =>
   useSearchSettingsStore.getState().searchResultsInstantDefault;
 
 export const getDefaultQuery = (): SearchState => {
-  const { query, sort } = useSearchSettingsStore.getState().defaultQuery;
+  const { query, sort, fileServiceKey } =
+    useSearchSettingsStore.getState().defaultQuery;
   const queryWithIds = ensureSearchQueryIds(query);
   return {
     query: { ...queryWithIds, rules: [...queryWithIds.rules] },
     sort: { ...sort },
+    fileServiceKey: fileServiceKey ?? null,
   };
 };
 

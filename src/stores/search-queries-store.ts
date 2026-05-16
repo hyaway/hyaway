@@ -52,6 +52,7 @@ function areSearchStatesEquivalent(
   return (
     staged.sort.sortType === committed.sort.sortType &&
     staged.sort.sortAsc === committed.sort.sortAsc &&
+    staged.fileServiceKey === committed.fileServiceKey &&
     serializeSearchQueryForComparison(stripEmptyRules(staged.query)) ===
       serializeSearchQueryForComparison(committed.query)
   );
@@ -120,6 +121,11 @@ type SearchQueriesState = {
     setDisplayName: (key: string, displayName: string) => void;
     /** Update the staged sort for an entry. */
     setStagedSort: (key: string, sort: SortConfig) => void;
+    /** Update the staged file domain for an entry. */
+    setStagedFileServiceKey: (
+      key: string,
+      fileServiceKey: string | null,
+    ) => void;
     /** Commit: copies staged → committed. */
     commit: (key: string) => void;
     /** Reset: copies committed → staged (reverts edits). */
@@ -179,6 +185,20 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               [key]: {
                 ...entry,
                 staged: { ...entry.staged, sort },
+              },
+            },
+          });
+        },
+
+        setStagedFileServiceKey: (key, fileServiceKey) => {
+          const { entries } = get();
+          const entry = entries[key] ?? defaultEntry();
+          set({
+            entries: {
+              ...entries,
+              [key]: {
+                ...entry,
+                staged: { ...entry.staged, fileServiceKey },
               },
             },
           });
@@ -308,7 +328,11 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             combinator: "and",
             rules: [primaryRule, ...filteredRules],
           };
-          const state = { query, sort: base.sort };
+          const state = {
+            query,
+            sort: base.sort,
+            fileServiceKey: base.fileServiceKey ?? null,
+          };
           const instantSearch = getSearchResultsInstantDefault();
 
           const { entries } = get();
