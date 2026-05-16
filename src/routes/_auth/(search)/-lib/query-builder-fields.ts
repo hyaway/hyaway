@@ -255,6 +255,7 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
           { name: "is currently in", label: "is currently in" },
           { name: "is not currently in", label: "is not currently in" },
         ],
+        defaultOperator: "is currently in",
         valueEditorType: "select",
         values: [],
         defaultValue: "my files",

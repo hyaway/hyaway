@@ -96,7 +96,12 @@ describe("ruleToSearchTag", () => {
     ["num_tags", ">", 12, "system:number of tags > 12"],
     ["duration_value", ">", "5s", "system:duration > 5s"],
     ["framerate", ">", 24, "system:framerate > 24"],
-    ["file_service", "=", "my files", "system:file service = my files"],
+    [
+      "file_service",
+      "is currently in",
+      "my files",
+      "system:file service is currently in my files",
+    ],
     ["num_urls", ">", 0, "system:number of urls > 0"],
     ["num_notes", ">", 0, "system:number of notes > 0"],
     ["num_frames", ">", 1, "system:number of frames > 1"],

@@ -69,7 +69,7 @@ function incompleteRuleToSearchTag(rule: RuleType): string {
     case "framerate":
       return `system:framerate ${operator} ${EMPTY_VALUE_LABEL}`;
     case "file_service":
-      return `system:file service ${operator} ${EMPTY_VALUE_LABEL}`;
+      return `system:file service ${normalizeFileServiceOperator(operator)} ${EMPTY_VALUE_LABEL}`;
     case "num_urls":
       return `system:number of urls ${operator} ${EMPTY_VALUE_LABEL}`;
     case "num_notes":
@@ -221,7 +221,7 @@ export function ruleToSearchTag(
     case "framerate":
       return `system:framerate ${operator} ${value}`;
     case "file_service":
-      return `system:file service ${operator} ${value}`;
+      return `system:file service ${normalizeFileServiceOperator(operator)} ${value}`;
     case "num_urls":
       return `system:number of urls ${operator} ${value}`;
     case "num_notes":
@@ -269,6 +269,10 @@ export function ruleToSearchTag(
     default:
       return null;
   }
+}
+
+function normalizeFileServiceOperator(operator: string): string {
+  return operator === "=" ? "is currently in" : operator;
 }
 
 /**
