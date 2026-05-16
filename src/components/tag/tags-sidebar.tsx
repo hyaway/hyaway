@@ -3,7 +3,6 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
-import { useMatch } from "@tanstack/react-router";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import type { TagsSortMode } from "@/stores/tags-settings-store";
 import {
@@ -51,13 +50,6 @@ export const TagsSidebar = memo(function TagsSidebar({
   const [search, setSearch] = useState("");
   const sortMode = useTagsSortMode();
   const { setSortMode } = useTagsSettingsActions();
-
-  // Detect search context from route
-  const searchMatch = useMatch({
-    from: "/_auth/(search)/search/$searchId",
-    shouldThrow: false,
-  });
-  const searchId = searchMatch?.params.searchId;
 
   // Defer heavy computation so UI stays responsive
   const deferredItems = useDeferredValue(items);
@@ -189,7 +181,7 @@ export const TagsSidebar = memo(function TagsSidebar({
       <SidebarContent className="min-h-0 flex-1 pe-1">
         <ScrollArea viewportClassName="h-full max-h-svh pe-2.5" ref={parentRef}>
           <SidebarGroup>
-            <TagActionMenu searchId={searchId} side="left">
+            <TagActionMenu side="left">
               <ol
                 style={{
                   height: `${rowVirtualizer.getTotalSize()}px`,

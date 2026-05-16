@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconCopy, IconPin, IconTrash } from "@tabler/icons-react";
+import { IconCopy, IconDeviceFloppy, IconTrash } from "@tabler/icons-react";
 import {
   createFileRoute,
   linkOptions,
@@ -145,7 +145,7 @@ function SearchPage() {
           {
             id: "save-search-as-default",
             label: "Save as default",
-            icon: IconPin,
+            icon: IconDeviceFloppy,
             onClick: handleSaveSearchAsDefault,
             overflowOnly: true,
           },
@@ -154,14 +154,14 @@ function SearchPage() {
           {
             id: "save-pending-as-default",
             label: "Save draft as default",
-            icon: IconPin,
+            icon: IconDeviceFloppy,
             onClick: handleSavePendingAsDefault,
             overflowOnly: true,
           },
           {
             id: "save-active-as-default",
             label: "Save current as default",
-            icon: IconPin,
+            icon: IconDeviceFloppy,
             onClick: handleSaveActiveAsDefault,
             disabled: !committed,
             overflowOnly: true,

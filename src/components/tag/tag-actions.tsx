@@ -11,8 +11,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import {
+  IconFilterMinus,
+  IconFilterPlus,
+  IconFilterX,
   IconMinus,
   IconPlus,
   IconSearch,
@@ -29,6 +32,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui-primitives/dropdown-menu";
 import {
+  useSearchDisplayName,
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
@@ -64,14 +68,16 @@ export interface TagAction {
   onClick: () => void;
 }
 
-export function useTagActions(
-  tag: string,
-  searchId: string | undefined,
-): Array<TagAction> {
+export interface TagActionSection {
+  id: string;
+  label?: string;
+  actions: Array<TagAction>;
+}
+
+function useNewSearchTagAction(tag: string): TagAction {
   const navigate = useNavigate();
-  const { setStagedQuery, createFromTag } = useSearchQueriesActions();
+  const { createFromTag } = useSearchQueriesActions();
   const { setDesktopOpen, setMobileOpen } = useSidebarStoreActions();
-  const entry = useSearchQueryEntry(searchId ?? "");
 
   const handleSearch = useCallback(() => {
     const id = createFromTag(tag);
@@ -79,6 +85,24 @@ export function useTagActions(
     setMobileOpen("right", false);
     navigate({ to: "/search/$searchId", params: { searchId: id } });
   }, [tag, navigate, createFromTag, setDesktopOpen, setMobileOpen]);
+
+  return useMemo(
+    () => ({
+      id: "search",
+      label: "New search",
+      icon: IconSearch,
+      onClick: handleSearch,
+    }),
+    [handleSearch],
+  );
+}
+
+export function useSearchTagActions(
+  tag: string,
+  searchId: string | undefined,
+): Array<TagAction> {
+  const { setStagedQuery } = useSearchQueriesActions();
+  const entry = useSearchQueryEntry(searchId ?? "");
 
   const handleInclude = useCallback(() => {
     if (!searchId) return;
@@ -155,45 +179,38 @@ export function useTagActions(
     : false;
 
   return useMemo(() => {
-    const actions: Array<TagAction> = [
-      {
-        id: "search",
-        label: "New search",
-        icon: IconSearch,
-        onClick: handleSearch,
-      },
-    ];
-    if (searchId) {
-      if (isIncluded) {
-        actions.push({
-          id: "remove-include",
-          label: "Remove from search",
-          icon: IconTrash,
-          onClick: () => handleRemove(tag),
-        });
-      } else {
-        actions.push({
-          id: "include",
-          label: "Include in search",
-          icon: IconPlus,
-          onClick: handleInclude,
-        });
-      }
-      if (isExcluded) {
-        actions.push({
-          id: "remove-exclude",
-          label: "Remove exclusion from search",
-          icon: IconTrash,
-          onClick: () => handleRemove(`-${tag}`),
-        });
-      } else {
-        actions.push({
-          id: "exclude",
-          label: "Exclude from search",
-          icon: IconMinus,
-          onClick: handleExclude,
-        });
-      }
+    const actions: Array<TagAction> = [];
+    if (!searchId) return actions;
+
+    if (isIncluded) {
+      actions.push({
+        id: "remove-include",
+        label: `Remove ${tag}`,
+        icon: IconFilterX,
+        onClick: () => handleRemove(tag),
+      });
+    } else {
+      actions.push({
+        id: "include",
+        label: `+${tag}`,
+        icon: IconFilterPlus,
+        onClick: handleInclude,
+      });
+    }
+    if (isExcluded) {
+      actions.push({
+        id: "remove-exclude",
+        label: `Remove -${tag}`,
+        icon: IconFilterX,
+        onClick: () => handleRemove(`-${tag}`),
+      });
+    } else {
+      actions.push({
+        id: "exclude",
+        label: `-${tag}`,
+        icon: IconFilterMinus,
+        onClick: handleExclude,
+      });
     }
     return actions;
   }, [
@@ -201,11 +218,44 @@ export function useTagActions(
     isIncluded,
     isExcluded,
     tag,
-    handleSearch,
     handleInclude,
     handleExclude,
     handleRemove,
   ]);
+}
+
+export function useCurrentSearchTagActions(
+  tag: string,
+): TagActionSection | null {
+  const params = useParams({ strict: false });
+  const searchId =
+    "searchId" in params && typeof params.searchId === "string"
+      ? params.searchId
+      : undefined;
+  const displayName = useSearchDisplayName(searchId ?? "");
+  const actions = useSearchTagActions(tag, searchId);
+
+  return useMemo(() => {
+    if (!searchId || actions.length === 0) return null;
+    return {
+      id: "current-search",
+      label: `${displayName} (current search)`,
+      actions,
+    };
+  }, [searchId, displayName, actions]);
+}
+
+export function useTagActionSections(tag: string): Array<TagActionSection> {
+  const newSearchAction = useNewSearchTagAction(tag);
+  const currentSearchSection = useCurrentSearchTagActions(tag);
+
+  return useMemo(
+    () => [
+      { id: "new-search", actions: [newSearchAction] },
+      ...(currentSearchSection ? [currentSearchSection] : []),
+    ],
+    [newSearchAction, currentSearchSection],
+  );
 }
 
 /**
@@ -253,11 +303,11 @@ export function useTagActionMenu() {
 /** Menu item content rendered inside the shared popup. */
 function TagActionMenuItems({
   tag,
-  actions,
+  sections,
   favouriteAction,
 }: {
   tag: string;
-  actions: Array<TagAction>;
+  sections: Array<TagActionSection>;
   favouriteAction?: TagAction | null;
 }) {
   return (
@@ -272,15 +322,23 @@ function TagActionMenuItems({
         </DropdownMenuLabel>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
-      {actions.map((action) => (
-        <DropdownMenuItem
-          key={action.id}
-          onClick={action.onClick}
-          className={"cursor-pointer"}
-        >
-          <action.icon />
-          {action.label}
-        </DropdownMenuItem>
+      {sections.map((section, sectionIndex) => (
+        <DropdownMenuGroup key={section.id}>
+          {sectionIndex > 0 && <DropdownMenuSeparator />}
+          {section.label && (
+            <DropdownMenuLabel>{section.label}</DropdownMenuLabel>
+          )}
+          {section.actions.map((action) => (
+            <DropdownMenuItem
+              key={action.id}
+              onClick={action.onClick}
+              className={"cursor-pointer"}
+            >
+              <action.icon />
+              {action.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
       ))}
       {favouriteAction && (
         <>
@@ -304,11 +362,9 @@ interface TagActionMenuPopupHandle {
 
 /** Inner component that holds menu state — re-renders here don't affect children. */
 const TagActionMenuPopup = memo(function TagActionMenuPopup({
-  searchId,
   side,
   handleRef,
 }: {
-  searchId?: string;
   side: "top" | "right" | "bottom" | "left";
   handleRef: React.RefObject<TagActionMenuPopupHandle | null>;
 }) {
@@ -319,7 +375,7 @@ const TagActionMenuPopup = memo(function TagActionMenuPopup({
     null,
   );
 
-  const actions = useTagActions(activeTag ?? "", searchId);
+  const sections = useTagActionSections(activeTag ?? "");
   const favouriteAction = useFavouriteTagAction(activeTag ?? "");
 
   useImperativeHandle(handleRef, () => ({
@@ -359,7 +415,7 @@ const TagActionMenuPopup = memo(function TagActionMenuPopup({
         {activeTag && (
           <TagActionMenuItems
             tag={activeTag}
-            actions={actions}
+            sections={sections}
             favouriteAction={favouriteAction}
           />
         )}
@@ -374,11 +430,9 @@ const TagActionMenuPopup = memo(function TagActionMenuPopup({
  * Only one menu instance is created regardless of how many tags exist.
  */
 export const TagActionMenu = memo(function TagActionMenu({
-  searchId,
   children,
   side = "bottom",
 }: {
-  searchId?: string;
   children: ReactNode;
   side?: "top" | "right" | "bottom" | "left";
 }) {
@@ -393,11 +447,7 @@ export const TagActionMenu = memo(function TagActionMenu({
   return (
     <TagActionMenuContext.Provider value={ctx}>
       {children}
-      <TagActionMenuPopup
-        handleRef={popupRef}
-        searchId={searchId}
-        side={side}
-      />
+      <TagActionMenuPopup handleRef={popupRef} side={side} />
     </TagActionMenuContext.Provider>
   );
 });
