@@ -4,6 +4,14 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-05-16
+
+### Fixed
+
+- File actions now update gallery metadata immediately after trashing, restoring, archiving, unarchiving, rating, or clearing view stats, so returning from a file detail page shows the correct file state and icons
+
+---
+
 ## 2026-05-14
 
 ### Added
