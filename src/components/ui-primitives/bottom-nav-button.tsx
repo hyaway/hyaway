@@ -60,25 +60,25 @@ const bottomNavButtonVariants = cva(
       maxButtons: {
         // 4 buttons: default behavior, labels at @xl
         4: [
-          "px-3 short:px-3 max-[150px]:px-0",
+          "short:px-3 px-3 max-[150px]:px-0",
           "@xl:flex-row @xl:gap-1.5 @xl:px-4",
           "short:@xl:flex-row short:@xl:gap-1.5 short:@xl:px-4",
         ],
         // 5 buttons: labels at @2xl
         5: [
-          "px-2.5 short:px-2.5 max-[200px]:px-0",
+          "short:px-2.5 px-2.5 max-[200px]:px-0",
           "@2xl:flex-row @2xl:gap-1.5 @2xl:px-4",
           "short:@2xl:flex-row short:@2xl:gap-1.5 short:@2xl:px-4",
         ],
         // 6 buttons: labels at @3xl, tighter mobile padding, extra tight under 250px
         6: [
-          "px-2 short:px-2 max-[250px]:px-0",
+          "short:px-2 px-2 max-[250px]:px-0",
           "@3xl:flex-row @3xl:gap-1.5 @3xl:px-4",
           "short:@3xl:flex-row short:@3xl:gap-1.5 short:@3xl:px-4",
         ],
         // 7 buttons: labels at @4xl, tightest mobile padding, extra tight under 300px
         7: [
-          "px-1.5 short:px-1.5 max-[300px]:px-0",
+          "short:px-1.5 px-1.5 max-[300px]:px-0",
           "@4xl:flex-row @4xl:gap-1.5 @4xl:px-4",
           "short:@4xl:flex-row short:@4xl:gap-1.5 short:@4xl:px-4",
         ],
@@ -103,13 +103,13 @@ const labelVariants = cva(["text-xs"], {
   variants: {
     maxButtons: {
       // 4: show labels, hide in short mode until @xl
-      4: "max-[250px]:sr-only short:sr-only short:@xl:not-sr-only @xl:text-sm",
+      4: "short:sr-only short:@xl:not-sr-only max-[250px]:sr-only @xl:text-sm",
       // 5: show labels, hide in short mode until @2xl
-      5: "max-[300px]:sr-only short:sr-only short:@2xl:not-sr-only @2xl:text-sm",
+      5: "short:sr-only short:@2xl:not-sr-only max-[300px]:sr-only @2xl:text-sm",
       // 6: show labels, hide at narrow widths, desktop at @3xl
-      6: "max-[360px]:sr-only short:sr-only short:@3xl:not-sr-only @3xl:text-sm",
+      6: "short:sr-only short:@3xl:not-sr-only max-[360px]:sr-only @3xl:text-sm",
       // 7: show labels, hide at narrow widths, desktop at @4xl
-      7: "max-[400px]:sr-only short:sr-only short:@4xl:not-sr-only @4xl:text-sm",
+      7: "short:sr-only short:@4xl:not-sr-only max-[400px]:sr-only @4xl:text-sm",
     },
     truncateLabel: {
       true: "",
@@ -121,25 +121,25 @@ const labelVariants = cva(["text-xs"], {
       maxButtons: 4,
       truncateLabel: true,
       className:
-        "short:@xl:max-w-[4ch] short:@xl:overflow-hidden short:@xl:whitespace-nowrap short:@xl:text-clip max-w-[4ch] overflow-hidden whitespace-nowrap text-clip",
+        "short:@xl:max-w-[4ch] short:@xl:overflow-hidden short:@xl:whitespace-nowrap short:@xl:text-clip max-w-[4ch] overflow-hidden text-clip whitespace-nowrap",
     },
     {
       maxButtons: 5,
       truncateLabel: true,
       className:
-        "short:@2xl:max-w-[4ch] short:@2xl:overflow-hidden short:@2xl:whitespace-nowrap short:@2xl:text-clip max-w-[4ch] overflow-hidden whitespace-nowrap text-clip",
+        "short:@2xl:max-w-[4ch] short:@2xl:overflow-hidden short:@2xl:whitespace-nowrap short:@2xl:text-clip max-w-[4ch] overflow-hidden text-clip whitespace-nowrap",
     },
     {
       maxButtons: 6,
       truncateLabel: true,
       className:
-        "short:@3xl:max-w-[4ch] short:@3xl:overflow-hidden short:@3xl:whitespace-nowrap short:@3xl:text-clip max-w-[4ch] overflow-hidden whitespace-nowrap text-clip",
+        "short:@3xl:max-w-[4ch] short:@3xl:overflow-hidden short:@3xl:whitespace-nowrap short:@3xl:text-clip max-w-[4ch] overflow-hidden text-clip whitespace-nowrap",
     },
     {
       maxButtons: 7,
       truncateLabel: true,
       className:
-        "short:@4xl:max-w-[4ch] short:@4xl:overflow-hidden short:@4xl:whitespace-nowrap short:@4xl:text-clip max-w-[4ch] overflow-hidden whitespace-nowrap text-clip",
+        "short:@4xl:max-w-[4ch] short:@4xl:overflow-hidden short:@4xl:whitespace-nowrap short:@4xl:text-clip max-w-[4ch] overflow-hidden text-clip whitespace-nowrap",
     },
   ],
   defaultVariants: {
@@ -155,10 +155,10 @@ const labelVariants = cva(["text-xs"], {
 const kbdVariants = cva(["hidden"], {
   variants: {
     maxButtons: {
-      4: "@xl:inline-flex short:@xl:inline-flex",
-      5: "@2xl:inline-flex short:@2xl:inline-flex",
-      6: "@3xl:inline-flex short:@3xl:inline-flex",
-      7: "@4xl:inline-flex short:@4xl:inline-flex",
+      4: "short:@xl:inline-flex @xl:inline-flex",
+      5: "short:@2xl:inline-flex @2xl:inline-flex",
+      6: "short:@3xl:inline-flex @3xl:inline-flex",
+      7: "short:@4xl:inline-flex @4xl:inline-flex",
     },
   },
   defaultVariants: {
@@ -172,10 +172,10 @@ const kbdVariants = cva(["hidden"], {
 const labelFlexVariants = cva(["flex flex-col items-center gap-0.5"], {
   variants: {
     maxButtons: {
-      4: "@xl:flex-row @xl:gap-1.5 short:@xl:flex-row short:@xl:gap-1.5",
-      5: "@2xl:flex-row @2xl:gap-1.5 short:@2xl:flex-row short:@2xl:gap-1.5",
-      6: "@3xl:flex-row @3xl:gap-1.5 short:@3xl:flex-row short:@3xl:gap-1.5",
-      7: "@4xl:flex-row @4xl:gap-1.5 short:@4xl:flex-row short:@4xl:gap-1.5",
+      4: "short:@xl:flex-row short:@xl:gap-1.5 @xl:flex-row @xl:gap-1.5",
+      5: "short:@2xl:flex-row short:@2xl:gap-1.5 @2xl:flex-row @2xl:gap-1.5",
+      6: "short:@3xl:flex-row short:@3xl:gap-1.5 @3xl:flex-row @3xl:gap-1.5",
+      7: "short:@4xl:flex-row short:@4xl:gap-1.5 @4xl:flex-row @4xl:gap-1.5",
     },
   },
   defaultVariants: {

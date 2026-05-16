@@ -9,7 +9,7 @@ import type { VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "rounded-4xl border border-transparent font-medium transition-all inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge select-all",
+  "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive group/badge inline-flex w-fit shrink-0 items-center justify-center overflow-hidden rounded-4xl border border-transparent font-medium whitespace-nowrap transition-all select-all focus-visible:ring-[3px] [&>svg]:pointer-events-none",
   {
     variants: {
       variant: {
@@ -23,16 +23,16 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-secondary hover:text-secondary-foreground dark:hover:bg-muted/50",
         overlay:
-          "isolate relative border-0 bg-background text-(--badge-overlay) before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] before:transition-colors hover:before:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
+          "bg-background relative isolate border-0 text-(--badge-overlay) before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:bg-[color-mix(in_srgb,var(--badge-overlay)_20%,transparent)] before:transition-colors hover:before:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
         default:
           "h-11 gap-2 px-4 text-sm has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&>svg]:size-6",
         "default-wrap":
-          "h-auto min-h-11 gap-2 px-4 py-1.5 text-sm has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&>svg]:size-6 shrink overflow-visible whitespace-normal break-normal wrap-anywhere",
+          "h-auto min-h-11 shrink gap-2 overflow-visible px-4 py-1.5 text-sm break-normal wrap-anywhere whitespace-normal has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&>svg]:size-6",
         "compact-mobile-wrap":
-          "h-auto min-h-11 gap-2 px-4 py-1.5 text-sm has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&>svg]:size-6 shrink overflow-visible whitespace-normal break-normal wrap-anywhere max-sm:min-h-9 max-sm:gap-1.5 max-sm:px-3 max-sm:py-1 max-sm:[&>svg]:size-5",
+          "h-auto min-h-11 shrink gap-2 overflow-visible px-4 py-1.5 text-sm break-normal wrap-anywhere whitespace-normal has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 max-sm:min-h-9 max-sm:gap-1.5 max-sm:px-3 max-sm:py-1 [&>svg]:size-6 max-sm:[&>svg]:size-5",
         xs: "h-7 gap-1 px-2 text-xs has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-4",
         sm: "h-9 gap-1.5 px-2.5 text-xs has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&>svg]:size-5",
         lg: "h-12 gap-2 px-5 text-sm has-data-[icon=inline-end]:pr-4 has-data-[icon=inline-start]:pl-4 [&>svg]:size-6",

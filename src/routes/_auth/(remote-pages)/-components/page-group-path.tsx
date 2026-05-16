@@ -43,7 +43,7 @@ const pageGroupPathDotVariants = cva("shrink-0 self-center", {
 });
 
 const pageGroupPathSeparatorVariants = cva(
-  "self-center text-muted-foreground shrink-0",
+  "text-muted-foreground shrink-0 self-center",
   {
     variants: {
       size: {

@@ -246,7 +246,8 @@ function TagActionMenuItems({
         <DropdownMenuLabel className={"p-0"}>
           <TagBadgeFromString
             displayTag={tag}
-            className="h-auto w-full justify-center px-2 py-3 break-normal wrap-anywhere whitespace-normal"
+            className="h-auto w-full"
+            size="compact-mobile-wrap"
           />
         </DropdownMenuLabel>
       </DropdownMenuGroup>

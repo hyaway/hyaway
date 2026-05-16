@@ -8,18 +8,18 @@ import type { VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const toggleVariants = cva(
-  "hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive gap-1.5 rounded-4xl text-sm font-medium transition-colors [&_svg:not([class*='size-'])]:size-6 group/toggle hover:bg-muted inline-flex items-center justify-center whitespace-nowrap outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive group/toggle hover:bg-muted inline-flex items-center justify-center gap-1.5 rounded-4xl text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-6",
   {
     variants: {
       variant: {
         default:
-          "bg-transparent aria-pressed:bg-primary aria-pressed:text-primary-foreground",
+          "aria-pressed:bg-primary aria-pressed:text-primary-foreground bg-transparent",
         outline:
-          "border-input hover:bg-muted border bg-transparent aria-pressed:bg-primary aria-pressed:text-primary-foreground",
+          "border-input hover:bg-muted aria-pressed:bg-primary aria-pressed:text-primary-foreground border bg-transparent",
         muted:
-          "bg-transparent aria-pressed:bg-muted aria-pressed:text-foreground",
+          "aria-pressed:bg-muted aria-pressed:text-foreground bg-transparent",
         "outline-muted":
-          "border-input hover:bg-muted border bg-transparent aria-pressed:bg-muted aria-pressed:text-foreground",
+          "border-input hover:bg-muted aria-pressed:bg-muted aria-pressed:text-foreground border bg-transparent",
       },
       size: {
         default: "h-11 min-w-11 rounded-[min(var(--radius-2xl),12px)] px-3",

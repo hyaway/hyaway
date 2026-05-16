@@ -76,6 +76,7 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
                     "transition-opacity",
                     !isVisible && "pointer-events-none opacity-10",
                   )}
+                  size="compact-mobile-wrap"
                 />
               </TagActionTrigger>
             );
