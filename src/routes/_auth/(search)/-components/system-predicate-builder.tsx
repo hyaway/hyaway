@@ -545,18 +545,12 @@ function CollapsedSearchQueryControls({
   return (
     <div className="@container flex flex-wrap items-center gap-2">
       <SearchPredicateInput
-        className="w-full flex-1"
+        className="w-full basis-full sm:flex-1 sm:basis-0"
         name={`hyaway-qb-collapsed-${entryKey}`}
         onAdd={onInlineSelect}
       />
-      <SystemFieldCombobox
-        className="**:data-[label=add]:hidden!"
-        onSelect={onSystemSelect}
-      />
-      <AddOrGroupButton
-        className="**:data-[label=add]:hidden! **:data-[label=group]:hidden!"
-        onClick={onAddGroup}
-      />
+      <SystemFieldCombobox onSelect={onSystemSelect} />
+      <AddOrGroupButton onClick={onAddGroup} />
     </div>
   );
 }
