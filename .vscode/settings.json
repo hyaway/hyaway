@@ -3,7 +3,16 @@
   "files.watcherExclude": {
     "**/routeTree.gen.ts": true
   },
+  "search.useIgnoreFiles": false,
   "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/dist-ssr": true,
+    "**/docs/.vitepress/cache": true,
+    "**/docs/.vitepress/dist": true,
+    "**/.tanstack": true,
+    "**/.wrangler": true,
+    "**/.temp": true,
     "**/routeTree.gen.ts": true
   },
   "files.readonlyInclude": {
