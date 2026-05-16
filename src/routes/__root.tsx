@@ -1,12 +1,10 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { Suspense, lazy } from "react";
 import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { TanStackDevtools } from "@tanstack/react-devtools";
 
 import type { QueryClient } from "@tanstack/react-query";
-import TanStackQueryDevtools from "@/integrations/tanstack-query/devtools";
 
 import { AppShell } from "@/components/app-shell/app-shell";
 import { PinLockScreen } from "@/components/app-shell/pin-lock-screen";
@@ -24,6 +22,35 @@ export interface MyRouterContext {
   /** If true, the back button uses browser history instead of parent route navigation */
   useHistoryBack?: boolean;
 }
+
+const AppDevtools = import.meta.env.DEV
+  ? lazy(async () => {
+      const [devtools, routerDevtools, queryDevtools] = await Promise.all([
+        import("@tanstack/react-devtools"),
+        import("@tanstack/react-router-devtools"),
+        import("@/integrations/tanstack-query/devtools"),
+      ]);
+
+      return {
+        default: function AppDevtoolsPanel() {
+          return (
+            <devtools.TanStackDevtools
+              config={{
+                position: "bottom-right",
+              }}
+              plugins={[
+                {
+                  name: "Tanstack Router",
+                  render: <routerDevtools.TanStackRouterDevtoolsPanel />,
+                },
+                queryDevtools.default,
+              ]}
+            />
+          );
+        },
+      };
+    })
+  : null;
 
 function RootComponent() {
   const hasHydrated = useThemeHydrated();
@@ -47,18 +74,11 @@ function RootComponent() {
       <AppShell>
         <Outlet />
       </AppShell>
-      <TanStackDevtools
-        config={{
-          position: "bottom-right",
-        }}
-        plugins={[
-          {
-            name: "Tanstack Router",
-            render: <TanStackRouterDevtoolsPanel />,
-          },
-          TanStackQueryDevtools,
-        ]}
-      />
+      {AppDevtools && (
+        <Suspense fallback={null}>
+          <AppDevtools />
+        </Suspense>
+      )}
     </GlobalTouchCountProvider>
   );
 }
