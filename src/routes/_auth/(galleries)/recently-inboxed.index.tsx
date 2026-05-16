@@ -3,6 +3,7 @@
 
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRecentlyInboxedSearchFooterAction } from "./-components/predefined-search-footer-action";
 import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -31,6 +32,7 @@ function RouteComponent() {
   const fileIds = data?.file_ids ?? [];
   const hasFiles = fileIds.length > 0;
   const reviewActions = useReviewActions({ fileIds });
+  const openSearchAction = useRecentlyInboxedSearchFooterAction();
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -57,7 +59,10 @@ function RouteComponent() {
         <PageHeaderActions>
           <RecentFilesSettingsPopover />
         </PageHeaderActions>
-        <PageFloatingFooter leftContent={refetchButton} />
+        <PageFloatingFooter
+          leftContent={refetchButton}
+          actions={[openSearchAction]}
+        />
       </>
     );
   }
@@ -75,7 +80,10 @@ function RouteComponent() {
         <PageHeaderActions>
           <RecentFilesSettingsPopover />
         </PageHeaderActions>
-        <PageFloatingFooter leftContent={refetchButton} />
+        <PageFloatingFooter
+          leftContent={refetchButton}
+          actions={[openSearchAction]}
+        />
       </>
     );
   }
@@ -97,7 +105,10 @@ function RouteComponent() {
       <PageHeaderActions>
         <RecentFilesSettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter leftContent={refetchButton} actions={reviewActions} />
+      <PageFloatingFooter
+        leftContent={refetchButton}
+        actions={[...reviewActions, openSearchAction]}
+      />
     </>
   );
 }

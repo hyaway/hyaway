@@ -4,6 +4,7 @@
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconArrowsShuffle } from "@tabler/icons-react";
+import { useRandomInboxSearchFooterAction } from "./-components/predefined-search-footer-action";
 import { RandomInboxSettingsPopover } from "./-components/random-inbox-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -31,6 +32,7 @@ function RouteComponent() {
   const fileIds = data?.file_ids ?? [];
   const hasFiles = fileIds.length > 0;
   const reviewActions = useReviewActions({ fileIds });
+  const openSearchAction = useRandomInboxSearchFooterAction();
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -63,7 +65,10 @@ function RouteComponent() {
         <PageHeaderActions>
           <RandomInboxSettingsPopover />
         </PageHeaderActions>
-        <PageFloatingFooter leftContent={shuffleButton} />
+        <PageFloatingFooter
+          leftContent={shuffleButton}
+          actions={[openSearchAction]}
+        />
       </>
     );
   }
@@ -81,7 +86,10 @@ function RouteComponent() {
         <PageHeaderActions>
           <RandomInboxSettingsPopover />
         </PageHeaderActions>
-        <PageFloatingFooter leftContent={shuffleButton} />
+        <PageFloatingFooter
+          leftContent={shuffleButton}
+          actions={[openSearchAction]}
+        />
       </>
     );
   }
@@ -103,7 +111,10 @@ function RouteComponent() {
       <PageHeaderActions>
         <RandomInboxSettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter leftContent={shuffleButton} actions={reviewActions} />
+      <PageFloatingFooter
+        leftContent={shuffleButton}
+        actions={[...reviewActions, openSearchAction]}
+      />
     </>
   );
 }

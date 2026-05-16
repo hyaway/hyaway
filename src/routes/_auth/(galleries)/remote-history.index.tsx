@@ -3,6 +3,7 @@
 
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRemoteHistorySearchFooterAction } from "./-components/predefined-search-footer-action";
 import { RemoteHistorySettingsPopover } from "./-components/remote-history-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -26,6 +27,7 @@ function RouteComponent() {
   const { data, isLoading, isFetching, isError, error } =
     useRemoteWatchHistoryQuery();
   const queryClient = useQueryClient();
+  const openSearchAction = useRemoteHistorySearchFooterAction();
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -52,7 +54,10 @@ function RouteComponent() {
         <PageHeaderActions>
           <RemoteHistorySettingsPopover />
         </PageHeaderActions>
-        <PageFloatingFooter leftContent={refetchButton} />
+        <PageFloatingFooter
+          leftContent={refetchButton}
+          actions={[openSearchAction]}
+        />
       </>
     );
   }
@@ -70,7 +75,10 @@ function RouteComponent() {
         <PageHeaderActions>
           <RemoteHistorySettingsPopover />
         </PageHeaderActions>
-        <PageFloatingFooter leftContent={refetchButton} />
+        <PageFloatingFooter
+          leftContent={refetchButton}
+          actions={[openSearchAction]}
+        />
       </>
     );
   }
@@ -98,7 +106,10 @@ function RouteComponent() {
       <PageHeaderActions>
         <RemoteHistorySettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter leftContent={refetchButton} />
+      <PageFloatingFooter
+        leftContent={refetchButton}
+        actions={[openSearchAction]}
+      />
     </>
   );
 }

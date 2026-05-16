@@ -4,6 +4,7 @@
 import { HAS_ONLY_FIELDS } from "./query-to-hydrus-search";
 import type { Field, OptionGroup } from "react-querybuilder";
 import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
+import type { SearchRuleInput } from "@/stores/search-defaults";
 import {
   HydrusFileSortType,
   ServiceType,
@@ -900,9 +901,7 @@ export const FIELD_HYDRUS_LABEL: Record<string, string> = {
   url_domain: "system:has url with domain",
 };
 
-const SYSTEM_TAG_RULE_ENTRIES: Array<
-  [string, { field: string; operator: string; value?: string }]
-> = [
+const SYSTEM_TAG_RULE_ENTRIES = [
   ["system:has audio", { field: "audio", operator: "has" }],
   ["system:no audio", { field: "audio", operator: "has_not" }],
   ["system:has transparency", { field: "transparency", operator: "has" }],
@@ -953,7 +952,7 @@ const SYSTEM_TAG_RULE_ENTRIES: Array<
     "system:does not have note with name",
     { field: "note_name", operator: "has_not" },
   ],
-];
+] as const satisfies ReadonlyArray<readonly [string, SearchRuleInput]>;
 
 /** All unique `system:*` tag values used in tag suggestions. */
 export const SYSTEM_TAGS: Array<string> = [
@@ -983,9 +982,8 @@ const SYSTEM_TAG_TO_FIELD: Record<string, string> = Object.fromEntries(
     .map(([k, v]) => [v, k]),
 );
 
-const SYSTEM_TAG_TO_RULE: Partial<
-  Record<string, { field: string; operator: string; value?: string }>
-> = Object.fromEntries(SYSTEM_TAG_RULE_ENTRIES);
+const SYSTEM_TAG_TO_RULE: Partial<Record<string, SearchRuleInput>> =
+  Object.fromEntries(SYSTEM_TAG_RULE_ENTRIES);
 
 /**
  * Resolve a system tag string (e.g. `"system:inbox"`) to a query builder rule.
@@ -993,14 +991,10 @@ const SYSTEM_TAG_TO_RULE: Partial<
  */
 export function systemTagToRule(
   systemTag: string,
-): { field: string; operator: string; value: string } | undefined {
+): SearchRuleInput | undefined {
   const explicitRule = SYSTEM_TAG_TO_RULE[systemTag];
   if (explicitRule) {
-    return {
-      field: explicitRule.field,
-      operator: explicitRule.operator,
-      value: String(explicitRule.value ?? ""),
-    };
+    return explicitRule;
   }
 
   const fieldName = SYSTEM_TAG_TO_FIELD[systemTag];
@@ -1015,10 +1009,10 @@ export function systemTagToRule(
         operator:
           (field as { defaultOperator?: string }).defaultOperator ?? "=",
         value: String(field.defaultValue ?? ""),
-      };
+      } as SearchRuleInput;
     }
   }
-  return { field: fieldName, operator: "=", value: "" };
+  return { field: fieldName, operator: "=", value: "" } as SearchRuleInput;
 }
 
 /** Get hydrus-style display label for a field, with fallback. */

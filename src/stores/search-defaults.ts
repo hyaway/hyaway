@@ -14,6 +14,114 @@ export type SortConfig = {
   sortAsc: boolean;
 };
 
+type SearchRuleBase<
+  TField extends string,
+  TOperator extends string,
+  TValue = string,
+> = {
+  field: TField;
+  operator: TOperator;
+  value: TValue;
+};
+
+type SearchStatusRule = SearchRuleBase<
+  "inbox" | "archive" | "everything",
+  "is",
+  boolean | string
+>;
+
+type SearchTagRule = SearchRuleBase<"tag", "=", string>;
+
+type SearchPresenceRule = {
+  field:
+    | "audio"
+    | "transparency"
+    | "exif"
+    | "icc_profile"
+    | "embedded_metadata"
+    | "forced_filetype"
+    | "duration_presence"
+    | "framerate_presence"
+    | "frames_presence"
+    | "tags_presence"
+    | "urls_presence"
+    | "notes_presence";
+  operator: "has" | "has_not";
+  value?: string;
+};
+
+type SearchComparisonRule = SearchRuleBase<
+  | "width"
+  | "height"
+  | "num_pixels"
+  | "filesize"
+  | "num_tags"
+  | "duration_value"
+  | "framerate"
+  | "num_urls"
+  | "num_notes"
+  | "num_frames"
+  | "media_views"
+  | "preview_views"
+  | "all_views"
+  | "media_viewtime"
+  | "preview_viewtime"
+  | "all_viewtime",
+  "=" | "≠" | ">" | "<" | "≈",
+  number | string
+>;
+
+type SearchExactComparisonRule = SearchRuleBase<
+  "hash" | "file_service",
+  "=" | ">" | "<",
+  string
+>;
+
+type SearchTimeRule = SearchRuleBase<
+  "import_time" | "modified_time" | "archived_time" | "last_viewed_time",
+  "=" | ">" | "<" | "≈",
+  string
+>;
+
+type SearchLimitRule = SearchRuleBase<"limit", "=", number | string>;
+
+type SearchFiletypeRule = SearchRuleBase<
+  "filetype",
+  "=" | "≠",
+  "image" | "video" | "animation" | "audio" | "application" | string
+>;
+
+type SearchRatioRule = SearchRuleBase<
+  "ratio",
+  "=" | "wider than" | "taller than" | "≈",
+  string
+>;
+
+type SearchUrlRule = {
+  field: "url_exact" | "url_regex" | "url_domain" | "note_name";
+  operator: "has" | "has_not";
+  value?: string;
+};
+
+type SearchRatingRule = SearchRuleBase<
+  `rating:${string}`,
+  "=" | ">" | "<" | "has" | "has_not",
+  "liked" | "disliked" | number | string
+>;
+
+export type SearchRuleInput =
+  | SearchStatusRule
+  | SearchTagRule
+  | SearchPresenceRule
+  | SearchComparisonRule
+  | SearchExactComparisonRule
+  | SearchTimeRule
+  | SearchLimitRule
+  | SearchFiletypeRule
+  | SearchRatioRule
+  | SearchUrlRule
+  | SearchRatingRule;
+
 /** Query + sort pair representing a complete search state. */
 export type SearchState = {
   query: RuleGroupType;
@@ -25,7 +133,7 @@ export type SearchState = {
 // Defaults
 // ---------------------------------------------------------------------------
 
-export function createSearchRule(rule: Omit<RuleType, "id">): RuleType {
+export function createSearchRule(rule: SearchRuleInput): RuleType {
   return { id: generateID(), ...rule } as RuleType;
 }
 

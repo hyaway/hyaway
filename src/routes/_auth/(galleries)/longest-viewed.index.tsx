@@ -3,6 +3,7 @@
 
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLongestViewedSearchFooterAction } from "./-components/predefined-search-footer-action";
 import { LongestViewedSettingsPopover } from "./-components/longest-viewed-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import { EmptyState } from "@/components/page-shell/empty-state";
@@ -26,6 +27,7 @@ function RouteComponent() {
   const { data, isLoading, isFetching, isError, error } =
     useLongestViewedFilesQuery();
   const queryClient = useQueryClient();
+  const openSearchAction = useLongestViewedSearchFooterAction();
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -52,7 +54,10 @@ function RouteComponent() {
         <PageHeaderActions>
           <LongestViewedSettingsPopover />
         </PageHeaderActions>
-        <PageFloatingFooter leftContent={refetchButton} />
+        <PageFloatingFooter
+          leftContent={refetchButton}
+          actions={[openSearchAction]}
+        />
       </>
     );
   }
@@ -70,7 +75,10 @@ function RouteComponent() {
         <PageHeaderActions>
           <LongestViewedSettingsPopover />
         </PageHeaderActions>
-        <PageFloatingFooter leftContent={refetchButton} />
+        <PageFloatingFooter
+          leftContent={refetchButton}
+          actions={[openSearchAction]}
+        />
       </>
     );
   }
@@ -95,7 +103,10 @@ function RouteComponent() {
       <PageHeaderActions>
         <LongestViewedSettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter leftContent={refetchButton} />
+      <PageFloatingFooter
+        leftContent={refetchButton}
+        actions={[openSearchAction]}
+      />
     </>
   );
 }
