@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { IconChevronDown, IconChevronUp, IconPlus } from "@tabler/icons-react";
+import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import {
   QueryBuilder,
   RuleGroupBodyComponents,
@@ -26,6 +26,7 @@ import {
   handleAddRule,
 } from "../-lib/system-predicate-builder-helpers";
 import {
+  AddOrGroupButton,
   CombinatorSeparator,
   QBActionElement,
   QBCombinatorSelect,
@@ -63,7 +64,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui-primitives/collapsible";
 import { Badge } from "@/components/ui-primitives/badge";
-import { Button } from "@/components/ui-primitives/button";
 import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
@@ -108,6 +108,31 @@ const PICKED_STAGED_OR_GROUP_BADGE_CLASSNAME = cn(
 // Inline tag input rendered at the bottom of each rule group body
 // ---------------------------------------------------------------------------
 
+function SearchPredicateInput({
+  className,
+  inputClassName,
+  name,
+  onAdd,
+}: {
+  className?: string;
+  inputClassName?: string;
+  name: string;
+  onAdd: (tag: string) => void;
+}) {
+  return (
+    <TagAutocompleteInput
+      className={cn("relative", className)}
+      inputClassName={cn("h-9 min-w-0", inputClassName)}
+      placeholder="Add tag or system predicate"
+      name={name}
+      onSelect={onAdd}
+      onSubmit={onAdd}
+      onBlur={onAdd}
+      clearOnSelect
+    />
+  );
+}
+
 function QBRuleGroupBody(props: RuleGroupProps & UseRuleGroup) {
   const rootContext = getQueryBuilderRootContext(props.context);
   const isRootGroup = props.path.length === 0;
@@ -138,15 +163,11 @@ function QBRuleGroupBody(props: RuleGroupProps & UseRuleGroup) {
         </div>
       )}
       {showInlineInput && (
-        <TagAutocompleteInput
-          className={cn("relative", "w-full max-w-2xl")}
-          inputClassName={cn("h-9", "max-w-2xl min-w-0 @md:min-w-48")}
-          placeholder="Add tag or system predicate"
+        <SearchPredicateInput
+          className="w-full max-w-2xl"
+          inputClassName="max-w-2xl @md:min-w-48"
           name={`hyaway-qb-inline-${props.path.join("-")}`}
-          onSelect={handleInlineSelect}
-          onSubmit={handleInlineSelect}
-          onBlur={handleInlineSelect}
-          clearOnSelect
+          onAdd={handleInlineSelect}
         />
       )}
     </>
@@ -523,36 +544,19 @@ function CollapsedSearchQueryControls({
 }) {
   return (
     <div className="@container flex flex-wrap items-center gap-2">
-      <TagAutocompleteInput
-        className={cn("relative", "min-w-56 flex-1")}
-        inputClassName={cn("h-9", "min-w-0")}
-        placeholder="Add tag or system predicate"
+      <SearchPredicateInput
+        className="w-full flex-1"
         name={`hyaway-qb-collapsed-${entryKey}`}
-        onSelect={onInlineSelect}
-        onSubmit={onInlineSelect}
-        onBlur={onInlineSelect}
-        clearOnSelect
+        onAdd={onInlineSelect}
       />
       <SystemFieldCombobox
         className="**:data-[label=add]:hidden!"
         onSelect={onSystemSelect}
       />
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-auto shrink-0 px-2.5 **:data-[label=add]:hidden! **:data-[label=group]:hidden!"
+      <AddOrGroupButton
+        className="**:data-[label=add]:hidden! **:data-[label=group]:hidden!"
         onClick={onAddGroup}
-        type="button"
-      >
-        <IconPlus data-icon="inline-start" className="size-5" />
-        <span data-label="add" className="hidden @sm:inline">
-          Add
-        </span>
-        <span>OR</span>
-        <span data-label="group" className="hidden @xs:inline">
-          group
-        </span>
-      </Button>
+      />
     </div>
   );
 }
