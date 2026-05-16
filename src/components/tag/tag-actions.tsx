@@ -16,7 +16,6 @@ import {
   IconMinus,
   IconPlus,
   IconSearch,
-  IconTagOff,
   IconTagStarred,
   IconTrash,
 } from "@tabler/icons-react";
@@ -43,16 +42,13 @@ import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { Permission } from "@/integrations/hydrus-api/models";
 import { TagBadgeFromString } from "@/components/tag/tag-badge";
 import { useSidebarStoreActions } from "@/stores/sidebar-store";
+import { CrossedOutIcon } from "@/components/ratings/crossed-out-icon";
 
 function IconTagUnstarred(props: SVGProps<SVGSVGElement>) {
   return (
-    <span className="relative inline-flex">
-      <IconTagStarred {...props} />
-      <IconTagOff
-        {...props}
-        className={cn("absolute inset-0", props.className)}
-      />
-    </span>
+    <CrossedOutIcon {...props} strokeBackgroundColor="text-popover">
+      <IconTagStarred />
+    </CrossedOutIcon>
   );
 }
 
