@@ -102,6 +102,12 @@ describe("ruleToSearchTag", () => {
       "my files",
       "system:file service is currently in my files",
     ],
+    [
+      "file_service",
+      "is not currently in",
+      "trash",
+      "system:file service is not currently in trash",
+    ],
     ["num_urls", ">", 0, "system:number of urls > 0"],
     ["num_notes", ">", 0, "system:number of notes > 0"],
     ["num_frames", ">", 1, "system:number of frames > 1"],

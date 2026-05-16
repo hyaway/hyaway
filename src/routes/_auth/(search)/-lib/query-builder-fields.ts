@@ -25,6 +25,12 @@ export const comparisonOperators = [
   { name: "≈", label: "is approximately (≈)" },
 ];
 
+const exactComparisonOperators = [
+  { name: "=", label: "is equal to (=)" },
+  { name: ">", label: "is greater than (>)" },
+  { name: "<", label: "is less than (<)" },
+];
+
 function hasOps(thing: string): Array<{ name: string; label: string }> {
   return [
     { name: "has", label: `has ${thing}` },
@@ -254,6 +260,8 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
         operators: [
           { name: "is currently in", label: "is currently in" },
           { name: "is not currently in", label: "is not currently in" },
+          // Hydrus also accepts "is pending to" / "is not pending to", but
+          // those repository workflow states are excluded from hyAway browsing.
         ],
         defaultOperator: "is currently in",
         valueEditorType: "select",
@@ -358,7 +366,7 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
       {
         name: "num_notes",
         label: "number of notes",
-        operators: comparisonOperators,
+        operators: exactComparisonOperators,
         defaultOperator: ">",
         inputType: "number",
         defaultValue: "0",
