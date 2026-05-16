@@ -11,6 +11,7 @@ const config = {
     "cn",
     "cx",
     "clsx",
+    "cva",
   ],
 };
 

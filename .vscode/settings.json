@@ -23,7 +23,8 @@
     "twMerge",
     "cn",
     "cx",
-    "clsx"
+    "clsx",
+    "cva"
   ],
   "tailwindCSS.experimental.configFile": "src/styles.css",
   "tailwindCSS.files.exclude": ["**/*.md", ".github/**/*.md"],
@@ -44,6 +45,7 @@
     "Preconfigured",
     "Renderable",
     "Retryable",
+    "tabler",
     "Tallymarks",
     "Undelete",
     "viewtime"
