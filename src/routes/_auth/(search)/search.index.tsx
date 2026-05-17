@@ -324,13 +324,13 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   );
 
   return (
-    <div className="border-border hover:bg-muted/50 relative flex flex-col gap-3 rounded-xl border p-5 transition-colors">
+    <div className="bg-muted/50 relative flex flex-col gap-3 rounded-2xl border border-transparent p-5 transition-colors">
       {!isRenaming && (
         <Link
           to="/search/$searchId"
           params={{ searchId }}
           aria-label={displayName}
-          className="focus-visible:ring-ring/50 absolute inset-0 z-0 rounded-xl outline-hidden focus-visible:ring-[3px]"
+          className="focus-visible:ring-ring/50 hover:bg-muted absolute inset-0 z-0 rounded-2xl outline-hidden transition-colors focus-visible:ring-[3px]"
         />
       )}
       <div className="pointer-events-none relative z-20 flex min-w-0 items-start justify-between gap-3">
@@ -361,7 +361,19 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             </form>
           ) : (
             <span className="flex items-center gap-1 text-lg leading-tight font-semibold">
-              {isPinned && <IconPinned className="size-5 shrink-0" />}
+              {isPinned && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleTogglePinned}
+                  type="button"
+                  title="Unpin"
+                  className="group pointer-events-auto relative size-9 shrink-0"
+                >
+                  <IconPinned className="size-5 group-hover:hidden group-focus-visible:hidden" />
+                  <IconPinnedOff className="hidden size-5 group-hover:block group-focus-visible:block" />
+                </Button>
+              )}
               {displayName}
               <Button
                 variant="ghost"
