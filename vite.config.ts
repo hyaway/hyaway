@@ -5,7 +5,8 @@ import { copyFileSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { URL, fileURLToPath } from "node:url";
 import { defineConfig, loadEnv } from "vite";
-import viteReact from "@vitejs/plugin-react";
+import viteReact, { reactCompilerPreset } from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
 import { devtools } from "@tanstack/devtools-vite";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -13,7 +14,7 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import type { Plugin } from "vite";
 
 const ReactCompilerConfig = {
-  target: "19", // React 19
+  target: "19" as const, // React 19
 };
 
 /** Copies LICENSE and NOTICE to dist after build, serves them in dev */
@@ -171,10 +172,9 @@ export default defineConfig(({ mode }) => {
         quoteStyle: "double",
         semicolons: true,
       }),
-      viteReact({
-        babel: {
-          plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
-        },
+      viteReact(),
+      babel({
+        presets: [reactCompilerPreset(ReactCompilerConfig)],
       }),
       tailwindcss(),
       copyLicenseFiles(),

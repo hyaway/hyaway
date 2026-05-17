@@ -72,6 +72,7 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@rolldown/plugin-babel": "^0.2.3",
     "@storybook/react-vite": "^10.4.0",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/devtools-vite": "^0.4.1",
@@ -86,7 +87,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/slug": "^5.0.9",
-    "@vitejs/plugin-react": "^5.2.0",
+    "@vitejs/plugin-react": "^6.0.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9.39.4",
     "eslint-plugin-compat": "^7.0.2",
@@ -98,8 +99,8 @@
     "shadcn": "^4.7.0",
     "storybook": "^10.4.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.3",
-    "vite-tsconfig-paths": "^5.1.4",
+    "vite": "^8.0.13",
+    "vite-tsconfig-paths": "^6.1.1",
     "vitepress": "^1.6.4",
     "vitest": "^4.1.6",
     "web-vitals": "^5.2.0"
