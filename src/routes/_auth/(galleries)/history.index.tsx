@@ -11,7 +11,6 @@ import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
-import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import { Button } from "@/components/ui-primitives/button";
 import {
   useWatchHistoryActions,
@@ -37,14 +36,15 @@ function RouteComponent() {
       params: { fileId: String(fileId) },
     });
 
-  const clearButton = (
-    <BottomNavButton
-      label="Clear"
-      icon={<IconTrashX className="size-6" />}
-      onClick={clearHistory}
-      disabled={fileIds.length === 0}
-    />
-  );
+  const clearAction = {
+    id: "clear-history",
+    label: "Clear",
+    icon: IconTrashX,
+    onClick: clearHistory,
+    variant: "destructive",
+    disabled: fileIds.length === 0,
+    overflowOnly: true,
+  } as const;
 
   const emptyContent = enabled ? (
     <EmptyState message="No files in history. Open a file to add it to your history." />
@@ -80,7 +80,7 @@ function RouteComponent() {
       <PageHeaderActions>
         <HistorySettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter leftContent={clearButton} />
+      <PageFloatingFooter actions={[clearAction]} />
     </>
   );
 }
