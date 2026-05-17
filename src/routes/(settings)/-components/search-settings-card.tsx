@@ -26,6 +26,8 @@ export function SearchSettingsCard() {
   const queryCount = useSearchQueryCount();
   const unpinnedQueryCount = useOtherSearchKeys().length;
   const { resetDefaultQuery } = useSearchSettingsActions();
+  const handleClearUnpinnedSearches = clearUnpinnedSearchQueries;
+  const handleClearSavedSearches = clearSearchQueries;
 
   return (
     <Card>
@@ -42,9 +44,7 @@ export function SearchSettingsCard() {
         <DefaultQuerySettings />
         <div className="border-border flex items-center justify-between gap-4 border-t pt-4">
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium">
-              Remove unpinned searches
-            </span>
+            <span className="text-sm font-medium">Clear unpinned searches</span>
             <span className="text-muted-foreground text-xs">
               {unpinnedQueryCount} unpinned{" "}
               {unpinnedQueryCount === 1 ? "search" : "searches"}
@@ -53,18 +53,16 @@ export function SearchSettingsCard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={clearUnpinnedSearchQueries}
+            onClick={handleClearUnpinnedSearches}
             disabled={unpinnedQueryCount === 0}
           >
             <IconTrashX data-icon="inline-start" />
-            Remove
+            Clear
           </Button>
         </div>
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium">
-              Remove all saved searches
-            </span>
+            <span className="text-sm font-medium">Clear saved searches</span>
             <span className="text-muted-foreground text-xs">
               {queryCount} {queryCount === 1 ? "search" : "searches"} saved
             </span>
@@ -72,11 +70,11 @@ export function SearchSettingsCard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={clearSearchQueries}
+            onClick={handleClearSavedSearches}
             disabled={queryCount === 0}
           >
             <IconTrashX data-icon="inline-start" />
-            Remove
+            Clear
           </Button>
         </div>
       </CardContent>
