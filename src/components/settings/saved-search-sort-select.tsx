@@ -44,7 +44,7 @@ export function SavedSearchSortSelect({
         }
       }}
     >
-      <SelectTrigger aria-label={ariaLabel} className="rounded-lg">
+      <SelectTrigger aria-label={ariaLabel}>
         <IconSortDescending className="size-4" />
         <span className="truncate">{SAVED_SEARCH_SORT_LABELS[value]}</span>
       </SelectTrigger>
