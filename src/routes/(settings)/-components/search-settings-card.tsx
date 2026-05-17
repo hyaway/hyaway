@@ -17,12 +17,15 @@ import {
 } from "@/components/ui-primitives/card";
 import {
   clearSearchQueries,
+  clearUnpinnedSearchQueries,
+  useOtherSearchKeys,
   useSearchQueryCount,
 } from "@/stores/search-queries-store";
 import { useSearchSettingsActions } from "@/stores/search-settings-store";
 
 export function SearchSettingsCard() {
   const queryCount = useSearchQueryCount();
+  const unpinnedQueryCount = useOtherSearchKeys().length;
   const { reset } = useSearchSettingsActions();
 
   return (
@@ -41,7 +44,29 @@ export function SearchSettingsCard() {
         <DefaultQuerySettings />
         <div className="border-border flex items-center justify-between gap-4 border-t pt-4">
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium">Remove saved searches</span>
+            <span className="text-sm font-medium">
+              Remove unpinned searches
+            </span>
+            <span className="text-muted-foreground text-xs">
+              {unpinnedQueryCount} unpinned{" "}
+              {unpinnedQueryCount === 1 ? "search" : "searches"}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearUnpinnedSearchQueries}
+            disabled={unpinnedQueryCount === 0}
+          >
+            <IconTrashX data-icon="inline-start" />
+            Remove
+          </Button>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-medium">
+              Remove all saved searches
+            </span>
             <span className="text-muted-foreground text-xs">
               {queryCount} {queryCount === 1 ? "search" : "searches"} saved
             </span>

@@ -514,3 +514,18 @@ export const getSearchDisplayName = (key: string) => {
 /** Delete all search queries and reset to default state. */
 export const clearSearchQueries = () =>
   useSearchQueriesStore.setState({ entries: defaultEntries() });
+
+/** Delete unpinned search queries while preserving pinned searches. */
+export const clearUnpinnedSearchQueries = () =>
+  useSearchQueriesStore.setState((state) => {
+    const pinnedEntries = Object.fromEntries(
+      Object.entries(state.entries).filter(([, entry]) => entry.pinned),
+    );
+
+    return {
+      entries:
+        Object.keys(pinnedEntries).length > 0
+          ? pinnedEntries
+          : defaultEntries(),
+    };
+  });

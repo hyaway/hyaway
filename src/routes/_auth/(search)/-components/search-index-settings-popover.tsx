@@ -12,11 +12,14 @@ import {
 import { Button } from "@/components/ui-primitives/button";
 import {
   clearSearchQueries,
+  clearUnpinnedSearchQueries,
+  useOtherSearchKeys,
   useSearchQueryCount,
 } from "@/stores/search-queries-store";
 
 export function SearchIndexSettingsPopover() {
   const queryCount = useSearchQueryCount();
+  const unpinnedQueryCount = useOtherSearchKeys().length;
 
   return (
     <SettingsPopover label="Settings">
@@ -27,7 +30,25 @@ export function SearchIndexSettingsPopover() {
       <DefaultQuerySettings />
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Remove saved searches</span>
+          <span className="text-sm font-medium">Remove unpinned searches</span>
+          <span className="text-muted-foreground text-xs">
+            {unpinnedQueryCount} unpinned{" "}
+            {unpinnedQueryCount === 1 ? "search" : "searches"}
+          </span>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={clearUnpinnedSearchQueries}
+          disabled={unpinnedQueryCount === 0}
+        >
+          <IconTrashX data-icon="inline-start" />
+          Remove
+        </Button>
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-medium">Remove all saved searches</span>
           <span className="text-muted-foreground text-xs">
             {queryCount} {queryCount === 1 ? "search" : "searches"} saved
           </span>
