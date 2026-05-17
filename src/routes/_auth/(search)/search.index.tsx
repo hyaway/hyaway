@@ -333,7 +333,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
           className="focus-visible:ring-ring/50 absolute inset-0 z-0 rounded-xl outline-hidden focus-visible:ring-[3px]"
         />
       )}
-      <div className="relative z-20 flex min-w-0 items-start justify-between gap-3">
+      <div className="pointer-events-none relative z-20 flex min-w-0 items-start justify-between gap-3">
         <div className="pointer-events-none min-w-0 flex-1">
           {isRenaming ? (
             <form
@@ -376,7 +376,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             </span>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="pointer-events-auto flex shrink-0 items-center gap-1">
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
