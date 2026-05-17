@@ -15,6 +15,8 @@ export interface RatingServiceSettings {
   showInOverlayEvenWhenNull: boolean;
   /** Whether to show this rating in review mode buttons */
   showInReview: boolean;
+  /** Whether this rating service should be displayed without edit controls */
+  readOnly: boolean;
 }
 
 /**
@@ -40,17 +42,49 @@ type RatingsSettingsState = {
     setShowInOverlay: (serviceKey: string, show: boolean) => void;
     setShowInOverlayEvenWhenNull: (serviceKey: string, show: boolean) => void;
     setShowInReview: (serviceKey: string, show: boolean) => void;
+    setReadOnly: (serviceKey: string, readOnly: boolean) => void;
     getServiceSettings: (serviceKey: string) => RatingServiceSettings;
     removeServiceSettings: (serviceKey: string) => void;
     reset: () => void;
   };
 };
 
-const DEFAULT_SERVICE_SETTINGS: RatingServiceSettings = {
+export const DEFAULT_RATING_SERVICE_SETTINGS: RatingServiceSettings = {
   showInOverlay: true,
   showInOverlayEvenWhenNull: false,
   showInReview: true,
+  readOnly: false,
 };
+
+export function getRatingServiceSettings(
+  settings: Record<string, RatingServiceSettings>,
+  serviceKey: string,
+): RatingServiceSettings {
+  return {
+    ...DEFAULT_RATING_SERVICE_SETTINGS,
+    ...settings[serviceKey],
+  };
+}
+
+export function isRatingServiceReadOnly(
+  settings: Record<string, RatingServiceSettings>,
+  serviceKey: string,
+): boolean {
+  return getRatingServiceSettings(settings, serviceKey).readOnly;
+}
+
+export function getReadOnlyRatingServiceKeys(
+  settings: Record<string, RatingServiceSettings>,
+): Set<string> {
+  return new Set(
+    Object.entries(settings)
+      .filter(
+        ([serviceKey]) =>
+          getRatingServiceSettings(settings, serviceKey).readOnly,
+      )
+      .map(([serviceKey]) => serviceKey),
+  );
+}
 
 const useRatingsSettingsStore = create<RatingsSettingsState>()(
   persist(
@@ -65,7 +99,7 @@ const useRatingsSettingsStore = create<RatingsSettingsState>()(
             serviceSettings: {
               ...state.serviceSettings,
               [serviceKey]: {
-                ...DEFAULT_SERVICE_SETTINGS,
+                ...DEFAULT_RATING_SERVICE_SETTINGS,
                 ...state.serviceSettings[serviceKey],
                 showInOverlay: show,
               },
@@ -76,7 +110,7 @@ const useRatingsSettingsStore = create<RatingsSettingsState>()(
             serviceSettings: {
               ...state.serviceSettings,
               [serviceKey]: {
-                ...DEFAULT_SERVICE_SETTINGS,
+                ...DEFAULT_RATING_SERVICE_SETTINGS,
                 ...state.serviceSettings[serviceKey],
                 showInOverlayEvenWhenNull: show,
               },
@@ -87,14 +121,25 @@ const useRatingsSettingsStore = create<RatingsSettingsState>()(
             serviceSettings: {
               ...state.serviceSettings,
               [serviceKey]: {
-                ...DEFAULT_SERVICE_SETTINGS,
+                ...DEFAULT_RATING_SERVICE_SETTINGS,
                 ...state.serviceSettings[serviceKey],
                 showInReview: show,
               },
             },
           })),
+        setReadOnly: (serviceKey: string, readOnly: boolean) =>
+          set((state) => ({
+            serviceSettings: {
+              ...state.serviceSettings,
+              [serviceKey]: {
+                ...DEFAULT_RATING_SERVICE_SETTINGS,
+                ...state.serviceSettings[serviceKey],
+                readOnly,
+              },
+            },
+          })),
         getServiceSettings: (serviceKey: string): RatingServiceSettings =>
-          get().serviceSettings[serviceKey] ?? DEFAULT_SERVICE_SETTINGS,
+          getRatingServiceSettings(get().serviceSettings, serviceKey),
         removeServiceSettings: (serviceKey: string) =>
           set((state) => {
             const { [serviceKey]: _, ...rest } = state.serviceSettings;
