@@ -4,23 +4,23 @@ hyAway is a companion web interface for browsing files from your [hydrus network
 
 ## Why hyAway?
 
-Hydrus is a powerful media management application, but it's pc only interface' isn't ideal for casual browsing — especially on mobile devices or when you're away from your main computer.
+Hydrus is a powerful media management application, but its desktop-only only interface' isn't ideal for casual browsing — especially on mobile devices or when you're away from your main computer.
 
 hyAway gives you a responsive, touch-friendly way to:
 
 - **Review files** — Archive or delete from your inbox with swipe gestures
-- **Browse your library** with a masonry gallery layout
-- **View files** with support for images, video, and audio
-- **Access your pages** to see what you've been working on
+- **Access your media pages** to see what you've been working on
 - **Search your library** with tags, OR groups, system predicates, sorting
+- **Browse thumbnails** with a masonry gallery layout
+- **View files** with support for images, video, and audio
 
 All without installing anything on your phone or tablet. [See screenshots →](../screenshots)
 
 ## How it works
 
-hyAway is a static web app that runs entirely in your browser. It connects directly to your Hydrus client's [Client API](https://hydrusnetwork.github.io/hydrus/client_api.html) — there's no server in the middle.
+hyAway is a static web app that runs entirely in your browser. It connects directly to your Hydrus client's [Client API](https://hydrusnetwork.github.io/hydrus/client_api.html). There's no server in the middle.
 
-Your browser (running hyaway.com) makes API calls directly to your Hydrus client on your computer. Your files and data stay on your computer — hyAway just provides a different way to view them.
+Your browser (running hyaway.com) makes API calls directly to your Hydrus client on your computer. Your files and data stay on your computer. hyAway just provides a different way to view them.
 
 ## Two ways to use it
 

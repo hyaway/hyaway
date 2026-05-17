@@ -23,7 +23,7 @@ features:
     link: /getting-started
     linkText: Get started
   - title: Screenshots
-    details: See hyAway in action — review queue, gallery, file viewer, and more
+    details: "See hyAway in action: review queue, gallery, file viewer, and more"
     link: /screenshots
     linkText: View screenshots
   - title: Self-hostable

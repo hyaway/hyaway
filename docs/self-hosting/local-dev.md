@@ -175,7 +175,7 @@ pnpm build
 pnpm serve
 ```
 
-The output is in the `dist/` folder — static files you can deploy anywhere.
+The output is in the `dist/` folder, static files you can deploy anywhere.
 
 ### Testing with Docker
 

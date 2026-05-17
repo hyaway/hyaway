@@ -154,10 +154,10 @@ Once you have your endpoint URL, continue to [Connect to Hydrus](./connect).
 
 Tailscale creates an encrypted, private network between your devices. When you use Tailscale Serve:
 
-- Hydrus is **only accessible to devices on your tailnet** — not the public internet
+- Hydrus is **only accessible to devices on your tailnet**, not the public internet
 - All traffic is **encrypted end-to-end**
 - You don't need to open ports on your router or configure firewalls
-- Your Hydrus instance remains "local only" — Tailscale handles the secure tunneling
+- Your Hydrus instance remains "local only". Tailscale handles the secure tunneling
 
 ### Tailscale Serve vs Funnel
 

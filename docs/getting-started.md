@@ -15,7 +15,7 @@ The [Client API](https://hydrusnetwork.github.io/hydrus/client_api.html) lets ex
 5. Check **support CORS headers** (required for connecting between hyaway.com and your own domain)
 6. Click **Apply**
 
-> **Why CORS?** When you visit hyaway.com, your browser runs code from that website. By default, browsers don't let websites talk to other servers (like your local Hydrus) — this is a security feature. Enabling CORS tells Hydrus "it's okay for hyaway.com to connect to me."
+> **Why CORS?** When you visit hyaway.com, your browser runs code from that website. By default, browsers don't let websites talk to other servers (like your local Hydrus). This is a security feature called CORS. Enabling it tells Hydrus "it's okay for hyaway.com to connect to me."
 
 ![Hydrus manage services dialog with CORS enabled](images/hydrus-cors-settings.png)
 
