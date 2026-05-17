@@ -562,8 +562,8 @@ export function ImageViewer({
               initialScale={fitScale}
               centerOnInit={true}
               limitToBounds={true}
-              alignmentAnimation={{ sizeX: 1000, sizeY: 1000 }}
-              wheel={{ step: 0.06, smoothStep: 0.0025 }}
+              autoAlignment={{ sizeX: 1000, sizeY: 1000 }}
+              wheel={{ step: 0.06 }}
               doubleClick={{ disabled: true }}
               onWheelStart={() => {
                 isZoomingRef.current = true;
@@ -571,10 +571,10 @@ export function ImageViewer({
               onWheelStop={() => {
                 isZoomingRef.current = false;
               }}
-              onPinchingStart={() => {
+              onPinchStart={() => {
                 isZoomingRef.current = true;
               }}
-              onPinchingStop={() => {
+              onPinchStop={() => {
                 isZoomingRef.current = false;
               }}
               onPanningStart={() => {
