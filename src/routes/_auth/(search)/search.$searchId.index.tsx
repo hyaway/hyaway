@@ -309,10 +309,7 @@ function SearchPage() {
       <PageHeaderActions>
         <SearchSettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter
-        leftContent={refetchButton}
-        actions={footerActions}
-      />
+      <PageFloatingFooter leftContent={refetchButton} actions={footerActions} />
     </>
   );
 }
