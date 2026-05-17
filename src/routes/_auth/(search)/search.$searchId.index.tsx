@@ -4,6 +4,7 @@
 import {
   IconCopy,
   IconDeviceFloppy,
+  IconPin,
   IconPinned,
   IconPinnedOff,
   IconTrash,
@@ -185,7 +186,7 @@ function SearchPage() {
       {
         id: isPinned ? "unpin-search" : "pin-search",
         label: isPinned ? "Unpin" : "Pin",
-        icon: isPinned ? IconPinnedOff : IconPinned,
+        icon: isPinned ? IconPinnedOff : IconPin,
         onClick: handleTogglePinned,
         overflowOnly: true,
       },
@@ -230,7 +231,17 @@ function SearchPage() {
   return (
     <>
       <>
-        <PageHeading title={displayName} />
+        <PageHeading
+          title={displayName}
+          eyebrow={
+            isPinned ? (
+              <span className="text-muted-foreground inline-flex items-center gap-1.5 font-medium">
+                <IconPinned className="size-4" />
+                Pinned
+              </span>
+            ) : undefined
+          }
+        />
         <div className="flex flex-col gap-2 pb-2">
           <SearchQueryBuilder onCommit={handleCommit} />
         </div>
