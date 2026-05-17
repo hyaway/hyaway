@@ -42,6 +42,8 @@ A visual tour of hyAway's main features.
 
 ![File metadata and tags](images/screenshots/file-viewer-3.png)
 
+![File tags menu](images/screenshots/file-viewer-5.png)
+
 ### Video player
 
 ![Video player](images/screenshots/file-viewer-4.png)
@@ -58,11 +60,29 @@ A visual tour of hyAway's main features.
 
 ![Pages sidebar tree](images/screenshots/pages-2.png)
 
-### Pages search
+### Pages filtering
 
-![Pages search with highlighting](images/screenshots/pages-3.png)
+![Pages filtering with highlighting](images/screenshots/pages-3.png)
 
 ---
+
+## Search
+
+### Search by tag
+
+![Search by adding tags](images/screenshots/search-1.png)
+
+### Sorting and editing search
+
+![Edit search](images/screenshots/search-2.png)
+
+### Query builder
+
+![Advanced search query builder](images/screenshots/search-3.png)
+
+### Saved searches
+
+## ![Search page with saved searches](images/screenshots/search-4.png)
 
 ## Watch history
 
@@ -73,3 +93,9 @@ A visual tour of hyAway's main features.
 ## Customization
 
 ![Settings and customization](images/screenshots/customization-1.png)
+
+---
+
+## PIN lock
+
+![PIN lock screen](images/screenshots/pin-lock-1.png)
