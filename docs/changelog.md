@@ -9,6 +9,8 @@ All notable changes to hyAway are documented here.
 ### Added
 
 - **Read-only ratings** — Rating services can now be marked read-only so their values remain visible without edit controls on file pages or review actions
+- **Pinned searches** — Search tabs can now be pinned so important searches stay available while clearing or managing the rest
+- **Custom search actions** — Search actions now support include/exclude behavior and direct search creation from pages and tag menus
 
 ---
 
