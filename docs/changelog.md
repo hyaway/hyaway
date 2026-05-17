@@ -6,6 +6,10 @@ All notable changes to hyAway are documented here.
 
 ## 2026-05-17
 
+### Changed
+
+- Updated major dependencies: Vite 8, TypeScript 6, ESLint 10, react-zoom-pan-pinch 4, and others
+
 ### Added
 
 - **Read-only ratings** — Rating services can now be marked read-only so their values remain visible without edit controls on file pages or review actions
