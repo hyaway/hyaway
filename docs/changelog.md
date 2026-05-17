@@ -6,28 +6,6 @@ All notable changes to hyAway are documented here.
 
 ## 2026-05-17
 
-### Changed
-
-- Updated major dependencies: Vite 8, TypeScript 6, ESLint 10, react-zoom-pan-pinch 4, and others
-
-### Added
-
-- **Read-only ratings** — Rating services can now be marked read-only so their values remain visible without edit controls on file pages or review actions
-- **Pinned searches** — Search tabs can now be pinned so important searches stay available while clearing or managing the rest
-- **Custom search actions** — Search actions now support include/exclude behavior and direct search creation from pages and tag menus
-
----
-
-## 2026-05-16
-
-### Fixed
-
-- File actions now update gallery metadata immediately after trashing, restoring, archiving, unarchiving, rating, or clearing view stats, so returning from a file detail page shows the correct file state and icons
-
----
-
-## 2026-05-14
-
 ### Added
 
 - **Search page** — New dedicated search experience accessible from the homepage and sidebar, with persistent search tabs that survive navigation
@@ -42,11 +20,15 @@ All notable changes to hyAway are documented here.
 - **Auto-generated search names** — New search tabs get readable auto-generated names based on their query rules
 - **PIN lock** — Protect the app with a 4-digit PIN required each new session
 - **Auto-lock** — Optionally lock the app after being in the background for a configurable duration
+- **Read-only ratings** — Rating services can now be marked read-only so their values remain visible without edit controls on file pages or review actions
+- **Pinned searches** — Search tabs can now be pinned so important searches stay available while clearing or managing the rest
+- **Custom search actions** — Search actions now support include/exclude behavior and direct search creation from pages and tag menus
 - Lock button in the sidebar header for quick manual locking
 - "Forgot PIN?" popover on the lock screen that clears the PIN and disconnects from the API
 
 ### Changed
 
+- Updated major dependencies: Vite 8, TypeScript 6, ESLint 10, react-zoom-pan-pinch 4, and others
 - "Add to review" actions now show a distinct cards-with-plus icon to differentiate from "New review"
 - Page breadcrumbs now show the actual page name and parent group path instead of the URL slug
 - Reset connection settings card now offers two separate actions: reset API values only, or reset and clear all saved data (searches, review queue, watch history)
@@ -57,6 +39,7 @@ All notable changes to hyAway are documented here.
 
 ### Fixed
 
+- File actions now update gallery metadata immediately after trashing, restoring, archiving, unarchiving, rating, or clearing view stats, so returning from a file detail page shows the correct file state and icons
 - Image viewer background now correctly matches the fill-canvas placeholder to the configured background preference
 - Image loading now respects the media viewer background preferences, preventing a brief average-color flash when opening images
 - Significantly improved speed when loading large collections (100k+ files) — searches and metadata fetching no longer cause the UI to hang
