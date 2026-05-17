@@ -244,7 +244,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   );
 
   return (
-    <div className="border-border hover:bg-muted/50 relative flex flex-col gap-3 rounded-xl border p-5 transition-colors sm:flex-row sm:items-start sm:gap-4">
+    <div className="border-border hover:bg-muted/50 relative flex flex-col gap-3 rounded-xl border p-5 transition-colors">
       {!isRenaming && (
         <Link
           to="/search/$searchId"
@@ -253,8 +253,8 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
           className="focus-visible:ring-ring/50 absolute inset-0 z-0 rounded-xl outline-hidden focus-visible:ring-[3px]"
         />
       )}
-      <div className="pointer-events-none relative z-10 flex min-w-0 flex-1 flex-col gap-2">
-        <div className="flex flex-col items-start gap-1">
+      <div className="relative z-20 flex min-w-0 items-start justify-between gap-3">
+        <div className="pointer-events-none min-w-0 flex-1">
           {isRenaming ? (
             <form
               onSubmit={handleRename}
@@ -296,6 +296,44 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             </span>
           )}
         </div>
+        <div className="flex shrink-0 items-center gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  title="Search actions"
+                  className="size-9 shrink-0"
+                >
+                  <IconDots className="size-5" />
+                </Button>
+              }
+            />
+            <DropdownMenuContent side="bottom" align="end">
+              <DropdownMenuItem onClick={handleTogglePinned}>
+                {isPinned ? <IconPinnedOff /> : <IconPin />}
+                {isPinned ? "Unpin" : "Pin"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleStartRename}>
+                <IconEdit />
+                Rename
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSave}>
+                <IconCopy />
+                Clone
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleDelete} variant="destructive">
+                <IconTrash />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+      <div className="pointer-events-none relative z-10 flex min-w-0 flex-col gap-2">
         {searchTags.length > 0 ? (
           <div className="pointer-events-none select-none **:select-none">
             <SearchTagList
@@ -319,42 +357,6 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             No query yet
           </Badge>
         )}
-      </div>
-      <div className="relative z-20 flex items-center gap-1 self-end sm:self-center">
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon"
-                type="button"
-                title="Search actions"
-                className="size-11 shrink-0"
-              >
-                <IconDots className="size-5.5" />
-              </Button>
-            }
-          />
-          <DropdownMenuContent side="bottom" align="end">
-            <DropdownMenuItem onClick={handleTogglePinned}>
-              {isPinned ? <IconPinnedOff /> : <IconPin />}
-              {isPinned ? "Unpin" : "Pin"}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleStartRename}>
-              <IconEdit />
-              Rename
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleSave}>
-              <IconCopy />
-              Clone
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleDelete} variant="destructive">
-              <IconTrash />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </div>
   );
