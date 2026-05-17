@@ -135,7 +135,7 @@ export const useAuthStore = create<AuthState>()(
       ...(persisted as Partial<AuthState>),
       // Normalize endpoint by trimming whitespace and removing trailing slashes from old stored values
       api_endpoint:
-        (persisted as Partial<AuthState>)?.api_endpoint
+        (persisted as Partial<AuthState>).api_endpoint
           ?.trim()
           .replace(/\/+$/, "") ?? current.api_endpoint,
     }),

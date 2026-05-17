@@ -74,7 +74,7 @@ export function ReviewDecisionFilmstrip({
 
   // Get thumbnail dimensions from Hydrus service settings, capped at max height
   const dimensions = useThumbnailDimensions();
-  const fixedHeight = Math.min(dimensions?.height ?? 200, MAX_FILMSTRIP_HEIGHT);
+  const fixedHeight = Math.min(dimensions.height, MAX_FILMSTRIP_HEIGHT);
   const contentHeight = fixedHeight - ITEM_FOOTER_HEIGHT;
 
   // Gallery settings for consistent styling
@@ -281,12 +281,10 @@ export function ReviewDecisionFilmstrip({
         className="group/gallery"
         data-image-bg={imageBackground}
         onKeyDown={handleKeyDown}
-        style={
-          {
-            "--gallery-entry-duration": `${entryDuration}ms`,
-            "--gallery-hover-zoom-duration": `${hoverZoomDuration}ms`,
-          }
-        }
+        style={{
+          "--gallery-entry-duration": `${entryDuration}ms`,
+          "--gallery-hover-zoom-duration": `${hoverZoomDuration}ms`,
+        }}
       >
         <ScrollArea
           viewportClassName="scroll-p-2 p-2 pb-5"
