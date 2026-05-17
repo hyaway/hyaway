@@ -219,6 +219,10 @@ export function defaultStaged(): SearchState {
 export type SearchQueryEntry = {
   staged: SearchState;
   committed: SearchState | undefined;
+  /** Unix timestamp in milliseconds for when the entry was created. */
+  createdAt: number;
+  /** Unix timestamp in milliseconds for the most recent entry change. */
+  modifiedAt: number;
   /** User-facing name. Falls back to the entry key when absent. */
   displayName?: string;
   /** Whether the search should appear in pinned search lists. */

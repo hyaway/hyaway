@@ -63,10 +63,20 @@ function areSearchStatesEquivalent(
 // ---------------------------------------------------------------------------
 
 function defaultEntry(): SearchQueryEntry {
+  const now = Date.now();
   return {
     staged: getDefaultQuery(),
     committed: undefined,
+    createdAt: now,
+    modifiedAt: now,
     pinned: false,
+  };
+}
+
+function markEntryModified(entry: SearchQueryEntry): SearchQueryEntry {
+  return {
+    ...entry,
+    modifiedAt: Date.now(),
   };
 }
 
@@ -155,11 +165,11 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const { entries } = get();
           const existing = key in entries;
           const entry = entries[key] ?? defaultEntry();
-          const updated = {
+          const updated = markEntryModified({
             ...entry,
             staged: { ...entry.staged, query },
             ...(displayName != null && { displayName }),
-          };
+          });
           set({
             entries: existing
               ? { ...entries, [key]: updated }
@@ -171,7 +181,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const { entries } = get();
           const existing = key in entries;
           const entry = entries[key] ?? defaultEntry();
-          const updated = { ...entry, displayName };
+          const updated = markEntryModified({ ...entry, displayName });
           set({
             entries: existing
               ? { ...entries, [key]: updated }
@@ -183,7 +193,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const { entries } = get();
           const existing = key in entries;
           const entry = entries[key] ?? defaultEntry();
-          const updated = { ...entry, pinned };
+          const updated = markEntryModified({ ...entry, pinned });
           set({
             entries: existing
               ? { ...entries, [key]: updated }
@@ -198,7 +208,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             entries: {
               ...entries,
               [key]: {
-                ...entry,
+                ...markEntryModified(entry),
                 staged: { ...entry.staged, sort },
               },
             },
@@ -212,7 +222,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             entries: {
               ...entries,
               [key]: {
-                ...entry,
+                ...markEntryModified(entry),
                 staged: { ...entry.staged, fileServiceKey },
               },
             },
@@ -230,7 +240,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           set({
             entries: {
               ...entries,
-              [key]: { ...entry, committed },
+              [key]: markEntryModified({ ...entry, committed }),
             },
           });
         },
@@ -242,7 +252,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             entries: {
               ...entries,
               [key]: {
-                ...current,
+                ...markEntryModified(current),
                 staged: current.committed ?? getDefaultQuery(),
               },
             },
@@ -256,7 +266,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             entries: {
               ...entries,
               [key]: {
-                ...current,
+                ...markEntryModified(current),
                 staged: emptyStaged(),
               },
             },
@@ -279,11 +289,14 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const cloneName = match
             ? `${match[1]} (${Number(match[2]) + 1})`
             : `${baseName} (1)`;
+          const now = Date.now();
           set({
             entries: {
               [toKey]: {
                 staged: source.staged,
                 committed: source.committed ?? source.staged,
+                createdAt: now,
+                modifiedAt: now,
                 displayName: cloneName,
                 pinned: false,
               },
@@ -299,7 +312,10 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             set({
               entries: {
                 ...entries,
-                [fromKey]: { ...source, displayName: newDisplayName },
+                [fromKey]: markEntryModified({
+                  ...source,
+                  displayName: newDisplayName,
+                }),
               },
             });
             return;
@@ -310,6 +326,8 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               newEntries[toKey] = {
                 staged: source.staged,
                 committed: source.committed,
+                createdAt: source.createdAt,
+                modifiedAt: Date.now(),
                 displayName: newDisplayName,
                 pinned: source.pinned,
               };
@@ -351,6 +369,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             fileServiceKey: base.fileServiceKey ?? null,
           };
           const instantSearch = getSearchResultsInstantDefault();
+          const now = Date.now();
 
           const { entries } = get();
           set({
@@ -358,6 +377,8 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               [searchId]: {
                 staged: state,
                 committed: instantSearch ? state : undefined,
+                createdAt: now,
+                modifiedAt: now,
                 displayName,
                 pinned: false,
               },
