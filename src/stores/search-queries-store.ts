@@ -5,7 +5,11 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type { RuleGroupType } from "react-querybuilder";
-import type { SearchQueryEntry, SortConfig } from "@/stores/search-defaults";
+import type {
+  SearchQueryEntry,
+  SearchState,
+  SortConfig,
+} from "@/stores/search-defaults";
 import type { SavedSearchSort } from "@/stores/search-settings-store";
 import {
   createSearchRule,
@@ -118,6 +122,39 @@ function getSortedSearchKeys(
     .map(([key]) => key);
 }
 
+function getAvailableGeneratedSearchKey(
+  entries: Record<string, SearchQueryEntry>,
+  displayName: string,
+): string {
+  let nextKey = generateSearchId(displayName);
+  while (nextKey in entries) {
+    nextKey = generateSearchId(displayName);
+  }
+  return nextKey;
+}
+
+function getAvailableNewSearchKey(
+  entries: Record<string, SearchQueryEntry>,
+  preferredKey: string,
+  displayName: string,
+): string {
+  if (!(preferredKey in entries)) return preferredKey;
+  return getAvailableGeneratedSearchKey(entries, displayName);
+}
+
+function getAvailableSearchKey(
+  entries: Record<string, SearchQueryEntry>,
+  fromKey: string,
+  preferredKey: string,
+  displayName: string,
+): string {
+  if (fromKey === preferredKey || !(preferredKey in entries)) {
+    return preferredKey;
+  }
+
+  return getAvailableGeneratedSearchKey(entries, displayName);
+}
+
 function defaultEntries(): Record<string, SearchQueryEntry> {
   return {};
 }
@@ -189,14 +226,20 @@ type SearchQueriesState = {
     clearUnpinnedSearches: () => void;
     /** Remove an entry entirely. */
     removeSearchEntry: (key: string) => void;
-    /** Copy an entry's current state to a new key. */
-    duplicateSearchEntry: (fromKey: string, toKey: string) => void;
+    /** Create a new search entry and return its key. */
+    createSearchEntry: (
+      displayName: string,
+      state?: SearchState,
+      options?: { commit?: boolean },
+    ) => string;
+    /** Copy an entry's current state to a new key and return the new key. */
+    duplicateSearchEntry: (fromKey: string) => string;
     /** Move an entry to a new key (rename). */
     renameSearchEntry: (
       fromKey: string,
       toKey: string,
       displayName: string,
-    ) => void;
+    ) => string;
     /** Create a new search from a tag string, commit it, and return its ID. */
     createSearchFromTag: (tag: string) => string;
   };
@@ -345,16 +388,45 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        duplicateSearchEntry: (fromKey, toKey) => {
+        createSearchEntry: (
+          displayName,
+          state = getDefaultQuery(),
+          options,
+        ) => {
+          const { entries } = get();
+          const searchId = getAvailableGeneratedSearchKey(entries, displayName);
+          const now = Date.now();
+          set({
+            entries: {
+              [searchId]: {
+                staged: state,
+                committed: options?.commit ? state : undefined,
+                createdAt: now,
+                modifiedAt: now,
+                displayName,
+                pinned: false,
+              },
+              ...entries,
+            },
+          });
+          return searchId;
+        },
+
+        duplicateSearchEntry: (fromKey) => {
           const { entries } = get();
           const source = entries[fromKey] ?? defaultEntry();
           const baseName = source.displayName ?? fromKey;
           const match = baseName.match(/^(.*?)\s*\((\d+)\)$/);
           const cloneName = nextUniqueName(match ? match[1] : baseName);
+          const targetKey = getAvailableNewSearchKey(
+            entries,
+            generateSearchId(cloneName),
+            cloneName,
+          );
           const now = Date.now();
           set({
             entries: {
-              [toKey]: {
+              [targetKey]: {
                 ...source,
                 committed: source.committed ?? source.staged,
                 createdAt: now,
@@ -365,12 +437,20 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
               ...entries,
             },
           });
+          return targetKey;
         },
 
         renameSearchEntry: (fromKey, toKey, newDisplayName) => {
           const { entries } = get();
           const source = entries[fromKey] ?? defaultEntry();
-          if (fromKey === toKey) {
+          const targetKey = getAvailableSearchKey(
+            entries,
+            fromKey,
+            toKey,
+            newDisplayName,
+          );
+
+          if (fromKey === targetKey) {
             set({
               entries: {
                 ...entries,
@@ -380,12 +460,26 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
                 }),
               },
             });
-            return;
+            return targetKey;
           }
+
+          if (!(fromKey in entries)) {
+            set({
+              entries: {
+                ...entries,
+                [targetKey]: markEntryModified({
+                  ...source,
+                  displayName: newDisplayName,
+                }),
+              },
+            });
+            return targetKey;
+          }
+
           const newEntries: typeof entries = {};
           for (const key of Object.keys(entries)) {
             if (key === fromKey) {
-              newEntries[toKey] = {
+              newEntries[targetKey] = {
                 ...source,
                 modifiedAt: Date.now(),
                 displayName: newDisplayName,
@@ -395,11 +489,11 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
             }
           }
           set({ entries: newEntries });
+          return targetKey;
         },
 
         createSearchFromTag: (tag) => {
           const displayName = nextUniqueName(tag);
-          const searchId = generateSearchId(displayName);
 
           const base = getDefaultQuery();
           const systemRule = systemTagToRule(tag);
@@ -431,6 +525,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const now = Date.now();
 
           const { entries } = get();
+          const searchId = getAvailableGeneratedSearchKey(entries, displayName);
           set({
             entries: {
               [searchId]: {

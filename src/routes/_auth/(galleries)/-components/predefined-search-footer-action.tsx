@@ -12,7 +12,6 @@ import {
   ServiceType,
 } from "@/integrations/hydrus-api/models";
 import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
-import { generateSearchId } from "@/lib/search-entry-utils";
 import { createSearchRule } from "@/stores/search-defaults";
 import {
   useLongestViewedLimit,
@@ -43,32 +42,17 @@ export function usePredefinedSearchFooterAction({
   disabled = false,
 }: UsePredefinedSearchFooterActionOptions): FloatingFooterAction {
   const navigate = useNavigate();
-  const {
-    commitSearchEntry,
-    setSearchStagedFileServiceKey,
-    setSearchStagedQuery,
-    setSearchStagedSort,
-  } = useSearchQueriesActions();
+  const { createSearchEntry } = useSearchQueriesActions();
 
   const handleOpenAsNewSearch = useCallback(() => {
     const uniqueDisplayName = nextUniqueName(displayName);
-    const searchId = generateSearchId(uniqueDisplayName);
-    setSearchStagedQuery(searchId, query, uniqueDisplayName);
-    setSearchStagedSort(searchId, sort);
-    setSearchStagedFileServiceKey(searchId, fileServiceKey);
-    commitSearchEntry(searchId);
+    const searchId = createSearchEntry(
+      uniqueDisplayName,
+      { query, sort, fileServiceKey },
+      { commit: true },
+    );
     navigate({ to: "/search/$searchId", params: { searchId } });
-  }, [
-    commitSearchEntry,
-    displayName,
-    fileServiceKey,
-    navigate,
-    query,
-    setSearchStagedFileServiceKey,
-    setSearchStagedQuery,
-    setSearchStagedSort,
-    sort,
-  ]);
+  }, [createSearchEntry, displayName, fileServiceKey, navigate, query, sort]);
 
   return {
     id: "open-as-new-search",

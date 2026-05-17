@@ -29,7 +29,7 @@ import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import { SearchSortTag } from "./-components/search-sort-tag";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
-import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
+import { copySearchCache } from "@/lib/search-entry-utils";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
@@ -113,17 +113,15 @@ function SearchPage() {
   );
 
   const handleSaveAsNew = useCallback(() => {
-    const newId = generateSearchId(displayName);
-    duplicateSearchEntry(searchId, newId);
-    copySearchCache(queryClient, searchId, newId);
+    const clonedSearchId = duplicateSearchEntry(searchId);
+    copySearchCache(queryClient, searchId, clonedSearchId);
     navigate({
       to: "/search/$searchId",
-      params: { searchId: newId },
+      params: { searchId: clonedSearchId },
       search: { builder: builderOpen, instant },
     });
   }, [
     builderOpen,
-    displayName,
     instant,
     searchId,
     duplicateSearchEntry,

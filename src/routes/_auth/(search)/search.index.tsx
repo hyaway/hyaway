@@ -21,7 +21,7 @@ import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
 import { SearchSortTag } from "./-components/search-sort-tag";
 import type { SavedSearchSort } from "@/stores/search-settings-store";
-import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
+import { copySearchCache } from "@/lib/search-entry-utils";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { SavedSearchSortSelect } from "@/components/settings/saved-search-sort-select";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
@@ -71,17 +71,15 @@ function SearchIndex() {
     [pinnedSearchKeys, otherSearchKeys],
   );
   const navigate = useNavigate();
-  const { setSearchDisplayName, createSearchFromTag } =
-    useSearchQueriesActions();
+  const { createSearchEntry, createSearchFromTag } = useSearchQueriesActions();
   const savedSearchSort = useSavedSearchSort();
   const { setSavedSearchSort } = useSearchSettingsActions();
 
   const handleAddNew = useCallback(() => {
     const displayName = nextDraftName();
-    const searchId = generateSearchId(displayName);
-    setSearchDisplayName(searchId, displayName);
+    const searchId = createSearchEntry(displayName);
     navigate({ to: "/search/$searchId", params: { searchId } });
-  }, [setSearchDisplayName, navigate]);
+  }, [createSearchEntry, navigate]);
 
   const handleQuickSearch = useCallback(
     (tag: string) => {
@@ -248,11 +246,10 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
     (e?: React.MouseEvent) => {
       e?.preventDefault();
       e?.stopPropagation();
-      const newId = generateSearchId(displayName);
-      duplicateSearchEntry(searchId, newId);
-      copySearchCache(queryClient, searchId, newId);
+      const clonedSearchId = duplicateSearchEntry(searchId);
+      copySearchCache(queryClient, searchId, clonedSearchId);
     },
-    [searchId, displayName, duplicateSearchEntry, queryClient],
+    [searchId, duplicateSearchEntry, queryClient],
   );
 
   const handleDelete = useCallback(
@@ -295,8 +292,8 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
         setIsRenaming(false);
         return;
       }
-      renameSearchEntry(searchId, newId, newName);
-      copySearchCache(queryClient, searchId, newId, true);
+      const renamedSearchId = renameSearchEntry(searchId, newId, newName);
+      copySearchCache(queryClient, searchId, renamedSearchId, true);
       setIsRenaming(false);
     },
     [searchId, renameSearchEntry, queryClient],
