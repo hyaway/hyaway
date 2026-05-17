@@ -94,11 +94,11 @@ export function TagAutocompleteInput({
   const suggestions = data?.tags.slice(0, MAX_TAG_SUGGESTIONS) ?? [];
   const hasSufficientInput = inputValue.trim().replace(/^-+/, "").length >= 3;
   const searchText = inputValue.trim().replace(/^-+/, "").toLowerCase();
-  const filteredFavourites = searchText
-    ? [...(favouriteTags ?? [])].filter((tag) =>
-        tag.toLowerCase().includes(searchText),
-      )
-    : [...(favouriteTags ?? [])];
+  const filteredFavourites = useMemo(() => {
+    const tags = [...(favouriteTags ?? [])];
+    if (!searchText) return tags;
+    return tags.filter((tag) => tag.toLowerCase().includes(searchText));
+  }, [favouriteTags, searchText]);
   const filteredStatic = useMemo(() => {
     if (!searchText || SYSTEM_TAG_SUGGESTIONS.length === 0) return [];
     if (!searchText.startsWith("system:") && searchText.length < 2) {

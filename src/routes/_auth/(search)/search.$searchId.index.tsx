@@ -77,10 +77,11 @@ function SearchPage() {
   const { setDefaultQuery } = useSearchSettingsActions();
   const navigate = useNavigate();
   const [preserveCurrentScroll, setPreserveCurrentScroll] = useState(false);
+  const committedQuery = committed?.query;
 
   const searchTags = useMemo(
-    () => (committed ? queryToHydrusSearch(committed.query) : []),
-    [committed],
+    () => (committedQuery ? queryToHydrusSearch(committedQuery) : []),
+    [committedQuery],
   );
 
   const { data, isLoading, isFetching, isError, error } =
@@ -91,9 +92,9 @@ function SearchPage() {
   const hasFiles = fileIds.length > 0;
   const reviewActions = useReviewActions({ fileIds });
 
-  const handleCommit = () => {
+  const handleCommit = useCallback(() => {
     setPreserveCurrentScroll(true);
-  };
+  }, []);
 
   const getFileLink = useCallback<FileLinkBuilder>(
     (fileId) =>
@@ -219,6 +220,10 @@ function SearchPage() {
     handleSaveAsNew,
     handleDelete,
   ]);
+  const footerActions = useMemo(
+    () => [...reviewActions, ...searchActions],
+    [reviewActions, searchActions],
+  );
 
   const fileCount = data?.file_ids?.length ?? 0;
 
@@ -306,7 +311,7 @@ function SearchPage() {
       </PageHeaderActions>
       <PageFloatingFooter
         leftContent={refetchButton}
-        actions={[...reviewActions, ...searchActions]}
+        actions={footerActions}
       />
     </>
   );

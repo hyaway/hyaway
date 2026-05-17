@@ -232,7 +232,10 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   const { staged } = entry;
   const theme = useActiveTheme();
 
-  const searchTags = useMemo(() => queryToHydrusSearch(staged.query), [staged]);
+  const searchTags = useMemo(
+    () => queryToHydrusSearch(staged.query),
+    [staged.query],
+  );
 
   const sortLabel = getSortLabel(staged.sort.sortType, staged.sort.sortAsc);
   const sortColor = getThemeAdjustedColorFromHex(
