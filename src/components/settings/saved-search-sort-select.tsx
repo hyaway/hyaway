@@ -16,9 +16,9 @@ import {
 } from "@/components/ui-primitives/select";
 
 const SAVED_SEARCH_SORT_LABELS = {
-  "newest-first": "Newest first",
-  "oldest-first": "Oldest first",
-  "modified-desc": "Last modified first",
+  "newest-first": "Newest",
+  "oldest-first": "Oldest",
+  "modified-desc": "Last modified",
 } satisfies Record<SavedSearchSort, string>;
 
 const SAVED_SEARCH_SORT_OPTIONS = SAVED_SEARCH_SORT_VALUES.map((value) => ({
