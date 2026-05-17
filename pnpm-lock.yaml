@@ -2115,7 +2115,6 @@ packages:
   '@tanstack/router-plugin@1.167.35':
     resolution: {integrity: sha512-UAScU5VAzLYVY4FML/Cbc5S5TucT4I8Ata05yozGOe4ZfepTKRffA5xWLtD2N+ov5svdv0KTX/kqlZnYPe28mA==}
     engines: {node: '>=20.19'}
-    hasBin: true
     peerDependencies:
       '@rsbuild/core': '>=1.0.2 || ^2.0.0'
       '@tanstack/react-router': ^1.169.2
