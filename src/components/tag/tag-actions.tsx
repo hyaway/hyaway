@@ -44,6 +44,7 @@ import {
 } from "@/components/ui-primitives/dropdown-menu";
 import {
   useSearchDisplayName,
+  useSearchKeys,
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
@@ -379,6 +380,75 @@ function CopyTagMenuItem({ tag }: { tag: string }) {
   );
 }
 
+function TagActionMenuActionItem({ action }: { action: TagAction }) {
+  return (
+    <DropdownMenuItem
+      onClick={action.onClick}
+      closeOnClick={action.closeOnClick ?? false}
+      className="cursor-pointer"
+    >
+      <action.icon />
+      {action.label}
+    </DropdownMenuItem>
+  );
+}
+
+function SearchTagActionSubmenu({
+  tag,
+  searchId,
+}: {
+  tag: string;
+  searchId: string;
+}) {
+  const displayName = useSearchDisplayName(searchId);
+  const actions = useSearchTagActions(tag, searchId);
+
+  if (actions.length === 0) return null;
+
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger className="min-w-56">
+        <span className="max-w-64 truncate">{displayName}</span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuSubContent>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{displayName}</DropdownMenuLabel>
+          {actions.map((action) => (
+            <TagActionMenuActionItem key={action.id} action={action} />
+          ))}
+        </DropdownMenuGroup>
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
+  );
+}
+
+function SearchTagActionsSubmenu({ tag }: { tag: string }) {
+  const searchIds = useSearchKeys();
+
+  if (searchIds.length === 0) return null;
+
+  return (
+    <>
+      <DropdownMenuSeparator />
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger>
+          <IconSearch />
+          Searches
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="min-w-64">
+          {searchIds.map((searchId) => (
+            <SearchTagActionSubmenu
+              key={searchId}
+              tag={tag}
+              searchId={searchId}
+            />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    </>
+  );
+}
+
 /** Menu item content rendered inside the shared popup. */
 function TagActionMenuItems({
   tag,
@@ -402,15 +472,7 @@ function TagActionMenuItems({
             <DropdownMenuLabel>{section.label}</DropdownMenuLabel>
           )}
           {section.actions.map((action) => (
-            <DropdownMenuItem
-              key={action.id}
-              onClick={action.onClick}
-              closeOnClick={action.closeOnClick ?? false}
-              className={"cursor-pointer"}
-            >
-              <action.icon />
-              {action.label}
-            </DropdownMenuItem>
+            <TagActionMenuActionItem key={action.id} action={action} />
           ))}
         </DropdownMenuGroup>
       ))}
@@ -420,7 +482,7 @@ function TagActionMenuItems({
           <DropdownMenuItem
             onClick={favouriteAction.onClick}
             closeOnClick={favouriteAction.closeOnClick ?? false}
-            className={"cursor-pointer"}
+            className="cursor-pointer"
           >
             <favouriteAction.icon />
             {favouriteAction.label}
@@ -442,15 +504,7 @@ function TagActionMenuContent({ tag }: { tag: string }) {
         sections={sections}
         favouriteAction={favouriteAction}
       />
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>Invite users</DropdownMenuSubTrigger>
-        <DropdownMenuSubContent>
-          <DropdownMenuItem>Email</DropdownMenuItem>
-          <DropdownMenuItem>Message</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>More...</DropdownMenuItem>
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
+      <SearchTagActionsSubmenu tag={tag} />
     </>
   );
 }
