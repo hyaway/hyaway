@@ -98,7 +98,7 @@ function SearchIndex() {
   return (
     <>
       <PageHeading title="Search" />
-      <div className="flex flex-col gap-4 pt-2">
+      <div className="flex flex-col gap-3 pt-2 sm:gap-4">
         <QuickTagSearch onSearch={handleQuickSearch} />
         <Separator />
         {searchKeys.length > 0 && (
@@ -166,9 +166,9 @@ function SearchEntryList({ searchKeys }: { searchKeys: Array<string> }) {
   const rowVirtualizer = useWindowVirtualizer({
     count: searchKeys.length,
     getItemKey,
-    estimateSize: () => 168,
+    estimateSize: () => 148,
     overscan: 4,
-    gap: 16,
+    gap: 8,
     scrollMargin: listRef.current?.offsetTop ?? 0,
   });
 
@@ -285,7 +285,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   );
 
   return (
-    <div className="bg-muted/50 relative flex flex-col gap-3 rounded-2xl border border-transparent p-5 transition-colors">
+    <div className="bg-muted/50 @container/search-card relative flex flex-col gap-2.5 rounded-2xl border border-transparent p-3 transition-colors sm:gap-3 sm:p-4">
       {!isRenaming && (
         <Link
           to="/search/$searchId"
@@ -294,8 +294,8 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
           className="focus-visible:ring-ring/50 hover:bg-muted absolute inset-0 z-0 rounded-2xl outline-hidden transition-colors focus-visible:ring-[3px]"
         />
       )}
-      <div className="pointer-events-none relative z-20 flex min-w-0 items-start justify-between gap-3">
-        <div className="pointer-events-none min-w-0 flex-1">
+      <div className="pointer-events-none relative z-20 flex min-w-0 flex-wrap items-start justify-between gap-2 sm:gap-3">
+        <div className="pointer-events-none min-w-0 flex-1 basis-48">
           {isRenaming ? (
             <form
               onSubmit={handleRename}
@@ -321,7 +321,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
               />
             </form>
           ) : (
-            <span className="flex items-center gap-1 text-lg leading-tight font-semibold">
+            <span className="flex min-h-9 min-w-0 flex-wrap items-center gap-1 text-lg/6 font-semibold">
               {isPinned && (
                 <Button
                   variant="ghost"
@@ -329,20 +329,22 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
                   onClick={handleTogglePinned}
                   type="button"
                   title="Unpin"
-                  className="group pointer-events-auto relative size-9 shrink-0"
+                  className="group pointer-events-auto relative hidden size-7 shrink-0 @xs/search-card:inline-flex @md/search-card:size-9"
                 >
                   <IconPinned className="size-5 group-hover:hidden group-focus-visible:hidden" />
                   <IconPinnedOff className="hidden size-5 group-hover:block group-focus-visible:block" />
                 </Button>
               )}
-              {displayName}
+              <span className="min-w-[5ch] flex-1 wrap-break-word">
+                {displayName}
+              </span>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleStartRename}
                 type="button"
                 title="Rename"
-                className="pointer-events-auto size-9"
+                className="pointer-events-auto hidden size-9 shrink-0 @md/search-card:inline-flex"
               >
                 <IconEdit className="size-5.5 -translate-y-px" />
               </Button>
