@@ -12,9 +12,12 @@ type SearchSettingsState = {
   defaultQuery: SearchState;
   /** Whether search result pages commit staged edits immediately by default. */
   searchResultsInstantDefault: boolean;
+  /** Whether search result pages open with the query builder expanded by default. */
+  searchResultsBuilderDefault: boolean;
   actions: {
     setDefaultQuery: (state: SearchState) => void;
     setSearchResultsInstantDefault: (enabled: boolean) => void;
+    setSearchResultsBuilderDefault: (enabled: boolean) => void;
     resetDefaultQuery: () => void;
     reset: () => void;
   };
@@ -25,6 +28,7 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
     (set, _get, store) => ({
       defaultQuery: defaultStaged(),
       searchResultsInstantDefault: true,
+      searchResultsBuilderDefault: false,
       actions: {
         setDefaultQuery: (defaultQuery: SearchState) =>
           set({
@@ -36,6 +40,9 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
         setSearchResultsInstantDefault: (
           searchResultsInstantDefault: boolean,
         ) => set({ searchResultsInstantDefault }),
+        setSearchResultsBuilderDefault: (
+          searchResultsBuilderDefault: boolean,
+        ) => set({ searchResultsBuilderDefault }),
         resetDefaultQuery: () => set({ defaultQuery: defaultStaged() }),
         reset: () => set(store.getInitialState()),
       },
@@ -53,6 +60,9 @@ export const useDefaultQuery = () =>
 
 export const useSearchResultsInstantDefault = () =>
   useSearchSettingsStore((state) => state.searchResultsInstantDefault);
+
+export const useSearchResultsBuilderDefault = () =>
+  useSearchSettingsStore((state) => state.searchResultsBuilderDefault);
 
 export const getSearchResultsInstantDefault = () =>
   useSearchSettingsStore.getState().searchResultsInstantDefault;

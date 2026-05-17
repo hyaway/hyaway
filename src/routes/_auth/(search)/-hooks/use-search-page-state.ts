@@ -3,7 +3,10 @@
 
 import { useCallback } from "react";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { useSearchResultsInstantDefault } from "@/stores/search-settings-store";
+import {
+  useSearchResultsBuilderDefault,
+  useSearchResultsInstantDefault,
+} from "@/stores/search-settings-store";
 
 const SEARCH_RESULTS_ROUTE_FULL_PATH = "/_auth/(search)/search/$searchId/";
 
@@ -12,6 +15,7 @@ export function useSearchPageState() {
   const { builder, instant } = useSearch({
     from: SEARCH_RESULTS_ROUTE_FULL_PATH,
   });
+  const builderDefault = useSearchResultsBuilderDefault();
   const instantDefault = useSearchResultsInstantDefault();
   const navigate = useNavigate();
 
@@ -41,7 +45,7 @@ export function useSearchPageState() {
 
   return {
     searchId,
-    builderOpen: builder ?? false,
+    builderOpen: builder ?? builderDefault,
     instant,
     instantSearch: instant ?? instantDefault,
     setBuilderOpen,
