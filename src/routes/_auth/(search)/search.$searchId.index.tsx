@@ -1,7 +1,13 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IconCopy, IconDeviceFloppy, IconTrash } from "@tabler/icons-react";
+import {
+  IconCopy,
+  IconDeviceFloppy,
+  IconPinned,
+  IconPinnedOff,
+  IconTrash,
+} from "@tabler/icons-react";
 import {
   createFileRoute,
   linkOptions,
@@ -39,6 +45,7 @@ import {
   useCommittedSearch,
   useSearchDirty,
   useSearchDisplayName,
+  useSearchPinned,
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
@@ -62,7 +69,8 @@ function SearchPage() {
   const committed = useCommittedSearch(searchId);
   const theme = useActiveTheme();
   const isDirty = useSearchDirty(searchId);
-  const { saveAs, remove } = useSearchQueriesActions();
+  const isPinned = useSearchPinned(searchId);
+  const { saveAs, remove, setPinned } = useSearchQueriesActions();
   const entry = useSearchQueryEntry(searchId);
   const { setDefaultQuery } = useSearchSettingsActions();
   const navigate = useNavigate();
@@ -126,6 +134,10 @@ function SearchPage() {
     navigate({ to: "/search" });
   }, [searchId, remove, navigate]);
 
+  const handleTogglePinned = useCallback(() => {
+    setPinned(searchId, !isPinned);
+  }, [searchId, isPinned, setPinned]);
+
   const handleSavePendingAsDefault = useCallback(() => {
     setDefaultQuery(entry.staged);
   }, [entry.staged, setDefaultQuery]);
@@ -171,6 +183,13 @@ function SearchPage() {
     return [
       ...defaultActions,
       {
+        id: isPinned ? "unpin-search" : "pin-search",
+        label: isPinned ? "Unpin" : "Pin",
+        icon: isPinned ? IconPinnedOff : IconPinned,
+        onClick: handleTogglePinned,
+        overflowOnly: true,
+      },
+      {
         id: "clone-search",
         label: "Clone",
         icon: IconCopy,
@@ -192,6 +211,8 @@ function SearchPage() {
     handleSavePendingAsDefault,
     handleSaveActiveAsDefault,
     handleSaveSearchAsDefault,
+    isPinned,
+    handleTogglePinned,
     handleSaveAsNew,
     handleDelete,
   ]);

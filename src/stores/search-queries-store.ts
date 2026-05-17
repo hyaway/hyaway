@@ -285,6 +285,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
                 staged: source.staged,
                 committed: source.committed ?? source.staged,
                 displayName: cloneName,
+                pinned: false,
               },
               ...entries,
             },
@@ -358,6 +359,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
                 staged: state,
                 committed: instantSearch ? state : undefined,
                 displayName,
+                pinned: false,
               },
               ...entries,
             },
@@ -424,6 +426,13 @@ export const useOtherSearchKeys = () =>
     useShallow((state) =>
       Object.keys(state.entries).filter((key) => !state.entries[key].pinned),
     ),
+  );
+
+/** Whether a search entry is pinned. */
+export const useSearchPinned = (key: string) =>
+  useSearchQueriesStore(
+    (state) =>
+      (state.entries[key] as SearchQueryEntry | undefined)?.pinned ?? false,
   );
 
 /** Get display name for a search entry (falls back to key). */

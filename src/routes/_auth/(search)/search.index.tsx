@@ -3,8 +3,12 @@
 
 import {
   IconCopy,
+  IconDots,
   IconEdit,
   IconInfoCircle,
+  IconPin,
+  IconPinned,
+  IconPinnedOff,
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
@@ -29,11 +33,20 @@ import {
   AlertTitle,
 } from "@/components/ui-primitives/alert";
 import { Button } from "@/components/ui-primitives/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui-primitives/dropdown-menu";
 import { Input } from "@/components/ui-primitives/input";
 import {
   nextDraftName,
+  useOtherSearchKeys,
+  usePinnedSearchKeys,
   useSearchDisplayName,
-  useSearchKeys,
+  useSearchPinned,
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
@@ -45,7 +58,12 @@ export const Route = createFileRoute("/_auth/(search)/search/")({
 });
 
 function SearchIndex() {
-  const searchKeys = useSearchKeys();
+  const pinnedSearchKeys = usePinnedSearchKeys();
+  const otherSearchKeys = useOtherSearchKeys();
+  const searchKeys = useMemo(
+    () => [...pinnedSearchKeys, ...otherSearchKeys],
+    [pinnedSearchKeys, otherSearchKeys],
+  );
   const navigate = useNavigate();
   const { setDisplayName, createFromTag } = useSearchQueriesActions();
 
@@ -150,7 +168,8 @@ function SearchEntryList({ searchKeys }: { searchKeys: Array<string> }) {
 function SearchEntryCard({ searchId }: { searchId: string }) {
   const entry = useSearchQueryEntry(searchId);
   const displayName = useSearchDisplayName(searchId);
-  const { saveAs, remove, rename } = useSearchQueriesActions();
+  const isPinned = useSearchPinned(searchId);
+  const { saveAs, remove, rename, setPinned } = useSearchQueriesActions();
   const queryClient = useQueryClient();
 
   const { staged } = entry;
@@ -167,28 +186,40 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   const renameInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
+    (e?: React.MouseEvent) => {
+      e?.preventDefault();
+      e?.stopPropagation();
       const newId = generateSearchId(displayName);
       saveAs(searchId, newId);
       copySearchCache(queryClient, searchId, newId);
     },
-    [searchId, saveAs, queryClient],
+    [searchId, displayName, saveAs, queryClient],
   );
 
   const handleDelete = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
+    (e?: React.MouseEvent) => {
+      e?.preventDefault();
+      e?.stopPropagation();
       remove(searchId);
     },
     [searchId, remove],
   );
 
-  const handleStartRename = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleStartRename = useCallback((e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     setIsRenaming(true);
     requestAnimationFrame(() => renameInputRef.current?.focus());
   }, []);
+
+  const handleTogglePinned = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.preventDefault();
+      e?.stopPropagation();
+      setPinned(searchId, !isPinned);
+    },
+    [searchId, isPinned, setPinned],
+  );
 
   const handleRename = useCallback(
     (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -213,16 +244,23 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   );
 
   return (
-    <Link
-      to="/search/$searchId"
-      params={{ searchId }}
-      disabled={isRenaming}
-      className="border-border hover:bg-muted/50 flex flex-col gap-3 rounded-xl border p-5 transition-colors sm:flex-row sm:items-start sm:gap-4"
-    >
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+    <div className="border-border hover:bg-muted/50 relative flex flex-col gap-3 rounded-xl border p-5 transition-colors sm:flex-row sm:items-start sm:gap-4">
+      {!isRenaming && (
+        <Link
+          to="/search/$searchId"
+          params={{ searchId }}
+          aria-label={displayName}
+          className="focus-visible:ring-ring/50 absolute inset-0 z-0 rounded-xl outline-hidden focus-visible:ring-[3px]"
+        />
+      )}
+      <div className="pointer-events-none relative z-10 flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex flex-col items-start gap-1">
           {isRenaming ? (
-            <form onSubmit={handleRename} onClick={(e) => e.stopPropagation()}>
+            <form
+              onSubmit={handleRename}
+              onClick={(e) => e.stopPropagation()}
+              className="pointer-events-auto"
+            >
               <Input
                 ref={renameInputRef}
                 name="newname"
@@ -243,6 +281,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             </form>
           ) : (
             <span className="flex items-center gap-1 text-lg leading-tight font-semibold">
+              {isPinned && <IconPinned className="size-5 shrink-0" />}
               {displayName}
               <Button
                 variant="ghost"
@@ -250,7 +289,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
                 onClick={handleStartRename}
                 type="button"
                 title="Rename"
-                className="size-9"
+                className="pointer-events-auto size-9"
               >
                 <IconEdit className="size-5.5 -translate-y-px" />
               </Button>
@@ -281,31 +320,43 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
           </Badge>
         )}
       </div>
-      <div className="flex items-center gap-1 self-end sm:self-center">
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleSave}
-            type="button"
-            title="Clone"
-            className="size-11 shrink-0"
-          >
-            <IconCopy className="size-5.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleDelete}
-            type="button"
-            title="Delete"
-            className="text-destructive size-11 shrink-0"
-          >
-            <IconTrash className="size-5.5" />
-          </Button>
-        </div>
+      <div className="relative z-20 flex items-center gap-1 self-end sm:self-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                type="button"
+                title="Search actions"
+                className="size-11 shrink-0"
+              >
+                <IconDots className="size-5.5" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent side="bottom" align="end">
+            <DropdownMenuItem onClick={handleTogglePinned}>
+              {isPinned ? <IconPinnedOff /> : <IconPin />}
+              {isPinned ? "Unpin" : "Pin"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleStartRename}>
+              <IconEdit />
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSave}>
+              <IconCopy />
+              Clone
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleDelete} variant="destructive">
+              <IconTrash />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </Link>
+    </div>
   );
 }
 
