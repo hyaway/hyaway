@@ -75,12 +75,14 @@ export function ApiEndpointCard() {
 
   // Cancel pending query when form becomes dirty
   useEffect(() => {
-    return form.store.subscribe(() => {
+    const subscription = form.store.subscribe(() => {
       const isDirty = form.state.isDirty;
       if (isDirty && isFetching) {
         queryClient.cancelQueries({ queryKey: ["apiVersion"] });
       }
     });
+
+    return () => subscription.unsubscribe();
   }, [form, isFetching, queryClient]);
 
   // Reset form when stored endpoint changes externally
