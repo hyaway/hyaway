@@ -1205,7 +1205,7 @@ export const controlClassnames = {
   queryBuilder: "@container",
   ruleGroup:
     "qb-group flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 p-2 [&_.qb-group]:ml-1 [&_.qb-group]:rounded-none [&_.qb-group]:border-0 [&_.qb-group]:border-l-4 [&_.qb-group]:border-l-primary",
-  header: "order-last flex flex-wrap items-center gap-2",
+  header: "flex flex-wrap items-center gap-2",
   addRule: "inline-flex w-auto shrink-0",
   addGroup: "inline-flex w-auto shrink-0",
   body: "flex flex-col gap-0",

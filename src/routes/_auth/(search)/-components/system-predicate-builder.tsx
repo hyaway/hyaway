@@ -8,6 +8,8 @@ import {
   QueryBuilder,
   RuleGroupBodyComponents,
   RuleGroupHeaderComponents,
+  useRuleGroup,
+  useStopEventPropagation,
 } from "react-querybuilder";
 import {
   FILE_SERVICE_TYPES,
@@ -199,6 +201,69 @@ function QBRuleGroupHeader(props: RuleGroupProps & UseRuleGroup) {
   return <RuleGroupHeaderComponents {...props} />;
 }
 
+function QBRuleGroup(props: RuleGroupProps) {
+  const ruleGroup = useRuleGroup(props);
+  const {
+    schema: {
+      controls: {
+        ruleGroupBodyElements: RuleGroupBodyElements,
+        ruleGroupHeaderElements: RuleGroupHeaderElements,
+      },
+    },
+  } = ruleGroup;
+  const addRule = useStopEventPropagation(ruleGroup.addRule);
+  const addGroup = useStopEventPropagation(ruleGroup.addGroup);
+  const cloneGroup = useStopEventPropagation(ruleGroup.cloneGroup);
+  const toggleLockGroup = useStopEventPropagation(ruleGroup.toggleLockGroup);
+  const toggleMuteGroup = useStopEventPropagation(ruleGroup.toggleMuteGroup);
+  const removeGroup = useStopEventPropagation(ruleGroup.removeGroup);
+  const shiftGroupUp = useStopEventPropagation(ruleGroup.shiftGroupUp);
+  const shiftGroupDown = useStopEventPropagation(ruleGroup.shiftGroupDown);
+  const actions = useMemo(
+    () => ({
+      addRule,
+      addGroup,
+      cloneGroup,
+      toggleLockGroup,
+      toggleMuteGroup,
+      removeGroup,
+      shiftGroupUp,
+      shiftGroupDown,
+    }),
+    [
+      addRule,
+      addGroup,
+      cloneGroup,
+      toggleLockGroup,
+      toggleMuteGroup,
+      removeGroup,
+      shiftGroupUp,
+      shiftGroupDown,
+    ],
+  );
+
+  return (
+    <div
+      ref={ruleGroup.previewRef}
+      title={ruleGroup.accessibleDescription}
+      className={ruleGroup.outerClassName}
+      data-not={ruleGroup.ruleGroup.not ? "true" : undefined}
+      data-dragmonitorid={ruleGroup.dragMonitorId}
+      data-dropmonitorid={ruleGroup.dropMonitorId}
+      data-rule-group-id={ruleGroup.id}
+      data-level={ruleGroup.path.length}
+      data-path={JSON.stringify(ruleGroup.path)}
+    >
+      <div className={ruleGroup.classNames.body}>
+        <RuleGroupBodyElements {...ruleGroup} {...actions} />
+      </div>
+      <div ref={ruleGroup.dropRef} className={ruleGroup.classNames.header}>
+        <RuleGroupHeaderElements {...ruleGroup} {...actions} />
+      </div>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
@@ -371,6 +436,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       removeRuleAction: QBActionElement,
       addGroupAction: QBActionElement,
       removeGroupAction: QBActionElement,
+      ruleGroup: QBRuleGroup,
       combinatorSelector: QBCombinatorSelect,
       ruleGroupBodyElements: QBRuleGroupBody,
       ruleGroupHeaderElements: QBRuleGroupHeader,
