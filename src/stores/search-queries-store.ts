@@ -6,6 +6,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type { RuleGroupType } from "react-querybuilder";
 import type { SearchQueryEntry, SortConfig } from "@/stores/search-defaults";
+import type { SavedSearchSort } from "@/stores/search-settings-store";
 import {
   createSearchRule,
   emptyStaged,
@@ -15,6 +16,7 @@ import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import {
   getDefaultQuery,
   getSearchResultsInstantDefault,
+  useSavedSearchSort,
 } from "@/stores/search-settings-store";
 import { generateSearchId } from "@/lib/search-entry-utils";
 import { isIgnorableTagRuleValue } from "@/lib/search-rule-utils";
@@ -78,6 +80,42 @@ function markEntryModified(entry: SearchQueryEntry): SearchQueryEntry {
     ...entry,
     modifiedAt: Date.now(),
   };
+}
+
+function compareSearchEntries(
+  left: [string, SearchQueryEntry],
+  right: [string, SearchQueryEntry],
+  sort: SavedSearchSort,
+): number {
+  const [leftKey, leftEntry] = left;
+  const [rightKey, rightEntry] = right;
+
+  let timeComparison: number;
+  switch (sort) {
+    case "newest-first":
+      timeComparison = rightEntry.createdAt - leftEntry.createdAt;
+      break;
+    case "oldest-first":
+      timeComparison = leftEntry.createdAt - rightEntry.createdAt;
+      break;
+    case "modified-desc":
+      timeComparison = rightEntry.modifiedAt - leftEntry.modifiedAt;
+      break;
+  }
+
+  if (timeComparison !== 0) return timeComparison;
+  return leftKey.localeCompare(rightKey);
+}
+
+function getSortedSearchKeys(
+  entries: Record<string, SearchQueryEntry>,
+  sort: SavedSearchSort,
+  pinned: boolean,
+): Array<string> {
+  return Object.entries(entries)
+    .filter(([, entry]) => entry.pinned === pinned)
+    .sort((left, right) => compareSearchEntries(left, right, sort))
+    .map(([key]) => key);
 }
 
 function defaultEntries(): Record<string, SearchQueryEntry> {
@@ -286,9 +324,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const source = entries[fromKey] ?? defaultEntry();
           const baseName = source.displayName ?? fromKey;
           const match = baseName.match(/^(.*?)\s*\((\d+)\)$/);
-          const cloneName = match
-            ? `${match[1]} (${Number(match[2]) + 1})`
-            : `${baseName} (1)`;
+          const cloneName = nextUniqueName(match ? match[1] : baseName);
           const now = Date.now();
           set({
             entries: {
@@ -434,20 +470,20 @@ export const useSearchKeys = () =>
   useSearchQueriesStore(useShallow((state) => Object.keys(state.entries)));
 
 /** Get pinned search keys. */
-export const usePinnedSearchKeys = () =>
-  useSearchQueriesStore(
-    useShallow((state) =>
-      Object.keys(state.entries).filter((key) => state.entries[key].pinned),
-    ),
+export const usePinnedSearchKeys = () => {
+  const sort = useSavedSearchSort();
+  return useSearchQueriesStore(
+    useShallow((state) => getSortedSearchKeys(state.entries, sort, true)),
   );
+};
 
 /** Get unpinned search keys. */
-export const useOtherSearchKeys = () =>
-  useSearchQueriesStore(
-    useShallow((state) =>
-      Object.keys(state.entries).filter((key) => !state.entries[key].pinned),
-    ),
+export const useOtherSearchKeys = () => {
+  const sort = useSavedSearchSort();
+  return useSearchQueriesStore(
+    useShallow((state) => getSortedSearchKeys(state.entries, sort, false)),
   );
+};
 
 /** Whether a search entry is pinned. */
 export const useSearchPinned = (key: string) =>

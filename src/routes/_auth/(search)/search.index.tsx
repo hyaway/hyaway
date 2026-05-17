@@ -10,6 +10,7 @@ import {
   IconPinned,
   IconPinnedOff,
   IconSearch,
+  IconSortDescending,
   IconTrash,
 } from "@tabler/icons-react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -20,6 +21,7 @@ import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
 import { SearchSortTag } from "./-components/search-sort-tag";
+import type { SavedSearchSort } from "@/stores/search-settings-store";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
@@ -42,6 +44,13 @@ import {
 } from "@/components/ui-primitives/dropdown-menu";
 import { Input } from "@/components/ui-primitives/input";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui-primitives/select";
+import {
   nextDraftName,
   useOtherSearchKeys,
   usePinnedSearchKeys,
@@ -50,8 +59,25 @@ import {
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
+import {
+  SAVED_SEARCH_SORT_VALUES,
+  isSavedSearchSort,
+  useSavedSearchSort,
+  useSearchSettingsActions,
+} from "@/stores/search-settings-store";
 import { useActiveTheme } from "@/stores/theme-store";
 import { Separator } from "@/components/ui-primitives/separator";
+
+const SAVED_SEARCH_SORT_LABELS = {
+  "newest-first": "Newest first",
+  "oldest-first": "Oldest first",
+  "modified-desc": "Last modified first",
+} satisfies Record<SavedSearchSort, string>;
+
+const SAVED_SEARCH_SORT_OPTIONS = SAVED_SEARCH_SORT_VALUES.map((value) => ({
+  value,
+  label: SAVED_SEARCH_SORT_LABELS[value],
+}));
 
 export const Route = createFileRoute("/_auth/(search)/search/")({
   component: SearchIndex,
@@ -66,6 +92,8 @@ function SearchIndex() {
   );
   const navigate = useNavigate();
   const { setDisplayName, createFromTag } = useSearchQueriesActions();
+  const savedSearchSort = useSavedSearchSort();
+  const { setSavedSearchSort } = useSearchSettingsActions();
 
   const handleAddNew = useCallback(() => {
     const displayName = nextDraftName();
@@ -93,6 +121,13 @@ function SearchIndex() {
       <div className="flex flex-col gap-4 pt-2">
         <QuickTagSearch onSearch={handleQuickSearch} />
         <Separator />
+        {searchKeys.length > 0 && (
+          <SavedSearchHeader
+            count={searchKeys.length}
+            sort={savedSearchSort}
+            onSortChange={setSavedSearchSort}
+          />
+        )}
         <SearchEntryList searchKeys={searchKeys} />
         {searchKeys.length > 0 && (
           <>
@@ -112,6 +147,51 @@ function SearchIndex() {
         <SearchIndexSettingsPopover />
       </PageHeaderActions>
     </>
+  );
+}
+
+function SavedSearchHeader({
+  count,
+  sort,
+  onSortChange,
+}: {
+  count: number;
+  sort: SavedSearchSort;
+  onSortChange: (sort: SavedSearchSort) => void;
+}) {
+  const selectedSortLabel = SAVED_SEARCH_SORT_LABELS[sort];
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="min-w-0">
+        <h2 className="text-base/6 font-semibold">Saved searches</h2>
+        <p className="text-muted-foreground text-sm/5">
+          {count} {count === 1 ? "search" : "searches"}
+        </p>
+      </div>
+      <Select
+        value={sort}
+        onValueChange={(nextSort) => {
+          if (nextSort && isSavedSearchSort(nextSort)) {
+            onSortChange(nextSort);
+          }
+        }}
+      >
+        <SelectTrigger aria-label="Sort saved searches" className="rounded-lg">
+          <IconSortDescending className="size-4" />
+          <span className="truncate">{selectedSortLabel}</span>
+        </SelectTrigger>
+        <SelectContent align="end" className="min-w-52">
+          <SelectGroup>
+            {SAVED_SEARCH_SORT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
 
