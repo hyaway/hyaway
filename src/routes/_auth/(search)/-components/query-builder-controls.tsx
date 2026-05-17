@@ -1137,6 +1137,7 @@ function TagValueEditor({
         onBlur={(tag) => handleCommit(tag)}
         disabled={disabled}
         placeholder="(empty)"
+        ariaLabel="Tag predicate value"
         name="hyaway-spb-tag"
         submitEmptyOnBlur
         submitEmptyOnEnter

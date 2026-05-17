@@ -34,6 +34,7 @@ export function TagAutocompleteInput({
   onSubmit,
   onBlur,
   placeholder = "Add tag or system predicate",
+  ariaLabel,
   name,
   disabled,
   className,
@@ -53,6 +54,7 @@ export function TagAutocompleteInput({
   /** Called when the input loses focus with non-empty text. */
   onBlur?: (tag: string) => void;
   placeholder?: string;
+  ariaLabel?: string;
   name?: string;
   disabled?: boolean;
   className?: string;
@@ -160,6 +162,7 @@ export function TagAutocompleteInput({
         value={inputValue}
         disabled={disabled}
         placeholder={placeholder}
+        aria-label={ariaLabel}
         onChange={(e) => {
           setInputValue(e.target.value);
           onChange?.(e.target.value);

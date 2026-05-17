@@ -321,6 +321,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
                 ref={renameInputRef}
                 name="newname"
                 defaultValue={displayName}
+                aria-label="Search name"
                 onBlur={(e) =>
                   handleRename(
                     e as unknown as React.SubmitEvent<HTMLFormElement>,
@@ -344,6 +345,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
                   onClick={handleTogglePinned}
                   type="button"
                   title="Unpin"
+                  aria-label="Unpin saved search"
                   className="group pointer-events-auto relative hidden size-4 shrink-0 @3xs/search-card:inline-flex @sm/search-card:size-6 @md/search-card:size-9"
                 >
                   <IconPinned className="size-5 group-hover:hidden group-focus-visible:hidden" />
@@ -357,6 +359,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
                 onClick={handleStartRename}
                 type="button"
                 title="Rename"
+                aria-label="Rename saved search"
                 className="pointer-events-auto hidden size-9 shrink-0 @md/search-card:inline-flex"
               >
                 <IconEdit className="size-5.5 -translate-y-px" />
@@ -373,6 +376,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
                   size="icon"
                   type="button"
                   title="Search actions"
+                  aria-label={`Actions for ${displayName}`}
                   className="size-9 shrink-0"
                 >
                   <IconDots className="size-5" />
@@ -451,6 +455,7 @@ function QuickTagSearch({ onSearch }: { onSearch: (tag: string) => void }) {
         className="relative min-w-0 flex-1"
         inputClassName="h-11"
         placeholder="Search tags…"
+        ariaLabel="Search tags"
         name="hyaway-quick-tag-search"
         onChange={(val) => {
           inputRef.current = val;

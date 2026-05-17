@@ -128,11 +128,13 @@ const PICKED_STAGED_OR_GROUP_BADGE_CLASSNAME = cn(
 function SearchPredicateInput({
   className,
   inputClassName,
+  ariaLabel = "Add tag or system predicate",
   name,
   onAdd,
 }: {
   className?: string;
   inputClassName?: string;
+  ariaLabel?: string;
   name: string;
   onAdd: (tag: string) => void;
 }) {
@@ -141,6 +143,7 @@ function SearchPredicateInput({
       className={cn("relative", className)}
       inputClassName={cn("h-9 min-w-0", inputClassName)}
       placeholder="Add tag or system predicate"
+      ariaLabel={ariaLabel}
       name={name}
       onSelect={onAdd}
       onSubmit={onAdd}
