@@ -61,7 +61,7 @@ export function ThumbnailGallerySkeleton({
           style={
             {
               "--thumbnail-width": `${DEFAULT_THUMBNAIL_SIZE}px`,
-            } as React.CSSProperties
+            }
           }
         >
           {heights.map((height, i) => (

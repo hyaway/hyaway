@@ -111,7 +111,7 @@ function getRatingAction(
   if (!ratingAction) return undefined;
   // Extract rating action fields (exclude actionType)
   const { actionType: _, ...rest } = ratingAction;
-  return rest as RatingSwipeAction;
+  return rest;
 }
 
 /** Create secondary actions array with a rating action */

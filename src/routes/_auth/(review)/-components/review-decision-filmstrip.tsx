@@ -285,7 +285,7 @@ export function ReviewDecisionFilmstrip({
           {
             "--gallery-entry-duration": `${entryDuration}ms`,
             "--gallery-hover-zoom-duration": `${hoverZoomDuration}ms`,
-          } as React.CSSProperties
+          }
         }
       >
         <ScrollArea

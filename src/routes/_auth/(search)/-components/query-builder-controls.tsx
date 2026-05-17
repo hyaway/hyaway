@@ -1009,7 +1009,7 @@ function IncDecValueEditor({
         )}
         style={
           incDecOverlayColor
-            ? ({ "--badge-overlay": incDecOverlayColor } as CSSProperties)
+            ? ({ "--badge-overlay": incDecOverlayColor })
             : undefined
         }
         value={numValue}

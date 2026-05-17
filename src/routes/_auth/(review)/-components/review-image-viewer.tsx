@@ -1163,7 +1163,7 @@ export function ReviewImageViewer({
                   minWidth: "auto",
                   minHeight: "auto",
                 }),
-          } as React.CSSProperties
+          }
         }
         className={cn(
           "transition-opacity duration-200",

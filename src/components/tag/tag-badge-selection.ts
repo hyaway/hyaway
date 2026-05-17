@@ -38,7 +38,7 @@ export function useSelectedTagBadgeStyle(
           theme,
         ),
         "--selected-tag-focus": theme === "light" ? "black" : "white",
-      }) as CSSProperties,
+      }),
     [cssVariable, theme],
   );
 }

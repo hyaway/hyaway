@@ -49,7 +49,7 @@ function getRatingActions(
       (a): a is SecondarySwipeAction & { actionType: "rating" } =>
         a.actionType === "rating",
     )
-    .map(({ actionType: _, ...rest }) => rest as RatingSwipeAction);
+    .map(({ actionType: _, ...rest }) => rest);
 }
 
 /**

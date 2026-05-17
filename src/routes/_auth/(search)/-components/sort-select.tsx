@@ -365,7 +365,7 @@ function SortOptionLabel({ sortType }: { sortType: HydrusFileSortType }) {
   return (
     <span
       className="inline-flex items-center gap-2 text-(--badge-overlay)"
-      style={{ "--badge-overlay": color } as CSSProperties}
+      style={{ "--badge-overlay": color }}
     >
       <span className="size-2.5 rounded-full bg-(--badge-overlay)" />
       {option.label}

@@ -93,8 +93,8 @@ export const useInfiniteGetFilesMetadata = (
   const fileIdsRef = useRef(file_ids);
   fileIdsRef.current = file_ids;
 
+  // eslint-disable-next-line @tanstack/query/exhaustive-deps -- file_ids accessed via ref intentionally; fingerprint covers invalidation
   return useInfiniteQuery({
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps -- file_ids accessed via ref intentionally; fingerprint covers invalidation
     queryKey: [
       "infiniteGetFilesMetadata",
       pathname,

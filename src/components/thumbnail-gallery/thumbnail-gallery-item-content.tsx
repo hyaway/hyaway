@@ -55,7 +55,7 @@ export function ThumbnailGalleryItemContent({
         averageColor
           ? ({
               "--average-color": averageColor,
-            } as React.CSSProperties)
+            })
           : undefined
       }
     >
