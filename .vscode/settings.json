@@ -40,6 +40,7 @@
   "cSpell.words": [
     "blurhash",
     "BOORU",
+    "cmdk",
     "colours",
     "Favourite",
     "Favourites",
@@ -47,16 +48,21 @@
     "hyaway",
     "inboxed",
     "IPFS",
+    "nopeer",
     "nums",
     "overscan",
     "Pannable",
     "partialize",
     "Preconfigured",
+    "querybuilder",
     "Renderable",
     "Retryable",
+    "rseidelsohn",
     "tabler",
     "Tallymarks",
     "Undelete",
+    "vaul",
+    "vidstack",
     "viewtime"
   ]
 }
