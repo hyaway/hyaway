@@ -222,7 +222,7 @@ interface BottomNavButtonProps {
 export const BottomNavButton = forwardRef<
   HTMLButtonElement,
   BottomNavButtonProps
->(function BottomNavButton(
+>(function BottomNavButtonMemo(
   {
     label,
     icon,

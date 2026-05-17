@@ -60,7 +60,7 @@ export interface ThumbnailGalleryItemProps extends React.HTMLAttributes<HTMLLIEl
   "aria-label"?: string;
 }
 
-export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItem({
+export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
   virtualRow,
   lanes,
   totalItemsCount,

@@ -594,7 +594,7 @@ function TagActionMenuProvider({
  * Wrap a group of `TagActionTrigger` elements inside this provider.
  * Only one menu instance is created regardless of how many tags exist.
  */
-export const TagActionMenu = memo(function TagActionMenu({
+export const TagActionMenu = memo(function TagActionMenuMemo({
   children,
   side = "bottom",
 }: {

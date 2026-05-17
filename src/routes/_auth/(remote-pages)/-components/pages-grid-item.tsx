@@ -47,7 +47,7 @@ export interface PagesGridItemProps {
 /**
  * Pages grid item component that shows page name and thumbnail previews
  */
-export const PagesGridItem = memo(function PagesGridItem({
+export const PagesGridItem = memo(function PagesGridItemMemo({
   pageKey,
   pageName,
   pageSlug,

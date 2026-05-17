@@ -17,7 +17,7 @@ interface ScrollAreaProps extends ScrollAreaPrimitive.Root.Props {
 }
 
 const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
-  function ScrollArea(
+  function ScrollAreaForwardRef(
     {
       className,
       viewportClassName,

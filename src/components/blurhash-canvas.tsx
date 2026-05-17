@@ -20,7 +20,7 @@ export interface BlurhashCanvasProps extends React.HTMLAttributes<HTMLCanvasElem
  * Renders a blurhash string as a canvas element.
  * Uses small dimensions by default since it's just a blur placeholder.
  */
-export const BlurhashCanvas = memo(function BlurhashCanvas({
+export const BlurhashCanvas = memo(function BlurhashCanvasMemo({
   blurhash,
   width = 32,
   height = 32,

@@ -178,7 +178,7 @@ interface DecisionFilmstripSectionProps {
   servicesMap: Map<string, RatingServiceInfo>;
 }
 
-const DecisionFilmstripSection = memo(function DecisionFilmstripSection({
+const DecisionFilmstripSection = memo(function DecisionFilmstripSectionMemo({
   direction,
   fileIds,
   bindings,

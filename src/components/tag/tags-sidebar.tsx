@@ -41,7 +41,7 @@ function fullTag(item: TagItem): string {
   return item.namespace ? `${item.namespace}:${item.tag}` : item.tag;
 }
 
-export const TagsSidebar = memo(function TagsSidebar({
+export const TagsSidebar = memo(function TagsSidebarMemo({
   items,
 }: {
   items: Array<FileMetadata>;
@@ -343,7 +343,7 @@ export const TagsSidebar = memo(function TagsSidebar({
 });
 
 // Row badge component - stable props enable compiler memoization
-const TagRowBadge = memo(function TagRowBadge({
+const TagRowBadge = memo(function TagRowBadgeMemo({
   tagItem,
   showCount,
 }: {

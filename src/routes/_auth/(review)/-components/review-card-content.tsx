@@ -42,7 +42,7 @@ interface ReviewCardContentProps {
   isTop?: boolean;
 }
 
-export const ReviewCardContent = memo(function ReviewCardContent({
+export const ReviewCardContent = memo(function ReviewCardContentMemo({
   fileId,
   isTop = false,
 }: ReviewCardContentProps) {

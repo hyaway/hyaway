@@ -228,7 +228,7 @@ function getExitCoords(direction: SwipeDirection) {
   }
 }
 
-export const ReviewSwipeCard = memo(function ReviewSwipeCard({
+export const ReviewSwipeCard = memo(function ReviewSwipeCardMemo({
   fileId,
   isTop,
   stackIndex,

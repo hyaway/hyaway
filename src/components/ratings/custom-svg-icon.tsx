@@ -19,7 +19,7 @@ interface CustomSvgIconProps {
  * Renders an SVG as an icon using CSS mask-image.
  * SVG colors are normalized to currentColor so the icon inherits the CSS color property.
  */
-export const CustomSvgIcon = memo(function CustomSvgIcon({
+export const CustomSvgIcon = memo(function CustomSvgIconMemo({
   svgContent,
   filled = false,
   className,
