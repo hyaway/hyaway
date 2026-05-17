@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { RightSidebarPortal } from "../app-shell/right-sidebar-portal";
 import { TagsSidebarSkeleton } from "@/components/tag/tags-sidebar-skeleton";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
+import { formatDuration } from "@/lib/format-utils";
 import { DEFAULT_THUMBNAIL_SIZE } from "@/stores/gallery-settings-store";
 
 /**
@@ -29,11 +30,12 @@ export function ThumbnailGallerySkeleton({
   );
 
   const [showMessage, setShowMessage] = useState(false);
-  const [remaining, setRemaining] = useState(30);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
+    const startedAt = Date.now();
     const interval = setInterval(() => {
-      setRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+      setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000));
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -48,7 +50,9 @@ export function ThumbnailGallerySkeleton({
       {showMessage && (
         <p className="text-muted-foreground mb-4 text-sm">
           Still loading… Large searches can take a while.{" "}
-          <span className="tabular-nums">{remaining}s until timeout</span>
+          <span className="tabular-nums">
+            Waited for: {formatDuration(elapsedSeconds * 1000)}
+          </span>
         </p>
       )}
       <div className="flex w-full flex-row">
