@@ -104,6 +104,7 @@ function SearchIndex() {
         {searchKeys.length > 0 && (
           <SavedSearchHeader
             count={searchKeys.length}
+            pinnedCount={pinnedSearchKeys.length}
             sort={savedSearchSort}
             onSortChange={setSavedSearchSort}
           />
@@ -132,20 +133,31 @@ function SearchIndex() {
 
 function SavedSearchHeader({
   count,
+  pinnedCount,
   sort,
   onSortChange,
 }: {
   count: number;
+  pinnedCount: number;
   sort: SavedSearchSort;
   onSortChange: (sort: SavedSearchSort) => void;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="min-w-0">
+      <div className="min-w-0 gap-1">
         <h2 className="text-base/6 font-semibold">Saved searches</h2>
-        <p className="text-muted-foreground text-sm/5">
-          {count} {count === 1 ? "search" : "searches"}
-        </p>
+        {count > 0 && (
+          <span className="text-muted-foreground text-sm/5">
+            <IconSearch className="inline size-4" />
+            {count}{" "}
+          </span>
+        )}
+        {pinnedCount > 0 && (
+          <span className="text-muted-foreground text-sm/5">
+            <IconPinned className="inline size-4" />
+            {pinnedCount}
+          </span>
+        )}
       </div>
       <SavedSearchSortSelect
         ariaLabel="Sort saved searches"
@@ -294,7 +306,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
           className="focus-visible:ring-ring/50 hover:bg-muted absolute inset-0 z-0 rounded-2xl outline-hidden transition-colors focus-visible:ring-[3px]"
         />
       )}
-      <div className="pointer-events-none relative z-20 flex min-w-0 flex-wrap items-start justify-between gap-2 sm:gap-3">
+      <div className="pointer-events-none relative z-20 flex min-w-0 items-start justify-between gap-2 sm:gap-3">
         <div className="pointer-events-none min-w-0 flex-1 basis-48">
           {isRenaming ? (
             <form
@@ -321,7 +333,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
               />
             </form>
           ) : (
-            <span className="flex min-h-9 min-w-0 flex-wrap items-center gap-1 text-lg/6 font-semibold">
+            <span className="flex min-h-9 min-w-0 items-center gap-1 text-lg/6 font-semibold">
               {isPinned && (
                 <Button
                   variant="ghost"
@@ -329,15 +341,13 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
                   onClick={handleTogglePinned}
                   type="button"
                   title="Unpin"
-                  className="group pointer-events-auto relative hidden size-7 shrink-0 @xs/search-card:inline-flex @md/search-card:size-9"
+                  className="group pointer-events-auto relative hidden size-4 shrink-0 @3xs/search-card:inline-flex @sm/search-card:size-6 @md/search-card:size-9"
                 >
                   <IconPinned className="size-5 group-hover:hidden group-focus-visible:hidden" />
                   <IconPinnedOff className="hidden size-5 group-hover:block group-focus-visible:block" />
                 </Button>
               )}
-              <span className="min-w-[5ch] flex-1 wrap-break-word">
-                {displayName}
-              </span>
+              <span className="min-w-[5ch] wrap-break-word">{displayName}</span>
               <Button
                 variant="ghost"
                 size="icon"

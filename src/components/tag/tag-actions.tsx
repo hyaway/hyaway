@@ -112,7 +112,7 @@ function useNewSearchTagAction(tag: string): TagAction {
   return useMemo(
     () => ({
       id: "search",
-      label: "New search",
+      label: "Open as new search",
       icon: IconSearch,
       onClick: handleSearch,
       closeOnClick: true,

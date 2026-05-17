@@ -68,7 +68,7 @@ export function usePredefinedSearchFooterAction({
 
   return {
     id: "open-as-new-search",
-    label: "New search",
+    label: "Open as new search",
     icon: IconSearch,
     onClick: handleOpenAsNewSearch,
     overflowOnly: true,
