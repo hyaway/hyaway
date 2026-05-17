@@ -161,36 +161,44 @@ type SearchQueriesState = {
   entries: Record<string, SearchQueryEntry>;
   actions: {
     /** Update the staged query for an entry (creates if missing). */
-    setStagedQuery: (
+    setSearchStagedQuery: (
       key: string,
       query: RuleGroupType,
       displayName?: string,
     ) => void;
     /** Set the user-facing display name for an entry. */
-    setDisplayName: (key: string, displayName: string) => void;
+    setSearchDisplayName: (key: string, displayName: string) => void;
     /** Set whether an entry is pinned in search lists. */
-    setPinned: (key: string, pinned: boolean) => void;
+    setSearchPinned: (key: string, pinned: boolean) => void;
     /** Update the staged sort for an entry. */
-    setStagedSort: (key: string, sort: SortConfig) => void;
+    setSearchStagedSort: (key: string, sort: SortConfig) => void;
     /** Update the staged file domain for an entry. */
-    setStagedFileServiceKey: (
+    setSearchStagedFileServiceKey: (
       key: string,
       fileServiceKey: string | null,
     ) => void;
     /** Commit: copies staged → committed. */
-    commit: (key: string) => void;
-    /** Reset: copies committed → staged (reverts edits). */
-    reset: (key: string) => void;
-    /** Clear: resets staged to the default empty query. */
-    clear: (key: string) => void;
+    commitSearchEntry: (key: string) => void;
+    /** Reset staged state to the last committed search snapshot. */
+    resetSearchEntryToLastCommit: (key: string) => void;
+    /** Reset staged state to an empty query. */
+    resetSearchEntryToEmpty: (key: string) => void;
+    /** Clear all search entries. */
+    clearSavedSearches: () => void;
+    /** Clear unpinned search entries while preserving pinned searches. */
+    clearUnpinnedSearches: () => void;
     /** Remove an entry entirely. */
-    remove: (key: string) => void;
+    removeSearchEntry: (key: string) => void;
     /** Copy an entry's current state to a new key. */
-    saveAs: (fromKey: string, toKey: string) => void;
+    duplicateSearchEntry: (fromKey: string, toKey: string) => void;
     /** Move an entry to a new key (rename). */
-    rename: (fromKey: string, toKey: string, displayName: string) => void;
+    renameSearchEntry: (
+      fromKey: string,
+      toKey: string,
+      displayName: string,
+    ) => void;
     /** Create a new search from a tag string, commit it, and return its ID. */
-    createFromTag: (tag: string) => string;
+    createSearchFromTag: (tag: string) => string;
   };
 };
 
@@ -199,7 +207,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
     (set, get) => ({
       entries: defaultEntries(),
       actions: {
-        setStagedQuery: (key, query, displayName) => {
+        setSearchStagedQuery: (key, query, displayName) => {
           const { entries } = get();
           const existing = key in entries;
           const entry = entries[key] ?? defaultEntry();
@@ -215,7 +223,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        setDisplayName: (key, displayName) => {
+        setSearchDisplayName: (key, displayName) => {
           const { entries } = get();
           const existing = key in entries;
           const entry = entries[key] ?? defaultEntry();
@@ -227,7 +235,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        setPinned: (key, pinned) => {
+        setSearchPinned: (key, pinned) => {
           const { entries } = get();
           const existing = key in entries;
           const entry = entries[key] ?? defaultEntry();
@@ -239,7 +247,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        setStagedSort: (key, sort) => {
+        setSearchStagedSort: (key, sort) => {
           const { entries } = get();
           const entry = entries[key] ?? defaultEntry();
           set({
@@ -253,7 +261,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        setStagedFileServiceKey: (key, fileServiceKey) => {
+        setSearchStagedFileServiceKey: (key, fileServiceKey) => {
           const { entries } = get();
           const entry = entries[key] ?? defaultEntry();
           set({
@@ -267,7 +275,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        commit: (key) => {
+        commitSearchEntry: (key) => {
           const { entries } = get();
           const entry = entries[key] ?? defaultEntry();
           const cleanedQuery = stripEmptyRules(entry.staged.query);
@@ -283,7 +291,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        reset: (key) => {
+        resetSearchEntryToLastCommit: (key) => {
           const { entries } = get();
           const current = entries[key] ?? defaultEntry();
           set({
@@ -297,7 +305,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        clear: (key) => {
+        resetSearchEntryToEmpty: (key) => {
           const { entries } = get();
           const current = entries[key] ?? defaultEntry();
           set({
@@ -311,7 +319,25 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        remove: (key) => {
+        clearSavedSearches: () => {
+          set({ entries: defaultEntries() });
+        },
+
+        clearUnpinnedSearches: () => {
+          const { entries } = get();
+          const pinnedEntries = Object.fromEntries(
+            Object.entries(entries).filter(([, entry]) => entry.pinned),
+          );
+
+          set({
+            entries:
+              Object.keys(pinnedEntries).length > 0
+                ? pinnedEntries
+                : defaultEntries(),
+          });
+        },
+
+        removeSearchEntry: (key) => {
           const { entries } = get();
           const { [key]: _, ...rest } = entries;
           set({
@@ -319,7 +345,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        saveAs: (fromKey, toKey) => {
+        duplicateSearchEntry: (fromKey, toKey) => {
           const { entries } = get();
           const source = entries[fromKey] ?? defaultEntry();
           const baseName = source.displayName ?? fromKey;
@@ -329,7 +355,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           set({
             entries: {
               [toKey]: {
-                staged: source.staged,
+                ...source,
                 committed: source.committed ?? source.staged,
                 createdAt: now,
                 modifiedAt: now,
@@ -341,7 +367,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           });
         },
 
-        rename: (fromKey, toKey, newDisplayName) => {
+        renameSearchEntry: (fromKey, toKey, newDisplayName) => {
           const { entries } = get();
           const source = entries[fromKey] ?? defaultEntry();
           if (fromKey === toKey) {
@@ -360,12 +386,9 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           for (const key of Object.keys(entries)) {
             if (key === fromKey) {
               newEntries[toKey] = {
-                staged: source.staged,
-                committed: source.committed,
-                createdAt: source.createdAt,
+                ...source,
                 modifiedAt: Date.now(),
                 displayName: newDisplayName,
-                pinned: source.pinned,
               };
             } else {
               newEntries[key] = entries[key];
@@ -374,7 +397,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           set({ entries: newEntries });
         },
 
-        createFromTag: (tag) => {
+        createSearchFromTag: (tag) => {
           const displayName = nextUniqueName(tag);
           const searchId = generateSearchId(displayName);
 
@@ -501,7 +524,7 @@ export const useSearchDisplayName = (key: string) =>
 
 /** Commit a search entry outside of React. */
 export const commitSearch = (key: string) =>
-  useSearchQueriesStore.getState().actions.commit(key);
+  useSearchQueriesStore.getState().actions.commitSearchEntry(key);
 
 /** Get display name outside of React (falls back to key). */
 export const getSearchDisplayName = (key: string) => {
@@ -510,22 +533,3 @@ export const getSearchDisplayName = (key: string) => {
     | undefined;
   return entry?.displayName ?? key;
 };
-
-/** Delete all search queries and reset to default state. */
-export const clearSearchQueries = () =>
-  useSearchQueriesStore.setState({ entries: defaultEntries() });
-
-/** Delete unpinned search queries while preserving pinned searches. */
-export const clearUnpinnedSearchQueries = () =>
-  useSearchQueriesStore.setState((state) => {
-    const pinnedEntries = Object.fromEntries(
-      Object.entries(state.entries).filter(([, entry]) => entry.pinned),
-    );
-
-    return {
-      entries:
-        Object.keys(pinnedEntries).length > 0
-          ? pinnedEntries
-          : defaultEntries(),
-    };
-  });

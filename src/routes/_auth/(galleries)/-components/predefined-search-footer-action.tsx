@@ -43,26 +43,30 @@ export function usePredefinedSearchFooterAction({
   disabled = false,
 }: UsePredefinedSearchFooterActionOptions): FloatingFooterAction {
   const navigate = useNavigate();
-  const { setStagedQuery, setStagedSort, setStagedFileServiceKey, commit } =
-    useSearchQueriesActions();
+  const {
+    commitSearchEntry,
+    setSearchStagedFileServiceKey,
+    setSearchStagedQuery,
+    setSearchStagedSort,
+  } = useSearchQueriesActions();
 
   const handleOpenAsNewSearch = useCallback(() => {
     const uniqueDisplayName = nextUniqueName(displayName);
     const searchId = generateSearchId(uniqueDisplayName);
-    setStagedQuery(searchId, query, uniqueDisplayName);
-    setStagedSort(searchId, sort);
-    setStagedFileServiceKey(searchId, fileServiceKey);
-    commit(searchId);
+    setSearchStagedQuery(searchId, query, uniqueDisplayName);
+    setSearchStagedSort(searchId, sort);
+    setSearchStagedFileServiceKey(searchId, fileServiceKey);
+    commitSearchEntry(searchId);
     navigate({ to: "/search/$searchId", params: { searchId } });
   }, [
-    commit,
+    commitSearchEntry,
     displayName,
     fileServiceKey,
     navigate,
     query,
-    setStagedFileServiceKey,
-    setStagedQuery,
-    setStagedSort,
+    setSearchStagedFileServiceKey,
+    setSearchStagedQuery,
+    setSearchStagedSort,
     sort,
   ]);
 

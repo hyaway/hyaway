@@ -71,7 +71,8 @@ function SearchPage() {
   const theme = useActiveTheme();
   const isDirty = useSearchDirty(searchId);
   const isPinned = useSearchPinned(searchId);
-  const { saveAs, remove, setPinned } = useSearchQueriesActions();
+  const { duplicateSearchEntry, removeSearchEntry, setSearchPinned } =
+    useSearchQueriesActions();
   const entry = useSearchQueryEntry(searchId);
   const { setDefaultQuery } = useSearchSettingsActions();
   const navigate = useNavigate();
@@ -113,7 +114,7 @@ function SearchPage() {
 
   const handleSaveAsNew = useCallback(() => {
     const newId = generateSearchId(displayName);
-    saveAs(searchId, newId);
+    duplicateSearchEntry(searchId, newId);
     copySearchCache(queryClient, searchId, newId);
     navigate({
       to: "/search/$searchId",
@@ -125,19 +126,19 @@ function SearchPage() {
     displayName,
     instant,
     searchId,
-    saveAs,
+    duplicateSearchEntry,
     navigate,
     queryClient,
   ]);
 
   const handleDelete = useCallback(() => {
-    remove(searchId);
+    removeSearchEntry(searchId);
     navigate({ to: "/search" });
-  }, [searchId, remove, navigate]);
+  }, [searchId, removeSearchEntry, navigate]);
 
   const handleTogglePinned = useCallback(() => {
-    setPinned(searchId, !isPinned);
-  }, [searchId, isPinned, setPinned]);
+    setSearchPinned(searchId, !isPinned);
+  }, [searchId, isPinned, setSearchPinned]);
 
   const handleSavePendingAsDefault = useCallback(() => {
     setDefaultQuery(entry.staged);

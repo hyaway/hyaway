@@ -71,16 +71,17 @@ function SearchIndex() {
     [pinnedSearchKeys, otherSearchKeys],
   );
   const navigate = useNavigate();
-  const { setDisplayName, createFromTag } = useSearchQueriesActions();
+  const { setSearchDisplayName, createSearchFromTag } =
+    useSearchQueriesActions();
   const savedSearchSort = useSavedSearchSort();
   const { setSavedSearchSort } = useSearchSettingsActions();
 
   const handleAddNew = useCallback(() => {
     const displayName = nextDraftName();
     const searchId = generateSearchId(displayName);
-    setDisplayName(searchId, displayName);
+    setSearchDisplayName(searchId, displayName);
     navigate({ to: "/search/$searchId", params: { searchId } });
-  }, [setDisplayName, navigate]);
+  }, [setSearchDisplayName, navigate]);
 
   const handleQuickSearch = useCallback(
     (tag: string) => {
@@ -89,10 +90,10 @@ function SearchIndex() {
         handleAddNew();
         return;
       }
-      const searchId = createFromTag(trimmed);
+      const searchId = createSearchFromTag(trimmed);
       navigate({ to: "/search/$searchId", params: { searchId } });
     },
-    [createFromTag, navigate, handleAddNew],
+    [createSearchFromTag, navigate, handleAddNew],
   );
 
   return (
@@ -222,7 +223,12 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   const entry = useSearchQueryEntry(searchId);
   const displayName = useSearchDisplayName(searchId);
   const isPinned = useSearchPinned(searchId);
-  const { saveAs, remove, rename, setPinned } = useSearchQueriesActions();
+  const {
+    duplicateSearchEntry,
+    removeSearchEntry,
+    renameSearchEntry,
+    setSearchPinned,
+  } = useSearchQueriesActions();
   const queryClient = useQueryClient();
 
   const { staged } = entry;
@@ -243,19 +249,19 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
       e?.preventDefault();
       e?.stopPropagation();
       const newId = generateSearchId(displayName);
-      saveAs(searchId, newId);
+      duplicateSearchEntry(searchId, newId);
       copySearchCache(queryClient, searchId, newId);
     },
-    [searchId, displayName, saveAs, queryClient],
+    [searchId, displayName, duplicateSearchEntry, queryClient],
   );
 
   const handleDelete = useCallback(
     (e?: React.MouseEvent) => {
       e?.preventDefault();
       e?.stopPropagation();
-      remove(searchId);
+      removeSearchEntry(searchId);
     },
-    [searchId, remove],
+    [searchId, removeSearchEntry],
   );
 
   const handleStartRename = useCallback((e?: React.MouseEvent) => {
@@ -269,9 +275,9 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
     (e?: React.MouseEvent) => {
       e?.preventDefault();
       e?.stopPropagation();
-      setPinned(searchId, !isPinned);
+      setSearchPinned(searchId, !isPinned);
     },
-    [searchId, isPinned, setPinned],
+    [searchId, isPinned, setSearchPinned],
   );
 
   const handleRename = useCallback(
@@ -285,15 +291,15 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
       const newId = encodeURIComponent(newName);
       if (newId === searchId) {
         // Same ID — just update display name
-        rename(searchId, searchId, newName);
+        renameSearchEntry(searchId, searchId, newName);
         setIsRenaming(false);
         return;
       }
-      rename(searchId, newId, newName);
+      renameSearchEntry(searchId, newId, newName);
       copySearchCache(queryClient, searchId, newId, true);
       setIsRenaming(false);
     },
-    [searchId, rename, queryClient],
+    [searchId, renameSearchEntry, queryClient],
   );
 
   return (

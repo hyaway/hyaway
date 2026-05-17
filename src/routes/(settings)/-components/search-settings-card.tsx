@@ -15,9 +15,8 @@ import {
   CardHeader,
 } from "@/components/ui-primitives/card";
 import {
-  clearSearchQueries,
-  clearUnpinnedSearchQueries,
   useOtherSearchKeys,
+  useSearchQueriesActions,
   useSearchQueryCount,
 } from "@/stores/search-queries-store";
 import { useSearchSettingsActions } from "@/stores/search-settings-store";
@@ -25,9 +24,9 @@ import { useSearchSettingsActions } from "@/stores/search-settings-store";
 export function SearchSettingsCard() {
   const queryCount = useSearchQueryCount();
   const unpinnedQueryCount = useOtherSearchKeys().length;
+  const { clearSavedSearches, clearUnpinnedSearches } =
+    useSearchQueriesActions();
   const { resetDefaultQuery } = useSearchSettingsActions();
-  const handleClearUnpinnedSearches = clearUnpinnedSearchQueries;
-  const handleClearSavedSearches = clearSearchQueries;
 
   return (
     <Card>
@@ -53,7 +52,7 @@ export function SearchSettingsCard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleClearUnpinnedSearches}
+            onClick={clearUnpinnedSearches}
             disabled={unpinnedQueryCount === 0}
           >
             <IconTrashX data-icon="inline-start" />
@@ -70,7 +69,7 @@ export function SearchSettingsCard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleClearSavedSearches}
+            onClick={clearSavedSearches}
             disabled={queryCount === 0}
           >
             <IconTrashX data-icon="inline-start" />

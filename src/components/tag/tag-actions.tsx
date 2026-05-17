@@ -99,15 +99,15 @@ export interface TagActionSection {
 
 function useNewSearchTagAction(tag: string): TagAction {
   const navigate = useNavigate();
-  const { createFromTag } = useSearchQueriesActions();
+  const { createSearchFromTag } = useSearchQueriesActions();
   const { setDesktopOpen, setMobileOpen } = useSidebarStoreActions();
 
   const handleSearch = useCallback(() => {
-    const id = createFromTag(tag);
+    const id = createSearchFromTag(tag);
     setDesktopOpen("right", false);
     setMobileOpen("right", false);
     navigate({ to: "/search/$searchId", params: { searchId: id } });
-  }, [tag, navigate, createFromTag, setDesktopOpen, setMobileOpen]);
+  }, [tag, navigate, createSearchFromTag, setDesktopOpen, setMobileOpen]);
 
   return useMemo(
     () => ({
@@ -125,7 +125,7 @@ export function useSearchTagActions(
   tag: string,
   searchId: string | undefined,
 ): Array<TagAction> {
-  const { setStagedQuery } = useSearchQueriesActions();
+  const { setSearchStagedQuery } = useSearchQueriesActions();
   const entry = useSearchQueryEntry(searchId ?? "");
 
   const handleInclude = useCallback(() => {
@@ -135,7 +135,7 @@ export function useSearchTagActions(
     const hasExcludedTag = currentQuery.rules.some(
       (r) => "field" in r && r.field === "tag" && r.value === excludedTag,
     );
-    setStagedQuery(searchId, {
+    setSearchStagedQuery(searchId, {
       ...currentQuery,
       rules: hasExcludedTag
         ? currentQuery.rules.map((r) =>
@@ -148,7 +148,7 @@ export function useSearchTagActions(
             createSearchRule({ field: "tag", operator: "=", value: tag }),
           ],
     });
-  }, [tag, searchId, entry.staged.query, setStagedQuery]);
+  }, [tag, searchId, entry.staged.query, setSearchStagedQuery]);
 
   const handleExclude = useCallback(() => {
     if (!searchId) return;
@@ -157,7 +157,7 @@ export function useSearchTagActions(
     const hasIncludedTag = currentQuery.rules.some(
       (r) => "field" in r && r.field === "tag" && r.value === tag,
     );
-    setStagedQuery(searchId, {
+    setSearchStagedQuery(searchId, {
       ...currentQuery,
       rules: hasIncludedTag
         ? currentQuery.rules.map((r) =>
@@ -174,20 +174,20 @@ export function useSearchTagActions(
             }),
           ],
     });
-  }, [tag, searchId, entry.staged.query, setStagedQuery]);
+  }, [tag, searchId, entry.staged.query, setSearchStagedQuery]);
 
   const handleRemove = useCallback(
     (value: string) => {
       if (!searchId) return;
       const currentQuery = entry.staged.query;
-      setStagedQuery(searchId, {
+      setSearchStagedQuery(searchId, {
         ...currentQuery,
         rules: currentQuery.rules.filter(
           (r) => !("field" in r && r.field === "tag" && r.value === value),
         ),
       });
     },
-    [searchId, entry.staged.query, setStagedQuery],
+    [searchId, entry.staged.query, setSearchStagedQuery],
   );
 
   // Check if the tag or its negation already exist in the root-level rules

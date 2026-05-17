@@ -4,7 +4,7 @@
 import { useCallback } from "react";
 import { useAuthActions } from "@/integrations/hydrus-api/hydrus-config-store";
 import { useReviewQueueActions } from "@/stores/review-queue-store";
-import { clearSearchQueries } from "@/stores/search-queries-store";
+import { useSearchQueriesActions } from "@/stores/search-queries-store";
 import { useSearchSettingsActions } from "@/stores/search-settings-store";
 import { useWatchHistoryActions } from "@/stores/watch-history-store";
 
@@ -16,13 +16,20 @@ export function useResetConnection() {
   const { reset: resetAuth } = useAuthActions();
   const { clearQueue } = useReviewQueueActions();
   const { clearHistory } = useWatchHistoryActions();
+  const { clearSavedSearches } = useSearchQueriesActions();
   const { resetDefaultQuery } = useSearchSettingsActions();
 
   return useCallback(() => {
     resetAuth();
     clearQueue();
     clearHistory();
-    clearSearchQueries();
+    clearSavedSearches();
     resetDefaultQuery();
-  }, [resetAuth, resetDefaultQuery, clearQueue, clearHistory]);
+  }, [
+    resetAuth,
+    resetDefaultQuery,
+    clearQueue,
+    clearHistory,
+    clearSavedSearches,
+  ]);
 }

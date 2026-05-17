@@ -281,12 +281,12 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
   } = useSearchPageState();
   const entry = useSearchQueryEntry(entryKey);
   const {
-    setStagedQuery,
-    setStagedSort,
-    setStagedFileServiceKey,
-    commit,
-    reset,
-    clear,
+    commitSearchEntry,
+    resetSearchEntryToLastCommit,
+    resetSearchEntryToEmpty,
+    setSearchStagedFileServiceKey,
+    setSearchStagedQuery,
+    setSearchStagedSort,
   } = useSearchQueriesActions();
   const [pickedSection, setPickedSection] = useState<PickedSearchSection>(null);
   const theme = useActiveTheme();
@@ -333,23 +333,23 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
 
   const handleSortTypeChange = useCallback(
     (value: HydrusFileSortType) => {
-      setStagedSort(entryKey, {
+      setSearchStagedSort(entryKey, {
         sortType: value,
         sortAsc: getDefaultSortAsc(value),
       });
     },
-    [entryKey, setStagedSort],
+    [entryKey, setSearchStagedSort],
   );
 
   const handleSortAscToggle = useCallback(() => {
-    setStagedSort(entryKey, { sortType, sortAsc: !sortAsc });
-  }, [entryKey, setStagedSort, sortType, sortAsc]);
+    setSearchStagedSort(entryKey, { sortType, sortAsc: !sortAsc });
+  }, [entryKey, setSearchStagedSort, sortType, sortAsc]);
 
   const handleFileServiceChange = useCallback(
     (value: string | null) => {
-      setStagedFileServiceKey(entryKey, value);
+      setSearchStagedFileServiceKey(entryKey, value);
     },
-    [entryKey, setStagedFileServiceKey],
+    [entryKey, setSearchStagedFileServiceKey],
   );
 
   const rootSearchEntries = useMemo(() => getRootSearchEntries(query), [query]);
@@ -458,9 +458,9 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
 
   const handleQueryChange = useCallback(
     (q: RuleGroupType) => {
-      setStagedQuery(entryKey, enforceCombinators(q));
+      setSearchStagedQuery(entryKey, enforceCombinators(q));
     },
-    [entryKey, setStagedQuery],
+    [entryKey, setSearchStagedQuery],
   );
 
   const addRootRule = useCallback(
@@ -476,12 +476,12 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
         query,
         context,
       );
-      setStagedQuery(
+      setSearchStagedQuery(
         entryKey,
         enforceCombinators({ ...query, rules: [...query.rules, nextRule] }),
       );
     },
-    [entryKey, query, setStagedQuery],
+    [entryKey, query, setSearchStagedQuery],
   );
 
   const handleRootInlineSelect = useCallback(
@@ -499,7 +499,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     };
     const nextGroupId = getRootSectionId(nextGroup);
 
-    setStagedQuery(
+    setSearchStagedQuery(
       entryKey,
       enforceCombinators({
         ...query,
@@ -507,29 +507,29 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       }),
     );
     setPickedSection({ kind: "root", id: nextGroupId });
-  }, [entryKey, query, setStagedQuery]);
+  }, [entryKey, query, setSearchStagedQuery]);
 
   const handleSearch = useCallback(() => {
-    commit(entryKey);
+    commitSearchEntry(entryKey);
     onCommit?.();
-  }, [entryKey, commit, onCommit]);
+  }, [entryKey, commitSearchEntry, onCommit]);
 
   const handleReset = useCallback(() => {
-    reset(entryKey);
-  }, [entryKey, reset]);
+    resetSearchEntryToLastCommit(entryKey);
+  }, [entryKey, resetSearchEntryToLastCommit]);
 
   const handleClear = useCallback(() => {
-    clear(entryKey);
-  }, [entryKey, clear]);
+    resetSearchEntryToEmpty(entryKey);
+  }, [entryKey, resetSearchEntryToEmpty]);
 
   const isDirty = useSearchDirty(entryKey);
 
   useEffect(() => {
     if (!instantSearch || !isDirty) return;
 
-    commit(entryKey);
+    commitSearchEntry(entryKey);
     onCommit?.();
-  }, [entryKey, instantSearch, isDirty, commit, onCommit]);
+  }, [entryKey, instantSearch, isDirty, commitSearchEntry, onCommit]);
 
   useEffect(() => {
     if (pickedSection?.kind !== "root") return;
