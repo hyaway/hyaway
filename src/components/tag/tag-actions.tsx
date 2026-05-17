@@ -7,9 +7,7 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useImperativeHandle,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
@@ -23,13 +21,18 @@ import {
   IconTagStarred,
 } from "@tabler/icons-react";
 import type { CSSProperties, ComponentType, ReactNode, SVGProps } from "react";
+import type { DropdownMenuHandle } from "@/components/ui-primitives/dropdown-menu";
 import {
-  DropdownMenu,
-  DropdownMenuAnchoredContent,
+  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuShared,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
 import {
   useSearchDisplayName,
@@ -296,7 +299,11 @@ export function useFavouriteTagAction(tag: string): TagAction | null {
 // --- Tag Action Menu (shared single-instance dropdown) ---
 
 interface TagActionMenuContextValue {
-  openMenu: (tag: string, anchor: HTMLElement) => void;
+  menuHandle: DropdownMenuHandle<TagActionMenuPayload>;
+}
+
+interface TagActionMenuPayload {
+  tag: string;
 }
 
 const TagActionMenuContext = createContext<TagActionMenuContextValue | null>(
@@ -408,73 +415,45 @@ function TagActionMenuItems({
   );
 }
 
-interface TagActionMenuPopupHandle {
-  open: (tag: string, anchor: HTMLElement) => void;
-}
-
-/** Inner component that holds menu state — re-renders here don't affect children. */
-const TagActionMenuPopup = memo(function TagActionMenuPopup({
-  side,
-  handleRef,
-}: {
-  side: "top" | "right" | "bottom" | "left";
-  handleRef: React.RefObject<TagActionMenuPopupHandle | null>;
-}) {
-  const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
-  const anchorRef = useRef<HTMLElement | null>(null);
-  const lastCloseRef = useRef<{ anchor: HTMLElement; time: number } | null>(
-    null,
-  );
-
-  const sections = useTagActionSections(activeTag ?? "");
-  const favouriteAction = useFavouriteTagAction(activeTag ?? "");
-
-  useImperativeHandle(handleRef, () => ({
-    open(tag: string, anchor: HTMLElement) {
-      const last = lastCloseRef.current;
-      if (last && last.anchor === anchor && Date.now() - last.time < 300) {
-        lastCloseRef.current = null;
-        return;
-      }
-      anchorRef.current = anchor;
-      setActiveTag(tag);
-      setOpen(true);
-    },
-  }));
-
-  const handleOpenChange = useCallback(
-    (nextOpen: boolean, details: { reason: string }) => {
-      if (!nextOpen) {
-        if (
-          details.reason !== "focus-out" &&
-          details.reason !== "trigger-hover"
-        ) {
-          lastCloseRef.current = {
-            anchor: anchorRef.current!,
-            time: Date.now(),
-          };
-          setOpen(false);
-        }
-      }
-    },
-    [],
-  );
+function TagActionMenuContent({ tag }: { tag: string }) {
+  const sections = useTagActionSections(tag);
+  const favouriteAction = useFavouriteTagAction(tag);
 
   return (
-    <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
-      <DropdownMenuAnchoredContent anchor={anchorRef.current} side={side}>
-        {activeTag && (
-          <TagActionMenuItems
-            tag={activeTag}
-            sections={sections}
-            favouriteAction={favouriteAction}
-          />
-        )}
-      </DropdownMenuAnchoredContent>
-    </DropdownMenu>
+    <>
+      <TagActionMenuItems
+        tag={tag}
+        sections={sections}
+        favouriteAction={favouriteAction}
+      />
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger>Invite users</DropdownMenuSubTrigger>
+        <DropdownMenuSubContent>
+          <DropdownMenuItem>Email</DropdownMenuItem>
+          <DropdownMenuItem>Message</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>More...</DropdownMenuItem>
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    </>
   );
-});
+}
+
+function TagActionMenuProvider({
+  children,
+  menuHandle,
+}: {
+  children: ReactNode;
+  menuHandle: DropdownMenuHandle<TagActionMenuPayload>;
+}) {
+  const ctx = useMemo(() => ({ menuHandle }), [menuHandle]);
+
+  return (
+    <TagActionMenuContext.Provider value={ctx}>
+      {children}
+    </TagActionMenuContext.Provider>
+  );
+}
 
 /**
  * Provides a single shared dropdown menu for a list of tag triggers.
@@ -488,19 +467,23 @@ export const TagActionMenu = memo(function TagActionMenu({
   children: ReactNode;
   side?: "top" | "right" | "bottom" | "left";
 }) {
-  const popupRef = useRef<TagActionMenuPopupHandle>(null);
-
-  const openMenu = useCallback((tag: string, anchor: HTMLElement) => {
-    popupRef.current?.open(tag, anchor);
-  }, []);
-
-  const ctx = useMemo(() => ({ openMenu }), [openMenu]);
-
   return (
-    <TagActionMenuContext.Provider value={ctx}>
-      {children}
-      <TagActionMenuPopup handleRef={popupRef} side={side} />
-    </TagActionMenuContext.Provider>
+    <DropdownMenuShared<TagActionMenuPayload>
+      modal={false}
+      content={(payload) => (
+        <DropdownMenuContent side={side} showBackdrop={false} className="w-auto">
+          {payload?.tag && (
+            <TagActionMenuContent key={payload.tag} tag={payload.tag} />
+          )}
+        </DropdownMenuContent>
+      )}
+    >
+      {(menuHandle) => (
+        <TagActionMenuProvider menuHandle={menuHandle}>
+          {children}
+        </TagActionMenuProvider>
+      )}
+    </DropdownMenuShared>
   );
 });
 
@@ -519,27 +502,24 @@ export function TagActionTrigger({
   className?: string;
 }) {
   const ctx = useContext(TagActionMenuContext);
-  const ref = useRef<HTMLButtonElement>(null);
-
-  const handleClick = useCallback(() => {
-    if (ctx && ref.current) {
-      ctx.openMenu(tag, ref.current);
-    }
-  }, [ctx, tag]);
 
   // System namespace tags don't get action menus
   if (tag.startsWith("system:") || tag.startsWith("-system:")) {
     return <span className={className}>{children}</span>;
   }
 
+  if (!ctx) {
+    return <span className={className}>{children}</span>;
+  }
+
   return (
-    <button
-      ref={ref}
+    <DropdownMenuTrigger
       type="button"
-      onClick={handleClick}
+      handle={ctx.menuHandle}
+      payload={{ tag }}
       className={cn("cursor-pointer select-none **:select-none", className)}
     >
       {children}
-    </button>
+    </DropdownMenuTrigger>
   );
 }
