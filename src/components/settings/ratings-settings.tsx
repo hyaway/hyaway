@@ -11,6 +11,7 @@ import {
 } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import {
+  getRatingServiceSettings,
   useRatingsOverlayMode,
   useRatingsServiceSettings,
   useRatingsSettingsActions,
@@ -22,6 +23,11 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui-primitives/tooltip";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
 import {
   getIncDecPositiveColors,
@@ -54,6 +60,7 @@ export function RatingsSettings({
     setShowInOverlay,
     setShowInOverlayEvenWhenNull,
     setShowInReview,
+    setReadOnly,
     removeServiceSettings,
   } = useRatingsSettingsActions();
   const { hasPermission } = usePermissions();
@@ -110,11 +117,7 @@ export function RatingsSettings({
   }
 
   const getSettings = (serviceKey: string) =>
-    ratingsServiceSettings[serviceKey] ?? {
-      showInOverlay: true,
-      showInOverlayEvenWhenNull: false,
-      showInReview: true,
-    };
+    getRatingServiceSettings(ratingsServiceSettings, serviceKey);
 
   const isCustomMode = overlayMode === "custom";
 
@@ -178,6 +181,10 @@ export function RatingsSettings({
                 checked={checked}
                 onCheckedChange={(value) => setShowInOverlay(serviceKey, value)}
                 disabled={!isCustomMode}
+                disabledReason={
+                  !isCustomMode ? "Using Hydrus overlay source" : undefined
+                }
+                disabledReasonLabel={!isCustomMode ? "Hydrus" : undefined}
               />
             );
           },
@@ -220,9 +227,45 @@ export function RatingsSettings({
                   setShowInOverlayEvenWhenNull(serviceKey, value)
                 }
                 disabled={!isCustomMode || !showInOverlay}
+                disabledReason={
+                  !isCustomMode
+                    ? "Using Hydrus overlay source"
+                    : !showInOverlay
+                      ? "Show overlay is disabled"
+                      : undefined
+                }
+                disabledReasonLabel={
+                  !isCustomMode
+                    ? "Hydrus"
+                    : !showInOverlay
+                      ? "Overlay off"
+                      : undefined
+                }
               />
             );
           },
+        )}
+      </SettingGroup>
+
+      {/* Read-only setting */}
+      <SettingGroup
+        label="Read-only"
+        description="Show ratings without edit controls or review actions"
+      >
+        {ratingServices.map(
+          ({ serviceKey, name, type, starShape, iconColors }) => (
+            <ServiceSwitch
+              key={serviceKey}
+              id={`${idPrefix}rating-${serviceKey}-read-only`}
+              serviceKey={serviceKey}
+              name={name}
+              type={type}
+              starShape={starShape}
+              iconColors={iconColors}
+              checked={getSettings(serviceKey).readOnly}
+              onCheckedChange={(checked) => setReadOnly(serviceKey, checked)}
+            />
+          ),
         )}
       </SettingGroup>
 
@@ -237,22 +280,43 @@ export function RatingsSettings({
           }
         >
           {ratingServices.map(
-            ({ serviceKey, name, type, starShape, iconColors }) => (
-              <ServiceSwitch
-                key={serviceKey}
-                id={`${idPrefix}rating-${serviceKey}-review`}
-                serviceKey={serviceKey}
-                name={name}
-                type={type}
-                starShape={starShape}
-                iconColors={iconColors}
-                checked={getSettings(serviceKey).showInReview && canEditRatings}
-                onCheckedChange={(checked) =>
-                  setShowInReview(serviceKey, checked)
-                }
-                disabled={!canEditRatings}
-              />
-            ),
+            ({ serviceKey, name, type, starShape, iconColors }) => {
+              const settings = getSettings(serviceKey);
+              return (
+                <ServiceSwitch
+                  key={serviceKey}
+                  id={`${idPrefix}rating-${serviceKey}-review`}
+                  serviceKey={serviceKey}
+                  name={name}
+                  type={type}
+                  starShape={starShape}
+                  iconColors={iconColors}
+                  checked={
+                    settings.showInReview &&
+                    canEditRatings &&
+                    !settings.readOnly
+                  }
+                  onCheckedChange={(checked) =>
+                    setShowInReview(serviceKey, checked)
+                  }
+                  disabled={!canEditRatings || settings.readOnly}
+                  disabledReason={
+                    !canEditRatings
+                      ? "Missing Edit file ratings permission"
+                      : settings.readOnly
+                        ? "Service is read-only"
+                        : undefined
+                  }
+                  disabledReasonLabel={
+                    !canEditRatings
+                      ? "Missing permission"
+                      : settings.readOnly
+                        ? "Read-only"
+                        : undefined
+                  }
+                />
+              );
+            },
           )}
         </SettingGroup>
       )}
@@ -315,6 +379,8 @@ interface ServiceSwitchProps {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
+  disabledReason?: string;
+  disabledReasonLabel?: string;
 }
 
 function ServiceSwitch({
@@ -327,6 +393,8 @@ function ServiceSwitch({
   checked,
   onCheckedChange,
   disabled,
+  disabledReason,
+  disabledReasonLabel,
 }: ServiceSwitchProps) {
   const { filled: FilledIcon } = useShapeIcons(serviceKey, starShape);
 
@@ -338,7 +406,7 @@ function ServiceSwitch({
         disabled && "cursor-not-allowed opacity-50",
       )}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         {type === ServiceType.RATING_INC_DEC ? (
           <IconSquareFilled
             className="size-5 shrink-0"
@@ -360,14 +428,28 @@ function ServiceSwitch({
             strokeWidth={1.5}
           />
         )}
-        <span className="text-sm">{name}</span>
+        <span className="truncate text-sm">{name}</span>
       </div>
-      <Switch
-        id={id}
-        checked={checked}
-        onCheckedChange={onCheckedChange}
-        disabled={disabled}
-      />
+      <div className="flex shrink-0 items-center gap-2">
+        {disabled && disabledReason && (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <span className="text-muted-foreground max-w-36 truncate rounded-md border px-1.5 py-0.5 text-xs/4">
+                  {disabledReasonLabel ?? disabledReason}
+                </span>
+              }
+            />
+            <TooltipContent>{disabledReason}</TooltipContent>
+          </Tooltip>
+        )}
+        <Switch
+          id={id}
+          checked={checked}
+          onCheckedChange={onCheckedChange}
+          disabled={disabled}
+        />
+      </div>
     </label>
   );
 }

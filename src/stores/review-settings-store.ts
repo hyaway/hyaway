@@ -446,4 +446,53 @@ export function hasUndoBinding(bindings: SwipeBindings): boolean {
   return SWIPE_DIRECTIONS.some((d) => bindings[d].fileAction === "undo");
 }
 
+/** Remove rating secondary actions that target any of the given service keys. */
+export function stripRatingActionsForServices(
+  binding: ReviewSwipeBinding,
+  serviceKeys: Set<string>,
+): ReviewSwipeBinding {
+  if (serviceKeys.size === 0 || !binding.secondaryActions?.length) {
+    return binding;
+  }
+
+  const secondaryActions = binding.secondaryActions.filter(
+    (action) =>
+      action.actionType !== "rating" || !serviceKeys.has(action.serviceKey),
+  );
+
+  if (secondaryActions.length === binding.secondaryActions.length) {
+    return binding;
+  }
+
+  return {
+    ...binding,
+    secondaryActions:
+      secondaryActions.length > 0 ? secondaryActions : undefined,
+  };
+}
+
+/** Remove rating secondary actions for every binding in a bindings map. */
+export function stripRatingActionsForServicesFromBindings(
+  bindings: SwipeBindings,
+  serviceKeys: Set<string>,
+): SwipeBindings {
+  if (serviceKeys.size === 0) return bindings;
+
+  let changed = false;
+  const nextBindings = { ...bindings };
+
+  for (const direction of SWIPE_DIRECTIONS) {
+    const nextBinding = stripRatingActionsForServices(
+      bindings[direction],
+      serviceKeys,
+    );
+    if (nextBinding !== bindings[direction]) {
+      nextBindings[direction] = nextBinding;
+      changed = true;
+    }
+  }
+
+  return changed ? nextBindings : bindings;
+}
+
 // #endregion

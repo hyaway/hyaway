@@ -4,6 +4,14 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-05-17
+
+### Added
+
+- **Read-only ratings** — Rating services can now be marked read-only so their values remain visible without edit controls on file pages or review actions
+
+---
+
 ## 2026-05-16
 
 ### Fixed

@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   IconAlertCircle,
   IconArchive,
@@ -43,6 +43,10 @@ import {
 } from "@/integrations/hydrus-api/models";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import {
+  getReadOnlyRatingServiceKeys,
+  useRatingsServiceSettings,
+} from "@/stores/ratings-settings-store";
 import {
   LikeDislikeControl,
   NumericalRatingControl,
@@ -163,6 +167,7 @@ function RatingServiceIcon({
 interface RatingServiceMenuItemProps {
   serviceKey: string;
   service: RatingServiceInfo;
+  disabled?: boolean;
 }
 
 /**
@@ -171,15 +176,19 @@ interface RatingServiceMenuItemProps {
 function RatingServiceMenuItem({
   serviceKey,
   service,
+  disabled,
 }: RatingServiceMenuItemProps) {
   return (
-    <DropdownMenuRadioItem value={serviceKey}>
+    <DropdownMenuRadioItem value={serviceKey} disabled={disabled}>
       <RatingServiceIcon
         serviceKey={serviceKey}
         service={service}
         className="text-muted-foreground size-4 shrink-0"
       />
-      {service.name}
+      <span className="min-w-0 flex-1 truncate">{service.name}</span>
+      {disabled && (
+        <span className="text-muted-foreground ml-auto text-xs">Read-only</span>
+      )}
     </DropdownMenuRadioItem>
   );
 }
@@ -408,6 +417,8 @@ interface DirectionBindingEditorProps {
   direction: SwipeDirection;
   binding: ReviewSwipeBinding;
   ratingServices: Array<[string, RatingServiceInfo]>;
+  allRatingServiceKeys: Set<string>;
+  readOnlyServiceKeys: Set<string>;
   canEditRatings: boolean;
   isModified: boolean;
   onBindingChange: (binding: ReviewSwipeBinding) => void;
@@ -418,6 +429,8 @@ function DirectionBindingEditor({
   direction,
   binding,
   ratingServices,
+  allRatingServiceKeys,
+  readOnlyServiceKeys,
   canEditRatings,
   isModified,
   onBindingChange,
@@ -446,7 +459,10 @@ function DirectionBindingEditor({
   // Detect orphaned rating action (service no longer exists)
   const isOrphanedRating =
     ratingAction?.serviceKey != null &&
-    !ratingServices.some(([key]) => key === ratingAction.serviceKey);
+    !allRatingServiceKeys.has(ratingAction.serviceKey);
+  const isReadOnlyRating =
+    ratingAction?.serviceKey != null &&
+    readOnlyServiceKeys.has(ratingAction.serviceKey);
 
   const handleFileActionChange = (value: Array<string>) => {
     const fileAction = value[0] as ReviewFileAction | undefined;
@@ -550,13 +566,7 @@ function DirectionBindingEditor({
             Rating action (optional)
           </Label>
 
-          {!canConfigureRating ? (
-            <span className="text-muted-foreground/50 text-xs">
-              {!canEditRatings
-                ? "No permission to edit ratings"
-                : "No rating services available"}
-            </span>
-          ) : isOrphanedRating ? (
+          {isOrphanedRating ? (
             <Alert variant="destructive">
               <IconAlertCircle />
               <AlertTitle>Rating service does not exist</AlertTitle>
@@ -574,6 +584,29 @@ function DirectionBindingEditor({
                 </Button>
               </AlertAction>
             </Alert>
+          ) : isReadOnlyRating ? (
+            <Alert>
+              <IconAlertCircle />
+              <AlertTitle>Rating service is read-only</AlertTitle>
+              <AlertDescription>
+                This rating action is disabled until the service is editable.
+              </AlertDescription>
+              <AlertAction>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleRatingActionChange(undefined)}
+                >
+                  Clear
+                </Button>
+              </AlertAction>
+            </Alert>
+          ) : !canConfigureRating ? (
+            <span className="text-muted-foreground/50 text-xs">
+              {!canEditRatings
+                ? "No permission to edit ratings"
+                : "No rating services available"}
+            </span>
           ) : (
             <div className="flex min-w-0 flex-col gap-2">
               {/* Service selector */}
@@ -611,6 +644,7 @@ function DirectionBindingEditor({
                         key={key}
                         serviceKey={key}
                         service={service}
+                        disabled={readOnlyServiceKeys.has(key)}
                       />
                     ))}
                   </DropdownMenuRadioGroup>
@@ -674,8 +708,18 @@ export function SwipeBindingsConfig({
   const bindings = useReviewSwipeBindings();
   const { setBinding, resetBindings } = useReviewSettingsActions();
   const { ratingServices } = useRatingServices();
+  const ratingsServiceSettings = useRatingsServiceSettings();
   const { hasPermission, isFetched: permissionsFetched } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
+
+  const readOnlyServiceKeys = useMemo(
+    () => getReadOnlyRatingServiceKeys(ratingsServiceSettings),
+    [ratingsServiceSettings],
+  );
+  const allRatingServiceKeys = useMemo(
+    () => new Set(ratingServices.map(([key]) => key)),
+    [ratingServices],
+  );
 
   const handleBindingChange = (
     direction: SwipeDirection,
@@ -736,6 +780,8 @@ export function SwipeBindingsConfig({
             direction={direction}
             binding={bindings[direction]}
             ratingServices={ratingServices}
+            allRatingServiceKeys={allRatingServiceKeys}
+            readOnlyServiceKeys={readOnlyServiceKeys}
             canEditRatings={canEditRatings && permissionsFetched}
             isModified={isDirectionModified(direction)}
             onBindingChange={(binding) =>

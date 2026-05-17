@@ -21,7 +21,10 @@ import {
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
-import { useRatingsServiceSettings } from "@/stores/ratings-settings-store";
+import {
+  getRatingServiceSettings,
+  useRatingsServiceSettings,
+} from "@/stores/ratings-settings-store";
 import { useReviewQueueCurrentFileId } from "@/stores/review-queue-store";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
@@ -58,10 +61,10 @@ export function useEnabledReviewRatingServices() {
 
   const enabledServices = useMemo(
     () =>
-      ratingServices.filter(
-        ([key]) =>
-          !(key in serviceSettings) || serviceSettings[key].showInReview,
-      ),
+      ratingServices.filter(([key]) => {
+        const settings = getRatingServiceSettings(serviceSettings, key);
+        return settings.showInReview && !settings.readOnly;
+      }),
     [ratingServices, serviceSettings],
   );
 

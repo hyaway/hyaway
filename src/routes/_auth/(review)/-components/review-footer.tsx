@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   IconArrowBackUp,
   IconArrowDown,
@@ -21,9 +21,14 @@ import type {
 import { useReviewQueueCurrentFileId } from "@/stores/review-queue-store";
 import {
   hasUndoBinding,
+  stripRatingActionsForServicesFromBindings,
   useReviewShortcutsEnabled,
   useReviewSwipeBindings,
 } from "@/stores/review-settings-store";
+import {
+  getReadOnlyRatingServiceKeys,
+  useRatingsServiceSettings,
+} from "@/stores/ratings-settings-store";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useFileActions } from "@/hooks/use-file-actions";
@@ -85,8 +90,18 @@ export function ReviewFooter({
 }: ReviewFooterProps) {
   const showShortcuts = useReviewShortcutsEnabled();
   const bindings = useReviewSwipeBindings();
+  const ratingsServiceSettings = useRatingsServiceSettings();
+  const readOnlyServiceKeys = useMemo(
+    () => getReadOnlyRatingServiceKeys(ratingsServiceSettings),
+    [ratingsServiceSettings],
+  );
+  const editableBindings = useMemo(
+    () =>
+      stripRatingActionsForServicesFromBindings(bindings, readOnlyServiceKeys),
+    [bindings, readOnlyServiceKeys],
+  );
   const { servicesMap } = useRatingServices();
-  const hasUndoDirection = hasUndoBinding(bindings);
+  const hasUndoDirection = hasUndoBinding(editableBindings);
 
   // Don't show footer when review is complete
   if (disabled) {
@@ -111,19 +126,22 @@ export function ReviewFooter({
   }> = [
     {
       direction: "left",
-      descriptor: getSwipeBindingDescriptor(bindings.left, servicesMap),
+      descriptor: getSwipeBindingDescriptor(editableBindings.left, servicesMap),
     },
     {
       direction: "down",
-      descriptor: getSwipeBindingDescriptor(bindings.down, servicesMap),
+      descriptor: getSwipeBindingDescriptor(editableBindings.down, servicesMap),
     },
     {
       direction: "up",
-      descriptor: getSwipeBindingDescriptor(bindings.up, servicesMap),
+      descriptor: getSwipeBindingDescriptor(editableBindings.up, servicesMap),
     },
     {
       direction: "right",
-      descriptor: getSwipeBindingDescriptor(bindings.right, servicesMap),
+      descriptor: getSwipeBindingDescriptor(
+        editableBindings.right,
+        servicesMap,
+      ),
     },
   ];
 
@@ -152,7 +170,7 @@ export function ReviewFooter({
             )}
 
             {directions.map(({ direction, descriptor }) => {
-              const binding = bindings[direction];
+              const binding = editableBindings[direction];
               const isUndo = binding.fileAction === "undo";
               return (
                 <BottomNavButton

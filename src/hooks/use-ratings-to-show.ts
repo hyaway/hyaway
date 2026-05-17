@@ -8,7 +8,6 @@ import type {
   RatingServiceInfo,
   RatingValue,
 } from "@/integrations/hydrus-api/models";
-import type { RatingServiceSettings } from "@/stores/ratings-settings-store";
 import {
   Permission,
   isIncDecRatingService,
@@ -18,6 +17,7 @@ import {
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import {
+  getRatingServiceSettings,
   useRatingsOverlayMode,
   useRatingsServiceSettings,
 } from "@/stores/ratings-settings-store";
@@ -61,17 +61,9 @@ export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
   return useMemo(() => {
     if (!item.ratings) return [];
 
-    // Helper to get settings with defaults
-    const getSettings = (serviceKey: string): RatingServiceSettings =>
-      serviceSettings[serviceKey] ?? {
-        showInOverlay: true,
-        showInOverlayEvenWhenNull: false,
-        showInReview: true,
-      };
-
     return ratingServices
       .filter(([serviceKey, service]) => {
-        const ratingValue = item.ratings?.[serviceKey];
+        const ratingValue = item.ratings?.[serviceKey] ?? null;
 
         // Determine visibility based on mode
         let showInOverlay: boolean;
@@ -81,7 +73,10 @@ export function useRatingsToShow(item: FileMetadata): Array<RatingToShow> {
           showInOverlay = service.show_in_thumbnail;
           showWhenNull = service.show_in_thumbnail_even_when_null ?? false;
         } else {
-          const settings = getSettings(serviceKey);
+          const settings = getRatingServiceSettings(
+            serviceSettings,
+            serviceKey,
+          );
           showInOverlay = settings.showInOverlay;
           showWhenNull = settings.showInOverlayEvenWhenNull;
         }

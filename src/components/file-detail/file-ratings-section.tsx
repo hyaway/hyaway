@@ -1,6 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useMemo } from "react";
 import { IconSquareFilled } from "@tabler/icons-react";
 
 import type {
@@ -15,10 +16,16 @@ import {
   isNumericalRatingService,
 } from "@/integrations/hydrus-api/models";
 import { SectionHeading } from "@/components/page-shell/section-heading";
+import { useRatingsToShow } from "@/hooks/use-ratings-to-show";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import {
+  isRatingServiceReadOnly,
+  useRatingsServiceSettings,
+} from "@/stores/ratings-settings-store";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
+import { RatingsOverlayBadge } from "@/components/ratings/ratings-overlay-badge";
 import {
   getDislikeColors,
   getIncDecPositiveColors,
@@ -37,10 +44,29 @@ interface FileRatingsSectionProps {
 
 export function FileRatingsSection({ data }: FileRatingsSectionProps) {
   const { ratingServices, isLoading: servicesLoading } = useRatingServices();
+  const ratingsToShow = useRatingsToShow(data);
+  const ratingsServiceSettings = useRatingsServiceSettings();
   const { hasPermission } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
+  // Read-only ratings use overlay visibility so "show when unset" controls whether they appear.
+  const readonlyVisibleServiceKeys = useMemo(
+    () => new Set(ratingsToShow.map(({ serviceKey }) => serviceKey)),
+    [ratingsToShow],
+  );
+  const visibleRatingServices = useMemo(
+    () =>
+      ratingServices.filter(([serviceKey]) => {
+        const readOnly = isRatingServiceReadOnly(
+          ratingsServiceSettings,
+          serviceKey,
+        );
 
-  if (servicesLoading || ratingServices.length === 0) {
+        return !readOnly || readonlyVisibleServiceKeys.has(serviceKey);
+      }),
+    [ratingServices, ratingsServiceSettings, readonlyVisibleServiceKeys],
+  );
+
+  if (servicesLoading || visibleRatingServices.length === 0) {
     return null;
   }
 
@@ -55,16 +81,24 @@ export function FileRatingsSection({ data }: FileRatingsSectionProps) {
         }
       />
       <div className="flex flex-col gap-3">
-        {ratingServices.map(([serviceKey, service]) => (
-          <RatingControl
-            key={serviceKey}
-            serviceKey={serviceKey}
-            service={service}
-            fileId={data.file_id}
-            currentRating={data.ratings?.[serviceKey] ?? null}
-            disabled={!canEditRatings}
-          />
-        ))}
+        {visibleRatingServices.map(([serviceKey, service]) => {
+          const readOnly = isRatingServiceReadOnly(
+            ratingsServiceSettings,
+            serviceKey,
+          );
+
+          return (
+            <RatingControl
+              key={serviceKey}
+              serviceKey={serviceKey}
+              service={service}
+              fileId={data.file_id}
+              currentRating={data.ratings?.[serviceKey] ?? null}
+              disabled={!canEditRatings}
+              readOnly={readOnly}
+            />
+          );
+        })}
       </div>
     </div>
   );
@@ -76,6 +110,7 @@ interface RatingControlProps {
   fileId: number;
   currentRating: RatingValue;
   disabled?: boolean;
+  readOnly?: boolean;
 }
 
 function RatingControl({
@@ -84,6 +119,7 @@ function RatingControl({
   fileId,
   currentRating,
   disabled,
+  readOnly,
 }: RatingControlProps) {
   const { mutate: setRating, isPending } = useSetRatingMutation();
 
@@ -94,6 +130,8 @@ function RatingControl({
   );
 
   const handleSetRating = (rating: RatingValue) => {
+    if (disabled || readOnly) return;
+
     setRating({
       file_id: fileId,
       rating_service_key: serviceKey,
@@ -161,7 +199,16 @@ function RatingControl({
         </div>
       </div>
       <div className="ml-auto flex items-center gap-2">
-        {isLikeRatingService(service) && (
+        {readOnly ? (
+          <RatingsOverlayBadge
+            serviceKey={serviceKey}
+            service={service}
+            value={currentRating}
+            badgeClassName="bg-background flex items-center gap-1.5 rounded-md border px-2 py-1 text-sm font-semibold shadow-xs"
+            iconClassName="size-5"
+            valueClassName="tabular-nums leading-none"
+          />
+        ) : isLikeRatingService(service) ? (
           <LikeDislikeControl
             value={currentRating as boolean | null}
             serviceKey={serviceKey}
@@ -171,8 +218,7 @@ function RatingControl({
             likeColors={getLikeColors(service)}
             dislikeColors={getDislikeColors(service)}
           />
-        )}
-        {isNumericalRatingService(service) && (
+        ) : isNumericalRatingService(service) ? (
           <NumericalRatingControl
             value={currentRating as number | null}
             minStars={service.min_stars}
@@ -183,15 +229,14 @@ function RatingControl({
             disabled={disabled || isPending}
             filledColors={getNumericalFilledColors(service)}
           />
-        )}
-        {isIncDecRatingService(service) && (
+        ) : isIncDecRatingService(service) ? (
           <IncDecRatingControl
             value={currentRating as number}
             onChange={handleSetRating}
             disabled={disabled || isPending}
             service={service}
           />
-        )}
+        ) : null}
       </div>
     </div>
   );

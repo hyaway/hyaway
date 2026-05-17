@@ -21,6 +21,7 @@ import type {
 } from "@/stores/review-settings-store";
 import {
   getBindingForDirection,
+  stripRatingActionsForServicesFromBindings,
   useReviewGesturesEnabled,
   useReviewImmersiveMode,
   useReviewSettingsActions,
@@ -44,6 +45,10 @@ import {
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { getFileMetadata } from "@/integrations/hydrus-api/api-client";
+import {
+  getReadOnlyRatingServiceKeys,
+  useRatingsServiceSettings,
+} from "@/stores/ratings-settings-store";
 
 /** Number of cards to render in the stack */
 const STACK_SIZE = 3;
@@ -220,6 +225,7 @@ export function useReviewSwipeDeck() {
   const nextFileIds = useReviewQueueNextFileIds(PREFETCH_COUNT);
   const { recordAction, undo } = useReviewQueueActions();
   const bindings = useReviewSwipeBindings();
+  const ratingsServiceSettings = useRatingsServiceSettings();
 
   const queryClient = useQueryClient();
 
@@ -232,9 +238,23 @@ export function useReviewSwipeDeck() {
 
   // Rating services (for filtering orphaned actions)
   const { ratingServices } = useRatingServices();
+  const readOnlyServiceKeys = useMemo(
+    () => getReadOnlyRatingServiceKeys(ratingsServiceSettings),
+    [ratingsServiceSettings],
+  );
   const validServiceKeys = useMemo(
-    () => new Set(ratingServices.map(([key]) => key)),
-    [ratingServices],
+    () =>
+      new Set(
+        ratingServices
+          .filter(([key]) => !readOnlyServiceKeys.has(key))
+          .map(([key]) => key),
+      ),
+    [ratingServices, readOnlyServiceKeys],
+  );
+  const editableBindings = useMemo(
+    () =>
+      stripRatingActionsForServicesFromBindings(bindings, readOnlyServiceKeys),
+    [bindings, readOnlyServiceKeys],
   );
 
   // Current file metadata
@@ -291,6 +311,8 @@ export function useReviewSwipeDeck() {
 
       // Reverse rating actions
       for (const rating of restore.ratings ?? []) {
+        if (readOnlyServiceKeys.has(rating.serviceKey)) continue;
+
         setRating({
           file_id: lastEntry.fileId,
           rating_service_key: rating.serviceKey,
@@ -298,7 +320,14 @@ export function useReviewSwipeDeck() {
         });
       }
     }
-  }, [history.length, undo, unarchiveFiles, undeleteFiles, setRating]);
+  }, [
+    history.length,
+    undo,
+    unarchiveFiles,
+    undeleteFiles,
+    setRating,
+    readOnlyServiceKeys,
+  ]);
 
   // Handle exit animation complete - remove card from exiting list
   const handleExitComplete = useCallback((fileId: number) => {
@@ -314,7 +343,7 @@ export function useReviewSwipeDeck() {
     (direction: SwipeDirection) => {
       if (!currentFileId) return;
 
-      const binding = getBindingForDirection(bindings, direction);
+      const binding = getBindingForDirection(editableBindings, direction);
       // Undo path — reverse last action instead of advancing (no animation, instant swap)
       if (binding.fileAction === "undo") {
         if (history.length === 0) return; // Nothing to undo
@@ -356,7 +385,7 @@ export function useReviewSwipeDeck() {
     [
       currentFileId,
       currentMetadata,
-      bindings,
+      editableBindings,
       getFileState,
       recordAction,
       archiveFiles,
@@ -402,7 +431,7 @@ export function useReviewSwipeDeck() {
     visibleFileIds,
     exitingCards,
     gesturesEnabled,
-    bindings,
+    bindings: editableBindings,
     skipAnimationRef,
     canUndo: history.length > 0,
     handleGestureSwipe,
