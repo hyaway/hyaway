@@ -795,11 +795,9 @@ function SidebarMenuSkeleton({
       <Skeleton
         className="h-5 max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"
-        style={
-          {
-            "--skeleton-width": width,
-          }
-        }
+        style={{
+          "--skeleton-width": width,
+        }}
       />
     </div>
   );

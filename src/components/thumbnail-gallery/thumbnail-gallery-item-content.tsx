@@ -53,9 +53,9 @@ export function ThumbnailGalleryItemContent({
       )}
       style={
         averageColor
-          ? ({
+          ? {
               "--average-color": averageColor,
-            })
+            }
           : undefined
       }
     >

@@ -1144,27 +1144,25 @@ export function ReviewImageViewer({
         }}
         onLoad={handleLoad}
         onError={handleError}
-        style={
-          {
-            x: isTop ? dragX : 0,
-            y: isTop ? dragY : 0,
-            ...getImageStyle(),
-            ...(isTop && naturalSize.width > 0
-              ? {
-                  width: scaledWidth,
-                  height: scaledHeight,
-                  minWidth: scaledWidth,
-                  minHeight: scaledHeight,
-                  flexShrink: 0,
-                }
-              : {
-                  width: "auto",
-                  height: "auto",
-                  minWidth: "auto",
-                  minHeight: "auto",
-                }),
-          }
-        }
+        style={{
+          x: isTop ? dragX : 0,
+          y: isTop ? dragY : 0,
+          ...getImageStyle(),
+          ...(isTop && naturalSize.width > 0
+            ? {
+                width: scaledWidth,
+                height: scaledHeight,
+                minWidth: scaledWidth,
+                minHeight: scaledHeight,
+                flexShrink: 0,
+              }
+            : {
+                width: "auto",
+                height: "auto",
+                minWidth: "auto",
+                minHeight: "auto",
+              }),
+        }}
         className={cn(
           "transition-opacity duration-200",
           loaded ? "opacity-100" : "opacity-0",

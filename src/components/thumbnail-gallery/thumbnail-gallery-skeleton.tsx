@@ -58,11 +58,9 @@ export function ThumbnailGallerySkeleton({
       <div className="flex w-full flex-row">
         <div
           className="w-full columns-(--thumbnail-width) gap-2"
-          style={
-            {
-              "--thumbnail-width": `${DEFAULT_THUMBNAIL_SIZE}px`,
-            }
-          }
+          style={{
+            "--thumbnail-width": `${DEFAULT_THUMBNAIL_SIZE}px`,
+          }}
         >
           {heights.map((height, i) => (
             <Skeleton

@@ -26,14 +26,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
         error: <IconAlertOctagon className="size-4" />,
         loading: <IconLoader className="size-4 animate-spin" />,
       }}
-      style={
-        {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
-        }
-      }
+      style={{
+        "--normal-bg": "var(--popover)",
+        "--normal-text": "var(--popover-foreground)",
+        "--normal-border": "var(--border)",
+        "--border-radius": "var(--radius)",
+      }}
       toastOptions={{
         classNames: {
           toast: "cn-toast",

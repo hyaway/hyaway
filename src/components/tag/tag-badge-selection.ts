@@ -31,14 +31,13 @@ export function useSelectedTagBadgeStyle(
   const theme = useActiveTheme();
 
   return useMemo(
-    () =>
-      ({
-        [cssVariable]: getThemeAdjustedColorFromHex(
-          SELECTED_TAG_BADGE_OVERLAY_HEX,
-          theme,
-        ),
-        "--selected-tag-focus": theme === "light" ? "black" : "white",
-      }),
+    () => ({
+      [cssVariable]: getThemeAdjustedColorFromHex(
+        SELECTED_TAG_BADGE_OVERLAY_HEX,
+        theme,
+      ),
+      "--selected-tag-focus": theme === "light" ? "black" : "white",
+    }),
     [cssVariable, theme],
   );
 }
