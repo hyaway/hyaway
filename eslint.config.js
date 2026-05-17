@@ -41,6 +41,8 @@ export default defineConfig(
     // Config files
     "eslint.config.js",
     "prettier.config.js",
+    // Local ESLint plugin (plain JS, not in tsconfig)
+    "eslint-plugin-local/**",
     // From .gitignore
     "node_modules/**",
     "dist/**",
