@@ -68,12 +68,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
 import { Button } from "@/components/ui-primitives/button";
-import {
-  Alert,
-  AlertAction,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui-primitives/alert";
 import { SettingsResetButton } from "@/components/settings/settings-ui";
 import { cn } from "@/lib/utils";
 
@@ -422,6 +416,51 @@ interface DirectionBindingEditorProps {
   onReset: () => void;
 }
 
+interface RatingActionWarningProps {
+  variant?: "default" | "destructive";
+  title: string;
+  description: React.ReactNode;
+  onClear: () => void;
+}
+
+function RatingActionWarning({
+  variant = "default",
+  title,
+  description,
+  onClear,
+}: RatingActionWarningProps) {
+  return (
+    <div
+      role="alert"
+      className={cn(
+        "bg-card text-card-foreground @container flex min-w-0 items-start gap-3 rounded-lg border px-5 py-4 text-left text-sm",
+        variant === "destructive" && "text-destructive",
+      )}
+    >
+      <IconAlertCircle className="mt-0.5 hidden size-6 shrink-0 @[14rem]:block" />
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="font-medium wrap-break-word">{title}</div>
+        <div
+          className={cn(
+            "text-muted-foreground text-sm wrap-break-word",
+            variant === "destructive" && "text-destructive/90",
+          )}
+        >
+          {description}
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-2 self-start"
+          onClick={onClear}
+        >
+          Clear
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function DirectionBindingEditor({
   direction,
   binding,
@@ -452,6 +491,7 @@ function DirectionBindingEditor({
   const selectedService = ratingServices.find(
     ([key]) => key === selectedServiceKey,
   )?.[1];
+  const selectedServiceName = selectedService?.name ?? selectedServiceKey;
 
   // Detect orphaned rating action (service no longer exists)
   const isOrphanedRating =
@@ -564,40 +604,25 @@ function DirectionBindingEditor({
           </Label>
 
           {isOrphanedRating ? (
-            <Alert variant="destructive">
-              <IconAlertCircle />
-              <AlertTitle>Rating service does not exist</AlertTitle>
-              <AlertDescription>
-                Rating service {ratingAction.serviceKey} associated with this
-                action was not found in services object.
-              </AlertDescription>
-              <AlertAction>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleRatingActionChange(undefined)}
-                >
-                  Clear
-                </Button>
-              </AlertAction>
-            </Alert>
+            <RatingActionWarning
+              variant="destructive"
+              title="Rating service does not exist"
+              description={
+                <>
+                  Rating service{" "}
+                  <span className="break-all">{ratingAction.serviceKey}</span>{" "}
+                  is no longer available. Clear it and pick a different rating service for this swipe
+                  action.
+                </>
+              }
+              onClear={() => handleRatingActionChange(undefined)}
+            />
           ) : isReadOnlyRating ? (
-            <Alert>
-              <IconAlertCircle />
-              <AlertTitle>Rating service is read-only</AlertTitle>
-              <AlertDescription>
-                This rating action is disabled until the service is editable.
-              </AlertDescription>
-              <AlertAction>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleRatingActionChange(undefined)}
-                >
-                  Clear
-                </Button>
-              </AlertAction>
-            </Alert>
+            <RatingActionWarning
+              title={`${selectedServiceName} is read-only`}
+              description="Clear it, or turn off read-only for this rating service in settings."
+              onClear={() => handleRatingActionChange(undefined)}
+            />
           ) : !canConfigureRating ? (
             <span className="text-muted-foreground/50 text-xs">
               {!canEditRatings
