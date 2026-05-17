@@ -3,7 +3,6 @@
 
 import { IconTrashX } from "@tabler/icons-react";
 import { DefaultQuerySettings } from "@/components/settings/default-query-settings";
-import { SearchBehaviorSettings } from "@/components/settings/search-behavior-settings";
 import {
   SettingsCardTitle,
   SettingsResetButton,
@@ -26,21 +25,20 @@ import { useSearchSettingsActions } from "@/stores/search-settings-store";
 export function SearchSettingsCard() {
   const queryCount = useSearchQueryCount();
   const unpinnedQueryCount = useOtherSearchKeys().length;
-  const { reset } = useSearchSettingsActions();
+  const { resetDefaultQuery } = useSearchSettingsActions();
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <SettingsCardTitle>Search</SettingsCardTitle>
-          <SettingsResetButton onReset={reset} />
+          <SettingsResetButton onReset={resetDefaultQuery} />
         </div>
         <CardDescription>
-          Configure search behavior for the query builder.
+          Configure query defaults and saved search data.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <SearchBehaviorSettings />
         <DefaultQuerySettings />
         <div className="border-border flex items-center justify-between gap-4 border-t pt-4">
           <div className="flex flex-col gap-1">

@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FileViewerSettingsCard } from "./-components/file-viewer-settings-card";
 import { ThumbnailGalleryDisplaySettingsCard } from "./-components/thumbnail-gallery-display-settings-card";
 import { PagesDisplaySettingsCard } from "./-components/pages-display-settings-card";
+import { SearchAppearanceSettingsCard } from "./-components/search-appearance-settings-card";
 import { ThemeCard } from "./-components/theme-card";
 import { ReviewControlsSettingsCard } from "./-components/review-controls-settings-card";
 import { RatingsSettingsCard } from "./-components/ratings-settings-card";
@@ -26,6 +27,7 @@ function SettingsAppearanceComponent() {
         Appearance Settings
       </Heading>
       <ThemeCard />
+      <SearchAppearanceSettingsCard />
       <PagesDisplaySettingsCard />
       <ThumbnailGalleryDisplaySettingsCard />
       <FileViewerSettingsCard />

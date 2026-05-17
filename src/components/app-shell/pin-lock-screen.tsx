@@ -94,9 +94,8 @@ export function PinLockScreen() {
                   Forgot your PIN?
                 </PopoverTitle>
                 <PopoverDescription className="text-center text-balance">
-                  This will reset all Hydrus API related data, clear saved
-                  searches, and remove the PIN. Your other settings will be
-                  preserved.
+                  This will reset Hydrus API values, clear data, and remove the
+                  PIN. Your appearance and limit settings will be preserved.
                 </PopoverDescription>
               </PopoverHeader>
               <Button variant="destructive" onClick={handleResetAccess}>

@@ -7,6 +7,10 @@ import type { SearchState } from "@/stores/search-defaults";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import { defaultStaged, ensureSearchQueryIds } from "@/stores/search-defaults";
 
+const DEFAULT_SEARCH_RESULTS_INSTANT = true;
+const DEFAULT_SEARCH_RESULTS_BUILDER = false;
+const DEFAULT_SAVED_SEARCH_SORT: SavedSearchSort = "newest-first";
+
 export const SAVED_SEARCH_SORT_VALUES = [
   "newest-first",
   "oldest-first",
@@ -34,6 +38,7 @@ type SearchSettingsState = {
     setSearchResultsBuilderDefault: (enabled: boolean) => void;
     setSavedSearchSort: (sort: SavedSearchSort) => void;
     resetDefaultQuery: () => void;
+    resetSearchAppearance: () => void;
     reset: () => void;
   };
 };
@@ -42,9 +47,9 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
   persist(
     (set, _get, store) => ({
       defaultQuery: defaultStaged(),
-      searchResultsInstantDefault: true,
-      searchResultsBuilderDefault: false,
-      savedSearchSort: "newest-first",
+      searchResultsInstantDefault: DEFAULT_SEARCH_RESULTS_INSTANT,
+      searchResultsBuilderDefault: DEFAULT_SEARCH_RESULTS_BUILDER,
+      savedSearchSort: DEFAULT_SAVED_SEARCH_SORT,
       actions: {
         setDefaultQuery: (defaultQuery: SearchState) =>
           set({
@@ -62,6 +67,12 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
         setSavedSearchSort: (savedSearchSort: SavedSearchSort) =>
           set({ savedSearchSort }),
         resetDefaultQuery: () => set({ defaultQuery: defaultStaged() }),
+        resetSearchAppearance: () =>
+          set({
+            searchResultsInstantDefault: DEFAULT_SEARCH_RESULTS_INSTANT,
+            searchResultsBuilderDefault: DEFAULT_SEARCH_RESULTS_BUILDER,
+            savedSearchSort: DEFAULT_SAVED_SEARCH_SORT,
+          }),
         reset: () => set(store.getInitialState()),
       },
     }),

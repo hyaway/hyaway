@@ -49,7 +49,8 @@ export function ResetCard({ resetKey }: { resetKey: () => void }) {
               Reset API values and clear saved data
             </span>
             <span className="text-muted-foreground text-xs">
-              Also clears your review queue, watch history, and saved searches.
+              Also clears your default search, saved searches, review queue, and
+              watch history.
             </span>
           </div>
           <Button

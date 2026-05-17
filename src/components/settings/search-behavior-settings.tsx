@@ -15,7 +15,7 @@ export function SearchBehaviorSettings() {
     useSearchSettingsActions();
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <SwitchField
         id="search-results-instant-default-switch"
         label="Instant search by default"
@@ -30,6 +30,6 @@ export function SearchBehaviorSettings() {
         checked={searchResultsBuilderDefault}
         onCheckedChange={setSearchResultsBuilderDefault}
       />
-    </>
+    </div>
   );
 }

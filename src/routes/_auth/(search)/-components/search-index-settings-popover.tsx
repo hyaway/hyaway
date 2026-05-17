@@ -3,7 +3,6 @@
 
 import { IconTrashX } from "@tabler/icons-react";
 import { DefaultQuerySettings } from "@/components/settings/default-query-settings";
-import { SearchBehaviorSettings } from "@/components/settings/search-behavior-settings";
 import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   SettingsHeader,
@@ -26,7 +25,6 @@ export function SearchIndexSettingsPopover() {
       <SettingsHeader>
         <SettingsTitle>Search</SettingsTitle>
       </SettingsHeader>
-      <SearchBehaviorSettings />
       <DefaultQuerySettings />
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1">

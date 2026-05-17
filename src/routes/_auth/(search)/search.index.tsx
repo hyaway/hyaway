@@ -10,7 +10,6 @@ import {
   IconPinned,
   IconPinnedOff,
   IconSearch,
-  IconSortDescending,
   IconTrash,
 } from "@tabler/icons-react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -24,6 +23,7 @@ import { SearchSortTag } from "./-components/search-sort-tag";
 import type { SavedSearchSort } from "@/stores/search-settings-store";
 import { copySearchCache, generateSearchId } from "@/lib/search-entry-utils";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
+import { SavedSearchSortSelect } from "@/components/settings/saved-search-sort-select";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { SearchTagList } from "@/components/tag/tag-badge";
@@ -44,13 +44,6 @@ import {
 } from "@/components/ui-primitives/dropdown-menu";
 import { Input } from "@/components/ui-primitives/input";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui-primitives/select";
-import {
   nextDraftName,
   useOtherSearchKeys,
   usePinnedSearchKeys,
@@ -60,24 +53,11 @@ import {
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
 import {
-  SAVED_SEARCH_SORT_VALUES,
-  isSavedSearchSort,
   useSavedSearchSort,
   useSearchSettingsActions,
 } from "@/stores/search-settings-store";
 import { useActiveTheme } from "@/stores/theme-store";
 import { Separator } from "@/components/ui-primitives/separator";
-
-const SAVED_SEARCH_SORT_LABELS = {
-  "newest-first": "Newest first",
-  "oldest-first": "Oldest first",
-  "modified-desc": "Last modified first",
-} satisfies Record<SavedSearchSort, string>;
-
-const SAVED_SEARCH_SORT_OPTIONS = SAVED_SEARCH_SORT_VALUES.map((value) => ({
-  value,
-  label: SAVED_SEARCH_SORT_LABELS[value],
-}));
 
 export const Route = createFileRoute("/_auth/(search)/search/")({
   component: SearchIndex,
@@ -159,8 +139,6 @@ function SavedSearchHeader({
   sort: SavedSearchSort;
   onSortChange: (sort: SavedSearchSort) => void;
 }) {
-  const selectedSortLabel = SAVED_SEARCH_SORT_LABELS[sort];
-
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="min-w-0">
@@ -169,28 +147,11 @@ function SavedSearchHeader({
           {count} {count === 1 ? "search" : "searches"}
         </p>
       </div>
-      <Select
+      <SavedSearchSortSelect
+        ariaLabel="Sort saved searches"
         value={sort}
-        onValueChange={(nextSort) => {
-          if (nextSort && isSavedSearchSort(nextSort)) {
-            onSortChange(nextSort);
-          }
-        }}
-      >
-        <SelectTrigger aria-label="Sort saved searches" className="rounded-lg">
-          <IconSortDescending className="size-4" />
-          <span className="truncate">{selectedSortLabel}</span>
-        </SelectTrigger>
-        <SelectContent align="end" className="min-w-52">
-          <SelectGroup>
-            {SAVED_SEARCH_SORT_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+        onValueChange={onSortChange}
+      />
     </div>
   );
 }
