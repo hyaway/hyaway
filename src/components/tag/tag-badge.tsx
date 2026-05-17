@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { IconTagStarred } from "@tabler/icons-react";
+import { Fragment, useMemo } from "react";
 import { TouchTarget } from "../ui-primitives/touch-target";
 import type { badgeVariants } from "@/components/ui-primitives/badge";
+import type { RovingTagActionTriggerProps } from "@/components/tag/tag-list-focus";
 import type { VariantProps } from "class-variance-authority";
 import type { ComponentProps, ReactNode } from "react";
 
@@ -14,7 +16,12 @@ import { useIsFavouriteTag } from "@/integrations/hydrus-api/queries/tags";
 import { parseTag } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 
-import { TagActionMenu, TagActionTrigger } from "@/components/tag/tag-actions";
+import {
+  TagActionMenu,
+  TagActionTrigger,
+  isSystemTag,
+} from "@/components/tag/tag-actions";
+import { useRovingTagActionTriggers } from "@/components/tag/tag-list-focus";
 
 type BadgeProps = ComponentProps<typeof Badge> &
   VariantProps<typeof badgeVariants>;
@@ -31,6 +38,7 @@ export function TagBadge({
   variant,
   children,
   className,
+  labelClassName,
   style,
   ...props
 }: {
@@ -38,6 +46,7 @@ export function TagBadge({
   namespace?: string;
   negated?: boolean;
   children?: ReactNode;
+  labelClassName?: string;
 } & BadgeProps) {
   const color = useNamespaceColor(namespace);
   const combinedStyle = { "--badge-overlay": color, ...style };
@@ -53,12 +62,20 @@ export function TagBadge({
       {...props}
     >
       <TouchTarget>
-        {negated ? "-" : ""}
-        {namespace ? `${namespace}: ` : ""}
-        {tag}
+        <span className={labelClassName}>
+          {negated ? "-" : ""}
+          {namespace ? (
+            <>
+              <span className="whitespace-nowrap">{namespace}:</span>{" "}
+            </>
+          ) : null}
+          {tag}
+        </span>
       </TouchTarget>
-      {isFavourite && <IconTagStarred className="size-5! shrink-0" />}
-      {children}
+      <div className="flex flex-wrap items-center gap-1">
+        {isFavourite && <IconTagStarred className="size-5! shrink-0" />}
+        {children}
+      </div>
     </Badge>
   );
 }
@@ -103,6 +120,27 @@ export function TagBadgeFromString({
   );
 }
 
+export function TagActionBadge({
+  displayTag,
+  triggerClassName,
+  triggerProps,
+  ...badgeProps
+}: {
+  displayTag: string;
+  triggerClassName?: string;
+  triggerProps?: RovingTagActionTriggerProps;
+} & Omit<ComponentProps<typeof TagBadgeFromString>, "displayTag">) {
+  return (
+    <TagActionTrigger
+      tag={displayTag}
+      className={triggerClassName}
+      {...(triggerProps ?? {})}
+    >
+      <TagBadgeFromString displayTag={displayTag} {...badgeProps} />
+    </TagActionTrigger>
+  );
+}
+
 /**
  * Renders an OR group as individual tag badges separated by "or" labels,
  * each with a bottom border that connects into one continuous line.
@@ -114,6 +152,7 @@ export function OrTagBadge({
   style,
   size,
   interactive,
+  getInteractiveTriggerProps,
 }: {
   tags: Array<string>;
   className?: string;
@@ -121,6 +160,7 @@ export function OrTagBadge({
   style?: ComponentProps<typeof TagBadgeFromString>["style"];
   size?: BadgeSize;
   interactive?: boolean;
+  getInteractiveTriggerProps?: (index: number) => RovingTagActionTriggerProps;
 }) {
   return (
     <>
@@ -141,7 +181,7 @@ export function OrTagBadge({
           />
         );
         return (
-          <>
+          <Fragment key={`${i}:${t}`}>
             {i > 0 && (
               <span
                 style={style}
@@ -157,15 +197,23 @@ export function OrTagBadge({
               </span>
             )}
             {interactive ? (
-              <TagActionTrigger key={i} tag={t} className="inline-flex">
-                {badge}
-              </TagActionTrigger>
+              <TagActionBadge
+                displayTag={t}
+                size={size}
+                style={style}
+                className={cn(
+                  "border-foreground/40 rounded-b-none border-y-2",
+                  isFirst && "border-l-2",
+                  isLast && "border-r-2",
+                  className,
+                )}
+                triggerClassName="inline-flex"
+                triggerProps={getInteractiveTriggerProps?.(i)}
+              />
             ) : (
-              <span key={i} className="inline-flex">
-                {badge}
-              </span>
+              <span className="inline-flex">{badge}</span>
             )}
-          </>
+          </Fragment>
         );
       })}
     </>
@@ -195,6 +243,36 @@ export function SearchTagList({
   orSeparatorClassName?: string;
   badgeSize?: BadgeSize;
 }) {
+  const interactiveDisplayTags = useMemo(() => {
+    if (!interactive) return [];
+    return tags.flatMap((entry) => (Array.isArray(entry) ? entry : [entry]));
+  }, [interactive, tags]);
+
+  const enabledInteractiveIndices = useMemo(
+    () =>
+      interactiveDisplayTags.flatMap((tag, index) =>
+        isSystemTag(tag) ? [] : [index],
+      ),
+    [interactiveDisplayTags],
+  );
+
+  const rovingTriggers = useRovingTagActionTriggers({
+    itemCount: interactiveDisplayTags.length,
+    enabledIndices: enabledInteractiveIndices,
+  });
+
+  const interactiveTagIndices = useMemo(() => {
+    let nextIndex = 0;
+
+    return tags.map((entry) => {
+      if (Array.isArray(entry)) {
+        return entry.map(() => nextIndex++);
+      }
+
+      return nextIndex++;
+    });
+  }, [tags]);
+
   const content = (
     <div className={cn("flex flex-wrap gap-1.5", className)}>
       {tags.map((entry, i) =>
@@ -206,15 +284,25 @@ export function SearchTagList({
             size={badgeSize}
             className={badgeClassName}
             separatorClassName={orSeparatorClassName}
+            getInteractiveTriggerProps={(orIndex) => {
+              const actionIndices = interactiveTagIndices[i];
+              return rovingTriggers.getTriggerProps(
+                Array.isArray(actionIndices) ? actionIndices[orIndex] : 0,
+              );
+            }}
           />
         ) : interactive ? (
-          <TagActionTrigger key={i} tag={entry}>
-            <TagBadgeFromString
-              displayTag={entry}
-              size={badgeSize}
-              className={badgeClassName}
-            />
-          </TagActionTrigger>
+          <TagActionBadge
+            key={i}
+            displayTag={entry}
+            size={badgeSize}
+            className={badgeClassName}
+            triggerProps={rovingTriggers.getTriggerProps(
+              typeof interactiveTagIndices[i] === "number"
+                ? interactiveTagIndices[i]
+                : 0,
+            )}
+          />
         ) : (
           <TagBadgeFromString
             key={i}

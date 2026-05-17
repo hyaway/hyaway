@@ -10,8 +10,9 @@ import { Input } from "@/components/ui-primitives/input";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagStatus } from "@/integrations/hydrus-api/models";
-import { TagBadgeFromString } from "@/components/tag/tag-badge";
-import { TagActionMenu, TagActionTrigger } from "@/components/tag/tag-actions";
+import { TagActionBadge } from "@/components/tag/tag-badge";
+import { TagActionMenu, isSystemTag } from "@/components/tag/tag-actions";
+import { useRovingTagActionTriggers } from "@/components/tag/tag-list-focus";
 import { compareTagStrings } from "@/lib/tag-utils";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,18 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
   }, [tags, search]);
 
   const filteredCount = filteredTagsSet?.size ?? tags.length;
+  const enabledTagIndices = useMemo(
+    () =>
+      tags.flatMap((tag, index) => {
+        const isVisible = !filteredTagsSet || filteredTagsSet.has(tag);
+        return isVisible && !isSystemTag(tag) ? [index] : [];
+      }),
+    [filteredTagsSet, tags],
+  );
+  const rovingTriggers = useRovingTagActionTriggers({
+    itemCount: tags.length,
+    enabledIndices: enabledTagIndices,
+  });
 
   if (tags.length === 0) {
     return (
@@ -66,19 +79,19 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
       />
       <TagActionMenu>
         <div className="flex flex-wrap gap-0.5">
-          {tags.map((tag) => {
+          {tags.map((tag, index) => {
             const isVisible = !filteredTagsSet || filteredTagsSet.has(tag);
             return (
-              <TagActionTrigger key={tag} tag={tag}>
-                <TagBadgeFromString
-                  displayTag={tag}
-                  className={cn(
-                    "transition-opacity",
-                    !isVisible && "pointer-events-none opacity-10",
-                  )}
-                  size="compact-mobile-wrap"
-                />
-              </TagActionTrigger>
+              <TagActionBadge
+                key={tag}
+                displayTag={tag}
+                className={cn(
+                  "transition-opacity",
+                  !isVisible && "pointer-events-none opacity-10",
+                )}
+                size="compact-mobile-wrap"
+                triggerProps={rovingTriggers.getTriggerProps(index)}
+              />
             );
           })}
         </div>

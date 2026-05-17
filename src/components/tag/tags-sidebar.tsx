@@ -28,6 +28,7 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface TagItem {
   tag: string;
@@ -146,6 +147,101 @@ export const TagsSidebar = memo(function TagsSidebar({
 
   // Cache virtual items
   const virtualItems = rowVirtualizer.getVirtualItems();
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const triggerRefs = React.useRef<Map<number, HTMLButtonElement>>(new Map());
+  const pendingFocusRef = React.useRef<number | null>(null);
+  const scrollOffset = rowVirtualizer.scrollOffset ?? 0;
+  const viewportEnd = scrollOffset + (rowVirtualizer.scrollRect?.height ?? 0);
+  const visibleIndices = virtualItems
+    .filter((item) => item.end > scrollOffset && item.start < viewportEnd)
+    .map((item) => item.index);
+  const firstVisibleIndex =
+    visibleIndices.length > 0
+      ? visibleIndices[0]
+      : (virtualItems[0]?.index ?? 0);
+  const tabbableIndex =
+    focusedIndex !== null && visibleIndices.includes(focusedIndex)
+      ? focusedIndex
+      : firstVisibleIndex;
+
+  React.useEffect(() => {
+    if (focusedIndex !== null && focusedIndex >= filteredTags.length) {
+      setFocusedIndex(null);
+    }
+  }, [filteredTags.length, focusedIndex]);
+
+  const setTriggerRef = React.useCallback(
+    (element: HTMLButtonElement | null, index: number) => {
+      if (element) {
+        triggerRefs.current.set(index, element);
+        if (pendingFocusRef.current === index) {
+          pendingFocusRef.current = null;
+          element.scrollIntoView({ block: "nearest", inline: "nearest" });
+          element.focus({ preventScroll: true });
+        }
+      } else {
+        triggerRefs.current.delete(index);
+      }
+    },
+    [],
+  );
+
+  const focusTagAtIndex = React.useCallback(
+    (nextIndex: number) => {
+      if (filteredTags.length === 0) return;
+
+      const boundedIndex = Math.max(
+        0,
+        Math.min(filteredTags.length - 1, nextIndex),
+      );
+      setFocusedIndex(boundedIndex);
+
+      if (!visibleIndices.includes(boundedIndex)) {
+        pendingFocusRef.current = boundedIndex;
+        rowVirtualizer.scrollToIndex(boundedIndex, { align: "auto" });
+        return;
+      }
+
+      const trigger = triggerRefs.current.get(boundedIndex);
+      trigger?.scrollIntoView({ block: "nearest", inline: "nearest" });
+      trigger?.focus({ preventScroll: true });
+    },
+    [filteredTags.length, rowVirtualizer, visibleIndices],
+  );
+
+  const handleTagKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+      switch (event.key) {
+        case "ArrowDown":
+        case "ArrowRight":
+          event.preventDefault();
+          event.stopPropagation();
+          event.nativeEvent.stopImmediatePropagation();
+          focusTagAtIndex(index + 1);
+          break;
+        case "ArrowUp":
+        case "ArrowLeft":
+          event.preventDefault();
+          event.stopPropagation();
+          event.nativeEvent.stopImmediatePropagation();
+          focusTagAtIndex(index - 1);
+          break;
+        case "Home":
+          event.preventDefault();
+          event.stopPropagation();
+          event.nativeEvent.stopImmediatePropagation();
+          focusTagAtIndex(0);
+          break;
+        case "End":
+          event.preventDefault();
+          event.stopPropagation();
+          event.nativeEvent.stopImmediatePropagation();
+          focusTagAtIndex(filteredTags.length - 1);
+          break;
+      }
+    },
+    [filteredTags.length, focusTagAtIndex],
+  );
 
   return (
     <>
@@ -181,7 +277,7 @@ export const TagsSidebar = memo(function TagsSidebar({
       <SidebarContent className="min-h-0 flex-1 pe-1">
         <ScrollArea viewportClassName="h-full max-h-svh pe-2.5" ref={parentRef}>
           <SidebarGroup>
-            <TagActionMenu side="left">
+            <TagActionMenu side={isMobile ? "bottom" : "left"}>
               <ol
                 style={{
                   height: `${rowVirtualizer.getTotalSize()}px`,
@@ -200,16 +296,31 @@ export const TagsSidebar = memo(function TagsSidebar({
                       }}
                       className="absolute top-0 left-0 w-full"
                     >
-                      <TagActionTrigger
-                        tag={fullTag(tagItem)}
-                        className="w-full text-left"
-                      >
-                        <TagRowContent
-                          tagItem={tagItem}
-                          index={virtualRow.index}
-                          showCount={deferredItems.length > 1}
-                        />
-                      </TagActionTrigger>
+                      <div className="flex min-w-0 flex-row flex-nowrap items-center justify-start gap-1 font-mono">
+                        <span
+                          aria-hidden="true"
+                          className="text-muted-foreground shrink-0 text-right tabular-nums"
+                        >
+                          {virtualRow.index + 1}.
+                        </span>
+                        <TagActionTrigger
+                          tag={fullTag(tagItem)}
+                          className="max-w-full min-w-0 text-left"
+                          tabIndex={virtualRow.index === tabbableIndex ? 0 : -1}
+                          triggerRef={(element) =>
+                            setTriggerRef(element, virtualRow.index)
+                          }
+                          onFocus={() => setFocusedIndex(virtualRow.index)}
+                          onKeyDownCapture={(event) =>
+                            handleTagKeyDown(event, virtualRow.index)
+                          }
+                        >
+                          <TagRowBadge
+                            tagItem={tagItem}
+                            showCount={deferredItems.length > 1}
+                          />
+                        </TagActionTrigger>
+                      </div>
                     </li>
                   );
                 })}
@@ -231,33 +342,24 @@ export const TagsSidebar = memo(function TagsSidebar({
   );
 });
 
-// Row content component - stable props enable compiler memoization
-const TagRowContent = memo(function TagRowContent({
+// Row badge component - stable props enable compiler memoization
+const TagRowBadge = memo(function TagRowBadge({
   tagItem,
-  index,
   showCount,
 }: {
   tagItem: TagItem;
-  index: number;
   showCount: boolean;
 }) {
   return (
-    <div className="flex min-w-0 flex-row flex-nowrap items-center justify-start gap-1 font-mono">
-      <span
-        aria-hidden="true"
-        className="text-muted-foreground shrink-0 text-right tabular-nums"
-      >
-        {index + 1}.
-      </span>
-      <TagBadge
-        tag={tagItem.tag}
-        namespace={tagItem.namespace}
-        className="h-auto min-h-6 shrink items-center justify-start overflow-visible px-2 py-1.5 text-left break-normal wrap-anywhere whitespace-normal"
-      >
-        {showCount && (
-          <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
-        )}
-      </TagBadge>
-    </div>
+    <TagBadge
+      tag={tagItem.tag}
+      namespace={tagItem.namespace}
+      className="h-auto min-h-6 shrink flex-wrap items-center justify-start gap-y-0.5 overflow-visible px-2 py-1.5 text-left break-normal wrap-anywhere whitespace-normal"
+      labelClassName={cn("min-w-[5ch] flex-1 basis-0 wrap-anywhere")}
+    >
+      {showCount && (
+        <TagBadge.Count className="h-5">{tagItem.count}</TagBadge.Count>
+      )}
+    </TagBadge>
   );
 });

@@ -57,6 +57,7 @@ import type {
   UseRuleGroup,
 } from "react-querybuilder";
 import type { HydrusFileSortType } from "@/integrations/hydrus-api/models";
+import type { RovingTagButtonProps } from "@/components/tag/tag-list-focus";
 import { Permission } from "@/integrations/hydrus-api/models";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
@@ -74,8 +75,14 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui-primitives/select";
+import {
+  SELECTED_TAG_BADGE_CLASSNAME,
+  SELECTED_TAG_BADGE_TRIGGER_CLASSNAME,
+  useSelectedTagBadgeStyle,
+} from "@/components/tag/tag-badge-selection";
 import { OrTagBadge, TagBadgeFromString } from "@/components/tag/tag-badge";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
+import { useRovingTagActionTriggers } from "@/components/tag/tag-list-focus";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
 import {
@@ -93,17 +100,15 @@ const FOCUSED_ROOT_QUERY_BUILDER_CLASSNAME = cn(
   "*:data-[level='0']:p-0",
 );
 
-const PRIMARY_BADGE_OVERLAY_HEX = "#6468f0";
-
-const PICKED_STAGED_TAG_CLASSNAME =
-  "shadow-[inset_0_0_0_2px_var(--badge-overlay)]";
-
 const STAGED_OR_GROUP_BUTTON_CLASSNAME = cn(
   "group/staged-or inline-flex flex-wrap gap-1.5 rounded-4xl",
   "border-0 bg-transparent text-inherit outline-none",
-  "focus-visible:ring-primary/80 focus-visible:ring-[3px]",
+  "focus-visible:ring-[3px] focus-visible:ring-(--selected-tag-focus)",
   "focus-visible:ring-offset-background focus-visible:ring-offset-2",
 );
+
+const STAGED_TAG_BUTTON_CLASSNAME =
+  "inline-flex rounded-4xl border-0 bg-transparent p-0 text-inherit outline-none";
 
 const STAGED_OR_GROUP_BADGE_CLASSNAME = cn(
   "group-hover/staged-or:before:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
@@ -309,16 +314,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       getThemeAdjustedColorFromHex(getSortColorHex(sortType, sortAsc), theme),
     [sortType, sortAsc, theme],
   );
-  const pickedStagedTagStyle = useMemo(
-    () =>
-      ({
-        "--badge-overlay": getThemeAdjustedColorFromHex(
-          PRIMARY_BADGE_OVERLAY_HEX,
-          theme,
-        ),
-      }) as ComponentProps<typeof TagBadgeFromString>["style"],
-    [theme],
-  );
+  const pickedStagedTagStyle = useSelectedTagBadgeStyle();
 
   const searchDisabled = hydrusSearch.length === 0;
   const selectedRootSectionId =
@@ -647,6 +643,9 @@ function StagedSearchTagList({
   onFileServiceSelect: () => void;
 }) {
   const hasTags = entries.length > 0;
+  const rovingTriggers = useRovingTagActionTriggers({
+    itemCount: entries.length + 1 + (fileServiceLabel ? 1 : 0),
+  });
 
   if (!hasTags && !fileServiceLabel) {
     return (
@@ -662,10 +661,10 @@ function StagedSearchTagList({
 
   return (
     <div className="flex flex-wrap gap-1.5 select-none **:select-none max-sm:gap-1">
-      {entries.map(({ key, sectionId, entry }) => {
+      {entries.map(({ key, sectionId, entry }, index) => {
         const isPicked = selectedRootSectionId === sectionId;
         const isOrGroup = Array.isArray(entry);
-        const stagedTagClassName = cn(isPicked && PICKED_STAGED_TAG_CLASSNAME);
+        const stagedTagClassName = cn(isPicked && SELECTED_TAG_BADGE_CLASSNAME);
 
         return (
           <StagedSearchTagButton
@@ -673,6 +672,7 @@ function StagedSearchTagList({
             isPicked={isPicked}
             className={isOrGroup ? STAGED_OR_GROUP_BUTTON_CLASSNAME : undefined}
             onClick={() => onRootEntrySelect(sectionId)}
+            rovingProps={rovingTriggers.getButtonProps(index)}
           >
             {isOrGroup ? (
               <OrTagBadge
@@ -697,24 +697,28 @@ function StagedSearchTagList({
           </StagedSearchTagButton>
         );
       })}
-      <StagedSearchTagButton isPicked={sortPicked} onClick={onSortSelect}>
+      <StagedSearchTagButton
+        isPicked={sortPicked}
+        onClick={onSortSelect}
+        rovingProps={rovingTriggers.getButtonProps(entries.length)}
+      >
         <SearchSortTag
           label={sortLabel}
           color={sortColor}
           size="compact-mobile-wrap"
-          className={cn(sortPicked && PICKED_STAGED_TAG_CLASSNAME)}
-          style={sortPicked ? pickedStagedTagStyle : undefined}
+          selected={sortPicked}
         />
       </StagedSearchTagButton>
       {fileServiceLabel && (
         <StagedSearchTagButton
           isPicked={fileServicePicked}
           onClick={onFileServiceSelect}
+          rovingProps={rovingTriggers.getButtonProps(entries.length + 1)}
         >
           <TagBadgeFromString
             displayTag={fileServiceLabel}
             size="compact-mobile-wrap"
-            className={cn(fileServicePicked && PICKED_STAGED_TAG_CLASSNAME)}
+            className={cn(fileServicePicked && SELECTED_TAG_BADGE_CLASSNAME)}
             style={fileServicePicked ? pickedStagedTagStyle : undefined}
           />
         </StagedSearchTagButton>
@@ -782,18 +786,29 @@ function StagedSearchTagButton({
   className,
   isPicked = false,
   onClick,
+  rovingProps,
 }: {
   children: ReactNode;
   className?: string;
   isPicked?: boolean;
   onClick: () => void;
+  rovingProps?: RovingTagButtonProps;
 }) {
+  const focusStyle = useSelectedTagBadgeStyle("--selected-tag-overlay");
+  const hasFocusContainer = className !== undefined;
+
   return (
     <button
       type="button"
       aria-pressed={isPicked}
-      className={cn(className ?? "contents", "**:cursor-pointer")}
+      style={focusStyle}
+      className={cn(
+        className ?? STAGED_TAG_BUTTON_CLASSNAME,
+        !hasFocusContainer && SELECTED_TAG_BADGE_TRIGGER_CLASSNAME,
+        "**:cursor-pointer",
+      )}
       onClick={onClick}
+      {...rovingProps}
     >
       {children}
     </button>

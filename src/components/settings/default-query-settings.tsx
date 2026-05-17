@@ -5,11 +5,17 @@ import { useCallback, useMemo } from "react";
 import { IconEraser } from "@tabler/icons-react";
 import type { RuleType } from "react-querybuilder";
 import type { DropdownMenuHandle } from "@/components/ui-primitives/dropdown-menu";
+import type { RovingTagButtonProps } from "@/components/tag/tag-list-focus";
 import {
   isSystemTag,
   useFavouriteTagAction,
 } from "@/components/tag/tag-actions";
 import { TagBadgeFromString } from "@/components/tag/tag-badge";
+import {
+  INTERACTIVE_TAG_BADGE_TRIGGER_CLASSNAME,
+  useSelectedTagBadgeStyle,
+} from "@/components/tag/tag-badge-selection";
+import { useRovingTagActionTriggers } from "@/components/tag/tag-list-focus";
 import {
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -112,17 +118,23 @@ function DefaultQueryTagTrigger({
   displayTag,
   ruleIndex,
   menuHandle,
+  rovingProps,
 }: {
   displayTag: string;
   ruleIndex: number;
   menuHandle: DropdownMenuHandle<DefaultQueryMenuPayload>;
+  rovingProps: RovingTagButtonProps;
 }) {
+  const focusStyle = useSelectedTagBadgeStyle("--selected-tag-overlay");
+
   return (
     <DropdownMenuTrigger
       type="button"
       handle={menuHandle}
       payload={{ tag: displayTag, ruleIndex }}
-      className="cursor-pointer select-none **:select-none"
+      style={focusStyle}
+      className={INTERACTIVE_TAG_BADGE_TRIGGER_CLASSNAME}
+      {...rovingProps}
     >
       <TagBadgeFromString displayTag={displayTag} size="default-wrap" />
     </DropdownMenuTrigger>
@@ -155,6 +167,9 @@ export function DefaultQuerySettings() {
     });
     return rules;
   }, [defaultQuery.query.rules]);
+  const rovingTriggers = useRovingTagActionTriggers({
+    itemCount: displayRules.length,
+  });
 
   const handleRemoveRule = useCallback(
     (ruleIndex: number) => {
@@ -205,12 +220,13 @@ export function DefaultQuerySettings() {
           </div>
           <div className="flex flex-wrap gap-1.5">
             {displayRules.length > 0 ? (
-              displayRules.map((rule) => (
+              displayRules.map((rule, triggerIndex) => (
                 <DefaultQueryTagTrigger
                   key={rule.index}
                   displayTag={rule.displayTag}
                   ruleIndex={rule.index}
                   menuHandle={menuHandle}
+                  rovingProps={rovingTriggers.getButtonProps(triggerIndex)}
                 />
               ))
             ) : (

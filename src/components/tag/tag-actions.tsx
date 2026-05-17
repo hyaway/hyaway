@@ -20,7 +20,15 @@ import {
   IconSearch,
   IconTagStarred,
 } from "@tabler/icons-react";
-import type { CSSProperties, ComponentType, ReactNode, SVGProps } from "react";
+import type {
+  CSSProperties,
+  ComponentType,
+  FocusEventHandler,
+  KeyboardEventHandler,
+  ReactNode,
+  Ref,
+  SVGProps,
+} from "react";
 import type { DropdownMenuHandle } from "@/components/ui-primitives/dropdown-menu";
 import {
   DropdownMenuContent,
@@ -51,6 +59,10 @@ import { useSidebarStoreActions } from "@/stores/sidebar-store";
 import { CrossedOutIcon } from "@/components/ratings/crossed-out-icon";
 import { parseTag } from "@/lib/tag-utils";
 import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
+import {
+  INTERACTIVE_TAG_BADGE_TRIGGER_CLASSNAME,
+  useSelectedTagBadgeStyle,
+} from "@/components/tag/tag-badge-selection";
 
 function IconTagUnstarred(props: SVGProps<SVGSVGElement>) {
   return (
@@ -353,7 +365,11 @@ function CopyTagMenuItem({ tag }: { tag: string }) {
       </span>
       <span className="min-w-0 flex-1 wrap-anywhere text-(--badge-overlay)">
         {negated ? "-" : ""}
-        {namespace ? `${namespace}: ` : ""}
+        {namespace ? (
+          <>
+            <span className="whitespace-nowrap">{namespace}:</span>{" "}
+          </>
+        ) : null}
         {tagText}
       </span>
       {isFavourite && (
@@ -471,7 +487,11 @@ export const TagActionMenu = memo(function TagActionMenu({
     <DropdownMenuShared<TagActionMenuPayload>
       modal={false}
       content={(payload) => (
-        <DropdownMenuContent side={side} showBackdrop={false} className="w-auto">
+        <DropdownMenuContent
+          side={side}
+          showBackdrop={false}
+          className="w-auto"
+        >
           {payload?.tag && (
             <TagActionMenuContent key={payload.tag} tag={payload.tag} />
           )}
@@ -496,12 +516,23 @@ export function TagActionTrigger({
   tag,
   children,
   className,
+  onFocus,
+  onKeyDown,
+  onKeyDownCapture,
+  tabIndex,
+  triggerRef,
 }: {
   tag: string;
   children: ReactNode;
   className?: string;
+  onFocus?: FocusEventHandler<HTMLButtonElement>;
+  onKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
+  onKeyDownCapture?: KeyboardEventHandler<HTMLButtonElement>;
+  tabIndex?: number;
+  triggerRef?: Ref<HTMLButtonElement>;
 }) {
   const ctx = useContext(TagActionMenuContext);
+  const selectedTagStyle = useSelectedTagBadgeStyle("--selected-tag-overlay");
 
   // System namespace tags don't get action menus
   if (tag.startsWith("system:") || tag.startsWith("-system:")) {
@@ -517,7 +548,13 @@ export function TagActionTrigger({
       type="button"
       handle={ctx.menuHandle}
       payload={{ tag }}
-      className={cn("cursor-pointer select-none **:select-none", className)}
+      ref={triggerRef}
+      onFocus={onFocus}
+      onKeyDown={onKeyDown}
+      onKeyDownCapture={onKeyDownCapture}
+      style={selectedTagStyle}
+      tabIndex={tabIndex}
+      className={cn(INTERACTIVE_TAG_BADGE_TRIGGER_CLASSNAME, className)}
     >
       {children}
     </DropdownMenuTrigger>
