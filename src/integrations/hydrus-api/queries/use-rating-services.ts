@@ -6,7 +6,11 @@ import { isRatingService } from "../models";
 import { useGetServicesQuery } from "./services";
 import { usePrefetchServiceRatingSvgs } from "./service-rating-svg";
 import type { RatingServiceInfo, ServiceInfo } from "../models";
-import { useRatingsServiceSettings } from "@/stores/ratings-settings-store";
+import {
+  getRatingServiceSettings,
+  useRatingsServiceSettings,
+  useReadOnlyRatingServiceKeys,
+} from "@/stores/ratings-settings-store";
 
 /**
  * Type guard for rating services with overlay settings from Hydrus.
@@ -59,6 +63,43 @@ export function useRatingServices() {
     ratingServices,
     servicesMap,
     isLoading,
+    ...rest,
+  };
+}
+
+/** Hook that returns rating services that can be edited by hyAway. */
+export function useEditableRatingServices() {
+  const { ratingServices, ...rest } = useRatingServices();
+  const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
+
+  const editableRatingServices = useMemo(
+    () => ratingServices.filter(([key]) => !readOnlyServiceKeys.has(key)),
+    [ratingServices, readOnlyServiceKeys],
+  );
+
+  return {
+    ratingServices: editableRatingServices,
+    readOnlyServiceKeys,
+    ...rest,
+  };
+}
+
+/** Hook that returns rating services enabled for review editing. */
+export function useReviewRatingServices() {
+  const { ratingServices, ...rest } = useRatingServices();
+  const serviceSettings = useRatingsServiceSettings();
+
+  const reviewRatingServices = useMemo(
+    () =>
+      ratingServices.filter(([key]) => {
+        const settings = getRatingServiceSettings(serviceSettings, key);
+        return settings.showInReview && !settings.readOnly;
+      }),
+    [ratingServices, serviceSettings],
+  );
+
+  return {
+    ratingServices: reviewRatingServices,
     ...rest,
   };
 }

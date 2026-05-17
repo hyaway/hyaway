@@ -43,10 +43,7 @@ import {
 } from "@/integrations/hydrus-api/models";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
-import {
-  getReadOnlyRatingServiceKeys,
-  useRatingsServiceSettings,
-} from "@/stores/ratings-settings-store";
+import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
 import {
   LikeDislikeControl,
   NumericalRatingControl,
@@ -708,14 +705,10 @@ export function SwipeBindingsConfig({
   const bindings = useReviewSwipeBindings();
   const { setBinding, resetBindings } = useReviewSettingsActions();
   const { ratingServices } = useRatingServices();
-  const ratingsServiceSettings = useRatingsServiceSettings();
   const { hasPermission, isFetched: permissionsFetched } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
 
-  const readOnlyServiceKeys = useMemo(
-    () => getReadOnlyRatingServiceKeys(ratingsServiceSettings),
-    [ratingsServiceSettings],
-  );
+  const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
   const allRatingServiceKeys = useMemo(
     () => new Set(ratingServices.map(([key]) => key)),
     [ratingServices],

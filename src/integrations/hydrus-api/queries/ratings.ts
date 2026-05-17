@@ -5,10 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { setRating } from "../api-client";
 import { updateFileMetadataCaches } from "./file-metadata-cache";
 import type { FileMetadata, RatingValue, SetRatingOptions } from "../models";
-import {
-  isRatingServiceReadOnly,
-  useRatingsServiceSettings,
-} from "@/stores/ratings-settings-store";
+import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
 
 /** Returns the original metadata object when the rating is already current. */
 const updateRating = (
@@ -61,16 +58,11 @@ const getFileIdsFromOptions = (
  */
 export const useSetRatingMutation = () => {
   const queryClient = useQueryClient();
-  const ratingsServiceSettings = useRatingsServiceSettings();
+  const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
 
   return useMutation({
     mutationFn: (options: SetRatingOptions) => {
-      if (
-        isRatingServiceReadOnly(
-          ratingsServiceSettings,
-          options.rating_service_key,
-        )
-      ) {
+      if (readOnlyServiceKeys.has(options.rating_service_key)) {
         return Promise.resolve();
       }
 
@@ -78,12 +70,7 @@ export const useSetRatingMutation = () => {
     },
     // Optimistic update: update cache immediately before server call
     onMutate: async (variables) => {
-      if (
-        isRatingServiceReadOnly(
-          ratingsServiceSettings,
-          variables.rating_service_key,
-        )
-      ) {
+      if (readOnlyServiceKeys.has(variables.rating_service_key)) {
         return;
       }
 

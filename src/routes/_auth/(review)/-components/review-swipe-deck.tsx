@@ -45,10 +45,7 @@ import {
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { getFileMetadata } from "@/integrations/hydrus-api/api-client";
-import {
-  getReadOnlyRatingServiceKeys,
-  useRatingsServiceSettings,
-} from "@/stores/ratings-settings-store";
+import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
 
 /** Number of cards to render in the stack */
 const STACK_SIZE = 3;
@@ -225,7 +222,6 @@ export function useReviewSwipeDeck() {
   const nextFileIds = useReviewQueueNextFileIds(PREFETCH_COUNT);
   const { recordAction, undo } = useReviewQueueActions();
   const bindings = useReviewSwipeBindings();
-  const ratingsServiceSettings = useRatingsServiceSettings();
 
   const queryClient = useQueryClient();
 
@@ -238,10 +234,7 @@ export function useReviewSwipeDeck() {
 
   // Rating services (for filtering orphaned actions)
   const { ratingServices } = useRatingServices();
-  const readOnlyServiceKeys = useMemo(
-    () => getReadOnlyRatingServiceKeys(ratingsServiceSettings),
-    [ratingsServiceSettings],
-  );
+  const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
   const validServiceKeys = useMemo(
     () =>
       new Set(

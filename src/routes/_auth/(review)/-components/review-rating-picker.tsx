@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { IconHeart } from "@tabler/icons-react";
 import type {
   FileMetadata,
@@ -19,12 +19,8 @@ import {
   isNumericalRatingService,
 } from "@/integrations/hydrus-api/models";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
-import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useReviewRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
-import {
-  getRatingServiceSettings,
-  useRatingsServiceSettings,
-} from "@/stores/ratings-settings-store";
 import { useReviewQueueCurrentFileId } from "@/stores/review-queue-store";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
@@ -54,19 +50,10 @@ import { Separator } from "@/components/ui-primitives/separator";
  * Returns services that are not excluded + relevant metadata.
  */
 export function useEnabledReviewRatingServices() {
-  const { ratingServices, isLoading } = useRatingServices();
-  const serviceSettings = useRatingsServiceSettings();
+  const { ratingServices: enabledServices, isLoading } =
+    useReviewRatingServices();
   const { hasPermission, isFetched: permissionsFetched } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
-
-  const enabledServices = useMemo(
-    () =>
-      ratingServices.filter(([key]) => {
-        const settings = getRatingServiceSettings(serviceSettings, key);
-        return settings.showInReview && !settings.readOnly;
-      }),
-    [ratingServices, serviceSettings],
-  );
 
   return {
     enabledServices,

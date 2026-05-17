@@ -20,10 +20,7 @@ import { useRatingsToShow } from "@/hooks/use-ratings-to-show";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
-import {
-  isRatingServiceReadOnly,
-  useRatingsServiceSettings,
-} from "@/stores/ratings-settings-store";
+import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
 import { useShapeIcons } from "@/components/ratings/use-shape-icons";
 import { RatingsOverlayBadge } from "@/components/ratings/ratings-overlay-badge";
 import {
@@ -45,7 +42,7 @@ interface FileRatingsSectionProps {
 export function FileRatingsSection({ data }: FileRatingsSectionProps) {
   const { ratingServices, isLoading: servicesLoading } = useRatingServices();
   const ratingsToShow = useRatingsToShow(data);
-  const ratingsServiceSettings = useRatingsServiceSettings();
+  const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
   const { hasPermission } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
   // Read-only ratings use overlay visibility so "show when unset" controls whether they appear.
@@ -56,14 +53,11 @@ export function FileRatingsSection({ data }: FileRatingsSectionProps) {
   const visibleRatingServices = useMemo(
     () =>
       ratingServices.filter(([serviceKey]) => {
-        const readOnly = isRatingServiceReadOnly(
-          ratingsServiceSettings,
-          serviceKey,
-        );
+        const readOnly = readOnlyServiceKeys.has(serviceKey);
 
         return !readOnly || readonlyVisibleServiceKeys.has(serviceKey);
       }),
-    [ratingServices, ratingsServiceSettings, readonlyVisibleServiceKeys],
+    [ratingServices, readOnlyServiceKeys, readonlyVisibleServiceKeys],
   );
 
   if (servicesLoading || visibleRatingServices.length === 0) {
@@ -82,10 +76,7 @@ export function FileRatingsSection({ data }: FileRatingsSectionProps) {
       />
       <div className="flex flex-col gap-3">
         {visibleRatingServices.map(([serviceKey, service]) => {
-          const readOnly = isRatingServiceReadOnly(
-            ratingsServiceSettings,
-            serviceKey,
-          );
+          const readOnly = readOnlyServiceKeys.has(serviceKey);
 
           return (
             <RatingControl

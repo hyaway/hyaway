@@ -25,10 +25,7 @@ import {
   useReviewShortcutsEnabled,
   useReviewSwipeBindings,
 } from "@/stores/review-settings-store";
-import {
-  getReadOnlyRatingServiceKeys,
-  useRatingsServiceSettings,
-} from "@/stores/ratings-settings-store";
+import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useFileActions } from "@/hooks/use-file-actions";
@@ -90,11 +87,7 @@ export function ReviewFooter({
 }: ReviewFooterProps) {
   const showShortcuts = useReviewShortcutsEnabled();
   const bindings = useReviewSwipeBindings();
-  const ratingsServiceSettings = useRatingsServiceSettings();
-  const readOnlyServiceKeys = useMemo(
-    () => getReadOnlyRatingServiceKeys(ratingsServiceSettings),
-    [ratingsServiceSettings],
-  );
+  const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
   const editableBindings = useMemo(
     () =>
       stripRatingActionsForServicesFromBindings(bindings, readOnlyServiceKeys),

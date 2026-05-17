@@ -1,6 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useMemo } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
@@ -163,6 +164,15 @@ export const useRatingsOverlayMode = () =>
 /** Get all service settings map */
 export const useRatingsServiceSettings = () =>
   useRatingsSettingsStore((state) => state.serviceSettings);
+
+/** Get the set of rating service keys marked read-only. */
+export const useReadOnlyRatingServiceKeys = () => {
+  const serviceSettings = useRatingsServiceSettings();
+  return useMemo(
+    () => getReadOnlyRatingServiceKeys(serviceSettings),
+    [serviceSettings],
+  );
+};
 
 /** Get actions for managing rating settings */
 export const useRatingsSettingsActions = () =>
