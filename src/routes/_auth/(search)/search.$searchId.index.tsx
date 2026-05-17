@@ -95,11 +95,14 @@ function SearchPage() {
     setPreserveCurrentScroll(true);
   };
 
-  const getFileLink: FileLinkBuilder = (fileId) =>
-    linkOptions({
-      to: "/search/$searchId/$fileId",
-      params: { searchId, fileId: String(fileId) },
-    });
+  const getFileLink = useCallback<FileLinkBuilder>(
+    (fileId) =>
+      linkOptions({
+        to: "/search/$searchId/$fileId",
+        params: { searchId, fileId: String(fileId) },
+      }),
+    [searchId],
+  );
 
   const refetchButton = (
     <RefetchButton
