@@ -43,8 +43,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
 import {
+  useOtherSearchKeys,
+  usePinnedSearchKeys,
   useSearchDisplayName,
-  useSearchKeys,
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
@@ -247,37 +248,12 @@ export function useSearchTagActions(
   ]);
 }
 
-export function useCurrentSearchTagActions(
-  tag: string,
-): TagActionSection | null {
-  const params = useParams({ strict: false });
-  const searchId =
-    "searchId" in params && typeof params.searchId === "string"
-      ? params.searchId
-      : undefined;
-  const displayName = useSearchDisplayName(searchId ?? "");
-  const actions = useSearchTagActions(tag, searchId);
-
-  return useMemo(() => {
-    if (!searchId || actions.length === 0) return null;
-    return {
-      id: "current-search",
-      label: `${displayName} (current search)`,
-      actions,
-    };
-  }, [searchId, displayName, actions]);
-}
-
 export function useTagActionSections(tag: string): Array<TagActionSection> {
   const newSearchAction = useNewSearchTagAction(tag);
-  const currentSearchSection = useCurrentSearchTagActions(tag);
 
   return useMemo(
-    () => [
-      { id: "new-search", actions: [newSearchAction] },
-      ...(currentSearchSection ? [currentSearchSection] : []),
-    ],
-    [newSearchAction, currentSearchSection],
+    () => [{ id: "new-search", actions: [newSearchAction] }],
+    [newSearchAction],
   );
 }
 
@@ -380,11 +356,17 @@ function CopyTagMenuItem({ tag }: { tag: string }) {
   );
 }
 
-function TagActionMenuActionItem({ action }: { action: TagAction }) {
+function TagActionMenuActionItem({
+  action,
+  closeOnClick = action.closeOnClick ?? false,
+}: {
+  action: TagAction;
+  closeOnClick?: boolean;
+}) {
   return (
     <DropdownMenuItem
       onClick={action.onClick}
-      closeOnClick={action.closeOnClick ?? false}
+      closeOnClick={closeOnClick}
       className="cursor-pointer"
     >
       <action.icon />
@@ -396,9 +378,11 @@ function TagActionMenuActionItem({ action }: { action: TagAction }) {
 function SearchTagActionSubmenu({
   tag,
   searchId,
+  secondaryLabel,
 }: {
   tag: string;
   searchId: string;
+  secondaryLabel?: string;
 }) {
   const displayName = useSearchDisplayName(searchId);
   const actions = useSearchTagActions(tag, searchId);
@@ -408,13 +392,24 @@ function SearchTagActionSubmenu({
   return (
     <DropdownMenuSub>
       <DropdownMenuSubTrigger className="min-w-56">
-        <span className="max-w-64 truncate">{displayName}</span>
+        <span className="flex min-w-0 flex-col items-start gap-0.5">
+          <span className="max-w-64 truncate">{displayName}</span>
+          {secondaryLabel && (
+            <span className="text-muted-foreground max-w-64 truncate text-xs/5">
+              {secondaryLabel}
+            </span>
+          )}
+        </span>
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
         <DropdownMenuGroup>
           <DropdownMenuLabel>{displayName}</DropdownMenuLabel>
           {actions.map((action) => (
-            <TagActionMenuActionItem key={action.id} action={action} />
+            <TagActionMenuActionItem
+              key={action.id}
+              action={action}
+              closeOnClick={false}
+            />
           ))}
         </DropdownMenuGroup>
       </DropdownMenuSubContent>
@@ -422,10 +417,75 @@ function SearchTagActionSubmenu({
   );
 }
 
-function SearchTagActionsSubmenu({ tag }: { tag: string }) {
-  const searchIds = useSearchKeys();
+function CurrentSearchTagActionSubmenu({ tag }: { tag: string }) {
+  const params = useParams({ strict: false });
+  const searchId =
+    "searchId" in params && typeof params.searchId === "string"
+      ? params.searchId
+      : undefined;
 
+  if (!searchId) return null;
+
+  return (
+    <SearchTagActionSubmenu
+      tag={tag}
+      searchId={searchId}
+      secondaryLabel="current search"
+    />
+  );
+}
+
+function SearchTagActionGroupSubmenu({
+  label,
+  searchIds,
+  tag,
+}: {
+  label: string;
+  searchIds: Array<string>;
+  tag: string;
+}) {
   if (searchIds.length === 0) return null;
+
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>{label}</DropdownMenuSubTrigger>
+      <DropdownMenuSubContent className="max-h-[60dvh] min-w-56">
+        {searchIds.map((searchId) => (
+          <SearchTagActionSubmenu
+            key={searchId}
+            tag={tag}
+            searchId={searchId}
+          />
+        ))}
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
+  );
+}
+
+function SearchTagActionsSubmenu({ tag }: { tag: string }) {
+  const params = useParams({ strict: false });
+  const currentSearchId =
+    "searchId" in params && typeof params.searchId === "string"
+      ? params.searchId
+      : undefined;
+  const pinnedSearchIds = usePinnedSearchKeys();
+  const otherSearchIds = useOtherSearchKeys();
+  const visiblePinnedSearchIds = useMemo(
+    () => pinnedSearchIds.filter((searchId) => searchId !== currentSearchId),
+    [currentSearchId, pinnedSearchIds],
+  );
+  const visibleOtherSearchIds = useMemo(
+    () => otherSearchIds.filter((searchId) => searchId !== currentSearchId),
+    [currentSearchId, otherSearchIds],
+  );
+
+  if (
+    !currentSearchId &&
+    visiblePinnedSearchIds.length === 0 &&
+    visibleOtherSearchIds.length === 0
+  ) {
+    return null;
+  }
 
   return (
     <>
@@ -436,13 +496,17 @@ function SearchTagActionsSubmenu({ tag }: { tag: string }) {
           Searches
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="min-w-64">
-          {searchIds.map((searchId) => (
-            <SearchTagActionSubmenu
-              key={searchId}
-              tag={tag}
-              searchId={searchId}
-            />
-          ))}
+          <CurrentSearchTagActionSubmenu tag={tag} />
+          <SearchTagActionGroupSubmenu
+            label="Pinned"
+            searchIds={visiblePinnedSearchIds}
+            tag={tag}
+          />
+          <SearchTagActionGroupSubmenu
+            label="Others"
+            searchIds={visibleOtherSearchIds}
+            tag={tag}
+          />
         </DropdownMenuSubContent>
       </DropdownMenuSub>
     </>

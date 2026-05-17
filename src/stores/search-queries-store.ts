@@ -66,6 +66,7 @@ function defaultEntry(): SearchQueryEntry {
   return {
     staged: getDefaultQuery(),
     committed: undefined,
+    pinned: false,
   };
 }
 
@@ -119,6 +120,8 @@ type SearchQueriesState = {
     ) => void;
     /** Set the user-facing display name for an entry. */
     setDisplayName: (key: string, displayName: string) => void;
+    /** Set whether an entry is pinned in search lists. */
+    setPinned: (key: string, pinned: boolean) => void;
     /** Update the staged sort for an entry. */
     setStagedSort: (key: string, sort: SortConfig) => void;
     /** Update the staged file domain for an entry. */
@@ -169,6 +172,18 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
           const existing = key in entries;
           const entry = entries[key] ?? defaultEntry();
           const updated = { ...entry, displayName };
+          set({
+            entries: existing
+              ? { ...entries, [key]: updated }
+              : { [key]: updated, ...entries },
+          });
+        },
+
+        setPinned: (key, pinned) => {
+          const { entries } = get();
+          const existing = key in entries;
+          const entry = entries[key] ?? defaultEntry();
+          const updated = { ...entry, pinned };
           set({
             entries: existing
               ? { ...entries, [key]: updated }
@@ -295,6 +310,7 @@ const useSearchQueriesStore = create<SearchQueriesState>()(
                 staged: source.staged,
                 committed: source.committed,
                 displayName: newDisplayName,
+                pinned: source.pinned,
               };
             } else {
               newEntries[key] = entries[key];
@@ -393,6 +409,22 @@ export const useSearchQueryCount = () =>
 /** Get all search keys. */
 export const useSearchKeys = () =>
   useSearchQueriesStore(useShallow((state) => Object.keys(state.entries)));
+
+/** Get pinned search keys. */
+export const usePinnedSearchKeys = () =>
+  useSearchQueriesStore(
+    useShallow((state) =>
+      Object.keys(state.entries).filter((key) => state.entries[key].pinned),
+    ),
+  );
+
+/** Get unpinned search keys. */
+export const useOtherSearchKeys = () =>
+  useSearchQueriesStore(
+    useShallow((state) =>
+      Object.keys(state.entries).filter((key) => !state.entries[key].pinned),
+    ),
+  );
 
 /** Get display name for a search entry (falls back to key). */
 export const useSearchDisplayName = (key: string) =>

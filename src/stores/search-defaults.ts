@@ -221,6 +221,8 @@ export type SearchQueryEntry = {
   committed: SearchState | undefined;
   /** User-facing name. Falls back to the entry key when absent. */
   displayName?: string;
+  /** Whether the search should appear in pinned search lists. */
+  pinned: boolean;
 };
 
 /**
