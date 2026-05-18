@@ -3,6 +3,7 @@
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
+  "packageManager": "pnpm@11.0.9",
   "scripts": {
     "dev": "vite --port 3000",
     "dev:host": "vite --port 3000 --host",
