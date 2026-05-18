@@ -31,6 +31,7 @@ All notable changes to hyAway are documented here.
 - Review completion now includes a "New random inbox" action that fetches a fresh random inbox set when opened
 - Opening "Recently inboxed" from review completion now refreshes that gallery before navigation
 - "Add to review" actions now use a distinct cards-with-plus icon to differentiate them from "New review"
+- Documentation screenshots have been updated to show new features
 - Updated major dependencies including Vite 8, TypeScript 6, ESLint 10, and react-zoom-pan-pinch 4
 
 ### Fixed
