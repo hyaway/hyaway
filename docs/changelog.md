@@ -8,44 +8,40 @@ All notable changes to hyAway are documented here.
 
 ### Added
 
-- **Search page** — New dedicated search experience accessible from the homepage and sidebar, with persistent search tabs that survive navigation
-- **Query builder** — Visual query builder for constructing complex searches with tag rules, OR groups, and negation
-- **System predicates** — Build searches using system predicates for file properties, dimensions, duration, file type, tags, time, URLs, notes, ratings, and file viewing statistics
-- **Sort controls** — Sort search results by import time, file size, dimensions, duration, number of tags, views, random, hash, and color properties with ascending/descending direction
-- **Instant search** — Toggle per-search-tab instant mode that automatically re-fetches results as rules change, without needing to press a search button
-- **Tag autocomplete** — Autocomplete input for tags powered by the Hydrus tag search API, with support for namespace colors
-- **Tag actions** — Right-click (or long-press) any tag badge to start a new search, include/exclude it from the current search, or add/remove it from favourites
-- **Favourite tags** — Save tags as favourites via the Hydrus API; favourite tags now show a special icon
-- **Default query** — Save a default set of tags and system predicates that pre-populate every new search tab
-- **Auto-generated search names** — New search tabs get readable auto-generated names based on their query rules
-- **PIN lock** — Protect the app with a 4-digit PIN required each new session
-- **Auto-lock** — Optionally lock the app after being in the background for a configurable duration
-- **Read-only ratings** — Rating services can now be marked read-only so their values remain visible without edit controls on file pages or review actions
-- **Pinned searches** — Search tabs can now be pinned so important searches stay available while clearing or managing the rest
-- **Custom search actions** — Search actions now support include/exclude behavior and direct search creation from pages and tag menus
-- Lock button in the sidebar header for quick manual locking
-- "Forgot PIN?" popover on the lock screen that clears the PIN and disconnects from the API
+- **Search page** — New Search page accessible from the homepage and sidebar, with saved searches
+- **Query builder** — Visual builder for complex searches with tag rules, OR groups, and negation
+- **System predicates** — Build searches using Hydrus system predicates for file properties, dimensions, duration, file type, tags, and related metadata
+- **Sort controls** — Sort search results by import time, file size, dimensions, duration, tag count, views, random order, hash, and color properties
+- **Tag autocomplete** — Autocomplete tag input powered by Hydrus tag search
+- **Instant search** — Automatically re-fetch results as search rules change
+- **Pinned searches** — Pin search tabs so important searches stay available while clearing or managing the rest
+- **Default query** — Save a default set of tags and system predicates that pre-populate each new search tab
+- **Favourite tags** — Save favourite tags in Hydrus; favourite tags now show a special icon wherever tags are displayed
+- **Favourite tags autosuggest** — Favourite tags appear in search autosuggest by default
+- **Tag actions** — Press any tag badge to start a new search, include or exclude it from saved searches, or add or remove it from favourites
+- **PIN lock** — Protect the app with a 4-digit PIN required for each new session
+- **Read-only ratings** — Mark rating services as read-only so their values stay visible without edit controls on file pages or review actions
 
 ### Changed
 
-- Updated major dependencies: Vite 8, TypeScript 6, ESLint 10, react-zoom-pan-pinch 4, and others
-- "Add to review" actions now show a distinct cards-with-plus icon to differentiate from "New review"
+- Reset connection settings now offers two actions: reset API values only, or reset API values and clear saved data such as searches, review queue, and watch history
+- Opened Hydrus pages now show their parent page path above the title, with hierarchy colors matching the pages list
 - Page breadcrumbs now show the actual page name and parent group path instead of the URL slug
-- Reset connection settings card now offers two separate actions: reset API values only, or reset and clear all saved data (searches, review queue, watch history)
-- Review completion now offers a "New random inbox" action that fetches a fresh random inbox set when opened
+- Pages search fields now include clear buttons in both the main page view and the pages sidebar
+- Review completion now includes a "New random inbox" action that fetches a fresh random inbox set when opened
 - Opening "Recently inboxed" from review completion now refreshes that gallery before navigation
-- Opened Hydrus pages now show their parent page path above the title with matching hierarchy styling and quick links back to filtered pages
-- Pages search fields now include buttons to clear query in both the main page view and the pages sidebar
+- "Add to review" actions now use a distinct cards-with-plus icon to differentiate them from "New review"
+- Updated major dependencies including Vite 8, TypeScript 6, ESLint 10, and react-zoom-pan-pinch 4
 
 ### Fixed
 
-- File actions now update gallery metadata immediately after trashing, restoring, archiving, unarchiving, rating, or clearing view stats, so returning from a file detail page shows the correct file state and icons
+- Large collections with 100k+ files now load faster; searches and metadata fetching no longer cause the UI to hang
+- File actions now update gallery metadata more consistently after trashing, restoring, archiving, unarchiving, rating, or clearing view stats, so returning from a file detail page shows the correct file state and icons
 - Image viewer background now correctly matches the fill-canvas placeholder to the configured background preference
-- Image loading now respects the media viewer background preferences, preventing a brief average-color flash when opening images
-- Significantly improved speed when loading large collections (100k+ files) — searches and metadata fetching no longer cause the UI to hang
+- File viewer image loading UI now respects the media viewer background preferences, preventing a brief average-color flash when opening images
+- Light theme text no longer appears thin because it now uses subpixel antialiasing for fuller weight
+- Inputs and form fields now have darker borders in light theme
 - Page headings no longer take excessive vertical space when text wraps to multiple lines
-- Inputs and form fields are now more visible in light theme with darker borders
-- Light theme text no longer appears thin. It now uses subpixel antialiasing for fuller weight
 - Pages search inputs now preserve typed spaces while still trimming searches and highlights correctly
 
 ---
