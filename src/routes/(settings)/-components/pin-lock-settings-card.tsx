@@ -75,6 +75,7 @@ export function PinLockSettingsCard() {
   const handleSavePin = () => {
     if (newPin.length < PIN_LENGTH) return;
     setPin(newPin);
+    window.scrollTo({ top: 0, behavior: "auto" });
     // Lock session to show the lock screen immediately
     lockSession();
   };
