@@ -47,7 +47,7 @@ export function SearchIndexSettingsPopover() {
       </div>
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Clear ALL saved searches</span>
+          <span className="text-sm font-medium">Clear all saved searches</span>
           <span className="text-muted-foreground text-xs">
             {queryCount} {queryCount === 1 ? "search" : "searches"} saved
           </span>
