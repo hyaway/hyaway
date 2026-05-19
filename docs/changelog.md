@@ -1,3 +1,7 @@
+---
+outline: 2
+---
+
 # Changelog
 
 All notable changes to hyAway are documented here.

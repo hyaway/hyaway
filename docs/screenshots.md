@@ -16,8 +16,6 @@ A visual tour of hyAway's main features.
 
 ![Skip gesture](images/screenshots/review-queue-3.png)
 
----
-
 ## Gallery
 
 ![Masonry gallery](images/screenshots/gallery-1.png)
@@ -25,8 +23,6 @@ A visual tour of hyAway's main features.
 ### Tags sidebar
 
 ![Gallery with tags sidebar](images/screenshots/gallery-2.png)
-
----
 
 ## File viewer
 
@@ -48,8 +44,6 @@ A visual tour of hyAway's main features.
 
 ![Video player](images/screenshots/file-viewer-4.png)
 
----
-
 ## Hydrus pages
 
 ### Pages index
@@ -63,8 +57,6 @@ A visual tour of hyAway's main features.
 ### Pages filtering
 
 ![Pages filtering with highlighting](images/screenshots/pages-3.png)
-
----
 
 ## Search
 
@@ -82,19 +74,15 @@ A visual tour of hyAway's main features.
 
 ### Saved searches
 
-## ![Search page with saved searches](images/screenshots/search-4.png)
+![Search page with saved searches](images/screenshots/search-4.png)
 
 ## Watch history
 
 ![Watch history](images/screenshots/watch-history-1.png)
 
----
-
 ## Customization
 
 ![Settings and customization](images/screenshots/customization-1.png)
-
----
 
 ## PIN lock
 

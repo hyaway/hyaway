@@ -65,6 +65,9 @@ export default defineConfig({
       { text: "Screenshots", link: "/screenshots" },
       { text: "Changelog", link: "/changelog" },
     ],
+    outline: {
+      level: [2, 3],
+    },
     sidebar: [
       {
         text: "Introduction",
@@ -108,7 +111,10 @@ export default defineConfig({
       },
       {
         text: "Resources",
-        items: [{ text: "Changelog", link: "/changelog" }],
+        items: [
+          { text: "Changelog", link: "/changelog" },
+          { text: "Future development", link: "/guide/future-development" },
+        ],
       },
     ],
     socialLinks: [{ icon: "github", link: "https://github.com/hyaway/hyaway" }],
