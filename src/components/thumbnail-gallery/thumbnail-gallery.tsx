@@ -40,6 +40,7 @@ import {
   useGalleryImageBackground,
   useGalleryLinkImageBackground,
   useGalleryReflowDuration,
+  useGalleryShowFooter,
   useGalleryShowScrollBadge,
   useGalleryVerticalGap,
 } from "@/stores/gallery-settings-store";
@@ -131,6 +132,7 @@ export function PureThumbnailGallery({
   const customBaseWidth = useGalleryCustomBaseWidth();
   const verticalGap = useGalleryVerticalGap();
   const horizontalGap = useGalleryHorizontalGap();
+  const showFooter = useGalleryShowFooter();
 
   // Animation durations - set as CSS variables at root to avoid child re-renders
   const reflowDuration = useGalleryReflowDuration();
@@ -170,14 +172,15 @@ export function PureThumbnailGallery({
   // Both affect height calculation: lanes determines column count, width is used in aspect ratio calc
   const heightCache = useMemo(
     () => new Map<number, number>(),
-    [effectiveLanes, width],
+    [effectiveLanes, width, showFooter],
   );
 
   const getItemHeight = (item: FileMetadata) => {
     const cached = heightCache.get(item.file_id);
     if (cached !== undefined) return cached;
     const aspectRatio = Math.max(Math.min(item.height / item.width, 2), 0.33);
-    const height = Math.max(aspectRatio * width, 64) + ITEM_FOOTER_HEIGHT;
+    const footerHeight = showFooter ? ITEM_FOOTER_HEIGHT : 0;
+    const height = Math.max(aspectRatio * width, 64) + footerHeight;
     heightCache.set(item.file_id, height);
     return height;
   };
@@ -252,7 +255,14 @@ export function PureThumbnailGallery({
   // Re-measure when items or dimensions change
   useEffect(() => {
     rowVirtualizer.measure();
-  }, [deferredItems, width, lanes, deferredVerticalGap, rowVirtualizer]);
+  }, [
+    deferredItems,
+    width,
+    lanes,
+    deferredVerticalGap,
+    showFooter,
+    rowVirtualizer,
+  ]);
 
   const showScrollBadge = useGalleryShowScrollBadge();
 

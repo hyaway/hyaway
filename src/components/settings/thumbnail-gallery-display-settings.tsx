@@ -30,10 +30,12 @@ import {
   useGalleryImageBackground,
   useGalleryLastOpenSection,
   useGalleryLinkImageBackground,
+  useGalleryLoadFullSizeImages,
   useGalleryMaxLanes,
   useGalleryMinLanes,
   useGalleryReflowDuration,
   useGallerySettingsActions,
+  useGalleryShowFooter,
   useGalleryShowScrollBadge,
   useGalleryVerticalGap,
 } from "@/stores/gallery-settings-store";
@@ -101,8 +103,10 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryReflowDuration = useGalleryReflowDuration();
   const galleryEntryDuration = useGalleryEntryDuration();
   const galleryHoverZoomDuration = useGalleryHoverZoomDuration();
+  const galleryShowFooter = useGalleryShowFooter();
   const galleryImageBackground = useGalleryImageBackground();
   const galleryLinkImageBackground = useGalleryLinkImageBackground();
+  const galleryLoadFullSizeImages = useGalleryLoadFullSizeImages();
   const galleryLastOpenSection = useGalleryLastOpenSection();
   const fileViewerImageBackground = useImageBackground();
   const tagsSortMode = useTagsSortMode();
@@ -132,6 +136,8 @@ export function ThumbnailGalleryDisplaySettings({
     setHoverZoomDuration,
     setImageBackground: setGalleryImageBackground,
     setLinkImageBackground,
+    setLoadFullSizeImages,
+    setShowFooter,
     setLastOpenSection,
   } = useGallerySettingsActions();
 
@@ -302,6 +308,20 @@ export function ThumbnailGalleryDisplaySettings({
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
+        <SwitchField
+          id={`${idPrefix}use-full-size-images-switch`}
+          label="Use full-size images for thumbnails"
+          description="Will load original images instead of thumbnails when possible. This will increase load times and data usage."
+          checked={galleryLoadFullSizeImages}
+          onCheckedChange={setLoadFullSizeImages}
+        />
+        <SwitchField
+          id={`${idPrefix}show-footer-switch`}
+          label="Show footer strip"
+          description="Show the metadata strip below gallery images"
+          checked={galleryShowFooter}
+          onCheckedChange={setShowFooter}
+        />
         <SwitchField
           id={`${idPrefix}show-context-menu-switch`}
           label="Show context menu on right-click"

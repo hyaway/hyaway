@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 import {
   useGalleryEnableContextMenu,
   useGalleryEnableHoverZoom,
+  useGalleryLoadFullSizeImages,
+  useGalleryShowFooter,
 } from "@/stores/gallery-settings-store";
 
 export {
@@ -78,6 +80,8 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
   const [menuOpen, setMenuOpen] = useState(false);
   const enableContextMenu = useGalleryEnableContextMenu();
   const enableHoverZoom = useGalleryEnableHoverZoom();
+  const loadFullSizeImages = useGalleryLoadFullSizeImages();
+  const showFooter = useGalleryShowFooter();
   const fileLink = getFileLink(item.file_id);
 
   // Track lane changes to scale animation duration by distance
@@ -102,9 +106,10 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
 
   const { scale, horizontalOrigin } = useMemo(() => {
     // Base scale from thumbnail size (clamped between 1.05 and 3)
+    const sourceWidth = loadFullSizeImages ? item.width : item.thumbnail_width;
     const baseScale = Math.min(
       Math.max(
-        Math.min(lanes * width, (item.thumbnail_width ?? width) * 1.1) / width,
+        Math.min(lanes * width, (sourceWidth ?? width) * 1.1) / width,
         1.05,
       ),
       2.5,
@@ -138,7 +143,14 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
       scale: Math.min(baseScale, best.maxScale),
       horizontalOrigin: best.origin,
     };
-  }, [lanes, width, item.thumbnail_width, virtualRow.lane]);
+  }, [
+    lanes,
+    width,
+    item.width,
+    item.thumbnail_width,
+    loadFullSizeImages,
+    virtualRow.lane,
+  ]);
 
   const originClass = useMemo(() => {
     if (isTopRow) {
@@ -210,7 +222,11 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
           enableHoverZoom && originClass,
         )}
       >
-        <ThumbnailGalleryItemContent item={item} />
+        <ThumbnailGalleryItemContent
+          item={item}
+          loadFullSizeImages={loadFullSizeImages}
+          showFooter={showFooter}
+        />
       </div>
     </li>
   );

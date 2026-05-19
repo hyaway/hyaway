@@ -3,13 +3,21 @@
 
 import { useState } from "react";
 
-import { useThumbnailUrl } from "@/hooks/use-url-with-api-key";
+import {
+  useFullFileIdUrl,
+  useThumbnailUrl,
+} from "@/hooks/use-url-with-api-key";
+import { isStaticImage } from "@/lib/mime-utils";
 import { cn } from "@/lib/utils";
+
+type GalleryImageSource = "thumbnail" | "full";
 
 export interface ThumbnailImageProps extends React.HTMLAttributes<HTMLImageElement> {
   fileId: number;
   width?: number;
   height?: number;
+  mime?: string;
+  source?: GalleryImageSource;
   /** Image loading strategy. Defaults to "lazy". */
   loading?: "lazy" | "eager";
 }
@@ -19,22 +27,30 @@ export function ThumbnailImage({
   className,
   width,
   height,
+  mime,
+  source = "thumbnail",
   loading = "lazy",
 }: ThumbnailImageProps) {
-  const [loaded, setLoaded] = useState(false);
-  const { url, onLoad, onError } = useThumbnailUrl(fileId);
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
+  const thumbnail = useThumbnailUrl(fileId);
+  const fullFile = useFullFileIdUrl(fileId);
+  const shouldLoadFullImage =
+    source === "full" && !!mime && isStaticImage(mime);
+  const { url, onLoad, onError } = shouldLoadFullImage ? fullFile : thumbnail;
+  const loaded = loadedUrl === url;
 
   const handleLoad = () => {
-    setLoaded(true);
+    setLoadedUrl(url);
     onLoad();
   };
 
   return (
     <img
       src={url}
-      alt={`Thumbnail for file ID ${fileId}`}
+      alt={`${shouldLoadFullImage ? "Image" : "Thumbnail"} for file ID ${fileId}`}
       className={cn(
-        "h-full w-full object-cover starting:scale-98 starting:opacity-0",
+        "h-full w-full starting:scale-98 starting:opacity-0",
+        shouldLoadFullImage ? "object-contain" : "object-cover",
         "transition-[opacity,scale] duration-(--gallery-entry-duration)",
         // Before load: always use average color from parent's --average-color CSS variable
         !loaded && "bg-(--average-color,var(--muted))/50",

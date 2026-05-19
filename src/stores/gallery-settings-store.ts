@@ -27,6 +27,8 @@ type GallerySettingsState = {
   minLanes: number;
   maxLanes: number;
   expandImages: boolean;
+  loadFullSizeImages: boolean;
+  showFooter: boolean;
   showScrollBadge: boolean;
   enableContextMenu: boolean;
   enableHoverZoom: boolean;
@@ -43,6 +45,8 @@ type GallerySettingsState = {
   actions: {
     setLanesRange: (min: number, max: number) => void;
     setExpandImages: (expand: boolean) => void;
+    setLoadFullSizeImages: (load: boolean) => void;
+    setShowFooter: (show: boolean) => void;
     setShowScrollBadge: (show: boolean) => void;
     setEnableContextMenu: (show: boolean) => void;
     setEnableHoverZoom: (enable: boolean) => void;
@@ -66,6 +70,8 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
       minLanes: MIN_GALLERY_LANES,
       maxLanes: MAX_GALLERY_LANES,
       expandImages: true,
+      loadFullSizeImages: false,
+      showFooter: true,
       showScrollBadge: true,
       enableContextMenu: true,
       enableHoverZoom: true,
@@ -83,6 +89,9 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
         setLanesRange: (minLanes: number, maxLanes: number) =>
           set({ minLanes, maxLanes }),
         setExpandImages: (expandImages: boolean) => set({ expandImages }),
+        setLoadFullSizeImages: (loadFullSizeImages: boolean) =>
+          set({ loadFullSizeImages }),
+        setShowFooter: (showFooter: boolean) => set({ showFooter }),
         setShowScrollBadge: (showScrollBadge: boolean) =>
           set({ showScrollBadge }),
         setEnableContextMenu: (enableContextMenu: boolean) =>
@@ -124,6 +133,12 @@ export const useGalleryMaxLanes = () =>
 
 export const useGalleryExpandImages = () =>
   useGallerySettingsStore((state) => state.expandImages);
+
+export const useGalleryLoadFullSizeImages = () =>
+  useGallerySettingsStore((state) => state.loadFullSizeImages);
+
+export const useGalleryShowFooter = () =>
+  useGallerySettingsStore((state) => state.showFooter);
 
 export const useGalleryShowScrollBadge = () =>
   useGallerySettingsStore((state) => state.showScrollBadge);

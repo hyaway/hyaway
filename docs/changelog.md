@@ -8,6 +8,15 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-05-19
+
+### Added
+
+- **Full-size gallery images** — Thumbnail galleries can now load original static images instead of thumbnails
+- **Gallery footer toggle** — Gallery display settings now include a footer toggle for showing or hiding the metadata strip below images
+
+---
+
 ## 2026-05-17
 
 ### Added
