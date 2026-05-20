@@ -18,10 +18,12 @@ import {
   MAX_GALLERY_GAP,
   MAX_GALLERY_HOVER_SCALE_DURATION,
   MAX_GALLERY_LANES,
+  MAX_GALLERY_OPTIMIZE_SIZE_THRESHOLD_MB,
   MAX_GALLERY_REFLOW_DURATION,
   MAX_GALLERY_RENDER_QUALITY,
   MIN_GALLERY_BASE_WIDTH,
   MIN_GALLERY_LANES,
+  MIN_GALLERY_OPTIMIZE_SIZE_THRESHOLD_MB,
   MIN_GALLERY_RENDER_QUALITY,
   useGalleryBaseWidthMode,
   useGalleryCustomBaseWidth,
@@ -37,6 +39,7 @@ import {
   useGalleryLinkImageBackground,
   useGalleryMaxLanes,
   useGalleryMinLanes,
+  useGalleryOptimizeSizeThresholdMB,
   useGalleryReflowDuration,
   useGalleryRenderQuality,
   useGallerySettingsActions,
@@ -62,6 +65,11 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { PERMISSION_LABELS } from "@/integrations/hydrus-api/permissions";
+import {
+  formatOptimizeSizeThresholdMB,
+  sizeThresholdToSliderValue,
+  sliderValueToSizeThreshold,
+} from "@/lib/optimize-image-settings";
 
 function subscribeToWindowSize(callback: () => void) {
   window.addEventListener("resize", callback);
@@ -113,6 +121,7 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryLinkImageBackground = useGalleryLinkImageBackground();
   const galleryImageLoadMode = useGalleryImageLoadMode();
   const galleryRenderQuality = useGalleryRenderQuality();
+  const galleryOptimizeSizeThresholdMB = useGalleryOptimizeSizeThresholdMB();
   const galleryLastOpenSection = useGalleryLastOpenSection();
   const fileViewerImageBackground = useImageBackground();
   const tagsSortMode = useTagsSortMode();
@@ -144,6 +153,7 @@ export function ThumbnailGalleryDisplaySettings({
     setLinkImageBackground,
     setImageLoadMode,
     setRenderQuality,
+    setOptimizeSizeThresholdMB,
     setShowFooter,
     setLastOpenSection,
   } = useGallerySettingsActions();
@@ -336,10 +346,15 @@ export function ThumbnailGalleryDisplaySettings({
             <Label>Source</Label>
           </div>
           <div className="text-muted-foreground space-y-1 text-xs">
-            <p>Thumbnail keeps Hydrus thumbnails for the fastest browsing.</p>
-            <p>Optimized renders large static images to screen-sized WebP.</p>
             <p>
-              Full size loads original static images and will use way more
+              Thumbnail uses Hydrus thumbnails, which are fastest for browsing.
+            </p>
+            <p>
+              Optimized asks Hydrus for a smaller image, which can load faster
+              with a small quality tradeoff.
+            </p>
+            <p>
+              Full size uses the original image and will use much more
               bandwidth.
             </p>
           </div>
@@ -364,17 +379,37 @@ export function ThumbnailGalleryDisplaySettings({
           </ToggleGroup>
 
           {galleryImageLoadMode === "optimized" && (
-            <SliderField
-              id={`${idPrefix}render-quality-slider`}
-              label="Optimized quality"
-              value={galleryRenderQuality}
-              min={MIN_GALLERY_RENDER_QUALITY}
-              max={MAX_GALLERY_RENDER_QUALITY}
-              step={5}
-              onValueChange={setRenderQuality}
-              formatValue={(v) => `${v}`}
-              commitOnRelease
-            />
+            <>
+              <SliderField
+                id={`${idPrefix}render-quality-slider`}
+                label="Optimized quality"
+                value={galleryRenderQuality}
+                min={MIN_GALLERY_RENDER_QUALITY}
+                max={MAX_GALLERY_RENDER_QUALITY}
+                step={1}
+                onValueChange={setRenderQuality}
+                formatValue={(v) => `${v}`}
+                commitOnRelease
+              />
+              <SliderField
+                id={`${idPrefix}optimize-size-threshold-slider`}
+                label="Optimize images over"
+                value={sizeThresholdToSliderValue(
+                  galleryOptimizeSizeThresholdMB,
+                )}
+                min={MIN_GALLERY_OPTIMIZE_SIZE_THRESHOLD_MB}
+                max={MAX_GALLERY_OPTIMIZE_SIZE_THRESHOLD_MB + 1}
+                step={1}
+                onValueChange={(value) =>
+                  setOptimizeSizeThresholdMB(sliderValueToSizeThreshold(value))
+                }
+                formatValue={(value) => {
+                  const sizeMB = sliderValueToSizeThreshold(value);
+                  return formatOptimizeSizeThresholdMB(sizeMB);
+                }}
+                commitOnRelease
+              />
+            </>
           )}
         </div>
       </AccordionSection>

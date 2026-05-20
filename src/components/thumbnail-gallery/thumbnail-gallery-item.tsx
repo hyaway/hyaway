@@ -18,6 +18,7 @@ import {
   useGalleryEnableContextMenu,
   useGalleryEnableHoverZoom,
   useGalleryImageLoadMode,
+  useGalleryOptimizeSizeThresholdMB,
   useGalleryRenderQuality,
   useGalleryShowFooter,
 } from "@/stores/gallery-settings-store";
@@ -84,6 +85,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
   const enableHoverZoom = useGalleryEnableHoverZoom();
   const imageLoadMode = useGalleryImageLoadMode();
   const renderQuality = useGalleryRenderQuality();
+  const optimizeSizeThresholdMB = useGalleryOptimizeSizeThresholdMB();
   const showFooter = useGalleryShowFooter();
   const fileLink = getFileLink(item.file_id);
 
@@ -233,6 +235,7 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
           item={item}
           imageLoadMode={imageLoadMode}
           renderQuality={renderQuality}
+          optimizeSizeThresholdMB={optimizeSizeThresholdMB}
           showFooter={showFooter}
         />
       </div>

@@ -10,9 +10,11 @@ import {
   useThumbnailUrl,
 } from "@/hooks/use-url-with-api-key";
 import { isStaticImage } from "@/lib/mime-utils";
+import {
+  MB_IN_BYTES,
+  normalizeOptimizeSizeThresholdMB,
+} from "@/lib/optimize-image-settings";
 import { cn } from "@/lib/utils";
-
-const OPTIMIZED_IMAGE_SIZE_THRESHOLD = 1 * 1024 * 1024;
 
 type GalleryImageSource = "thumbnail" | "original" | "optimized";
 
@@ -25,6 +27,7 @@ export interface ThumbnailImageProps extends React.HTMLAttributes<HTMLImageEleme
   numFrames?: number | null;
   source?: GalleryImageSource;
   renderQuality?: number;
+  optimizeSizeThresholdMB?: number;
   /** Image loading strategy. Defaults to "lazy". */
   loading?: "lazy" | "eager";
 }
@@ -39,8 +42,12 @@ export function ThumbnailImage({
   numFrames,
   source = "thumbnail",
   renderQuality = 90,
+  optimizeSizeThresholdMB = 1,
   loading = "lazy",
 }: ThumbnailImageProps) {
+  const normalizedOptimizeSizeThresholdMB = normalizeOptimizeSizeThresholdMB(
+    optimizeSizeThresholdMB,
+  );
   const staticImage = !!mime && isStaticImage(mime);
   const renderDimensions = staticImage
     ? getOptimizedRenderDimensions(source, width, height)
@@ -50,7 +57,7 @@ export function ThumbnailImage({
     staticImage &&
     (numFrames ?? 0) <= 1 &&
     size != null &&
-    size > OPTIMIZED_IMAGE_SIZE_THRESHOLD &&
+    size > normalizedOptimizeSizeThresholdMB * MB_IN_BYTES &&
     renderDimensions !== undefined;
   const shouldLoadOriginalImage =
     staticImage && (source === "original" || source === "optimized");

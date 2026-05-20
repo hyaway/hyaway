@@ -15,6 +15,7 @@ interface ThumbnailGalleryItemContentProps {
   item: FileMetadata;
   imageLoadMode?: GalleryImageLoadMode;
   renderQuality?: number;
+  optimizeSizeThresholdMB?: number;
   showFooter?: boolean;
   /** Image loading strategy passed to thumbnail. Defaults to "lazy". */
   imageLoading?: "lazy" | "eager";
@@ -24,6 +25,7 @@ export function ThumbnailGalleryItemContent({
   item,
   imageLoadMode = "thumbnail",
   renderQuality,
+  optimizeSizeThresholdMB,
   showFooter = true,
   imageLoading,
 }: ThumbnailGalleryItemContentProps) {
@@ -68,6 +70,7 @@ export function ThumbnailGalleryItemContent({
             numFrames={item.num_frames}
             source={shouldUseFullDimensions ? imageLoadMode : "thumbnail"}
             renderQuality={renderQuality}
+            optimizeSizeThresholdMB={optimizeSizeThresholdMB}
             loading={imageLoading}
           />
         )}

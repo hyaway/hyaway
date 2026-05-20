@@ -11,9 +11,12 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import {
+  MAX_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB,
   MAX_REVIEW_RENDER_QUALITY,
+  MIN_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB,
   MIN_REVIEW_RENDER_QUALITY,
   useReviewImageLoadMode,
+  useReviewOptimizeSizeThresholdMB,
   useReviewRenderQuality,
   useReviewSettingsActions,
   useReviewTrackWatchHistory,
@@ -22,6 +25,11 @@ import {
   useReviewQueueActions,
   useReviewQueueCount,
 } from "@/stores/review-queue-store";
+import {
+  formatOptimizeSizeThresholdMB,
+  sizeThresholdToSliderValue,
+  sliderValueToSizeThreshold,
+} from "@/lib/optimize-image-settings";
 
 export const REVIEW_QUEUE_SETTINGS_TITLE = "Review queue";
 
@@ -36,8 +44,13 @@ export function ReviewQueueSettings({
   const trackWatchHistory = useReviewTrackWatchHistory();
   const imageLoadMode = useReviewImageLoadMode();
   const renderQuality = useReviewRenderQuality();
-  const { setTrackWatchHistory, setImageLoadMode, setRenderQuality } =
-    useReviewSettingsActions();
+  const optimizeSizeThresholdMB = useReviewOptimizeSizeThresholdMB();
+  const {
+    setTrackWatchHistory,
+    setImageLoadMode,
+    setRenderQuality,
+    setOptimizeSizeThresholdMB,
+  } = useReviewSettingsActions();
   const { clearQueue } = useReviewQueueActions();
 
   return (
@@ -52,9 +65,13 @@ export function ReviewQueueSettings({
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-0.5">
           <Label>Image loading</Label>
-          <span className="text-muted-foreground text-xs">
-            Optimized images load faster but may lose quality
-          </span>
+          <div className="text-muted-foreground space-y-1 text-xs">
+            <p>Original uses the full image file, which keeps all detail.</p>
+            <p>
+              Optimized asks Hydrus for a smaller image, which can load faster
+              with a small quality tradeoff.
+            </p>
+          </div>
         </div>
         <ToggleGroup
           value={[imageLoadMode]}
@@ -69,17 +86,35 @@ export function ReviewQueueSettings({
           <ToggleGroupItem value="optimized">Optimized</ToggleGroupItem>
         </ToggleGroup>
         {imageLoadMode === "optimized" && (
-          <SliderField
-            id={`${idPrefix}review-render-quality`}
-            label="Optimized quality"
-            value={renderQuality}
-            min={MIN_REVIEW_RENDER_QUALITY}
-            max={MAX_REVIEW_RENDER_QUALITY}
-            step={5}
-            onValueChange={setRenderQuality}
-            formatValue={(v) => `${v}`}
-            commitOnRelease
-          />
+          <>
+            <SliderField
+              id={`${idPrefix}review-render-quality`}
+              label="Optimized quality"
+              value={renderQuality}
+              min={MIN_REVIEW_RENDER_QUALITY}
+              max={MAX_REVIEW_RENDER_QUALITY}
+              step={1}
+              onValueChange={setRenderQuality}
+              formatValue={(v) => `${v}`}
+              commitOnRelease
+            />
+            <SliderField
+              id={`${idPrefix}review-optimize-size-threshold`}
+              label="Optimize images over"
+              value={sizeThresholdToSliderValue(optimizeSizeThresholdMB)}
+              min={MIN_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB}
+              max={MAX_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB + 1}
+              step={1}
+              onValueChange={(value) =>
+                setOptimizeSizeThresholdMB(sliderValueToSizeThreshold(value))
+              }
+              formatValue={(value) => {
+                const sizeMB = sliderValueToSizeThreshold(value);
+                return formatOptimizeSizeThresholdMB(sizeMB);
+              }}
+              commitOnRelease
+            />
+          </>
         )}
       </div>
       <div className="flex items-center justify-between gap-4">

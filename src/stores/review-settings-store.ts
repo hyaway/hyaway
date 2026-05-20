@@ -4,6 +4,11 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
+import {
+  MAX_OPTIMIZE_SIZE_THRESHOLD_MB,
+  MIN_OPTIMIZE_SIZE_THRESHOLD_MB,
+  normalizeOptimizeSizeThresholdMB,
+} from "@/lib/optimize-image-settings";
 
 // #region Types
 
@@ -118,6 +123,11 @@ export const DEFAULT_SWIPE_BINDINGS: SwipeBindings = {
 export const DEFAULT_REVIEW_RENDER_QUALITY = 90;
 export const MIN_REVIEW_RENDER_QUALITY = 40;
 export const MAX_REVIEW_RENDER_QUALITY = 100;
+export const DEFAULT_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB = 3;
+export const MIN_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB =
+  MIN_OPTIMIZE_SIZE_THRESHOLD_MB;
+export const MAX_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB =
+  MAX_OPTIMIZE_SIZE_THRESHOLD_MB;
 
 // #endregion
 
@@ -138,6 +148,8 @@ type ReviewSettingsState = {
   imageLoadMode: ReviewImageLoadMode;
   /** WEBP quality used when review mode renders optimized images */
   renderQuality: number;
+  /** Minimum file size in MB before review mode offers optimized rendering */
+  optimizeSizeThresholdMB: number;
   /** Start review in immersive (fullscreen overlay) mode */
   immersiveMode: boolean;
   /** Mapping of swipe directions to action bindings */
@@ -158,6 +170,8 @@ type ReviewSettingsState = {
     setImageLoadMode: (mode: ReviewImageLoadMode) => void;
     /** Set optimized render quality */
     setRenderQuality: (quality: number) => void;
+    /** Set minimum file size before optimized rendering is used */
+    setOptimizeSizeThresholdMB: (sizeMB: number) => void;
     /** Set immersive mode */
     setImmersiveMode: (enabled: boolean) => void;
     /** Set the binding for a specific direction */
@@ -184,6 +198,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
       trackWatchHistory: true,
       imageLoadMode: "optimized",
       renderQuality: DEFAULT_REVIEW_RENDER_QUALITY,
+      optimizeSizeThresholdMB: DEFAULT_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB,
       immersiveMode: false,
       bindings: DEFAULT_SWIPE_BINDINGS,
 
@@ -230,6 +245,14 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           });
         },
 
+        setOptimizeSizeThresholdMB: (optimizeSizeThresholdMB: number) => {
+          set({
+            optimizeSizeThresholdMB: normalizeOptimizeSizeThresholdMB(
+              optimizeSizeThresholdMB,
+            ),
+          });
+        },
+
         setImmersiveMode: (immersiveMode: boolean) => {
           set({ immersiveMode });
         },
@@ -259,6 +282,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
             trackWatchHistory: initial.trackWatchHistory,
             imageLoadMode: initial.imageLoadMode,
             renderQuality: initial.renderQuality,
+            optimizeSizeThresholdMB: initial.optimizeSizeThresholdMB,
             immersiveMode: initial.immersiveMode,
           });
         },
@@ -281,6 +305,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
         trackWatchHistory: state.trackWatchHistory,
         imageLoadMode: state.imageLoadMode,
         renderQuality: state.renderQuality,
+        optimizeSizeThresholdMB: state.optimizeSizeThresholdMB,
         immersiveMode: state.immersiveMode,
         bindings: state.bindings,
       }),
@@ -413,6 +438,10 @@ export const useReviewImageLoadMode = () =>
 /** Get optimized render quality setting */
 export const useReviewRenderQuality = () =>
   useReviewSettingsStore((state) => state.renderQuality);
+
+/** Get minimum file size before optimized rendering is used */
+export const useReviewOptimizeSizeThresholdMB = () =>
+  useReviewSettingsStore((state) => state.optimizeSizeThresholdMB);
 
 /** Get immersive mode setting */
 export const useReviewImmersiveMode = () =>

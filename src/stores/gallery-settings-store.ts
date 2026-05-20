@@ -5,6 +5,11 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { ImageBackground } from "./file-viewer-settings-store";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
+import {
+  MAX_OPTIMIZE_SIZE_THRESHOLD_MB,
+  MIN_OPTIMIZE_SIZE_THRESHOLD_MB,
+  normalizeOptimizeSizeThresholdMB,
+} from "@/lib/optimize-image-settings";
 
 export const MAX_GALLERY_LANES = 30;
 export const MIN_GALLERY_LANES = 1;
@@ -23,6 +28,11 @@ export const MAX_GALLERY_HOVER_SCALE_DURATION = 1000;
 export const DEFAULT_GALLERY_RENDER_QUALITY = 90;
 export const MIN_GALLERY_RENDER_QUALITY = 40;
 export const MAX_GALLERY_RENDER_QUALITY = 100;
+export const DEFAULT_GALLERY_OPTIMIZE_SIZE_THRESHOLD_MB = 1;
+export const MIN_GALLERY_OPTIMIZE_SIZE_THRESHOLD_MB =
+  MIN_OPTIMIZE_SIZE_THRESHOLD_MB;
+export const MAX_GALLERY_OPTIMIZE_SIZE_THRESHOLD_MB =
+  MAX_OPTIMIZE_SIZE_THRESHOLD_MB;
 
 export type GalleryBaseWidthMode = "service" | "custom";
 export type GalleryImageLoadMode = "thumbnail" | "original" | "optimized";
@@ -33,6 +43,7 @@ type GallerySettingsState = {
   expandImages: boolean;
   imageLoadMode: GalleryImageLoadMode;
   renderQuality: number;
+  optimizeSizeThresholdMB: number;
   showFooter: boolean;
   showScrollBadge: boolean;
   enableContextMenu: boolean;
@@ -52,6 +63,7 @@ type GallerySettingsState = {
     setExpandImages: (expand: boolean) => void;
     setImageLoadMode: (mode: GalleryImageLoadMode) => void;
     setRenderQuality: (quality: number) => void;
+    setOptimizeSizeThresholdMB: (sizeMB: number) => void;
     setShowFooter: (show: boolean) => void;
     setShowScrollBadge: (show: boolean) => void;
     setEnableContextMenu: (show: boolean) => void;
@@ -82,6 +94,7 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
       expandImages: true,
       imageLoadMode: "thumbnail",
       renderQuality: DEFAULT_GALLERY_RENDER_QUALITY,
+      optimizeSizeThresholdMB: DEFAULT_GALLERY_OPTIMIZE_SIZE_THRESHOLD_MB,
       showFooter: true,
       showScrollBadge: true,
       enableContextMenu: true,
@@ -107,6 +120,12 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
             renderQuality: Math.min(
               MAX_GALLERY_RENDER_QUALITY,
               Math.max(MIN_GALLERY_RENDER_QUALITY, renderQuality),
+            ),
+          }),
+        setOptimizeSizeThresholdMB: (optimizeSizeThresholdMB: number) =>
+          set({
+            optimizeSizeThresholdMB: normalizeOptimizeSizeThresholdMB(
+              optimizeSizeThresholdMB,
             ),
           }),
         setShowFooter: (showFooter: boolean) => set({ showFooter }),
@@ -171,6 +190,9 @@ export const useGalleryImageLoadMode = () =>
 
 export const useGalleryRenderQuality = () =>
   useGallerySettingsStore((state) => state.renderQuality);
+
+export const useGalleryOptimizeSizeThresholdMB = () =>
+  useGallerySettingsStore((state) => state.optimizeSizeThresholdMB);
 
 export const useGalleryShowFooter = () =>
   useGallerySettingsStore((state) => state.showFooter);

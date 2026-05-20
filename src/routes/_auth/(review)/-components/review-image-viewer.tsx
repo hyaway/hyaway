@@ -21,12 +21,14 @@ import {
 import {
   useReviewImageLoadMode,
   useReviewImmersiveMode,
+  useReviewOptimizeSizeThresholdMB,
   useReviewRenderQuality,
   useReviewSettingsActions,
 } from "@/stores/review-settings-store";
 import { useFillCanvasBackground } from "@/stores/file-viewer-settings-store";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
+import { MB_IN_BYTES } from "@/lib/optimize-image-settings";
 import { useImageBackgroundCycle } from "@/hooks/use-image-background-cycle";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { Toggle } from "@/components/ui-primitives/toggle";
@@ -37,8 +39,6 @@ const SCALE_TOLERANCE = 0.02;
 const MAX_ZOOM = 4.0;
 // Scroll wheel zoom sensitivity
 const WHEEL_ZOOM_STEP = 0.001;
-// File size threshold for optimization (5MB)
-const FILE_SIZE_THRESHOLD = 5 * 1024 * 1024;
 // Minimum visible size for the image (prevents pinching it into near-zero pixels)
 const MIN_IMAGE_DIMENSION_PX = 48;
 // Ignore degenerate pinch samples; prevents huge jumps when two pointers briefly
@@ -76,6 +76,7 @@ export function ReviewImageViewer({
 }: ReviewImageViewerProps) {
   const globalImageLoadMode = useReviewImageLoadMode();
   const renderQuality = useReviewRenderQuality();
+  const optimizeSizeThresholdMB = useReviewOptimizeSizeThresholdMB();
   const fillCanvasBackground = useFillCanvasBackground();
   const immersiveMode = useReviewImmersiveMode();
   const { setImmersiveMode } = useReviewSettingsActions();
@@ -94,8 +95,14 @@ export function ReviewImageViewer({
     if (!staticImage || isAnimated || imageProjectFile) return false;
     if (fileSize == null) return false;
 
-    return fileSize > FILE_SIZE_THRESHOLD;
-  }, [staticImage, isAnimated, imageProjectFile, fileSize]);
+    return fileSize > optimizeSizeThresholdMB * MB_IN_BYTES;
+  }, [
+    staticImage,
+    isAnimated,
+    imageProjectFile,
+    fileSize,
+    optimizeSizeThresholdMB,
+  ]);
 
   // Local state for load mode - initialized from global setting, can be toggled per-image
   const [localLoadMode, setLocalLoadMode] = useState<ReviewImageLoadMode>(
