@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { shouldIgnoreKeyboardEvent } from "@/lib/keyboard-utils";
 import { useImageBackgroundCycle } from "@/hooks/use-image-background-cycle";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   useFileViewerStartExpanded,
   useFillCanvasBackground,
@@ -50,6 +51,7 @@ export function ImageViewer({
   onError,
 }: ImageViewerProps) {
   const startExpanded = useFileViewerStartExpanded();
+  const usesMousePointer = useMediaQuery("(hover: hover) and (pointer: fine)");
   const [viewerMode, setViewerMode] = useState<ViewerMode>("inline");
   const [inlineExpanded, setInlineExpanded] = useState(startExpanded);
   const [loaded, setLoaded] = useState(false);
@@ -562,7 +564,12 @@ export function ImageViewer({
               initialScale={fitScale}
               centerOnInit={true}
               limitToBounds={true}
-              autoAlignment={{ sizeX: 1000, sizeY: 1000 }}
+              disablePadding={usesMousePointer}
+              autoAlignment={
+                usesMousePointer
+                  ? { sizeX: 0, sizeY: 0 }
+                  : { sizeX: 1000, sizeY: 1000 }
+              }
               wheel={{ step: 0.0015 }}
               doubleClick={{ disabled: true }}
               onWheelStart={() => {
