@@ -5,6 +5,7 @@ import { ThumbnailGalleryItemFooter } from "./thumbnail-gallery-item-footer";
 import { ThumbnailImage } from "./thumbnail-gallery-item-image";
 import { ThumbnailRatingsOverlay } from "./thumbnail-ratings-overlay";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import type { GalleryImageLoadMode } from "@/stores/gallery-settings-store";
 import { BlurhashCanvas } from "@/components/blurhash-canvas";
 import { getAverageColorFromBlurhash } from "@/lib/color-utils";
 import { isStaticImage } from "@/lib/mime-utils";
@@ -12,7 +13,8 @@ import { cn } from "@/lib/utils";
 
 interface ThumbnailGalleryItemContentProps {
   item: FileMetadata;
-  loadFullSizeImages?: boolean;
+  imageLoadMode?: GalleryImageLoadMode;
+  renderQuality?: number;
   showFooter?: boolean;
   /** Image loading strategy passed to thumbnail. Defaults to "lazy". */
   imageLoading?: "lazy" | "eager";
@@ -20,12 +22,14 @@ interface ThumbnailGalleryItemContentProps {
 
 export function ThumbnailGalleryItemContent({
   item,
-  loadFullSizeImages = false,
+  imageLoadMode = "thumbnail",
+  renderQuality,
   showFooter = true,
   imageLoading,
 }: ThumbnailGalleryItemContentProps) {
   const isPermanentlyDeleted = item.is_deleted && !item.is_trashed;
-  const shouldLoadFullImage = loadFullSizeImages && isStaticImage(item.mime);
+  const shouldUseFullDimensions =
+    imageLoadMode !== "thumbnail" && isStaticImage(item.mime);
   const averageColor = getAverageColorFromBlurhash(item.blurhash ?? undefined);
 
   return (
@@ -55,10 +59,15 @@ export function ThumbnailGalleryItemContent({
         ) : (
           <ThumbnailImage
             fileId={item.file_id}
-            width={shouldLoadFullImage ? item.width : item.thumbnail_width}
-            height={shouldLoadFullImage ? item.height : item.thumbnail_height}
+            width={shouldUseFullDimensions ? item.width : item.thumbnail_width}
+            height={
+              shouldUseFullDimensions ? item.height : item.thumbnail_height
+            }
             mime={item.mime}
-            source={shouldLoadFullImage ? "full" : "thumbnail"}
+            size={item.size}
+            numFrames={item.num_frames}
+            source={shouldUseFullDimensions ? imageLoadMode : "thumbnail"}
+            renderQuality={renderQuality}
             loading={imageLoading}
           />
         )}

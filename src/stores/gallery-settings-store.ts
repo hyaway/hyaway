@@ -20,14 +20,19 @@ export const DEFAULT_GALLERY_ENTRY_DURATION = 350;
 export const MAX_GALLERY_ENTRY_DURATION = 1000;
 export const DEFAULT_GALLERY_HOVER_ZOOM_DURATION = 150;
 export const MAX_GALLERY_HOVER_SCALE_DURATION = 1000;
+export const DEFAULT_GALLERY_RENDER_QUALITY = 90;
+export const MIN_GALLERY_RENDER_QUALITY = 40;
+export const MAX_GALLERY_RENDER_QUALITY = 100;
 
 export type GalleryBaseWidthMode = "service" | "custom";
+export type GalleryImageLoadMode = "thumbnail" | "original" | "optimized";
 
 type GallerySettingsState = {
   minLanes: number;
   maxLanes: number;
   expandImages: boolean;
-  loadFullSizeImages: boolean;
+  imageLoadMode: GalleryImageLoadMode;
+  renderQuality: number;
   showFooter: boolean;
   showScrollBadge: boolean;
   enableContextMenu: boolean;
@@ -45,7 +50,8 @@ type GallerySettingsState = {
   actions: {
     setLanesRange: (min: number, max: number) => void;
     setExpandImages: (expand: boolean) => void;
-    setLoadFullSizeImages: (load: boolean) => void;
+    setImageLoadMode: (mode: GalleryImageLoadMode) => void;
+    setRenderQuality: (quality: number) => void;
     setShowFooter: (show: boolean) => void;
     setShowScrollBadge: (show: boolean) => void;
     setEnableContextMenu: (show: boolean) => void;
@@ -64,13 +70,18 @@ type GallerySettingsState = {
   };
 };
 
+type LegacyGallerySettingsState = Partial<GallerySettingsState> & {
+  loadFullSizeImages?: boolean;
+};
+
 const useGallerySettingsStore = create<GallerySettingsState>()(
   persist(
     (set, _get, store) => ({
       minLanes: MIN_GALLERY_LANES,
       maxLanes: MAX_GALLERY_LANES,
       expandImages: true,
-      loadFullSizeImages: false,
+      imageLoadMode: "thumbnail",
+      renderQuality: DEFAULT_GALLERY_RENDER_QUALITY,
       showFooter: true,
       showScrollBadge: true,
       enableContextMenu: true,
@@ -89,8 +100,15 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
         setLanesRange: (minLanes: number, maxLanes: number) =>
           set({ minLanes, maxLanes }),
         setExpandImages: (expandImages: boolean) => set({ expandImages }),
-        setLoadFullSizeImages: (loadFullSizeImages: boolean) =>
-          set({ loadFullSizeImages }),
+        setImageLoadMode: (imageLoadMode: GalleryImageLoadMode) =>
+          set({ imageLoadMode }),
+        setRenderQuality: (renderQuality: number) =>
+          set({
+            renderQuality: Math.min(
+              MAX_GALLERY_RENDER_QUALITY,
+              Math.max(MIN_GALLERY_RENDER_QUALITY, renderQuality),
+            ),
+          }),
         setShowFooter: (showFooter: boolean) => set({ showFooter }),
         setShowScrollBadge: (showScrollBadge: boolean) =>
           set({ showScrollBadge }),
@@ -119,8 +137,22 @@ const useGallerySettingsStore = create<GallerySettingsState>()(
     }),
     {
       name: "hyaway-gallery-settings",
+      version: 1,
       storage: createJSONStorage(() => localStorage),
       partialize: ({ actions, ...rest }) => rest,
+      migrate: (persisted, version) => {
+        if (version < 1) {
+          const state = persisted as LegacyGallerySettingsState;
+
+          return {
+            ...state,
+            imageLoadMode: state.loadFullSizeImages ? "original" : "thumbnail",
+            loadFullSizeImages: undefined,
+          };
+        }
+
+        return persisted;
+      },
     },
   ),
 );
@@ -134,8 +166,11 @@ export const useGalleryMaxLanes = () =>
 export const useGalleryExpandImages = () =>
   useGallerySettingsStore((state) => state.expandImages);
 
-export const useGalleryLoadFullSizeImages = () =>
-  useGallerySettingsStore((state) => state.loadFullSizeImages);
+export const useGalleryImageLoadMode = () =>
+  useGallerySettingsStore((state) => state.imageLoadMode);
+
+export const useGalleryRenderQuality = () =>
+  useGallerySettingsStore((state) => state.renderQuality);
 
 export const useGalleryShowFooter = () =>
   useGallerySettingsStore((state) => state.showFooter);

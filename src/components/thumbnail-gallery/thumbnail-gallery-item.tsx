@@ -12,11 +12,13 @@ import {
   ContextMenu,
   ContextMenuTrigger,
 } from "@/components/ui-primitives/context-menu";
+import { isStaticImage } from "@/lib/mime-utils";
 import { cn } from "@/lib/utils";
 import {
   useGalleryEnableContextMenu,
   useGalleryEnableHoverZoom,
-  useGalleryLoadFullSizeImages,
+  useGalleryImageLoadMode,
+  useGalleryRenderQuality,
   useGalleryShowFooter,
 } from "@/stores/gallery-settings-store";
 
@@ -80,7 +82,8 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
   const [menuOpen, setMenuOpen] = useState(false);
   const enableContextMenu = useGalleryEnableContextMenu();
   const enableHoverZoom = useGalleryEnableHoverZoom();
-  const loadFullSizeImages = useGalleryLoadFullSizeImages();
+  const imageLoadMode = useGalleryImageLoadMode();
+  const renderQuality = useGalleryRenderQuality();
   const showFooter = useGalleryShowFooter();
   const fileLink = getFileLink(item.file_id);
 
@@ -106,7 +109,10 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
 
   const { scale, horizontalOrigin } = useMemo(() => {
     // Base scale from thumbnail size (clamped between 1.05 and 3)
-    const sourceWidth = loadFullSizeImages ? item.width : item.thumbnail_width;
+    const sourceWidth =
+      imageLoadMode !== "thumbnail" && isStaticImage(item.mime)
+        ? item.width
+        : item.thumbnail_width;
     const baseScale = Math.min(
       Math.max(
         Math.min(lanes * width, (sourceWidth ?? width) * 1.1) / width,
@@ -146,9 +152,10 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
   }, [
     lanes,
     width,
+    item.mime,
     item.width,
     item.thumbnail_width,
-    loadFullSizeImages,
+    imageLoadMode,
     virtualRow.lane,
   ]);
 
@@ -224,7 +231,8 @@ export const ThumbnailGalleryItem = memo(function ThumbnailGalleryItemMemo({
       >
         <ThumbnailGalleryItemContent
           item={item}
-          loadFullSizeImages={loadFullSizeImages}
+          imageLoadMode={imageLoadMode}
+          renderQuality={renderQuality}
           showFooter={showFooter}
         />
       </div>

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useState, useSyncExternalStore } from "react";
+import { IconAlertTriangle } from "@tabler/icons-react";
 import {
   AccordionSection,
   RangeSliderField,
@@ -9,6 +10,7 @@ import {
   SwitchField,
 } from "./setting-fields";
 import type { ImageBackground } from "@/stores/file-viewer-settings-store";
+import type { GalleryImageLoadMode } from "@/stores/gallery-settings-store";
 import type { TagsSortMode } from "@/stores/tags-settings-store";
 import {
   MAX_GALLERY_BASE_WIDTH,
@@ -17,8 +19,10 @@ import {
   MAX_GALLERY_HOVER_SCALE_DURATION,
   MAX_GALLERY_LANES,
   MAX_GALLERY_REFLOW_DURATION,
+  MAX_GALLERY_RENDER_QUALITY,
   MIN_GALLERY_BASE_WIDTH,
   MIN_GALLERY_LANES,
+  MIN_GALLERY_RENDER_QUALITY,
   useGalleryBaseWidthMode,
   useGalleryCustomBaseWidth,
   useGalleryEnableContextMenu,
@@ -28,12 +32,13 @@ import {
   useGalleryHorizontalGap,
   useGalleryHoverZoomDuration,
   useGalleryImageBackground,
+  useGalleryImageLoadMode,
   useGalleryLastOpenSection,
   useGalleryLinkImageBackground,
-  useGalleryLoadFullSizeImages,
   useGalleryMaxLanes,
   useGalleryMinLanes,
   useGalleryReflowDuration,
+  useGalleryRenderQuality,
   useGallerySettingsActions,
   useGalleryShowFooter,
   useGalleryShowScrollBadge,
@@ -106,7 +111,8 @@ export function ThumbnailGalleryDisplaySettings({
   const galleryShowFooter = useGalleryShowFooter();
   const galleryImageBackground = useGalleryImageBackground();
   const galleryLinkImageBackground = useGalleryLinkImageBackground();
-  const galleryLoadFullSizeImages = useGalleryLoadFullSizeImages();
+  const galleryImageLoadMode = useGalleryImageLoadMode();
+  const galleryRenderQuality = useGalleryRenderQuality();
   const galleryLastOpenSection = useGalleryLastOpenSection();
   const fileViewerImageBackground = useImageBackground();
   const tagsSortMode = useTagsSortMode();
@@ -136,7 +142,8 @@ export function ThumbnailGalleryDisplaySettings({
     setHoverZoomDuration,
     setImageBackground: setGalleryImageBackground,
     setLinkImageBackground,
-    setLoadFullSizeImages,
+    setImageLoadMode,
+    setRenderQuality,
     setShowFooter,
     setLastOpenSection,
   } = useGallerySettingsActions();
@@ -309,13 +316,6 @@ export function ThumbnailGalleryDisplaySettings({
           </ToggleGroup>
         </div>
         <SwitchField
-          id={`${idPrefix}use-full-size-images-switch`}
-          label="Use full-size images for thumbnails"
-          description="Will load original images instead of thumbnails when possible. This will increase load times and data usage."
-          checked={galleryLoadFullSizeImages}
-          onCheckedChange={setLoadFullSizeImages}
-        />
-        <SwitchField
           id={`${idPrefix}show-footer-switch`}
           label="Show footer strip"
           description="Show the metadata strip below gallery images"
@@ -328,6 +328,55 @@ export function ThumbnailGalleryDisplaySettings({
           checked={galleryEnableContextMenu}
           onCheckedChange={setEnableContextMenu}
         />
+      </AccordionSection>
+
+      <AccordionSection value="image-loading" title="Thumbnail image loading">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-0.5">
+            <Label>Source</Label>
+          </div>
+          <div className="text-muted-foreground space-y-1 text-xs">
+            <p>Thumbnail keeps Hydrus thumbnails for the fastest browsing.</p>
+            <p>Optimized renders large static images to screen-sized WebP.</p>
+            <p>
+              Full size loads original static images and will use way more
+              bandwidth.
+            </p>
+          </div>
+          <ToggleGroup
+            value={[galleryImageLoadMode]}
+            onValueChange={(value) => {
+              const newValue = value[0] as GalleryImageLoadMode | undefined;
+              if (newValue) setImageLoadMode(newValue);
+            }}
+            variant="outline"
+            size="sm"
+          >
+            <ToggleGroupItem value="thumbnail">Thumbnail</ToggleGroupItem>
+            <ToggleGroupItem value="optimized">Optimized</ToggleGroupItem>
+            <ToggleGroupItem value="original">
+              <IconAlertTriangle
+                className="text-destructive size-4"
+                aria-hidden="true"
+              />
+              Full size
+            </ToggleGroupItem>
+          </ToggleGroup>
+
+          {galleryImageLoadMode === "optimized" && (
+            <SliderField
+              id={`${idPrefix}render-quality-slider`}
+              label="Optimized quality"
+              value={galleryRenderQuality}
+              min={MIN_GALLERY_RENDER_QUALITY}
+              max={MAX_GALLERY_RENDER_QUALITY}
+              step={5}
+              onValueChange={setRenderQuality}
+              formatValue={(v) => `${v}`}
+              commitOnRelease
+            />
+          )}
+        </div>
       </AccordionSection>
 
       <AccordionSection value="animation" title="Animation">

@@ -115,6 +115,10 @@ export const DEFAULT_SWIPE_BINDINGS: SwipeBindings = {
   down: { fileAction: "undo" },
 };
 
+export const DEFAULT_REVIEW_RENDER_QUALITY = 90;
+export const MIN_REVIEW_RENDER_QUALITY = 40;
+export const MAX_REVIEW_RENDER_QUALITY = 100;
+
 // #endregion
 
 // #region Store
@@ -132,6 +136,8 @@ type ReviewSettingsState = {
   trackWatchHistory: boolean;
   /** How to load static images: 'original' for full size, 'resized' for server-side resize */
   imageLoadMode: ReviewImageLoadMode;
+  /** WEBP quality used when review mode renders optimized images */
+  renderQuality: number;
   /** Start review in immersive (fullscreen overlay) mode */
   immersiveMode: boolean;
   /** Mapping of swipe directions to action bindings */
@@ -150,6 +156,8 @@ type ReviewSettingsState = {
     setTrackWatchHistory: (enabled: boolean) => void;
     /** Set image load mode */
     setImageLoadMode: (mode: ReviewImageLoadMode) => void;
+    /** Set optimized render quality */
+    setRenderQuality: (quality: number) => void;
     /** Set immersive mode */
     setImmersiveMode: (enabled: boolean) => void;
     /** Set the binding for a specific direction */
@@ -175,6 +183,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
       thresholds: DEFAULT_SWIPE_THRESHOLDS,
       trackWatchHistory: true,
       imageLoadMode: "optimized",
+      renderQuality: DEFAULT_REVIEW_RENDER_QUALITY,
       immersiveMode: false,
       bindings: DEFAULT_SWIPE_BINDINGS,
 
@@ -212,6 +221,15 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           set({ imageLoadMode });
         },
 
+        setRenderQuality: (renderQuality: number) => {
+          set({
+            renderQuality: Math.min(
+              MAX_REVIEW_RENDER_QUALITY,
+              Math.max(MIN_REVIEW_RENDER_QUALITY, renderQuality),
+            ),
+          });
+        },
+
         setImmersiveMode: (immersiveMode: boolean) => {
           set({ immersiveMode });
         },
@@ -240,6 +258,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           set({
             trackWatchHistory: initial.trackWatchHistory,
             imageLoadMode: initial.imageLoadMode,
+            renderQuality: initial.renderQuality,
             immersiveMode: initial.immersiveMode,
           });
         },
@@ -261,6 +280,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
         thresholds: state.thresholds,
         trackWatchHistory: state.trackWatchHistory,
         imageLoadMode: state.imageLoadMode,
+        renderQuality: state.renderQuality,
         immersiveMode: state.immersiveMode,
         bindings: state.bindings,
       }),
@@ -389,6 +409,10 @@ export const useReviewTrackWatchHistory = () =>
 /** Get image load mode setting */
 export const useReviewImageLoadMode = () =>
   useReviewSettingsStore((state) => state.imageLoadMode);
+
+/** Get optimized render quality setting */
+export const useReviewRenderQuality = () =>
+  useReviewSettingsStore((state) => state.renderQuality);
 
 /** Get immersive mode setting */
 export const useReviewImmersiveMode = () =>

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { IconTrashX } from "@tabler/icons-react";
-import { SettingsGroup, SwitchField } from "./setting-fields";
+import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
 import type { ReviewImageLoadMode } from "@/stores/review-settings-store";
 import { Button } from "@/components/ui-primitives/button";
 import { Label } from "@/components/ui-primitives/label";
@@ -11,7 +11,10 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import {
+  MAX_REVIEW_RENDER_QUALITY,
+  MIN_REVIEW_RENDER_QUALITY,
   useReviewImageLoadMode,
+  useReviewRenderQuality,
   useReviewSettingsActions,
   useReviewTrackWatchHistory,
 } from "@/stores/review-settings-store";
@@ -32,7 +35,9 @@ export function ReviewQueueSettings({
   const count = useReviewQueueCount();
   const trackWatchHistory = useReviewTrackWatchHistory();
   const imageLoadMode = useReviewImageLoadMode();
-  const { setTrackWatchHistory, setImageLoadMode } = useReviewSettingsActions();
+  const renderQuality = useReviewRenderQuality();
+  const { setTrackWatchHistory, setImageLoadMode, setRenderQuality } =
+    useReviewSettingsActions();
   const { clearQueue } = useReviewQueueActions();
 
   return (
@@ -63,6 +68,19 @@ export function ReviewQueueSettings({
           <ToggleGroupItem value="original">Original</ToggleGroupItem>
           <ToggleGroupItem value="optimized">Optimized</ToggleGroupItem>
         </ToggleGroup>
+        {imageLoadMode === "optimized" && (
+          <SliderField
+            id={`${idPrefix}review-render-quality`}
+            label="Optimized quality"
+            value={renderQuality}
+            min={MIN_REVIEW_RENDER_QUALITY}
+            max={MAX_REVIEW_RENDER_QUALITY}
+            step={5}
+            onValueChange={setRenderQuality}
+            formatValue={(v) => `${v}`}
+            commitOnRelease
+          />
+        )}
       </div>
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1">

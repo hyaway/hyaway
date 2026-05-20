@@ -21,6 +21,7 @@ import {
 import {
   useReviewImageLoadMode,
   useReviewImmersiveMode,
+  useReviewRenderQuality,
   useReviewSettingsActions,
 } from "@/stores/review-settings-store";
 import { useFillCanvasBackground } from "@/stores/file-viewer-settings-store";
@@ -74,6 +75,7 @@ export function ReviewImageViewer({
   isTop = false,
 }: ReviewImageViewerProps) {
   const globalImageLoadMode = useReviewImageLoadMode();
+  const renderQuality = useReviewRenderQuality();
   const fillCanvasBackground = useFillCanvasBackground();
   const immersiveMode = useReviewImmersiveMode();
   const { setImmersiveMode } = useReviewSettingsActions();
@@ -157,7 +159,7 @@ export function ReviewImageViewer({
   const fullUrl = useFullFileIdUrl(fileId);
   const renderUrl = useRenderFileIdUrl(fileId, {
     renderFormat: RenderFormat.WEBP,
-    renderQuality: 90,
+    renderQuality,
     ...(renderDimensions ?? projectFileFullDimensions),
   });
 
