@@ -49,35 +49,28 @@ export function ThumbnailImage({
     optimizeSizeThresholdMB,
   );
   const staticImage = !!mime && isStaticImage(mime);
-  const renderDimensions = staticImage
-    ? getOptimizedRenderDimensions(source, width, height)
-    : undefined;
-  const shouldLoadOptimizedImage =
-    source === "optimized" &&
-    staticImage &&
-    (numFrames ?? 0) <= 1 &&
-    size != null &&
-    size > normalizedOptimizeSizeThresholdMB * MB_IN_BYTES &&
-    renderDimensions !== undefined;
-  const shouldLoadOriginalImage =
-    staticImage && (source === "original" || source === "optimized");
+  const imageSourceCandidate = resolveGalleryImageSourceCandidate({
+    source,
+    staticImage,
+    numFrames,
+    size,
+    optimizeSizeThresholdMB: normalizedOptimizeSizeThresholdMB,
+  });
 
-  if (shouldLoadOptimizedImage) {
+  if (imageSourceCandidate === "optimized") {
     return (
       <OptimizedImage
         fileId={fileId}
         className={className}
         width={width}
         height={height}
-        renderWidth={renderDimensions.width}
-        renderHeight={renderDimensions.height}
         renderQuality={renderQuality}
         loading={loading}
       />
     );
   }
 
-  if (shouldLoadOriginalImage) {
+  if (imageSourceCandidate === "original") {
     return (
       <OriginalImage
         fileId={fileId}
@@ -98,6 +91,35 @@ export function ThumbnailImage({
       loading={loading}
     />
   );
+}
+
+interface ResolveGalleryImageSourceCandidateOptions {
+  source: GalleryImageSource;
+  staticImage: boolean;
+  numFrames?: number | null;
+  size?: number | null;
+  optimizeSizeThresholdMB: number;
+}
+
+function resolveGalleryImageSourceCandidate({
+  source,
+  staticImage,
+  numFrames,
+  size,
+  optimizeSizeThresholdMB,
+}: ResolveGalleryImageSourceCandidateOptions): GalleryImageSource {
+  if (!staticImage) return "thumbnail";
+  if (source === "thumbnail") return "thumbnail";
+  if (source === "original") return "original";
+
+  if (size == null) return "thumbnail";
+
+  const sizeThresholdBytes = optimizeSizeThresholdMB * MB_IN_BYTES;
+  if (size <= sizeThresholdBytes) return "original";
+
+  const isAnimated = (numFrames ?? 0) > 1;
+
+  return isAnimated ? "thumbnail" : "optimized";
 }
 
 interface SourceImageProps {
@@ -123,17 +145,41 @@ function OriginalImage(props: SourceImageProps) {
 }
 
 interface OptimizedImageProps extends SourceImageProps {
+  renderQuality: number;
+}
+
+function OptimizedImage({ renderQuality, ...props }: OptimizedImageProps) {
+  const renderDimensions = getOptimizedRenderDimensions(
+    props.width,
+    props.height,
+  );
+
+  if (!renderDimensions) {
+    return <ThumbnailUrlImage {...props} />;
+  }
+
+  return (
+    <OptimizedRenderImage
+      {...props}
+      renderWidth={renderDimensions.width}
+      renderHeight={renderDimensions.height}
+      renderQuality={renderQuality}
+    />
+  );
+}
+
+interface OptimizedRenderImageProps extends SourceImageProps {
   renderWidth: number;
   renderHeight: number;
   renderQuality: number;
 }
 
-function OptimizedImage({
+function OptimizedRenderImage({
   renderWidth,
   renderHeight,
   renderQuality,
   ...props
-}: OptimizedImageProps) {
+}: OptimizedRenderImageProps) {
   const media = useRenderFileIdUrl(props.fileId, {
     renderFormat: RenderFormat.WEBP,
     renderQuality,
@@ -196,11 +242,10 @@ function GalleryImageElement({
 }
 
 function getOptimizedRenderDimensions(
-  source: GalleryImageSource,
   width: number | undefined,
   height: number | undefined,
 ) {
-  if (source !== "optimized" || !width || !height) return undefined;
+  if (!width || !height) return undefined;
 
   const screenWidth = Math.round(window.screen.width * window.devicePixelRatio);
   const screenHeight = Math.round(
