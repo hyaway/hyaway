@@ -22,6 +22,7 @@ All notable changes to hyAway are documented here.
 ### Fixed
 
 - Image viewer wheel scrolling no longer jumps immediately to maximum zoom
+- Image viewer mouse-wheel zooming stutter fixed
 
 ---
 
