@@ -8,6 +8,19 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-05-20
+
+### Added
+
+- **Gallery image loading modes** — Thumbnail galleries now let you choose between Hydrus thumbnails, optimized images, and full-size originals
+- **Optimized image controls** — Gallery and review settings now let you tune optimized image quality and choose the file size where Hydrus should return a smaller image
+
+### Changed
+
+- The previous full-size thumbnail toggle has been replaced with clearer image loading mode choices
+
+---
+
 ## 2026-05-19
 
 ### Added
