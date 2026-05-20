@@ -563,7 +563,7 @@ export function ImageViewer({
               centerOnInit={true}
               limitToBounds={true}
               autoAlignment={{ sizeX: 1000, sizeY: 1000 }}
-              wheel={{ step: 0.06 }}
+              wheel={{ step: 0.0015 }}
               doubleClick={{ disabled: true }}
               onWheelStart={() => {
                 isZoomingRef.current = true;

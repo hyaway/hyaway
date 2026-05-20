@@ -19,6 +19,10 @@ All notable changes to hyAway are documented here.
 
 - The previous full-size thumbnail toggle has been replaced with clearer image loading mode choices
 
+### Fixed
+
+- Image viewer wheel scrolling no longer jumps immediately to maximum zoom
+
 ---
 
 ## 2026-05-19
