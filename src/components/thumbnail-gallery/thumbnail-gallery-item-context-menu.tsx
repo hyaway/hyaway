@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useNavigate } from "@tanstack/react-router";
-import { IconCards, IconClockX, IconExternalLink } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  IconCards,
+  IconClockX,
+  IconExternalLink,
+  IconEyeOff,
+} from "@tabler/icons-react";
 
 import { useThumbnailGalleryContext } from "./thumbnail-gallery-context";
 
@@ -16,6 +22,7 @@ import {
   ContextMenuSeparator,
 } from "@/components/ui-primitives/context-menu";
 import { useFileActions } from "@/hooks/use-file-actions";
+import { hideFileIdsInViewCaches } from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import {
   useClearFileViewsMutation,
   useClearFileViewtimeMutation,
@@ -56,6 +63,7 @@ export function ThumbnailGalleryItemContextMenu({
   hideReviewActions = false,
 }: ThumbnailGalleryItemContextMenuProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { setQueue, addToQueue } = useReviewQueueActions();
   const queueRemaining = useReviewQueueRemaining();
   const { fileIds, infoMode, reviewSource } = useThumbnailGalleryContext();
@@ -86,6 +94,10 @@ export function ThumbnailGalleryItemContextMenu({
   const handleAddToReview = () => {
     addToQueue(fileIdsFromHere, reviewSource);
     navigate({ to: "/review" });
+  };
+
+  const handleHideFromView = () => {
+    hideFileIdsInViewCaches(queryClient, [item.file_id], reviewSource);
   };
 
   const handleClearViewtime = () => {
@@ -185,6 +197,19 @@ export function ThumbnailGalleryItemContextMenu({
           ))}
         </div>
       ))}
+
+      {reviewSource && (
+        <>
+          {(!hideReviewActions ||
+            showClearViewtime ||
+            showClearViews ||
+            actionGroups.length > 0) && <ContextMenuSeparator />}
+          <ContextMenuItem onClick={handleHideFromView}>
+            <IconEyeOff />
+            Hide from view
+          </ContextMenuItem>
+        </>
+      )}
     </ContextMenuContent>
   );
 }
