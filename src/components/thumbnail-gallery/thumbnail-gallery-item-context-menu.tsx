@@ -66,7 +66,7 @@ export function ThumbnailGalleryItemContextMenu({
   const actionGroups = useFileActions(item, {
     includeOpen: true,
     includeExternal: true,
-    hideFromViewSource: reviewSource,
+    reviewSource,
   });
 
   // Get file IDs from this item onward

@@ -17,6 +17,7 @@ import {
 import type { ComponentType, SVGProps } from "react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import type { ReviewSource } from "@/stores/review-queue-store";
 
 import {
   useDownloadFileIdUrl,
@@ -78,7 +79,10 @@ interface ManagementActionData {
   is_trashed?: boolean;
 }
 
-function useManagementActions(data: ManagementActionData): Array<FileAction> {
+function useManagementActions(
+  data: ManagementActionData,
+  reviewSource?: ReviewSource | Array<ReviewSource>,
+): Array<FileAction> {
   const { hasPermission } = usePermissions();
   const canManageFiles = hasPermission(Permission.IMPORT_AND_DELETE_FILES);
   const deleteFilesMutation = useDeleteFilesMutation();
@@ -99,7 +103,11 @@ function useManagementActions(data: ManagementActionData): Array<FileAction> {
         id: "delete",
         label: "Trash",
         icon: IconTrash,
-        onClick: () => deleteFilesMutation.mutate({ file_id: data.file_id }),
+        onClick: () =>
+          deleteFilesMutation.mutate({
+            file_id: data.file_id,
+            reviewSource,
+          }),
         variant: "destructive",
         isPending: deleteFilesMutation.isPending,
         disabled: !canManageFiles,
@@ -238,6 +246,8 @@ interface UseFileActionsOptions {
   onRefetch?: () => void;
   /** Whether refetch is in progress */
   isRefetching?: boolean;
+  /** Source view to update if trashing should hide the item locally. */
+  reviewSource?: ReviewSource | Array<ReviewSource>;
 }
 
 export function useFileActions(
@@ -259,13 +269,14 @@ export function useFileActions(
     includeThumbnail = true,
     onRefetch,
     isRefetching,
+    reviewSource,
   } = options;
 
   const isPermanentlyDeleted = data.is_deleted && !data.is_trashed;
 
   // Always call hooks (rules of hooks), but conditionally include results
   const navigationActions = useNavigationActions(data.file_id);
-  const managementActions = useManagementActions(data);
+  const managementActions = useManagementActions(data, reviewSource);
   const externalActions = useExternalActions(data, { includeThumbnail });
 
   const groups: Array<FileActionsGroup> = [];
