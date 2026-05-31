@@ -17,6 +17,12 @@ import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-galle
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import { useReviewActions } from "@/hooks/use-review-actions";
+import {
+  formatHiddenFileCount,
+  getHiddenFileCount,
+  getHiddenFileIds,
+  getVisibleFileIds,
+} from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import { useRandomInboxFilesQuery } from "@/integrations/hydrus-api/queries/search";
 
 export const Route = createFileRoute("/_auth/(galleries)/random-inbox/")({
@@ -30,8 +36,14 @@ function RouteComponent() {
   const queryClient = useQueryClient();
 
   const fileIds = data?.file_ids ?? [];
-  const hasFiles = fileIds.length > 0;
-  const reviewActions = useReviewActions({ fileIds });
+  const hiddenFileIds = getHiddenFileIds(data);
+  const visibleFileIds = getVisibleFileIds(fileIds, data);
+  const hasFiles = visibleFileIds.length > 0;
+  const hiddenLabel = formatHiddenFileCount(getHiddenFileCount(data));
+  const reviewActions = useReviewActions({
+    fileIds: visibleFileIds,
+    source: { type: "predefinedSearch", key: "randomInbox" },
+  });
   const openSearchAction = useRandomInboxSearchFooterAction();
 
   // Link builder for contextual navigation
@@ -98,11 +110,18 @@ function RouteComponent() {
     <>
       <>
         <PageHeading
-          title={`Random inbox (${data?.file_ids?.length ?? 0} files)`}
+          title={`Random inbox (${visibleFileIds.length} files${hiddenLabel ? `, ${hiddenLabel}` : ""})`}
         />
         {hasFiles ? (
-          <ThumbnailGalleryProvider fileIds={fileIds}>
-            <ThumbnailGallery fileIds={fileIds} getFileLink={getFileLink} />
+          <ThumbnailGalleryProvider
+            fileIds={visibleFileIds}
+            reviewSource={{ type: "predefinedSearch", key: "randomInbox" }}
+          >
+            <ThumbnailGallery
+              fileIds={fileIds}
+              hiddenFileIds={hiddenFileIds}
+              getFileLink={getFileLink}
+            />
           </ThumbnailGalleryProvider>
         ) : (
           <EmptyState message="No inbox files found." />

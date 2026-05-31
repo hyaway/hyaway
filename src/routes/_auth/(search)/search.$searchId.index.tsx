@@ -41,6 +41,12 @@ import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-galle
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGallerySkeleton } from "@/components/thumbnail-gallery/thumbnail-gallery-skeleton";
 import { useReviewActions } from "@/hooks/use-review-actions";
+import {
+  formatHiddenFileCount,
+  getHiddenFileCount,
+  getHiddenFileIds,
+  getVisibleFileIds,
+} from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import {
   useCommittedSearch,
@@ -89,8 +95,13 @@ function SearchPage() {
   const queryClient = useQueryClient();
 
   const fileIds = data?.file_ids ?? [];
-  const hasFiles = fileIds.length > 0;
-  const reviewActions = useReviewActions({ fileIds });
+  const hiddenFileIds = getHiddenFileIds(data);
+  const visibleFileIds = getVisibleFileIds(fileIds, data);
+  const hasFiles = visibleFileIds.length > 0;
+  const reviewActions = useReviewActions({
+    fileIds: visibleFileIds,
+    source: { type: "searchPage", entryKey: searchId },
+  });
 
   const handleCommit = useCallback(() => {
     setPreserveCurrentScroll(true);
@@ -225,13 +236,19 @@ function SearchPage() {
     [reviewActions, searchActions],
   );
 
-  const fileCount = data?.file_ids?.length ?? 0;
+  const fileCount = visibleFileIds.length;
+  const hiddenLabel = formatHiddenFileCount(getHiddenFileCount(data));
+  const fileCountLabel = `${fileCount} ${fileCount === 1 ? "file" : "files"}`;
+  const pageTitle =
+    !isLoading && !isError
+      ? `${displayName} (${fileCountLabel}${hiddenLabel ? `, ${hiddenLabel}` : ""})`
+      : displayName;
 
   const activeLabel = isLoading
     ? "Loading files for:"
     : isError
       ? "Error for query:"
-      : `${fileCount} ${fileCount === 1 ? "file" : "files"} found for:`;
+      : "Results for:";
   const showActiveSearchTags =
     !instantSearch && isDirty && searchTags.length > 0;
 
@@ -239,7 +256,7 @@ function SearchPage() {
     <>
       <>
         <PageHeading
-          title={displayName}
+          title={pageTitle}
           eyebrow={
             isPinned ? (
               <span className="text-muted-foreground inline-flex items-center gap-1.5 font-medium">
@@ -285,9 +302,13 @@ function SearchPage() {
           />
         )}
         {!isLoading && !isError && hasFiles && (
-          <ThumbnailGalleryProvider fileIds={fileIds}>
+          <ThumbnailGalleryProvider
+            fileIds={visibleFileIds}
+            reviewSource={{ type: "searchPage", entryKey: searchId }}
+          >
             <ThumbnailGallery
               fileIds={fileIds}
+              hiddenFileIds={hiddenFileIds}
               getFileLink={getFileLink}
               preserveCurrentScroll={preserveCurrentScroll}
             />

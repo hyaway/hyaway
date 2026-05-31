@@ -10,6 +10,7 @@ import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { FileDetail } from "@/components/file-detail/file-detail";
 import { useFileContextNavigation } from "@/hooks/use-file-context-navigation";
+import { getVisibleFileIds } from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import { useGetPageInfoQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 
 export const Route = createFileRoute(
@@ -73,7 +74,9 @@ function FileDetailWithContext({
     true,
   );
 
-  const fileIds = data?.page_info.media.hash_ids;
+  const fileIds = data
+    ? getVisibleFileIds(data.page_info.media.hash_ids, data)
+    : undefined;
 
   const buildParams = (fid: number) => ({
     pageId: resolvedPageSlug,

@@ -19,6 +19,12 @@ import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-galle
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGalleryDisplaySettingsPopover } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
 import { useReviewActions } from "@/hooks/use-review-actions";
+import {
+  formatHiddenFileCount,
+  getHiddenFileCount,
+  getHiddenFileIds,
+  getVisibleFileIds,
+} from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import { PageState } from "@/integrations/hydrus-api/models";
 import {
   useFocusPageMutation,
@@ -96,7 +102,13 @@ function PageContent({
 
   // Get file IDs for review queue
   const fileIds = data?.page_info.media.hash_ids ?? [];
-  const reviewActions = useReviewActions({ fileIds });
+  const hiddenFileIds = getHiddenFileIds(data);
+  const visibleFileIds = getVisibleFileIds(fileIds, data);
+  const hiddenLabel = formatHiddenFileCount(getHiddenFileCount(data));
+  const reviewActions = useReviewActions({
+    fileIds: visibleFileIds,
+    source: { type: "remotePage", pageKey: resolvedPageKey },
+  });
 
   // Determine if page is in a loading/initializing state
   const pageState = data?.page_info.page_state;
@@ -186,13 +198,17 @@ function PageContent({
     <>
       <>
         <PageHeading
-          title={`Page: ${data?.page_info.name} (${data?.page_info.media.num_files ?? 0} files)`}
+          title={`Page: ${data?.page_info.name} (${visibleFileIds.length} files${hiddenLabel ? `, ${hiddenLabel}` : ""})`}
           eyebrow={pagePath}
         />
         {data?.page_info.media ? (
-          <ThumbnailGalleryProvider fileIds={data.page_info.media.hash_ids}>
+          <ThumbnailGalleryProvider
+            fileIds={visibleFileIds}
+            reviewSource={{ type: "remotePage", pageKey: resolvedPageKey }}
+          >
             <ThumbnailGallery
               fileIds={data.page_info.media.hash_ids}
+              hiddenFileIds={hiddenFileIds}
               getFileLink={getFileLink}
             />
           </ThumbnailGalleryProvider>

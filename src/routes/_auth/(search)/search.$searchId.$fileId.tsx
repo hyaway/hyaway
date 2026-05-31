@@ -6,6 +6,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCommittedSearchFilesQuery } from "./-hooks/use-committed-search-query";
 import { FileDetail } from "@/components/file-detail/file-detail";
 import { useFileContextNavigation } from "@/hooks/use-file-context-navigation";
+import { getVisibleFileIds } from "@/integrations/hydrus-api/queries/file-metadata-cache";
 
 export const Route = createFileRoute(
   "/_auth/(search)/search/$searchId/$fileId",
@@ -22,7 +23,9 @@ function RouteComponent() {
 
   const { data, isLoading, isError } = useCommittedSearchFilesQuery(searchId);
 
-  const fileIds = data?.file_ids;
+  const fileIds = data
+    ? getVisibleFileIds(data.file_ids ?? [], data)
+    : undefined;
 
   const buildParams = (fid: number) => ({
     searchId,
