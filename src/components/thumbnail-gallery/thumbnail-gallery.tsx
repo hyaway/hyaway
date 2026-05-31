@@ -49,6 +49,8 @@ import { useSidebarIsTransitioning } from "@/stores/sidebar-store";
 
 export interface ThumbnailGalleryProps {
   fileIds: Array<number>;
+  /** File IDs to hide visually while keeping the source metadata query unchanged. */
+  hiddenFileIds?: Array<number>;
   /** Custom link builder for contextual navigation */
   getFileLink?: FileLinkBuilder;
   /**
@@ -62,6 +64,7 @@ export interface ThumbnailGalleryProps {
 
 export function ThumbnailGallery({
   fileIds,
+  hiddenFileIds,
   getFileLink,
   preserveCurrentScroll,
   "aria-label": ariaLabel = "File gallery",
@@ -93,7 +96,8 @@ export function ThumbnailGallery({
   return (
     <PureThumbnailGallery
       itemsQuery={itemsQuery}
-      totalItems={fileIds.length}
+      hiddenFileIds={hiddenFileIds}
+      totalItems={fileIds.length - (hiddenFileIds?.length ?? 0)}
       defaultDimensions={defaultDimensions}
       getFileLink={getFileLink}
       preserveCurrentScroll={preserveCurrentScroll}
@@ -104,6 +108,7 @@ export function ThumbnailGallery({
 
 export function PureThumbnailGallery({
   itemsQuery,
+  hiddenFileIds,
   totalItems,
   defaultDimensions,
   getFileLink,
@@ -111,6 +116,7 @@ export function PureThumbnailGallery({
   "aria-label": ariaLabel,
 }: {
   itemsQuery: ReturnType<typeof useInfiniteGetFilesMetadata>;
+  hiddenFileIds?: Array<number>;
   totalItems: number;
   defaultDimensions: { width: number; height: number };
   getFileLink?: FileLinkBuilder;
@@ -119,9 +125,18 @@ export function PureThumbnailGallery({
 }) {
   const { data, isFetchingNextPage, fetchNextPage, hasNextPage } = itemsQuery;
 
+  const hiddenFileIdSet = useMemo(
+    () => (hiddenFileIds?.length ? new Set(hiddenFileIds) : null),
+    [hiddenFileIds],
+  );
   const items = useMemo(
-    () => (data ? data.pages.flatMap((d) => d.metadata) : []),
-    [data],
+    () =>
+      data
+        ? data.pages
+            .flatMap((d) => d.metadata)
+            .filter((item) => !hiddenFileIdSet?.has(item.file_id))
+        : [],
+    [data, hiddenFileIdSet],
   );
 
   // Defer items so old grid stays visible while new items load
