@@ -34,7 +34,9 @@ import {
   useReviewQueueFileIds,
   useReviewQueueHistory,
   useReviewQueueNextFileIds,
+  useReviewQueueSources,
 } from "@/stores/review-queue-store";
+import { hideFileIdsInViewCaches } from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import {
   useArchiveFilesMutation,
   useDeleteFilesMutation,
@@ -42,6 +44,7 @@ import {
   useUnarchiveFilesMutation,
   useUndeleteFilesMutation,
 } from "@/integrations/hydrus-api/queries/manage-files";
+import { useHydrusHideFromViewOptions } from "@/integrations/hydrus-api/queries/options";
 import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { getFileMetadata } from "@/integrations/hydrus-api/api-client";
@@ -142,6 +145,29 @@ function reverseFileAction(
   undoMutations[fileAction]({ file_ids: [fileId] });
 }
 
+function shouldHideFromViewAfterReviewAction(
+  fileAction: ReviewFileAction,
+  options: {
+    hideFilteredFiles: boolean;
+    hideFilteredFilesEvenWhenSkipped: boolean;
+  },
+) {
+  if (!options.hideFilteredFiles) return false;
+
+  switch (fileAction) {
+    case "archive":
+    case "trash":
+      return true;
+    case "skip":
+      return options.hideFilteredFilesEvenWhenSkipped;
+    case "undo":
+      return false;
+    default:
+      fileAction satisfies never;
+      return false;
+  }
+}
+
 /**
  * Execute secondary rating actions and build restore entries for undo.
  * Returns the restore entries so the caller can record them in history.
@@ -219,6 +245,7 @@ export function useReviewSwipeDeck() {
   const currentIndex = useReviewQueueCurrentIndex();
   const currentFileId = useReviewQueueCurrentFileId();
   const history = useReviewQueueHistory();
+  const reviewSources = useReviewQueueSources();
   const nextFileIds = useReviewQueueNextFileIds(PREFETCH_COUNT);
   const { recordAction, undo } = useReviewQueueActions();
   const bindings = useReviewSwipeBindings();
@@ -231,6 +258,8 @@ export function useReviewSwipeDeck() {
   const { mutate: unarchiveFiles } = useUnarchiveFilesMutation();
   const { mutate: undeleteFiles } = useUndeleteFilesMutation();
   const { mutate: setRating } = useSetRatingMutation();
+  const { hideFilteredFiles, hideFilteredFilesEvenWhenSkipped } =
+    useHydrusHideFromViewOptions();
 
   // Rating services (for filtering orphaned actions)
   const { ratingServices } = useRatingServices();
@@ -354,6 +383,15 @@ export function useReviewSwipeDeck() {
         trash: trashFiles,
       });
 
+      if (
+        shouldHideFromViewAfterReviewAction(binding.fileAction, {
+          hideFilteredFiles,
+          hideFilteredFilesEvenWhenSkipped,
+        })
+      ) {
+        hideFileIdsInViewCaches(queryClient, [currentFileId], reviewSources);
+      }
+
       // Execute secondary actions and collect restore data
       const ratingsRestore = executeSecondaryRatingActions(
         binding.secondaryActions ?? [],
@@ -385,6 +423,10 @@ export function useReviewSwipeDeck() {
       trashFiles,
       setRating,
       validServiceKeys,
+      queryClient,
+      reviewSources,
+      hideFilteredFiles,
+      hideFilteredFilesEvenWhenSkipped,
       history.length,
       performUndo,
     ],
