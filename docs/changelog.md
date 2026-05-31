@@ -18,6 +18,7 @@ All notable changes to hyAway are documented here.
 - **Hide trashed files** — Trashing files hides them from view if Hydrus setting "Remove files from view when they are sent to the trash" is enabled. This will hide file in Hydrus pages. For search based queries this persists until next data refresh/session
 - **Show hidden files** — Galleries with hidden files offer a footer action to show them again
 - **Review source actions** — Review completion now shows buttons for every source that contributed files, including saved searches, Hydrus pages, and predefined galleries
+- **Latest opened page** — The pages list now adds a special card for the most recently opened Hydrus page when it still exists, and attempts matching after Hydrus assigns it a new page key on restart
 
 ### Changed
 

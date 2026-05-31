@@ -42,6 +42,7 @@ export interface PagesGridItemProps {
   useCustomHighlight?: boolean;
   groupLabel?: string;
   groupStripeColorsByLevel?: Array<string | null>;
+  badgeLabel?: string;
 }
 
 /**
@@ -62,6 +63,7 @@ export const PagesGridItem = memo(function PagesGridItemMemo({
   useCustomHighlight = false,
   groupLabel,
   groupStripeColorsByLevel = [],
+  badgeLabel,
 }: PagesGridItemProps) {
   const { data, isLoading } = useGetPageInfoQuery(pageKey, true);
   const useFriendlyUrls = usePagesUseFriendlyUrls();
@@ -106,6 +108,11 @@ export const PagesGridItem = memo(function PagesGridItemMemo({
         className,
       )}
     >
+      {badgeLabel ? (
+        <span className="bg-primary text-primary-foreground absolute top-0 right-0 z-10 max-w-[calc(100%-1.5rem)] px-2 py-1 text-xs/4 font-medium shadow-xs">
+          {badgeLabel}
+        </span>
+      ) : null}
       {activeStripeColors.length > 0 ? (
         <div className="absolute inset-x-1.5 bottom-0 flex gap-1">
           {activeStripeColors.map((color, colorIndex) => (

@@ -33,6 +33,7 @@ import {
   useGetMediaPagesQuery,
   useGetPagesTreeQuery,
 } from "@/integrations/hydrus-api/queries/manage-pages";
+import { useLatestOpenedPageMatch } from "@/stores/latest-opened-page-store";
 import {
   usePagesCardWidth,
   usePagesExpandCards,
@@ -46,6 +47,37 @@ import {
 const PagesSearchSchema = z.object({
   q: z.string().optional(),
 });
+
+type PagesGridEntry = {
+  id: string;
+  page: MediaPage;
+  isLatestCard: boolean;
+};
+
+function createPageGridEntries(
+  pages: Array<MediaPage>,
+  latestPage: MediaPage | null,
+): Array<PagesGridEntry> {
+  const entries: Array<PagesGridEntry> = [];
+
+  if (latestPage) {
+    entries.push({
+      id: `latest-opened-${latestPage.page_key}`,
+      page: latestPage,
+      isLatestCard: true,
+    });
+  }
+
+  for (const page of pages) {
+    entries.push({
+      id: page.page_key,
+      page,
+      isLatestCard: false,
+    });
+  }
+
+  return entries;
+}
 
 export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
   validateSearch: (search) => PagesSearchSchema.parse(search),
@@ -113,6 +145,13 @@ function PagesIndex() {
     return pages.filter((page) => matchedPageKeys.has(page.page_key));
   }, [matchedPageKeys, normalizedQuery, pages]);
 
+  const latestPageMatch = useLatestOpenedPageMatch(filteredPages);
+
+  const gridEntries = useMemo(
+    () => createPageGridEntries(filteredPages, latestPageMatch),
+    [filteredPages, latestPageMatch],
+  );
+
   const groupMetaByPageKey = usePageGroupMetaByPageKey(pagesTree ?? null);
 
   const { registerLabelRef, supportsCustomHighlight } =
@@ -125,7 +164,7 @@ function PagesIndex() {
     containerRef,
     minLanes,
     maxLanes,
-    isPending ? 6 : filteredPages.length,
+    isPending ? 6 : gridEntries.length,
     { cardWidth, horizontalGap, verticalGap, expandCards },
   );
 
@@ -179,7 +218,7 @@ function PagesIndex() {
     <EmptyState message={emptySearchMessage} />
   ) : (
     <PagesGrid
-      pages={filteredPages}
+      entries={gridEntries}
       containerRef={containerRef}
       gridConfig={gridConfig}
       highlightQuery={normalizedQuery}
@@ -212,7 +251,7 @@ function PagesIndex() {
 }
 
 function PagesGrid({
-  pages,
+  entries,
   containerRef,
   gridConfig,
   highlightQuery,
@@ -220,7 +259,7 @@ function PagesGrid({
   useCustomHighlight,
   groupMetaByPageKey,
 }: {
-  pages: Array<MediaPage>;
+  entries: Array<PagesGridEntry>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   gridConfig: PageGridLanesResult;
   highlightQuery: string;
@@ -240,12 +279,12 @@ function PagesGrid({
     verticalGap,
   } = gridConfig;
   const getItemKey = useCallback(
-    (index: number) => pages[index].page_key,
-    [pages],
+    (index: number) => entries[index].id,
+    [entries],
   );
 
   const rowVirtualizer = useWindowVirtualizer({
-    count: pages.length,
+    count: entries.length,
     getItemKey,
     estimateSize: () => effectiveCardHeight,
     overscan: 4,
@@ -265,7 +304,7 @@ function PagesGrid({
   const { setLinkRef, handleKeyDown, handleItemFocus, getTabIndex } =
     useMasonryNavigation({
       lanes,
-      totalItems: pages.length,
+      totalItems: entries.length,
       getVirtualItems: rowVirtualizer.getVirtualItems.bind(rowVirtualizer),
       scrollToIndex: rowVirtualizer.scrollToIndex.bind(rowVirtualizer),
     });
@@ -287,7 +326,11 @@ function PagesGrid({
       >
         {lanes > 0 &&
           virtualItems.map((virtualRow) => {
-            const page = pages[virtualRow.index];
+            const entry = entries[virtualRow.index];
+            const page = entry.page;
+            const labelKey = entry.isLatestCard
+              ? `latest-opened-${page.page_key}`
+              : page.page_key;
             const groupMeta = groupMetaByPageKey.get(page.page_key);
             const groupLabel = groupMeta?.label ?? "";
             const groupStripeColorsByLevel =
@@ -308,12 +351,16 @@ function PagesGrid({
                   pageName={page.name}
                   pageSlug={page.slug}
                   index={virtualRow.index}
+                  className={
+                    entry.isLatestCard ? "bg-primary/5 shadow-sm" : undefined
+                  }
+                  badgeLabel={entry.isLatestCard ? "Last opened" : undefined}
                   tabIndex={getTabIndex(virtualRow.index, visibleIndices)}
                   setLinkRef={setLinkRef}
                   onItemFocus={handleItemFocus}
-                  labelRef={registerLabelRef(page.page_key)}
+                  labelRef={registerLabelRef(labelKey)}
                   getGroupLabelRef={(segmentIndex) =>
-                    registerLabelRef(`${page.page_key}-group-${segmentIndex}`)
+                    registerLabelRef(`${labelKey}-group-${segmentIndex}`)
                   }
                   highlightQuery={highlightQuery}
                   useCustomHighlight={useCustomHighlight}
@@ -326,8 +373,8 @@ function PagesGrid({
       </ul>
       <ScrollPositionBadge
         current={(lastItemIndex ?? 0) + 1}
-        loaded={pages.length}
-        total={pages.length}
+        loaded={entries.length}
+        total={entries.length}
         isScrolling={rowVirtualizer.isScrolling}
         show={showScrollBadge}
       />

@@ -4,6 +4,7 @@
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { IconFocusCentered, IconRefreshDot } from "@tabler/icons-react";
+import { useEffect } from "react";
 import { PageGroupPathForPage } from "./-components/page-group-path";
 import { useResolvedPage } from "./-hooks/use-resolved-page";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -26,6 +27,7 @@ import {
   useGetPageInfoQuery,
   useRefreshPageMutation,
 } from "@/integrations/hydrus-api/queries/manage-pages";
+import { useLatestOpenedPageActions } from "@/stores/latest-opened-page-store";
 
 const PAGE_STATE_LABELS: Partial<Record<PageState, string>> = {
   [PageState.INITIALIZING]: "Initializing",
@@ -87,6 +89,7 @@ function PageContent({
   const refreshPageMutation = useRefreshPageMutation();
   const focusPageMutation = useFocusPageMutation();
   const queryClient = useQueryClient();
+  const { setLatestOpenedPage } = useLatestOpenedPageActions();
   const pagePath = (
     <PageGroupPathForPage
       pageKey={resolvedPageKey}
@@ -107,6 +110,19 @@ function PageContent({
     fileIds: visibleFileIds,
     source: reviewSource,
   });
+
+  useEffect(() => {
+    setLatestOpenedPage({
+      pageKey: resolvedPageKey,
+      pageSlug: resolvedPageSlug,
+      pageName: resolvedPageName,
+    });
+  }, [
+    resolvedPageKey,
+    resolvedPageName,
+    resolvedPageSlug,
+    setLatestOpenedPage,
+  ]);
 
   // Determine if page is in a loading/initializing state
   const pageState = data?.page_info.page_state;
