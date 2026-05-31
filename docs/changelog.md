@@ -8,6 +8,23 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-05-31
+
+### Added
+
+- **Local gallery hiding** — Hide files from Hydrus-backed galleries until next data refresh/next session
+- **Review hiding** — Hide files when performing review actions based on Hydrus setting "Remove files from view when they are archive/delete filtered" and "--even skipped files". Hiding is scoped to galleries that contributed to review. This is hyAway only and persists until next data refresh/session
+- **Hide from view** — Thumbnail context menus now include a direct action for hiding a file from the current gallery view.
+- **Hide trashed files** — Trashing files hides them from view if Hydrus setting "Remove files from view when they are sent to the trash" is enabled. This will hide file in Hydrus pages. For search based queries this persists until next data refresh/session
+- **Show hidden files** — Galleries with hidden files offer a footer action to show them again
+- **Review source actions** — Review completion now shows buttons for every source that contributed files, including saved searches, Hydrus pages, and predefined galleries
+
+### Changed
+
+- Review completion buttons now wrap on narrow screens and take full width on the smallest layouts
+
+---
+
 ## 2026-05-20
 
 ### Added
