@@ -159,7 +159,7 @@ const markTrashed = (meta: FileMetadata) =>
   updateMetadataFields(meta, { is_deleted: true, is_trashed: true });
 
 type DeleteFilesMutationOptions = DeleteFilesOptions & {
-  hideFromViewSource?: ReviewSource | Array<ReviewSource> | null;
+  reviewSource?: ReviewSource | Array<ReviewSource> | null;
 };
 
 /**
@@ -171,19 +171,14 @@ export const useDeleteFilesMutation = () => {
 
   return useMutation({
     mutationFn: (options: DeleteFilesMutationOptions) => {
-      const { hideFromViewSource: _hideFromViewSource, ...apiOptions } =
-        options;
+      const { reviewSource: _reviewSource, ...apiOptions } = options;
       return deleteFiles(apiOptions);
     },
     onSuccess: (_data, variables) => {
       const fileIds = getFileIdsFromIdentifiers(variables);
       updateFileMetadataCaches(queryClient, fileIds, markTrashed);
       if (hideTrashedFiles) {
-        hideFileIdsInViewCaches(
-          queryClient,
-          fileIds,
-          variables.hideFromViewSource,
-        );
+        hideFileIdsInViewCaches(queryClient, fileIds, variables.reviewSource);
       }
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyTrashed"],
