@@ -74,6 +74,23 @@ function withAddedHiddenFileIds<T extends object>(
   };
 }
 
+function withoutHiddenFileIds<T extends object>(data: T & ViewCacheLocalData) {
+  const hiddenFileIds = getHiddenFileIds(data);
+  if (hiddenFileIds.length === 0) return data;
+
+  const { hiddenFileIds: _hiddenFileIds, ...nextHyawaySlice } =
+    data.hyaway ?? {};
+  if (Object.keys(nextHyawaySlice).length === 0) {
+    const { hyaway: _hyaway, ...nextData } = data;
+    return nextData;
+  }
+
+  return {
+    ...data,
+    hyaway: nextHyawaySlice,
+  };
+}
+
 /** Updates matching metadata entries and returns undefined when nothing changed. */
 function updateMetadataArray(
   metadata: Array<FileMetadata>,
@@ -276,5 +293,37 @@ export function hideFileIdsInViewCaches(
       );
       return withAddedHiddenFileIds(oldData, hiddenFileIds);
     },
+  );
+}
+
+export function clearHiddenFileIdsInViewCaches(
+  queryClient: QueryClient,
+  sourceOrSources: ReviewSource | Array<ReviewSource> | null | undefined,
+) {
+  if (!sourceOrSources) return;
+
+  const sources = Array.isArray(sourceOrSources)
+    ? sourceOrSources
+    : [sourceOrSources];
+  if (sources.length === 0) return;
+
+  queryClient.setQueriesData<SearchFilesResponse & ViewCacheLocalData>(
+    {
+      predicate: (query) =>
+        sources.some((source) =>
+          queryKeyMatchesReviewSourceSearch(query.queryKey, source),
+        ),
+    },
+    (oldData) => (oldData ? withoutHiddenFileIds(oldData) : oldData),
+  );
+
+  queryClient.setQueriesData<GetPageInfoResponse & ViewCacheLocalData>(
+    {
+      predicate: (query) =>
+        sources.some((source) =>
+          queryKeyMatchesReviewSourcePageInfo(query.queryKey, source),
+        ),
+    },
+    (oldData) => (oldData ? withoutHiddenFileIds(oldData) : oldData),
   );
 }

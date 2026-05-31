@@ -3,10 +3,11 @@
 
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { IconArrowsShuffle } from "@tabler/icons-react";
+import { IconArrowsShuffle, IconEye } from "@tabler/icons-react";
 import { useRandomInboxSearchFooterAction } from "./-components/predefined-search-footer-action";
 import { RandomInboxSettingsPopover } from "./-components/random-inbox-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
+import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
@@ -18,6 +19,7 @@ import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbna
 import { BottomNavButton } from "@/components/ui-primitives/bottom-nav-button";
 import { useReviewActions } from "@/hooks/use-review-actions";
 import {
+  clearHiddenFileIdsInViewCaches,
   formatHiddenFileCount,
   getHiddenFileCount,
   getHiddenFileIds,
@@ -45,6 +47,20 @@ function RouteComponent() {
     source: { type: "predefinedSearch", key: "randomInbox" },
   });
   const openSearchAction = useRandomInboxSearchFooterAction();
+  const unhideAction: FloatingFooterAction | null =
+    hiddenFileIds.length > 0
+      ? {
+          id: "unhide-files",
+          label: "Unhide files",
+          icon: IconEye,
+          onClick: () =>
+            clearHiddenFileIdsInViewCaches(queryClient, {
+              type: "predefinedSearch",
+              key: "randomInbox",
+            }),
+          overflowOnly: true,
+        }
+      : null;
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -132,7 +148,11 @@ function RouteComponent() {
       </PageHeaderActions>
       <PageFloatingFooter
         leftContent={shuffleButton}
-        actions={[...reviewActions, openSearchAction]}
+        actions={[
+          ...reviewActions,
+          ...(unhideAction ? [unhideAction] : []),
+          openSearchAction,
+        ]}
       />
     </>
   );

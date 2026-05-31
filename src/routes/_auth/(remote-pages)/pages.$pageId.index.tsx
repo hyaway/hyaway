@@ -3,7 +3,11 @@
 
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { IconFocusCentered, IconRefreshDot } from "@tabler/icons-react";
+import {
+  IconEye,
+  IconFocusCentered,
+  IconRefreshDot,
+} from "@tabler/icons-react";
 import { PageGroupPathForPage } from "./-components/page-group-path";
 import { useResolvedPage } from "./-hooks/use-resolved-page";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -20,6 +24,7 @@ import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbna
 import { ThumbnailGalleryDisplaySettingsPopover } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
 import { useReviewActions } from "@/hooks/use-review-actions";
 import {
+  clearHiddenFileIdsInViewCaches,
   formatHiddenFileCount,
   getHiddenFileCount,
   getHiddenFileIds,
@@ -155,6 +160,21 @@ function PageContent({
       isPending: focusPageMutation.isPending,
       overflowOnly: true,
     },
+    ...(hiddenFileIds.length > 0
+      ? [
+          {
+            id: "unhide-files",
+            label: "Unhide files",
+            icon: IconEye,
+            onClick: () =>
+              clearHiddenFileIdsInViewCaches(queryClient, {
+                type: "remotePage",
+                pageKey: resolvedPageKey,
+              }),
+            overflowOnly: true,
+          },
+        ]
+      : []),
   ];
 
   if (isLoading || isInitializing) {

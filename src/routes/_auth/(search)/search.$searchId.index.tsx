@@ -4,6 +4,7 @@
 import {
   IconCopy,
   IconDeviceFloppy,
+  IconEye,
   IconPin,
   IconPinned,
   IconPinnedOff,
@@ -42,6 +43,7 @@ import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbna
 import { ThumbnailGallerySkeleton } from "@/components/thumbnail-gallery/thumbnail-gallery-skeleton";
 import { useReviewActions } from "@/hooks/use-review-actions";
 import {
+  clearHiddenFileIdsInViewCaches,
   formatHiddenFileCount,
   getHiddenFileCount,
   getHiddenFileIds,
@@ -211,6 +213,21 @@ function SearchPage() {
         onClick: handleSaveAsNew,
         overflowOnly: true,
       },
+      ...(hiddenFileIds.length > 0
+        ? [
+            {
+              id: "unhide-files",
+              label: "Unhide files",
+              icon: IconEye,
+              onClick: () =>
+                clearHiddenFileIdsInViewCaches(queryClient, {
+                  type: "searchPage",
+                  entryKey: searchId,
+                }),
+              overflowOnly: true,
+            },
+          ]
+        : []),
       {
         id: "delete-search",
         label: "Delete",
@@ -229,6 +246,9 @@ function SearchPage() {
     isPinned,
     handleTogglePinned,
     handleSaveAsNew,
+    hiddenFileIds.length,
+    queryClient,
+    searchId,
     handleDelete,
   ]);
   const footerActions = useMemo(
