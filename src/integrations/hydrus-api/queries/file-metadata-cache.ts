@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { QueryClient } from "@tanstack/react-query";
-import type { FileMetadata } from "../models";
+import type {
+  FileMetadata,
+  GetPageInfoResponse,
+  SearchFilesResponse,
+} from "../models";
+import type { ReviewSource } from "@/stores/review-queue-store";
 
 type BatchMetadataData = {
   metadata: Array<FileMetadata>;
@@ -12,6 +17,62 @@ type InfiniteMetadataData = {
   pages: Array<BatchMetadataData & { nextCursor?: number }>;
   pageParams: Array<number>;
 };
+
+type ViewCacheLocalData = {
+  hyaway?: {
+    hiddenFileIds?: Array<number>;
+  };
+};
+
+export function getHiddenFileIds(data: unknown) {
+  if (!data || typeof data !== "object") return [];
+  return (data as ViewCacheLocalData).hyaway?.hiddenFileIds ?? [];
+}
+
+export function getHiddenFileCount(data: unknown) {
+  return getHiddenFileIds(data).length;
+}
+
+export function getVisibleFileIds(fileIds: Array<number>, data: unknown) {
+  const hiddenFileIds = getHiddenFileIds(data);
+  if (hiddenFileIds.length === 0) return fileIds;
+
+  const hiddenFileIdSet = new Set(hiddenFileIds);
+  return fileIds.filter((fileId) => !hiddenFileIdSet.has(fileId));
+}
+
+export function formatHiddenFileCount(hiddenFileCount: number) {
+  if (hiddenFileCount <= 0) return "";
+  const noun = hiddenFileCount === 1 ? "file" : "files";
+  return `${hiddenFileCount} hidden ${noun}`;
+}
+
+function withAddedHiddenFileIds<T extends object>(
+  data: T & ViewCacheLocalData,
+  fileIds: Array<number>,
+) {
+  if (fileIds.length === 0) return data;
+
+  const hiddenFileIds = getHiddenFileIds(data);
+  const hiddenFileIdsSet = new Set(hiddenFileIds);
+  const fileIdsToHide: Array<number> = [];
+
+  for (const fileId of fileIds) {
+    if (hiddenFileIdsSet.has(fileId)) continue;
+    hiddenFileIdsSet.add(fileId);
+    fileIdsToHide.push(fileId);
+  }
+
+  if (fileIdsToHide.length === 0) return data;
+
+  return {
+    ...data,
+    hyaway: {
+      ...data.hyaway,
+      hiddenFileIds: [...hiddenFileIds, ...fileIdsToHide],
+    },
+  };
+}
 
 /** Updates matching metadata entries and returns undefined when nothing changed. */
 function updateMetadataArray(
@@ -131,4 +192,89 @@ export function updateFileMetadataCaches(
   updateSingleFileMetadataCaches(queryClient, fileIds, updater);
   updateBatchFileMetadataCaches(queryClient, fileIdSet, updater);
   updateInfiniteFileMetadataCaches(queryClient, fileIdSet, updater);
+}
+
+function queryKeyMatchesReviewSourceSearch(
+  queryKey: ReadonlyArray<unknown>,
+  source: ReviewSource,
+) {
+  switch (source.type) {
+    case "searchPage":
+      return (
+        queryKey[0] === "searchFiles" &&
+        queryKey[1] === "searchPage" &&
+        queryKey[2] === source.entryKey
+      );
+    case "predefinedSearch":
+      return queryKey[0] === "searchFiles" && queryKey[1] === source.key;
+    case "remotePage":
+      return false;
+    default:
+      source satisfies never;
+      return false;
+  }
+}
+
+function queryKeyMatchesReviewSourcePageInfo(
+  queryKey: ReadonlyArray<unknown>,
+  source: ReviewSource,
+) {
+  return (
+    source.type === "remotePage" &&
+    queryKey[0] === "getPageInfo" &&
+    queryKey[1] === source.pageKey
+  );
+}
+
+/**
+ * Marks files as hidden in cached current views. The raw Hydrus file-id lists
+ * stay intact; consumers derive visible IDs from the local hidden-file list.
+ */
+export function hideFileIdsInViewCaches(
+  queryClient: QueryClient,
+  fileIds: Array<number> | undefined,
+  sourceOrSources: ReviewSource | Array<ReviewSource> | null | undefined,
+) {
+  if (!fileIds?.length || !sourceOrSources) return;
+
+  const sources = Array.isArray(sourceOrSources)
+    ? sourceOrSources
+    : [sourceOrSources];
+  if (sources.length === 0) return;
+
+  queryClient.setQueriesData<SearchFilesResponse & ViewCacheLocalData>(
+    {
+      predicate: (query) =>
+        sources.some((source) =>
+          queryKeyMatchesReviewSourceSearch(query.queryKey, source),
+        ) &&
+        (query.isActive() || !query.isStale()),
+    },
+    (oldData) => {
+      if (!oldData?.file_ids) return oldData;
+      const hiddenFileIds = fileIds.filter((fileId) =>
+        oldData.file_ids?.includes(fileId),
+      );
+      return withAddedHiddenFileIds(oldData, hiddenFileIds);
+    },
+  );
+
+  queryClient.setQueriesData<GetPageInfoResponse & ViewCacheLocalData>(
+    {
+      predicate: (query) =>
+        sources.some((source) =>
+          queryKeyMatchesReviewSourcePageInfo(query.queryKey, source),
+        ) &&
+        (query.isActive() || !query.isStale()),
+    },
+    (oldData) => {
+      const media = oldData?.page_info.media;
+      if (!oldData || !media) return oldData;
+      // Hydrus names this field hash_ids, but page info returns numeric file ids.
+      const hiddenFileIds = fileIds.filter((fileId) =>
+        media.hash_ids.includes(fileId),
+      );
+      return withAddedHiddenFileIds(oldData, hiddenFileIds);
+    },
+  );
 }

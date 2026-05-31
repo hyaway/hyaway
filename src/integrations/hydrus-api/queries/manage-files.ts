@@ -19,7 +19,11 @@ import {
 } from "../api-client";
 import { CanvasType } from "../models";
 import { useIsApiConfigured } from "../hydrus-config-store";
-import { updateFileMetadataCaches } from "./file-metadata-cache";
+import {
+  hideFileIdsInViewCaches,
+  updateFileMetadataCaches,
+} from "./file-metadata-cache";
+import { useHydrusHideFromViewOptions } from "./options";
 
 import type {
   DeleteFilesOptions,
@@ -27,6 +31,7 @@ import type {
   UndeleteFilesOptions,
 } from "../api-client";
 import type { FileMetadata, FileViewingStatistics } from "../models";
+import type { ReviewSource } from "@/stores/review-queue-store";
 
 export const useGetSingleFileMetadata = (fileId: number) => {
   const isConfigured = useIsApiConfigured();
@@ -153,17 +158,33 @@ const updateMetadataFields = (
 const markTrashed = (meta: FileMetadata) =>
   updateMetadataFields(meta, { is_deleted: true, is_trashed: true });
 
+type DeleteFilesMutationOptions = DeleteFilesOptions & {
+  hideFromViewSource?: ReviewSource | Array<ReviewSource> | null;
+};
+
 /**
  * Mutation to delete files (send to trash)
  */
 export const useDeleteFilesMutation = () => {
   const queryClient = useQueryClient();
+  const { hideTrashedFiles } = useHydrusHideFromViewOptions();
 
   return useMutation({
-    mutationFn: (options: DeleteFilesOptions) => deleteFiles(options),
+    mutationFn: (options: DeleteFilesMutationOptions) => {
+      const { hideFromViewSource: _hideFromViewSource, ...apiOptions } =
+        options;
+      return deleteFiles(apiOptions);
+    },
     onSuccess: (_data, variables) => {
       const fileIds = getFileIdsFromIdentifiers(variables);
       updateFileMetadataCaches(queryClient, fileIds, markTrashed);
+      if (hideTrashedFiles) {
+        hideFileIdsInViewCaches(
+          queryClient,
+          fileIds,
+          variables.hideFromViewSource,
+        );
+      }
       queryClient.invalidateQueries({
         queryKey: ["searchFiles", "recentlyTrashed"],
         refetchType: "none",
