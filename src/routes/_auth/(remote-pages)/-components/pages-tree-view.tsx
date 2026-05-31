@@ -10,6 +10,7 @@ import {
 import { usePagesSearchHighlights } from "../-hooks/use-pages-search-highlights";
 import { filterPagesTree } from "../-hooks/use-pages-tree-search";
 import { HighlightedText } from "./pages-highlighted-text";
+import type { MediaPage } from "@/integrations/hydrus-api/models";
 import type { PagesTreeNode } from "@/integrations/hydrus-api/queries/manage-pages";
 import {
   SidebarMenu,
@@ -21,6 +22,7 @@ import { usePagesUseFriendlyUrls } from "@/stores/pages-settings-store";
 
 interface PagesTreeViewProps {
   root: PagesTreeNode | null;
+  latestPage: MediaPage | null;
   query: string;
   emptyMessage?: string;
 }
@@ -63,6 +65,7 @@ function buildTreeRows(root: PagesTreeNode | null, expandedKeys: Set<string>) {
 
 export function PagesTreeView({
   root,
+  latestPage,
   query,
   emptyMessage = "No pages found.",
 }: PagesTreeViewProps) {
@@ -159,7 +162,7 @@ export function PagesTreeView({
     });
   };
 
-  if (!filteredTree || rows.length === 0) {
+  if ((!filteredTree || rows.length === 0) && !latestPage) {
     return (
       <p className="text-muted-foreground px-2 py-3 text-xs/5">
         {emptyMessage}
@@ -169,6 +172,37 @@ export function PagesTreeView({
 
   return (
     <SidebarMenu className="px-1">
+      {latestPage ? (
+        <SidebarMenuItem
+          key={`latest-opened-${latestPage.page_key}`}
+          className="mb-1"
+        >
+          <SidebarMenuLinkButton
+            to="/pages/$pageId"
+            params={{
+              pageId: useFriendlyUrls ? latestPage.slug : latestPage.page_key,
+            }}
+            size="lg"
+            className="border-primary/20 bg-primary/5 hover:bg-primary/10 data-active:bg-primary/10 border shadow-xs"
+          >
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="text-primary text-xs/4 font-medium">
+                Last opened
+              </span>
+              <span
+                ref={registerLabelRef(`latest-opened-${latestPage.page_key}`)}
+                className="truncate"
+              >
+                <HighlightedText
+                  text={latestPage.name}
+                  query={query}
+                  useCustomHighlight={supportsCustomHighlight}
+                />
+              </span>
+            </span>
+          </SidebarMenuLinkButton>
+        </SidebarMenuItem>
+      ) : null}
       {rows.map((row) =>
         row.isGroup ? (
           <SidebarMenuItem

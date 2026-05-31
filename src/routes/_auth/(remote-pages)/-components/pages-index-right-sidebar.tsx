@@ -4,6 +4,7 @@
 import { useSearch } from "@tanstack/react-router";
 import { PagesSearchInput } from "./pages-search-input";
 import { PagesTreeView } from "./pages-tree-view";
+import type { MediaPage } from "@/integrations/hydrus-api/models";
 import type { PagesTreeNode } from "@/integrations/hydrus-api/queries/manage-pages";
 import { RightSidebarPortal } from "@/components/app-shell/right-sidebar-portal";
 import {
@@ -17,6 +18,7 @@ import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 
 interface PagesIndexRightSidebarProps {
   tree: PagesTreeNode | null;
+  latestPage: MediaPage | null;
   treeEmptyMessage?: string;
 }
 
@@ -24,6 +26,7 @@ const PAGES_ROUTE_FULL_PATH = "/_auth/(remote-pages)/pages/";
 
 export function PagesIndexRightSidebar({
   tree,
+  latestPage,
   treeEmptyMessage,
 }: PagesIndexRightSidebarProps) {
   const { q } = useSearch({ from: PAGES_ROUTE_FULL_PATH });
@@ -45,6 +48,7 @@ export function PagesIndexRightSidebar({
             <ScrollArea className="h-full">
               <PagesTreeView
                 root={tree}
+                latestPage={latestPage}
                 query={query}
                 emptyMessage={treeEmptyMessage}
               />

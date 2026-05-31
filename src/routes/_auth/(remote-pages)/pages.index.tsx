@@ -240,6 +240,7 @@ function PagesIndex() {
       </div>
       <PagesIndexRightSidebar
         tree={pagesTree}
+        latestPage={latestPageMatch}
         treeEmptyMessage={treeSidebarEmptyMessage}
       />
       <PageHeaderActions>
