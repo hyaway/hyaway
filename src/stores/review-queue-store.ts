@@ -79,6 +79,25 @@ function hasReviewSource(
   return !!source && sources.some((item) => isSameReviewSource(item, source));
 }
 
+function createFreshReviewQueueState(
+  ids: Array<number>,
+  source: ReviewSource | null | undefined,
+) {
+  return {
+    fileIds: [...new Set(ids)],
+    currentIndex: 0,
+    history: [],
+    sources: source ? [source] : [],
+  };
+}
+
+function isReviewQueueComplete({
+  currentIndex,
+  fileIds,
+}: Pick<ReviewQueueState, "currentIndex" | "fileIds">) {
+  return fileIds.length > 0 && currentIndex >= fileIds.length;
+}
+
 /** Stats derived from action history, grouped by swipe direction */
 export type ReviewDirectionStats = Record<SwipeDirection, number>;
 
@@ -122,18 +141,18 @@ const useReviewQueueStore = create<ReviewQueueState>()(
 
       actions: {
         setQueue: (ids, source = null) => {
-          // Dedupe while preserving order
-          const uniqueIds = [...new Set(ids)];
-          set({
-            fileIds: uniqueIds,
-            currentIndex: 0,
-            history: [],
-            sources: source ? [source] : [],
-          });
+          set(createFreshReviewQueueState(ids, source));
         },
 
         addToQueue: (ids, source) => {
-          const { fileIds, sources } = get();
+          const { currentIndex, fileIds, sources } = get();
+          const isComplete = isReviewQueueComplete({ currentIndex, fileIds });
+
+          if (isComplete) {
+            set(createFreshReviewQueueState(ids, source));
+            return;
+          }
+
           const existingSet = new Set(fileIds);
           const newIds = ids.filter((id) => !existingSet.has(id));
           const shouldAddSource = !!source && !hasReviewSource(sources, source);
@@ -247,10 +266,7 @@ export const useReviewQueueRemaining = () =>
 
 /** Check if the queue is complete */
 export const useReviewQueueIsComplete = () =>
-  useReviewQueueStore(
-    (state) =>
-      state.fileIds.length > 0 && state.currentIndex >= state.fileIds.length,
-  );
+  useReviewQueueStore(isReviewQueueComplete);
 
 /** Check if the queue is empty */
 export const useReviewQueueIsEmpty = () =>
