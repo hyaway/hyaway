@@ -45,7 +45,17 @@ export interface ReviewHistoryEntry {
 export type ReviewSource =
   | { type: "remotePage"; pageKey: string }
   | { type: "searchPage"; entryKey: string }
-  | { type: "predefinedSearch"; key: "randomInbox" | "recentlyInboxed" };
+  | {
+      type: "predefinedSearch";
+      key:
+        | "longestViewed"
+        | "mostViewed"
+        | "randomInbox"
+        | "recentlyArchived"
+        | "recentlyInboxed"
+        | "recentlyTrashed"
+        | "remoteWatchHistory";
+    };
 
 function isSameReviewSource(left: ReviewSource, right: ReviewSource) {
   switch (left.type) {
