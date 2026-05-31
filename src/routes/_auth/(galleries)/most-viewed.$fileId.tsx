@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { FileDetail } from "@/components/file-detail/file-detail";
 import { useFileContextNavigation } from "@/hooks/use-file-context-navigation";
+import { getVisibleFileIds } from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import { useMostViewedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 
 export const Route = createFileRoute("/_auth/(galleries)/most-viewed/$fileId")({
@@ -21,7 +22,9 @@ function RouteComponent() {
   // Load the context (list of file IDs in this gallery)
   const { data, isLoading, isError } = useMostViewedFilesQuery();
 
-  const fileIds = data?.file_ids;
+  const fileIds = data
+    ? getVisibleFileIds(data.file_ids ?? [], data)
+    : undefined;
 
   const buildParams = (fid: number) => ({ fileId: String(fid) });
 

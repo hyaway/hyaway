@@ -3,11 +3,9 @@
 
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { IconEye } from "@tabler/icons-react";
 import { useRecentlyInboxedSearchFooterAction } from "./-components/predefined-search-footer-action";
 import { RecentFilesSettingsPopover } from "./-components/recent-files-settings-popover";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
-import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageError } from "@/components/page-shell/page-error";
 import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer";
@@ -18,13 +16,7 @@ import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { useReviewActions } from "@/hooks/use-review-actions";
-import {
-  clearHiddenFileIdsInViewCaches,
-  formatHiddenFileCount,
-  getHiddenFileCount,
-  getHiddenFileIds,
-  getVisibleFileIds,
-} from "@/integrations/hydrus-api/queries/file-metadata-cache";
+import { useHiddenFileView } from "@/hooks/use-hidden-file-view";
 import { useRecentlyInboxedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 
 export const Route = createFileRoute("/_auth/(galleries)/recently-inboxed/")({
@@ -39,29 +31,18 @@ function RouteComponent() {
   const queryClient = useQueryClient();
 
   const fileIds = data?.file_ids ?? [];
-  const hiddenFileIds = getHiddenFileIds(data);
-  const visibleFileIds = getVisibleFileIds(fileIds, data);
+  const reviewSource = {
+    type: "predefinedSearch",
+    key: "recentlyInboxed",
+  } as const;
+  const { hiddenFileIds, visibleFileIds, hiddenLabel, showHiddenFilesAction } =
+    useHiddenFileView({ data, fileIds, source: reviewSource });
   const hasFiles = visibleFileIds.length > 0;
-  const hiddenLabel = formatHiddenFileCount(getHiddenFileCount(data));
   const reviewActions = useReviewActions({
     fileIds: visibleFileIds,
-    source: { type: "predefinedSearch", key: "recentlyInboxed" },
+    source: reviewSource,
   });
   const openSearchAction = useRecentlyInboxedSearchFooterAction();
-  const unhideAction: FloatingFooterAction | null =
-    hiddenFileIds.length > 0
-      ? {
-          id: "unhide-files",
-          label: "Unhide files",
-          icon: IconEye,
-          onClick: () =>
-            clearHiddenFileIdsInViewCaches(queryClient, {
-              type: "predefinedSearch",
-              key: "recentlyInboxed",
-            }),
-          overflowOnly: true,
-        }
-      : null;
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -126,7 +107,7 @@ function RouteComponent() {
         {hasFiles ? (
           <ThumbnailGalleryProvider
             fileIds={visibleFileIds}
-            reviewSource={{ type: "predefinedSearch", key: "recentlyInboxed" }}
+            reviewSource={reviewSource}
           >
             <ThumbnailGallery
               fileIds={fileIds}
@@ -145,7 +126,7 @@ function RouteComponent() {
         leftContent={refetchButton}
         actions={[
           ...reviewActions,
-          ...(unhideAction ? [unhideAction] : []),
+          ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
           openSearchAction,
         ]}
       />

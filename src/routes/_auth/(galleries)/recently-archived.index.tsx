@@ -15,6 +15,7 @@ import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
+import { useHiddenFileView } from "@/hooks/use-hidden-file-view";
 import { useRecentlyArchivedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 
 export const Route = createFileRoute("/_auth/(galleries)/recently-archived/")({
@@ -28,6 +29,13 @@ function RouteComponent() {
     useRecentlyArchivedFilesQuery();
   const queryClient = useQueryClient();
   const openSearchAction = useRecentlyArchivedSearchFooterAction();
+  const fileIds = data?.file_ids ?? [];
+  const reviewSource = {
+    type: "predefinedSearch",
+    key: "recentlyArchived",
+  } as const;
+  const { hiddenFileIds, visibleFileIds, hiddenLabel, showHiddenFilesAction } =
+    useHiddenFileView({ data, fileIds, source: reviewSource });
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -87,12 +95,16 @@ function RouteComponent() {
     <>
       <>
         <PageHeading
-          title={`Recently archived (${data?.file_ids?.length ?? 0} files)`}
+          title={`Recently archived (${visibleFileIds.length} files${hiddenLabel ? `, ${hiddenLabel}` : ""})`}
         />
-        {data?.file_ids && data.file_ids.length > 0 ? (
-          <ThumbnailGalleryProvider fileIds={data.file_ids}>
+        {visibleFileIds.length > 0 ? (
+          <ThumbnailGalleryProvider
+            fileIds={visibleFileIds}
+            reviewSource={reviewSource}
+          >
             <ThumbnailGallery
-              fileIds={data.file_ids}
+              fileIds={fileIds}
+              hiddenFileIds={hiddenFileIds}
               getFileLink={getFileLink}
             />
           </ThumbnailGalleryProvider>
@@ -105,7 +117,10 @@ function RouteComponent() {
       </PageHeaderActions>
       <PageFloatingFooter
         leftContent={refetchButton}
-        actions={[openSearchAction]}
+        actions={[
+          ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
+          openSearchAction,
+        ]}
       />
     </>
   );

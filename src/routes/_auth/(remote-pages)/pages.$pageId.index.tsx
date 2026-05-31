@@ -3,11 +3,7 @@
 
 import { createFileRoute, linkOptions } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  IconEye,
-  IconFocusCentered,
-  IconRefreshDot,
-} from "@tabler/icons-react";
+import { IconFocusCentered, IconRefreshDot } from "@tabler/icons-react";
 import { PageGroupPathForPage } from "./-components/page-group-path";
 import { useResolvedPage } from "./-hooks/use-resolved-page";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -23,13 +19,7 @@ import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-galle
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGalleryDisplaySettingsPopover } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
 import { useReviewActions } from "@/hooks/use-review-actions";
-import {
-  clearHiddenFileIdsInViewCaches,
-  formatHiddenFileCount,
-  getHiddenFileCount,
-  getHiddenFileIds,
-  getVisibleFileIds,
-} from "@/integrations/hydrus-api/queries/file-metadata-cache";
+import { useHiddenFileView } from "@/hooks/use-hidden-file-view";
 import { PageState } from "@/integrations/hydrus-api/models";
 import {
   useFocusPageMutation,
@@ -107,12 +97,15 @@ function PageContent({
 
   // Get file IDs for review queue
   const fileIds = data?.page_info.media.hash_ids ?? [];
-  const hiddenFileIds = getHiddenFileIds(data);
-  const visibleFileIds = getVisibleFileIds(fileIds, data);
-  const hiddenLabel = formatHiddenFileCount(getHiddenFileCount(data));
+  const reviewSource = {
+    type: "remotePage",
+    pageKey: resolvedPageKey,
+  } as const;
+  const { hiddenFileIds, visibleFileIds, hiddenLabel, showHiddenFilesAction } =
+    useHiddenFileView({ data, fileIds, source: reviewSource });
   const reviewActions = useReviewActions({
     fileIds: visibleFileIds,
-    source: { type: "remotePage", pageKey: resolvedPageKey },
+    source: reviewSource,
   });
 
   // Determine if page is in a loading/initializing state
@@ -160,21 +153,7 @@ function PageContent({
       isPending: focusPageMutation.isPending,
       overflowOnly: true,
     },
-    ...(hiddenFileIds.length > 0
-      ? [
-          {
-            id: "unhide-files",
-            label: "Unhide files",
-            icon: IconEye,
-            onClick: () =>
-              clearHiddenFileIdsInViewCaches(queryClient, {
-                type: "remotePage",
-                pageKey: resolvedPageKey,
-              }),
-            overflowOnly: true,
-          },
-        ]
-      : []),
+    ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
   ];
 
   if (isLoading || isInitializing) {
@@ -224,7 +203,7 @@ function PageContent({
         {data?.page_info.media ? (
           <ThumbnailGalleryProvider
             fileIds={visibleFileIds}
-            reviewSource={{ type: "remotePage", pageKey: resolvedPageKey }}
+            reviewSource={reviewSource}
           >
             <ThumbnailGallery
               fileIds={data.page_info.media.hash_ids}

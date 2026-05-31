@@ -4,7 +4,6 @@
 import {
   IconCopy,
   IconDeviceFloppy,
-  IconEye,
   IconPin,
   IconPinned,
   IconPinnedOff,
@@ -42,13 +41,7 @@ import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-galle
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGallerySkeleton } from "@/components/thumbnail-gallery/thumbnail-gallery-skeleton";
 import { useReviewActions } from "@/hooks/use-review-actions";
-import {
-  clearHiddenFileIdsInViewCaches,
-  formatHiddenFileCount,
-  getHiddenFileCount,
-  getHiddenFileIds,
-  getVisibleFileIds,
-} from "@/integrations/hydrus-api/queries/file-metadata-cache";
+import { useHiddenFileView } from "@/hooks/use-hidden-file-view";
 import { SearchTagList } from "@/components/tag/tag-badge";
 import {
   useCommittedSearch,
@@ -97,12 +90,13 @@ function SearchPage() {
   const queryClient = useQueryClient();
 
   const fileIds = data?.file_ids ?? [];
-  const hiddenFileIds = getHiddenFileIds(data);
-  const visibleFileIds = getVisibleFileIds(fileIds, data);
+  const reviewSource = { type: "searchPage", entryKey: searchId } as const;
+  const { hiddenFileIds, visibleFileIds, hiddenLabel, showHiddenFilesAction } =
+    useHiddenFileView({ data, fileIds, source: reviewSource });
   const hasFiles = visibleFileIds.length > 0;
   const reviewActions = useReviewActions({
     fileIds: visibleFileIds,
-    source: { type: "searchPage", entryKey: searchId },
+    source: reviewSource,
   });
 
   const handleCommit = useCallback(() => {
@@ -213,21 +207,7 @@ function SearchPage() {
         onClick: handleSaveAsNew,
         overflowOnly: true,
       },
-      ...(hiddenFileIds.length > 0
-        ? [
-            {
-              id: "unhide-files",
-              label: "Unhide files",
-              icon: IconEye,
-              onClick: () =>
-                clearHiddenFileIdsInViewCaches(queryClient, {
-                  type: "searchPage",
-                  entryKey: searchId,
-                }),
-              overflowOnly: true,
-            },
-          ]
-        : []),
+      ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
       {
         id: "delete-search",
         label: "Delete",
@@ -246,9 +226,7 @@ function SearchPage() {
     isPinned,
     handleTogglePinned,
     handleSaveAsNew,
-    hiddenFileIds.length,
-    queryClient,
-    searchId,
+    showHiddenFilesAction,
     handleDelete,
   ]);
   const footerActions = useMemo(
@@ -257,7 +235,6 @@ function SearchPage() {
   );
 
   const fileCount = visibleFileIds.length;
-  const hiddenLabel = formatHiddenFileCount(getHiddenFileCount(data));
   const fileCountLabel = `${fileCount} ${fileCount === 1 ? "file" : "files"}`;
   const pageTitle =
     !isLoading && !isError
@@ -324,7 +301,7 @@ function SearchPage() {
         {!isLoading && !isError && hasFiles && (
           <ThumbnailGalleryProvider
             fileIds={visibleFileIds}
-            reviewSource={{ type: "searchPage", entryKey: searchId }}
+            reviewSource={reviewSource}
           >
             <ThumbnailGallery
               fileIds={fileIds}
