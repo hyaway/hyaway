@@ -5,6 +5,7 @@ import {
   PAGES_DISPLAY_SETTINGS_TITLE,
   PagesDisplaySettings,
 } from "@/components/settings/pages-display-settings";
+import { PagesLatestOpenedSettings } from "@/components/settings/pages-latest-opened-settings";
 import { PagesUrlsSettings } from "@/components/settings/pages-urls-settings";
 import {
   SettingsCardTitle,
@@ -36,6 +37,8 @@ export function PagesDisplaySettingsCard() {
       </CardHeader>
       <CardContent>
         <PagesUrlsSettings />
+        <Separator className="my-4" />
+        <PagesLatestOpenedSettings />
         <Separator className="my-4" />
         <SettingsSubheading className="mb-4">
           {PAGES_DISPLAY_SETTINGS_TITLE}

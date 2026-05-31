@@ -23,6 +23,7 @@ type PagesSettingsState = {
   minLanes: number;
   maxLanes: number;
   showScrollBadge: boolean;
+  showLatestOpenedPage: boolean;
   useFriendlyUrls: boolean;
   cardWidth: number;
   horizontalGap: number;
@@ -32,6 +33,7 @@ type PagesSettingsState = {
   actions: {
     setLanesRange: (min: number, max: number) => void;
     setShowScrollBadge: (show: boolean) => void;
+    setShowLatestOpenedPage: (show: boolean) => void;
     setUseFriendlyUrls: (use: boolean) => void;
     setCardWidth: (width: number) => void;
     setHorizontalGap: (gap: number) => void;
@@ -48,6 +50,7 @@ const usePagesSettingsStore = create<PagesSettingsState>()(
       minLanes: MIN_PAGES_LANES + 1,
       maxLanes: MAX_PAGES_LANES,
       showScrollBadge: true,
+      showLatestOpenedPage: true,
       useFriendlyUrls: true,
       cardWidth: DEFAULT_PAGE_CARD_WIDTH,
       horizontalGap: DEFAULT_PAGE_CARD_HORIZONTAL_GAP,
@@ -59,6 +62,8 @@ const usePagesSettingsStore = create<PagesSettingsState>()(
           set({ minLanes, maxLanes }),
         setShowScrollBadge: (showScrollBadge: boolean) =>
           set({ showScrollBadge }),
+        setShowLatestOpenedPage: (showLatestOpenedPage: boolean) =>
+          set({ showLatestOpenedPage }),
         setUseFriendlyUrls: (useFriendlyUrls: boolean) =>
           set({ useFriendlyUrls }),
         setCardWidth: (cardWidth: number) => set({ cardWidth }),
@@ -86,6 +91,9 @@ export const usePagesMaxLanes = () =>
 
 export const usePagesShowScrollBadge = () =>
   usePagesSettingsStore((state) => state.showScrollBadge);
+
+export const usePagesShowLatestOpenedPage = () =>
+  usePagesSettingsStore((state) => state.showLatestOpenedPage);
 
 export const usePagesUseFriendlyUrls = () =>
   usePagesSettingsStore((state) => state.useFriendlyUrls);

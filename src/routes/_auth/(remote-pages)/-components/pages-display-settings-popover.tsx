@@ -6,6 +6,10 @@ import {
   PagesDisplaySettings,
 } from "@/components/settings/pages-display-settings";
 import {
+  PAGES_LATEST_OPENED_SETTINGS_TITLE,
+  PagesLatestOpenedSettings,
+} from "@/components/settings/pages-latest-opened-settings";
+import {
   PAGES_URLS_SETTINGS_TITLE,
   PagesUrlsSettings,
 } from "@/components/settings/pages-urls-settings";
@@ -23,6 +27,11 @@ export function PagesDisplaySettingsPopover() {
         <SettingsTitle>{PAGES_URLS_SETTINGS_TITLE}</SettingsTitle>
       </SettingsHeader>
       <PagesUrlsSettings idPrefix="popover-" />
+      <Separator className="my-4" />
+      <SettingsHeader>
+        <SettingsTitle>{PAGES_LATEST_OPENED_SETTINGS_TITLE}</SettingsTitle>
+      </SettingsHeader>
+      <PagesLatestOpenedSettings idPrefix="popover-" />
       <Separator className="my-4" />
       <SettingsHeader>
         <SettingsTitle>{PAGES_DISPLAY_SETTINGS_TITLE}</SettingsTitle>

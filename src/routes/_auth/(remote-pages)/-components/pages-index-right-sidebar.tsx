@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useSearch } from "@tanstack/react-router";
+import { PagesDisplaySettingsPopover } from "./pages-display-settings-popover";
 import { PagesSearchInput } from "./pages-search-input";
 import { PagesTreeView } from "./pages-tree-view";
 import type { MediaPage } from "@/integrations/hydrus-api/models";
@@ -38,6 +39,7 @@ export function PagesIndexRightSidebar({
         <SidebarHeader className="gap-3 px-3 py-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm/5 font-semibold">Pages</h2>
+            <PagesDisplaySettingsPopover />
           </div>
           <PagesSearchInput variant="sidebar" />
         </SidebarHeader>

@@ -40,6 +40,7 @@ import {
   usePagesHorizontalGap,
   usePagesMaxLanes,
   usePagesMinLanes,
+  usePagesShowLatestOpenedPage,
   usePagesShowScrollBadge,
   usePagesVerticalGap,
 } from "@/stores/pages-settings-store";
@@ -104,6 +105,7 @@ function PagesIndex() {
   const horizontalGap = usePagesHorizontalGap();
   const verticalGap = usePagesVerticalGap();
   const expandCards = usePagesExpandCards();
+  const showLatestOpenedPage = usePagesShowLatestOpenedPage();
   const containerRef = useRef<HTMLDivElement>(null);
   const searchQuery = q ?? "";
   const normalizedQuery = searchQuery.trim();
@@ -146,10 +148,11 @@ function PagesIndex() {
   }, [matchedPageKeys, normalizedQuery, pages]);
 
   const latestPageMatch = useLatestOpenedPageMatch(filteredPages);
+  const visibleLatestPage = showLatestOpenedPage ? latestPageMatch : null;
 
   const gridEntries = useMemo(
-    () => createPageGridEntries(filteredPages, latestPageMatch),
-    [filteredPages, latestPageMatch],
+    () => createPageGridEntries(filteredPages, visibleLatestPage),
+    [filteredPages, visibleLatestPage],
   );
 
   const groupMetaByPageKey = usePageGroupMetaByPageKey(pagesTree ?? null);
@@ -240,7 +243,7 @@ function PagesIndex() {
       </div>
       <PagesIndexRightSidebar
         tree={pagesTree}
-        latestPage={latestPageMatch}
+        latestPage={visibleLatestPage}
         treeEmptyMessage={treeSidebarEmptyMessage}
       />
       <PageHeaderActions>
