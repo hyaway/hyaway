@@ -178,6 +178,34 @@ export const useFileViewingStatisticsOptions = () => {
 };
 
 /**
+ * Hydrus file-list hide preferences exposed through get_client_options.
+ * These settings control whether hyAway hides files from cached thumbnail views
+ * after trashing or archive/delete filtering.
+ */
+export const useHydrusHideFromViewOptions = () => {
+  const {
+    data: options,
+    isFetched,
+    isLoading,
+  } = useGetClientOptionsQuery((response) => ({
+    oldOptions: response.old_options,
+    booleans: response.options?.booleans,
+  }));
+
+  return useMemo(
+    () => ({
+      hideFilteredFiles: options?.oldOptions?.remove_filtered_files ?? false,
+      hideFilteredFilesEvenWhenSkipped:
+        options?.booleans?.remove_filtered_files_even_when_skipped ?? false,
+      hideTrashedFiles: options?.oldOptions?.remove_trashed_files ?? false,
+      isFetched,
+      isLoading,
+    }),
+    [options, isFetched, isLoading],
+  );
+};
+
+/**
  * Returns the effective gallery base width mode.
  * Falls back to "custom" when "service" is selected but MANAGE_DATABASE permission is missing.
  */

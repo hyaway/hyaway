@@ -637,6 +637,8 @@ export const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
       namespace_colours: z
         .record(z.string(), z.array(z.number()).min(3).max(3))
         .optional(),
+      remove_filtered_files: z.boolean().optional(),
+      remove_trashed_files: z.boolean().optional(),
     })
     .optional(),
   options: z
@@ -644,6 +646,7 @@ export const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
       booleans: z
         .object({
           file_viewing_statistics_active: z.boolean().optional(),
+          remove_filtered_files_even_when_skipped: z.boolean().optional(),
         })
         .optional(),
       noneable_integers: z
