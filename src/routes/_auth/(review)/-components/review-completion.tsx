@@ -10,7 +10,7 @@ import {
   IconCheck,
 } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { linkOptions, useNavigate } from "@tanstack/react-router";
 
 import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import { ReviewDecisionFilmstrip } from "./review-decision-filmstrip";
@@ -18,6 +18,7 @@ import { ReviewStatsBreakdown } from "./review-stats-breakdown";
 import type {
   ReviewDirectionStats,
   ReviewFileIdsByDirection,
+  ReviewSource,
 } from "@/stores/review-queue-store";
 import type {
   SwipeBindings,
@@ -27,11 +28,14 @@ import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
 import {
   useReviewQueueActions,
   useReviewQueueHistory,
+  useReviewQueueSources,
 } from "@/stores/review-queue-store";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { Button, LinkButton } from "@/components/ui-primitives/button";
 import { cn } from "@/lib/utils";
 import { Heading } from "@/components/ui-primitives/heading";
+import { useExistingSearchQueryEntries } from "@/stores/search-queries-store";
 
 const DIRECTION_ICONS: Record<
   SwipeDirection,
@@ -60,6 +64,7 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
   const { clearQueue } = useReviewQueueActions();
   const total = stats.left + stats.right + stats.up + stats.down;
   const history = useReviewQueueHistory();
+  const sources = useReviewQueueSources();
   const { servicesMap } = useRatingServices();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -147,6 +152,14 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
       {/* Actions */}
       <div className="flex w-full flex-col items-center gap-2">
         <Heading level={3}>What's next?</Heading>
+        <div className="flex flex-row flex-wrap justify-center gap-2 empty:hidden">
+          {sources.map((source) => (
+            <ReviewSourceButton
+              key={getReviewSourceKey(source)}
+              source={source}
+            />
+          ))}
+        </div>
         <div className="flex flex-row flex-wrap justify-center gap-2">
           <LinkButton
             variant="outline"
@@ -168,6 +181,88 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+function getReviewSourceKey(source: ReviewSource) {
+  switch (source.type) {
+    case "remotePage":
+      return `remotePage:${source.pageKey}`;
+    case "searchPage":
+      return `searchPage:${source.entryKey}`;
+    case "predefinedSearch":
+      return `predefinedSearch:${source.key}`;
+    default:
+      source satisfies never;
+      return "";
+  }
+}
+
+function ReviewSourceButton({ source }: { source: ReviewSource }) {
+  switch (source.type) {
+    case "remotePage":
+      return <RemotePageReviewSourceButton source={source} />;
+    case "searchPage":
+      return <SearchPageReviewSourceButton source={source} />;
+    case "predefinedSearch":
+      return null;
+    default:
+      source satisfies never;
+      return null;
+  }
+}
+
+function RemotePageReviewSourceButton({
+  source,
+}: {
+  source: Extract<ReviewSource, { type: "remotePage" }>;
+}) {
+  const { data: mediaPages = [] } = useGetMediaPagesQuery();
+  const page = useMemo(
+    () => mediaPages.find((item) => item.page_key === source.pageKey),
+    [mediaPages, source.pageKey],
+  );
+
+  if (!page) return null;
+
+  return (
+    <LinkButton
+      variant="outline"
+      size="xl"
+      {...linkOptions({
+        to: "/pages/$pageId",
+        params: { pageId: page.slug },
+      })}
+    >
+      <span className="text-muted-foreground">Page:</span>
+      <span>{page.name}</span>
+    </LinkButton>
+  );
+}
+
+function SearchPageReviewSourceButton({
+  source,
+}: {
+  source: Extract<ReviewSource, { type: "searchPage" }>;
+}) {
+  const entryKeys = useMemo(() => [source.entryKey], [source.entryKey]);
+  const entries = useExistingSearchQueryEntries(entryKeys);
+  const entry = entries[source.entryKey];
+
+  if (!entry) return null;
+
+  return (
+    <LinkButton
+      variant="outline"
+      size="xl"
+      {...linkOptions({
+        to: "/search/$searchId",
+        params: { searchId: source.entryKey },
+      })}
+    >
+      <span className="text-muted-foreground">Search:</span>
+      <span>{entry.displayName ?? source.entryKey}</span>
+    </LinkButton>
   );
 }
 
