@@ -55,6 +55,27 @@ const DISPLAY_DIRECTIONS: ReadonlyArray<SwipeDirection> = [
   "right",
 ];
 
+const PREDEFINED_SOURCE_LABELS: Record<
+  Extract<ReviewSource, { type: "predefinedSearch" }>["key"],
+  string
+> = {
+  longestViewed: "Longest viewed",
+  mostViewed: "Most viewed",
+  randomInbox: "Random inbox",
+  recentlyArchived: "Recently archived",
+  recentlyInboxed: "Recently inboxed",
+  recentlyTrashed: "Recently trashed",
+  remoteWatchHistory: "Remote history",
+};
+
+const REVIEW_COMPLETION_BUTTON_CLASS = cn(
+  "h-auto min-h-14 w-full max-w-full min-w-0 shrink flex-wrap py-3 text-center leading-tight whitespace-normal sm:w-auto",
+);
+const REVIEW_COMPLETION_BUTTON_VALUE_CLASS = cn("min-w-0 wrap-anywhere");
+const REVIEW_COMPLETION_BUTTON_ROW_CLASS = cn(
+  "flex w-full flex-row flex-wrap justify-center gap-2 empty:hidden",
+);
+
 interface ReviewCompletionProps {
   stats: ReviewDirectionStats;
   bindings: SwipeBindings;
@@ -152,7 +173,7 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
       {/* Actions */}
       <div className="flex w-full flex-col items-center gap-2">
         <Heading level={3}>What's next?</Heading>
-        <div className="flex flex-row flex-wrap justify-center gap-2 empty:hidden">
+        <div className={REVIEW_COMPLETION_BUTTON_ROW_CLASS}>
           {sources.map((source) => (
             <ReviewSourceButton
               key={getReviewSourceKey(source)}
@@ -160,22 +181,38 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
             />
           ))}
         </div>
-        <div className="flex flex-row flex-wrap justify-center gap-2">
+        <div className={REVIEW_COMPLETION_BUTTON_ROW_CLASS}>
           <LinkButton
             variant="outline"
             size="xl"
+            className={REVIEW_COMPLETION_BUTTON_CLASS}
             to="/pages"
             search={{ q: undefined }}
           >
             Pages
           </LinkButton>
-          <Button variant="outline" size="xl" onClick={handleNewRandomInbox}>
+          <Button
+            variant="outline"
+            size="xl"
+            className={REVIEW_COMPLETION_BUTTON_CLASS}
+            onClick={handleNewRandomInbox}
+          >
             New random inbox
           </Button>
-          <Button variant="outline" size="xl" onClick={handleRecentlyInboxed}>
-            Recently inboxed
+          <Button
+            variant="outline"
+            size="xl"
+            className={REVIEW_COMPLETION_BUTTON_CLASS}
+            onClick={handleRecentlyInboxed}
+          >
+            Refreshed recently inboxed
           </Button>
-          <Button variant="outline" onClick={clearQueue} size="xl">
+          <Button
+            variant="outline"
+            className={REVIEW_COMPLETION_BUTTON_CLASS}
+            onClick={clearQueue}
+            size="xl"
+          >
             Clear review queue
           </Button>
         </div>
@@ -205,10 +242,55 @@ function ReviewSourceButton({ source }: { source: ReviewSource }) {
     case "searchPage":
       return <SearchPageReviewSourceButton source={source} />;
     case "predefinedSearch":
-      return null;
+      return <PredefinedSearchReviewSourceButton source={source} />;
     default:
       source satisfies never;
       return null;
+  }
+}
+
+function PredefinedSearchReviewSourceButton({
+  source,
+}: {
+  source: Extract<ReviewSource, { type: "predefinedSearch" }>;
+}) {
+  const link = getPredefinedSearchSourceLink(source);
+
+  return (
+    <LinkButton
+      variant="outline"
+      size="xl"
+      className={REVIEW_COMPLETION_BUTTON_CLASS}
+      {...link}
+    >
+      <span className={REVIEW_COMPLETION_BUTTON_VALUE_CLASS}>
+        {PREDEFINED_SOURCE_LABELS[source.key]}
+      </span>
+    </LinkButton>
+  );
+}
+
+function getPredefinedSearchSourceLink(
+  source: Extract<ReviewSource, { type: "predefinedSearch" }>,
+) {
+  switch (source.key) {
+    case "longestViewed":
+      return linkOptions({ to: "/longest-viewed" });
+    case "mostViewed":
+      return linkOptions({ to: "/most-viewed" });
+    case "randomInbox":
+      return linkOptions({ to: "/random-inbox" });
+    case "recentlyArchived":
+      return linkOptions({ to: "/recently-archived" });
+    case "recentlyInboxed":
+      return linkOptions({ to: "/recently-inboxed" });
+    case "recentlyTrashed":
+      return linkOptions({ to: "/recently-trashed" });
+    case "remoteWatchHistory":
+      return linkOptions({ to: "/remote-history" });
+    default:
+      source.key satisfies never;
+      return linkOptions({ to: "/" });
   }
 }
 
@@ -229,13 +311,14 @@ function RemotePageReviewSourceButton({
     <LinkButton
       variant="outline"
       size="xl"
+      className={REVIEW_COMPLETION_BUTTON_CLASS}
       {...linkOptions({
         to: "/pages/$pageId",
         params: { pageId: page.slug },
       })}
     >
       <span className="text-muted-foreground">Page:</span>
-      <span>{page.name}</span>
+      <span className={REVIEW_COMPLETION_BUTTON_VALUE_CLASS}>{page.name}</span>
     </LinkButton>
   );
 }
@@ -255,13 +338,16 @@ function SearchPageReviewSourceButton({
     <LinkButton
       variant="outline"
       size="xl"
+      className={REVIEW_COMPLETION_BUTTON_CLASS}
       {...linkOptions({
         to: "/search/$searchId",
         params: { searchId: source.entryKey },
       })}
     >
       <span className="text-muted-foreground">Search:</span>
-      <span>{entry.displayName ?? source.entryKey}</span>
+      <span className={REVIEW_COMPLETION_BUTTON_VALUE_CLASS}>
+        {entry.displayName ?? source.entryKey}
+      </span>
     </LinkButton>
   );
 }
