@@ -58,7 +58,7 @@ export function ThumbnailGalleryItemContextMenu({
   const navigate = useNavigate();
   const { setQueue, addToQueue } = useReviewQueueActions();
   const queueRemaining = useReviewQueueRemaining();
-  const { fileIds, infoMode } = useThumbnailGalleryContext();
+  const { fileIds, infoMode, reviewSource } = useThumbnailGalleryContext();
 
   const clearViewtimeMutation = useClearFileViewtimeMutation();
   const clearViewsMutation = useClearFileViewsMutation();
@@ -66,6 +66,7 @@ export function ThumbnailGalleryItemContextMenu({
   const actionGroups = useFileActions(item, {
     includeOpen: true,
     includeExternal: true,
+    hideFromViewSource: reviewSource,
   });
 
   // Get file IDs from this item onward
@@ -78,12 +79,12 @@ export function ThumbnailGalleryItemContextMenu({
   const clientApiStats = getClientApiStats(item);
 
   const handleNewReview = () => {
-    setQueue(fileIdsFromHere);
+    setQueue(fileIdsFromHere, reviewSource);
     navigate({ to: "/review" });
   };
 
   const handleAddToReview = () => {
-    addToQueue(fileIdsFromHere);
+    addToQueue(fileIdsFromHere, reviewSource);
     navigate({ to: "/review" });
   };
 
@@ -125,7 +126,7 @@ export function ThumbnailGalleryItemContextMenu({
                 <span className="-ml-1.5 text-xl font-normal [-webkit-text-stroke:3px_var(--color-muted)]">
                   +
                 </span>
-                <span className="-ml-[1ch] text-xl font-normal">+</span>
+                <span className="ml-[-1ch] text-xl font-normal">+</span>
               </span>
               {fileIdsFromHere.length > 1
                 ? "Add to review from here"

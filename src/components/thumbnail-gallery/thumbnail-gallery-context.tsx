@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createContext, useContext, useMemo } from "react";
+import type { ReviewSource } from "@/stores/review-queue-store";
 import type { WatchHistoryEntry } from "@/stores/watch-history-store";
 
 /**
@@ -26,6 +27,8 @@ interface ThumbnailGalleryContextValue {
   localHistoryEntries?: Array<WatchHistoryEntry>;
   /** All file IDs in the gallery (for review from here) */
   fileIds?: Array<number>;
+  /** Source view to hide files from when review hide settings apply. */
+  reviewSource?: ReviewSource;
 }
 
 const ThumbnailGalleryContext = createContext<ThumbnailGalleryContextValue>({
@@ -40,6 +43,8 @@ export interface ThumbnailGalleryProviderProps {
   localHistoryEntries?: Array<WatchHistoryEntry>;
   /** All file IDs in the gallery (for review from here) */
   fileIds?: Array<number>;
+  /** Source view to hide files from when review hide settings apply. */
+  reviewSource?: ReviewSource;
 }
 
 export function ThumbnailGalleryProvider({
@@ -47,10 +52,11 @@ export function ThumbnailGalleryProvider({
   infoMode = "filesize",
   localHistoryEntries,
   fileIds,
+  reviewSource,
 }: ThumbnailGalleryProviderProps) {
   const value = useMemo(
-    () => ({ infoMode, localHistoryEntries, fileIds }),
-    [infoMode, localHistoryEntries, fileIds],
+    () => ({ infoMode, localHistoryEntries, fileIds, reviewSource }),
+    [infoMode, localHistoryEntries, fileIds, reviewSource],
   );
 
   return (
