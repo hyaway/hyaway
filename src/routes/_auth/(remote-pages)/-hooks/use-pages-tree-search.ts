@@ -3,6 +3,40 @@
 
 import type { PagesTreeNode } from "@/integrations/hydrus-api/queries/manage-pages";
 
+export function getPagesSearchTerms(query: string) {
+  return query
+    .trim()
+    .toLowerCase()
+    .split(/[\s/\\>]+/)
+    .filter(Boolean);
+}
+
+export function getPagesSearchMatchRanges(
+  text: string,
+  terms: Array<string>,
+): Array<[number, number]> {
+  const lowerText = text.toLowerCase();
+  const ranges: Array<[number, number]> = [];
+
+  for (const term of terms) {
+    let index = 0;
+
+    while (index < lowerText.length) {
+      const matchIndex = lowerText.indexOf(term, index);
+      if (matchIndex === -1) break;
+      ranges.push([matchIndex, matchIndex + term.length]);
+      index = matchIndex + term.length;
+    }
+  }
+
+  return ranges.sort(([aStart, aEnd], [bStart, bEnd]) => {
+    if (aStart !== bStart) {
+      return aStart - bStart;
+    }
+    return bEnd - aEnd;
+  });
+}
+
 export function collectGroupKeys(root: PagesTreeNode | null) {
   const keys = new Set<string>();
 
@@ -33,8 +67,8 @@ export function filterPagesTree(
     return { tree: null, autoExpandKeys: new Set() };
   }
 
-  const normalizedQuery = query.trim().toLowerCase();
-  if (!normalizedQuery) {
+  const terms = getPagesSearchTerms(query);
+  if (terms.length === 0) {
     return { tree: root, autoExpandKeys: new Set() };
   }
 
@@ -50,8 +84,10 @@ export function filterPagesTree(
   const filterNode = (
     node: PagesTreeNode,
     ancestorGroupMatched: boolean,
+    ancestorNames: Array<string>,
   ): PagesTreeNode | null => {
-    const nameMatch = node.name.toLowerCase().includes(normalizedQuery);
+    const pathText = [...ancestorNames, node.name].join(" ").toLowerCase();
+    const nameMatch = terms.every((term) => pathText.includes(term));
     const isGroup = !node.is_media_page;
     const groupMatch = isGroup && nameMatch;
 
@@ -60,8 +96,11 @@ export function filterPagesTree(
       return node;
     }
 
+    const nextAncestorNames = isGroup
+      ? [...ancestorNames, node.name]
+      : ancestorNames;
     const filteredChildren = node.pages
-      ?.map((child) => filterNode(child, false))
+      ?.map((child) => filterNode(child, false, nextAncestorNames))
       .filter((child): child is PagesTreeNode => child !== null);
 
     const hasChildren = Boolean(filteredChildren?.length);
@@ -81,7 +120,7 @@ export function filterPagesTree(
   };
 
   const filteredChildren = root.pages
-    ?.map((child) => filterNode(child, false))
+    ?.map((child) => filterNode(child, false, []))
     .filter((child): child is PagesTreeNode => child !== null);
 
   if (!filteredChildren?.length) {

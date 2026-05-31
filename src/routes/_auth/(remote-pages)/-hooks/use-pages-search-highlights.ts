@@ -8,6 +8,10 @@ import {
   useReducer,
   useRef,
 } from "react";
+import {
+  getPagesSearchMatchRanges,
+  getPagesSearchTerms,
+} from "./use-pages-tree-search";
 
 function getTextNode(element: HTMLElement) {
   const child = element.firstChild;
@@ -15,22 +19,6 @@ function getTextNode(element: HTMLElement) {
     return null;
   }
   return child as Text;
-}
-
-function getMatchRanges(text: string, query: string): Array<[number, number]> {
-  const lowerText = text.toLowerCase();
-  const lowerQuery = query.toLowerCase();
-  const ranges: Array<[number, number]> = [];
-
-  let index = 0;
-  while (index < lowerText.length) {
-    const matchIndex = lowerText.indexOf(lowerQuery, index);
-    if (matchIndex === -1) break;
-    ranges.push([matchIndex, matchIndex + lowerQuery.length]);
-    index = matchIndex + lowerQuery.length;
-  }
-
-  return ranges;
 }
 
 interface PagesSearchHighlightsOptions {
@@ -77,8 +65,8 @@ export function usePagesSearchHighlights({
       return;
     }
 
-    const normalizedQuery = query.trim();
-    if (!normalizedQuery) {
+    const terms = getPagesSearchTerms(query);
+    if (terms.length === 0) {
       CSS.highlights.delete(highlightName);
       return;
     }
@@ -93,7 +81,7 @@ export function usePagesSearchHighlights({
       const textContent = textNode.textContent;
       if (!textContent) return;
 
-      const matches = getMatchRanges(textContent, normalizedQuery);
+      const matches = getPagesSearchMatchRanges(textContent, terms);
       matches.forEach(([start, end]) => {
         const range = document.createRange();
         range.setStart(textNode, start);

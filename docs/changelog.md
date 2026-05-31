@@ -23,6 +23,7 @@ All notable changes to hyAway are documented here.
 ### Changed
 
 - Review completion buttons now wrap on narrow screens and take full width on the smallest layouts
+- Pages search now matches terms across parent groups and page names, so searches can combine a group name with a leaf page name
 
 ---
 

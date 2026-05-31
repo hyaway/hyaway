@@ -1,6 +1,10 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import {
+  getPagesSearchMatchRanges,
+  getPagesSearchTerms,
+} from "../-hooks/use-pages-tree-search";
 import type { ReactNode } from "react";
 
 interface HighlightedTextProps {
@@ -14,37 +18,37 @@ export function HighlightedText({
   query,
   useCustomHighlight = false,
 }: HighlightedTextProps) {
-  const normalizedQuery = query.trim();
+  const terms = getPagesSearchTerms(query);
 
-  if (useCustomHighlight || !normalizedQuery) {
+  if (useCustomHighlight || terms.length === 0) {
     return text;
   }
 
-  const lowerText = text.toLowerCase();
-  const lowerQuery = normalizedQuery.toLowerCase();
   const parts: Array<ReactNode> = [];
-
   let currentIndex = 0;
-  let matchIndex = lowerText.indexOf(lowerQuery, currentIndex);
+  const ranges = getPagesSearchMatchRanges(text, terms);
 
-  while (matchIndex !== -1) {
-    if (matchIndex > currentIndex) {
-      parts.push(text.slice(currentIndex, matchIndex));
+  ranges.forEach(([start, end]) => {
+    if (start < currentIndex) {
+      return;
     }
 
-    const matchText = text.slice(matchIndex, matchIndex + lowerQuery.length);
+    if (start > currentIndex) {
+      parts.push(text.slice(currentIndex, start));
+    }
+
+    const matchText = text.slice(start, end);
     parts.push(
       <mark
-        key={`match-${matchIndex}`}
+        key={`match-${start}-${end}`}
         className="bg-primary text-primary-foreground rounded-xs"
       >
         {matchText}
       </mark>,
     );
 
-    currentIndex = matchIndex + lowerQuery.length;
-    matchIndex = lowerText.indexOf(lowerQuery, currentIndex);
-  }
+    currentIndex = end;
+  });
 
   if (currentIndex < text.length) {
     parts.push(text.slice(currentIndex));
