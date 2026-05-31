@@ -563,6 +563,19 @@ const DEFAULT_ENTRY = defaultEntry();
 export const useSearchQueryEntry = (key: string): SearchQueryEntry =>
   useSearchQueriesStore((state) => state.entries[key] ?? DEFAULT_ENTRY);
 
+/** Get existing search entries for a set of keys. Missing entries are omitted. */
+export const useExistingSearchQueryEntries = (keys: Array<string>) =>
+  useSearchQueriesStore(
+    useShallow((state) => {
+      const entries: Partial<Record<string, SearchQueryEntry>> = {};
+      for (const key of keys) {
+        const entry = state.entries[key] as SearchQueryEntry | undefined;
+        if (entry) entries[key] = entry;
+      }
+      return entries;
+    }),
+  );
+
 /** Get committed state for a search entry. */
 export const useCommittedSearch = (key: string) =>
   useSearchQueriesStore(

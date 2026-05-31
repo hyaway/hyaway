@@ -42,6 +42,43 @@ export interface ReviewHistoryEntry {
   restore: RestoreData;
 }
 
+export type ReviewSource =
+  | { type: "remotePage"; pageKey: string }
+  | { type: "searchPage"; entryKey: string }
+  | { type: "predefinedSearch"; key: "randomInbox" | "recentlyInboxed" };
+
+function isSameReviewSource(left: ReviewSource, right: ReviewSource) {
+  switch (left.type) {
+    case "remotePage":
+      if (right.type !== "remotePage") return false;
+      return left.pageKey === right.pageKey;
+    case "searchPage":
+      if (right.type !== "searchPage") return false;
+      return left.entryKey === right.entryKey;
+    case "predefinedSearch":
+      if (right.type !== "predefinedSearch") return false;
+      return left.key === right.key;
+    default:
+      left satisfies never;
+      return false;
+  }
+}
+
+function addReviewSource(
+  sources: Array<ReviewSource>,
+  source: ReviewSource | null | undefined,
+) {
+  if (!source) return sources;
+  return hasReviewSource(sources, source) ? sources : [...sources, source];
+}
+
+function hasReviewSource(
+  sources: Array<ReviewSource>,
+  source: ReviewSource | null | undefined,
+) {
+  return !!source && sources.some((item) => isSameReviewSource(item, source));
+}
+
 /** Stats derived from action history, grouped by swipe direction */
 export type ReviewDirectionStats = Record<SwipeDirection, number>;
 
@@ -52,12 +89,14 @@ type ReviewQueueState = {
   currentIndex: number;
   /** Action history for undo (not persisted) */
   history: Array<ReviewHistoryEntry>;
+  /** Source views that contributed files to this review queue. */
+  sources: Array<ReviewSource>;
 
   actions: {
     /** Set the queue to a new list of file IDs (replaces existing, dedupes) */
-    setQueue: (ids: Array<number>) => void;
+    setQueue: (ids: Array<number>, source?: ReviewSource | null) => void;
     /** Add file IDs to the existing queue (dedupes) */
-    addToQueue: (ids: Array<number>) => void;
+    addToQueue: (ids: Array<number>, source?: ReviewSource | null) => void;
     /** Clear the entire queue and reset index */
     clearQueue: () => void;
     /** Advance to the next item */
@@ -79,25 +118,43 @@ const useReviewQueueStore = create<ReviewQueueState>()(
       fileIds: [],
       currentIndex: 0,
       history: [],
+      sources: [],
 
       actions: {
-        setQueue: (ids) => {
+        setQueue: (ids, source = null) => {
           // Dedupe while preserving order
           const uniqueIds = [...new Set(ids)];
-          set({ fileIds: uniqueIds, currentIndex: 0, history: [] });
+          set({
+            fileIds: uniqueIds,
+            currentIndex: 0,
+            history: [],
+            sources: source ? [source] : [],
+          });
         },
 
-        addToQueue: (ids) => {
-          const { fileIds } = get();
+        addToQueue: (ids, source) => {
+          const { fileIds, sources } = get();
           const existingSet = new Set(fileIds);
           const newIds = ids.filter((id) => !existingSet.has(id));
-          if (newIds.length > 0) {
-            set({ fileIds: [...fileIds, ...newIds] });
+          const shouldAddSource = !!source && !hasReviewSource(sources, source);
+          if (newIds.length > 0 || shouldAddSource) {
+            set((state) => ({
+              fileIds:
+                newIds.length > 0
+                  ? [...state.fileIds, ...newIds]
+                  : state.fileIds,
+              sources: addReviewSource(state.sources, source),
+            }));
           }
         },
 
         clearQueue: () => {
-          set({ fileIds: [], currentIndex: 0, history: [] });
+          set({
+            fileIds: [],
+            currentIndex: 0,
+            history: [],
+            sources: [],
+          });
         },
 
         advance: () => {
@@ -147,6 +204,7 @@ const useReviewQueueStore = create<ReviewQueueState>()(
         fileIds: state.fileIds,
         currentIndex: state.currentIndex,
         history: state.history,
+        sources: state.sources,
       }),
     },
   ),
@@ -165,6 +223,10 @@ export const useReviewQueueCurrentIndex = () =>
 /** Get the action history */
 export const useReviewQueueHistory = () =>
   useReviewQueueStore((state) => state.history);
+
+/** Get the source views that contributed files to the active review. */
+export const useReviewQueueSources = () =>
+  useReviewQueueStore((state) => state.sources);
 
 /** Get the current file ID (or undefined if done) */
 export const useReviewQueueCurrentFileId = () =>
