@@ -6,6 +6,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { IconCards } from "@tabler/icons-react";
 import type { ComponentType, SVGProps } from "react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
+import type { ReviewSource } from "@/stores/review-queue-store";
 import {
   useReviewQueueActions,
   useReviewQueueRemaining,
@@ -37,6 +38,8 @@ const IconCardsPlus: ComponentType<SVGProps<SVGSVGElement>> = (props) =>
 interface UseReviewActionsOptions {
   /** File IDs to add to review queue */
   fileIds: Array<number>;
+  /** Source view to hide files from when review hide settings apply. */
+  source?: ReviewSource;
 }
 
 /**
@@ -45,6 +48,7 @@ interface UseReviewActionsOptions {
  */
 export function useReviewActions({
   fileIds,
+  source,
 }: UseReviewActionsOptions): Array<FloatingFooterAction> {
   const navigate = useNavigate();
   const { setQueue, addToQueue } = useReviewQueueActions();
@@ -54,13 +58,13 @@ export function useReviewActions({
 
   const handleReview = () => {
     if (!hasFiles) return;
-    setQueue(fileIds);
+    setQueue(fileIds, source);
     navigate({ to: "/review" });
   };
 
   const handleAddToQueue = () => {
     if (!hasFiles) return;
-    addToQueue(fileIds);
+    addToQueue(fileIds, source);
     navigate({ to: "/review" });
   };
 
