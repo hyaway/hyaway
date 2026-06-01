@@ -21,6 +21,8 @@ All notable changes to hyAway are documented here.
 - **Latest opened page** — The pages list now adds a special card for the most recently opened Hydrus page when it still exists, and attempts matching after Hydrus assigns it a new page key on restart
 - **System predicate comparisons** — Query builder system predicates now support greater-than-or-equal and less-than-or-equal comparisons (Hydrus versions >= 673)
 - **Rating search predicates** — Search builder system predicate menus and autosuggest now include Hydrus rating services, including value comparisons, has rating, and no rating searches
+- **File note editing** — File details now let you add, rename, edit, and delete Hydrus file notes inline when note editing permission is granted
+- **File details note expansion** — Appearance settings now let long file notes open expanded by default
 
 ### Changed
 
