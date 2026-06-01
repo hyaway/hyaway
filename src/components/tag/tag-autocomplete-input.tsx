@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IconTagStarred } from "@tabler/icons-react";
 import { defaultFilter } from "cmdk";
 import type { CSSProperties } from "react";
+import type { SystemTagSuggestion } from "@/routes/_auth/(search)/-lib/query-builder-fields";
 import {
   Command,
   CommandGroup,
@@ -42,6 +43,7 @@ export function TagAutocompleteInput({
   clearOnSelect,
   submitEmptyOnBlur,
   submitEmptyOnEnter,
+  systemTagSuggestions = SYSTEM_TAG_SUGGESTIONS,
 }: {
   /** Controlled value (optional — uncontrolled by default). */
   value?: string;
@@ -66,6 +68,8 @@ export function TagAutocompleteInput({
   submitEmptyOnBlur?: boolean;
   /** Call onSubmit with an empty string when Enter is pressed in a cleared input. */
   submitEmptyOnEnter?: boolean;
+  /** System predicate suggestions to include alongside Hydrus tag matches. */
+  systemTagSuggestions?: Array<SystemTagSuggestion>;
 }) {
   const [inputValue, setInputValue] = useState(value);
   const [debouncedInput, setDebouncedInput] = useState(value);
@@ -100,25 +104,26 @@ export function TagAutocompleteInput({
     return tags.filter((tag) => tag.toLowerCase().includes(searchText));
   }, [favouriteTags, searchText]);
   const filteredStatic = useMemo(() => {
-    if (!searchText || SYSTEM_TAG_SUGGESTIONS.length === 0) return [];
+    if (!searchText || systemTagSuggestions.length === 0) return [];
     if (!searchText.startsWith("system:") && searchText.length < 2) {
       return [];
     }
 
     const isSystemSearch = searchText.startsWith("system:");
 
-    if (searchText === "system:") return SYSTEM_TAG_SUGGESTIONS;
+    if (searchText === "system:") return systemTagSuggestions;
 
-    const matches = SYSTEM_TAG_SUGGESTIONS.map((suggestion) => ({
-      suggestion,
-      score: defaultFilter(suggestion.value, searchText, suggestion.keywords),
-    }))
+    const matches = systemTagSuggestions
+      .map((suggestion) => ({
+        suggestion,
+        score: defaultFilter(suggestion.value, searchText, suggestion.keywords),
+      }))
       .filter((entry) => entry.score > 0)
       .sort((a, b) => b.score - a.score)
       .map((entry) => entry.suggestion);
 
     return isSystemSearch ? matches : matches.slice(0, 2);
-  }, [searchText]);
+  }, [searchText, systemTagSuggestions]);
   const showFavourites =
     open && !hasSufficientInput && filteredFavourites.length > 0;
   const showDropdown =

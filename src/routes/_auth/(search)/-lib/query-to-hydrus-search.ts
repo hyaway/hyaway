@@ -1,6 +1,12 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import {
+  getHasRatingSystemTag,
+  getNoRatingSystemTag,
+  getRatingSystemTag,
+  isRatingFieldName,
+} from "./rating-predicate-utils";
 import type { RuleGroupType, RuleType } from "react-querybuilder";
 import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
 import { isIgnorableTagRuleValue } from "@/lib/search-rule-utils";
@@ -42,9 +48,8 @@ function incompleteRuleToSearchTag(rule: RuleType): string {
   const { field, operator } = rule;
 
   if (field === "tag") return EMPTY_VALUE_LABEL;
-  if (field.startsWith("rating:")) {
-    const serviceName = field.slice("rating:".length);
-    return `system:rating for ${serviceName} ${operator} ${EMPTY_VALUE_LABEL}`;
+  if (isRatingFieldName(field)) {
+    return `${getRatingSystemTag(field)} ${operator} ${EMPTY_VALUE_LABEL}`;
   }
 
   switch (field) {
@@ -175,23 +180,22 @@ export function ruleToSearchTag(
   }
 
   // Rating fields
-  if (field.startsWith("rating:")) {
-    const serviceName = field.slice("rating:".length);
+  if (isRatingFieldName(field)) {
     if (operator === "has") {
-      return `system:has rating for ${serviceName}`;
+      return getHasRatingSystemTag(field);
     }
     if (operator === "has_not") {
-      return `system:no rating for ${serviceName}`;
+      return getNoRatingSystemTag(field);
     }
     // Like/dislike ratings use "liked"/"disliked" as values
     if (value === "liked" || value === "disliked") {
       const ratingVal = value === "liked" ? "like" : "dislike";
-      return `system:rating for ${serviceName} = ${ratingVal}`;
+      return `${getRatingSystemTag(field)} = ${ratingVal}`;
     }
     if (!hasRuleValue(value)) {
       return options.allowIncomplete ? incompleteRuleToSearchTag(rule) : null;
     }
-    return `system:rating for ${serviceName} ${operator} ${value}`;
+    return `${getRatingSystemTag(field)} ${operator} ${value}`;
   }
 
   // Comparison / value fields

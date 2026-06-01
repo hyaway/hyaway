@@ -16,12 +16,17 @@ import { defaultFilter } from "cmdk";
 import { isOptionGroupArray, useValueSelector } from "react-querybuilder";
 import {
   FIELD_SEARCH_KEYWORDS,
-  SYSTEM_TAGS,
+  buildSystemFieldOptions,
+  buildSystemFieldSelectorGroups,
+  buildSystemTagSuggestions,
   fieldGroups,
+  fieldHasSystemPredicateChoices,
   getFieldHydrusLabel,
+  getSelectedSystemTagForRule,
   isNoValueField,
   systemTagToRule,
 } from "../-lib/query-builder-fields";
+import { isRatingFieldName } from "../-lib/rating-predicate-utils";
 import type {
   ActionProps,
   Field,
@@ -36,6 +41,11 @@ import type {
   RatingServiceInfo,
   StarShape,
 } from "@/integrations/hydrus-api/models";
+import type {
+  SystemFieldOption,
+  SystemFieldOptionGroup,
+  SystemTagSuggestion,
+} from "../-lib/query-builder-fields";
 import {
   isLikeRatingService,
   isNumericalRatingService,
@@ -72,6 +82,14 @@ import { useTagColor } from "@/integrations/hydrus-api/queries/options";
 const QUERY_BUILDER_VALUE_WIDTH = cn("max-w-2xl min-w-40 flex-1 basis-40");
 const QUERY_BUILDER_LINE_WIDTH = cn("w-full max-w-5xl");
 
+type QueryBuilderFieldContext = {
+  fieldGroups?: Array<OptionGroup<Field>>;
+};
+
+function getFieldContext(context: unknown): QueryBuilderFieldContext {
+  return context && typeof context === "object" ? context : {};
+}
+
 // ---------------------------------------------------------------------------
 // Field selector
 // ---------------------------------------------------------------------------
@@ -82,38 +100,26 @@ const QUERY_BUILDER_LINE_WIDTH = cn("w-full max-w-5xl");
 export function QBFieldSelect(props: VersatileSelectorProps) {
   if (props.value === "tag") return null;
 
-  const currentOperator = props.rule?.operator;
-  const selectedSystemTag = SYSTEM_TAGS.find((tag) => {
-    const rule = systemTagToRule(tag);
-    return rule?.field === props.value && rule?.operator === currentOperator;
-  });
+  const fieldOptions = isOptionGroupArray(props.options)
+    ? (props.options as Array<OptionGroup<Field>>)
+    : fieldGroups;
+  const selectedSystemTag = getSelectedSystemTagForRule(
+    String(props.value),
+    props.rule?.operator,
+    fieldOptions,
+  );
 
   const filtered = useMemo(() => {
     if (!isOptionGroupArray(props.options)) return props.options;
-    return (props.options as Array<OptionGroup<Field>>)
-      .map((group) => ({
-        ...group,
-        options: group.options
-          .filter((o) => o.name !== "tag")
-          .flatMap((o) => {
-            const systemPredicateOptions = SYSTEM_TAGS.filter((tag) => {
-              const rule = systemTagToRule(tag);
-              return rule?.field === o.name;
-            }).map((tag) => ({ ...o, name: tag, label: tag }));
-
-            return systemPredicateOptions.length > 1
-              ? systemPredicateOptions
-              : [o];
-          }),
-      }))
-      .filter((group) => group.options.length > 0);
-  }, [props.options]);
+    return buildSystemFieldSelectorGroups(fieldOptions);
+  }, [fieldOptions, props.options]);
   return (
     <QBSelect
       {...props}
       options={filtered as typeof props.options}
       displayValue={selectedSystemTag}
       colorLabels
+      systemFieldGroups={fieldOptions}
     />
   );
 }
@@ -144,9 +150,7 @@ export function QBOperatorSelect(props: VersatileSelectorProps) {
       typeof props.rule?.field === "string" &&
       first.name === "has" &&
       second.name === "has_not" &&
-      SYSTEM_TAGS.filter(
-        (tag) => systemTagToRule(tag)?.field === props.rule?.field,
-      ).length > 1;
+      fieldHasSystemPredicateChoices(props.rule.field);
 
     return (
       <div className="inline-flex min-w-0 items-center gap-1.5">
@@ -178,12 +182,8 @@ export function QBOperatorSelect(props: VersatileSelectorProps) {
 // Main select combobox
 // ---------------------------------------------------------------------------
 
-type OptionItem = { name: string; label: string };
-type OptionGroupItem = {
-  label: string;
-  inline?: boolean;
-  options: Array<OptionItem>;
-};
+type OptionItem = SystemFieldOption;
+type OptionGroupItem = SystemFieldOptionGroup;
 
 /**
  * Shared drill-down Command content used by both QBSelect and
@@ -380,7 +380,12 @@ export function QBSelect({
   colorLabels,
   rule,
   schema,
-}: VersatileSelectorProps & { colorLabels?: boolean; displayValue?: string }) {
+  systemFieldGroups = fieldGroups,
+}: VersatileSelectorProps & {
+  colorLabels?: boolean;
+  displayValue?: string;
+  systemFieldGroups?: Array<OptionGroup<Field>>;
+}) {
   const [open, setOpen] = useState(false);
 
   const { onChange, val } = useValueSelector({
@@ -416,7 +421,7 @@ export function QBSelect({
 
   const handleSelect = (name: string) => {
     if (name.startsWith("system:") && rule?.id) {
-      const resolved = systemTagToRule(name);
+      const resolved = systemTagToRule(name, systemFieldGroups);
       if (resolved) {
         const query = schema.getQuery();
         const updated = updateRuleById(query, rule.id, {
@@ -524,6 +529,7 @@ export function QBActionElement({
   disabledTranslation,
   className,
   level,
+  context,
 }: ActionProps) {
   const isRemoveRule = testID === "remove-rule";
   const isRemoveGroup = testID === "remove-group";
@@ -586,12 +592,18 @@ export function QBActionElement({
   }
 
   if (isAddRule) {
+    const fieldContext = getFieldContext(context);
+    const activeFieldGroups = fieldContext.fieldGroups;
     return (
       <SystemFieldCombobox
         className={className}
         disabled={disabled}
+        fieldGroups={activeFieldGroups}
         onSelect={(fieldName) =>
-          handleOnClick(undefined, { inlineTag: fieldName })
+          handleOnClick(undefined, {
+            fieldGroups: activeFieldGroups,
+            inlineTag: fieldName,
+          })
         }
       />
     );
@@ -600,39 +612,24 @@ export function QBActionElement({
   return null;
 }
 
-/** All non-tag system fields grouped for the "Add system" action. */
-const systemFieldOptions: Array<OptionGroupItem> = fieldGroups
-  .map((group) => ({
-    label: group.label,
-    inline: (group as { inline?: boolean }).inline,
-    options: group.options
-      .filter((o) => o.name !== "tag")
-      .flatMap((o) => {
-        const systemTags = SYSTEM_TAGS.filter(
-          (tag) => systemTagToRule(tag)?.field === o.name,
-        );
-
-        if (systemTags.length === 0) {
-          return [{ name: getFieldHydrusLabel(o.name), label: o.label }];
-        }
-
-        return systemTags.map((tag) => ({ name: tag, label: tag }));
-      }),
-  }))
-  .filter((group) => group.options.length > 0);
-
 export function SystemFieldCombobox({
   className,
   disabled,
   onSelect,
   ariaLabel = "Add system predicate",
+  fieldGroups: activeFieldGroups = fieldGroups,
 }: {
   className?: string;
   disabled?: boolean;
   onSelect: (fieldName: string) => void;
   ariaLabel?: string;
+  fieldGroups?: Array<OptionGroup<Field>>;
 }) {
   const [open, setOpen] = useState(false);
+  const systemFieldOptions = useMemo(
+    () => buildSystemFieldOptions(activeFieldGroups),
+    [activeFieldGroups],
+  );
 
   const handleSelect = (name: string) => {
     onSelect(name);
@@ -689,7 +686,7 @@ export function QBValueEditor(props: ValueEditorProps) {
   }
 
   // Rating fields — render type-specific value editors with icons
-  if (field.startsWith("rating:") && fieldData.ratingService) {
+  if (isRatingFieldName(field) && fieldData.ratingService) {
     const service = fieldData.ratingService as RatingServiceInfo;
     const serviceKey = fieldData.ratingServiceKey as string;
 
@@ -730,13 +727,20 @@ export function QBValueEditor(props: ValueEditorProps) {
 
   // Tag field — plain text input (user types the tag)
   if (field === "tag") {
+    const fieldContext = getFieldContext(props.context);
+    const activeFieldGroups = fieldContext.fieldGroups;
     return (
       <TagValueEditor
         value={value ?? ""}
         onChange={handleOnChange}
         disabled={disabled}
+        systemTagSuggestions={
+          activeFieldGroups
+            ? buildSystemTagSuggestions(activeFieldGroups)
+            : undefined
+        }
         onSystemSelect={(systemTag) => {
-          const resolved = systemTagToRule(systemTag);
+          const resolved = systemTagToRule(systemTag, activeFieldGroups);
           if (!resolved) return;
           const query = props.schema.getQuery();
           const updated = updateRuleById(query, props.rule.id!, {
@@ -1059,11 +1063,13 @@ function TagValueEditor({
   value,
   onChange,
   onSystemSelect,
+  systemTagSuggestions,
   disabled,
 }: {
   value: string;
   onChange: (val: string) => void;
   onSystemSelect?: (systemTag: string) => void;
+  systemTagSuggestions?: Array<SystemTagSuggestion>;
   disabled?: boolean;
 }) {
   const [inputValue, setInputValue] = useState(value);
@@ -1141,6 +1147,7 @@ function TagValueEditor({
         name="hyaway-spb-tag"
         submitEmptyOnBlur
         submitEmptyOnEnter
+        systemTagSuggestions={systemTagSuggestions}
       />
       <Button
         variant="ghost"

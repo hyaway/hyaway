@@ -4,6 +4,8 @@
 import { ruleToSearchTag } from "./query-to-hydrus-search";
 import { fieldGroups, systemTagToRule } from "./query-builder-fields";
 import type {
+  Field,
+  OptionGroup,
   RuleGroupProps,
   RuleGroupType,
   RuleGroupTypeAny,
@@ -33,6 +35,7 @@ export type PickedSearchSection =
 export type QueryBuilderRootContext = {
   rootBuilderOpen: boolean;
   selectedRootSectionId: RootSearchSectionId | null;
+  fieldGroups?: Array<OptionGroup<Field>>;
 };
 
 export type AddRuleContext = Parameters<typeof handleAddRule>[3];
@@ -74,17 +77,20 @@ export const handleAddRule = (
   _query: RuleGroupType,
   context?: {
     addSystem?: boolean;
+    fieldGroups?: Array<OptionGroup<Field>>;
     inlineTag?: string;
     systemField?: string;
   },
 ): RuleType => {
+  const activeFieldGroups = context?.fieldGroups ?? fieldGroups;
+
   if (context?.inlineTag) {
-    const systemRule = systemTagToRule(context.inlineTag);
+    const systemRule = systemTagToRule(context.inlineTag, activeFieldGroups);
     if (systemRule) return { ...rule, ...systemRule };
     return { ...rule, field: "tag", operator: "=", value: context.inlineTag };
   }
   if (context?.addSystem && context.systemField) {
-    for (const group of fieldGroups) {
+    for (const group of activeFieldGroups) {
       const field = group.options.find((f) => f.name === context.systemField);
       if (field) {
         return {

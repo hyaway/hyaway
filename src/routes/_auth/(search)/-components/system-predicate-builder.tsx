@@ -14,6 +14,7 @@ import {
 import {
   FILE_SERVICE_TYPES,
   buildRatingFieldGroups,
+  buildSystemTagSuggestions,
   fieldGroups,
   getDefaultSortAsc,
   getSortColorHex,
@@ -52,7 +53,10 @@ import type {
   RootSearchSectionId,
   StagedSearchEntry,
 } from "../-lib/system-predicate-builder-helpers";
+import type { SystemTagSuggestion } from "../-lib/query-builder-fields";
 import type {
+  Field,
+  OptionGroup,
   RuleGroupProps,
   RuleGroupType,
   RuleType,
@@ -60,8 +64,6 @@ import type {
 } from "react-querybuilder";
 import type { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 import type { RovingTagButtonProps } from "@/components/tag/tag-list-focus";
-import { Permission } from "@/integrations/hydrus-api/models";
-import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import {
@@ -131,12 +133,14 @@ function SearchPredicateInput({
   ariaLabel = "Add tag or system predicate",
   name,
   onAdd,
+  systemTagSuggestions,
 }: {
   className?: string;
   inputClassName?: string;
   ariaLabel?: string;
   name: string;
   onAdd: (tag: string) => void;
+  systemTagSuggestions?: Array<SystemTagSuggestion>;
 }) {
   return (
     <TagAutocompleteInput
@@ -149,6 +153,7 @@ function SearchPredicateInput({
       onSubmit={onAdd}
       onBlur={onAdd}
       clearOnSelect
+      systemTagSuggestions={systemTagSuggestions}
     />
   );
 }
@@ -165,9 +170,12 @@ function QBRuleGroupBody(props: RuleGroupProps & UseRuleGroup) {
 
   const handleInlineSelect = useCallback(
     (tag: string) => {
-      props.addRule(undefined, { inlineTag: tag });
+      props.addRule(undefined, {
+        fieldGroups: rootContext?.fieldGroups,
+        inlineTag: tag,
+      });
     },
-    [props.addRule],
+    [props.addRule, rootContext?.fieldGroups],
   );
 
   const combinator = props.ruleGroup.combinator ?? "and";
@@ -188,6 +196,11 @@ function QBRuleGroupBody(props: RuleGroupProps & UseRuleGroup) {
           inputClassName="max-w-2xl @md:min-w-48"
           name={`hyaway-qb-inline-${props.path.join("-")}`}
           onAdd={handleInlineSelect}
+          systemTagSuggestions={
+            rootContext?.fieldGroups
+              ? buildSystemTagSuggestions(rootContext.fieldGroups)
+              : undefined
+          }
         />
       )}
     </>
@@ -298,7 +311,6 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
   const sortType = entry.staged.sort.sortType;
   const sortAsc = entry.staged.sort.sortAsc;
   const fileServiceKey = entry.staged.fileServiceKey;
-  const canEditRatings = useHasPermission(Permission.EDIT_FILE_RATINGS);
   const { ratingServices } = useRatingServices();
   const { data: servicesData } = useGetServicesQuery();
 
@@ -327,12 +339,16 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       }));
     }
 
-    if (canEditRatings && ratingServices.length > 0) {
+    if (ratingServices.length > 0) {
       return [...groups, ...buildRatingFieldGroups(ratingServices)];
     }
 
     return groups;
-  }, [canEditRatings, ratingServices, fileServiceValues]);
+  }, [ratingServices, fileServiceValues]);
+  const systemTagSuggestions = useMemo(
+    () => buildSystemTagSuggestions(allFieldGroups),
+    [allFieldGroups],
+  );
 
   const handleSortTypeChange = useCallback(
     (value: HydrusFileSortType) => {
@@ -426,8 +442,9 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     () => ({
       rootBuilderOpen: isOpen,
       selectedRootSectionId,
+      fieldGroups: allFieldGroups,
     }),
-    [isOpen, selectedRootSectionId],
+    [allFieldGroups, isOpen, selectedRootSectionId],
   );
 
   const queryBuilderControlElements = useMemo(
@@ -489,9 +506,9 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
 
   const handleRootInlineSelect = useCallback(
     (tag: string) => {
-      addRootRule({ inlineTag: tag });
+      addRootRule({ fieldGroups: allFieldGroups, inlineTag: tag });
     },
-    [addRootRule],
+    [addRootRule, allFieldGroups],
   );
 
   const handleAddRootGroup = useCallback(() => {
@@ -625,9 +642,13 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       {!isOpen && (
         <CollapsedSearchQueryControls
           entryKey={entryKey}
+          fieldGroups={allFieldGroups}
           onInlineSelect={handleRootInlineSelect}
-          onSystemSelect={(fieldName) => addRootRule({ inlineTag: fieldName })}
+          onSystemSelect={(fieldName) =>
+            addRootRule({ fieldGroups: allFieldGroups, inlineTag: fieldName })
+          }
           onAddGroup={handleAddRootGroup}
+          systemTagSuggestions={systemTagSuggestions}
         />
       )}
       {isOpen && builderContent}
@@ -664,14 +685,18 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
 
 function CollapsedSearchQueryControls({
   entryKey,
+  fieldGroups: activeFieldGroups,
   onInlineSelect,
   onSystemSelect,
   onAddGroup,
+  systemTagSuggestions,
 }: {
   entryKey: string;
+  fieldGroups: Array<OptionGroup<Field>>;
   onInlineSelect: (tag: string) => void;
   onSystemSelect: (fieldName: string) => void;
   onAddGroup: () => void;
+  systemTagSuggestions: Array<SystemTagSuggestion>;
 }) {
   return (
     <div className="@container flex flex-wrap items-center gap-2">
@@ -679,8 +704,12 @@ function CollapsedSearchQueryControls({
         className="w-full basis-full sm:flex-1 sm:basis-0"
         name={`hyaway-qb-collapsed-${entryKey}`}
         onAdd={onInlineSelect}
+        systemTagSuggestions={systemTagSuggestions}
       />
-      <SystemFieldCombobox onSelect={onSystemSelect} />
+      <SystemFieldCombobox
+        fieldGroups={activeFieldGroups}
+        onSelect={onSystemSelect}
+      />
       <AddOrGroupButton onClick={onAddGroup} />
     </div>
   );

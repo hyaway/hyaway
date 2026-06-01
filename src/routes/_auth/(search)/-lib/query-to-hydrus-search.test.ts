@@ -3,7 +3,17 @@
 
 import { describe, expect, it } from "vitest";
 import { queryToHydrusSearch, ruleToSearchTag } from "./query-to-hydrus-search";
+import {
+  buildRatingFieldGroups,
+  buildSystemFieldOptions,
+  buildSystemFieldSelectorGroups,
+  buildSystemTags,
+  getSelectedSystemTagForRule,
+  systemTagToRule,
+} from "./query-builder-fields";
 import type { RuleGroupType, RuleType } from "react-querybuilder";
+import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
+import { ServiceType } from "@/integrations/hydrus-api/models";
 
 const makeRule = (
   field: string,
@@ -322,5 +332,71 @@ describe("queryToHydrusSearch", () => {
     };
 
     expect(queryToHydrusSearch(query)).toEqual(["series:*"]);
+  });
+});
+
+describe("rating system predicate metadata", () => {
+  const ratingService: RatingServiceInfo = {
+    name: "score",
+    type: ServiceType.RATING_NUMERICAL,
+    type_pretty: "numerical rating",
+    min_stars: 1,
+    max_stars: 5,
+    star_shape: "fat star",
+  };
+
+  const ratingFieldGroups = buildRatingFieldGroups([
+    ["rating-service-key", ratingService],
+  ]);
+
+  it("adds rating service predicates to system tag suggestions", () => {
+    expect(buildSystemTags(ratingFieldGroups)).toEqual(
+      expect.arrayContaining([
+        "system:rating for score",
+        "system:has rating for score",
+        "system:no rating for score",
+      ]),
+    );
+  });
+
+  it("groups rating services as second-level system field options", () => {
+    expect(buildSystemFieldOptions(ratingFieldGroups)).toEqual([
+      {
+        label: "system:rating",
+        inline: undefined,
+        options: [{ name: "system:rating for score", label: "score" }],
+      },
+    ]);
+  });
+
+  it("keeps rating services as one field selector option per service", () => {
+    expect(buildSystemFieldSelectorGroups(ratingFieldGroups)).toMatchObject([
+      {
+        label: "system:rating",
+        options: [{ name: "system:rating for score", label: "score" }],
+      },
+    ]);
+  });
+
+  it("resolves the displayed system tag for selected rating rules", () => {
+    expect(
+      getSelectedSystemTagForRule("rating:score", "=", ratingFieldGroups),
+    ).toBe("system:rating for score");
+  });
+
+  it("converts rating service system tags back to query builder rules", () => {
+    expect(
+      systemTagToRule("system:rating for score", ratingFieldGroups),
+    ).toEqual({
+      field: "rating:score",
+      operator: "=",
+      value: "5",
+    });
+    expect(
+      systemTagToRule("system:has rating for score", ratingFieldGroups),
+    ).toEqual({ field: "rating:score", operator: "has", value: "" });
+    expect(
+      systemTagToRule("system:no rating for score", ratingFieldGroups),
+    ).toEqual({ field: "rating:score", operator: "has_not", value: "" });
   });
 });

@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { HAS_ONLY_FIELDS } from "./query-to-hydrus-search";
+import {
+  SYSTEM_RATING_GROUP_LABEL,
+  getRatingFieldName,
+  getRatingSystemTag,
+  getRatingSystemTags,
+  isRatingFieldName,
+  parseRatingSystemTag,
+} from "./rating-predicate-utils";
 import type { Field, OptionGroup } from "react-querybuilder";
 import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
 import type { SearchRuleInput } from "@/stores/search-defaults";
@@ -430,11 +438,19 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
 ];
 
 // ---------------------------------------------------------------------------
-// Dynamic rating fields
+// Rating service fields
 // ---------------------------------------------------------------------------
 
+function isRatingGroup(group: OptionGroup<Field>): boolean {
+  return group.label === SYSTEM_RATING_GROUP_LABEL;
+}
+
+function getSystemFieldOption(field: Field): SystemFieldOption {
+  return { name: getFieldHydrusLabel(field.name), label: field.label };
+}
+
 /**
- * Build the rating field groups dynamically from API-discovered services.
+ * Build rating field groups from API-discovered services.
  * Each rating type gets appropriate operators:
  * - Like/dislike: has/no/liked/disliked (no value needed)
  * - Numerical: has/no + comparison (value = star count)
@@ -448,7 +464,7 @@ export function buildRatingFieldGroups(
   const options: Array<Field> = ratingServices.map(([serviceKey, service]) => {
     if (isLikeRatingService(service)) {
       return {
-        name: `rating:${service.name}`,
+        name: getRatingFieldName(service.name),
         label: service.name,
         operators: likeRatingOperators,
         defaultOperator: "=",
@@ -465,7 +481,7 @@ export function buildRatingFieldGroups(
 
     if (isNumericalRatingService(service)) {
       return {
-        name: `rating:${service.name}`,
+        name: getRatingFieldName(service.name),
         label: service.name,
         operators: numericalRatingOperators,
         defaultOperator: "=",
@@ -478,7 +494,7 @@ export function buildRatingFieldGroups(
 
     // Inc/Dec
     return {
-      name: `rating:${service.name}`,
+      name: getRatingFieldName(service.name),
       label: service.name,
       operators: numericalRatingOperators,
       defaultOperator: ">",
@@ -489,7 +505,7 @@ export function buildRatingFieldGroups(
     };
   });
 
-  return [{ label: "system:rating", options }];
+  return [{ label: SYSTEM_RATING_GROUP_LABEL, options }];
 }
 
 // ---------------------------------------------------------------------------
@@ -972,11 +988,129 @@ export type SystemTagSuggestion = {
   keywords?: Array<string>;
 };
 
-export const SYSTEM_TAG_SUGGESTIONS: Array<SystemTagSuggestion> =
-  SYSTEM_TAGS.map((value) => ({
+export type SystemFieldOption = { name: string; label: string };
+
+export type SystemFieldOptionGroup = {
+  label: string;
+  inline?: boolean;
+  options: Array<SystemFieldOption>;
+};
+
+export function buildSystemTags(
+  groups: Array<OptionGroup<Field>> = fieldGroups,
+): Array<string> {
+  return [
+    ...new Set(
+      [
+        ...SYSTEM_TAGS,
+        ...groups.flatMap((group) =>
+          group.options.flatMap((field) => {
+            if (!isRatingFieldName(field.name)) return [];
+            return getRatingSystemTags(field.name);
+          }),
+        ),
+      ].filter((v) => v.startsWith("system:")),
+    ),
+  ];
+}
+
+export function buildSystemTagSuggestions(
+  groups: Array<OptionGroup<Field>> = fieldGroups,
+): Array<SystemTagSuggestion> {
+  return buildSystemTags(groups).map((value) => ({
     value,
     keywords: SYSTEM_TAG_SEARCH_KEYWORDS[value],
   }));
+}
+
+export function buildSystemFieldOptions(
+  groups: Array<OptionGroup<Field>> = fieldGroups,
+): Array<SystemFieldOptionGroup> {
+  const systemTags = buildSystemTags(groups);
+
+  return groups
+    .map((group) => ({
+      label: group.label,
+      inline: (group as { inline?: boolean }).inline,
+      options: group.options
+        .filter((field) => field.name !== "tag")
+        .flatMap((field) => {
+          if (isRatingGroup(group)) {
+            return [getSystemFieldOption(field)];
+          }
+
+          const fieldSystemTags = systemTags.filter(
+            (tag) => systemTagToRule(tag, groups)?.field === field.name,
+          );
+
+          if (fieldSystemTags.length === 0) {
+            return [getSystemFieldOption(field)];
+          }
+
+          return fieldSystemTags.map((tag) => ({ name: tag, label: tag }));
+        }),
+    }))
+    .filter((group) => group.options.length > 0);
+}
+
+export function buildSystemFieldSelectorGroups(
+  groups: Array<OptionGroup<Field>> = fieldGroups,
+): Array<OptionGroup<Field>> {
+  const systemTags = buildSystemTags(groups);
+
+  return groups
+    .map((group) => ({
+      ...group,
+      options: group.options
+        .filter((field) => field.name !== "tag")
+        .flatMap((field) => {
+          if (isRatingGroup(group)) {
+            return [
+              {
+                ...field,
+                name: getRatingSystemTag(field.name),
+                label: field.label,
+              },
+            ];
+          }
+
+          const systemPredicateOptions = systemTags
+            .filter((tag) => systemTagToRule(tag, groups)?.field === field.name)
+            .map((tag) => ({ ...field, name: tag, label: tag }));
+
+          return systemPredicateOptions.length > 1
+            ? systemPredicateOptions
+            : [field];
+        }),
+    }))
+    .filter((group) => group.options.length > 0);
+}
+
+export function getSelectedSystemTagForRule(
+  field: string,
+  operator: string | undefined,
+  groups: Array<OptionGroup<Field>> = fieldGroups,
+): string | undefined {
+  return buildSystemTags(groups).find((tag) => {
+    const rule = systemTagToRule(tag, groups);
+    if (!rule) return false;
+    return rule.field === field && rule.operator === operator;
+  });
+}
+
+export function fieldHasSystemPredicateChoices(
+  field: string,
+  groups: Array<OptionGroup<Field>> = fieldGroups,
+): boolean {
+  return (
+    buildSystemTags(groups).filter(
+      (tag) => systemTagToRule(tag, groups)?.field === field,
+    ).length > 1
+  );
+}
+
+export const SYSTEM_TAG_SUGGESTIONS: Array<SystemTagSuggestion> =
+  buildSystemTagSuggestions();
 
 /** Reverse map: system tag string → field name. */
 const SYSTEM_TAG_TO_FIELD: Record<string, string> = Object.fromEntries(
@@ -988,23 +1122,11 @@ const SYSTEM_TAG_TO_FIELD: Record<string, string> = Object.fromEntries(
 const SYSTEM_TAG_TO_RULE: Partial<Record<string, SearchRuleInput>> =
   Object.fromEntries(SYSTEM_TAG_RULE_ENTRIES);
 
-/**
- * Resolve a system tag string (e.g. `"system:inbox"`) to a query builder rule.
- * Returns `undefined` if the tag is not a known system tag.
- */
-export function systemTagToRule(
-  systemTag: string,
-): SearchRuleInput | undefined {
-  const explicitRule = SYSTEM_TAG_TO_RULE[systemTag];
-  if (explicitRule) {
-    return explicitRule;
-  }
-
-  const fieldName = SYSTEM_TAG_TO_FIELD[systemTag];
-  if (!fieldName) return undefined;
-
-  // Look up the field definition for its default operator/value
-  for (const group of fieldGroups) {
+function getFieldDefaultRule(
+  fieldName: string,
+  groups: Array<OptionGroup<Field>>,
+): SearchRuleInput {
+  for (const group of groups) {
     const field = group.options.find((f) => f.name === fieldName);
     if (field) {
       return {
@@ -1018,11 +1140,46 @@ export function systemTagToRule(
   return { field: fieldName, operator: "=", value: "" } as SearchRuleInput;
 }
 
+function systemRatingTagToRule(
+  systemTag: string,
+  groups: Array<OptionGroup<Field>>,
+): SearchRuleInput | undefined {
+  const parsed = parseRatingSystemTag(systemTag);
+  if (!parsed) return undefined;
+
+  if (parsed.kind === "rating") {
+    return getFieldDefaultRule(parsed.fieldName, groups);
+  }
+
+  return { field: parsed.fieldName, operator: parsed.kind, value: "" };
+}
+
+/**
+ * Resolve a system tag string (e.g. `"system:inbox"`) to a query builder rule.
+ * Returns `undefined` if the tag is not a known system tag.
+ */
+export function systemTagToRule(
+  systemTag: string,
+  groups: Array<OptionGroup<Field>> = fieldGroups,
+): SearchRuleInput | undefined {
+  const explicitRule = SYSTEM_TAG_TO_RULE[systemTag];
+  if (explicitRule) {
+    return explicitRule;
+  }
+
+  const ratingRule = systemRatingTagToRule(systemTag, groups);
+  if (ratingRule) return ratingRule;
+
+  const fieldName = SYSTEM_TAG_TO_FIELD[systemTag];
+  if (!fieldName) return undefined;
+
+  return getFieldDefaultRule(fieldName, groups);
+}
+
 /** Get hydrus-style display label for a field, with fallback. */
 export function getFieldHydrusLabel(fieldName: string): string {
   if (FIELD_HYDRUS_LABEL[fieldName]) return FIELD_HYDRUS_LABEL[fieldName];
-  if (fieldName.startsWith("rating:"))
-    return `system:rating for ${fieldName.slice("rating:".length)}`;
+  if (isRatingFieldName(fieldName)) return getRatingSystemTag(fieldName);
   return fieldName;
 }
 
