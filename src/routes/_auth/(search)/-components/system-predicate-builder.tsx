@@ -123,6 +123,10 @@ const PICKED_STAGED_OR_GROUP_BADGE_CLASSNAME = cn(
   "border-(--badge-overlay)",
 );
 
+const SEARCH_BUILDER_SELECT_CONTENT_STYLE = {
+  "--search-builder-select-max-height": "min(60dvh, var(--available-height))",
+} as ComponentProps<typeof SelectContent>["style"];
+
 // ---------------------------------------------------------------------------
 // Inline tag input rendered at the bottom of each rule group body
 // ---------------------------------------------------------------------------
@@ -863,7 +867,11 @@ function FileDomainSection({
           >
             <span className="truncate">{selectedLabel}</span>
           </SelectTrigger>
-          <SelectContent align="start" className="max-h-[60dvh]">
+          <SelectContent
+            align="start"
+            className="max-h-(--search-builder-select-max-height)"
+            style={SEARCH_BUILDER_SELECT_CONTENT_STYLE}
+          >
             <SelectGroup>
               <SelectItem value="__all__">(default)</SelectItem>
               {services.map((service) => (

@@ -507,7 +507,7 @@ function NumericalRatingDropdown({
       <DropdownMenuContent
         align="center"
         side="right"
-        className="max-h-64 min-w-32 overflow-y-auto"
+        className="max-h-[min(16rem,var(--available-height))] min-w-32 overflow-y-auto"
       >
         <DropdownMenuRadioGroup
           value={radioValue}

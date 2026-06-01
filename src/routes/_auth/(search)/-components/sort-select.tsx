@@ -106,6 +106,12 @@ const SORT_GROUPS = [
   },
 ] as const;
 
+const SORT_DROPDOWN_HEIGHT_STYLE = {
+  "--sort-dropdown-max-height": "min(60dvh, var(--available-height))",
+  "--sort-dropdown-list-max-height":
+    "calc(var(--sort-dropdown-max-height) - 3rem)",
+} as CSSProperties;
+
 export type { SortConfig } from "@/stores/search-defaults";
 
 export function SortSection({
@@ -224,12 +230,14 @@ export function SortSelect({
         />
       </PopoverTrigger>
       <PopoverContent
-        className="max-h-[60dvh] w-80 max-w-[calc(100dvw-1rem)] p-0"
+        className="max-h-(--sort-dropdown-max-height) w-80 max-w-[calc(100dvw-1rem)] overflow-hidden p-0"
+        style={SORT_DROPDOWN_HEIGHT_STYLE}
         align="end"
         side="bottom"
         positionMethod="fixed"
       >
         <Command
+          className="max-h-(--sort-dropdown-max-height)"
           shouldFilter={isSearching}
           filter={(itemValue, searchTerm, keywords) => {
             if (searchTerm.length < 3) {
@@ -247,7 +255,7 @@ export function SortSelect({
             value={search}
             onValueChange={setSearch}
           />
-          <CommandList className="max-h-none">
+          <CommandList className="max-h-(--sort-dropdown-list-max-height) min-h-0 flex-1">
             <CommandEmpty>No results.</CommandEmpty>
             {isSearching ? (
               SORT_GROUPS.map((group) => (

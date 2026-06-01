@@ -81,6 +81,16 @@ import { useTagColor } from "@/integrations/hydrus-api/queries/options";
 
 const QUERY_BUILDER_VALUE_WIDTH = cn("max-w-2xl min-w-40 flex-1 basis-40");
 const QUERY_BUILDER_LINE_WIDTH = cn("w-full max-w-5xl");
+const QUERY_BUILDER_DROPDOWN_HEIGHT_STYLE = {
+  "--qb-dropdown-max-height": "min(60dvh, var(--available-height))",
+  "--qb-dropdown-list-max-height": "calc(var(--qb-dropdown-max-height) - 3rem)",
+} as CSSProperties;
+const QUERY_BUILDER_DROPDOWN_CONTENT_CLASSNAME =
+  "max-h-(--qb-dropdown-max-height) overflow-hidden p-0";
+const QUERY_BUILDER_DROPDOWN_COMMAND_CLASSNAME =
+  "max-h-(--qb-dropdown-max-height)";
+const QUERY_BUILDER_DROPDOWN_LIST_CLASSNAME =
+  "min-h-0 flex-1 max-h-(--qb-dropdown-list-max-height)";
 
 type QueryBuilderFieldContext = {
   fieldGroups?: Array<OptionGroup<Field>>;
@@ -215,6 +225,7 @@ function DrillDownCommandContent({
 
   return (
     <Command
+      className={QUERY_BUILDER_DROPDOWN_COMMAND_CLASSNAME}
       shouldFilter={isSearching}
       filter={(itemValue, searchTerm, keywords) => {
         if (searchTerm.length < 3) {
@@ -232,7 +243,7 @@ function DrillDownCommandContent({
         value={search}
         onValueChange={setSearch}
       />
-      <CommandList className="max-h-none">
+      <CommandList className={QUERY_BUILDER_DROPDOWN_LIST_CLASSNAME}>
         <CommandEmpty>No results.</CommandEmpty>
         {groups ? (
           isSearching ? (
@@ -463,7 +474,11 @@ export function QBSelect({
         />
       </PopoverTrigger>
       <PopoverContent
-        className="max-h-[60dvh] w-96 max-w-[calc(100dvw-1rem)] p-0"
+        className={cn(
+          "w-96 max-w-[calc(100dvw-1rem)]",
+          QUERY_BUILDER_DROPDOWN_CONTENT_CLASSNAME,
+        )}
+        style={QUERY_BUILDER_DROPDOWN_HEIGHT_STYLE}
         align="end"
         side="bottom"
         positionMethod="fixed"
@@ -655,7 +670,11 @@ export function SystemFieldCombobox({
         <IconChevronDown data-icon="inline-end" className="size-4" />
       </PopoverTrigger>
       <PopoverContent
-        className="max-h-[70dvh] w-80 max-w-[calc(100dvw-1rem)] p-0"
+        className={cn(
+          "w-80 max-w-[calc(100dvw-1rem)]",
+          QUERY_BUILDER_DROPDOWN_CONTENT_CLASSNAME,
+        )}
+        style={QUERY_BUILDER_DROPDOWN_HEIGHT_STYLE}
         align="start"
         positionMethod="fixed"
       >

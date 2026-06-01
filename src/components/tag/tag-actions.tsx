@@ -449,7 +449,7 @@ function SearchTagActionGroupSubmenu({
   return (
     <DropdownMenuSub>
       <DropdownMenuSubTrigger>{label}</DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className="max-h-[60dvh] min-w-56">
+      <DropdownMenuSubContent className="max-h-[min(60dvh,var(--available-height))] min-w-56">
         {searchIds.map((searchId) => (
           <SearchTagActionSubmenu
             key={searchId}
