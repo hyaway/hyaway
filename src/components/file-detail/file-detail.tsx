@@ -145,9 +145,6 @@ function FileDetailContent({
         <FileRatingsSection data={data} />
         <Separator className="my-2" />
         <FileNotesSection data={data} />
-        {data.notes && Object.keys(data.notes).length > 0 && (
-          <Separator className="my-2" />
-        )}
         <FileUrlsSection data={data} />
         {data.known_urls && data.known_urls.length > 0 && (
           <Separator className="my-2" />

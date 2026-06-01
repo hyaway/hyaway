@@ -8,6 +8,7 @@ import {
   GetPagesResponseSchema,
   GetServicesResponseSchema,
   RequestNewPermissionsResponseSchema,
+  SetNotesResponseSchema,
   VerifyAccessKeyResponseSchema,
 } from "./models";
 
@@ -33,6 +34,7 @@ import type {
   SearchFilesResponse,
   SearchTagsOptions,
   SearchTagsResponse,
+  SetNotesResponse,
   SetRatingOptions,
   VerifyAccessKeyResponse,
 } from "./models";
@@ -393,6 +395,55 @@ export async function setFileViewtime(
 }
 
 // #endregion File Viewing Statistics
+
+// #region Notes
+
+export type SetNotesOptions = {
+  /** File identifier */
+  file_id?: number;
+  /** SHA256 hash identifier */
+  hash?: string;
+  /** Note names mapped to note content */
+  notes: Record<string, string>;
+  /** Leave false for direct user edits so Hydrus strictly overwrites names. */
+  merge_cleverly?: boolean;
+  extend_existing_note_if_possible?: boolean;
+  conflict_resolution?: 0 | 1 | 2 | 3;
+};
+
+export type DeleteNotesOptions = {
+  /** File identifier */
+  file_id?: number;
+  /** SHA256 hash identifier */
+  hash?: string;
+  /** Note names to delete */
+  note_names: Array<string>;
+};
+
+/**
+ * Add or update notes for a file.
+ *
+ * @permission Requires: Edit File Notes (7)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_notes_set_notes
+ */
+export async function setNotes(
+  options: SetNotesOptions,
+): Promise<SetNotesResponse> {
+  const response = await sessionKeyClient.post("/add_notes/set_notes", options);
+  return SetNotesResponseSchema.parse(response.data);
+}
+
+/**
+ * Delete notes from a file.
+ *
+ * @permission Requires: Edit File Notes (7)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_notes_delete_notes
+ */
+export async function deleteNotes(options: DeleteNotesOptions): Promise<void> {
+  await sessionKeyClient.post("/add_notes/delete_notes", options);
+}
+
+// #endregion Notes
 
 // #region Ratings
 

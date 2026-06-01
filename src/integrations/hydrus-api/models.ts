@@ -530,6 +530,14 @@ export type GetFileMetadataResponse = z.infer<
 >;
 // #endregion Search
 
+// #region Notes
+export const SetNotesResponseSchema = BaseResponseSchema.extend({
+  notes: z.record(z.string(), z.string()),
+});
+
+export type SetNotesResponse = z.infer<typeof SetNotesResponseSchema>;
+// #endregion Notes
+
 // #region Ratings
 /**
  * Rating value for set_rating endpoint.

@@ -168,6 +168,7 @@ The app uses a permission-based feature gating system. Features degrade graceful
 | `EDIT_FILE_TAGS`             | 5     | No       | Tag autocomplete in search                          |
 | `MANAGE_PAGES`               | 4     | No       | View/refresh/focus Hydrus pages                     |
 | `MANAGE_DATABASE`            | 6     | No       | Thumbnail dimensions, namespace colors              |
+| `EDIT_FILE_NOTES`            | 7     | No       | Add, edit, and delete file notes                    |
 | `EDIT_FILE_TIMES`            | 11    | No       | Sync view statistics to Hydrus                      |
 | `EDIT_FILE_RATINGS`          | 9     | No       | Set file ratings                                    |
 

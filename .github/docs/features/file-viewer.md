@@ -11,6 +11,7 @@ The file viewer displays individual files with type-specific media players, meta
 - **Type-specific viewers** - Images, video, audio, deleted files, unsupported formats
 - **Context navigation** - Prev/next within gallery context
 - **File actions** - Trash, archive, download, open externally
+- **Editable notes** - Add, edit, and delete Hydrus file notes when permission is available
 - **Watch history** - Tracks viewed files (optional)
 - **Floating footer** - Actions always accessible
 
@@ -37,6 +38,7 @@ import { FileDetail } from "@/components/file-detail/file-detail";
 - `FileStatusBadges` - Inbox/trash/archive status
 - `ContentDetailsTable` / `FileInfoTable` - Metadata tables
 - `InlineTagsList` - All tags for the file
+- `FileNotesSection` - Hydrus notes with permission-gated editing controls
 - `PageFloatingFooter` - Action buttons
 
 ### `FileViewer`
@@ -128,6 +130,7 @@ useGetSingleFileMetadata() → FileMetadata
     │
     ├─► InlineTagsList → tags
     │
+    ├─► FileNotesSection → view and edit notes
     └─► useFileActions() → action buttons
             │
             ▼
@@ -163,6 +166,7 @@ When `trackLocalWatchHistory={true}` and history is enabled globally:
 | `file-viewer.tsx`                | MIME-based viewer router            |
 | `viewers/*.tsx`                  | Type-specific media players         |
 | `file-page-header.tsx`           | Breadcrumb header                   |
+| `file-notes-section.tsx`         | Notes display and editing controls  |
 | `file-status-badges.tsx`         | Status indicators                   |
 | `use-file-context-navigation.ts` | Prev/next navigation                |
 | `use-file-actions.tsx`           | Action button generation            |
