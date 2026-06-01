@@ -85,12 +85,15 @@ const QUERY_BUILDER_DROPDOWN_HEIGHT_STYLE = {
   "--qb-dropdown-max-height": "min(60dvh, var(--available-height))",
   "--qb-dropdown-list-max-height": "calc(var(--qb-dropdown-max-height) - 3rem)",
 } as CSSProperties;
-const QUERY_BUILDER_DROPDOWN_CONTENT_CLASSNAME =
-  "max-h-(--qb-dropdown-max-height) overflow-hidden p-0";
-const QUERY_BUILDER_DROPDOWN_COMMAND_CLASSNAME =
-  "max-h-(--qb-dropdown-max-height)";
-const QUERY_BUILDER_DROPDOWN_LIST_CLASSNAME =
-  "min-h-0 flex-1 max-h-(--qb-dropdown-list-max-height)";
+const QUERY_BUILDER_DROPDOWN_CONTENT_CLASSNAME = cn(
+  "max-h-(--qb-dropdown-max-height) overflow-hidden p-0",
+);
+const QUERY_BUILDER_DROPDOWN_COMMAND_CLASSNAME = cn(
+  "max-h-(--qb-dropdown-max-height)",
+);
+const QUERY_BUILDER_DROPDOWN_LIST_CLASSNAME = cn(
+  "max-h-(--qb-dropdown-list-max-height) min-h-0 flex-1",
+);
 
 type QueryBuilderFieldContext = {
   fieldGroups?: Array<OptionGroup<Field>>;

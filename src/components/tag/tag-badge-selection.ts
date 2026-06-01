@@ -10,8 +10,9 @@ import { useActiveTheme } from "@/stores/theme-store";
 
 const SELECTED_TAG_BADGE_OVERLAY_HEX = "#6468f0";
 
-export const SELECTED_TAG_BADGE_CLASSNAME =
-  "shadow-[inset_0_0_0_2px_var(--badge-overlay)]";
+export const SELECTED_TAG_BADGE_CLASSNAME = cn(
+  "shadow-[inset_0_0_0_2px_var(--badge-overlay)]",
+);
 
 export const SELECTED_TAG_BADGE_TRIGGER_CLASSNAME = cn(
   "focus-visible:[&>span]:[box-shadow:inset_0_0_0_2px_var(--selected-tag-focus)]! focus-visible:[&>span]:[--badge-overlay:var(--selected-tag-overlay)]!",

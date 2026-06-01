@@ -111,8 +111,9 @@ const STAGED_OR_GROUP_BUTTON_CLASSNAME = cn(
   "focus-visible:ring-offset-background focus-visible:ring-offset-2",
 );
 
-const STAGED_TAG_BUTTON_CLASSNAME =
-  "inline-flex rounded-4xl border-0 bg-transparent p-0 text-inherit outline-none";
+const STAGED_TAG_BUTTON_CLASSNAME = cn(
+  "inline-flex rounded-4xl border-0 bg-transparent p-0 text-inherit outline-none",
+);
 
 const STAGED_OR_GROUP_BADGE_CLASSNAME = cn(
   "group-hover/staged-or:before:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
