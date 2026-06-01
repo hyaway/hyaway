@@ -19,6 +19,7 @@ All notable changes to hyAway are documented here.
 - **Show hidden files** — Galleries with hidden files offer a footer action to show them again
 - **Review source actions** — Review completion now shows buttons for every source that contributed files, including saved searches, Hydrus pages, and predefined galleries
 - **Latest opened page** — The pages list now adds a special card for the most recently opened Hydrus page when it still exists, and attempts matching after Hydrus assigns it a new page key on restart
+- **System predicate comparisons** — Query builder system predicates now support greater-than-or-equal and less-than-or-equal comparisons (Hydrus versions >= 673)
 
 ### Changed
 

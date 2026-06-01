@@ -22,14 +22,18 @@ export const comparisonOperators = [
   { name: "=", label: "is equal to (=)" },
   { name: "≠", label: "is not equal to (≠)" },
   { name: ">", label: "is greater than (>)" },
+  { name: ">=", label: "is greater than or equal to (>=)" },
   { name: "<", label: "is less than (<)" },
+  { name: "<=", label: "is less than or equal to (<=)" },
   { name: "≈", label: "is approximately (≈)" },
 ];
 
 const exactComparisonOperators = [
   { name: "=", label: "is equal to (=)" },
   { name: ">", label: "is greater than (>)" },
+  { name: ">=", label: "is greater than or equal to (>=)" },
   { name: "<", label: "is less than (<)" },
+  { name: "<=", label: "is less than or equal to (<=)" },
 ];
 
 function hasOps(thing: string): Array<{ name: string; label: string }> {
@@ -50,7 +54,9 @@ const filetypeValues = [
 /** Time comparison operators with labels that work for both deltas and dates. */
 const timeComparisonOperators = [
   { name: "<", label: "more recent than (<)" },
+  { name: "<=", label: "on or more recent than (<=)" },
   { name: ">", label: "older than (>)" },
+  { name: ">=", label: "on or older than (>=)" },
   { name: "=", label: "exactly (=)" },
   { name: "≈", label: "around (≈)" },
 ];
@@ -71,7 +77,9 @@ const likeRatingOperators = [
 const numericalRatingOperators = [
   { name: "=", label: "is equal to (=)" },
   { name: ">", label: "is greater than (>)" },
+  { name: ">=", label: "is greater than or equal to (>=)" },
   { name: "<", label: "is less than (<)" },
+  { name: "<=", label: "is less than or equal to (<=)" },
   { name: "has", label: "has rating" },
   { name: "has_not", label: "no rating" },
 ];

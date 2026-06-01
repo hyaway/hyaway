@@ -67,19 +67,19 @@ type SearchComparisonRule = SearchRuleBase<
   | "media_viewtime"
   | "preview_viewtime"
   | "all_viewtime",
-  "=" | "≠" | ">" | "<" | "≈",
+  "=" | "≠" | ">" | ">=" | "<" | "<=" | "≈",
   number | string
 >;
 
 type SearchExactComparisonRule = SearchRuleBase<
   "hash" | "file_service",
-  "=" | ">" | "<",
+  "=" | ">" | ">=" | "<" | "<=",
   string
 >;
 
 type SearchTimeRule = SearchRuleBase<
   "import_time" | "modified_time" | "archived_time" | "last_viewed_time",
-  "=" | ">" | "<" | "≈",
+  "=" | ">" | ">=" | "<" | "<=" | "≈",
   string
 >;
 
@@ -105,7 +105,7 @@ type SearchUrlRule = {
 
 type SearchRatingRule = SearchRuleBase<
   `rating:${string}`,
-  "=" | ">" | "<" | "has" | "has_not",
+  "=" | ">" | ">=" | "<" | "<=" | "has" | "has_not",
   "liked" | "disliked" | number | string
 >;
 

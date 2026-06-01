@@ -78,6 +78,8 @@ describe("ruleToSearchTag", () => {
       "system:rating for likes = dislike",
     ],
     [makeRule("rating:score", ">", 3), "system:rating for score > 3"],
+    [makeRule("rating:score", ">=", 3), "system:rating for score >= 3"],
+    [makeRule("rating:score", "<=", 3), "system:rating for score <= 3"],
     [makeRule("rating:score", "=", 0), "system:rating for score = 0"],
     [makeRule("rating:score", "=", ""), null],
     [makeRule("rating:score", "=", null), null],
@@ -87,7 +89,9 @@ describe("ruleToSearchTag", () => {
 
   it.each([
     ["width", ">", 640, "system:width > 640"],
+    ["width", ">=", 640, "system:width >= 640"],
     ["height", "<", 480, "system:height < 480"],
+    ["height", "<=", 480, "system:height <= 480"],
     ["ratio", "=", "16:9", "system:ratio = 16:9"],
     ["num_pixels", ">", "1mp", "system:num pixels > 1mp"],
     ["filesize", "<", "10mb", "system:filesize < 10mb"],
