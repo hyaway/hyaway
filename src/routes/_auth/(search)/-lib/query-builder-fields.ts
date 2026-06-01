@@ -132,8 +132,26 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
     ],
   },
   {
-    label: "system:file properties",
+    label: "system:file",
     options: [
+      {
+        name: "filetype",
+        label: "filetype",
+        operators: [
+          { name: "is", label: "is" },
+          { name: "is not", label: "is not" },
+        ],
+        valueEditorType: "select",
+        values: filetypeValues,
+        defaultValue: "image",
+      },
+      {
+        name: "filesize",
+        label: "filesize",
+        operators: comparisonOperators,
+        defaultOperator: "<",
+        defaultValue: "200 KB",
+      },
       { name: "audio", label: "audio", operators: hasOps("audio") },
       {
         name: "transparency",
@@ -155,6 +173,26 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
         name: "forced_filetype",
         label: "forced filetype",
         operators: hasOps("forced filetype"),
+      },
+      {
+        name: "hash",
+        label: "hash",
+        operators: [{ name: "=", label: "is" }],
+        defaultValue: "",
+      },
+      {
+        name: "file_service",
+        label: "file service",
+        operators: [
+          { name: "is currently in", label: "is currently in" },
+          { name: "is not currently in", label: "is not currently in" },
+          // Hydrus also accepts "is pending to" / "is not pending to", but
+          // those repository workflow states are excluded from hyAway browsing.
+        ],
+        defaultOperator: "is currently in",
+        valueEditorType: "select",
+        values: [],
+        defaultValue: "my files",
       },
     ],
   },
@@ -233,49 +271,6 @@ export const fieldGroups: Array<DisplayOptionGroup> = [
         defaultOperator: ">",
         inputType: "number",
         defaultValue: "600",
-      },
-    ],
-  },
-  {
-    label: "system:file",
-    options: [
-      {
-        name: "filetype",
-        label: "filetype",
-        operators: [
-          { name: "is", label: "is" },
-          { name: "is not", label: "is not" },
-        ],
-        valueEditorType: "select",
-        values: filetypeValues,
-        defaultValue: "image",
-      },
-      {
-        name: "filesize",
-        label: "filesize",
-        operators: comparisonOperators,
-        defaultOperator: "<",
-        defaultValue: "200 KB",
-      },
-      {
-        name: "hash",
-        label: "hash",
-        operators: [{ name: "=", label: "is" }],
-        defaultValue: "",
-      },
-      {
-        name: "file_service",
-        label: "file service",
-        operators: [
-          { name: "is currently in", label: "is currently in" },
-          { name: "is not currently in", label: "is not currently in" },
-          // Hydrus also accepts "is pending to" / "is not pending to", but
-          // those repository workflow states are excluded from hyAway browsing.
-        ],
-        defaultOperator: "is currently in",
-        valueEditorType: "select",
-        values: [],
-        defaultValue: "my files",
       },
     ],
   },
