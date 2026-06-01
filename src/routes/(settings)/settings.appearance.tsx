@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createFileRoute } from "@tanstack/react-router";
+import { FileDetailSettingsCard } from "./-components/file-detail-settings-card";
 import { FileViewerSettingsCard } from "./-components/file-viewer-settings-card";
 import { ThumbnailGalleryDisplaySettingsCard } from "./-components/thumbnail-gallery-display-settings-card";
 import { PagesDisplaySettingsCard } from "./-components/pages-display-settings-card";
@@ -31,6 +32,7 @@ function SettingsAppearanceComponent() {
       <PagesDisplaySettingsCard />
       <ThumbnailGalleryDisplaySettingsCard />
       <FileViewerSettingsCard />
+      <FileDetailSettingsCard />
       <ReviewControlsSettingsCard />
       <RatingsSettingsCard />
       <ResetAllAppearanceSettingsCard />

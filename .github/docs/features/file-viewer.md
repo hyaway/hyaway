@@ -149,6 +149,7 @@ Stored in `stores/file-viewer-settings-store.ts`:
 | `videoStartExpanded`   | boolean                                      | Videos start expanded                         |
 | `mediaAutoPlay`        | boolean                                      | Video/audio start automatically               |
 | `mediaStartWithSound`  | boolean                                      | Video/audio start with sound                  |
+| `notesOpenExpanded`    | boolean                                      | Long notes open expanded                      |
 
 ## Watch History
 

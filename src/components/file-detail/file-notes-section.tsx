@@ -43,6 +43,7 @@ import {
 } from "@/integrations/hydrus-api/queries/notes";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import { Permission } from "@/integrations/hydrus-api/models";
+import { useNotesOpenExpanded } from "@/stores/file-viewer-settings-store";
 import { cn } from "@/lib/utils";
 
 interface FileNotesSectionProps {
@@ -129,7 +130,8 @@ function FileNote({
   canEditNotes,
   noteNames,
 }: FileNoteProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const notesOpenExpanded = useNotesOpenExpanded();
+  const [isOpen, setIsOpen] = useState(notesOpenExpanded);
   const [isEditing, setIsEditing] = useState(false);
   const { mutate: deleteFileNotes, isPending: isDeleting } =
     useDeleteFileNotesMutation();

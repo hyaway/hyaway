@@ -17,6 +17,8 @@ type FileViewerSettingsState = {
   // Media settings (video/audio)
   mediaAutoPlay: boolean;
   mediaStartWithSound: boolean;
+  // Details settings
+  notesOpenExpanded: boolean;
   actions: {
     setStartExpanded: (expanded: boolean) => void;
     setImageBackground: (bg: ImageBackground) => void;
@@ -24,6 +26,7 @@ type FileViewerSettingsState = {
     setVideoStartExpanded: (expanded: boolean) => void;
     setMediaAutoPlay: (autoplay: boolean) => void;
     setMediaStartWithSound: (withSound: boolean) => void;
+    setNotesOpenExpanded: (expanded: boolean) => void;
     reset: () => void;
   };
 };
@@ -40,6 +43,8 @@ const useFileViewerSettingsStore = create<FileViewerSettingsState>()(
       // Media settings (video/audio)
       mediaAutoPlay: true,
       mediaStartWithSound: false,
+      // Details settings
+      notesOpenExpanded: false,
       actions: {
         setStartExpanded: (startExpanded: boolean) => set({ startExpanded }),
         setImageBackground: (imageBackground: ImageBackground) =>
@@ -51,6 +56,8 @@ const useFileViewerSettingsStore = create<FileViewerSettingsState>()(
         setMediaAutoPlay: (mediaAutoPlay: boolean) => set({ mediaAutoPlay }),
         setMediaStartWithSound: (mediaStartWithSound: boolean) =>
           set({ mediaStartWithSound }),
+        setNotesOpenExpanded: (notesOpenExpanded: boolean) =>
+          set({ notesOpenExpanded }),
         reset: () => set(store.getInitialState()),
       },
     }),
@@ -79,6 +86,9 @@ export const useMediaAutoPlay = () =>
 
 export const useMediaStartWithSound = () =>
   useFileViewerSettingsStore((state) => state.mediaStartWithSound);
+
+export const useNotesOpenExpanded = () =>
+  useFileViewerSettingsStore((state) => state.notesOpenExpanded);
 
 export const useFileViewerSettingsActions = () =>
   useFileViewerSettingsStore((state) => state.actions);
