@@ -14,11 +14,11 @@ All notable changes to hyAway are documented here.
 
 - **Local gallery hiding** — Hide files from Hydrus-backed galleries until next data refresh/next session
 - **Review hiding** — Hide files when performing review actions based on Hydrus setting "Remove files from view when they are archive/delete filtered" and "--even skipped files". Hiding is scoped to galleries that contributed to review. This is hyAway only and persists until next data refresh/session
-- **Hide from view** — Thumbnail context menus now include a direct action for hiding a file from the current gallery view.
+- **Hide from view** — Thumbnail context menus now include a direct action for hiding a file from the current gallery view
 - **Hide trashed files** — Trashing files hides them from view if Hydrus setting "Remove files from view when they are sent to the trash" is enabled. This will hide file in Hydrus pages. For search based queries this persists until next data refresh/session
 - **Show hidden files** — Galleries with hidden files offer a footer action to show them again
-- **Review source actions** — Review completion now shows buttons for every source that contributed files, including saved searches, Hydrus pages, and predefined galleries
-- **Latest opened page** — The pages list now adds a special card for the most recently opened Hydrus page when it still exists, and attempts matching after Hydrus assigns it a new page key on restart
+- **Review source links** — Review completion now shows buttons for every source that contributed files, including saved searches, Hydrus pages, and predefined galleries
+- **Latest opened page** — The pages list now adds a special card for the most recently opened Hydrus page when it still exists, and attempts matching after Hydrus assigns it a new page key on Hydrus client restart
 - **System predicate comparisons** — Query builder system predicates now support greater-than-or-equal and less-than-or-equal comparisons (Hydrus versions >= 673)
 - **Rating search predicates** — Search builder system predicate menus and autosuggest now include Hydrus rating services, including value comparisons, has rating, and no rating searches
 - **File note editing** — File details now let you add, rename, edit, and delete Hydrus file notes inline when note editing permission is granted
@@ -28,7 +28,7 @@ All notable changes to hyAway are documented here.
 
 - Query builder file predicates are now grouped together, with file type and file size shown first
 - Review completion buttons now wrap on narrow screens and take full width on the smallest layouts
-- Pages search now matches terms across parent groups and page names, so searches can combine a group name with a leaf page name
+- Pages filter now matches terms across parent groups and leaf page names, which allows entering both at the same time
 
 ### Fixed
 
