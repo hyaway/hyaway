@@ -8,7 +8,7 @@ All notable changes to hyAway are documented here.
 
 ---
 
-## 2026-05-31
+## 2026-06-01
 
 ### Added
 
