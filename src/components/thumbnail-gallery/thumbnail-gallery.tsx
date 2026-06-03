@@ -129,17 +129,15 @@ export function PureThumbnailGallery({
     () => (hiddenFileIds?.length ? new Set(hiddenFileIds) : null),
     [hiddenFileIds],
   );
-  const loadedItems = useMemo(
-    () => (data ? data.pages.flatMap((page) => page.metadata) : []),
-    [data],
-  );
-  const visibleItems = useMemo(
-    () =>
-      hiddenFileIdSet
-        ? loadedItems.filter((item) => !hiddenFileIdSet.has(item.file_id))
-        : loadedItems,
-    [hiddenFileIdSet, loadedItems],
-  );
+  const { loadedItemsCount, visibleItems } = useMemo(() => {
+    const loaded = data ? data.pages.flatMap((page) => page.metadata) : [];
+    return {
+      loadedItemsCount: loaded.length,
+      visibleItems: hiddenFileIdSet
+        ? loaded.filter((item) => !hiddenFileIdSet.has(item.file_id))
+        : loaded,
+    };
+  }, [data, hiddenFileIdSet]);
 
   // Defer items so old grid stays visible while new items load
   const deferredItems = useDeferredValue(visibleItems);
@@ -248,7 +246,7 @@ export function PureThumbnailGallery({
     if (!hasNextPage || isFetchingNextPage || fetchingRef.current) return;
 
     const loadedButNothingVisible =
-      totalItems > 0 && loadedItems.length > 0 && visibleItems.length === 0;
+      totalItems > 0 && loadedItemsCount > 0 && visibleItems.length === 0;
     const fetchThreshold = Math.min(
       Math.max(deferredItems.length * 0.5, 1),
       256,
@@ -271,7 +269,7 @@ export function PureThumbnailGallery({
     hasNextPage,
     isFetchingNextPage,
     lastItemIndex,
-    loadedItems.length,
+    loadedItemsCount,
     totalItems,
     visibleItems.length,
   ]);
