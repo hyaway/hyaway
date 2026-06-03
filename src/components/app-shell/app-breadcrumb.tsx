@@ -22,6 +22,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui-primitives/breadcrumb";
 
+function formatBreadcrumbTitle(title: string) {
+  return title.length === 64
+    ? title.slice(0, 3) + "..." + title.slice(-4)
+    : title;
+}
+
 export function AppBreadcrumb() {
   const matches = useMatches();
   const router = useRouter();
@@ -29,18 +35,28 @@ export function AppBreadcrumb() {
 
   // Filter routes that define their own getTitle (not inherited from parent)
   // by comparing the getTitle function reference to the previous match's
-  const breadcrumbs: Array<{ title: string; path: string }> = [];
+  const breadcrumbs: Array<{
+    title: string;
+    mobileTitle?: string;
+    path: string;
+  }> = [];
   let prevGetTitle: (() => string) | undefined;
+  let prevGetMobileTitle: (() => string) | undefined;
   let useHistoryBack = false;
 
   for (const match of matches) {
     const context = match.context as MyRouterContext | undefined;
     const getTitle = context?.getTitle;
+    const getMobileTitle = context?.getMobileTitle;
 
     // Only add if this route defines its own getTitle (different from parent's)
     if (getTitle && getTitle !== prevGetTitle) {
       breadcrumbs.push({
         title: getTitle(),
+        mobileTitle:
+          getMobileTitle && getMobileTitle !== prevGetMobileTitle
+            ? getMobileTitle()
+            : undefined,
         path: match.pathname,
       });
     }
@@ -51,6 +67,7 @@ export function AppBreadcrumb() {
     }
 
     prevGetTitle = getTitle;
+    prevGetMobileTitle = getMobileTitle;
   }
 
   // Get parent breadcrumb (second to last) for the up button
@@ -115,11 +132,19 @@ export function AppBreadcrumb() {
           {currentCrumb && (
             <BreadcrumbItem>
               <BreadcrumbPage>
-                {currentCrumb.title.length === 64
-                  ? currentCrumb.title.slice(0, 3) +
-                    "..." +
-                    currentCrumb.title.slice(-4)
-                  : currentCrumb.title}
+                {currentCrumb.mobileTitle &&
+                currentCrumb.mobileTitle !== currentCrumb.title ? (
+                  <>
+                    <span className="@md:hidden">
+                      {formatBreadcrumbTitle(currentCrumb.mobileTitle)}
+                    </span>
+                    <span className="hidden @md:inline">
+                      {formatBreadcrumbTitle(currentCrumb.title)}
+                    </span>
+                  </>
+                ) : (
+                  formatBreadcrumbTitle(currentCrumb.title)
+                )}
               </BreadcrumbPage>
             </BreadcrumbItem>
           )}

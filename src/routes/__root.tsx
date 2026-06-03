@@ -19,6 +19,7 @@ import { useAutoLock, useShouldShowLockScreen } from "@/stores/pin-lock-store";
 export interface MyRouterContext {
   queryClient: QueryClient;
   getTitle?: () => string;
+  getMobileTitle?: () => string;
   /** If true, the back button uses browser history instead of parent route navigation */
   useHistoryBack?: boolean;
 }

@@ -19,8 +19,8 @@ export const Route = createFileRoute("/_auth/(remote-pages)/pages/$pageId")({
       queryKey: ["getPages"],
       queryFn: getPages,
     }),
-  beforeLoad: ({ params, context }) => ({
-    getTitle: () => {
+  beforeLoad: ({ params, context }) => {
+    const getPageTitle = (includeGroupLabel: boolean) => {
       const cached = context.queryClient.getQueryData<GetPagesResponse>([
         "getPages",
       ]);
@@ -32,12 +32,17 @@ export const Route = createFileRoute("/_auth/(remote-pages)/pages/$pageId")({
           const groupMeta = tree
             ? buildPageGroupMetaByPageKey(tree).get(resolved.page.page_key)
             : null;
-          return groupMeta?.label
+          return includeGroupLabel && groupMeta?.label
             ? `${groupMeta.label} / ${resolved.page.name}`
             : resolved.page.name;
         }
       }
       return params.pageId;
-    },
-  }),
+    };
+
+    return {
+      getTitle: () => getPageTitle(true),
+      getMobileTitle: () => getPageTitle(false),
+    };
+  },
 });
