@@ -8,6 +8,18 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-06-02
+
+### Changed
+
+- Hydrus page breadcrumbs on small screens now show only the page name, keeping parent folder names out of the compact header
+
+### Fixed
+
+- Thumbnail galleries now keep loading the next visible files after review actions hide a large batch of images
+
+---
+
 ## 2026-06-01
 
 ### Added
