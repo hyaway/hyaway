@@ -129,18 +129,20 @@ export function PureThumbnailGallery({
     () => (hiddenFileIds?.length ? new Set(hiddenFileIds) : null),
     [hiddenFileIds],
   );
-  const items = useMemo(
+  const loadedItems = useMemo(
+    () => (data ? data.pages.flatMap((page) => page.metadata) : []),
+    [data],
+  );
+  const visibleItems = useMemo(
     () =>
-      data
-        ? data.pages
-            .flatMap((d) => d.metadata)
-            .filter((item) => !hiddenFileIdSet?.has(item.file_id))
-        : [],
-    [data, hiddenFileIdSet],
+      hiddenFileIdSet
+        ? loadedItems.filter((item) => !hiddenFileIdSet.has(item.file_id))
+        : loadedItems,
+    [hiddenFileIdSet, loadedItems],
   );
 
   // Defer items so old grid stays visible while new items load
-  const deferredItems = useDeferredValue(items);
+  const deferredItems = useDeferredValue(visibleItems);
 
   // Get layout settings - defer expensive ones for responsive slider UX
   const baseWidthMode = useEffectiveGalleryBaseWidthMode();
@@ -243,29 +245,36 @@ export function PureThumbnailGallery({
   // Guard against duplicate fetch calls before isFetchingNextPage updates
   const fetchingRef = useRef(false);
   useEffect(() => {
-    if (isFetchingNextPage) {
-      fetchingRef.current = true;
-    } else {
+    if (!hasNextPage || isFetchingNextPage || fetchingRef.current) return;
+
+    const loadedButNothingVisible =
+      totalItems > 0 && loadedItems.length > 0 && visibleItems.length === 0;
+    const fetchThreshold = Math.min(
+      Math.max(deferredItems.length * 0.5, 1),
+      256,
+    );
+    const isNearRenderedEnd =
+      lastItemIndex !== undefined &&
+      lastItemIndex >= deferredItems.length - fetchThreshold;
+
+    if (!loadedButNothingVisible && !isNearRenderedEnd) {
+      return;
+    }
+
+    fetchingRef.current = true;
+    void fetchNextPage().finally(() => {
       fetchingRef.current = false;
-    }
-  }, [isFetchingNextPage]);
-
-  // Infinite scroll - fetch next page when near the end
-  // 50% from end
-  useEffect(() => {
-    const FETCH_THRESHOLD = Math.min(deferredItems.length * 0.5, 256);
-    if (lastItemIndex === undefined) return;
-    if (fetchingRef.current) return;
-
-    if (
-      lastItemIndex >= deferredItems.length - FETCH_THRESHOLD &&
-      hasNextPage &&
-      !isFetchingNextPage
-    ) {
-      fetchingRef.current = true;
-      fetchNextPage();
-    }
-  }, [hasNextPage, fetchNextPage, deferredItems.length, lastItemIndex]);
+    });
+  }, [
+    deferredItems.length,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    lastItemIndex,
+    loadedItems.length,
+    totalItems,
+    visibleItems.length,
+  ]);
 
   // Re-measure when items or dimensions change
   useEffect(() => {
