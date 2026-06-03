@@ -371,7 +371,7 @@ export function PureThumbnailGallery({
             })}
           </ul>
           <ScrollPositionBadge
-            current={(lastItemIndex ?? 0) + 1}
+            current={lastItemIndex === undefined ? 0 : lastItemIndex + 1}
             loaded={deferredItems.length}
             total={totalItems}
             isScrolling={rowVirtualizer.isScrolling}
