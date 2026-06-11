@@ -26,6 +26,7 @@ import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { SectionHeading } from "@/components/page-shell/section-heading";
 import { Separator } from "@/components/ui-primitives/separator";
 import { LOADING_ACTIONS, useFileActions } from "@/hooks/use-file-actions";
+import { useFavoriteHotkey } from "@/hooks/use-favorite-hotkey";
 import {
   useLocalWatchHistoryTracker,
   useRemoteFileViewTimeTracker,
@@ -47,6 +48,7 @@ export function FileDetail({
   trackLocalWatchHistory = true,
 }: FileDetailProps) {
   const { data, isLoading, isError, error } = useGetSingleFileMetadata(fileId);
+  useFavoriteHotkey(fileId);
 
   if (isLoading) {
     return (
