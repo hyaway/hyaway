@@ -146,9 +146,33 @@ export function ImageViewer({
     });
   }, []);
 
-  const setCurrentScale = useCallback((scale: number) => {
-    currentScaleRef.current = scale;
+  // Inputs the pannable-zoom marker depends on, kept in a ref so the stable
+  // onScaleChange callback can read the latest values without being recreated.
+  const pannableInputsRef = useRef({ overlay: false, fit: 0 });
+
+  const syncPannableZoomMarker = useCallback((scale: number) => {
+    const { overlay, fit } = pannableInputsRef.current;
+    const pannable = overlay && scale > fit + SCALE_TOLERANCE;
+    document.body.toggleAttribute("data-pannable-zoom", pannable);
   }, []);
+
+  const setCurrentScale = useCallback(
+    (scale: number) => {
+      currentScaleRef.current = scale;
+      syncPannableZoomMarker(scale);
+    },
+    [syncPannableZoomMarker],
+  );
+
+  // Recompute the pannable-zoom marker when overlay state or fit scale change
+  // (not just on transform), and clear it when the viewer goes away.
+  useEffect(() => {
+    pannableInputsRef.current = { overlay: isOverlayActive, fit: fitScale };
+    syncPannableZoomMarker(currentScaleRef.current);
+    return () => {
+      document.body.removeAttribute("data-pannable-zoom");
+    };
+  }, [isOverlayActive, fitScale, syncPannableZoomMarker]);
 
   const setCurrentPosition = useCallback((x: number, y: number) => {
     currentPositionRef.current = { x, y };
