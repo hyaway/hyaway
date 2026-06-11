@@ -102,7 +102,26 @@ export function useFileContextNavigation({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (shouldIgnoreKeyboardEvent(event)) return;
 
-      if (event.key === "[" || event.key === "{") {
+      const goPrev =
+        event.key === "[" || event.key === "{" || event.key === "ArrowLeft";
+      const goNext =
+        event.key === "]" || event.key === "}" || event.key === "ArrowRight";
+      if (!goPrev && !goNext) return;
+
+      // Arrow keys double as image pan controls. Yield them to the viewer while
+      // an image is being panned (zoomed in an overlay) or in fullscreen; the
+      // bracket aliases still navigate in those states.
+      const isArrow =
+        event.key === "ArrowLeft" || event.key === "ArrowRight";
+      if (
+        isArrow &&
+        (document.body.hasAttribute("data-pannable-zoom") ||
+          document.fullscreenElement)
+      ) {
+        return;
+      }
+
+      if (goPrev) {
         if (prevId === null) return;
         event.preventDefault();
         navigate({
@@ -113,15 +132,14 @@ export function useFileContextNavigation({
         return;
       }
 
-      if (event.key === "]" || event.key === "}") {
-        if (nextId === null) return;
-        event.preventDefault();
-        navigate({
-          to: contextRoute,
-          params: buildParams(nextId),
-          replace: true,
-        });
-      }
+      // goNext
+      if (nextId === null) return;
+      event.preventDefault();
+      navigate({
+        to: contextRoute,
+        params: buildParams(nextId),
+        replace: true,
+      });
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -269,7 +287,7 @@ export function useFileContextNavigation({
       id: "nav-prev",
       label: "Previous",
       icon: IconChevronLeft,
-      title: "Previous file ( [ )",
+      title: "Previous file ( ← )",
       onClick: () => {
         if (prevId !== null) {
           navigate({
@@ -285,7 +303,7 @@ export function useFileContextNavigation({
       id: "nav-next",
       label: "Next",
       icon: IconChevronRight,
-      title: "Next file ( ] )",
+      title: "Next file ( → )",
       onClick: () => {
         if (nextId !== null) {
           navigate({
