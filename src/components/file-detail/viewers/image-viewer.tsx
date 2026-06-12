@@ -14,6 +14,7 @@ import {
   useControls,
   useTransformEffect,
 } from "react-zoom-pan-pinch";
+import { FavoriteToggleButton } from "./favorite-toggle-button";
 import { viewerFixedHeight, viewerMinHeight } from "./style-constants";
 import type { ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import type { ImageBackground } from "@/stores/file-viewer-settings-store";
@@ -654,6 +655,7 @@ export function ImageViewer({
                   <ZoomBadge />
 
                   <OverlayControls
+                    fileId={fileId}
                     fitScale={fitScale}
                     isAtFit={isAtFit}
                     isAt1x={isAt1x}
@@ -872,6 +874,7 @@ function InlineViewer({
       />
 
       <InlineModeControls
+        fileId={fileId}
         isExpanded={isExpanded}
         isBottomVisible={isBottomVisible}
         isInView={isInView}
@@ -884,6 +887,7 @@ function InlineViewer({
 }
 
 function InlineModeControls({
+  fileId,
   isExpanded,
   isBottomVisible,
   isInView,
@@ -891,6 +895,7 @@ function InlineModeControls({
   onToggleFullscreen,
   onCycleBackground,
 }: {
+  fileId: number;
   isExpanded: boolean;
   isBottomVisible: boolean;
   isInView: boolean;
@@ -918,6 +923,8 @@ function InlineModeControls({
         className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 flex cursor-default gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity"
         onDoubleClick={(e) => e.stopPropagation()}
       >
+        <FavoriteToggleButton fileId={fileId} />
+
         <Toggle
           variant="outline"
           size="sm"
@@ -965,6 +972,7 @@ function InlineModeControls({
 }
 
 function OverlayControls({
+  fileId,
   fitScale,
   isAtFit,
   isAt1x,
@@ -976,6 +984,7 @@ function OverlayControls({
   onExit,
   onSetZoomIntent,
 }: {
+  fileId: number;
   fitScale: number;
   isAtFit: boolean;
   isAt1x: boolean;
@@ -1001,6 +1010,8 @@ function OverlayControls({
 
   return (
     <div className="bg-card/90 pointer-hover:opacity-0 pointer-hover:group-hover:opacity-100 absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 cursor-default gap-1 rounded-md border p-1 opacity-100 shadow-lg backdrop-blur-sm transition-opacity">
+      <FavoriteToggleButton fileId={fileId} />
+
       <Toggle
         variant="outline"
         size="sm"
