@@ -3,6 +3,7 @@
 
 import {
   BaseResponseSchema,
+  CleanTagsResponseSchema,
   GetClientOptionsResponseSchema,
   GetPageInfoResponseSchema,
   GetPagesResponseSchema,
@@ -22,6 +23,7 @@ import {
 import type {
   AccessKeyType,
   CanvasType,
+  CleanTagsResponse,
   FavouriteTagsResponse,
   GetClientOptionsResponse,
   GetFileMetadataResponse,
@@ -36,6 +38,7 @@ import type {
   SearchTagsResponse,
   SetNotesResponse,
   SetRatingOptions,
+  UpdateFileTagsOptions,
   VerifyAccessKeyResponse,
 } from "./models";
 
@@ -145,6 +148,49 @@ export async function searchTags(
   // Skip Zod — tag autocomplete can return thousands of results,
   // each just { value: string, count: number } with no transforms.
   return response.data as SearchTagsResponse;
+}
+
+/**
+ * Clean tags according to Hydrus parsing rules.
+ *
+ * @permission Requires: Add Tags (2)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_tags_clean_tags
+ */
+export async function cleanTags(
+  tags: Array<string>,
+): Promise<CleanTagsResponse> {
+  const response = await sessionKeyClient.get("/add_tags/clean_tags", {
+    params: {
+      tags: JSON.stringify(tags),
+    },
+  });
+  return CleanTagsResponseSchema.parse(response.data);
+}
+
+/**
+ * Add or remove a tag mapping for files in an explicit local tag service.
+ *
+ * @permission Requires: Add Tags (2)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_tags_add_tags
+ */
+export async function updateFileTags(
+  options: UpdateFileTagsOptions,
+): Promise<void> {
+  const { serviceKey, tag, action, ...fileIdentifiers } = options;
+
+  if (!serviceKey) {
+    throw new Error("A tag service key is required to update file tags.");
+  }
+
+  await sessionKeyClient.post("/add_tags/add_tags", {
+    ...fileIdentifiers,
+    service_keys_to_actions_to_tags: {
+      [serviceKey]: {
+        [action]: [tag],
+      },
+    },
+    create_new_deleted_mappings: false,
+  });
 }
 
 /**
