@@ -96,7 +96,9 @@ export function PageFloatingFooter({
               {overflowActions.map((action) => (
                 <DropdownMenuItem
                   key={action.id}
-                  onClick={action.onClick}
+                  // Link actions navigate/download via the rendered <a>; don't also
+                  // fire onClick or it happens twice (e.g. double download).
+                  onClick={action.href ? undefined : action.onClick}
                   variant={action.variant}
                   disabled={action.disabled}
                   render={
@@ -129,7 +131,9 @@ function ActionButton({ action }: { action: FloatingFooterAction }) {
     <BottomNavButton
       label={action.label}
       icon={<action.icon className="size-6" />}
-      onClick={action.onClick}
+      // Link actions navigate/download via the rendered <a>; don't also
+      // fire onClick or it happens twice (e.g. double download).
+      onClick={action.href ? undefined : action.onClick}
       intent={action.variant}
       isLoading={action.isPending}
       disabled={action.disabled}

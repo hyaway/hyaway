@@ -241,7 +241,9 @@ function ReviewMoreActionsMenu() {
             {group.actions.map((action) => (
               <DropdownMenuItem
                 key={action.id}
-                onClick={action.onClick}
+                // Link actions navigate/download via the rendered <a>; don't also
+                // fire onClick or it happens twice (e.g. double download).
+                onClick={action.href ? undefined : action.onClick}
                 variant={action.variant}
                 disabled={action.disabled}
                 render={
