@@ -97,12 +97,11 @@ const BaseServiceInfoSchema = z.object({
 // Basic (Non-Rating) Services
 // -----------------------------------------------------------------------------
 
-/** All non-rating service types */
+/** Other basic non-rating service types. */
 const BASIC_SERVICE_TYPES = [
   ServiceType.TAG_REPOSITORY,
   ServiceType.FILE_REPOSITORY,
   ServiceType.LOCAL_FILE_DOMAIN,
-  ServiceType.LOCAL_TAG_DOMAIN,
   ServiceType.ALL_KNOWN_TAGS,
   ServiceType.ALL_KNOWN_FILES,
   ServiceType.LOCAL_BOORU,
@@ -120,6 +119,12 @@ const BASIC_SERVICE_TYPES = [
 /** Helper to create a basic (non-rating) service schema for a specific type */
 const basicService = <T extends ServiceType>(serviceType: T) =>
   BaseServiceInfoSchema.extend({ type: z.literal(serviceType) });
+
+export const LocalTagServiceInfoSchema = basicService(
+  ServiceType.LOCAL_TAG_DOMAIN,
+);
+
+export type LocalTagServiceInfo = z.infer<typeof LocalTagServiceInfoSchema>;
 
 // -----------------------------------------------------------------------------
 // Rating Services
@@ -277,6 +282,7 @@ export const ServiceInfoSchema = z.discriminatedUnion("type", [
   LikeRatingServiceInfoSchema,
   NumericalRatingServiceInfoSchema,
   IncDecRatingServiceInfoSchema,
+  LocalTagServiceInfoSchema,
   // Basic services (non-rating)
   ...BASIC_SERVICE_TYPES.map(basicService),
 ]);
