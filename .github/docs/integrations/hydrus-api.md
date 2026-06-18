@@ -165,7 +165,7 @@ The app uses a permission-based feature gating system. Features degrade graceful
 | ---------------------------- | ----- | -------- | --------------------------------------------------- |
 | `SEARCH_FOR_AND_FETCH_FILES` | 3     | **Yes**  | Core functionality - file search, metadata, viewing |
 | `IMPORT_AND_DELETE_FILES`    | 1     | No       | Archive, unarchive, trash, restore files            |
-| `EDIT_FILE_TAGS`             | 5     | No       | Tag autocomplete in search                          |
+| `EDIT_FILE_TAGS`             | 2     | No       | Tag autocomplete and review tag add/remove actions  |
 | `MANAGE_PAGES`               | 4     | No       | View/refresh/focus Hydrus pages                     |
 | `MANAGE_DATABASE`            | 6     | No       | Thumbnail dimensions, namespace colors              |
 | `EDIT_FILE_NOTES`            | 7     | No       | Add, edit, and delete file notes                    |
@@ -289,7 +289,7 @@ export const useEffectiveGalleryBaseWidthMode = (): GalleryBaseWidthMode => {
 When requesting a new API key, users can choose between:
 
 - **All permissions** (`permits_everything: true`) - Full access
-- **Granular permissions** - Only the 5 permissions the app uses
+- **Granular permissions** - Only the permissions the app uses
 
 ```tsx
 // api-client.ts
@@ -482,6 +482,80 @@ Search for files matching given criteria. Returns file IDs, not full metadata.
 Tags support system predicates like `system:inbox`, `system:limit=16`, `system:height > 2000`. OR predicates use nested arrays: `["bird", ["cat", "dog"]]`.
 
 Used by `searchFiles()`.
+
+---
+
+#### `GET /add_tags/search_tags`
+
+Search for tag autocomplete suggestions. Review tag action configuration uses this endpoint with `tag_display_type=storage` and the selected local tag service key so suggestions match the storage mappings that add/remove actions edit.
+
+**Parameters:**
+
+| Name               | Type   | Description                                      |
+| ------------------ | ------ | ------------------------------------------------ |
+| `search`           | string | Partial tag text                                 |
+| `tag_display_type` | string | `display` or `storage`                           |
+| `tag_service_key`  | string | (optional) Tag domain to search                  |
+| `file_service_key` | string | (optional) File domain used to scope suggestions |
+
+**Response:**
+
+```json
+{
+  "tags": [
+    { "value": "series:example", "count": 42 },
+    { "value": "character:example", "count": 12 }
+  ]
+}
+```
+
+Used by `searchTags()`.
+
+---
+
+#### `GET /add_tags/clean_tags`
+
+Clean and canonicalize raw tag text according to Hydrus parsing rules before saving configured review tag actions.
+
+**Parameters:**
+
+| Name   | Type  | Description                   |
+| ------ | ----- | ----------------------------- |
+| `tags` | array | JSON-encoded list of raw tags |
+
+**Response:**
+
+```json
+{
+  "tags": ["series:example"]
+}
+```
+
+Used by `cleanTags()`.
+
+---
+
+#### `POST /add_tags/add_tags`
+
+Add or remove tag mappings for files. Review tag actions only target explicit local tag domain service keys; the app does not default to `my tags` or any other service during execution.
+
+**Body:**
+
+```json
+{
+  "file_id": 123,
+  "service_keys_to_actions_to_tags": {
+    "6c6f63616c2074616773": {
+      "0": ["series:example"]
+    }
+  },
+  "override_previously_deleted_mappings": true
+}
+```
+
+For remove actions, action `1` is used with `create_new_deleted_mappings: false` so removing an absent tag does not create a new deleted mapping.
+
+Used by `updateFileTags()`.
 
 ---
 

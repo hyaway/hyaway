@@ -434,6 +434,29 @@ export const FavouriteTagsResponseSchema = BaseResponseSchema.extend({
 
 export type FavouriteTagsResponse = z.infer<typeof FavouriteTagsResponseSchema>;
 
+export const CleanTagsResponseSchema = BaseResponseSchema.extend({
+  tags: z.array(z.string()),
+});
+
+export type CleanTagsResponse = z.infer<typeof CleanTagsResponseSchema>;
+
+export enum ContentUpdateAction {
+  ADD = 0,
+  DELETE = 1,
+}
+
+export type FileTagEditIdentifiers =
+  | { file_id: number; file_ids?: never; hash?: never; hashes?: never }
+  | { file_ids: Array<number>; file_id?: never; hash?: never; hashes?: never }
+  | { hash: string; file_id?: never; file_ids?: never; hashes?: never }
+  | { hashes: Array<string>; file_id?: never; file_ids?: never; hash?: never };
+
+export type UpdateFileTagsOptions = FileTagEditIdentifiers & {
+  serviceKey: string;
+  tag: string;
+  action: ContentUpdateAction.ADD | ContentUpdateAction.DELETE;
+};
+
 // #endregion Tag Search
 
 export enum TagStatus {
@@ -502,6 +525,7 @@ export const FileMetadataSchema = z.object({
       z.string(),
       z.any() as z.ZodType<{
         display_tags: Partial<Record<TagStatus, Array<string>>>;
+        storage_tags: Partial<Record<TagStatus, Array<string>>>;
       }>,
     )
     .optional(),

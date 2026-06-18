@@ -14,7 +14,7 @@ export const MINIMUM_REQUIRED_PERMISSIONS =
 /**
  * Permissions that enhance app functionality (not required but recommended).
  * - IMPORT_AND_DELETE_FILES: Archive/trash file management
- * - EDIT_FILE_TAGS: Tag autocomplete in search
+ * - EDIT_FILE_TAGS: Tag autocomplete and review tag actions
  * - MANAGE_PAGES: View/manage Hydrus pages
  * - MANAGE_DATABASE: Access thumbnail dimensions, namespace colors
  * - EDIT_FILE_TIMES: Sync view statistics to Hydrus
