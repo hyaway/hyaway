@@ -210,6 +210,7 @@ function ReviewMoreActionsMenu() {
       includeOpen: true,
       includeExternal: true,
       includeThumbnail: true,
+      includeSendToPage: true,
     },
   );
 
