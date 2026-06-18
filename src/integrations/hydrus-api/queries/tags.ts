@@ -2,10 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getFavouriteTags, searchTags, setFavouriteTags } from "../api-client";
+import {
+  addFileTags,
+  getFavouriteTags,
+  searchTags,
+  setFavouriteTags,
+} from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
 import { Permission } from "../models";
 import { useHasPermission } from "./access";
+import type { AddFileTagsOptions } from "../tag-actions";
 
 /**
  * Search for tag autocomplete suggestions.
@@ -111,5 +117,26 @@ export const useSetFavouriteTagsMutation = () => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["favouriteTags"] });
     },
+  });
+};
+
+/**
+ * Mutation to add or remove tags on files for a local tag service.
+ *
+ * Requires Add Tags permission. Invalidates affected files' metadata on settle.
+ */
+export const useAddFileTagsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (options: AddFileTagsOptions) => addFileTags(options),
+    onSettled: (_data, _err, variables) => {
+      for (const fileId of variables.file_ids) {
+        queryClient.invalidateQueries({
+          queryKey: ["getSingleFileMetadata", fileId],
+        });
+      }
+    },
+    mutationKey: ["addFileTags"],
   });
 };

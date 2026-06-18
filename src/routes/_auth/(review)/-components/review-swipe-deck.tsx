@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence } from "motion/react";
+import { toast } from "sonner";
 import { ReviewSwipeCard } from "./review-swipe-card";
 import { ReviewCardContent } from "./review-card-content";
 import { useReviewKeyboardShortcuts } from "./use-review-keyboard-shortcuts";
@@ -19,6 +20,7 @@ import type {
   SecondarySwipeAction,
   SwipeBindings,
 } from "@/stores/review-settings-store";
+import type { TagRestoreEntry } from "@/integrations/hydrus-api/tag-actions";
 import {
   getBindingForDirection,
   stripRatingActionsForServicesFromBindings,
@@ -26,6 +28,7 @@ import {
   useReviewImmersiveMode,
   useReviewSettingsActions,
   useReviewSwipeBindings,
+  useReviewTagServiceKey,
 } from "@/stores/review-settings-store";
 import {
   useReviewQueueActions,
@@ -49,6 +52,19 @@ import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings"
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { getFileMetadata } from "@/integrations/hydrus-api/api-client";
 import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
+import { Permission } from "@/integrations/hydrus-api/models";
+import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
+import { useAddFileTagsMutation } from "@/integrations/hydrus-api/queries/tags";
+import {
+  TAG_ACTION_ADD,
+  TAG_ACTION_DELETE,
+  planTagActions,
+  resolveTagServiceKey,
+  tagsToRemoveOnUndo,
+} from "@/integrations/hydrus-api/tag-actions";
+import { getTagActions } from "@/stores/review-binding-utils";
+import { useFavoriteToggle } from "@/hooks/use-favorite-toggle";
 
 /** Number of cards to render in the stack */
 const STACK_SIZE = 3;
@@ -258,8 +274,19 @@ export function useReviewSwipeDeck() {
   const { mutate: unarchiveFiles } = useUnarchiveFilesMutation();
   const { mutate: undeleteFiles } = useUndeleteFilesMutation();
   const { mutate: setRating } = useSetRatingMutation();
+  const { mutate: addFileTags } = useAddFileTagsMutation();
   const { hideFilteredFiles, hideFilteredFilesEvenWhenSkipped } =
     useHydrusHideFromViewOptions();
+
+  // Tag service resolution + permission for secondary tag actions
+  const localTagServices = useLocalTagServices();
+  const tagServiceKey = useReviewTagServiceKey();
+  const { hasPermission } = usePermissions();
+  const canEditTags = hasPermission(Permission.EDIT_FILE_TAGS);
+  const resolvedTagServiceKey = useMemo(
+    () => resolveTagServiceKey(localTagServices, tagServiceKey),
+    [localTagServices, tagServiceKey],
+  );
 
   // Rating services (for filtering orphaned actions)
   const { ratingServices } = useRatingServices();
@@ -341,6 +368,18 @@ export function useReviewSwipeDeck() {
           rating: rating.previousValue,
         });
       }
+
+      // Reverse tag actions — delete only tags this swipe actually added.
+      // All entries share the global service key resolved at swipe time.
+      const tagsToRemove = tagsToRemoveOnUndo(restore.tags ?? []);
+      if (tagsToRemove.length > 0 && restore.tags && restore.tags.length > 0) {
+        addFileTags({
+          file_ids: [lastEntry.fileId],
+          service_key: restore.tags[0].serviceKey,
+          tags: tagsToRemove,
+          action: TAG_ACTION_DELETE,
+        });
+      }
     }
   }, [
     history.length,
@@ -349,6 +388,7 @@ export function useReviewSwipeDeck() {
     undeleteFiles,
     setRating,
     readOnlyServiceKeys,
+    addFileTags,
   ]);
 
   // Handle exit animation complete - remove card from exiting list
@@ -392,7 +432,7 @@ export function useReviewSwipeDeck() {
         hideFileIdsInViewCaches(queryClient, [currentFileId], reviewSources);
       }
 
-      // Execute secondary actions and collect restore data
+      // Execute secondary rating actions and collect restore data
       const ratingsRestore = executeSecondaryRatingActions(
         binding.secondaryActions ?? [],
         currentFileId,
@@ -401,10 +441,31 @@ export function useReviewSwipeDeck() {
         setRating,
       );
 
+      // Execute secondary tag actions
+      let tagsRestore: Array<TagRestoreEntry> = [];
+      const tagActions = getTagActions(binding.secondaryActions);
+      if (tagActions.length > 0 && canEditTags && resolvedTagServiceKey) {
+        const planned = planTagActions(
+          tagActions,
+          resolvedTagServiceKey,
+          currentMetadata?.tags,
+        );
+        if (planned.tags.length > 0) {
+          addFileTags({
+            file_ids: [currentFileId],
+            service_key: resolvedTagServiceKey,
+            tags: planned.tags,
+            action: TAG_ACTION_ADD,
+          });
+          tagsRestore = planned.restore;
+        }
+      }
+
       // Record the action in history (always record, even if unchanged)
       const restore: RestoreData = {
         fileState,
         ratings: ratingsRestore.length > 0 ? ratingsRestore : undefined,
+        tags: tagsRestore.length > 0 ? tagsRestore : undefined,
       };
       recordAction({
         fileId: currentFileId,
@@ -429,6 +490,9 @@ export function useReviewSwipeDeck() {
       hideFilteredFilesEvenWhenSkipped,
       history.length,
       performUndo,
+      addFileTags,
+      canEditTags,
+      resolvedTagServiceKey,
     ],
   );
 
@@ -439,6 +503,19 @@ export function useReviewSwipeDeck() {
     [setImmersiveMode, immersiveMode],
   );
 
+  // Favourite ('s') — toggle the favourite rating on the current review file
+  const { enabled: favoriteEnabled, toggle: toggleFavorite } =
+    useFavoriteToggle(currentFileId ?? 0);
+  const handleToggleFavorite = useCallback(() => {
+    if (currentFileId == null) return;
+    const result = toggleFavorite();
+    if (!result) return;
+    toast(result.nextLiked ? "★ Favourited" : "Removed favourite", {
+      description: result.serviceName,
+      duration: 1500,
+    });
+  }, [currentFileId, toggleFavorite]);
+
   // Keyboard shortcuts
   const handleInstantSwipe = useCallback(
     (direction: SwipeDirection) => {
@@ -447,7 +524,12 @@ export function useReviewSwipeDeck() {
     },
     [handleSwipe],
   );
-  useReviewKeyboardShortcuts(handleInstantSwipe, performUndo, toggleImmersive);
+  useReviewKeyboardShortcuts(
+    handleInstantSwipe,
+    performUndo,
+    toggleImmersive,
+    currentFileId != null && favoriteEnabled ? handleToggleFavorite : undefined,
+  );
 
   // Gesture swipe from card drag — resets skip flag so animations play
   const handleGestureSwipe = useCallback(

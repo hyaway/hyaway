@@ -56,12 +56,11 @@ export type RatingSwipeAction =
     };
 
 /**
- * Tag action to perform on swipe.
- * Adds a specific tag to the file.
+ * Tag action to perform on swipe — adds a specific tag to the file.
+ * The target tag service is a single global setting (`tagServiceKey`),
+ * so individual actions carry only the tag text.
  */
 export interface TagSwipeAction {
-  /** The tag service key to add the tag to */
-  serviceKey: string;
   /** The tag to add (e.g., "character:zelda" or "cute") */
   tag: string;
 }
@@ -154,6 +153,8 @@ type ReviewSettingsState = {
   immersiveMode: boolean;
   /** Mapping of swipe directions to action bindings */
   bindings: SwipeBindings;
+  /** Global local tag service key that review tag actions write to (null = unset) */
+  tagServiceKey: string | null;
 
   actions: {
     /** Enable or disable keyboard shortcuts */
@@ -179,6 +180,8 @@ type ReviewSettingsState = {
       direction: SwipeDirection,
       binding: ReviewSwipeBinding,
     ) => void;
+    /** Set the global tag service key (null to clear) */
+    setTagServiceKey: (serviceKey: string | null) => void;
     /** Reset controls settings (shortcuts, gestures) to defaults */
     resetControlsSettings: () => void;
     /** Reset data settings (trackWatchHistory, imageLoadMode, immersiveMode) to defaults */
@@ -201,6 +204,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
       optimizeSizeThresholdMB: DEFAULT_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB,
       immersiveMode: false,
       bindings: DEFAULT_SWIPE_BINDINGS,
+      tagServiceKey: null,
 
       actions: {
         setShortcutsEnabled: (shortcutsEnabled: boolean) => {
@@ -266,6 +270,10 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           }));
         },
 
+        setTagServiceKey: (tagServiceKey: string | null) => {
+          set({ tagServiceKey });
+        },
+
         resetControlsSettings: () => {
           const initial = store.getInitialState();
           set({
@@ -295,7 +303,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
     }),
     {
       name: "hyaway-review-queue", // Keeping this key for backward compatibility
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         shortcutsEnabled: state.shortcutsEnabled,
@@ -308,6 +316,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
         optimizeSizeThresholdMB: state.optimizeSizeThresholdMB,
         immersiveMode: state.immersiveMode,
         bindings: state.bindings,
+        tagServiceKey: state.tagServiceKey,
       }),
       // Migrations from older store shapes
       migrate: (persisted, version) => {
@@ -394,6 +403,32 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           }
         }
 
+        // v3 -> v4: addTag secondary actions changed shape
+        // ({ serviceKey, tag } -> { tag }); the target service is now a global
+        // setting. Defensively drop any malformed addTag actions. (No production
+        // data has tag actions yet — the feature was a stub until now.)
+        if (version < 4 && state && typeof state === "object") {
+          const bindings = state.bindings as SwipeBindings | undefined;
+          if (bindings) {
+            const nextBindings = { ...bindings };
+            for (const direction of SWIPE_DIRECTIONS) {
+              const binding = bindings[direction];
+              if (!binding.secondaryActions?.length) continue;
+              const cleaned = binding.secondaryActions.filter(
+                (a: SecondarySwipeAction) =>
+                  a.actionType !== "addTag" ||
+                  (typeof (a as { tag?: unknown }).tag === "string" &&
+                    (a as { tag: string }).tag.trim().length > 0),
+              );
+              nextBindings[direction] = {
+                ...binding,
+                secondaryActions: cleaned.length > 0 ? cleaned : undefined,
+              };
+            }
+            state = { ...state, bindings: nextBindings };
+          }
+        }
+
         return state;
       },
     },
@@ -450,6 +485,10 @@ export const useReviewImmersiveMode = () =>
 /** Get the complete bindings object */
 export const useReviewSwipeBindings = () =>
   useReviewSettingsStore((state) => state.bindings);
+
+/** Get the global tag service key (null when unset) */
+export const useReviewTagServiceKey = () =>
+  useReviewSettingsStore((state) => state.tagServiceKey);
 
 /** Get the binding for a specific direction */
 export const useReviewSwipeBinding = (direction: SwipeDirection) =>

@@ -15,6 +15,7 @@ export function useReviewKeyboardShortcuts(
   onSwipe: (direction: SwipeDirection) => void,
   onUndo: () => void,
   onToggleImmersive?: () => void,
+  onToggleFavorite?: () => void,
 ) {
   const shortcutsEnabled = useReviewShortcutsEnabled();
 
@@ -26,6 +27,9 @@ export function useReviewKeyboardShortcuts(
   });
   const onImmersiveKey = useEffectEvent(() => {
     onToggleImmersive?.();
+  });
+  const onFavoriteKey = useEffectEvent(() => {
+    onToggleFavorite?.();
   });
 
   useEffect(() => {
@@ -69,6 +73,11 @@ export function useReviewKeyboardShortcuts(
         case "T":
           e.preventDefault();
           onImmersiveKey();
+          break;
+        case "s":
+        case "S":
+          e.preventDefault();
+          onFavoriteKey();
           break;
       }
     };

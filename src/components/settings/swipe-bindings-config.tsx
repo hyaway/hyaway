@@ -14,7 +14,9 @@ import {
   IconPlayerTrackNext,
   IconPlus,
   IconSquareFilled,
+  IconTag,
   IconTrash,
+  IconX,
 } from "@tabler/icons-react";
 import type {
   RatingSwipeAction,
@@ -28,12 +30,14 @@ import type {
   LikeRatingServiceInfo,
   NumericalRatingServiceInfo,
   RatingServiceInfo,
+  ServiceInfo,
 } from "@/integrations/hydrus-api/models";
 import {
   DEFAULT_SWIPE_BINDINGS,
   SWIPE_DIRECTIONS,
   useReviewSettingsActions,
   useReviewSwipeBindings,
+  useReviewTagServiceKey,
 } from "@/stores/review-settings-store";
 import {
   Permission,
@@ -41,9 +45,12 @@ import {
   isLikeRatingService,
   isNumericalRatingService,
 } from "@/integrations/hydrus-api/models";
+import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import { resolveTagServiceKey } from "@/integrations/hydrus-api/tag-actions";
 import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
+import { getTagActions, withTagActions } from "@/stores/review-binding-utils";
 import {
   LikeDislikeControl,
   NumericalRatingControl,
@@ -69,6 +76,7 @@ import {
 } from "@/components/ui-primitives/dropdown-menu";
 import { Button } from "@/components/ui-primitives/button";
 import { SettingsResetButton } from "@/components/settings/settings-ui";
+import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import { cn } from "@/lib/utils";
 
 // #region Direction Config
@@ -369,6 +377,165 @@ function IncDecRatingValuePicker({
 
 // #endregion
 
+// #region Tag Service Selector
+
+function TagServiceSelector({
+  localTagServices,
+  selectedKey,
+  onSelect,
+}: {
+  localTagServices: Array<[string, ServiceInfo]>;
+  selectedKey: string | null;
+  onSelect: (key: string | null) => void;
+}) {
+  if (localTagServices.length === 0) {
+    return (
+      <p className="text-muted-foreground/70 text-xs">
+        No local tag service available to add tags to.
+      </p>
+    );
+  }
+
+  if (localTagServices.length === 1) {
+    return (
+      <p className="text-muted-foreground text-xs">
+        Tags are added to <strong>{localTagServices[0][1].name}</strong>.
+      </p>
+    );
+  }
+
+  const selectedName =
+    localTagServices.find(([key]) => key === selectedKey)?.[1].name ??
+    "Select tag service...";
+
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <Label className="text-muted-foreground text-xs">Review tag service</Label>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={(props) => (
+            <Button
+              {...props}
+              variant="outline"
+              size="sm"
+              className="w-full min-w-0 justify-start sm:w-72"
+            >
+              <IconTag className="text-muted-foreground size-4 shrink-0" />
+              <span className="truncate">{selectedName}</span>
+            </Button>
+          )}
+        />
+        <DropdownMenuContent align="start" className="w-72">
+          <DropdownMenuRadioGroup
+            value={selectedKey ?? ""}
+            onValueChange={(value) => onSelect(value || null)}
+          >
+            {localTagServices.map(([key, service]) => (
+              <DropdownMenuRadioItem key={key} value={key}>
+                <span className="min-w-0 flex-1 truncate">{service.name}</span>
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
+// #endregion
+
+// #region Tags To Add Editor
+
+function TagsToAddEditor({
+  binding,
+  canEditTags,
+  tagServiceConfigured,
+  onBindingChange,
+}: {
+  binding: ReviewSwipeBinding;
+  canEditTags: boolean;
+  tagServiceConfigured: boolean;
+  onBindingChange: (binding: ReviewSwipeBinding) => void;
+}) {
+  const tags = getTagActions(binding.secondaryActions).map((a) => a.tag);
+  const disabled = !canEditTags || !tagServiceConfigured;
+
+  const handleAddTag = (tag: string) => {
+    const trimmed = tag.trim();
+    if (!trimmed || tags.includes(trimmed)) return;
+    onBindingChange({
+      ...binding,
+      secondaryActions: withTagActions(binding.secondaryActions, [
+        ...tags,
+        trimmed,
+      ]),
+    });
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    onBindingChange({
+      ...binding,
+      secondaryActions: withTagActions(
+        binding.secondaryActions,
+        tags.filter((t) => t !== tag),
+      ),
+    });
+  };
+
+  return (
+    <div className="flex min-w-0 flex-col gap-2">
+      <Label
+        className={cn(
+          "text-xs",
+          disabled ? "text-muted-foreground/50" : "text-muted-foreground",
+        )}
+      >
+        Tags to add (optional)
+      </Label>
+
+      {disabled ? (
+        <span className="text-muted-foreground/50 text-xs">
+          {!canEditTags
+            ? "No permission to add tags"
+            : "Choose a review tag service first"}
+        </span>
+      ) : (
+        <div className="flex min-w-0 flex-col gap-2">
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="bg-muted inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs"
+                >
+                  <span className="max-w-40 truncate">{tag}</span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${tag}`}
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={() => handleRemoveTag(tag)}
+                  >
+                    <IconX className="size-3.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <TagAutocompleteInput
+            placeholder="Add a tag..."
+            ariaLabel="Add a tag to this swipe"
+            clearOnSelect
+            onSelect={handleAddTag}
+            onSubmit={handleAddTag}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// #endregion
+
 // #region Direction Binding Editor
 
 /** Create a default rating action for a service (like, max stars, +1) */
@@ -411,6 +578,8 @@ interface DirectionBindingEditorProps {
   allRatingServiceKeys: Set<string>;
   readOnlyServiceKeys: Set<string>;
   canEditRatings: boolean;
+  canEditTags: boolean;
+  tagServiceConfigured: boolean;
   isModified: boolean;
   onBindingChange: (binding: ReviewSwipeBinding) => void;
   onReset: () => void;
@@ -468,6 +637,8 @@ function DirectionBindingEditor({
   allRatingServiceKeys,
   readOnlyServiceKeys,
   canEditRatings,
+  canEditTags,
+  tagServiceConfigured,
   isModified,
   onBindingChange,
   onReset,
@@ -699,6 +870,16 @@ function DirectionBindingEditor({
           )}
         </div>
       )}
+
+      {/* Tags to add — hidden for undo (no secondary actions) */}
+      {binding.fileAction !== "undo" && (
+        <TagsToAddEditor
+          binding={binding}
+          canEditTags={canEditTags}
+          tagServiceConfigured={tagServiceConfigured}
+          onBindingChange={onBindingChange}
+        />
+      )}
     </div>
   );
 }
@@ -728,10 +909,28 @@ export function SwipeBindingsConfig({
   columns = 2,
 }: SwipeBindingsConfigProps) {
   const bindings = useReviewSwipeBindings();
-  const { setBinding, resetBindings } = useReviewSettingsActions();
+  const { setBinding, resetBindings, setTagServiceKey } =
+    useReviewSettingsActions();
   const { ratingServices } = useRatingServices();
   const { hasPermission, isFetched: permissionsFetched } = usePermissions();
   const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
+  const canEditTags = hasPermission(Permission.EDIT_FILE_TAGS);
+  const localTagServices = useLocalTagServices();
+  const tagServiceKey = useReviewTagServiceKey();
+  const resolvedTagServiceKey = useMemo(
+    () => resolveTagServiceKey(localTagServices, tagServiceKey),
+    [localTagServices, tagServiceKey],
+  );
+
+  useEffect(() => {
+    if (
+      canEditTags &&
+      localTagServices.length === 1 &&
+      tagServiceKey !== localTagServices[0][0]
+    ) {
+      setTagServiceKey(localTagServices[0][0]);
+    }
+  }, [canEditTags, localTagServices, tagServiceKey, setTagServiceKey]);
 
   const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
   const allRatingServiceKeys = useMemo(
@@ -786,6 +985,14 @@ export function SwipeBindingsConfig({
         </div>
       )}
 
+      {canEditTags && permissionsFetched && (
+        <TagServiceSelector
+          localTagServices={localTagServices}
+          selectedKey={resolvedTagServiceKey}
+          onSelect={setTagServiceKey}
+        />
+      )}
+
       <div
         className={cn(
           "grid min-w-0 gap-3 sm:gap-4",
@@ -801,6 +1008,8 @@ export function SwipeBindingsConfig({
             allRatingServiceKeys={allRatingServiceKeys}
             readOnlyServiceKeys={readOnlyServiceKeys}
             canEditRatings={canEditRatings && permissionsFetched}
+            canEditTags={canEditTags && permissionsFetched}
+            tagServiceConfigured={resolvedTagServiceKey != null}
             isModified={isDirectionModified(direction)}
             onBindingChange={(binding) =>
               handleBindingChange(direction, binding)

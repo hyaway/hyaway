@@ -19,6 +19,9 @@ import {
   sessionKeyClient,
 } from "./clients/session-key-client";
 
+import { buildAddTagsBody } from "./tag-actions";
+import type { AddFileTagsOptions } from "./tag-actions";
+
 import type {
   AccessKeyType,
   CanvasType,
@@ -481,4 +484,18 @@ export async function getServiceRatingSvg(serviceKey: string): Promise<string> {
 }
 
 // #endregion Ratings
+
+// #region Tags
+
+/**
+ * Add or remove tags on files for a single local tag service.
+ *
+ * @permission Requires: Add Tags (2)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#add_tags_add_tags
+ */
+export async function addFileTags(options: AddFileTagsOptions): Promise<void> {
+  await sessionKeyClient.post("/add_tags/add_tags", buildAddTagsBody(options));
+}
+
+// #endregion Tags
 // #endregion API Functions

@@ -15,6 +15,7 @@ import type {
 } from "@/stores/review-settings-store";
 import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
 import { isNumericalRatingService } from "@/integrations/hydrus-api/models";
+import { getTagActions } from "@/stores/review-binding-utils";
 
 /** Visual descriptor for a swipe binding */
 export interface SwipeBindingDescriptor {
@@ -160,22 +161,42 @@ function buildSwipeBindingDescriptor(
     ...style,
   };
   const ratingActions = getRatingActions(binding.secondaryActions);
+  const tagActions = getTagActions(binding.secondaryActions);
+
+  const longParts: Array<string> = [];
+  const shortParts: Array<string> = [];
 
   if (ratingActions.length > 0) {
-    const ratingLabels = ratingActions
-      .map((a) => formatRatingAction(a, services))
-      .join(", ");
-    const shortRatingLabels = ratingActions
-      .map((a) => formatRatingActionShort(a, services))
-      .join(",");
-    return {
-      ...fileDescriptor,
-      label: `${fileDescriptor.label} + ${ratingLabels}`,
-      shortLabel: `${fileDescriptor.shortLabel} ${shortRatingLabels}`,
-    };
+    longParts.push(
+      ratingActions.map((a) => formatRatingAction(a, services)).join(", "),
+    );
+    shortParts.push(
+      ratingActions.map((a) => formatRatingActionShort(a, services)).join(","),
+    );
   }
 
-  return fileDescriptor;
+  if (tagActions.length > 0) {
+    longParts.push(tagActions.map((a) => a.tag).join(", "));
+    const n = tagActions.length;
+    shortParts.push(`+${n} tag${n === 1 ? "" : "s"}`);
+  }
+
+  if (longParts.length === 0) {
+    return fileDescriptor;
+  }
+
+  // A "skip" that only exists to apply secondary actions (tags/rating) doesn't
+  // need the "Skip" word — it's noise. Show just the secondary parts.
+  const isSkip = binding.fileAction === "skip";
+  return {
+    ...fileDescriptor,
+    label: isSkip
+      ? longParts.join(" + ")
+      : `${fileDescriptor.label} + ${longParts.join(" + ")}`,
+    shortLabel: isSkip
+      ? shortParts.join(" ")
+      : `${fileDescriptor.shortLabel} ${shortParts.join(" ")}`,
+  };
 }
 
 /**

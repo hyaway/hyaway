@@ -12,3 +12,4 @@ count.txt
 .temp/
 .idea/
 .reference/
+.pnpm-store/

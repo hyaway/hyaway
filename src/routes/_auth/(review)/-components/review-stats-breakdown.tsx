@@ -16,6 +16,7 @@ import type {
 } from "@/stores/review-settings-store";
 import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
 import { cn } from "@/lib/utils";
+import { getTagActions } from "@/stores/review-binding-utils";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 
 const DIRECTION_ICONS: Record<
@@ -157,18 +158,12 @@ function InlineStatItem({
     >
       {count}
       {showLabel && (
-        <>
-          {/* Short label on small screens */}
-          <span className="sm:hidden">
-            {" "}
-            {descriptor.shortLabel.toLowerCase()}
-          </span>
-          {/* Full label on larger screens */}
-          <span className="hidden sm:inline">
-            {" "}
-            {descriptor.label.toLowerCase()}
-          </span>
-        </>
+        /* Compact label everywhere — keeps the counts row tight; the tags
+           themselves are listed in the hints row above the footer. */
+        <span>
+          {" "}
+          {descriptor.shortLabel.toLowerCase()}
+        </span>
       )}
       <DirectionIcon className="size-3" />
     </span>
@@ -180,9 +175,12 @@ function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
   const descriptor = getSwipeBindingDescriptor(binding, services);
   const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];
+  const tags = getTagActions(binding.secondaryActions).map((a) => a.tag);
+  // Drop the "Skip" word for a tag-only skip, matching the descriptor relabel.
+  const showActionWord = binding.fileAction !== "skip";
 
   return (
-    <div className="flex w-20 min-w-0 flex-col items-center gap-1">
+    <div className="flex w-24 min-w-0 flex-col items-center gap-1">
       <div
         className={cn(
           "flex size-10 items-center justify-center",
@@ -194,9 +192,25 @@ function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
         <DirectionIcon className="size-4" />
       </div>
       <span className="text-2xl font-semibold tabular-nums">{count}</span>
-      <span className="text-muted-foreground text-center text-xs leading-tight break-all">
-        {descriptor.label}
-      </span>
+      {tags.length > 0 ? (
+        <div className="text-muted-foreground flex flex-col items-center gap-0.5 text-center text-xs leading-tight">
+          {showActionWord && (
+            <span className="wrap-break-word font-medium">
+              {binding.fileAction.charAt(0).toUpperCase() +
+                binding.fileAction.slice(1)}
+            </span>
+          )}
+          {tags.map((tag) => (
+            <span key={tag} className="wrap-break-word">
+              {tag}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <span className="text-muted-foreground wrap-break-word text-center text-xs leading-tight">
+          {descriptor.label}
+        </span>
+      )}
     </div>
   );
 }

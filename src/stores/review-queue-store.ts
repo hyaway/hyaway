@@ -9,6 +9,7 @@ import type {
   ReviewFileAction,
   SwipeDirection,
 } from "@/stores/review-settings-store";
+import type { TagRestoreEntry } from "@/integrations/hydrus-api/tag-actions";
 
 /** Previous state of a file before action, used for undo */
 export type PreviousFileState = "inbox" | "archived" | "trashed" | null;
@@ -29,6 +30,8 @@ export interface RestoreData {
   fileState: PreviousFileState;
   /** Ratings to restore (if any rating actions were taken) */
   ratings?: Array<RatingRestoreEntry>;
+  /** Tags added by the swipe, for removal on undo */
+  tags?: Array<TagRestoreEntry>;
 }
 
 /** A single action record in the history stack */

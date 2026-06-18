@@ -3,6 +3,7 @@
 
 import { IconPlayerStopFilled } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
+import { ReviewBindingHints } from "./-components/review-binding-hints";
 import { ReviewCompletion } from "./-components/review-completion";
 import { ReviewFooter } from "./-components/review-footer";
 import { useReviewImmersiveEffects } from "./-components/use-review-immersive-effects";
@@ -170,6 +171,9 @@ function ReviewPage() {
           handleExitComplete={deckState.handleExitComplete}
         />
       </div>
+
+      {/* Desktop tag hints — sit just above the footer */}
+      {!isImmersive && <ReviewBindingHints bindings={deckState.bindings} />}
 
       {/* Footer - renders via portal */}
       <ReviewFooter
