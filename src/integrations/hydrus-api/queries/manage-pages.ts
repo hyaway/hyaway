@@ -3,7 +3,13 @@
 
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { focusPage, getPageInfo, getPages, refreshPage } from "../api-client";
+import {
+  addFilesToPage,
+  focusPage,
+  getPageInfo,
+  getPages,
+  refreshPage,
+} from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
 import { PageState, Permission } from "../models";
 import { useHasPermission } from "./access";
@@ -309,5 +315,31 @@ export const useFocusPageMutation = () => {
       return focusPage(pageKey);
     },
     mutationKey: ["focusRemotePage"],
+  });
+};
+
+export const useAddFilesToPageMutation = () => {
+  const queryClient = useQueryClient();
+  const isConfigured = useIsApiConfigured();
+
+  return useMutation({
+    mutationFn: async ({
+      pageKey,
+      fileIds,
+    }: {
+      pageKey: string;
+      fileIds: Array<number>;
+    }) => {
+      if (!isConfigured) {
+        throw new Error("Hydrus API session not established.");
+      }
+      return addFilesToPage(pageKey, fileIds);
+    },
+    onSuccess: (_data, { pageKey }) => {
+      // The page's file count changed; refresh its info and the page list.
+      queryClient.invalidateQueries({ queryKey: ["getPageInfo", pageKey] });
+      queryClient.invalidateQueries({ queryKey: ["getPages"] });
+    },
+    mutationKey: ["addFilesToPage"],
   });
 };

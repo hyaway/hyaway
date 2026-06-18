@@ -210,6 +210,7 @@ function FileDetailFooter({
   const actionGroups = useFileActions(data, {
     includeExternal: true,
     includeThumbnail: false,
+    includeSendToPage: true,
     onRefetch: handleRefetch,
   });
   const allActions = actionGroups.flatMap((g) => g.actions);

@@ -6,6 +6,7 @@ import { SearchLimitsSettingsCard } from "./-components/search-limits-settings-c
 import { SearchSettingsCard } from "./-components/search-settings-card";
 import { HistorySettingsCard } from "./-components/history-settings-card";
 import { ReviewQueueSettingsCard } from "./-components/review-queue-settings-card";
+import { SendToPageSettingsCard } from "./-components/send-to-page-settings-card";
 import { ResetAllDataSettingsCard } from "./-components/reset-all-data-settings-card";
 import { Heading } from "@/components/ui-primitives/heading";
 
@@ -24,6 +25,7 @@ function SettingsDataComponent() {
         Data Settings
       </Heading>
       <ReviewQueueSettingsCard />
+      <SendToPageSettingsCard />
       <SearchSettingsCard />
       <SearchLimitsSettingsCard />
       <HistorySettingsCard />

@@ -10,10 +10,12 @@ import {
   IconMusic,
   IconPhoto,
   IconRefresh,
+  IconSend,
   IconTrash,
   IconTrashOff,
 } from "@tabler/icons-react";
 
+import { toast } from "sonner";
 import type { ComponentType, SVGProps } from "react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
@@ -32,6 +34,16 @@ import {
 } from "@/integrations/hydrus-api/queries/manage-files";
 import { Permission } from "@/integrations/hydrus-api/models";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import {
+  useAddFilesToPageMutation,
+  useFocusPageMutation,
+  useGetMediaPagesQuery,
+} from "@/integrations/hydrus-api/queries/manage-pages";
+import {
+  useSendToPageKey,
+  useSendToPageName,
+} from "@/stores/send-to-page-store";
+import { resolveSendToPageState } from "@/lib/send-to-page";
 
 export interface FileAction {
   id: string;
@@ -210,6 +222,71 @@ function useExternalActions(
   return actions;
 }
 
+// --- Send to Hydrus Page Action ---
+
+/**
+ * Action that adds the file to the user's configured "send to" Hydrus page
+ * (and focuses it). Empty when the key lacks Manage Pages permission. Toasts a
+ * warning when no page is configured or the configured page is closed.
+ */
+function useSendToPageAction(fileId: number): Array<FileAction> {
+  const { hasPermission } = usePermissions();
+  const canManagePages = hasPermission(Permission.MANAGE_PAGES);
+  const pageKey = useSendToPageKey();
+  const pageName = useSendToPageName();
+  const { data: mediaPages } = useGetMediaPagesQuery();
+  const { mutate: addFilesToPage } = useAddFilesToPageMutation();
+  const { mutate: focusPage } = useFocusPageMutation();
+
+  if (!canManagePages) return [];
+
+  const handleSend = () => {
+    const resolution = resolveSendToPageState(pageKey, pageName, mediaPages);
+
+    if (resolution.status === "unset") {
+      toast("No target page set", {
+        description: "Choose a Hydrus page in Settings → Data.",
+      });
+      return;
+    }
+
+    if (resolution.status === "closed") {
+      toast.warning(
+        resolution.name
+          ? `“${resolution.name}” is closed in Hydrus`
+          : "The target page is closed in Hydrus",
+        { description: "Reopen it in Hydrus, or pick another in Settings." },
+      );
+      return;
+    }
+
+    addFilesToPage(
+      { pageKey: resolution.pageKey, fileIds: [fileId] },
+      {
+        onSuccess: () => {
+          focusPage(resolution.pageKey);
+          toast.success(`Sent to “${resolution.name}”`);
+        },
+        onError: () => {
+          toast.warning(`Couldn’t send to “${resolution.name}”`, {
+            description: "The page may have just been closed.",
+          });
+        },
+      },
+    );
+  };
+
+  return [
+    {
+      id: "send-to-page",
+      label: pageName ? `Send to “${pageName}”` : "Send to Hydrus page",
+      icon: IconSend,
+      onClick: handleSend,
+      overflowOnly: true,
+    },
+  ];
+}
+
 // --- Loading Placeholder Actions ---
 
 /**
@@ -242,6 +319,8 @@ interface UseFileActionsOptions {
   includeExternal?: boolean;
   /** Include the thumbnail action (set to false on detail page where full image is shown) */
   includeThumbnail?: boolean;
+  /** Include the "Send to Hydrus page" action */
+  includeSendToPage?: boolean;
   /** Callback to refetch/refresh file data */
   onRefetch?: () => void;
   /** Whether refetch is in progress */
@@ -267,6 +346,7 @@ export function useFileActions(
     includeOpen = false,
     includeExternal = true,
     includeThumbnail = true,
+    includeSendToPage = false,
     onRefetch,
     isRefetching,
     reviewSource,
@@ -278,6 +358,7 @@ export function useFileActions(
   const navigationActions = useNavigationActions(data.file_id);
   const managementActions = useManagementActions(data, reviewSource);
   const externalActions = useExternalActions(data, { includeThumbnail });
+  const sendToPageActions = useSendToPageAction(data.file_id);
 
   const groups: Array<FileActionsGroup> = [];
 
@@ -291,6 +372,10 @@ export function useFileActions(
 
     if (includeExternal) {
       groups.push({ id: "external", actions: externalActions });
+    }
+
+    if (includeSendToPage && sendToPageActions.length > 0) {
+      groups.push({ id: "page", actions: sendToPageActions });
     }
   }
 

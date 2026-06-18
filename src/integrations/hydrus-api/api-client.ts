@@ -267,6 +267,23 @@ export async function focusPage(pageKey: string): Promise<void> {
 }
 
 /**
+ * Add files to an existing page in the Hydrus client.
+ * The page must already be open; there is no API to create a new page.
+ *
+ * @permission Requires: Manage Pages (4)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#manage_pages_add_files
+ */
+export async function addFilesToPage(
+  pageKey: string,
+  fileIds: Array<number>,
+): Promise<void> {
+  await sessionKeyClient.post("/manage_pages/add_files", {
+    page_key: pageKey,
+    file_ids: fileIds,
+  });
+}
+
+/**
  * Get client options from Hydrus.
  *
  * @permission Requires: Manage Database (6)
