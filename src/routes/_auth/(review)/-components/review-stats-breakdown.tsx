@@ -175,7 +175,13 @@ function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
   const descriptor = getSwipeBindingDescriptor(binding, services);
   const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];
-  const tags = getTagActions(binding.secondaryActions).map((a) => a.tag);
+  const addTags = getTagActions(binding.secondaryActions, "addTag").map(
+    (a) => a.tag,
+  );
+  const removeTags = getTagActions(binding.secondaryActions, "removeTag").map(
+    (a) => a.tag,
+  );
+  const hasTags = addTags.length + removeTags.length > 0;
   // Drop the "Skip" word for a tag-only skip, matching the descriptor relabel.
   const showActionWord = binding.fileAction !== "skip";
 
@@ -192,7 +198,7 @@ function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
         <DirectionIcon className="size-4" />
       </div>
       <span className="text-2xl font-semibold tabular-nums">{count}</span>
-      {tags.length > 0 ? (
+      {hasTags ? (
         <div className="text-muted-foreground flex flex-col items-center gap-0.5 text-center text-xs leading-tight">
           {showActionWord && (
             <span className="wrap-break-word font-medium">
@@ -200,9 +206,17 @@ function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
                 binding.fileAction.slice(1)}
             </span>
           )}
-          {tags.map((tag) => (
-            <span key={tag} className="wrap-break-word">
-              {tag}
+          {addTags.map((tag) => (
+            <span
+              key={`add-${tag}`}
+              className="wrap-break-word text-emerald-700 dark:text-emerald-400"
+            >
+              +{tag}
+            </span>
+          ))}
+          {removeTags.map((tag) => (
+            <span key={`remove-${tag}`} className="text-destructive wrap-break-word">
+              −{tag}
             </span>
           ))}
         </div>

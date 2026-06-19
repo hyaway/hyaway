@@ -3,14 +3,12 @@
 
 import { describe, expect, it } from "vitest";
 import {
-  TAG_ACTION_ADD,
-  TAG_ACTION_DELETE,
   buildAddTagsBody,
   planTagActions,
+  planTagUndo,
   resolveTagServiceKey,
   selectLocalTagServices,
   tagIsCurrentOnFile,
-  tagsToRemoveOnUndo,
 } from "./tag-actions";
 import { ServiceType, TagStatus } from "./models";
 import type { FileMetadata, ServiceInfo } from "./models";
@@ -20,31 +18,44 @@ const tagsField: FileMetadata["tags"] = {
 };
 
 describe("buildAddTagsBody", () => {
-  it("builds an add body (action 0)", () => {
+  it("builds an add-only body (action 0)", () => {
     expect(
-      buildAddTagsBody({
-        file_ids: [1],
-        service_key: "svc",
-        tags: ["a", "b"],
-        action: TAG_ACTION_ADD,
-      }),
+      buildAddTagsBody({ file_ids: [1], service_key: "svc", add: ["a", "b"] }),
     ).toEqual({
       file_ids: [1],
       service_keys_to_actions_to_tags: { svc: { "0": ["a", "b"] } },
     });
   });
 
-  it("builds a delete body (action 1)", () => {
+  it("builds a remove-only body (action 1)", () => {
     expect(
-      buildAddTagsBody({
-        file_ids: [2],
-        service_key: "svc",
-        tags: ["x"],
-        action: TAG_ACTION_DELETE,
-      }),
+      buildAddTagsBody({ file_ids: [2], service_key: "svc", remove: ["x"] }),
     ).toEqual({
       file_ids: [2],
       service_keys_to_actions_to_tags: { svc: { "1": ["x"] } },
+    });
+  });
+
+  it("combines add and remove in one body", () => {
+    expect(
+      buildAddTagsBody({
+        file_ids: [3],
+        service_key: "svc",
+        add: ["a"],
+        remove: ["x"],
+      }),
+    ).toEqual({
+      file_ids: [3],
+      service_keys_to_actions_to_tags: { svc: { "0": ["a"], "1": ["x"] } },
+    });
+  });
+
+  it("omits empty action lists", () => {
+    expect(
+      buildAddTagsBody({ file_ids: [4], service_key: "svc", add: [], remove: [] }),
+    ).toEqual({
+      file_ids: [4],
+      service_keys_to_actions_to_tags: { svc: {} },
     });
   });
 });
@@ -96,27 +107,44 @@ describe("tagIsCurrentOnFile", () => {
 });
 
 describe("planTagActions", () => {
-  it("dedupes, trims, drops empties, and records presence", () => {
+  it("dedupes/trims both sides and records op + presence", () => {
     const result = planTagActions(
       [{ tag: "new" }, { tag: " new " }, { tag: "existing" }, { tag: "  " }],
+      [{ tag: "blue" }, { tag: "gone" }],
       "svc",
       tagsField,
     );
-    expect(result.tags).toEqual(["new", "existing"]);
+    expect(result.add).toEqual(["new", "existing"]);
+    expect(result.remove).toEqual(["blue", "gone"]);
     expect(result.restore).toEqual([
-      { serviceKey: "svc", tag: "new", wasPresent: false },
-      { serviceKey: "svc", tag: "existing", wasPresent: true },
+      { serviceKey: "svc", tag: "new", op: "add", wasPresent: false },
+      { serviceKey: "svc", tag: "existing", op: "add", wasPresent: true },
+      { serviceKey: "svc", tag: "blue", op: "remove", wasPresent: true },
+      { serviceKey: "svc", tag: "gone", op: "remove", wasPresent: false },
     ]);
+  });
+
+  it("lets add win when a tag is on both sides", () => {
+    const result = planTagActions(
+      [{ tag: "both" }],
+      [{ tag: "both" }],
+      "svc",
+      tagsField,
+    );
+    expect(result.add).toEqual(["both"]);
+    expect(result.remove).toEqual([]);
   });
 });
 
-describe("tagsToRemoveOnUndo", () => {
-  it("returns only tags that were not already present", () => {
+describe("planTagUndo", () => {
+  it("re-adds removed-present tags and deletes added-absent tags", () => {
     expect(
-      tagsToRemoveOnUndo([
-        { serviceKey: "svc", tag: "new", wasPresent: false },
-        { serviceKey: "svc", tag: "existing", wasPresent: true },
+      planTagUndo([
+        { serviceKey: "svc", tag: "added", op: "add", wasPresent: false },
+        { serviceKey: "svc", tag: "already", op: "add", wasPresent: true },
+        { serviceKey: "svc", tag: "removed", op: "remove", wasPresent: true },
+        { serviceKey: "svc", tag: "absent", op: "remove", wasPresent: false },
       ]),
-    ).toEqual(["new"]);
+    ).toEqual({ add: ["removed"], remove: ["added"] });
   });
 });

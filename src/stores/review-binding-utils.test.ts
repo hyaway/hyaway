@@ -17,13 +17,26 @@ describe("getTagActions", () => {
     expect(getTagActions(undefined)).toEqual([]);
   });
 
-  it("extracts addTag actions without actionType", () => {
+  it("extracts addTag actions without actionType (default kind)", () => {
     const actions: Array<SecondarySwipeAction> = [
       ratingAction,
       { actionType: "addTag", tag: "cat" },
+      { actionType: "removeTag", tag: "nope" },
       { actionType: "addTag", tag: "blue" },
     ];
     expect(getTagActions(actions)).toEqual([{ tag: "cat" }, { tag: "blue" }]);
+  });
+
+  it("extracts removeTag actions when kind is removeTag", () => {
+    const actions: Array<SecondarySwipeAction> = [
+      { actionType: "addTag", tag: "cat" },
+      { actionType: "removeTag", tag: "nope" },
+      { actionType: "removeTag", tag: "old" },
+    ];
+    expect(getTagActions(actions, "removeTag")).toEqual([
+      { tag: "nope" },
+      { tag: "old" },
+    ]);
   });
 });
 
@@ -50,5 +63,18 @@ describe("withTagActions", () => {
       { actionType: "addTag", tag: "old" },
     ];
     expect(withTagActions(existing, [])).toEqual([ratingAction]);
+  });
+
+  it("writes removeTag actions while preserving addTag + ratings", () => {
+    const existing: Array<SecondarySwipeAction> = [
+      ratingAction,
+      { actionType: "addTag", tag: "keep" },
+      { actionType: "removeTag", tag: "old" },
+    ];
+    expect(withTagActions(existing, ["gone"], "removeTag")).toEqual([
+      ratingAction,
+      { actionType: "addTag", tag: "keep" },
+      { actionType: "removeTag", tag: "gone" },
+    ]);
   });
 });

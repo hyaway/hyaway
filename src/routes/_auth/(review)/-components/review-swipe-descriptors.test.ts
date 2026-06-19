@@ -41,4 +41,27 @@ describe("getSwipeBindingDescriptor with tags", () => {
     const binding: ReviewSwipeBinding = { fileAction: "trash" };
     expect(getSwipeBindingDescriptor(binding).label).toBe("Trash");
   });
+
+  it("shows removed tags with a minus and combined counts", () => {
+    const binding: ReviewSwipeBinding = {
+      fileAction: "archive",
+      secondaryActions: [
+        { actionType: "addTag", tag: "reviewed" },
+        { actionType: "removeTag", tag: "unsorted" },
+      ],
+    };
+    const d = getSwipeBindingDescriptor(binding);
+    expect(d.label).toBe("Archive + reviewed + −unsorted");
+    expect(d.shortLabel).toBe("Archive +1 −1 tags");
+  });
+
+  it("handles a remove-only tag-skip (singular minus)", () => {
+    const binding: ReviewSwipeBinding = {
+      fileAction: "skip",
+      secondaryActions: [{ actionType: "removeTag", tag: "unsorted" }],
+    };
+    const d = getSwipeBindingDescriptor(binding);
+    expect(d.label).toBe("−unsorted");
+    expect(d.shortLabel).toBe("−1 tag");
+  });
 });

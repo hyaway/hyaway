@@ -14,6 +14,7 @@ import type {
   SwipeDirection,
 } from "@/stores/review-settings-store";
 import { getTagActions } from "@/stores/review-binding-utils";
+import { cn } from "@/lib/utils";
 
 /** Max tags listed per direction before collapsing to a count. */
 export const MAX_HINT_TAGS = 5;
@@ -21,10 +22,12 @@ export const MAX_HINT_TAGS = 5;
 export interface DirectionHint {
   /** Action label to show, or null to omit (skip with tags). */
   actionLabel: string | null;
-  /** Tags to list one per line (empty when overflowing). */
-  tags: Array<string>;
-  /** Total tag count when it exceeds the max; otherwise null. */
-  overflowCount: number | null;
+  /** Tags this direction adds. */
+  addTags: Array<string>;
+  /** Tags this direction removes. */
+  removeTags: Array<string>;
+  /** When the total exceeds the max, show counts instead of per-line lists. */
+  overflow: boolean;
 }
 
 /**
@@ -32,14 +35,19 @@ export interface DirectionHint {
  *
  * - Skip + tags drops the (meaningless) "Skip" label and shows just the tags.
  * - Any other action shows the action label plus its tags.
- * - More than `maxTags` tags collapse to a count instead of a per-line list.
+ * - More than `maxTags` total tags collapse to counts instead of per-line lists.
  */
 export function buildDirectionHint(
   binding: ReviewSwipeBinding,
   maxTags = MAX_HINT_TAGS,
 ): DirectionHint | null {
-  const tags = getTagActions(binding.secondaryActions).map((a) => a.tag);
-  if (tags.length === 0) return null;
+  const addTags = getTagActions(binding.secondaryActions, "addTag").map(
+    (a) => a.tag,
+  );
+  const removeTags = getTagActions(binding.secondaryActions, "removeTag").map(
+    (a) => a.tag,
+  );
+  if (addTags.length + removeTags.length === 0) return null;
 
   const actionLabel =
     binding.fileAction === "skip"
@@ -47,11 +55,17 @@ export function buildDirectionHint(
       : binding.fileAction.charAt(0).toUpperCase() +
         binding.fileAction.slice(1);
 
-  if (tags.length > maxTags) {
-    return { actionLabel, tags: [], overflowCount: tags.length };
-  }
-  return { actionLabel, tags, overflowCount: null };
+  return {
+    actionLabel,
+    addTags,
+    removeTags,
+    overflow: addTags.length + removeTags.length > maxTags,
+  };
 }
+
+/** Muted semantic colours for added vs removed tags. */
+const ADD_TAG_CLASS = "text-emerald-700 dark:text-emerald-400";
+const REMOVE_TAG_CLASS = "text-destructive";
 
 const DIRECTION_ARROWS: Record<SwipeDirection, Icon> = {
   left: IconArrowLeft,
@@ -103,19 +117,37 @@ export function ReviewBindingHints({ bindings }: { bindings: SwipeBindings }) {
               <Arrow className="size-3.5 shrink-0" aria-hidden />
               {hint.actionLabel}
             </span>
-            {hint.overflowCount != null ? (
-              <span className="text-foreground/80">
-                +{hint.overflowCount} tags
+            {hint.overflow ? (
+              <span className="flex items-center gap-1">
+                {hint.addTags.length > 0 && (
+                  <span className={ADD_TAG_CLASS}>+{hint.addTags.length}</span>
+                )}
+                {hint.removeTags.length > 0 && (
+                  <span className={REMOVE_TAG_CLASS}>
+                    −{hint.removeTags.length}
+                  </span>
+                )}
+                <span className="text-muted-foreground">tags</span>
               </span>
             ) : (
-              hint.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-foreground/80 max-w-[20ch] truncate"
-                >
-                  {tag}
-                </span>
-              ))
+              <>
+                {hint.addTags.map((tag) => (
+                  <span
+                    key={`add-${tag}`}
+                    className={cn("max-w-[20ch] truncate", ADD_TAG_CLASS)}
+                  >
+                    +{tag}
+                  </span>
+                ))}
+                {hint.removeTags.map((tag) => (
+                  <span
+                    key={`remove-${tag}`}
+                    className={cn("max-w-[20ch] truncate", REMOVE_TAG_CLASS)}
+                  >
+                    −{tag}
+                  </span>
+                ))}
+              </>
             )}
           </div>
         );

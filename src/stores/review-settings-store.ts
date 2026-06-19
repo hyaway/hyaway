@@ -56,22 +56,23 @@ export type RatingSwipeAction =
     };
 
 /**
- * Tag action to perform on swipe — adds a specific tag to the file.
+ * Tag action to perform on swipe — adds or removes a specific tag on the file.
  * The target tag service is a single global setting (`tagServiceKey`),
  * so individual actions carry only the tag text.
  */
 export interface TagSwipeAction {
-  /** The tag to add (e.g., "character:zelda" or "cute") */
+  /** The tag to add or remove (e.g., "character:zelda" or "cute") */
   tag: string;
 }
 
 /**
  * Secondary actions that can be performed alongside the primary file action.
- * Supports rating and tag actions, extensible for future action types.
+ * Supports rating and tag (add/remove) actions, extensible for future types.
  */
 export type SecondarySwipeAction =
   | ({ actionType: "rating" } & RatingSwipeAction)
-  | ({ actionType: "addTag" } & TagSwipeAction);
+  | ({ actionType: "addTag" } & TagSwipeAction)
+  | ({ actionType: "removeTag" } & TagSwipeAction);
 
 /**
  * A binding that maps a swipe direction to one or more actions.

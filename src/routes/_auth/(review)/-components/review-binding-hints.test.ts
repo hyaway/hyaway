@@ -14,49 +14,57 @@ describe("buildDirectionHint", () => {
     expect(buildDirectionHint({ fileAction: "undo" })).toBeNull();
   });
 
-  it("includes the action label for non-skip actions", () => {
+  it("includes the action label and split add/remove lists", () => {
     const binding: ReviewSwipeBinding = {
       fileAction: "archive",
       secondaryActions: [
         { actionType: "addTag", tag: "reviewed" },
         { actionType: "addTag", tag: "keeper" },
+        { actionType: "removeTag", tag: "unsorted" },
       ],
     };
     expect(buildDirectionHint(binding)).toEqual({
       actionLabel: "Archive",
-      tags: ["reviewed", "keeper"],
-      overflowCount: null,
+      addTags: ["reviewed", "keeper"],
+      removeTags: ["unsorted"],
+      overflow: false,
     });
   });
 
-  it("omits the action label for skip (just the tags)", () => {
+  it("omits the action label for skip", () => {
     const binding: ReviewSwipeBinding = {
       fileAction: "skip",
       secondaryActions: [{ actionType: "addTag", tag: "later" }],
     };
     expect(buildDirectionHint(binding)).toEqual({
       actionLabel: null,
-      tags: ["later"],
-      overflowCount: null,
+      addTags: ["later"],
+      removeTags: [],
+      overflow: false,
     });
   });
 
-  it("collapses to a count when tags exceed the max", () => {
+  it("overflows when the combined add+remove count exceeds the max", () => {
     const binding: ReviewSwipeBinding = {
       fileAction: "archive",
-      secondaryActions: ["a", "b", "c", "d", "e", "f"].map((tag) => ({
-        actionType: "addTag" as const,
-        tag,
-      })),
+      secondaryActions: [
+        ...["a", "b", "c"].map((tag) => ({
+          actionType: "addTag" as const,
+          tag,
+        })),
+        ...["d", "e", "f"].map((tag) => ({
+          actionType: "removeTag" as const,
+          tag,
+        })),
+      ],
     };
-    expect(buildDirectionHint(binding, 5)).toEqual({
-      actionLabel: "Archive",
-      tags: [],
-      overflowCount: 6,
-    });
+    const hint = buildDirectionHint(binding, 5);
+    expect(hint?.overflow).toBe(true);
+    expect(hint?.addTags).toHaveLength(3);
+    expect(hint?.removeTags).toHaveLength(3);
   });
 
-  it("lists exactly the max without collapsing", () => {
+  it("does not overflow at exactly the max", () => {
     const binding: ReviewSwipeBinding = {
       fileAction: "archive",
       secondaryActions: ["a", "b", "c", "d", "e"].map((tag) => ({
@@ -64,8 +72,6 @@ describe("buildDirectionHint", () => {
         tag,
       })),
     };
-    const hint = buildDirectionHint(binding, 5);
-    expect(hint?.overflowCount).toBeNull();
-    expect(hint?.tags).toHaveLength(5);
+    expect(buildDirectionHint(binding, 5)?.overflow).toBe(false);
   });
 });

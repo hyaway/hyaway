@@ -446,18 +446,41 @@ function TagServiceSelector({
 
 // #region Tags To Add Editor
 
-function TagsToAddEditor({
+/** Per-kind copy + (muted) colour for the add/remove tag editors. */
+const TAG_EDITOR_VARIANTS = {
+  addTag: {
+    label: "Tags to add (optional)",
+    placeholder: "Add a tag...",
+    ariaLabel: "Add a tag to this swipe",
+    noPermission: "No permission to edit tags",
+    chipClass: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    sign: "",
+  },
+  removeTag: {
+    label: "Tags to remove (optional)",
+    placeholder: "Remove a tag...",
+    ariaLabel: "Remove a tag on this swipe",
+    noPermission: "No permission to edit tags",
+    chipClass: "bg-destructive/10 text-destructive",
+    sign: "−",
+  },
+} as const;
+
+function TagsEditor({
   binding,
+  kind,
   canEditTags,
   tagServiceConfigured,
   onBindingChange,
 }: {
   binding: ReviewSwipeBinding;
+  kind: "addTag" | "removeTag";
   canEditTags: boolean;
   tagServiceConfigured: boolean;
   onBindingChange: (binding: ReviewSwipeBinding) => void;
 }) {
-  const tags = getTagActions(binding.secondaryActions).map((a) => a.tag);
+  const variant = TAG_EDITOR_VARIANTS[kind];
+  const tags = getTagActions(binding.secondaryActions, kind).map((a) => a.tag);
   const disabled = !canEditTags || !tagServiceConfigured;
 
   const handleAddTag = (tag: string) => {
@@ -465,10 +488,11 @@ function TagsToAddEditor({
     if (!trimmed || tags.includes(trimmed)) return;
     onBindingChange({
       ...binding,
-      secondaryActions: withTagActions(binding.secondaryActions, [
-        ...tags,
-        trimmed,
-      ]),
+      secondaryActions: withTagActions(
+        binding.secondaryActions,
+        [...tags, trimmed],
+        kind,
+      ),
     });
   };
 
@@ -478,6 +502,7 @@ function TagsToAddEditor({
       secondaryActions: withTagActions(
         binding.secondaryActions,
         tags.filter((t) => t !== tag),
+        kind,
       ),
     });
   };
@@ -490,14 +515,12 @@ function TagsToAddEditor({
           disabled ? "text-muted-foreground/50" : "text-muted-foreground",
         )}
       >
-        Tags to add (optional)
+        {variant.label}
       </Label>
 
       {disabled ? (
         <span className="text-muted-foreground/50 text-xs">
-          {!canEditTags
-            ? "No permission to add tags"
-            : "Choose a review tag service first"}
+          {!canEditTags ? variant.noPermission : "Choose a review tag service first"}
         </span>
       ) : (
         <div className="flex min-w-0 flex-col gap-2">
@@ -506,13 +529,19 @@ function TagsToAddEditor({
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="bg-muted inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs"
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs",
+                    variant.chipClass,
+                  )}
                 >
-                  <span className="max-w-40 truncate">{tag}</span>
+                  <span className="max-w-40 truncate">
+                    {variant.sign}
+                    {tag}
+                  </span>
                   <button
                     type="button"
                     aria-label={`Remove ${tag}`}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="opacity-70 hover:opacity-100"
                     onClick={() => handleRemoveTag(tag)}
                   >
                     <IconX className="size-3.5" />
@@ -522,8 +551,8 @@ function TagsToAddEditor({
             </div>
           )}
           <TagAutocompleteInput
-            placeholder="Add a tag..."
-            ariaLabel="Add a tag to this swipe"
+            placeholder={variant.placeholder}
+            ariaLabel={variant.ariaLabel}
             clearOnSelect
             onSelect={handleAddTag}
             onSubmit={handleAddTag}
@@ -871,14 +900,24 @@ function DirectionBindingEditor({
         </div>
       )}
 
-      {/* Tags to add — hidden for undo (no secondary actions) */}
+      {/* Tags to add / remove — hidden for undo (no secondary actions) */}
       {binding.fileAction !== "undo" && (
-        <TagsToAddEditor
-          binding={binding}
-          canEditTags={canEditTags}
-          tagServiceConfigured={tagServiceConfigured}
-          onBindingChange={onBindingChange}
-        />
+        <>
+          <TagsEditor
+            binding={binding}
+            kind="addTag"
+            canEditTags={canEditTags}
+            tagServiceConfigured={tagServiceConfigured}
+            onBindingChange={onBindingChange}
+          />
+          <TagsEditor
+            binding={binding}
+            kind="removeTag"
+            canEditTags={canEditTags}
+            tagServiceConfigured={tagServiceConfigured}
+            onBindingChange={onBindingChange}
+          />
+        </>
       )}
     </div>
   );

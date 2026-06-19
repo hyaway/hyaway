@@ -57,11 +57,9 @@ import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
 import { useAddFileTagsMutation } from "@/integrations/hydrus-api/queries/tags";
 import {
-  TAG_ACTION_ADD,
-  TAG_ACTION_DELETE,
   planTagActions,
+  planTagUndo,
   resolveTagServiceKey,
-  tagsToRemoveOnUndo,
 } from "@/integrations/hydrus-api/tag-actions";
 import { getTagActions } from "@/stores/review-binding-utils";
 import { useFavoriteToggle } from "@/hooks/use-favorite-toggle";
@@ -246,7 +244,8 @@ function executeSecondaryRatingActions(
         break;
       }
       case "addTag":
-        // TODO: implement tag secondary actions
+      case "removeTag":
+        // Tag actions are handled separately in handleSwipe.
         break;
       default:
         action satisfies never;
@@ -369,16 +368,19 @@ export function useReviewSwipeDeck() {
         });
       }
 
-      // Reverse tag actions — delete only tags this swipe actually added.
-      // All entries share the global service key resolved at swipe time.
-      const tagsToRemove = tagsToRemoveOnUndo(restore.tags ?? []);
-      if (tagsToRemove.length > 0 && restore.tags && restore.tags.length > 0) {
-        addFileTags({
-          file_ids: [lastEntry.fileId],
-          service_key: restore.tags[0].serviceKey,
-          tags: tagsToRemove,
-          action: TAG_ACTION_DELETE,
-        });
+      // Reverse tag actions — re-add tags the swipe removed, delete tags it
+      // added (only the ones it actually changed). All entries share the
+      // global service key resolved at swipe time.
+      if (restore.tags && restore.tags.length > 0) {
+        const undoTags = planTagUndo(restore.tags);
+        if (undoTags.add.length > 0 || undoTags.remove.length > 0) {
+          addFileTags({
+            file_ids: [lastEntry.fileId],
+            service_key: restore.tags[0].serviceKey,
+            add: undoTags.add,
+            remove: undoTags.remove,
+          });
+        }
       }
     }
   }, [
@@ -441,21 +443,30 @@ export function useReviewSwipeDeck() {
         setRating,
       );
 
-      // Execute secondary tag actions
+      // Execute secondary tag actions (add and/or remove, in one request)
       let tagsRestore: Array<TagRestoreEntry> = [];
-      const tagActions = getTagActions(binding.secondaryActions);
-      if (tagActions.length > 0 && canEditTags && resolvedTagServiceKey) {
+      const addTagActions = getTagActions(binding.secondaryActions, "addTag");
+      const removeTagActions = getTagActions(
+        binding.secondaryActions,
+        "removeTag",
+      );
+      if (
+        (addTagActions.length > 0 || removeTagActions.length > 0) &&
+        canEditTags &&
+        resolvedTagServiceKey
+      ) {
         const planned = planTagActions(
-          tagActions,
+          addTagActions,
+          removeTagActions,
           resolvedTagServiceKey,
           currentMetadata?.tags,
         );
-        if (planned.tags.length > 0) {
+        if (planned.add.length > 0 || planned.remove.length > 0) {
           addFileTags({
             file_ids: [currentFileId],
             service_key: resolvedTagServiceKey,
-            tags: planned.tags,
-            action: TAG_ACTION_ADD,
+            add: planned.add,
+            remove: planned.remove,
           });
           tagsRestore = planned.restore;
         }

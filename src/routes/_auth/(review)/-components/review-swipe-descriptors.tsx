@@ -161,7 +161,8 @@ function buildSwipeBindingDescriptor(
     ...style,
   };
   const ratingActions = getRatingActions(binding.secondaryActions);
-  const tagActions = getTagActions(binding.secondaryActions);
+  const addTagActions = getTagActions(binding.secondaryActions, "addTag");
+  const removeTagActions = getTagActions(binding.secondaryActions, "removeTag");
 
   const longParts: Array<string> = [];
   const shortParts: Array<string> = [];
@@ -175,10 +176,21 @@ function buildSwipeBindingDescriptor(
     );
   }
 
-  if (tagActions.length > 0) {
-    longParts.push(tagActions.map((a) => a.tag).join(", "));
-    const n = tagActions.length;
-    shortParts.push(`+${n} tag${n === 1 ? "" : "s"}`);
+  if (addTagActions.length > 0) {
+    longParts.push(addTagActions.map((a) => a.tag).join(", "));
+  }
+  if (removeTagActions.length > 0) {
+    longParts.push(removeTagActions.map((a) => `−${a.tag}`).join(", "));
+  }
+
+  const tagShortBits: Array<string> = [];
+  if (addTagActions.length > 0) tagShortBits.push(`+${addTagActions.length}`);
+  if (removeTagActions.length > 0) {
+    tagShortBits.push(`−${removeTagActions.length}`);
+  }
+  if (tagShortBits.length > 0) {
+    const total = addTagActions.length + removeTagActions.length;
+    shortParts.push(`${tagShortBits.join(" ")} tag${total === 1 ? "" : "s"}`);
   }
 
   if (longParts.length === 0) {

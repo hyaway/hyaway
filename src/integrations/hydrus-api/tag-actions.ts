@@ -9,12 +9,17 @@ export const TAG_ACTION_ADD = 0;
 export const TAG_ACTION_DELETE = 1;
 export type TagActionCode = typeof TAG_ACTION_ADD | typeof TAG_ACTION_DELETE;
 
-/** Options for an add_tags call against a single local tag service. */
+/**
+ * Options for an add_tags call against a single local tag service.
+ * `add` and `remove` are combined into one request.
+ */
 export interface AddFileTagsOptions {
   file_ids: Array<number>;
   service_key: string;
-  tags: Array<string>;
-  action: TagActionCode;
+  /** Tags to add (action 0). */
+  add?: Array<string>;
+  /** Tags to remove (action 1). */
+  remove?: Array<string>;
 }
 
 /** Request body shape for POST /add_tags/add_tags. */
@@ -26,14 +31,19 @@ export interface AddTagsBody {
   >;
 }
 
-/** Build the add_tags request body for one service + action. */
+/** Build the add_tags request body combining add (0) and remove (1). */
 export function buildAddTagsBody(options: AddFileTagsOptions): AddTagsBody {
+  const actions: Record<string, Array<string>> = {};
+  if (options.add && options.add.length > 0) {
+    actions[String(TAG_ACTION_ADD)] = options.add;
+  }
+  if (options.remove && options.remove.length > 0) {
+    actions[String(TAG_ACTION_DELETE)] = options.remove;
+  }
   return {
     file_ids: options.file_ids,
     service_keys_to_actions_to_tags: {
-      [options.service_key]: {
-        [options.action]: options.tags,
-      },
+      [options.service_key]: actions,
     },
   };
 }
@@ -76,10 +86,12 @@ export function tagIsCurrentOnFile(
   return current?.includes(tag) ?? false;
 }
 
-/** A record of a tag added during review, used to reverse it on undo. */
+/** A record of a tag change during review, used to reverse it on undo. */
 export interface TagRestoreEntry {
   serviceKey: string;
   tag: string;
+  /** Whether this swipe added or removed the tag. */
+  op: "add" | "remove";
   /** Whether the file already had this tag before the swipe. */
   wasPresent: boolean;
 }
@@ -87,31 +99,52 @@ export interface TagRestoreEntry {
 /** Result of planning the tag side of a swipe. */
 export interface PlannedTagActions {
   /** Unique, trimmed tags to add. */
-  tags: Array<string>;
+  add: Array<string>;
+  /** Unique, trimmed tags to remove. */
+  remove: Array<string>;
   /** Restore entries to record for undo. */
   restore: Array<TagRestoreEntry>;
 }
 
 /**
- * Plan the tags to add for a swipe plus the restore entries for undo.
- * Dedupes + trims tags and records whether each was already present.
+ * Plan the add + remove tags for a swipe plus the restore entries for undo.
+ * Dedupes + trims each side. If a tag is listed for both add and remove, the
+ * add wins. Records whether each tag was already present so undo only reverses
+ * the changes the swipe actually made.
  */
 export function planTagActions(
-  tagActions: ReadonlyArray<{ tag: string }>,
+  addActions: ReadonlyArray<{ tag: string }>,
+  removeActions: ReadonlyArray<{ tag: string }>,
   serviceKey: string,
   tags: FileMetadata["tags"],
 ): PlannedTagActions {
-  const seen = new Set<string>();
-  const planned: PlannedTagActions = { tags: [], restore: [] };
+  const planned: PlannedTagActions = { add: [], remove: [], restore: [] };
 
-  for (const { tag } of tagActions) {
+  const addSet = new Set<string>();
+  for (const { tag } of addActions) {
     const trimmed = tag.trim();
-    if (!trimmed || seen.has(trimmed)) continue;
-    seen.add(trimmed);
-    planned.tags.push(trimmed);
+    if (!trimmed || addSet.has(trimmed)) continue;
+    addSet.add(trimmed);
+    planned.add.push(trimmed);
     planned.restore.push({
       serviceKey,
       tag: trimmed,
+      op: "add",
+      wasPresent: tagIsCurrentOnFile(tags, serviceKey, trimmed),
+    });
+  }
+
+  const removeSet = new Set<string>();
+  for (const { tag } of removeActions) {
+    const trimmed = tag.trim();
+    // Skip blanks, dupes, and any tag also being added (add wins).
+    if (!trimmed || removeSet.has(trimmed) || addSet.has(trimmed)) continue;
+    removeSet.add(trimmed);
+    planned.remove.push(trimmed);
+    planned.restore.push({
+      serviceKey,
+      tag: trimmed,
+      op: "remove",
       wasPresent: tagIsCurrentOnFile(tags, serviceKey, trimmed),
     });
   }
@@ -119,9 +152,23 @@ export function planTagActions(
   return planned;
 }
 
-/** Tags to delete on undo — only those the swipe actually added. */
-export function tagsToRemoveOnUndo(
-  restore: ReadonlyArray<TagRestoreEntry>,
-): Array<string> {
-  return restore.filter((entry) => !entry.wasPresent).map((entry) => entry.tag);
+/**
+ * Compute the undo for recorded tag changes: re-add tags the swipe actually
+ * removed (were present), and delete tags the swipe actually added (weren't
+ * present). Pre-existing/absent tags are left untouched.
+ */
+export function planTagUndo(restore: ReadonlyArray<TagRestoreEntry>): {
+  add: Array<string>;
+  remove: Array<string>;
+} {
+  const add: Array<string> = [];
+  const remove: Array<string> = [];
+  for (const entry of restore) {
+    if (entry.op === "add" && !entry.wasPresent) {
+      remove.push(entry.tag);
+    } else if (entry.op === "remove" && entry.wasPresent) {
+      add.push(entry.tag);
+    }
+  }
+  return { add, remove };
 }
