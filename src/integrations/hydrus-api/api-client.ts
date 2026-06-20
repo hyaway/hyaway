@@ -189,6 +189,7 @@ export async function updateFileTags(
         [action]: [tag],
       },
     },
+    override_previously_deleted_mappings: true,
     create_new_deleted_mappings: false,
   });
 }
