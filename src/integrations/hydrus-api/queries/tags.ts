@@ -2,10 +2,27 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getFavouriteTags, searchTags, setFavouriteTags } from "../api-client";
+import {
+  cleanTags,
+  getFavouriteTags,
+  searchTags,
+  setFavouriteTags,
+  updateFileTags,
+} from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
-import { Permission } from "../models";
+import { ContentUpdateAction, Permission, TagStatus } from "../models";
 import { useHasPermission } from "./access";
+import { updateFileMetadataCaches } from "./file-metadata-cache";
+import type {
+  FileMetadata,
+  SearchTagsOptions,
+  UpdateFileTagsOptions,
+} from "../models";
+
+type SearchTagsQueryOptions = Omit<SearchTagsOptions, "search">;
+
+export const useCanEditFileTags = () =>
+  useHasPermission(Permission.EDIT_FILE_TAGS);
 
 /**
  * Search for tag autocomplete suggestions.
@@ -13,18 +30,32 @@ import { useHasPermission } from "./access";
  * Requires both Search Files and Add Tags permissions.
  * Returns tags sorted by descending count.
  */
-export const useSearchTagsQuery = (search: string) => {
+export const useSearchTagsQuery = (
+  search: string,
+  options?: SearchTagsQueryOptions,
+) => {
   const isConfigured = useIsApiConfigured();
   const canSearch = useHasPermission(Permission.SEARCH_FOR_AND_FETCH_FILES);
-  const canTags = useHasPermission(Permission.EDIT_FILE_TAGS);
+  const canTags = useCanEditFileTags();
   const trimmed = search.trim();
+  const tagDisplayType = options?.tag_display_type ?? "display";
+  const tagServiceKey = options?.tag_service_key;
+  const fileServiceKey = options?.file_service_key;
 
   return useQuery({
-    queryKey: ["searchTags", trimmed],
+    queryKey: [
+      "searchTags",
+      trimmed,
+      tagDisplayType,
+      tagServiceKey,
+      fileServiceKey,
+    ],
     queryFn: async () => {
       return searchTags({
         search: trimmed,
-        tag_display_type: "display",
+        tag_display_type: tagDisplayType,
+        tag_service_key: tagServiceKey,
+        file_service_key: fileServiceKey,
       });
     },
     enabled: isConfigured && canSearch && canTags && trimmed.length >= 3,
@@ -42,7 +73,7 @@ const emptySet: ReadonlySet<string> = new Set<string>();
  */
 export const useFavouriteTagsQuery = () => {
   const isConfigured = useIsApiConfigured();
-  const canTags = useHasPermission(Permission.EDIT_FILE_TAGS);
+  const canTags = useCanEditFileTags();
 
   return useQuery({
     queryKey: ["favouriteTags"],
@@ -111,5 +142,147 @@ export const useSetFavouriteTagsMutation = () => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["favouriteTags"] });
     },
+  });
+};
+
+export function getCurrentStorageTags(
+  metadata: FileMetadata | undefined,
+  serviceKey: string,
+): ReadonlyArray<string> {
+  const serviceTags = metadata?.tags?.[serviceKey];
+  if (!serviceTags) return [];
+  return serviceTags.storage_tags[TagStatus.CURRENT] ?? [];
+}
+
+export function getTagActionStateChange(
+  metadata: FileMetadata | undefined,
+  serviceKey: string,
+  tag: string,
+  action: ContentUpdateAction,
+) {
+  const currentTags = getCurrentStorageTags(metadata, serviceKey);
+  const hasTag = currentTags.includes(tag);
+
+  switch (action) {
+    case ContentUpdateAction.ADD:
+      return { hasTag, changed: !hasTag };
+    case ContentUpdateAction.DELETE:
+      return { hasTag, changed: hasTag };
+    default:
+      action satisfies never;
+      return { hasTag, changed: false };
+  }
+}
+
+export function applyStorageTagChange(
+  metadata: FileMetadata,
+  serviceKey: string,
+  tag: string,
+  action: ContentUpdateAction,
+): FileMetadata {
+  const { changed } = getTagActionStateChange(
+    metadata,
+    serviceKey,
+    tag,
+    action,
+  );
+  if (!changed) return metadata;
+
+  const serviceTags = metadata.tags?.[serviceKey] ?? {
+    display_tags: {},
+    storage_tags: {},
+  };
+  const currentTags = serviceTags.storage_tags[TagStatus.CURRENT] ?? [];
+  let nextCurrentTags: Array<string>;
+
+  switch (action) {
+    case ContentUpdateAction.ADD:
+      nextCurrentTags = [...currentTags, tag];
+      break;
+    case ContentUpdateAction.DELETE:
+      nextCurrentTags = currentTags.filter((currentTag) => currentTag !== tag);
+      break;
+    default:
+      action satisfies never;
+      return metadata;
+  }
+
+  return {
+    ...metadata,
+    tags: {
+      ...(metadata.tags ?? {}),
+      [serviceKey]: {
+        ...serviceTags,
+        storage_tags: {
+          ...serviceTags.storage_tags,
+          [TagStatus.CURRENT]: nextCurrentTags,
+        },
+      },
+    },
+  };
+}
+
+const getFileIdsFromTagOptions = (
+  options: UpdateFileTagsOptions,
+): Array<number> | undefined => {
+  if ("file_ids" in options && options.file_ids) return options.file_ids;
+  if ("file_id" in options && options.file_id) return [options.file_id];
+  return undefined;
+};
+
+export const useCleanTagsMutation = () => {
+  return useMutation({
+    mutationFn: cleanTags,
+    mutationKey: ["cleanTags"],
+  });
+};
+
+export const useUpdateFileTagsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateFileTags,
+    onMutate: async (variables) => {
+      const fileIds = getFileIdsFromTagOptions(variables);
+      if (!fileIds) return;
+
+      for (const fileId of fileIds) {
+        await queryClient.cancelQueries({
+          queryKey: ["getSingleFileMetadata", fileId],
+        });
+      }
+
+      updateFileMetadataCaches(queryClient, fileIds, (metadata) =>
+        applyStorageTagChange(
+          metadata,
+          variables.serviceKey,
+          variables.tag,
+          variables.action,
+        ),
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["searchFiles"],
+        refetchType: "none",
+      });
+    },
+    onSettled: (_data, _error, variables) => {
+      const fileIds = getFileIdsFromTagOptions(variables);
+      for (const fileId of fileIds ?? []) {
+        queryClient.invalidateQueries({
+          queryKey: ["getSingleFileMetadata", fileId],
+        });
+      }
+      queryClient.invalidateQueries({
+        queryKey: ["getFilesMetadata"],
+        refetchType: "none",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["infiniteGetFilesMetadata"],
+        refetchType: "none",
+      });
+    },
+    mutationKey: ["updateFileTags"],
   });
 };
