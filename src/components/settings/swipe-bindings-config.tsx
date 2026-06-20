@@ -646,6 +646,7 @@ function DirectionBindingEditor({
     setSelectedTagServiceKey(serviceKey);
     setTagValidationMessage("");
     if (!serviceKey) {
+      setTagInputValue("");
       handleTagActionChange(undefined);
       return;
     }
@@ -703,7 +704,7 @@ function DirectionBindingEditor({
   const canConfigureTag = canEditTags && hasLocalTagServices;
 
   return (
-    <div className="@container flex min-w-0 flex-col gap-3 overflow-hidden rounded-lg border p-3 sm:p-4">
+    <div className="@container flex min-w-0 flex-col gap-3 rounded-lg border p-3 sm:p-4">
       {/* Direction Header */}
       <div className="flex min-w-0 items-center justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -939,29 +940,31 @@ function DirectionBindingEditor({
                 </DropdownMenu>
               </div>
 
-              <TagAutocompleteInput
-                value={tagInputValue}
-                onChange={(value) => {
-                  setTagInputValue(value);
-                  setTagValidationMessage("");
-                  if (!value.trim()) {
-                    handleTagActionChange(undefined);
-                  }
-                }}
-                onSelect={handleTagCommit}
-                onSubmit={handleTagCommit}
-                onBlur={handleTagCommit}
-                placeholder="Enter tag"
-                ariaLabel="Tag action tag"
-                disabled={!selectedTagServiceKey || cleanTagsMutation.isPending}
-                systemTagSuggestions={[]}
-                showFavouriteSuggestions={false}
-                submitEmptyOnBlur
-                submitEmptyOnEnter
-                searchOptions={{
-                  tag_display_type: "storage",
-                }}
-              />
+              {selectedTagServiceKey && (
+                <TagAutocompleteInput
+                  value={tagInputValue}
+                  onChange={(value) => {
+                    setTagInputValue(value);
+                    setTagValidationMessage("");
+                    if (!value.trim()) {
+                      handleTagActionChange(undefined);
+                    }
+                  }}
+                  onSelect={handleTagCommit}
+                  onSubmit={handleTagCommit}
+                  onBlur={handleTagCommit}
+                  placeholder="Enter tag"
+                  ariaLabel="Tag action tag"
+                  disabled={cleanTagsMutation.isPending}
+                  systemTagSuggestions={[]}
+                  showFavouriteSuggestions={false}
+                  submitEmptyOnBlur
+                  submitEmptyOnEnter
+                  searchOptions={{
+                    tag_display_type: "storage",
+                  }}
+                />
+              )}
 
               {tagValidationMessage && (
                 <span className="text-destructive text-xs">

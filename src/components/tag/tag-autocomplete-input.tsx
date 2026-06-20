@@ -6,6 +6,7 @@ import { IconTagStarred } from "@tabler/icons-react";
 import { defaultFilter } from "cmdk";
 import type { CSSProperties } from "react";
 import type { SystemTagSuggestion } from "@/routes/_auth/(search)/-lib/query-builder-fields";
+import type { SearchTagsOptions } from "@/integrations/hydrus-api/models";
 import {
   Command,
   CommandGroup,
@@ -44,6 +45,8 @@ export function TagAutocompleteInput({
   submitEmptyOnBlur,
   submitEmptyOnEnter,
   systemTagSuggestions = SYSTEM_TAG_SUGGESTIONS,
+  searchOptions,
+  showFavouriteSuggestions = true,
 }: {
   /** Controlled value (optional — uncontrolled by default). */
   value?: string;
@@ -70,6 +73,10 @@ export function TagAutocompleteInput({
   submitEmptyOnEnter?: boolean;
   /** System predicate suggestions to include alongside Hydrus tag matches. */
   systemTagSuggestions?: Array<SystemTagSuggestion>;
+  /** Additional Hydrus tag search options, such as service key and display type. */
+  searchOptions?: Omit<SearchTagsOptions, "search">;
+  /** Show favourite tag suggestions for short input. */
+  showFavouriteSuggestions?: boolean;
 }) {
   const [inputValue, setInputValue] = useState(value);
   const [debouncedInput, setDebouncedInput] = useState(value);
@@ -93,6 +100,7 @@ export function TagAutocompleteInput({
   const isNegative = debouncedInput.startsWith("-");
   const { data } = useSearchTagsQuery(
     debouncedInput.replace(/^-+/, "").replace(/:$/, ""),
+    searchOptions,
   );
   const { data: favouriteTags } = useFavouriteTagsQuery();
   const suggestions = data?.tags.slice(0, MAX_TAG_SUGGESTIONS) ?? [];
@@ -125,7 +133,10 @@ export function TagAutocompleteInput({
     return isSystemSearch ? matches : matches.slice(0, 2);
   }, [searchText, systemTagSuggestions]);
   const showFavourites =
-    open && !hasSufficientInput && filteredFavourites.length > 0;
+    showFavouriteSuggestions &&
+    open &&
+    !hasSufficientInput &&
+    filteredFavourites.length > 0;
   const showDropdown =
     (open && hasSufficientInput && suggestions.length > 0) ||
     showFavourites ||
