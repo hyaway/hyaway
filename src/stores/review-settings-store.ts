@@ -3,6 +3,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import type { LocalTagServiceInfo } from "@/integrations/hydrus-api/models";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import {
   MAX_OPTIMIZE_SIZE_THRESHOLD_MB,
@@ -57,14 +58,13 @@ export type RatingSwipeAction =
 
 /**
  * Tag action to perform on swipe.
- * Adds a specific tag to the file.
+ * Adds or removes a specific storage tag mapping from the file.
  */
-export interface TagSwipeAction {
-  /** The tag service key to add the tag to */
+export type TagSwipeAction = {
+  type: "add" | "remove";
   serviceKey: string;
-  /** The tag to add (e.g., "character:zelda" or "cute") */
   tag: string;
-}
+};
 
 /**
  * Secondary actions that can be performed alongside the primary file action.
@@ -72,7 +72,7 @@ export interface TagSwipeAction {
  */
 export type SecondarySwipeAction =
   | ({ actionType: "rating" } & RatingSwipeAction)
-  | ({ actionType: "addTag" } & TagSwipeAction);
+  | ({ actionType: "tag" } & TagSwipeAction);
 
 /**
  * A binding that maps a swipe direction to one or more actions.
@@ -499,18 +499,14 @@ export function hasUndoBinding(bindings: SwipeBindings): boolean {
   return SWIPE_DIRECTIONS.some((d) => bindings[d].fileAction === "undo");
 }
 
-/** Remove rating secondary actions that target any of the given service keys. */
-export function stripRatingActionsForServices(
+function stripSecondaryActions(
   binding: ReviewSwipeBinding,
-  serviceKeys: Set<string>,
+  shouldStrip: (action: SecondarySwipeAction) => boolean,
 ): ReviewSwipeBinding {
-  if (serviceKeys.size === 0 || !binding.secondaryActions?.length) {
-    return binding;
-  }
+  if (!binding.secondaryActions?.length) return binding;
 
   const secondaryActions = binding.secondaryActions.filter(
-    (action) =>
-      action.actionType !== "rating" || !serviceKeys.has(action.serviceKey),
+    (action) => !shouldStrip(action),
   );
 
   if (secondaryActions.length === binding.secondaryActions.length) {
@@ -524,21 +520,15 @@ export function stripRatingActionsForServices(
   };
 }
 
-/** Remove rating secondary actions for every binding in a bindings map. */
-export function stripRatingActionsForServicesFromBindings(
+function stripSecondaryActionsFromBindings(
   bindings: SwipeBindings,
-  serviceKeys: Set<string>,
+  shouldStrip: (action: SecondarySwipeAction) => boolean,
 ): SwipeBindings {
-  if (serviceKeys.size === 0) return bindings;
-
   let changed = false;
   const nextBindings = { ...bindings };
 
   for (const direction of SWIPE_DIRECTIONS) {
-    const nextBinding = stripRatingActionsForServices(
-      bindings[direction],
-      serviceKeys,
-    );
+    const nextBinding = stripSecondaryActions(bindings[direction], shouldStrip);
     if (nextBinding !== bindings[direction]) {
       nextBindings[direction] = nextBinding;
       changed = true;
@@ -546,6 +536,79 @@ export function stripRatingActionsForServicesFromBindings(
   }
 
   return changed ? nextBindings : bindings;
+}
+
+/** Remove rating secondary actions that target any of the given service keys. */
+export function stripRatingActionsForServices(
+  binding: ReviewSwipeBinding,
+  serviceKeys: Set<string>,
+): ReviewSwipeBinding {
+  if (serviceKeys.size === 0 || !binding.secondaryActions?.length) {
+    return binding;
+  }
+
+  return stripSecondaryActions(
+    binding,
+    (action) =>
+      action.actionType === "rating" && serviceKeys.has(action.serviceKey),
+  );
+}
+
+/** Remove rating secondary actions for every binding in a bindings map. */
+export function stripRatingActionsForServicesFromBindings(
+  bindings: SwipeBindings,
+  serviceKeys: Set<string>,
+): SwipeBindings {
+  if (serviceKeys.size === 0) return bindings;
+
+  return stripSecondaryActionsFromBindings(
+    bindings,
+    (action) =>
+      action.actionType === "rating" && serviceKeys.has(action.serviceKey),
+  );
+}
+
+function shouldStripTagAction(
+  action: TagSwipeAction,
+  localTagServicesByKey: Map<string, LocalTagServiceInfo> | undefined,
+) {
+  return !action.serviceKey || !localTagServicesByKey?.has(action.serviceKey);
+}
+
+export function stripInvalidTagActions(
+  binding: ReviewSwipeBinding,
+  localTagServicesByKey: Map<string, LocalTagServiceInfo> | undefined,
+): ReviewSwipeBinding {
+  return stripSecondaryActions(
+    binding,
+    (action) =>
+      action.actionType === "tag" &&
+      shouldStripTagAction(action, localTagServicesByKey),
+  );
+}
+
+export function stripInvalidTagActionsFromBindings(
+  bindings: SwipeBindings,
+  localTagServicesByKey: Map<string, LocalTagServiceInfo> | undefined,
+): SwipeBindings {
+  return stripSecondaryActionsFromBindings(
+    bindings,
+    (action) =>
+      action.actionType === "tag" &&
+      shouldStripTagAction(action, localTagServicesByKey),
+  );
+}
+
+export function stripTagActionsForMissingPermission(
+  bindings: SwipeBindings,
+  canEditFileTags: boolean,
+): SwipeBindings {
+  if (canEditFileTags) return bindings;
+
+  return stripSecondaryActionsFromBindings(
+    bindings,
+    (action) => action.actionType === "tag",
+  );
 }
 
 // #endregion
