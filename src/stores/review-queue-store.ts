@@ -8,6 +8,7 @@ import type {
   RatingSwipeAction,
   ReviewFileAction,
   SwipeDirection,
+  TagSwipeAction,
 } from "@/stores/review-settings-store";
 
 /** Previous state of a file before action, used for undo */
@@ -23,12 +24,21 @@ export interface RatingRestoreEntry {
   previousValue: boolean | number | null;
 }
 
+/** A single tag restoration entry for an edit that changed storage mappings. */
+export interface TagRestoreEntry {
+  serviceKey: string;
+  tag: string;
+  actionType: TagSwipeAction["type"];
+}
+
 /** Data needed to restore a file to its previous state */
 export interface RestoreData {
   /** File state to restore (null means no file action was taken) */
   fileState: PreviousFileState;
   /** Ratings to restore (if any rating actions were taken) */
   ratings?: Array<RatingRestoreEntry>;
+  /** Tags to restore (if any tag actions changed storage mappings) */
+  tags?: Array<TagRestoreEntry>;
 }
 
 /** A single action record in the history stack */
