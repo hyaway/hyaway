@@ -487,7 +487,7 @@ Used by `searchFiles()`.
 
 #### `GET /add_tags/search_tags`
 
-Search for tag autocomplete suggestions. Review tag action configuration uses this endpoint with `tag_display_type=storage` and the selected local tag service key so suggestions match the storage mappings that add/remove actions edit.
+Search for tag autocomplete suggestions. Review tag action configuration uses this endpoint with `tag_display_type=storage` so suggestions come from storage mappings, independent of the selected local tag service used for execution.
 
 **Parameters:**
 
