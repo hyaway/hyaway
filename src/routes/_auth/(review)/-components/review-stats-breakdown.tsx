@@ -148,21 +148,40 @@ function InlineStatItem({
   const binding = bindings[direction];
   const descriptor = getSwipeBindingDescriptor(binding, services);
   const DirectionIcon = DIRECTION_ICONS[direction];
+  const addCount = getTagActions(binding.secondaryActions, "addTag").length;
+  const removeCount = getTagActions(
+    binding.secondaryActions,
+    "removeTag",
+  ).length;
+  const hasTags = addCount + removeCount > 0;
+  // Action (+ rating) word only; tag counts render separately below.
+  const label = descriptor.shortLabel.toLowerCase();
 
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap",
+        "inline-flex shrink-0 items-center gap-1 whitespace-nowrap",
         descriptor.textClass,
       )}
     >
-      {count}
-      {showLabel && (
-        /* Compact label everywhere — keeps the counts row tight; the tags
-           themselves are listed in the hints row above the footer. */
-        <span>
-          {" "}
-          {descriptor.shortLabel.toLowerCase()}
+      <span className="font-semibold">{count}</span>
+      {showLabel && label && <span>{label}</span>}
+      {showLabel && hasTags && (
+        <span className="inline-flex items-center gap-1">
+          <span className="text-muted-foreground/40" aria-hidden>
+            ·
+          </span>
+          {addCount > 0 && (
+            <span className="text-emerald-700 dark:text-emerald-400">
+              +{addCount}
+            </span>
+          )}
+          {removeCount > 0 && (
+            <span className="text-destructive">−{removeCount}</span>
+          )}
+          <span className="text-muted-foreground/70">
+            tag{addCount + removeCount === 1 ? "" : "s"}
+          </span>
         </span>
       )}
       <DirectionIcon className="size-3" />

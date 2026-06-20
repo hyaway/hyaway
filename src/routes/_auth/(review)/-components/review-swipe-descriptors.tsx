@@ -183,31 +183,21 @@ function buildSwipeBindingDescriptor(
     longParts.push(removeTagActions.map((a) => `−${a.tag}`).join(", "));
   }
 
-  const tagShortBits: Array<string> = [];
-  if (addTagActions.length > 0) tagShortBits.push(`+${addTagActions.length}`);
-  if (removeTagActions.length > 0) {
-    tagShortBits.push(`−${removeTagActions.length}`);
-  }
-  if (tagShortBits.length > 0) {
-    const total = addTagActions.length + removeTagActions.length;
-    shortParts.push(`${tagShortBits.join(" ")} tag${total === 1 ? "" : "s"}`);
-  }
-
   if (longParts.length === 0) {
     return fileDescriptor;
   }
 
   // A "skip" that only exists to apply secondary actions (tags/rating) doesn't
-  // need the "Skip" word — it's noise. Show just the secondary parts.
+  // need the "Skip" word — it's noise. The short label keeps only the action +
+  // rating; tag counts are rendered separately (coloured) in the stats bar.
   const isSkip = binding.fileAction === "skip";
+  const shortBase = isSkip ? "" : fileDescriptor.shortLabel;
   return {
     ...fileDescriptor,
     label: isSkip
       ? longParts.join(" + ")
       : `${fileDescriptor.label} + ${longParts.join(" + ")}`,
-    shortLabel: isSkip
-      ? shortParts.join(" ")
-      : `${fileDescriptor.shortLabel} ${shortParts.join(" ")}`,
+    shortLabel: [shortBase, ...shortParts].filter(Boolean).join(" "),
   };
 }
 

@@ -6,7 +6,7 @@ import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import type { ReviewSwipeBinding } from "@/stores/review-settings-store";
 
 describe("getSwipeBindingDescriptor with tags", () => {
-  it("appends tag names (long) and a count (short)", () => {
+  it("lists tag names in the long label; short label is action-only", () => {
     const binding: ReviewSwipeBinding = {
       fileAction: "archive",
       secondaryActions: [
@@ -16,25 +16,26 @@ describe("getSwipeBindingDescriptor with tags", () => {
     };
     const d = getSwipeBindingDescriptor(binding);
     expect(d.label).toBe("Archive + reviewed, keeper");
-    expect(d.shortLabel).toBe("Archive +2 tags");
+    // Tag counts are rendered separately (coloured) in the stats bar.
+    expect(d.shortLabel).toBe("Archive");
   });
 
-  it("drops the 'Skip' word for a tag-only skip (singular)", () => {
+  it("drops the 'Skip' word for a tag-only skip", () => {
     const binding: ReviewSwipeBinding = {
       fileAction: "skip",
       secondaryActions: [{ actionType: "addTag", tag: "later" }],
     };
     const d = getSwipeBindingDescriptor(binding);
     expect(d.label).toBe("later");
-    expect(d.shortLabel).toBe("+1 tag");
+    expect(d.shortLabel).toBe("");
   });
 
-  it("keeps the action word for a non-skip tag binding", () => {
+  it("keeps the action word (short) for a non-skip tag binding", () => {
     const binding: ReviewSwipeBinding = {
       fileAction: "archive",
       secondaryActions: [{ actionType: "addTag", tag: "later" }],
     };
-    expect(getSwipeBindingDescriptor(binding).shortLabel).toBe("Archive +1 tag");
+    expect(getSwipeBindingDescriptor(binding).shortLabel).toBe("Archive");
   });
 
   it("renders just the file label with no secondary actions", () => {
@@ -52,16 +53,16 @@ describe("getSwipeBindingDescriptor with tags", () => {
     };
     const d = getSwipeBindingDescriptor(binding);
     expect(d.label).toBe("Archive + reviewed + −unsorted");
-    expect(d.shortLabel).toBe("Archive +1 −1 tags");
+    expect(d.shortLabel).toBe("Archive");
   });
 
-  it("handles a remove-only tag-skip (singular minus)", () => {
+  it("handles a remove-only tag-skip in the long label", () => {
     const binding: ReviewSwipeBinding = {
       fileAction: "skip",
       secondaryActions: [{ actionType: "removeTag", tag: "unsorted" }],
     };
     const d = getSwipeBindingDescriptor(binding);
     expect(d.label).toBe("−unsorted");
-    expect(d.shortLabel).toBe("−1 tag");
+    expect(d.shortLabel).toBe("");
   });
 });
