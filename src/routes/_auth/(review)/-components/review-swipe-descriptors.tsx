@@ -12,8 +12,12 @@ import type {
   ReviewFileAction,
   ReviewSwipeBinding,
   SecondarySwipeAction,
+  TagSwipeAction,
 } from "@/stores/review-settings-store";
-import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
+import type {
+  LocalTagServiceInfo,
+  RatingServiceInfo,
+} from "@/integrations/hydrus-api/models";
 import { isNumericalRatingService } from "@/integrations/hydrus-api/models";
 
 /** Visual descriptor for a swipe binding */
@@ -48,6 +52,18 @@ function getRatingActions(
     .filter(
       (a): a is SecondarySwipeAction & { actionType: "rating" } =>
         a.actionType === "rating",
+    )
+    .map(({ actionType: _, ...rest }) => rest);
+}
+
+function getTagActions(
+  secondaryActions?: Array<SecondarySwipeAction>,
+): Array<TagSwipeAction> {
+  if (!secondaryActions) return [];
+  return secondaryActions
+    .filter(
+      (a): a is SecondarySwipeAction & { actionType: "tag" } =>
+        a.actionType === "tag",
     )
     .map(({ actionType: _, ...rest }) => rest);
 }
@@ -109,6 +125,22 @@ export function formatRatingActionShort(
   return getRatingValueString(action, services);
 }
 
+export function formatTagAction(
+  action: TagSwipeAction,
+  services?: Map<string, LocalTagServiceInfo>,
+): string {
+  const service = services?.get(action.serviceKey);
+  const serviceName = truncate(service?.name ?? action.serviceKey, 20);
+  const tag = truncate(action.tag, 20);
+  const preposition = action.type === "add" ? "to" : "from";
+  return `${action.type} ${tag} ${preposition} ${serviceName}`;
+}
+
+export function formatTagActionShort(action: TagSwipeAction): string {
+  const prefix = action.type === "add" ? "+" : "-";
+  return `${prefix}${truncate(action.tag, 16)}`;
+}
+
 /** Base descriptor without styling (shared between normal and overlay) */
 interface BaseDescriptor {
   label: string;
@@ -148,7 +180,8 @@ const FILE_ACTION_OVERLAY_STYLES: Record<ReviewFileAction, DescriptorStyle> = {
 /** Internal helper to build a swipe binding descriptor */
 function buildSwipeBindingDescriptor(
   binding: ReviewSwipeBinding,
-  services: Map<string, RatingServiceInfo> | undefined,
+  ratingServices: Map<string, RatingServiceInfo> | undefined,
+  tagServices: Map<string, LocalTagServiceInfo> | undefined,
   styles: Record<ReviewFileAction, DescriptorStyle>,
 ): SwipeBindingDescriptor {
   const base = FILE_ACTION_BASE[binding.fileAction];
@@ -160,18 +193,31 @@ function buildSwipeBindingDescriptor(
     ...style,
   };
   const ratingActions = getRatingActions(binding.secondaryActions);
+  const tagActions = getTagActions(binding.secondaryActions);
+  const actionLabels: Array<string> = [];
+  const shortActionLabels: Array<string> = [];
 
   if (ratingActions.length > 0) {
-    const ratingLabels = ratingActions
-      .map((a) => formatRatingAction(a, services))
-      .join(", ");
-    const shortRatingLabels = ratingActions
-      .map((a) => formatRatingActionShort(a, services))
-      .join(",");
+    actionLabels.push(
+      ...ratingActions.map((a) => formatRatingAction(a, ratingServices)),
+    );
+    shortActionLabels.push(
+      ...ratingActions.map((a) => formatRatingActionShort(a, ratingServices)),
+    );
+  }
+
+  if (tagActions.length > 0) {
+    actionLabels.push(
+      ...tagActions.map((a) => formatTagAction(a, tagServices)),
+    );
+    shortActionLabels.push(...tagActions.map(formatTagActionShort));
+  }
+
+  if (actionLabels.length > 0) {
     return {
       ...fileDescriptor,
-      label: `${fileDescriptor.label} + ${ratingLabels}`,
-      shortLabel: `${fileDescriptor.shortLabel} ${shortRatingLabels}`,
+      label: `${fileDescriptor.label} + ${actionLabels.join(", ")}`,
+      shortLabel: `${fileDescriptor.shortLabel} ${shortActionLabels.join(",")}`,
     };
   }
 
@@ -189,8 +235,14 @@ function buildSwipeBindingDescriptor(
 export function getSwipeBindingDescriptor(
   binding: ReviewSwipeBinding,
   services?: Map<string, RatingServiceInfo>,
+  tagServices?: Map<string, LocalTagServiceInfo>,
 ): SwipeBindingDescriptor {
-  return buildSwipeBindingDescriptor(binding, services, FILE_ACTION_STYLES);
+  return buildSwipeBindingDescriptor(
+    binding,
+    services,
+    tagServices,
+    FILE_ACTION_STYLES,
+  );
 }
 
 /**
@@ -204,10 +256,12 @@ export function getSwipeBindingDescriptor(
 export function getSwipeBindingOverlayDescriptor(
   binding: ReviewSwipeBinding,
   services?: Map<string, RatingServiceInfo>,
+  tagServices?: Map<string, LocalTagServiceInfo>,
 ): SwipeBindingDescriptor {
   return buildSwipeBindingDescriptor(
     binding,
     services,
+    tagServices,
     FILE_ACTION_OVERLAY_STYLES,
   );
 }

@@ -23,6 +23,7 @@ import {
   useReviewSwipeThresholds,
 } from "@/stores/review-settings-store";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
 import { cn } from "@/lib/utils";
 
 // Re-export SwipeDirection for consumers that import from this file
@@ -264,6 +265,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCardMemo({
   const showGestureThresholds = useReviewShowGestureThresholds();
   const thresholds = useReviewSwipeThresholds();
   const { servicesMap } = useRatingServices();
+  const { localTagServicesByKey } = useLocalTagServices();
 
   // Calculate rotation based on horizontal drag
   const rotate = useTransform(
@@ -542,6 +544,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCardMemo({
               const descriptor = getSwipeBindingOverlayDescriptor(
                 binding,
                 servicesMap,
+                localTagServicesByKey,
               );
               const Icon = descriptor.icon;
               const opacity =
