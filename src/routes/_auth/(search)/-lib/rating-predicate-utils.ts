@@ -73,7 +73,9 @@ export function parseRatingSystemTag(
 
   if (systemTag.startsWith(SYSTEM_RATING_PREFIX)) {
     return {
-      fieldName: getRatingFieldName(systemTag.slice(SYSTEM_RATING_PREFIX.length)),
+      fieldName: getRatingFieldName(
+        systemTag.slice(SYSTEM_RATING_PREFIX.length),
+      ),
       kind: "rating",
     };
   }
