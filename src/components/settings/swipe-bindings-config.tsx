@@ -75,6 +75,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui-primitives/dropdown-menu";
 import { Button } from "@/components/ui-primitives/button";
+import { ReviewConfigBar } from "@/components/settings/review-config-bar";
 import { SettingsResetButton } from "@/components/settings/settings-ui";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import { cn } from "@/lib/utils";
@@ -1024,6 +1025,8 @@ export function SwipeBindingsConfig({
           )}
         </div>
       )}
+
+      <ReviewConfigBar />
 
       {canEditTags && permissionsFetched && (
         <TagServiceSelector
