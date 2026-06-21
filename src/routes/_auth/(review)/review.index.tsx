@@ -69,7 +69,7 @@ function ReviewPage() {
             </LinkButton>
           }
         />
-        <SwipeBindingsConfig className="mt-8" />
+        <SwipeBindingsConfig className="my-8" />
       </div>
     );
   }
