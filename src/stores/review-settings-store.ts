@@ -140,6 +140,13 @@ export type ValidSecondarySwipeAction =
   | ValidRatingSecondarySwipeAction
   | ValidTagSecondarySwipeAction;
 
+export type LooseSecondarySwipeActionType =
+  LooseSecondarySwipeAction["actionType"];
+
+export type LooseSecondarySwipeActionOf<
+  TActionType extends LooseSecondarySwipeActionType,
+> = Extract<LooseSecondarySwipeAction, { actionType: TActionType }>;
+
 type UnnormalizedLooseSecondarySwipeAction =
   | (Omit<LooseRatingSecondarySwipeAction, "id"> & { id?: string })
   | (Omit<LooseTagSecondarySwipeAction, "id"> & { id?: string });
@@ -640,6 +647,57 @@ export function getAllSecondarySwipeActions(
   binding: ReviewSwipeBinding,
 ): Array<LooseSecondarySwipeAction> {
   return binding.secondaryActions ?? [];
+}
+
+export function getSecondarySwipeActionsByType<
+  TActionType extends LooseSecondarySwipeActionType,
+>(
+  secondaryActions: Array<LooseSecondarySwipeAction> | undefined,
+  actionType: TActionType,
+): Array<LooseSecondarySwipeActionOf<TActionType>> {
+  return (
+    secondaryActions?.filter(
+      (action): action is LooseSecondarySwipeActionOf<TActionType> =>
+        action.actionType === actionType,
+    ) ?? []
+  );
+}
+
+export function withUpsertedSecondarySwipeAction(
+  secondaryActions: Array<LooseSecondarySwipeAction> | undefined,
+  replacement: LooseSecondarySwipeAction,
+): Array<LooseSecondarySwipeAction> {
+  const actions = secondaryActions ?? [];
+  const replacementIndex = actions.findIndex(
+    (action) =>
+      action.actionType === replacement.actionType &&
+      action.id === replacement.id,
+  );
+
+  if (replacementIndex === -1) {
+    return [...actions, replacement];
+  }
+
+  return actions.map((action, index) =>
+    index === replacementIndex ? replacement : action,
+  );
+}
+
+export function withoutSecondarySwipeAction(
+  secondaryActions: Array<LooseSecondarySwipeAction> | undefined,
+  actionType: LooseSecondarySwipeActionType,
+  actionId: string,
+): Array<LooseSecondarySwipeAction> | undefined {
+  const otherActions = (secondaryActions ?? []).filter(
+    (action) => action.actionType !== actionType || action.id !== actionId,
+  );
+  return otherActions.length > 0 ? otherActions : undefined;
+}
+
+export function getTagSwipeActionIdentity(
+  action: Pick<LooseTagSwipeAction, "serviceKey" | "tag">,
+) {
+  return `${action.serviceKey}\u0000${action.tag}`;
 }
 
 export function isValidRatingSecondarySwipeAction(
