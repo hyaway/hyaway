@@ -155,8 +155,19 @@ export interface ReviewSwipeBinding {
   secondaryActions?: Array<LooseSecondarySwipeAction>;
 }
 
+export type ValidReviewSwipeBinding = Omit<
+  ReviewSwipeBinding,
+  "secondaryActions"
+> & {
+  secondaryActions?: Array<ValidSecondarySwipeAction>;
+};
+
 /** Complete mapping of all swipe directions to their bindings */
 export type SwipeBindings = Record<SwipeDirection, ReviewSwipeBinding>;
+export type ValidSwipeBindings = Record<
+  SwipeDirection,
+  ValidReviewSwipeBinding
+>;
 
 // #endregion
 
@@ -566,10 +577,10 @@ export function getFileActionForDirection(
  * Get the binding for a direction from bindings object.
  * Non-hook version for use in callbacks.
  */
-export function getBindingForDirection(
-  bindings: SwipeBindings,
+export function getBindingForDirection<TBinding extends ReviewSwipeBinding>(
+  bindings: Record<SwipeDirection, TBinding>,
   direction: SwipeDirection,
-): ReviewSwipeBinding {
+): TBinding {
   return bindings[direction];
 }
 
@@ -699,11 +710,11 @@ export function getValidSecondarySwipeActions(
 export function getValidReviewSwipeBinding(
   binding: ReviewSwipeBinding,
   context: SecondarySwipeActionValidityContext = {},
-): ReviewSwipeBinding {
+): ValidReviewSwipeBinding {
   const secondaryActions = getValidSecondarySwipeActions(binding, context);
 
   if (secondaryActions.length === (binding.secondaryActions?.length ?? 0)) {
-    return binding;
+    return binding as ValidReviewSwipeBinding;
   }
 
   return {
@@ -716,9 +727,9 @@ export function getValidReviewSwipeBinding(
 export function getValidSwipeBindings(
   bindings: SwipeBindings,
   context: SecondarySwipeActionValidityContext = {},
-): SwipeBindings {
+): ValidSwipeBindings {
   let changed = false;
-  const nextBindings = { ...bindings };
+  const nextBindings = { ...bindings } as ValidSwipeBindings;
 
   for (const direction of SWIPE_DIRECTIONS) {
     const nextBinding = getValidReviewSwipeBinding(
@@ -731,7 +742,7 @@ export function getValidSwipeBindings(
     }
   }
 
-  return changed ? nextBindings : bindings;
+  return changed ? nextBindings : (bindings as ValidSwipeBindings);
 }
 
 export function normalizeReviewSwipeBinding(
