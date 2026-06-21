@@ -74,9 +74,9 @@ function getTagActions(
  */
 function getRatingValueString(
   action: RatingSwipeAction,
-  services?: Map<string, RatingServiceInfo>,
+  ratingServices?: Map<string, RatingServiceInfo>,
 ): string {
-  const service = services?.get(action.serviceKey);
+  const service = ratingServices?.get(action.serviceKey);
 
   switch (action.type) {
     case "setLike":
@@ -102,15 +102,15 @@ function getRatingValueString(
  * Examples: "favorite like", "mynumeric 7/10", "myinc +1"
  *
  * @param action The rating action to format
- * @param services Optional map of serviceKey -> RatingServiceInfo for display
+ * @param ratingServices Optional map of serviceKey -> RatingServiceInfo for display
  */
 export function formatRatingAction(
   action: RatingSwipeAction,
-  services?: Map<string, RatingServiceInfo>,
+  ratingServices?: Map<string, RatingServiceInfo>,
 ): string {
-  const service = services?.get(action.serviceKey);
+  const service = ratingServices?.get(action.serviceKey);
   const serviceName = truncate(service?.name ?? action.serviceKey, 20);
-  const valueStr = getRatingValueString(action, services);
+  const valueStr = getRatingValueString(action, ratingServices);
   return `${serviceName} ${valueStr}`;
 }
 
@@ -120,16 +120,16 @@ export function formatRatingAction(
  */
 export function formatRatingActionShort(
   action: RatingSwipeAction,
-  services?: Map<string, RatingServiceInfo>,
+  ratingServices?: Map<string, RatingServiceInfo>,
 ): string {
-  return getRatingValueString(action, services);
+  return getRatingValueString(action, ratingServices);
 }
 
 export function formatTagAction(
   action: TagSwipeAction,
-  services?: Map<string, LocalTagServiceInfo>,
+  tagServices?: Map<string, LocalTagServiceInfo>,
 ): string {
-  const service = services?.get(action.serviceKey);
+  const service = tagServices?.get(action.serviceKey);
   const serviceName = truncate(service?.name ?? action.serviceKey, 20);
   const tag = truncate(action.tag, 20);
   const preposition = action.type === "add" ? "to" : "from";
@@ -229,17 +229,17 @@ function buildSwipeBindingDescriptor(
  * Used for stats display and other UI elements.
  *
  * @param binding The swipe binding to describe
- * @param services Optional map of serviceKey -> RatingServiceInfo for display
+ * @param ratingServices Optional map of serviceKey -> RatingServiceInfo for display
  * @returns Descriptor with label, icon, and styling classes
  */
 export function getSwipeBindingDescriptor(
   binding: ReviewSwipeBinding,
-  services?: Map<string, RatingServiceInfo>,
+  ratingServices?: Map<string, RatingServiceInfo>,
   tagServices?: Map<string, LocalTagServiceInfo>,
 ): SwipeBindingDescriptor {
   return buildSwipeBindingDescriptor(
     binding,
-    services,
+    ratingServices,
     tagServices,
     FILE_ACTION_STYLES,
   );
@@ -250,17 +250,17 @@ export function getSwipeBindingDescriptor(
  * Uses stronger background colors suitable for overlay display.
  *
  * @param binding The swipe binding to describe
- * @param services Optional map of serviceKey -> RatingServiceInfo for display
+ * @param ratingServices Optional map of serviceKey -> RatingServiceInfo for display
  * @returns Descriptor with label, icon, and overlay styling classes
  */
 export function getSwipeBindingOverlayDescriptor(
   binding: ReviewSwipeBinding,
-  services?: Map<string, RatingServiceInfo>,
+  ratingServices?: Map<string, RatingServiceInfo>,
   tagServices?: Map<string, LocalTagServiceInfo>,
 ): SwipeBindingDescriptor {
   return buildSwipeBindingDescriptor(
     binding,
-    services,
+    ratingServices,
     tagServices,
     FILE_ACTION_OVERLAY_STYLES,
   );
