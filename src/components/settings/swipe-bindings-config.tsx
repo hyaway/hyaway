@@ -714,6 +714,16 @@ function toCommitableTagAction(
   };
 }
 
+function getDefaultLocalTagServiceKey(
+  localTagServices: Array<[string, LocalTagServiceInfo]>,
+) {
+  return (
+    localTagServices.find(
+      ([, service]) => service.name.trim().toLowerCase() === "my tags",
+    )?.[0] ?? localTagServices[0]?.[0]
+  );
+}
+
 interface TagActionEditorProps {
   draft: TagActionDraft;
   localTagServices: Array<[string, LocalTagServiceInfo]>;
@@ -1279,7 +1289,13 @@ function DirectionBindingEditor({
               size="sm"
               onClick={() => {
                 const actionId = createSecondarySwipeActionId("tag");
-                upsertTagAction({ type: "add" }, actionId);
+                upsertTagAction(
+                  {
+                    type: "add",
+                    serviceKey: getDefaultLocalTagServiceKey(localTagServices),
+                  },
+                  actionId,
+                );
               }}
               disabled={!canAddTag}
             >
