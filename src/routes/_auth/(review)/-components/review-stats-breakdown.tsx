@@ -217,7 +217,7 @@ function GridStatItem({
         <DirectionIcon className="size-4" />
       </div>
       <span className="text-2xl font-semibold tabular-nums">{count}</span>
-      <span className="text-muted-foreground text-center text-xs leading-tight break-all">
+      <span className="text-muted-foreground text-center text-xs leading-tight break-all whitespace-pre-line">
         {descriptor.label}
       </span>
     </div>

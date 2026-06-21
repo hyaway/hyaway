@@ -58,7 +58,7 @@ describe("review swipe descriptors tag actions", () => {
       new Map([["localTags", localTagService]]),
     );
 
-    expect(descriptor.label).toBe("Archive + +series:example");
+    expect(descriptor.label).toBe("Archive\n+series:example");
     expect(descriptor.shortLabel).toBe("Archive +series:example");
   });
 
@@ -78,7 +78,7 @@ describe("review swipe descriptors tag actions", () => {
 
     const descriptor = getSwipeBindingDescriptor(binding, ratingServices);
 
-    expect(descriptor.label).toBe("Archive + Favorite like");
+    expect(descriptor.label).toBe("Archive\nFavorite like");
     expect(descriptor.shortLabel).toBe("Archive Fav like");
   });
 
@@ -102,7 +102,7 @@ describe("review swipe descriptors tag actions", () => {
       new Map([["localTags", localTagService]]),
     );
 
-    expect(descriptor.label).toBe("Trash + -series:example");
+    expect(descriptor.label).toBe("Trash\n-series:example");
     expect(descriptor.shortLabel).toBe("Trash -series:example");
   });
 
@@ -141,7 +141,7 @@ describe("review swipe descriptors tag actions", () => {
     );
 
     expect(descriptor.label).toBe(
-      "Archive + Favorite like, star rating 7/10, +series:example",
+      "Archive\nFavorite like\nstar rating 7/10\n+series:example",
     );
     expect(descriptor.shortLabel).toBe(
       "Archive Fav like,sta 7/10,+series:example",
@@ -175,7 +175,7 @@ describe("review swipe descriptors tag actions", () => {
       new Map([["localTags", localTagService]]),
     );
 
-    expect(descriptor.label).toBe("Favorite like, +reviewed");
+    expect(descriptor.label).toBe("Favorite like\n+reviewed");
     expect(descriptor.shortLabel).toBe("Fav like,+reviewed");
   });
 

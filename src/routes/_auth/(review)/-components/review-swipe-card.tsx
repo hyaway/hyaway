@@ -571,7 +571,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCardMemo({
                     )}
                   >
                     <Icon aria-hidden="true" className="size-16" />
-                    <span className="text-lg font-semibold">
+                    <span className="text-center text-lg font-semibold whitespace-pre-line">
                       {isDisabledUndo ? "Nothing to undo" : descriptor.label}
                     </span>
                   </div>

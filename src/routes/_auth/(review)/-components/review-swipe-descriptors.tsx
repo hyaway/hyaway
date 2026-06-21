@@ -200,13 +200,13 @@ function buildSwipeBindingDescriptor(
     const compactActionLabels = validSecondaryActions.map((action) =>
       formatSecondaryActionCompact(action, ratingServices),
     );
-    const actionLabel = fullActionLabels.join(", ");
+    const actionLabel = fullActionLabels.join("\n");
     const shortActionLabel = compactActionLabels.join(",");
 
     return {
       ...fileDescriptor,
       label: fileLabelPrefix
-        ? `${fileLabelPrefix} + ${actionLabel}`
+        ? `${fileLabelPrefix}\n${actionLabel}`
         : actionLabel,
       shortLabel: shortFileLabelPrefix
         ? `${shortFileLabelPrefix} ${shortActionLabel}`
