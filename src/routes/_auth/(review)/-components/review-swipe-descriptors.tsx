@@ -10,11 +10,11 @@ import {
 import type {
   ReviewFileAction,
   ReviewSwipeBinding,
-  TagSecondarySwipeAction,
-  TagSwipeAction,
   ValidRatingSecondarySwipeAction,
   ValidRatingSwipeAction,
   ValidSecondarySwipeAction,
+  ValidTagSecondarySwipeAction,
+  ValidTagSwipeAction,
 } from "@/stores/review-settings-store";
 import type {
   LocalTagServiceInfo,
@@ -61,11 +61,11 @@ function getRatingActions(
 
 function getTagActions(
   secondaryActions?: Array<ValidSecondarySwipeAction>,
-): Array<TagSwipeAction> {
+): Array<ValidTagSwipeAction> {
   if (!secondaryActions) return [];
   return secondaryActions
     .filter(
-      (action): action is TagSecondarySwipeAction =>
+      (action): action is ValidTagSecondarySwipeAction =>
         action.actionType === "tag",
     )
     .map(({ actionType: _, ...rest }) => rest);
@@ -129,7 +129,7 @@ export function formatRatingActionShort(
 }
 
 export function formatTagAction(
-  action: TagSwipeAction,
+  action: ValidTagSwipeAction,
   tagServices?: Map<string, LocalTagServiceInfo>,
 ): string {
   const service = tagServices?.get(action.serviceKey);
@@ -139,7 +139,7 @@ export function formatTagAction(
   return `${action.type} ${tag} ${preposition} ${serviceName}`;
 }
 
-export function formatTagActionShort(action: TagSwipeAction): string {
+export function formatTagActionShort(action: ValidTagSwipeAction): string {
   const prefix = action.type === "add" ? "+" : "-";
   return `${prefix}${truncate(action.tag, 16)}`;
 }

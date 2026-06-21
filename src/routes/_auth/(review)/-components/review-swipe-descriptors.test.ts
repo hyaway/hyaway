@@ -58,6 +58,7 @@ describe("review swipe descriptors tag actions", () => {
       fileAction: "archive",
       secondaryActions: [
         {
+          id: "tag-add-1",
           actionType: "tag",
           type: "add",
           serviceKey: "localTags",
@@ -81,6 +82,7 @@ describe("review swipe descriptors tag actions", () => {
       fileAction: "trash",
       secondaryActions: [
         {
+          id: "tag-remove-1",
           actionType: "tag",
           type: "remove",
           serviceKey: "localTags",
@@ -104,18 +106,21 @@ describe("review swipe descriptors tag actions", () => {
       fileAction: "archive",
       secondaryActions: [
         {
+          id: "rating-like-1",
           actionType: "rating",
           type: "setLike",
           serviceKey: "favorites",
           value: true,
         },
         {
+          id: "rating-inc-1",
           actionType: "rating",
           type: "incDecDelta",
           serviceKey: "increment",
           delta: 1,
         },
         {
+          id: "tag-add-1",
           actionType: "tag",
           type: "add",
           serviceKey: "localTags",
@@ -139,11 +144,13 @@ describe("review swipe descriptors tag actions", () => {
       fileAction: "archive",
       secondaryActions: [
         {
+          id: "rating-incomplete-1",
           actionType: "rating",
           type: "setLike",
           serviceKey: "favorites",
         },
         {
+          id: "tag-incomplete-1",
           actionType: "tag",
           type: "add",
           serviceKey: "localTags",
