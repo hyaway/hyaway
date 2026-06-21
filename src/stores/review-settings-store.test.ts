@@ -3,6 +3,9 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  getAllSecondarySwipeActions,
+  getValidSecondarySwipeActions,
+  getValidSwipeBindings,
   normalizeReviewSwipeBinding,
   normalizeSwipeBindings,
   stripInvalidRatingActions,
@@ -83,7 +86,7 @@ function bindingsWithSecondaryActions(
 
 describe("review settings action stripping helpers", () => {
   describe("normalizeReviewSwipeBinding", () => {
-    it("keeps the first rating action for each rating service", () => {
+    it("preserves duplicate rating actions during normalization", () => {
       const duplicateRatingAction = {
         ...ratingAction,
         value: false,
@@ -96,14 +99,16 @@ describe("review settings action stripping helpers", () => {
 
       const next = normalizeReviewSwipeBinding(binding);
 
-      expect(next.secondaryActions).toHaveLength(2);
+      expect(next.secondaryActions).toHaveLength(3);
       expect(next.secondaryActions?.[0]).toMatchObject(ratingAction);
       expectGeneratedActionId(next.secondaryActions?.[0], "rating");
-      expect(next.secondaryActions?.[1]).toMatchObject(tagAction);
-      expectGeneratedActionId(next.secondaryActions?.[1], "tag");
+      expect(next.secondaryActions?.[1]).toMatchObject(duplicateRatingAction);
+      expectGeneratedActionId(next.secondaryActions?.[1], "rating");
+      expect(next.secondaryActions?.[2]).toMatchObject(tagAction);
+      expectGeneratedActionId(next.secondaryActions?.[2], "tag");
     });
 
-    it("keeps the first tag action for each local tag service and tag", () => {
+    it("preserves duplicate tag actions during normalization", () => {
       const duplicateTagAction = {
         ...tagAction,
         type: "remove",
@@ -120,11 +125,13 @@ describe("review settings action stripping helpers", () => {
 
       const next = normalizeReviewSwipeBinding(binding);
 
-      expect(next.secondaryActions).toHaveLength(2);
+      expect(next.secondaryActions).toHaveLength(3);
       expect(next.secondaryActions?.[0]).toMatchObject(tagAction);
       expectGeneratedActionId(next.secondaryActions?.[0], "tag");
-      expect(next.secondaryActions?.[1]).toMatchObject(otherServiceTagAction);
+      expect(next.secondaryActions?.[1]).toMatchObject(duplicateTagAction);
       expectGeneratedActionId(next.secondaryActions?.[1], "tag");
+      expect(next.secondaryActions?.[2]).toMatchObject(otherServiceTagAction);
+      expectGeneratedActionId(next.secondaryActions?.[2], "tag");
     });
 
     it("removes secondary actions from undo bindings", () => {
@@ -147,9 +154,11 @@ describe("review settings action stripping helpers", () => {
       const next = normalizeSwipeBindings(bindings);
 
       expect(next).not.toBe(bindings);
-      expect(next.left.secondaryActions).toHaveLength(1);
+      expect(next.left.secondaryActions).toHaveLength(2);
       expect(next.left.secondaryActions?.[0]).toMatchObject(ratingAction);
       expectGeneratedActionId(next.left.secondaryActions?.[0], "rating");
+      expect(next.left.secondaryActions?.[1]).toMatchObject(ratingAction);
+      expectGeneratedActionId(next.left.secondaryActions?.[1], "rating");
       expect(next.right).toBe(bindings.right);
     });
 
@@ -173,6 +182,91 @@ describe("review settings action stripping helpers", () => {
         ratingActionWithId,
         tagActionWithId,
       ]);
+    });
+
+    it("preserves incomplete secondary actions during normalization", () => {
+      const incompleteRatingAction = {
+        actionType: "rating",
+        type: "setLike",
+        serviceKey: "",
+      } satisfies SecondarySwipeAction;
+      const incompleteTagAction = {
+        actionType: "tag",
+        type: "add",
+        serviceKey: "localTags",
+        tag: "",
+      } satisfies SecondarySwipeAction;
+      const binding = bindingWithSecondaryActions([
+        incompleteRatingAction,
+        incompleteTagAction,
+      ]);
+
+      const next = normalizeReviewSwipeBinding(binding);
+
+      expect(next.secondaryActions).toHaveLength(2);
+      expect(next.secondaryActions?.[0]).toMatchObject(incompleteRatingAction);
+      expectGeneratedActionId(next.secondaryActions?.[0], "rating");
+      expect(next.secondaryActions?.[1]).toMatchObject(incompleteTagAction);
+      expectGeneratedActionId(next.secondaryActions?.[1], "tag");
+    });
+  });
+
+  describe("secondary action selectors", () => {
+    it("returns all persisted secondary actions", () => {
+      const binding = bindingWithSecondaryActions([ratingAction, tagAction]);
+
+      expect(getAllSecondarySwipeActions(binding)).toEqual([
+        ratingAction,
+        tagAction,
+      ]);
+    });
+
+    it("filters invalid rating and tag actions without mutating persisted rows", () => {
+      const incompleteRatingAction = {
+        actionType: "rating",
+        type: "setLike",
+        serviceKey: "stars",
+      } satisfies SecondarySwipeAction;
+      const incompleteTagAction = {
+        actionType: "tag",
+        type: "add",
+        serviceKey: "localTags",
+        tag: "",
+      } satisfies SecondarySwipeAction;
+      const binding = bindingWithSecondaryActions([
+        ratingAction,
+        incompleteRatingAction,
+        tagAction,
+        incompleteTagAction,
+      ]);
+
+      const validActions = getValidSecondarySwipeActions(binding, {
+        ratingServicesByKey: new Map([["stars", ratingService]]),
+        localTagServicesByKey: new Map([["localTags", localTagService]]),
+      });
+
+      expect(getAllSecondarySwipeActions(binding)).toHaveLength(4);
+      expect(validActions).toEqual([ratingAction, tagAction]);
+    });
+
+    it("filters invalid secondary actions across bindings", () => {
+      const incompleteRatingAction = {
+        actionType: "rating",
+        type: "setLike",
+        serviceKey: "stars",
+      } satisfies SecondarySwipeAction;
+      const bindings = bindingsWithSecondaryActions([
+        ratingAction,
+        incompleteRatingAction,
+      ]);
+
+      const next = getValidSwipeBindings(bindings, {
+        ratingServicesByKey: new Map([["stars", ratingService]]),
+      });
+
+      expect(next).not.toBe(bindings);
+      expect(next.left.secondaryActions).toEqual([ratingAction]);
+      expect(bindings.left.secondaryActions).toHaveLength(2);
     });
   });
 

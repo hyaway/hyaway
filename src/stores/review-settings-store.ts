@@ -8,6 +8,11 @@ import type {
   LocalTagServiceInfo,
   RatingServiceInfo,
 } from "@/integrations/hydrus-api/models";
+import {
+  isIncDecRatingService,
+  isLikeRatingService,
+  isNumericalRatingService,
+} from "@/integrations/hydrus-api/models";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import {
   MAX_OPTIMIZE_SIZE_THRESHOLD_MB,
@@ -43,21 +48,21 @@ export type RatingSwipeAction =
       type: "setLike";
       serviceKey: string;
       /** true = like, false = dislike, null = clear */
-      value: boolean | null;
+      value?: boolean | null;
     }
   | {
       /** Set a numerical star rating */
       type: "setNumerical";
       serviceKey: string;
       /** Star value or null to clear */
-      value: number | null;
+      value?: number | null;
     }
   | {
       /** Increment or decrement an inc/dec rating */
       type: "incDecDelta";
       serviceKey: string;
       /** +1 to increment, -1 to decrement */
-      delta: 1 | -1;
+      delta?: 1 | -1;
     };
 
 /**
@@ -526,10 +531,6 @@ export function hasUndoBinding(bindings: SwipeBindings): boolean {
   return SWIPE_DIRECTIONS.some((d) => bindings[d].fileAction === "undo");
 }
 
-function getTagActionIdentity(action: TagSwipeAction): string {
-  return `${action.serviceKey}\u0000${action.tag}`;
-}
-
 export function createSecondarySwipeActionId(
   actionType: SecondarySwipeAction["actionType"],
 ): string {
@@ -559,34 +560,125 @@ function normalizeSecondaryActions(
 ): Array<SecondarySwipeAction> | undefined {
   if (!secondaryActions?.length) return undefined;
 
-  const ratingServiceKeys = new Set<string>();
-  const tagActionIdentities = new Set<string>();
   const actionIds = new Set<string>();
-  const normalized: Array<SecondarySwipeAction> = [];
-
-  for (const action of secondaryActions) {
-    if (action.actionType === "rating") {
-      if (!action.serviceKey || ratingServiceKeys.has(action.serviceKey)) {
-        continue;
-      }
-      ratingServiceKeys.add(action.serviceKey);
-      normalized.push(withNormalizedSecondaryActionId(action, actionIds));
-      continue;
-    }
-
-    if (!action.serviceKey || !action.tag) {
-      continue;
-    }
-
-    const identity = getTagActionIdentity(action);
-    if (tagActionIdentities.has(identity)) {
-      continue;
-    }
-    tagActionIdentities.add(identity);
-    normalized.push(withNormalizedSecondaryActionId(action, actionIds));
-  }
+  const normalized = secondaryActions.map((action) =>
+    withNormalizedSecondaryActionId(action, actionIds),
+  );
 
   return normalized.length > 0 ? normalized : undefined;
+}
+
+export interface SecondarySwipeActionValidityContext {
+  ratingServicesByKey?: Map<string, RatingServiceInfo>;
+  localTagServicesByKey?: Map<string, LocalTagServiceInfo>;
+  readOnlyRatingServiceKeys?: Set<string>;
+  canEditFileRatings?: boolean;
+  canEditFileTags?: boolean;
+}
+
+export function getAllSecondarySwipeActions(
+  binding: ReviewSwipeBinding,
+): Array<SecondarySwipeAction> {
+  return binding.secondaryActions ?? [];
+}
+
+export function isValidRatingSecondarySwipeAction(
+  action: SecondarySwipeAction,
+  context: SecondarySwipeActionValidityContext = {},
+): action is RatingSecondarySwipeAction {
+  if (action.actionType !== "rating") return false;
+  if (context.canEditFileRatings === false) return false;
+  if (!action.serviceKey) return false;
+  if (context.readOnlyRatingServiceKeys?.has(action.serviceKey)) return false;
+
+  const service = context.ratingServicesByKey?.get(action.serviceKey);
+  if (context.ratingServicesByKey && !service) return false;
+
+  switch (action.type) {
+    case "setLike":
+      if (service && !isLikeRatingService(service)) return false;
+      return action.value !== undefined;
+    case "setNumerical":
+      if (service && !isNumericalRatingService(service)) return false;
+      return action.value !== undefined;
+    case "incDecDelta":
+      if (service && !isIncDecRatingService(service)) return false;
+      return action.delta === 1 || action.delta === -1;
+  }
+}
+
+export function isValidTagSecondarySwipeAction(
+  action: SecondarySwipeAction,
+  context: SecondarySwipeActionValidityContext = {},
+): action is TagSecondarySwipeAction {
+  if (action.actionType !== "tag") return false;
+  if (context.canEditFileTags === false) return false;
+  if (!action.serviceKey || !action.tag.trim()) return false;
+  if (
+    context.localTagServicesByKey &&
+    !context.localTagServicesByKey.has(action.serviceKey)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+export function isValidSecondarySwipeAction(
+  action: SecondarySwipeAction,
+  context: SecondarySwipeActionValidityContext = {},
+): action is SecondarySwipeAction {
+  return (
+    isValidRatingSecondarySwipeAction(action, context) ||
+    isValidTagSecondarySwipeAction(action, context)
+  );
+}
+
+export function getValidSecondarySwipeActions(
+  binding: ReviewSwipeBinding,
+  context: SecondarySwipeActionValidityContext = {},
+): Array<SecondarySwipeAction> {
+  return getAllSecondarySwipeActions(binding).filter((action) =>
+    isValidSecondarySwipeAction(action, context),
+  );
+}
+
+export function getValidReviewSwipeBinding(
+  binding: ReviewSwipeBinding,
+  context: SecondarySwipeActionValidityContext = {},
+): ReviewSwipeBinding {
+  const secondaryActions = getValidSecondarySwipeActions(binding, context);
+
+  if (secondaryActions.length === (binding.secondaryActions?.length ?? 0)) {
+    return binding;
+  }
+
+  return {
+    ...binding,
+    secondaryActions:
+      secondaryActions.length > 0 ? secondaryActions : undefined,
+  };
+}
+
+export function getValidSwipeBindings(
+  bindings: SwipeBindings,
+  context: SecondarySwipeActionValidityContext = {},
+): SwipeBindings {
+  let changed = false;
+  const nextBindings = { ...bindings };
+
+  for (const direction of SWIPE_DIRECTIONS) {
+    const nextBinding = getValidReviewSwipeBinding(
+      bindings[direction],
+      context,
+    );
+    if (nextBinding !== bindings[direction]) {
+      nextBindings[direction] = nextBinding;
+      changed = true;
+    }
+  }
+
+  return changed ? nextBindings : bindings;
 }
 
 export function normalizeReviewSwipeBinding(
