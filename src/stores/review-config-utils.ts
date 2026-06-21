@@ -48,9 +48,14 @@ export function uniqueConfigName(
   return `${base} ${n}`;
 }
 
-/** Stable, unique id for a saved config. */
+/**
+ * Stable, unique id for a saved config. Uses the same scheme as the rest of
+ * the app (see `randomHash` in `lib/search-entry-utils`) rather than
+ * `crypto.randomUUID`, which is only defined in secure contexts and throws
+ * (aborting the save) when the app is served over plain HTTP.
+ */
 export function makeConfigId(): string {
-  return crypto.randomUUID();
+  return Math.random().toString(36).slice(2, 10);
 }
 
 /** Add a new config from a snapshot (name uniquified against all existing). */
