@@ -24,13 +24,17 @@ import type {
   SwipeBindings,
   SwipeDirection,
 } from "@/stores/review-settings-store";
-import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
+import type {
+  LocalTagServiceInfo,
+  RatingServiceInfo,
+} from "@/integrations/hydrus-api/models";
 import {
   useReviewQueueActions,
   useReviewQueueHistory,
   useReviewQueueSources,
 } from "@/stores/review-queue-store";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
 import { useGetMediaPagesQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { Button, LinkButton } from "@/components/ui-primitives/button";
 import { cn } from "@/lib/utils";
@@ -87,6 +91,7 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
   const history = useReviewQueueHistory();
   const sources = useReviewQueueSources();
   const { servicesMap } = useRatingServices();
+  const { localTagServicesByKey } = useLocalTagServices();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -165,6 +170,7 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
               fileIds={fileIdsByDirection[direction]}
               bindings={bindings}
               servicesMap={servicesMap}
+              tagServicesMap={localTagServicesByKey}
             />
           ))}
         </div>
@@ -357,6 +363,7 @@ interface DecisionFilmstripSectionProps {
   fileIds: Array<number>;
   bindings: SwipeBindings;
   servicesMap: Map<string, RatingServiceInfo>;
+  tagServicesMap: Map<string, LocalTagServiceInfo>;
 }
 
 const DecisionFilmstripSection = memo(function DecisionFilmstripSectionMemo({
@@ -364,11 +371,12 @@ const DecisionFilmstripSection = memo(function DecisionFilmstripSectionMemo({
   fileIds,
   bindings,
   servicesMap,
+  tagServicesMap,
 }: DecisionFilmstripSectionProps) {
   const binding = bindings[direction];
   const descriptor = useMemo(
-    () => getSwipeBindingDescriptor(binding, servicesMap),
-    [binding, servicesMap],
+    () => getSwipeBindingDescriptor(binding, servicesMap, tagServicesMap),
+    [binding, servicesMap, tagServicesMap],
   );
   const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];
