@@ -9,10 +9,6 @@ import {
   IconArrowRight,
   IconArrowUp,
   IconDots,
-  IconPlus,
-  IconPlusFilled,
-  IconTag,
-  IconTagFilled,
 } from "@tabler/icons-react";
 import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import { ReviewRatingButton } from "./review-rating-picker";
