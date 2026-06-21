@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { cva } from "class-variance-authority";
-import { createContext, forwardRef, useContext } from "react";
+import { createContext, forwardRef, useContext, useId } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { Badge } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";
@@ -186,6 +186,8 @@ const labelFlexVariants = cva(["flex flex-col items-center gap-0.5"], {
 interface BottomNavButtonProps {
   /** The label for the button */
   label: string;
+  /** Accessible description for extra context beyond the visible label */
+  ariaDescription?: string;
   /** Icon content to display */
   icon?: ReactNode;
   /**
@@ -225,6 +227,7 @@ export const BottomNavButton = forwardRef<
 >(function BottomNavButtonMemo(
   {
     label,
+    ariaDescription,
     icon,
     customContent,
     onClick,
@@ -243,6 +246,7 @@ export const BottomNavButton = forwardRef<
   ref,
 ) {
   const maxButtons = useContext(BottomNavButtonContext);
+  const ariaDescriptionId = useId();
 
   return (
     <Button
@@ -256,7 +260,13 @@ export const BottomNavButton = forwardRef<
       render={render}
       data-menu-open={dataMenuOpen || undefined}
       title={title}
+      aria-describedby={ariaDescription ? ariaDescriptionId : undefined}
     >
+      {ariaDescription && (
+        <span id={ariaDescriptionId} className="sr-only">
+          {ariaDescription}
+        </span>
+      )}
       {isLoading ? (
         <Spinner className="short:size-5 size-6" />
       ) : (

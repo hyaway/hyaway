@@ -225,6 +225,7 @@ export function ReviewFooter({
                 <BottomNavButton
                   key={direction}
                   label={getFileActionLabel(binding.fileAction)}
+                  ariaDescription={descriptor.label}
                   customContent={
                     <DirectionalIcon direction={direction}>
                       <descriptor.icon className="size-6" />
