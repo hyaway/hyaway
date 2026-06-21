@@ -17,9 +17,9 @@ import type {
 import type {
   ReviewFileAction,
   ReviewFileMutationAction,
-  SecondarySwipeAction,
-  SwipeBindings,
   TagSwipeActionType,
+  ValidSecondarySwipeAction,
+  ValidSwipeBindings,
 } from "@/stores/review-settings-store";
 import type {
   FileMetadata,
@@ -27,11 +27,7 @@ import type {
 } from "@/integrations/hydrus-api/models";
 import {
   getBindingForDirection,
-  stripInvalidRatingActionsFromBindings,
-  stripInvalidTagActionsFromBindings,
-  stripRatingActionsForMissingPermission,
-  stripRatingActionsForServicesFromBindings,
-  stripTagActionsForMissingPermission,
+  getValidSwipeBindings,
   useReviewGesturesEnabled,
   useReviewImmersiveMode,
   useReviewSettingsActions,
@@ -211,7 +207,7 @@ function shouldHideFromViewAfterReviewAction(
  * Returns the restore entries so the caller can record them in history.
  */
 function executeSecondaryRatingActions(
-  secondaryActions: Array<SecondarySwipeAction>,
+  secondaryActions: Array<ValidSecondarySwipeAction>,
   fileId: number,
   ratings: Record<string, unknown> | undefined,
   validRatingServiceKeys: Set<string>,
@@ -252,7 +248,6 @@ function executeSecondaryRatingActions(
         rating: action.value,
       });
     } else {
-      // action.type === "incDecDelta"
       const prevValue = (currentRating as number | null) ?? 0;
       restoreEntries.push({
         serviceKey,
@@ -279,7 +274,7 @@ function getReverseContentUpdateAction(actionType: "add" | "remove") {
 }
 
 function executeSecondaryTagActions(
-  secondaryActions: Array<SecondarySwipeAction>,
+  secondaryActions: Array<ValidSecondarySwipeAction>,
   fileId: number,
   metadata: FileMetadata | undefined,
   validLocalTagServiceKeys: Set<string>,
@@ -368,31 +363,17 @@ export function useReviewSwipeDeck() {
     [localTagServices],
   );
   const editableBindings = useMemo(() => {
-    const withoutReadOnlyRatings = stripRatingActionsForServicesFromBindings(
-      bindings,
+    return getValidSwipeBindings(bindings, {
+      canEditFileRatings: canEditRatings,
+      canEditFileTags: canEditTags,
+      localTagServicesByKey: localTagServicesFetched
+        ? localTagServicesByKey
+        : undefined,
+      ratingServicesByKey: ratingServicesFetched
+        ? ratingServicesByKey
+        : undefined,
       readOnlyRatingServiceKeys,
-    );
-    const withoutMissingRatingPermission =
-      stripRatingActionsForMissingPermission(
-        withoutReadOnlyRatings,
-        canEditRatings,
-      );
-    const withoutInvalidRatings = ratingServicesFetched
-      ? stripInvalidRatingActionsFromBindings(
-          withoutMissingRatingPermission,
-          ratingServicesByKey,
-        )
-      : withoutMissingRatingPermission;
-    const withoutMissingTagPermission = stripTagActionsForMissingPermission(
-      withoutInvalidRatings,
-      canEditTags,
-    );
-    return localTagServicesFetched
-      ? stripInvalidTagActionsFromBindings(
-          withoutMissingTagPermission,
-          localTagServicesByKey,
-        )
-      : withoutMissingTagPermission;
+    });
   }, [
     bindings,
     canEditRatings,
@@ -647,7 +628,7 @@ export function ReviewSwipeDeckVisual({
   visibleFileIds: Array<number>;
   exitingCards: Map<number, SwipeDirection>;
   gesturesEnabled: boolean;
-  bindings: SwipeBindings;
+  bindings: ValidSwipeBindings;
   canUndo: boolean;
   skipAnimationRef: React.RefObject<boolean>;
   handleSwipe: (direction: SwipeDirection) => void;
