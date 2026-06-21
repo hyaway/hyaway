@@ -19,7 +19,7 @@ import type {
   ReviewFileMutationAction,
   SecondarySwipeAction,
   SwipeBindings,
-  TagSwipeAction,
+  TagSwipeActionType,
 } from "@/stores/review-settings-store";
 import type {
   FileMetadata,
@@ -136,7 +136,7 @@ type RatingMutate = (args: {
 type TagMutate = (args: UpdateFileTagsOptions) => void;
 
 const contentUpdateActionByTagAction: Record<
-  TagSwipeAction["type"],
+  TagSwipeActionType,
   ContentUpdateAction
 > = {
   add: ContentUpdateAction.ADD,
@@ -144,7 +144,7 @@ const contentUpdateActionByTagAction: Record<
 };
 
 const reverseContentUpdateActionByTagAction: Record<
-  TagSwipeAction["type"],
+  TagSwipeActionType,
   ContentUpdateAction
 > = {
   add: ContentUpdateAction.DELETE,
