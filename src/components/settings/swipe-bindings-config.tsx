@@ -1148,33 +1148,16 @@ function DirectionBindingEditor({
       {/* Rating Actions — hidden when undo is selected (no secondary actions for undo) */}
       {binding.fileAction !== "undo" && (
         <div className="flex min-w-0 flex-col gap-2">
-          <div className="flex min-w-0 items-center justify-between gap-2">
-            <Label
-              className={cn(
-                "text-xs",
-                canEditRatings && hasRatingServices
-                  ? "text-muted-foreground"
-                  : "text-muted-foreground/50",
-              )}
-            >
-              Rating actions (optional)
-            </Label>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const actionId = createSecondarySwipeActionId("rating");
-                upsertRatingAction(
-                  getEmptyRatingAction("", ratingServices),
-                  actionId,
-                );
-              }}
-              disabled={!canAddRating}
-            >
-              <IconPlus className="size-4" />
-              Add rating
-            </Button>
-          </div>
+          <Label
+            className={cn(
+              "text-xs",
+              canEditRatings && hasRatingServices
+                ? "text-muted-foreground"
+                : "text-muted-foreground/50",
+            )}
+          >
+            Rating actions (optional)
+          </Label>
 
           {!canEditRatings && ratingActions.length === 0 ? (
             <span className="text-muted-foreground/50 text-xs">
@@ -1186,123 +1169,122 @@ function DirectionBindingEditor({
             </span>
           ) : null}
 
-          <div className="flex min-w-0 flex-col gap-2">
-            {ratingActions.map((ratingAction, index) => {
-              const actionId = ratingAction.id;
-              const service = ratingServices.find(
-                ([key]) => key === ratingAction.serviceKey,
-              )?.[1];
-              const serviceName =
-                service?.name ?? ratingAction.serviceKey ?? "Rating service";
-              const isOrphanedRating =
-                ratingAction.serviceKey &&
-                !allRatingServiceKeys.has(ratingAction.serviceKey);
-              const isReadOnlyRating = readOnlyServiceKeys.has(
-                ratingAction.serviceKey ?? "",
-              );
+          {ratingActions.length > 0 && (
+            <div className="flex min-w-0 flex-col gap-2">
+              {ratingActions.map((ratingAction, index) => {
+                const actionId = ratingAction.id;
+                const service = ratingServices.find(
+                  ([key]) => key === ratingAction.serviceKey,
+                )?.[1];
+                const serviceName =
+                  service?.name ?? ratingAction.serviceKey ?? "Rating service";
+                const isOrphanedRating =
+                  ratingAction.serviceKey &&
+                  !allRatingServiceKeys.has(ratingAction.serviceKey);
+                const isReadOnlyRating = readOnlyServiceKeys.has(
+                  ratingAction.serviceKey ?? "",
+                );
 
-              if (isOrphanedRating) {
+                if (isOrphanedRating) {
+                  return (
+                    <RatingActionWarning
+                      key={`${ratingAction.serviceKey}-${index}`}
+                      variant="destructive"
+                      title="Rating service does not exist"
+                      description={
+                        <>
+                          Rating service{" "}
+                          <span className="break-all">
+                            {ratingAction.serviceKey}
+                          </span>{" "}
+                          is no longer available. Clear it and pick a different
+                          rating service for this swipe action.
+                        </>
+                      }
+                      onClear={() => removeRatingAction(actionId)}
+                    />
+                  );
+                }
+
+                if (isReadOnlyRating) {
+                  return (
+                    <RatingActionWarning
+                      key={`${ratingAction.serviceKey}-${index}`}
+                      title={`${serviceName} is read-only`}
+                      description="Clear it, or turn off read-only for this rating service in settings."
+                      onClear={() => removeRatingAction(actionId)}
+                    />
+                  );
+                }
+
                 return (
-                  <RatingActionWarning
-                    key={`${ratingAction.serviceKey}-${index}`}
-                    variant="destructive"
-                    title="Rating service does not exist"
-                    description={
-                      <>
-                        Rating service{" "}
-                        <span className="break-all">
-                          {ratingAction.serviceKey}
-                        </span>{" "}
-                        is no longer available. Clear it and pick a different
-                        rating service for this swipe action.
-                      </>
-                    }
-                    onClear={() => removeRatingAction(actionId)}
+                  <RatingActionEditor
+                    key={actionId}
+                    selectedServiceKey={ratingAction.serviceKey ?? ""}
+                    ratingAction={ratingAction}
+                    ratingServices={ratingServices}
+                    readOnlyServiceKeys={readOnlyServiceKeys}
+                    usedServiceKeys={usedRatingServiceKeys}
+                    disabled={!canEditRatings}
+                    validationMessage={getRatingActionValidationMessage(
+                      ratingAction,
+                      actionId,
+                    )}
+                    onServiceChange={(serviceKey) => {
+                      upsertRatingAction(
+                        getEmptyRatingAction(serviceKey, ratingServices),
+                        actionId,
+                      );
+                    }}
+                    onRatingActionChange={(newRatingAction) => {
+                      upsertRatingAction(
+                        newRatingAction ??
+                          getEmptyRatingAction(
+                            ratingAction.serviceKey ?? "",
+                            ratingServices,
+                          ),
+                        actionId,
+                      );
+                    }}
+                    onRemove={() => removeRatingAction(actionId)}
                   />
                 );
-              }
+              })}
+            </div>
+          )}
 
-              if (isReadOnlyRating) {
-                return (
-                  <RatingActionWarning
-                    key={`${ratingAction.serviceKey}-${index}`}
-                    title={`${serviceName} is read-only`}
-                    description="Clear it, or turn off read-only for this rating service in settings."
-                    onClear={() => removeRatingAction(actionId)}
-                  />
-                );
-              }
-
-              return (
-                <RatingActionEditor
-                  key={actionId}
-                  selectedServiceKey={ratingAction.serviceKey ?? ""}
-                  ratingAction={ratingAction}
-                  ratingServices={ratingServices}
-                  readOnlyServiceKeys={readOnlyServiceKeys}
-                  usedServiceKeys={usedRatingServiceKeys}
-                  disabled={!canEditRatings}
-                  validationMessage={getRatingActionValidationMessage(
-                    ratingAction,
-                    actionId,
-                  )}
-                  onServiceChange={(serviceKey) => {
-                    upsertRatingAction(
-                      getEmptyRatingAction(serviceKey, ratingServices),
-                      actionId,
-                    );
-                  }}
-                  onRatingActionChange={(newRatingAction) => {
-                    upsertRatingAction(
-                      newRatingAction ??
-                        getEmptyRatingAction(
-                          ratingAction.serviceKey ?? "",
-                          ratingServices,
-                        ),
-                      actionId,
-                    );
-                  }}
-                  onRemove={() => removeRatingAction(actionId)}
-                />
+          <Button
+            variant="outline"
+            size="sm"
+            className="self-start"
+            onClick={() => {
+              const actionId = createSecondarySwipeActionId("rating");
+              upsertRatingAction(
+                getEmptyRatingAction("", ratingServices),
+                actionId,
               );
-            })}
-          </div>
+            }}
+            disabled={!canAddRating}
+          >
+            <IconPlus className="size-4" />
+            Add rating
+          </Button>
         </div>
       )}
 
       {/* Tag Actions — hidden when undo is selected (no secondary actions for undo) */}
       {binding.fileAction !== "undo" && (
         <div className="flex min-w-0 flex-col gap-2">
-          <div className="flex min-w-0 items-center justify-between gap-2">
-            <Label
-              className={cn(
-                "text-xs",
-                canEditTags && hasLocalTagServices
-                  ? "text-muted-foreground"
-                  : "text-muted-foreground/50",
-              )}
-            >
-              Tag actions (optional)
-            </Label>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const actionId = createSecondarySwipeActionId("tag");
-                upsertTagAction(
-                  {
-                    type: "add",
-                    serviceKey: getDefaultLocalTagServiceKey(localTagServices),
-                  },
-                  actionId,
-                );
-              }}
-              disabled={!canAddTag}
-            >
-              <IconPlus className="size-4" />
-              Add tag
-            </Button>
-          </div>
+          <Label
+            className={cn(
+              "text-xs",
+              canEditTags && hasLocalTagServices
+                ? "text-muted-foreground"
+                : "text-muted-foreground/50",
+            )}
+          >
+            Tag actions (optional)
+          </Label>
 
           {!canEditTags && tagActions.length === 0 ? (
             <span className="text-muted-foreground/50 text-xs">
@@ -1314,67 +1296,89 @@ function DirectionBindingEditor({
             </span>
           ) : null}
 
-          <div className="flex min-w-0 flex-col gap-2">
-            {tagActions.map((tagAction, index) => {
-              const identity = getTagSwipeActionIdentity(tagAction);
-              const actionId = tagAction.id;
-              const isOrphanedTag =
-                tagAction.serviceKey &&
-                !allLocalTagServiceKeys.has(tagAction.serviceKey);
+          {tagActions.length > 0 && (
+            <div className="flex min-w-0 flex-col gap-2">
+              {tagActions.map((tagAction, index) => {
+                const identity = getTagSwipeActionIdentity(tagAction);
+                const actionId = tagAction.id;
+                const isOrphanedTag =
+                  tagAction.serviceKey &&
+                  !allLocalTagServiceKeys.has(tagAction.serviceKey);
 
-              if (isOrphanedTag) {
+                if (isOrphanedTag) {
+                  return (
+                    <RatingActionWarning
+                      key={`${identity}-${index}`}
+                      variant="destructive"
+                      title="Tag service does not exist"
+                      description={
+                        <>
+                          Tag service{" "}
+                          <span className="break-all">
+                            {tagAction.serviceKey}
+                          </span>{" "}
+                          is no longer available. Clear it and pick a different
+                          local tag domain for this swipe action.
+                        </>
+                      }
+                      onClear={() => removeTagAction(actionId)}
+                    />
+                  );
+                }
+
                 return (
-                  <RatingActionWarning
-                    key={`${identity}-${index}`}
-                    variant="destructive"
-                    title="Tag service does not exist"
-                    description={
-                      <>
-                        Tag service{" "}
-                        <span className="break-all">
-                          {tagAction.serviceKey}
-                        </span>{" "}
-                        is no longer available. Clear it and pick a different
-                        local tag domain for this swipe action.
-                      </>
+                  <TagActionEditor
+                    key={actionId}
+                    draft={{
+                      ...tagAction,
+                      validationMessage: getTagDraftDuplicateMessage(
+                        tagAction,
+                        actionId,
+                      ),
+                    }}
+                    localTagServices={localTagServices}
+                    disabled={!canEditTags}
+                    cleanTagsMutation={cleanTagsMutation}
+                    validateDraft={(draft) =>
+                      getTagDraftDuplicateMessage(draft, actionId)
                     }
-                    onClear={() => removeTagAction(actionId)}
+                    onDraftChange={(draft) => {
+                      upsertTagAction(
+                        {
+                          type: draft.type,
+                          serviceKey: draft.serviceKey,
+                          tag: draft.tag,
+                        },
+                        actionId,
+                      );
+                    }}
+                    onCommit={(draft) => commitTagDraft(draft, actionId)}
+                    onRemove={() => removeTagAction(actionId)}
                   />
                 );
-              }
+              })}
+            </div>
+          )}
 
-              return (
-                <TagActionEditor
-                  key={actionId}
-                  draft={{
-                    ...tagAction,
-                    validationMessage: getTagDraftDuplicateMessage(
-                      tagAction,
-                      actionId,
-                    ),
-                  }}
-                  localTagServices={localTagServices}
-                  disabled={!canEditTags}
-                  cleanTagsMutation={cleanTagsMutation}
-                  validateDraft={(draft) =>
-                    getTagDraftDuplicateMessage(draft, actionId)
-                  }
-                  onDraftChange={(draft) => {
-                    upsertTagAction(
-                      {
-                        type: draft.type,
-                        serviceKey: draft.serviceKey,
-                        tag: draft.tag,
-                      },
-                      actionId,
-                    );
-                  }}
-                  onCommit={(draft) => commitTagDraft(draft, actionId)}
-                  onRemove={() => removeTagAction(actionId)}
-                />
+          <Button
+            variant="outline"
+            size="sm"
+            className="self-start"
+            onClick={() => {
+              const actionId = createSecondarySwipeActionId("tag");
+              upsertTagAction(
+                {
+                  type: "add",
+                  serviceKey: getDefaultLocalTagServiceKey(localTagServices),
+                },
+                actionId,
               );
-            })}
-          </div>
+            }}
+            disabled={!canAddTag}
+          >
+            <IconPlus className="size-4" />
+            Add tag
+          </Button>
         </div>
       )}
     </div>
