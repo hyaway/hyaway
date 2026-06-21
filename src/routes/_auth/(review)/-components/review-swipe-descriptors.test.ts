@@ -133,4 +133,32 @@ describe("review swipe descriptors tag actions", () => {
     expect(descriptor.label).toBe("Archive + 2 ratings, 1 tag");
     expect(descriptor.shortLabel).toBe("Archive +2R +1T");
   });
+
+  it("ignores persisted incomplete secondary actions in swipe descriptors", () => {
+    const binding: ReviewSwipeBinding = {
+      fileAction: "archive",
+      secondaryActions: [
+        {
+          actionType: "rating",
+          type: "setLike",
+          serviceKey: "favorites",
+        },
+        {
+          actionType: "tag",
+          type: "add",
+          serviceKey: "localTags",
+          tag: "",
+        },
+      ],
+    };
+
+    const descriptor = getSwipeBindingDescriptor(
+      binding,
+      undefined,
+      new Map([["localTags", localTagService]]),
+    );
+
+    expect(descriptor.label).toBe("Archive");
+    expect(descriptor.shortLabel).toBe("Archive");
+  });
 });

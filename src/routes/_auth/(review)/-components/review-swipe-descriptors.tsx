@@ -8,18 +8,19 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import type {
-  RatingSecondarySwipeAction,
-  RatingSwipeAction,
   ReviewFileAction,
   ReviewSwipeBinding,
-  SecondarySwipeAction,
   TagSecondarySwipeAction,
   TagSwipeAction,
+  ValidRatingSecondarySwipeAction,
+  ValidRatingSwipeAction,
+  ValidSecondarySwipeAction,
 } from "@/stores/review-settings-store";
 import type {
   LocalTagServiceInfo,
   RatingServiceInfo,
 } from "@/integrations/hydrus-api/models";
+import { getValidSecondarySwipeActions } from "@/stores/review-settings-store";
 import { isNumericalRatingService } from "@/integrations/hydrus-api/models";
 
 /** Visual descriptor for a swipe binding */
@@ -47,19 +48,19 @@ function truncate(str: string, maxLength: number): string {
 
 /** Extract rating actions from secondary actions array */
 function getRatingActions(
-  secondaryActions?: Array<SecondarySwipeAction>,
-): Array<RatingSwipeAction> {
+  secondaryActions?: Array<ValidSecondarySwipeAction>,
+): Array<ValidRatingSwipeAction> {
   if (!secondaryActions) return [];
   return secondaryActions
     .filter(
-      (action): action is RatingSecondarySwipeAction =>
+      (action): action is ValidRatingSecondarySwipeAction =>
         action.actionType === "rating",
     )
     .map(({ actionType: _, ...rest }) => rest);
 }
 
 function getTagActions(
-  secondaryActions?: Array<SecondarySwipeAction>,
+  secondaryActions?: Array<ValidSecondarySwipeAction>,
 ): Array<TagSwipeAction> {
   if (!secondaryActions) return [];
   return secondaryActions
@@ -75,7 +76,7 @@ function getTagActions(
  * Examples: "like", "7/10", "+1"
  */
 function getRatingValueString(
-  action: RatingSwipeAction,
+  action: ValidRatingSwipeAction,
   ratingServices?: Map<string, RatingServiceInfo>,
 ): string {
   const service = ratingServices?.get(action.serviceKey);
@@ -107,7 +108,7 @@ function getRatingValueString(
  * @param ratingServices Optional map of serviceKey -> RatingServiceInfo for display
  */
 export function formatRatingAction(
-  action: RatingSwipeAction,
+  action: ValidRatingSwipeAction,
   ratingServices?: Map<string, RatingServiceInfo>,
 ): string {
   const service = ratingServices?.get(action.serviceKey);
@@ -121,7 +122,7 @@ export function formatRatingAction(
  * Examples: "like", "7/10", "+1"
  */
 export function formatRatingActionShort(
-  action: RatingSwipeAction,
+  action: ValidRatingSwipeAction,
   ratingServices?: Map<string, RatingServiceInfo>,
 ): string {
   return getRatingValueString(action, ratingServices);
@@ -194,8 +195,12 @@ function buildSwipeBindingDescriptor(
     icon: base.icon,
     ...style,
   };
-  const ratingActions = getRatingActions(binding.secondaryActions);
-  const tagActions = getTagActions(binding.secondaryActions);
+  const validSecondaryActions = getValidSecondarySwipeActions(binding, {
+    localTagServicesByKey: tagServices,
+    ratingServicesByKey: ratingServices,
+  });
+  const ratingActions = getRatingActions(validSecondaryActions);
+  const tagActions = getTagActions(validSecondaryActions);
   const actionLabels: Array<string> = [];
   const shortActionLabels: Array<string> = [];
   const secondaryActionCount = ratingActions.length + tagActions.length;
