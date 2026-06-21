@@ -59,7 +59,7 @@ describe("review swipe descriptors tag actions", () => {
     );
 
     expect(descriptor.label).toBe("Archive\n+series:example");
-    expect(descriptor.shortLabel).toBe("Archive +series:example");
+    expect(descriptor.secondaryActionCount).toBe(1);
   });
 
   it("keeps full rating service names in swipe descriptor labels", () => {
@@ -79,7 +79,7 @@ describe("review swipe descriptors tag actions", () => {
     const descriptor = getSwipeBindingDescriptor(binding, ratingServices);
 
     expect(descriptor.label).toBe("Archive\nFavorite like");
-    expect(descriptor.shortLabel).toBe("Archive Fav like");
+    expect(descriptor.secondaryActionCount).toBe(1);
   });
 
   it("includes remove tag actions in swipe descriptors", () => {
@@ -103,7 +103,6 @@ describe("review swipe descriptors tag actions", () => {
     );
 
     expect(descriptor.label).toBe("Trash\n-series:example");
-    expect(descriptor.shortLabel).toBe("Trash -series:example");
   });
 
   it("formats multiple secondary actions with compact ordered labels", () => {
@@ -143,9 +142,7 @@ describe("review swipe descriptors tag actions", () => {
     expect(descriptor.label).toBe(
       "Archive\nFavorite like\nstar rating 7/10\n+series:example",
     );
-    expect(descriptor.shortLabel).toBe(
-      "Archive Fav like,sta 7/10,+series:example",
-    );
+    expect(descriptor.secondaryActionCount).toBe(3);
   });
 
   it("omits skip labels when skip has valid secondary actions", () => {
@@ -176,7 +173,6 @@ describe("review swipe descriptors tag actions", () => {
     );
 
     expect(descriptor.label).toBe("Favorite like\n+reviewed");
-    expect(descriptor.shortLabel).toBe("Fav like,+reviewed");
   });
 
   it("ignores persisted incomplete secondary actions in swipe descriptors", () => {
@@ -206,6 +202,6 @@ describe("review swipe descriptors tag actions", () => {
     );
 
     expect(descriptor.label).toBe("Archive");
-    expect(descriptor.shortLabel).toBe("Archive");
+    expect(descriptor.secondaryActionCount).toBe(0);
   });
 });

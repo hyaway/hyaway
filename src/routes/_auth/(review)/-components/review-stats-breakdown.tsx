@@ -9,6 +9,7 @@ import {
   IconCircleFilled,
 } from "@tabler/icons-react";
 import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
+import type { Icon } from "@tabler/icons-react";
 import type { ReviewDirectionStats } from "@/stores/review-queue-store";
 import type {
   SwipeBindings,
@@ -18,14 +19,22 @@ import type {
   LocalTagServiceInfo,
   RatingServiceInfo,
 } from "@/integrations/hydrus-api/models";
+import { Button } from "@/components/ui-primitives/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui-primitives/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui-primitives/tooltip";
 import { cn } from "@/lib/utils";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
 
-const DIRECTION_ICONS: Record<
-  SwipeDirection,
-  React.ComponentType<{ className?: string }>
-> = {
+const DIRECTION_ICONS: Record<SwipeDirection, Icon> = {
   left: IconArrowLeft,
   right: IconArrowRight,
   up: IconArrowUp,
@@ -159,32 +168,67 @@ function InlineStatItem({
     ratingServices,
     tagServices,
   );
+  const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];
-
-  return (
+  const inlineContent = (
+    <>
+      {count}
+      {showLabel && (
+        <span className="inline-flex items-center gap-0.5">
+          <ActionIcon className="size-4" strokeWidth={2.5} />
+          {descriptor.secondaryActionCount > 0 && (
+            <span className="text-muted-foreground">
+              +{descriptor.secondaryActionCount}
+            </span>
+          )}
+        </span>
+      )}
+      <DirectionIcon className="size-4" strokeWidth={2.5} />
+    </>
+  );
+  const content = (
     <span
       className={cn(
         "inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap",
         descriptor.textClass,
       )}
     >
-      {count}
-      {showLabel && (
-        <>
-          {/* Short label on small screens */}
-          <span className="sm:hidden">
-            {" "}
-            {descriptor.shortLabel.toLowerCase()}
-          </span>
-          {/* Full label on larger screens */}
-          <span className="hidden sm:inline">
-            {" "}
-            {descriptor.label.toLowerCase()}
-          </span>
-        </>
-      )}
-      <DirectionIcon className="size-3" />
+      {inlineContent}
     </span>
+  );
+  const trigger = (
+    <Button
+      variant="ghost"
+      size="sm"
+      aria-label={`Show ${descriptor.label.replace(/\n/g, " ")} details`}
+      className={descriptor.textClass}
+    >
+      {inlineContent}
+    </Button>
+  );
+
+  if (!showLabel) return content;
+
+  return (
+    <Popover>
+      <PopoverTrigger render={trigger} />
+      <PopoverContent side="bottom" align="center" className="w-56 gap-2 p-3">
+        <div className="flex items-start gap-2">
+          <span
+            className={cn(
+              "mt-0.5 flex shrink-0 items-center",
+              descriptor.textClass,
+            )}
+          >
+            <ActionIcon className="size-4" strokeWidth={2.5} />
+            <DirectionIcon className="size-4" strokeWidth={2.5} />
+          </span>
+          <span className="text-sm whitespace-pre-line">
+            {descriptor.label}
+          </span>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -203,8 +247,7 @@ function GridStatItem({
   );
   const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];
-
-  return (
+  const content = (
     <div className="flex w-20 min-w-0 flex-col items-center gap-1">
       <div
         className={cn(
@@ -221,5 +264,18 @@ function GridStatItem({
         {descriptor.label}
       </span>
     </div>
+  );
+
+  if (descriptor.secondaryActionCount === 0) {
+    return content;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={content} />
+      <TooltipContent side="top" className="text-center whitespace-pre-line">
+        {descriptor.label}
+      </TooltipContent>
+    </Tooltip>
   );
 }

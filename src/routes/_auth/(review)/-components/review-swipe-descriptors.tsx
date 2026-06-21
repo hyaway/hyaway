@@ -7,6 +7,7 @@ import {
   IconPlayerTrackNext,
   IconTrash,
 } from "@tabler/icons-react";
+import type { Icon } from "@tabler/icons-react";
 import type {
   ReviewFileAction,
   ReviewSwipeBinding,
@@ -25,23 +26,14 @@ import { isNumericalRatingService } from "@/integrations/hydrus-api/models";
 export interface SwipeBindingDescriptor {
   /** Display label for the binding */
   label: string;
-  /** Dense label for compact surfaces like mobile inline stats */
-  shortLabel: string;
+  /** Number of valid secondary actions attached to the binding */
+  secondaryActionCount: number;
   /** Icon component to render */
-  icon: React.ComponentType<{ className?: string }>;
+  icon: Icon;
   /** Tailwind classes for the icon/text color */
   textClass: string;
   /** Tailwind classes for the background (used in overlays and badges) */
   bgClass: string;
-}
-
-/** Truncate a string to maxLength, adding ellipsis if needed */
-function truncate(str: string, maxLength: number): string {
-  if (str.length <= maxLength) return str;
-  return `${str
-    .trim()
-    .slice(0, maxLength - 1)
-    .trim()}`;
 }
 
 /**
@@ -73,24 +65,6 @@ function getRatingValueString(
   }
 }
 
-function getCompactServiceName(
-  serviceName: string | undefined,
-  fallback: string,
-) {
-  const normalized = (serviceName ?? fallback).trim().replace(/\s+/g, " ");
-  return normalized.slice(0, 3) || fallback.slice(0, 3);
-}
-
-function formatRatingActionCompact(
-  action: ValidRatingSwipeAction,
-  ratingServices?: Map<string, RatingServiceInfo>,
-): string {
-  const service = ratingServices?.get(action.serviceKey);
-  const serviceName = getCompactServiceName(service?.name, action.serviceKey);
-  const valueStr = getRatingValueString(action, ratingServices);
-  return `${serviceName} ${valueStr}`;
-}
-
 function formatRatingActionFull(
   action: ValidRatingSwipeAction,
   ratingServices?: Map<string, RatingServiceInfo>,
@@ -100,25 +74,9 @@ function formatRatingActionFull(
   return `${service?.name ?? action.serviceKey} ${valueStr}`;
 }
 
-function formatTagActionCompact(action: ValidTagSwipeAction): string {
-  const prefix = action.type === "add" ? "+" : "-";
-  return `${prefix}${truncate(action.tag, 16)}`;
-}
-
 function formatTagActionFull(action: ValidTagSwipeAction): string {
   const prefix = action.type === "add" ? "+" : "-";
   return `${prefix}${action.tag}`;
-}
-
-function formatSecondaryActionCompact(
-  action: ValidSecondarySwipeAction,
-  ratingServices?: Map<string, RatingServiceInfo>,
-): string {
-  if (action.actionType === "rating") {
-    return formatRatingActionCompact(action, ratingServices);
-  }
-
-  return formatTagActionCompact(action);
 }
 
 function formatSecondaryActionFull(
@@ -135,7 +93,7 @@ function formatSecondaryActionFull(
 /** Base descriptor without styling (shared between normal and overlay) */
 interface BaseDescriptor {
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: Icon;
 }
 
 /** Styling for a descriptor */
@@ -179,7 +137,7 @@ function buildSwipeBindingDescriptor(
   const style = styles[binding.fileAction];
   const fileDescriptor: SwipeBindingDescriptor = {
     label: base.label,
-    shortLabel: base.label,
+    secondaryActionCount: 0,
     icon: base.icon,
     ...style,
   };
@@ -190,27 +148,19 @@ function buildSwipeBindingDescriptor(
   const secondaryActionCount = validSecondaryActions.length;
   const fileLabelPrefix =
     binding.fileAction === "skip" ? "" : fileDescriptor.label;
-  const shortFileLabelPrefix =
-    binding.fileAction === "skip" ? "" : fileDescriptor.shortLabel;
 
   if (secondaryActionCount > 0) {
     const fullActionLabels = validSecondaryActions.map((action) =>
       formatSecondaryActionFull(action, ratingServices),
     );
-    const compactActionLabels = validSecondaryActions.map((action) =>
-      formatSecondaryActionCompact(action, ratingServices),
-    );
     const actionLabel = fullActionLabels.join("\n");
-    const shortActionLabel = compactActionLabels.join(",");
 
     return {
       ...fileDescriptor,
+      secondaryActionCount,
       label: fileLabelPrefix
         ? `${fileLabelPrefix}\n${actionLabel}`
         : actionLabel,
-      shortLabel: shortFileLabelPrefix
-        ? `${shortFileLabelPrefix} ${shortActionLabel}`
-        : shortActionLabel,
     };
   }
 
