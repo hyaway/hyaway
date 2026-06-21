@@ -102,7 +102,7 @@ const DIRECTION_CONFIG: Record<
   down: { label: "Swipe Down", icon: IconArrowDown },
 };
 
-const FILE_ACTIONS: Array<{
+const PRIMARY_ACTIONS: Array<{
   value: ReviewFileAction;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -962,17 +962,17 @@ function DirectionBindingEditor({
       ),
     [ratingActions],
   );
-  const handleFileActionChange = (value: Array<string>) => {
-    const fileAction = value[0] as ReviewFileAction | undefined;
-    // File action is required, ignore attempts to clear
-    if (!fileAction) {
+  const handlePrimaryActionChange = (value: Array<string>) => {
+    const primaryAction = value[0] as ReviewFileAction | undefined;
+    // Primary action is required, ignore attempts to clear
+    if (!primaryAction) {
       return;
     }
     onBindingChange({
       ...binding,
-      fileAction,
+      fileAction: primaryAction,
       // Undo doesn't support secondary actions — clear them
-      ...(fileAction === "undo" ? { secondaryActions: undefined } : {}),
+      ...(primaryAction === "undo" ? { secondaryActions: undefined } : {}),
     });
   };
 
@@ -1126,17 +1126,17 @@ function DirectionBindingEditor({
         )}
       </div>
 
-      {/* File Action */}
+      {/* Primary Action */}
       <div className="flex min-w-0 flex-col gap-2">
-        <Label className="text-muted-foreground text-xs">File action</Label>
+        <Label className="text-muted-foreground text-xs">Primary action</Label>
         <ToggleGroup
           value={[binding.fileAction]}
-          onValueChange={handleFileActionChange}
+          onValueChange={handlePrimaryActionChange}
           variant="outline"
           size="sm"
           className="flex-wrap justify-start"
         >
-          {FILE_ACTIONS.map(({ value, label, icon: Icon }) => (
+          {PRIMARY_ACTIONS.map(({ value, label, icon: Icon }) => (
             <ToggleGroupItem key={value} value={value} aria-label={label}>
               <Icon className="size-4" />
               <span className="hidden @[10rem]:inline">{label}</span>
@@ -1401,7 +1401,7 @@ export interface SwipeBindingsConfigProps {
 
 /**
  * Configuration UI for swipe direction bindings.
- * Allows setting file action and optional rating action for each swipe direction.
+ * Allows setting a primary action and optional secondary actions for each swipe direction.
  */
 export function SwipeBindingsConfig({
   className,
