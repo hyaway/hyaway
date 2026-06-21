@@ -131,6 +131,17 @@ export const DEFAULT_SWIPE_BINDINGS: SwipeBindings = {
   down: { fileAction: "undo" },
 };
 
+/**
+ * Blank swipe bindings — every direction does nothing ("skip") with no
+ * secondary actions. Used when starting a new (unsaved) config from scratch.
+ */
+export const CLEARED_SWIPE_BINDINGS: SwipeBindings = {
+  left: { fileAction: "skip" },
+  right: { fileAction: "skip" },
+  up: { fileAction: "skip" },
+  down: { fileAction: "skip" },
+};
+
 export const DEFAULT_REVIEW_RENDER_QUALITY = 90;
 export const MIN_REVIEW_RENDER_QUALITY = 40;
 export const MAX_REVIEW_RENDER_QUALITY = 100;
@@ -204,6 +215,8 @@ type ReviewSettingsState = {
     overwriteActiveConfig: () => void;
     /** Load a saved config into the live config */
     loadConfig: (id: string) => void;
+    /** Start a new, unsaved config: clear all swipe actions, drop the active id */
+    newConfig: () => void;
     /** Rename a saved config */
     renameConfig: (id: string, name: string) => void;
     /** Delete a saved config */
@@ -340,6 +353,10 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
               activeConfigId: id,
             };
           });
+        },
+
+        newConfig: () => {
+          set({ bindings: CLEARED_SWIPE_BINDINGS, activeConfigId: null });
         },
 
         renameConfig: (id, name) => {

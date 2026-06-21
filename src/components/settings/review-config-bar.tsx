@@ -8,6 +8,7 @@ import {
   IconCopy,
   IconDeviceFloppy,
   IconPencil,
+  IconPlus,
   IconTrash,
 } from "@tabler/icons-react";
 import {
@@ -39,7 +40,8 @@ import { cn } from "@/lib/utils";
 type DialogState =
   | { kind: "name"; mode: "saveAs" | "rename"; id?: string; value: string }
   | { kind: "delete"; id: string; name: string }
-  | { kind: "discard"; pendingId: string }
+  // pendingId: the config to load after discarding, or null to start a new one
+  | { kind: "discard"; pendingId: string | null }
   | null;
 
 export function ReviewConfigBar() {
@@ -51,6 +53,7 @@ export function ReviewConfigBar() {
     saveConfigAs,
     overwriteActiveConfig,
     loadConfig,
+    newConfig,
     renameConfig,
     deleteConfig,
   } = useReviewSettingsActions();
@@ -64,6 +67,14 @@ export function ReviewConfigBar() {
       setDialog({ kind: "discard", pendingId: id });
     } else {
       loadConfig(id);
+    }
+  };
+
+  const startNewConfig = () => {
+    if (dirty) {
+      setDialog({ kind: "discard", pendingId: null });
+    } else {
+      newConfig();
     }
   };
 
@@ -123,6 +134,15 @@ export function ReviewConfigBar() {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={startNewConfig}
+      >
+        <IconPlus className="size-4" />
+        New
+      </Button>
 
       <Button
         variant="outline"
@@ -261,8 +281,8 @@ export function ReviewConfigBar() {
             <DialogTitle>Discard unsaved changes?</DialogTitle>
             <DialogDescription>
               {activeName
-                ? `You have unsaved edits to "${activeName}". Loading another config will discard them.`
-                : "Loading another config will discard your unsaved edits."}
+                ? `You have unsaved edits to "${activeName}" that will be discarded.`
+                : "Your unsaved edits will be discarded."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -272,11 +292,17 @@ export function ReviewConfigBar() {
             <Button
               variant="destructive"
               onClick={() => {
-                if (dialog?.kind === "discard") loadConfig(dialog.pendingId);
+                if (dialog?.kind === "discard") {
+                  if (dialog.pendingId) {
+                    loadConfig(dialog.pendingId);
+                  } else {
+                    newConfig();
+                  }
+                }
                 close();
               }}
             >
-              Discard &amp; load
+              Discard changes
             </Button>
           </DialogFooter>
         </DialogContent>
