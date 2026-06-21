@@ -3,12 +3,23 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { setupCrossTabSync } from "@/lib/cross-tab-sync";
+import { useShallow } from "zustand/shallow";
+import {
+  addConfigEntry,
+  configsEqual,
+  makeConfigId,
+  overwriteConfigEntry,
+  removeConfigEntry,
+  renameConfigEntry,
+  sortedConfigs,
+} from "./review-config-utils";
+import type { SavedReviewConfig } from "./review-config-utils";
 import {
   MAX_OPTIMIZE_SIZE_THRESHOLD_MB,
   MIN_OPTIMIZE_SIZE_THRESHOLD_MB,
   normalizeOptimizeSizeThresholdMB,
 } from "@/lib/optimize-image-settings";
+import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 // #region Types
 
@@ -156,6 +167,10 @@ type ReviewSettingsState = {
   bindings: SwipeBindings;
   /** Global local tag service key that review tag actions write to (null = unset) */
   tagServiceKey: string | null;
+  /** Saved review configs (presets), keyed by id */
+  savedConfigs: Record<string, SavedReviewConfig>;
+  /** Currently-loaded config id (null = unsaved scratch) */
+  activeConfigId: string | null;
 
   actions: {
     /** Enable or disable keyboard shortcuts */
@@ -183,6 +198,16 @@ type ReviewSettingsState = {
     ) => void;
     /** Set the global tag service key (null to clear) */
     setTagServiceKey: (serviceKey: string | null) => void;
+    /** Save the live config as a new named config; returns its id */
+    saveConfigAs: (name: string) => string;
+    /** Overwrite the active config with the live config (no-op if none active) */
+    overwriteActiveConfig: () => void;
+    /** Load a saved config into the live config */
+    loadConfig: (id: string) => void;
+    /** Rename a saved config */
+    renameConfig: (id: string, name: string) => void;
+    /** Delete a saved config */
+    deleteConfig: (id: string) => void;
     /** Reset controls settings (shortcuts, gestures) to defaults */
     resetControlsSettings: () => void;
     /** Reset data settings (trackWatchHistory, imageLoadMode, immersiveMode) to defaults */
@@ -206,6 +231,8 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
       immersiveMode: false,
       bindings: DEFAULT_SWIPE_BINDINGS,
       tagServiceKey: null,
+      savedConfigs: {},
+      activeConfigId: null,
 
       actions: {
         setShortcutsEnabled: (shortcutsEnabled: boolean) => {
@@ -275,6 +302,60 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           set({ tagServiceKey });
         },
 
+        saveConfigAs: (name) => {
+          const id = makeConfigId();
+          set((state) => ({
+            savedConfigs: addConfigEntry(state.savedConfigs, id, name, {
+              bindings: state.bindings,
+              tagServiceKey: state.tagServiceKey,
+            }),
+            activeConfigId: id,
+          }));
+          return id;
+        },
+
+        overwriteActiveConfig: () => {
+          set((state) => {
+            if (!state.activeConfigId) return {};
+            return {
+              savedConfigs: overwriteConfigEntry(
+                state.savedConfigs,
+                state.activeConfigId,
+                {
+                  bindings: state.bindings,
+                  tagServiceKey: state.tagServiceKey,
+                },
+              ),
+            };
+          });
+        },
+
+        loadConfig: (id) => {
+          set((state) => {
+            if (!(id in state.savedConfigs)) return {};
+            const config = state.savedConfigs[id];
+            return {
+              bindings: config.bindings,
+              tagServiceKey: config.tagServiceKey,
+              activeConfigId: id,
+            };
+          });
+        },
+
+        renameConfig: (id, name) => {
+          set((state) => ({
+            savedConfigs: renameConfigEntry(state.savedConfigs, id, name),
+          }));
+        },
+
+        deleteConfig: (id) => {
+          set((state) => ({
+            savedConfigs: removeConfigEntry(state.savedConfigs, id),
+            activeConfigId:
+              state.activeConfigId === id ? null : state.activeConfigId,
+          }));
+        },
+
         resetControlsSettings: () => {
           const initial = store.getInitialState();
           set({
@@ -304,7 +385,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
     }),
     {
       name: "hyaway-review-queue", // Keeping this key for backward compatibility
-      version: 4,
+      version: 5,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         shortcutsEnabled: state.shortcutsEnabled,
@@ -318,6 +399,8 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
         immersiveMode: state.immersiveMode,
         bindings: state.bindings,
         tagServiceKey: state.tagServiceKey,
+        savedConfigs: state.savedConfigs,
+        activeConfigId: state.activeConfigId,
       }),
       // Migrations from older store shapes
       migrate: (persisted, version) => {
@@ -430,6 +513,21 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           }
         }
 
+        // v4 -> v5: introduce saved configs (presets). Default the new fields.
+        if (version < 5 && state && typeof state === "object") {
+          state = {
+            ...state,
+            savedConfigs:
+              state.savedConfigs && typeof state.savedConfigs === "object"
+                ? state.savedConfigs
+                : {},
+            activeConfigId:
+              typeof state.activeConfigId === "string"
+                ? state.activeConfigId
+                : null,
+          };
+        }
+
         return state;
       },
     },
@@ -490,6 +588,33 @@ export const useReviewSwipeBindings = () =>
 /** Get the global tag service key (null when unset) */
 export const useReviewTagServiceKey = () =>
   useReviewSettingsStore((state) => state.tagServiceKey);
+
+/** Saved review configs as a name-sorted array. */
+export const useSavedReviewConfigs = () =>
+  useReviewSettingsStore(useShallow((state) => sortedConfigs(state.savedConfigs)));
+
+/** Currently-loaded config id (null when unsaved). */
+export const useActiveReviewConfigId = () =>
+  useReviewSettingsStore((state) => state.activeConfigId);
+
+/** Name of the currently-loaded config (null when unsaved). */
+export const useActiveReviewConfigName = () =>
+  useReviewSettingsStore((state) => {
+    const id = state.activeConfigId;
+    if (!id || !(id in state.savedConfigs)) return null;
+    return state.savedConfigs[id].name;
+  });
+
+/** True when the live config has unsaved edits vs the loaded config. */
+export const useReviewConfigDirty = () =>
+  useReviewSettingsStore((state) => {
+    const id = state.activeConfigId;
+    if (!id || !(id in state.savedConfigs)) return false;
+    return !configsEqual(
+      { bindings: state.bindings, tagServiceKey: state.tagServiceKey },
+      state.savedConfigs[id],
+    );
+  });
 
 /** Get the binding for a specific direction */
 export const useReviewSwipeBinding = (direction: SwipeDirection) =>
