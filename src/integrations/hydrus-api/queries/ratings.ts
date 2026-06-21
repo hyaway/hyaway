@@ -3,9 +3,14 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { setRating } from "../api-client";
+import { Permission } from "../models";
+import { useHasPermission } from "./access";
 import { updateFileMetadataCaches } from "./file-metadata-cache";
 import type { FileMetadata, RatingValue, SetRatingOptions } from "../models";
 import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
+
+export const useCanEditFileRatings = () =>
+  useHasPermission(Permission.EDIT_FILE_RATINGS);
 
 /** Returns the original metadata object when the rating is already current. */
 const updateRating = (

@@ -21,12 +21,19 @@ import type {
 import { useReviewQueueCurrentFileId } from "@/stores/review-queue-store";
 import {
   hasUndoBinding,
+  stripInvalidRatingActionsFromBindings,
+  stripInvalidTagActionsFromBindings,
+  stripRatingActionsForMissingPermission,
   stripRatingActionsForServicesFromBindings,
+  stripTagActionsForMissingPermission,
   useReviewShortcutsEnabled,
   useReviewSwipeBindings,
 } from "@/stores/review-settings-store";
 import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useCanEditFileRatings } from "@/integrations/hydrus-api/queries/ratings";
+import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
+import { useCanEditFileTags } from "@/integrations/hydrus-api/queries/tags";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useFileActions } from "@/hooks/use-file-actions";
 import { FooterPortal } from "@/components/app-shell/footer-portal";
@@ -87,13 +94,49 @@ export function ReviewFooter({
 }: ReviewFooterProps) {
   const showShortcuts = useReviewShortcutsEnabled();
   const bindings = useReviewSwipeBindings();
-  const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
-  const editableBindings = useMemo(
-    () =>
-      stripRatingActionsForServicesFromBindings(bindings, readOnlyServiceKeys),
-    [bindings, readOnlyServiceKeys],
-  );
-  const { servicesMap } = useRatingServices();
+  const readOnlyRatingServiceKeys = useReadOnlyRatingServiceKeys();
+  const { ratingServicesByKey, isFetched: ratingServicesFetched } =
+    useRatingServices();
+  const { localTagServicesByKey, isFetched: localTagServicesFetched } =
+    useLocalTagServices();
+  const canEditRatings = useCanEditFileRatings();
+  const canEditTags = useCanEditFileTags();
+  const editableBindings = useMemo(() => {
+    const withoutReadOnlyRatings = stripRatingActionsForServicesFromBindings(
+      bindings,
+      readOnlyRatingServiceKeys,
+    );
+    const withoutMissingRatingPermission =
+      stripRatingActionsForMissingPermission(
+        withoutReadOnlyRatings,
+        canEditRatings,
+      );
+    const withoutInvalidRatings = ratingServicesFetched
+      ? stripInvalidRatingActionsFromBindings(
+          withoutMissingRatingPermission,
+          ratingServicesByKey,
+        )
+      : withoutMissingRatingPermission;
+    const withoutMissingTagPermission = stripTagActionsForMissingPermission(
+      withoutInvalidRatings,
+      canEditTags,
+    );
+    return localTagServicesFetched
+      ? stripInvalidTagActionsFromBindings(
+          withoutMissingTagPermission,
+          localTagServicesByKey,
+        )
+      : withoutMissingTagPermission;
+  }, [
+    bindings,
+    canEditRatings,
+    canEditTags,
+    localTagServicesByKey,
+    localTagServicesFetched,
+    ratingServicesByKey,
+    ratingServicesFetched,
+    readOnlyRatingServiceKeys,
+  ]);
   const hasUndoDirection = hasUndoBinding(editableBindings);
 
   // Don't show footer when review is complete
@@ -119,21 +162,34 @@ export function ReviewFooter({
   }> = [
     {
       direction: "left",
-      descriptor: getSwipeBindingDescriptor(editableBindings.left, servicesMap),
+      descriptor: getSwipeBindingDescriptor(
+        editableBindings.left,
+        ratingServicesByKey,
+        localTagServicesByKey,
+      ),
     },
     {
       direction: "down",
-      descriptor: getSwipeBindingDescriptor(editableBindings.down, servicesMap),
+      descriptor: getSwipeBindingDescriptor(
+        editableBindings.down,
+        ratingServicesByKey,
+        localTagServicesByKey,
+      ),
     },
     {
       direction: "up",
-      descriptor: getSwipeBindingDescriptor(editableBindings.up, servicesMap),
+      descriptor: getSwipeBindingDescriptor(
+        editableBindings.up,
+        ratingServicesByKey,
+        localTagServicesByKey,
+      ),
     },
     {
       direction: "right",
       descriptor: getSwipeBindingDescriptor(
         editableBindings.right,
-        servicesMap,
+        ratingServicesByKey,
+        localTagServicesByKey,
       ),
     },
   ];
