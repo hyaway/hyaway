@@ -5,7 +5,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import type { TagsSortMode } from "@/stores/tags-settings-store";
-import type {TagItem} from "@/lib/tag-sidebar-sort";
+import type { TagItem, TagSortMode } from "@/lib/tag-sidebar-sort";
 import {
   useTagsSettingsActions,
   useTagsSortMode,
@@ -24,7 +24,7 @@ import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/s
 import { TagBadge } from "@/components/tag/tag-badge";
 import { TagActionMenu, TagActionTrigger } from "@/components/tag/tag-actions";
 import { parseTag } from "@/lib/tag-utils";
-import {  sortTagItems } from "@/lib/tag-sidebar-sort";
+import { sortTagItems } from "@/lib/tag-sidebar-sort";
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -37,21 +37,41 @@ function fullTag(item: TagItem): string {
   return item.namespace ? `${item.namespace}:${item.tag}` : item.tag;
 }
 
+const DEFAULT_SORT_OPTIONS = [
+  { value: "count", label: "Count" },
+  { value: "namespace", label: "Namespace" },
+] as const;
+
 export const TagsSidebar = memo(function TagsSidebarMemo({
   items,
+  title = "Tags",
+  showIndex = true,
+  sort,
 }: {
   items: Array<FileMetadata>;
+  title?: string;
+  showIndex?: boolean;
+  sort?: {
+    mode: string;
+    onChange: (mode: string) => void;
+    options: ReadonlyArray<{ value: string; label: string }>;
+  };
 }) {
   const isMobile = useIsMobile();
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
   const [search, setSearch] = useState("");
-  const sortMode = useTagsSortMode();
+  const storeSortMode = useTagsSortMode();
   const { setSortMode } = useTagsSettingsActions();
+  const activeSortMode: string = sort ? sort.mode : storeSortMode;
+  const handleSortChange = sort
+    ? sort.onChange
+    : (mode: string) => setSortMode(mode as TagsSortMode);
+  const sortOptions = sort ? sort.options : DEFAULT_SORT_OPTIONS;
 
   // Defer heavy computation so UI stays responsive
   const deferredItems = useDeferredValue(items);
   const deferredSearch = useDeferredValue(search);
-  const deferredSortMode = useDeferredValue(sortMode);
+  const deferredSortMode = useDeferredValue(activeSortMode);
 
   const tags = useMemo((): Array<TagItem> => {
     if (!allTagsServiceId || deferredItems.length === 0) return [];
@@ -88,7 +108,7 @@ export const TagsSidebar = memo(function TagsSidebarMemo({
       result[i] = { tag, count, namespace };
     }
 
-    return sortTagItems(result, deferredSortMode);
+    return sortTagItems(result, deferredSortMode as TagSortMode);
   }, [deferredItems, allTagsServiceId, deferredSortMode]);
 
   // Filter tags based on search
@@ -218,7 +238,7 @@ export const TagsSidebar = memo(function TagsSidebarMemo({
     <>
       <SidebarHeader className="gap-4">
         <Heading level={3} className="text-lg font-semibold">
-          Tags
+          {title}
         </Heading>
         <SidebarInput
           type="search"
@@ -228,21 +248,24 @@ export const TagsSidebar = memo(function TagsSidebarMemo({
           tabIndex={isMobile ? -1 : undefined}
         />
         <ToggleGroup
-          value={[sortMode]}
+          value={[activeSortMode]}
           onValueChange={(value) => {
-            const newValue = value[0] as TagsSortMode | undefined;
-            if (newValue) setSortMode(newValue);
+            const next = value[0];
+            if (next) handleSortChange(next);
           }}
           variant="outline-muted"
           size="sm"
           className="w-full"
         >
-          <ToggleGroupItem value="count" className="flex-1">
-            Count
-          </ToggleGroupItem>
-          <ToggleGroupItem value="namespace" className="flex-1">
-            Namespace
-          </ToggleGroupItem>
+          {sortOptions.map((option) => (
+            <ToggleGroupItem
+              key={option.value}
+              value={option.value}
+              className="flex-1"
+            >
+              {option.label}
+            </ToggleGroupItem>
+          ))}
         </ToggleGroup>
       </SidebarHeader>
       <SidebarContent className="min-h-0 flex-1 pe-1">
@@ -268,12 +291,14 @@ export const TagsSidebar = memo(function TagsSidebarMemo({
                       className="absolute top-0 left-0 w-full"
                     >
                       <div className="flex min-w-0 flex-row flex-nowrap items-center justify-start gap-1 font-mono">
-                        <span
-                          aria-hidden="true"
-                          className="text-muted-foreground shrink-0 text-right tabular-nums"
-                        >
-                          {virtualRow.index + 1}.
-                        </span>
+                        {showIndex && (
+                          <span
+                            aria-hidden="true"
+                            className="text-muted-foreground shrink-0 text-right tabular-nums"
+                          >
+                            {virtualRow.index + 1}.
+                          </span>
+                        )}
                         <TagActionTrigger
                           tag={fullTag(tagItem)}
                           className="max-w-full min-w-0 text-left"
