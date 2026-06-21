@@ -14,9 +14,13 @@ import type {
   SwipeBindings,
   SwipeDirection,
 } from "@/stores/review-settings-store";
-import type { RatingServiceInfo } from "@/integrations/hydrus-api/models";
+import type {
+  LocalTagServiceInfo,
+  RatingServiceInfo,
+} from "@/integrations/hydrus-api/models";
 import { cn } from "@/lib/utils";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
 
 const DIRECTION_ICONS: Record<
   SwipeDirection,
@@ -63,7 +67,8 @@ export function ReviewStatsBreakdown({
   showLabels = true,
   className,
 }: ReviewStatsBreakdownProps) {
-  const { servicesMap } = useRatingServices();
+  const { ratingServicesByKey } = useRatingServices();
+  const { localTagServicesByKey } = useLocalTagServices();
 
   // Filter to only directions that have bindings (and optionally non-zero counts)
   // Always exclude undo-bound directions since they don't produce countable stats
@@ -99,7 +104,8 @@ export function ReviewStatsBreakdown({
               direction={direction}
               count={stats[direction]}
               bindings={bindings}
-              services={servicesMap}
+              ratingServices={ratingServicesByKey}
+              tagServices={localTagServicesByKey}
               showLabel={showLabels}
             />
           </span>
@@ -122,7 +128,8 @@ export function ReviewStatsBreakdown({
           direction={direction}
           count={stats[direction]}
           bindings={bindings}
-          services={servicesMap}
+          ratingServices={ratingServicesByKey}
+          tagServices={localTagServicesByKey}
         />
       ))}
     </div>
@@ -133,7 +140,8 @@ interface StatItemProps {
   direction: SwipeDirection;
   count: number;
   bindings: SwipeBindings;
-  services: Map<string, RatingServiceInfo>;
+  ratingServices: Map<string, RatingServiceInfo>;
+  tagServices: Map<string, LocalTagServiceInfo>;
   showLabel?: boolean;
 }
 
@@ -141,11 +149,16 @@ function InlineStatItem({
   direction,
   count,
   bindings,
-  services,
+  ratingServices,
+  tagServices,
   showLabel = true,
 }: StatItemProps) {
   const binding = bindings[direction];
-  const descriptor = getSwipeBindingDescriptor(binding, services);
+  const descriptor = getSwipeBindingDescriptor(
+    binding,
+    ratingServices,
+    tagServices,
+  );
   const DirectionIcon = DIRECTION_ICONS[direction];
 
   return (
@@ -175,9 +188,19 @@ function InlineStatItem({
   );
 }
 
-function GridStatItem({ direction, count, bindings, services }: StatItemProps) {
+function GridStatItem({
+  direction,
+  count,
+  bindings,
+  ratingServices,
+  tagServices,
+}: StatItemProps) {
   const binding = bindings[direction];
-  const descriptor = getSwipeBindingDescriptor(binding, services);
+  const descriptor = getSwipeBindingDescriptor(
+    binding,
+    ratingServices,
+    tagServices,
+  );
   const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];
 
