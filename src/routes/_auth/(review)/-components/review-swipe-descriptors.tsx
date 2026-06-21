@@ -10,10 +10,8 @@ import {
 import type {
   ReviewFileAction,
   ReviewSwipeBinding,
-  ValidRatingSecondarySwipeAction,
   ValidRatingSwipeAction,
   ValidSecondarySwipeAction,
-  ValidTagSecondarySwipeAction,
   ValidTagSwipeAction,
 } from "@/stores/review-settings-store";
 import type {
@@ -27,7 +25,7 @@ import { isNumericalRatingService } from "@/integrations/hydrus-api/models";
 export interface SwipeBindingDescriptor {
   /** Display label for the binding */
   label: string;
-  /** Short label without rating service names (for small screens) */
+  /** Dense label for compact surfaces like mobile inline stats */
   shortLabel: string;
   /** Icon component to render */
   icon: React.ComponentType<{ className?: string }>;
@@ -44,31 +42,6 @@ function truncate(str: string, maxLength: number): string {
     .trim()
     .slice(0, maxLength - 1)
     .trim()}`;
-}
-
-/** Extract rating actions from secondary actions array */
-function getRatingActions(
-  secondaryActions?: Array<ValidSecondarySwipeAction>,
-): Array<ValidRatingSwipeAction> {
-  if (!secondaryActions) return [];
-  return secondaryActions
-    .filter(
-      (action): action is ValidRatingSecondarySwipeAction =>
-        action.actionType === "rating",
-    )
-    .map(({ actionType: _, ...rest }) => rest);
-}
-
-function getTagActions(
-  secondaryActions?: Array<ValidSecondarySwipeAction>,
-): Array<ValidTagSwipeAction> {
-  if (!secondaryActions) return [];
-  return secondaryActions
-    .filter(
-      (action): action is ValidTagSecondarySwipeAction =>
-        action.actionType === "tag",
-    )
-    .map(({ actionType: _, ...rest }) => rest);
 }
 
 /**
@@ -100,48 +73,63 @@ function getRatingValueString(
   }
 }
 
-/**
- * Format a rating action as a display string.
- * Examples: "favorite like", "mynumeric 7/10", "myinc +1"
- *
- * @param action The rating action to format
- * @param ratingServices Optional map of serviceKey -> RatingServiceInfo for display
- */
-export function formatRatingAction(
+function getCompactServiceName(
+  serviceName: string | undefined,
+  fallback: string,
+) {
+  const normalized = (serviceName ?? fallback).trim().replace(/\s+/g, " ");
+  return normalized.slice(0, 3) || fallback.slice(0, 3);
+}
+
+function formatRatingActionCompact(
   action: ValidRatingSwipeAction,
   ratingServices?: Map<string, RatingServiceInfo>,
 ): string {
   const service = ratingServices?.get(action.serviceKey);
-  const serviceName = truncate(service?.name ?? action.serviceKey, 20);
+  const serviceName = getCompactServiceName(service?.name, action.serviceKey);
   const valueStr = getRatingValueString(action, ratingServices);
   return `${serviceName} ${valueStr}`;
 }
 
-/**
- * Format a rating action as a short string (without service name).
- * Examples: "like", "7/10", "+1"
- */
-export function formatRatingActionShort(
+function formatRatingActionFull(
   action: ValidRatingSwipeAction,
   ratingServices?: Map<string, RatingServiceInfo>,
 ): string {
-  return getRatingValueString(action, ratingServices);
+  const service = ratingServices?.get(action.serviceKey);
+  const valueStr = getRatingValueString(action, ratingServices);
+  return `${service?.name ?? action.serviceKey} ${valueStr}`;
 }
 
-export function formatTagAction(
-  action: ValidTagSwipeAction,
-  tagServices?: Map<string, LocalTagServiceInfo>,
-): string {
-  const service = tagServices?.get(action.serviceKey);
-  const serviceName = truncate(service?.name ?? action.serviceKey, 20);
-  const tag = truncate(action.tag, 20);
-  const preposition = action.type === "add" ? "to" : "from";
-  return `${action.type} ${tag} ${preposition} ${serviceName}`;
-}
-
-export function formatTagActionShort(action: ValidTagSwipeAction): string {
+function formatTagActionCompact(action: ValidTagSwipeAction): string {
   const prefix = action.type === "add" ? "+" : "-";
   return `${prefix}${truncate(action.tag, 16)}`;
+}
+
+function formatTagActionFull(action: ValidTagSwipeAction): string {
+  const prefix = action.type === "add" ? "+" : "-";
+  return `${prefix}${action.tag}`;
+}
+
+function formatSecondaryActionCompact(
+  action: ValidSecondarySwipeAction,
+  ratingServices?: Map<string, RatingServiceInfo>,
+): string {
+  if (action.actionType === "rating") {
+    return formatRatingActionCompact(action, ratingServices);
+  }
+
+  return formatTagActionCompact(action);
+}
+
+function formatSecondaryActionFull(
+  action: ValidSecondarySwipeAction,
+  ratingServices?: Map<string, RatingServiceInfo>,
+): string {
+  if (action.actionType === "rating") {
+    return formatRatingActionFull(action, ratingServices);
+  }
+
+  return formatTagActionFull(action);
 }
 
 /** Base descriptor without styling (shared between normal and overlay) */
@@ -199,58 +187,30 @@ function buildSwipeBindingDescriptor(
     localTagServicesByKey: tagServices,
     ratingServicesByKey: ratingServices,
   });
-  const ratingActions = getRatingActions(validSecondaryActions);
-  const tagActions = getTagActions(validSecondaryActions);
-  const actionLabels: Array<string> = [];
-  const shortActionLabels: Array<string> = [];
-  const secondaryActionCount = ratingActions.length + tagActions.length;
+  const secondaryActionCount = validSecondaryActions.length;
+  const fileLabelPrefix =
+    binding.fileAction === "skip" ? "" : fileDescriptor.label;
+  const shortFileLabelPrefix =
+    binding.fileAction === "skip" ? "" : fileDescriptor.shortLabel;
 
-  if (secondaryActionCount > 1) {
-    const labelParts: Array<string> = [];
-    const shortLabelParts: Array<string> = [];
-
-    if (ratingActions.length > 0) {
-      labelParts.push(
-        `${ratingActions.length} rating${ratingActions.length === 1 ? "" : "s"}`,
-      );
-      shortLabelParts.push(`+${ratingActions.length}R`);
-    }
-
-    if (tagActions.length > 0) {
-      labelParts.push(
-        `${tagActions.length} tag${tagActions.length === 1 ? "" : "s"}`,
-      );
-      shortLabelParts.push(`+${tagActions.length}T`);
-    }
+  if (secondaryActionCount > 0) {
+    const fullActionLabels = validSecondaryActions.map((action) =>
+      formatSecondaryActionFull(action, ratingServices),
+    );
+    const compactActionLabels = validSecondaryActions.map((action) =>
+      formatSecondaryActionCompact(action, ratingServices),
+    );
+    const actionLabel = fullActionLabels.join(", ");
+    const shortActionLabel = compactActionLabels.join(",");
 
     return {
       ...fileDescriptor,
-      label: `${fileDescriptor.label} + ${labelParts.join(", ")}`,
-      shortLabel: `${fileDescriptor.shortLabel} ${shortLabelParts.join(" ")}`,
-    };
-  }
-
-  if (ratingActions.length > 0) {
-    actionLabels.push(
-      ...ratingActions.map((a) => formatRatingAction(a, ratingServices)),
-    );
-    shortActionLabels.push(
-      ...ratingActions.map((a) => formatRatingActionShort(a, ratingServices)),
-    );
-  }
-
-  if (tagActions.length > 0) {
-    actionLabels.push(
-      ...tagActions.map((a) => formatTagAction(a, tagServices)),
-    );
-    shortActionLabels.push(...tagActions.map(formatTagActionShort));
-  }
-
-  if (actionLabels.length > 0) {
-    return {
-      ...fileDescriptor,
-      label: `${fileDescriptor.label} + ${actionLabels.join(", ")}`,
-      shortLabel: `${fileDescriptor.shortLabel} ${shortActionLabels.join(",")}`,
+      label: fileLabelPrefix
+        ? `${fileLabelPrefix} + ${actionLabel}`
+        : actionLabel,
+      shortLabel: shortFileLabelPrefix
+        ? `${shortFileLabelPrefix} ${shortActionLabel}`
+        : shortActionLabel,
     };
   }
 

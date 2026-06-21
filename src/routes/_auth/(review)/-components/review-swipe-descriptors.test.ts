@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { describe, expect, it } from "vitest";
-import {
-  formatTagAction,
-  formatTagActionShort,
-  getSwipeBindingDescriptor,
-} from "./review-swipe-descriptors";
+import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import type { ReviewSwipeBinding } from "@/stores/review-settings-store";
-import type { LocalTagServiceInfo } from "@/integrations/hydrus-api/models";
+import type {
+  LocalTagServiceInfo,
+  RatingServiceInfo,
+} from "@/integrations/hydrus-api/models";
 import { ServiceType } from "@/integrations/hydrus-api/models";
 
 const localTagService = {
@@ -17,42 +16,28 @@ const localTagService = {
   type_pretty: "local tag domain",
 } as LocalTagServiceInfo;
 
+const ratingServices = new Map<string, RatingServiceInfo>([
+  [
+    "favorites",
+    {
+      name: "Favorite",
+      type: ServiceType.RATING_LIKE,
+      type_pretty: "local like/dislike rating service",
+    } as RatingServiceInfo,
+  ],
+  [
+    "stars",
+    {
+      name: "star rating",
+      type: ServiceType.RATING_NUMERICAL,
+      type_pretty: "local numerical rating service",
+      min_stars: 0,
+      max_stars: 10,
+    } as RatingServiceInfo,
+  ],
+]);
+
 describe("review swipe descriptors tag actions", () => {
-  it("formats full add tag action labels with service names", () => {
-    expect(
-      formatTagAction(
-        { type: "add", serviceKey: "localTags", tag: "series:example" },
-        new Map([["localTags", localTagService]]),
-      ),
-    ).toBe("add series:example to my tags");
-  });
-
-  it("formats full remove tag action labels with service names", () => {
-    expect(
-      formatTagAction(
-        { type: "remove", serviceKey: "localTags", tag: "series:example" },
-        new Map([["localTags", localTagService]]),
-      ),
-    ).toBe("remove series:example from my tags");
-  });
-
-  it("formats short add and remove tag action labels", () => {
-    expect(
-      formatTagActionShort({
-        type: "add",
-        serviceKey: "localTags",
-        tag: "series:example",
-      }),
-    ).toBe("+series:example");
-    expect(
-      formatTagActionShort({
-        type: "remove",
-        serviceKey: "localTags",
-        tag: "series:example",
-      }),
-    ).toBe("-series:example");
-  });
-
   it("includes add tag actions in swipe descriptors", () => {
     const binding: ReviewSwipeBinding = {
       fileAction: "archive",
@@ -73,8 +58,28 @@ describe("review swipe descriptors tag actions", () => {
       new Map([["localTags", localTagService]]),
     );
 
-    expect(descriptor.label).toBe("Archive + add series:example to my tags");
+    expect(descriptor.label).toBe("Archive + +series:example");
     expect(descriptor.shortLabel).toBe("Archive +series:example");
+  });
+
+  it("keeps full rating service names in swipe descriptor labels", () => {
+    const binding: ReviewSwipeBinding = {
+      fileAction: "archive",
+      secondaryActions: [
+        {
+          id: "rating-like-1",
+          actionType: "rating",
+          type: "setLike",
+          serviceKey: "favorites",
+          value: true,
+        },
+      ],
+    };
+
+    const descriptor = getSwipeBindingDescriptor(binding, ratingServices);
+
+    expect(descriptor.label).toBe("Archive + Favorite like");
+    expect(descriptor.shortLabel).toBe("Archive Fav like");
   });
 
   it("includes remove tag actions in swipe descriptors", () => {
@@ -97,11 +102,11 @@ describe("review swipe descriptors tag actions", () => {
       new Map([["localTags", localTagService]]),
     );
 
-    expect(descriptor.label).toBe("Trash + remove series:example from my tags");
+    expect(descriptor.label).toBe("Trash + -series:example");
     expect(descriptor.shortLabel).toBe("Trash -series:example");
   });
 
-  it("summarizes multiple secondary actions with counts", () => {
+  it("formats multiple secondary actions with compact ordered labels", () => {
     const binding: ReviewSwipeBinding = {
       fileAction: "archive",
       secondaryActions: [
@@ -115,9 +120,9 @@ describe("review swipe descriptors tag actions", () => {
         {
           id: "rating-inc-1",
           actionType: "rating",
-          type: "incDecDelta",
-          serviceKey: "increment",
-          delta: 1,
+          type: "setNumerical",
+          serviceKey: "stars",
+          value: 7,
         },
         {
           id: "tag-add-1",
@@ -131,12 +136,47 @@ describe("review swipe descriptors tag actions", () => {
 
     const descriptor = getSwipeBindingDescriptor(
       binding,
-      undefined,
+      ratingServices,
       new Map([["localTags", localTagService]]),
     );
 
-    expect(descriptor.label).toBe("Archive + 2 ratings, 1 tag");
-    expect(descriptor.shortLabel).toBe("Archive +2R +1T");
+    expect(descriptor.label).toBe(
+      "Archive + Favorite like, star rating 7/10, +series:example",
+    );
+    expect(descriptor.shortLabel).toBe(
+      "Archive Fav like,sta 7/10,+series:example",
+    );
+  });
+
+  it("omits skip labels when skip has valid secondary actions", () => {
+    const binding: ReviewSwipeBinding = {
+      fileAction: "skip",
+      secondaryActions: [
+        {
+          id: "rating-like-1",
+          actionType: "rating",
+          type: "setLike",
+          serviceKey: "favorites",
+          value: true,
+        },
+        {
+          id: "tag-add-1",
+          actionType: "tag",
+          type: "add",
+          serviceKey: "localTags",
+          tag: "reviewed",
+        },
+      ],
+    };
+
+    const descriptor = getSwipeBindingDescriptor(
+      binding,
+      ratingServices,
+      new Map([["localTags", localTagService]]),
+    );
+
+    expect(descriptor.label).toBe("Favorite like, +reviewed");
+    expect(descriptor.shortLabel).toBe("Fav like,+reviewed");
   });
 
   it("ignores persisted incomplete secondary actions in swipe descriptors", () => {
