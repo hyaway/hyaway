@@ -8,7 +8,7 @@ import type {
   RatingSwipeAction,
   ReviewFileAction,
   SwipeDirection,
-  TagSwipeAction,
+  TagSwipeActionType,
 } from "@/stores/review-settings-store";
 
 /** Previous state of a file before action, used for undo */
@@ -28,7 +28,7 @@ export interface RatingRestoreEntry {
 export interface TagRestoreEntry {
   serviceKey: string;
   tag: string;
-  actionType: TagSwipeAction["type"];
+  actionType: TagSwipeActionType;
 }
 
 /** Data needed to restore a file to its previous state */

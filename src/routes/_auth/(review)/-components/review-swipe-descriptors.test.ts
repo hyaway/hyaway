@@ -98,4 +98,39 @@ describe("review swipe descriptors tag actions", () => {
     expect(descriptor.label).toBe("Trash + remove series:example from my tags");
     expect(descriptor.shortLabel).toBe("Trash -series:example");
   });
+
+  it("summarizes multiple secondary actions with counts", () => {
+    const binding: ReviewSwipeBinding = {
+      fileAction: "archive",
+      secondaryActions: [
+        {
+          actionType: "rating",
+          type: "setLike",
+          serviceKey: "favorites",
+          value: true,
+        },
+        {
+          actionType: "rating",
+          type: "incDecDelta",
+          serviceKey: "increment",
+          delta: 1,
+        },
+        {
+          actionType: "tag",
+          type: "add",
+          serviceKey: "localTags",
+          tag: "series:example",
+        },
+      ],
+    };
+
+    const descriptor = getSwipeBindingDescriptor(
+      binding,
+      undefined,
+      new Map([["localTags", localTagService]]),
+    );
+
+    expect(descriptor.label).toBe("Archive + 2 ratings, 1 tag");
+    expect(descriptor.shortLabel).toBe("Archive +2R +1T");
+  });
 });

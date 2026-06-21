@@ -8,10 +8,12 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import type {
+  RatingSecondarySwipeAction,
   RatingSwipeAction,
   ReviewFileAction,
   ReviewSwipeBinding,
   SecondarySwipeAction,
+  TagSecondarySwipeAction,
   TagSwipeAction,
 } from "@/stores/review-settings-store";
 import type {
@@ -50,8 +52,8 @@ function getRatingActions(
   if (!secondaryActions) return [];
   return secondaryActions
     .filter(
-      (a): a is SecondarySwipeAction & { actionType: "rating" } =>
-        a.actionType === "rating",
+      (action): action is RatingSecondarySwipeAction =>
+        action.actionType === "rating",
     )
     .map(({ actionType: _, ...rest }) => rest);
 }
@@ -62,8 +64,8 @@ function getTagActions(
   if (!secondaryActions) return [];
   return secondaryActions
     .filter(
-      (a): a is SecondarySwipeAction & { actionType: "tag" } =>
-        a.actionType === "tag",
+      (action): action is TagSecondarySwipeAction =>
+        action.actionType === "tag",
     )
     .map(({ actionType: _, ...rest }) => rest);
 }
@@ -196,6 +198,32 @@ function buildSwipeBindingDescriptor(
   const tagActions = getTagActions(binding.secondaryActions);
   const actionLabels: Array<string> = [];
   const shortActionLabels: Array<string> = [];
+  const secondaryActionCount = ratingActions.length + tagActions.length;
+
+  if (secondaryActionCount > 1) {
+    const labelParts: Array<string> = [];
+    const shortLabelParts: Array<string> = [];
+
+    if (ratingActions.length > 0) {
+      labelParts.push(
+        `${ratingActions.length} rating${ratingActions.length === 1 ? "" : "s"}`,
+      );
+      shortLabelParts.push(`+${ratingActions.length}R`);
+    }
+
+    if (tagActions.length > 0) {
+      labelParts.push(
+        `${tagActions.length} tag${tagActions.length === 1 ? "" : "s"}`,
+      );
+      shortLabelParts.push(`+${tagActions.length}T`);
+    }
+
+    return {
+      ...fileDescriptor,
+      label: `${fileDescriptor.label} + ${labelParts.join(", ")}`,
+      shortLabel: `${fileDescriptor.shortLabel} ${shortLabelParts.join(" ")}`,
+    };
+  }
 
   if (ratingActions.length > 0) {
     actionLabels.push(
