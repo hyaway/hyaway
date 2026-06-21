@@ -530,6 +530,29 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
 
         return state;
       },
+
+      // Cross-tab safety. `setupCrossTabSync` rehydrates this store on every
+      // `storage` event, which re-runs the migrate above. A tab still running an
+      // older build (pre-saved-configs) persists a snapshot without
+      // `savedConfigs`; the v4->v5 migrate then defaults it back to `{}`, which
+      // the default shallow merge would use to overwrite configs saved in THIS
+      // tab — silent data loss. Union saved configs and keep the active id when
+      // the incoming snapshot doesn't carry one, so a stale rehydrate can never
+      // drop data. (Trade-off: a config deleted in another tab won't sync away;
+      // that's preferable to losing configs.)
+      merge: (persistedState, currentState) => {
+        const persisted = (persistedState ?? {}) as Partial<ReviewSettingsState>;
+        return {
+          ...currentState,
+          ...persisted,
+          savedConfigs: {
+            ...currentState.savedConfigs,
+            ...(persisted.savedConfigs ?? {}),
+          },
+          activeConfigId:
+            persisted.activeConfigId ?? currentState.activeConfigId,
+        };
+      },
     },
   ),
 );
