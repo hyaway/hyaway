@@ -14,6 +14,7 @@ import type { CardSize } from "./review-swipe-card";
 import type { SwipeThresholds } from "@/stores/review-settings-store";
 import { useReviewSwipeBindings } from "@/stores/review-settings-store";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
 import { cn } from "@/lib/utils";
 
 export interface ReviewThresholdOverlayProps {
@@ -36,22 +37,27 @@ export function ReviewThresholdOverlay({
 }: ReviewThresholdOverlayProps) {
   const bindings = useReviewSwipeBindings();
   const { servicesMap } = useRatingServices();
+  const { localTagServicesByKey } = useLocalTagServices();
   // Get descriptors for each direction
   const leftDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.left,
     servicesMap,
+    localTagServicesByKey,
   );
   const rightDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.right,
     servicesMap,
+    localTagServicesByKey,
   );
   const upDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.up,
     servicesMap,
+    localTagServicesByKey,
   );
   const downDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.down,
     servicesMap,
+    localTagServicesByKey,
   );
 
   // Calculate percentage coordinates for crosshair label (doubled to match settings display)
