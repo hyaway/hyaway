@@ -5,6 +5,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import type { TagsSortMode } from "@/stores/tags-settings-store";
+import type {TagItem} from "@/lib/tag-sidebar-sort";
 import {
   useTagsSettingsActions,
   useTagsSortMode,
@@ -22,19 +23,14 @@ import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagBadge } from "@/components/tag/tag-badge";
 import { TagActionMenu, TagActionTrigger } from "@/components/tag/tag-actions";
-import { compareTags, parseTag } from "@/lib/tag-utils";
+import { parseTag } from "@/lib/tag-utils";
+import {  sortTagItems } from "@/lib/tag-sidebar-sort";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-
-interface TagItem {
-  tag: string;
-  count: number;
-  namespace: string;
-}
 
 /** Reconstruct the full display tag string from namespace + tag. */
 function fullTag(item: TagItem): string {
@@ -92,32 +88,7 @@ export const TagsSidebar = memo(function TagsSidebarMemo({
       result[i] = { tag, count, namespace };
     }
 
-    // Sort based on mode
-    if (deferredSortMode === "namespace") {
-      // Group by namespace first, then by count within each namespace
-      result.sort((a, b) => {
-        // Namespace comparison
-        const nsCompare = compareTags(a, b);
-        if (a.namespace !== b.namespace) return nsCompare;
-
-        // Within same namespace, sort by count descending
-        if (b.count !== a.count) return b.count - a.count;
-
-        // Then by tag name
-        return a.tag.localeCompare(b.tag);
-      });
-    } else {
-      // Sort by count (default)
-      result.sort((a, b) => {
-        // Count comparison (descending)
-        if (b.count !== a.count) return b.count - a.count;
-
-        // Then by namespace and tag
-        return compareTags(a, b);
-      });
-    }
-
-    return result;
+    return sortTagItems(result, deferredSortMode);
   }, [deferredItems, allTagsServiceId, deferredSortMode]);
 
   // Filter tags based on search
