@@ -9,6 +9,10 @@ import {
   IconArrowRight,
   IconArrowUp,
   IconDots,
+  IconPlus,
+  IconPlusFilled,
+  IconTag,
+  IconTagFilled,
 } from "@tabler/icons-react";
 import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import { ReviewRatingButton } from "./review-rating-picker";
@@ -221,11 +225,18 @@ export function ReviewFooter({
             {directions.map(({ direction, descriptor }) => {
               const binding = editableBindings[direction];
               const isUndo = binding.fileAction === "undo";
+              const fileActionLabel = getFileActionLabel(binding.fileAction);
+              const actionDescription =
+                descriptor.label === fileActionLabel
+                  ? undefined
+                  : descriptor.label;
+
               return (
                 <BottomNavButton
                   key={direction}
-                  label={getFileActionLabel(binding.fileAction)}
-                  ariaDescription={descriptor.label}
+                  label={fileActionLabel}
+                  ariaDescription={actionDescription}
+                  labelBadge={actionDescription ? "+" : undefined}
                   customContent={
                     <DirectionalIcon direction={direction}>
                       <descriptor.icon className="size-6" />

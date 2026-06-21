@@ -8,6 +8,11 @@ import { Badge } from "@/components/ui-primitives/badge";
 import { Button } from "@/components/ui-primitives/button";
 import { Kbd } from "@/components/ui-primitives/kbd";
 import { Spinner } from "@/components/ui-primitives/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui-primitives/tooltip";
 import { cn } from "@/lib/utils";
 
 /**
@@ -213,11 +218,13 @@ interface BottomNavButtonProps {
   "data-menu-open"?: boolean;
   /** Badge number to display on icon */
   badge?: number;
+  /** Small decorative content anchored to the label */
+  labelBadge?: ReactNode;
   /** Keyboard shortcut hint */
   kbd?: string;
   /** Truncate label at max characters */
   truncateLabel?: boolean;
-  /** Tooltip text (native title attribute) */
+  /** Tooltip text */
   title?: string;
 }
 
@@ -240,6 +247,7 @@ export const BottomNavButton = forwardRef<
     "data-menu-open": dataMenuOpen,
     badge,
     kbd,
+    labelBadge,
     truncateLabel,
     title,
   },
@@ -247,8 +255,9 @@ export const BottomNavButton = forwardRef<
 ) {
   const maxButtons = useContext(BottomNavButtonContext);
   const ariaDescriptionId = useId();
+  const tooltipText = title ?? ariaDescription;
 
-  return (
+  const button = (
     <Button
       ref={ref}
       variant="ghost"
@@ -259,7 +268,6 @@ export const BottomNavButton = forwardRef<
       disabled={disabled || isLoading}
       render={render}
       data-menu-open={dataMenuOpen || undefined}
-      title={title}
       aria-describedby={ariaDescription ? ariaDescriptionId : undefined}
     >
       {ariaDescription && (
@@ -289,13 +297,30 @@ export const BottomNavButton = forwardRef<
       )}
       <span
         className={cn(
+          "relative",
           labelVariants({ maxButtons, truncateLabel }),
           kbd && labelFlexVariants({ maxButtons }),
         )}
       >
         {label}
         {kbd && <Kbd className={kbdVariants({ maxButtons })}>{kbd}</Kbd>}
+        {labelBadge && (
+          <span className="pointer-events-none absolute -top-1 -right-2">
+            {labelBadge}
+          </span>
+        )}
       </span>
     </Button>
+  );
+
+  if (!tooltipText) return button;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={button} />
+      <TooltipContent side="top" className="text-center whitespace-pre-line">
+        {tooltipText}
+      </TooltipContent>
+    </Tooltip>
   );
 });
