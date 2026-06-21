@@ -12,16 +12,26 @@ import type {
   PreviousFileState,
   RatingRestoreEntry,
   RestoreData,
+  TagRestoreEntry,
 } from "@/stores/review-queue-store";
 import type {
   ReviewFileAction,
   ReviewFileMutationAction,
   SecondarySwipeAction,
   SwipeBindings,
+  TagSwipeAction,
 } from "@/stores/review-settings-store";
+import type {
+  FileMetadata,
+  UpdateFileTagsOptions,
+} from "@/integrations/hydrus-api/models";
 import {
   getBindingForDirection,
+  stripInvalidRatingActionsFromBindings,
+  stripInvalidTagActionsFromBindings,
+  stripRatingActionsForMissingPermission,
   stripRatingActionsForServicesFromBindings,
+  stripTagActionsForMissingPermission,
   useReviewGesturesEnabled,
   useReviewImmersiveMode,
   useReviewSettingsActions,
@@ -45,9 +55,19 @@ import {
   useUndeleteFilesMutation,
 } from "@/integrations/hydrus-api/queries/manage-files";
 import { useHydrusHideFromViewOptions } from "@/integrations/hydrus-api/queries/options";
-import { useSetRatingMutation } from "@/integrations/hydrus-api/queries/ratings";
+import {
+  useCanEditFileRatings,
+  useSetRatingMutation,
+} from "@/integrations/hydrus-api/queries/ratings";
+import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
+import {
+  getTagActionStateChange,
+  useCanEditFileTags,
+  useUpdateFileTagsMutation,
+} from "@/integrations/hydrus-api/queries/tags";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { getFileMetadata } from "@/integrations/hydrus-api/api-client";
+import { ContentUpdateAction } from "@/integrations/hydrus-api/models";
 import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
 
 /** Number of cards to render in the stack */
@@ -112,6 +132,24 @@ type RatingMutate = (args: {
   rating_service_key: string;
   rating: boolean | number | null;
 }) => void;
+/** Mutation function signature for tag operations */
+type TagMutate = (args: UpdateFileTagsOptions) => void;
+
+const contentUpdateActionByTagAction: Record<
+  TagSwipeAction["type"],
+  ContentUpdateAction
+> = {
+  add: ContentUpdateAction.ADD,
+  remove: ContentUpdateAction.DELETE,
+};
+
+const reverseContentUpdateActionByTagAction: Record<
+  TagSwipeAction["type"],
+  ContentUpdateAction
+> = {
+  add: ContentUpdateAction.DELETE,
+  remove: ContentUpdateAction.ADD,
+};
 
 /**
  * Execute the primary file action if it would change state.
@@ -176,65 +214,105 @@ function executeSecondaryRatingActions(
   secondaryActions: Array<SecondarySwipeAction>,
   fileId: number,
   ratings: Record<string, unknown> | undefined,
-  validServiceKeys: Set<string>,
+  validRatingServiceKeys: Set<string>,
   setRating: RatingMutate,
 ): Array<RatingRestoreEntry> {
   const restoreEntries: Array<RatingRestoreEntry> = [];
 
   for (const action of secondaryActions) {
-    switch (action.actionType) {
-      case "rating": {
-        const { serviceKey } = action;
+    if (action.actionType !== "rating") continue;
 
-        // Skip orphaned rating actions (service no longer exists)
-        if (!validServiceKeys.has(serviceKey)) break;
+    const { serviceKey } = action;
 
-        const currentRating = ratings?.[serviceKey] ?? null;
+    // Skip orphaned rating actions (service no longer exists)
+    if (!validRatingServiceKeys.has(serviceKey)) continue;
 
-        if (action.type === "setLike") {
-          restoreEntries.push({
-            serviceKey,
-            actionType: "setLike",
-            previousValue: currentRating as boolean | null,
-          });
-          setRating({
-            file_id: fileId,
-            rating_service_key: serviceKey,
-            rating: action.value,
-          });
-        } else if (action.type === "setNumerical") {
-          restoreEntries.push({
-            serviceKey,
-            actionType: "setNumerical",
-            previousValue: currentRating as number | null,
-          });
-          setRating({
-            file_id: fileId,
-            rating_service_key: serviceKey,
-            rating: action.value,
-          });
-        } else {
-          // action.type === "incDecDelta"
-          const prevValue = (currentRating as number | null) ?? 0;
-          restoreEntries.push({
-            serviceKey,
-            actionType: "incDecDelta",
-            previousValue: prevValue,
-          });
-          setRating({
-            file_id: fileId,
-            rating_service_key: serviceKey,
-            rating: Math.max(0, prevValue + action.delta),
-          });
-        }
-        break;
-      }
-      case "addTag":
-        // TODO: implement tag secondary actions
-        break;
-      default:
-        action satisfies never;
+    const currentRating = ratings?.[serviceKey] ?? null;
+
+    if (action.type === "setLike") {
+      restoreEntries.push({
+        serviceKey,
+        actionType: "setLike",
+        previousValue: currentRating as boolean | null,
+      });
+      setRating({
+        file_id: fileId,
+        rating_service_key: serviceKey,
+        rating: action.value,
+      });
+    } else if (action.type === "setNumerical") {
+      restoreEntries.push({
+        serviceKey,
+        actionType: "setNumerical",
+        previousValue: currentRating as number | null,
+      });
+      setRating({
+        file_id: fileId,
+        rating_service_key: serviceKey,
+        rating: action.value,
+      });
+    } else {
+      // action.type === "incDecDelta"
+      const prevValue = (currentRating as number | null) ?? 0;
+      restoreEntries.push({
+        serviceKey,
+        actionType: "incDecDelta",
+        previousValue: prevValue,
+      });
+      setRating({
+        file_id: fileId,
+        rating_service_key: serviceKey,
+        rating: Math.max(0, prevValue + action.delta),
+      });
     }
+  }
+
+  return restoreEntries;
+}
+
+function getContentUpdateAction(actionType: "add" | "remove") {
+  return contentUpdateActionByTagAction[actionType];
+}
+
+function getReverseContentUpdateAction(actionType: "add" | "remove") {
+  return reverseContentUpdateActionByTagAction[actionType];
+}
+
+function executeSecondaryTagActions(
+  secondaryActions: Array<SecondarySwipeAction>,
+  fileId: number,
+  metadata: FileMetadata | undefined,
+  validLocalTagServiceKeys: Set<string>,
+  canEditTags: boolean,
+  updateTags: TagMutate,
+): Array<TagRestoreEntry> {
+  const restoreEntries: Array<TagRestoreEntry> = [];
+  if (!canEditTags || !metadata) return restoreEntries;
+
+  for (const action of secondaryActions) {
+    if (action.actionType !== "tag") continue;
+    if (!validLocalTagServiceKeys.has(action.serviceKey)) continue;
+
+    const contentAction = getContentUpdateAction(action.type);
+    const { changed } = getTagActionStateChange(
+      metadata,
+      action.serviceKey,
+      action.tag,
+      contentAction,
+    );
+    if (!changed) continue;
+
+    restoreEntries.push({
+      serviceKey: action.serviceKey,
+      tag: action.tag,
+      actionType: action.type,
+    });
+    updateTags({
+      file_id: fileId,
+      serviceKey: action.serviceKey,
+      tag: action.tag,
+      action: contentAction,
+    });
   }
 
   return restoreEntries;
@@ -258,26 +336,73 @@ export function useReviewSwipeDeck() {
   const { mutate: unarchiveFiles } = useUnarchiveFilesMutation();
   const { mutate: undeleteFiles } = useUndeleteFilesMutation();
   const { mutate: setRating } = useSetRatingMutation();
+  const { mutate: updateTags } = useUpdateFileTagsMutation();
   const { hideFilteredFiles, hideFilteredFilesEvenWhenSkipped } =
     useHydrusHideFromViewOptions();
 
   // Rating services (for filtering orphaned actions)
-  const { ratingServices } = useRatingServices();
-  const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
-  const validServiceKeys = useMemo(
+  const {
+    ratingServices,
+    ratingServicesByKey,
+    isFetched: ratingServicesFetched,
+  } = useRatingServices();
+  const {
+    localTagServices,
+    localTagServicesByKey,
+    isFetched: localTagServicesFetched,
+  } = useLocalTagServices();
+  const canEditRatings = useCanEditFileRatings();
+  const canEditTags = useCanEditFileTags();
+  const readOnlyRatingServiceKeys = useReadOnlyRatingServiceKeys();
+  const validRatingServiceKeys = useMemo(
     () =>
       new Set(
         ratingServices
-          .filter(([key]) => !readOnlyServiceKeys.has(key))
+          .filter(([key]) => !readOnlyRatingServiceKeys.has(key))
           .map(([key]) => key),
       ),
-    [ratingServices, readOnlyServiceKeys],
+    [ratingServices, readOnlyRatingServiceKeys],
   );
-  const editableBindings = useMemo(
-    () =>
-      stripRatingActionsForServicesFromBindings(bindings, readOnlyServiceKeys),
-    [bindings, readOnlyServiceKeys],
+  const validLocalTagServiceKeys = useMemo(
+    () => new Set(localTagServices.map(([key]) => key)),
+    [localTagServices],
   );
+  const editableBindings = useMemo(() => {
+    const withoutReadOnlyRatings = stripRatingActionsForServicesFromBindings(
+      bindings,
+      readOnlyRatingServiceKeys,
+    );
+    const withoutMissingRatingPermission =
+      stripRatingActionsForMissingPermission(
+        withoutReadOnlyRatings,
+        canEditRatings,
+      );
+    const withoutInvalidRatings = ratingServicesFetched
+      ? stripInvalidRatingActionsFromBindings(
+          withoutMissingRatingPermission,
+          ratingServicesByKey,
+        )
+      : withoutMissingRatingPermission;
+    const withoutMissingTagPermission = stripTagActionsForMissingPermission(
+      withoutInvalidRatings,
+      canEditTags,
+    );
+    return localTagServicesFetched
+      ? stripInvalidTagActionsFromBindings(
+          withoutMissingTagPermission,
+          localTagServicesByKey,
+        )
+      : withoutMissingTagPermission;
+  }, [
+    bindings,
+    canEditRatings,
+    canEditTags,
+    localTagServicesByKey,
+    localTagServicesFetched,
+    ratingServicesByKey,
+    ratingServicesFetched,
+    readOnlyRatingServiceKeys,
+  ]);
 
   // Current file metadata
   const { data: currentMetadata } = useGetSingleFileMetadata(
@@ -332,14 +457,29 @@ export function useReviewSwipeDeck() {
       });
 
       // Reverse rating actions
-      for (const rating of restore.ratings ?? []) {
-        if (readOnlyServiceKeys.has(rating.serviceKey)) continue;
+      if (canEditRatings) {
+        for (const rating of restore.ratings ?? []) {
+          if (!validRatingServiceKeys.has(rating.serviceKey)) continue;
 
-        setRating({
-          file_id: lastEntry.fileId,
-          rating_service_key: rating.serviceKey,
-          rating: rating.previousValue,
-        });
+          setRating({
+            file_id: lastEntry.fileId,
+            rating_service_key: rating.serviceKey,
+            rating: rating.previousValue,
+          });
+        }
+      }
+
+      // Reverse tag actions that changed state
+      if (canEditTags) {
+        for (const tag of restore.tags ?? []) {
+          if (!validLocalTagServiceKeys.has(tag.serviceKey)) continue;
+          updateTags({
+            file_id: lastEntry.fileId,
+            serviceKey: tag.serviceKey,
+            tag: tag.tag,
+            action: getReverseContentUpdateAction(tag.actionType),
+          });
+        }
       }
     }
   }, [
@@ -348,7 +488,11 @@ export function useReviewSwipeDeck() {
     unarchiveFiles,
     undeleteFiles,
     setRating,
-    readOnlyServiceKeys,
+    updateTags,
+    canEditRatings,
+    validRatingServiceKeys,
+    canEditTags,
+    validLocalTagServiceKeys,
   ]);
 
   // Handle exit animation complete - remove card from exiting list
@@ -397,14 +541,23 @@ export function useReviewSwipeDeck() {
         binding.secondaryActions ?? [],
         currentFileId,
         currentMetadata?.ratings,
-        validServiceKeys,
+        validRatingServiceKeys,
         setRating,
+      );
+      const tagsRestore = executeSecondaryTagActions(
+        binding.secondaryActions ?? [],
+        currentFileId,
+        currentMetadata,
+        validLocalTagServiceKeys,
+        canEditTags,
+        updateTags,
       );
 
       // Record the action in history (always record, even if unchanged)
       const restore: RestoreData = {
         fileState,
         ratings: ratingsRestore.length > 0 ? ratingsRestore : undefined,
+        tags: tagsRestore.length > 0 ? tagsRestore : undefined,
       };
       recordAction({
         fileId: currentFileId,
@@ -422,7 +575,10 @@ export function useReviewSwipeDeck() {
       archiveFiles,
       trashFiles,
       setRating,
-      validServiceKeys,
+      updateTags,
+      validRatingServiceKeys,
+      validLocalTagServiceKeys,
+      canEditTags,
       queryClient,
       reviewSources,
       hideFilteredFiles,
