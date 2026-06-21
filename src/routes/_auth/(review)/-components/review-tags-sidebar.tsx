@@ -1,7 +1,8 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {ReviewTagsSortMode} from "@/stores/tags-settings-store";
+import { useMemo } from "react";
+import type { ReviewTagsSortMode } from "@/stores/tags-settings-store";
 import { RightSidebarPortal } from "@/components/app-shell/right-sidebar-portal";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
@@ -31,19 +32,35 @@ export function ReviewTagsSidebar() {
   const reviewSortMode = useReviewTagsSortMode();
   const { setReviewSortMode } = useTagsSettingsActions();
 
+  // Stabilise the props handed to TagsSidebar. A fresh `items` array (or `sort`
+  // object) every render keeps TagsSidebar's internal useDeferredValue(items)
+  // in a perpetual transition, which stops the deferred sort mode from
+  // settling — so the displayed order lags behind the Alpha/Namespace toggle.
+  // Memoising keeps identities stable so the sort tracks the toggle. (The
+  // gallery already passes a stable, deferred array, which is why it's fine.)
+  const items = useMemo(
+    () => (currentMetadata ? [currentMetadata] : []),
+    [currentMetadata],
+  );
+  const sort = useMemo(
+    () => ({
+      mode: reviewSortMode,
+      onChange: (mode: string) =>
+        setReviewSortMode(mode as ReviewTagsSortMode),
+      options: REVIEW_SORT_OPTIONS,
+    }),
+    [reviewSortMode, setReviewSortMode],
+  );
+
   if (currentFileId === undefined) return null;
 
   return (
     <RightSidebarPortal>
       <TagsSidebar
-        items={currentMetadata ? [currentMetadata] : []}
+        items={items}
         title="Current file"
         showIndex={false}
-        sort={{
-          mode: reviewSortMode,
-          onChange: (mode) => setReviewSortMode(mode as ReviewTagsSortMode),
-          options: REVIEW_SORT_OPTIONS,
-        }}
+        sort={sort}
       />
     </RightSidebarPortal>
   );
