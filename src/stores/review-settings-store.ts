@@ -3,7 +3,10 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { LocalTagServiceInfo } from "@/integrations/hydrus-api/models";
+import type {
+  LocalTagServiceInfo,
+  RatingServiceInfo,
+} from "@/integrations/hydrus-api/models";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 import {
   MAX_OPTIMIZE_SIZE_THRESHOLD_MB,
@@ -565,6 +568,49 @@ export function stripRatingActionsForServicesFromBindings(
     bindings,
     (action) =>
       action.actionType === "rating" && serviceKeys.has(action.serviceKey),
+  );
+}
+
+function shouldStripRatingAction(
+  action: RatingSwipeAction,
+  ratingServicesByKey: Map<string, RatingServiceInfo> | undefined,
+) {
+  return !ratingServicesByKey?.has(action.serviceKey);
+}
+
+export function stripInvalidRatingActions(
+  binding: ReviewSwipeBinding,
+  ratingServicesByKey: Map<string, RatingServiceInfo> | undefined,
+): ReviewSwipeBinding {
+  return stripSecondaryActions(
+    binding,
+    (action) =>
+      action.actionType === "rating" &&
+      shouldStripRatingAction(action, ratingServicesByKey),
+  );
+}
+
+export function stripInvalidRatingActionsFromBindings(
+  bindings: SwipeBindings,
+  ratingServicesByKey: Map<string, RatingServiceInfo> | undefined,
+): SwipeBindings {
+  return stripSecondaryActionsFromBindings(
+    bindings,
+    (action) =>
+      action.actionType === "rating" &&
+      shouldStripRatingAction(action, ratingServicesByKey),
+  );
+}
+
+export function stripRatingActionsForMissingPermission(
+  bindings: SwipeBindings,
+  canEditFileRatings: boolean,
+): SwipeBindings {
+  if (canEditFileRatings) return bindings;
+
+  return stripSecondaryActionsFromBindings(
+    bindings,
+    (action) => action.actionType === "rating",
   );
 }
 

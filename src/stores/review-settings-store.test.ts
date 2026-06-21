@@ -3,13 +3,19 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  stripInvalidRatingActions,
+  stripInvalidRatingActionsFromBindings,
   stripInvalidTagActions,
   stripInvalidTagActionsFromBindings,
+  stripRatingActionsForMissingPermission,
   stripRatingActionsForServices,
   stripRatingActionsForServicesFromBindings,
   stripTagActionsForMissingPermission,
 } from "./review-settings-store";
-import type { LocalTagServiceInfo } from "@/integrations/hydrus-api/models";
+import type {
+  LocalTagServiceInfo,
+  RatingServiceInfo,
+} from "@/integrations/hydrus-api/models";
 import type {
   ReviewSwipeBinding,
   SecondarySwipeAction,
@@ -22,6 +28,12 @@ const localTagService = {
   type: ServiceType.LOCAL_TAG_DOMAIN,
   type_pretty: "local tag domain",
 } as LocalTagServiceInfo;
+
+const ratingService = {
+  name: "stars",
+  type: ServiceType.RATING_LIKE,
+  type_pretty: "like/dislike rating",
+} as RatingServiceInfo;
 
 const ratingAction = {
   actionType: "rating",
@@ -103,6 +115,67 @@ describe("review settings action stripping helpers", () => {
         bindings,
         new Set(),
       );
+
+      expect(next).toBe(bindings);
+    });
+  });
+
+  describe("stripInvalidRatingActions", () => {
+    it("strips rating actions for missing rating services", () => {
+      const bindings = bindingsWithSecondaryActions([ratingAction]);
+
+      const next = stripInvalidRatingActionsFromBindings(
+        bindings,
+        new Map([["otherRating", ratingService]]),
+      );
+
+      expect(next.left.secondaryActions).toBeUndefined();
+    });
+
+    it("keeps rating actions for available rating services", () => {
+      const bindings = bindingsWithSecondaryActions([ratingAction]);
+
+      const next = stripInvalidRatingActionsFromBindings(
+        bindings,
+        new Map([["stars", ratingService]]),
+      );
+
+      expect(next).toBe(bindings);
+    });
+
+    it("preserves other secondary actions when stripping invalid rating actions", () => {
+      const binding = bindingWithSecondaryActions([ratingAction, tagAction]);
+
+      const next = stripInvalidRatingActions(
+        binding,
+        new Map([["otherRating", ratingService]]),
+      );
+
+      expect(next.secondaryActions).toEqual([tagAction]);
+    });
+  });
+
+  describe("stripRatingActionsForMissingPermission", () => {
+    it("strips rating actions when Edit File Ratings permission is missing", () => {
+      const bindings = bindingsWithSecondaryActions([ratingAction]);
+
+      const next = stripRatingActionsForMissingPermission(bindings, false);
+
+      expect(next.left.secondaryActions).toBeUndefined();
+    });
+
+    it("preserves tag actions when Edit File Ratings permission is missing", () => {
+      const bindings = bindingsWithSecondaryActions([ratingAction, tagAction]);
+
+      const next = stripRatingActionsForMissingPermission(bindings, false);
+
+      expect(next.left.secondaryActions).toEqual([tagAction]);
+    });
+
+    it("keeps bindings unchanged when Edit File Ratings permission is present", () => {
+      const bindings = bindingsWithSecondaryActions([ratingAction]);
+
+      const next = stripRatingActionsForMissingPermission(bindings, true);
 
       expect(next).toBe(bindings);
     });
