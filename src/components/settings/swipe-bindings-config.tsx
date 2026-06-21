@@ -1279,7 +1279,7 @@ function DirectionBindingEditor({
               size="sm"
               onClick={() => {
                 const actionId = createSecondarySwipeActionId("tag");
-                upsertTagAction({}, actionId);
+                upsertTagAction({ type: "add" }, actionId);
               }}
               disabled={!canAddTag}
             >
