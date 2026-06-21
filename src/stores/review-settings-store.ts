@@ -3,6 +3,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { generateID } from "@react-querybuilder/core";
 import type {
   LocalTagServiceInfo,
   RatingServiceInfo,
@@ -76,10 +77,14 @@ export type TagSwipeAction = {
  * Supports rating and tag actions, extensible for future action types.
  */
 export type RatingSecondarySwipeAction = {
+  id?: string;
   actionType: "rating";
 } & RatingSwipeAction;
 
-export type TagSecondarySwipeAction = { actionType: "tag" } & TagSwipeAction;
+export type TagSecondarySwipeAction = {
+  id?: string;
+  actionType: "tag";
+} & TagSwipeAction;
 
 export type SecondarySwipeAction =
   | RatingSecondarySwipeAction
@@ -405,7 +410,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           }
         }
 
-        // v3 -> v4: normalize duplicate secondary swipe actions.
+        // v3 -> v4: normalize duplicate secondary swipe actions and add row ids.
         if (version < 4 && state && typeof state === "object") {
           const bindings = state.bindings as SwipeBindings | undefined;
           if (bindings) {
@@ -525,6 +530,30 @@ function getTagActionIdentity(action: TagSwipeAction): string {
   return `${action.serviceKey}\u0000${action.tag}`;
 }
 
+export function createSecondarySwipeActionId(
+  actionType: SecondarySwipeAction["actionType"],
+): string {
+  return `${actionType}:${generateID()}`;
+}
+
+function withNormalizedSecondaryActionId(
+  action: SecondarySwipeAction,
+  usedIds: Set<string>,
+): SecondarySwipeAction {
+  if (action.id && !usedIds.has(action.id)) {
+    usedIds.add(action.id);
+    return action;
+  }
+
+  let id = createSecondarySwipeActionId(action.actionType);
+  while (usedIds.has(id)) {
+    id = createSecondarySwipeActionId(action.actionType);
+  }
+
+  usedIds.add(id);
+  return { ...action, id };
+}
+
 function normalizeSecondaryActions(
   secondaryActions: Array<SecondarySwipeAction> | undefined,
 ): Array<SecondarySwipeAction> | undefined {
@@ -532,6 +561,7 @@ function normalizeSecondaryActions(
 
   const ratingServiceKeys = new Set<string>();
   const tagActionIdentities = new Set<string>();
+  const actionIds = new Set<string>();
   const normalized: Array<SecondarySwipeAction> = [];
 
   for (const action of secondaryActions) {
@@ -540,7 +570,7 @@ function normalizeSecondaryActions(
         continue;
       }
       ratingServiceKeys.add(action.serviceKey);
-      normalized.push(action);
+      normalized.push(withNormalizedSecondaryActionId(action, actionIds));
       continue;
     }
 
@@ -553,7 +583,7 @@ function normalizeSecondaryActions(
       continue;
     }
     tagActionIdentities.add(identity);
-    normalized.push(action);
+    normalized.push(withNormalizedSecondaryActionId(action, actionIds));
   }
 
   return normalized.length > 0 ? normalized : undefined;
