@@ -5,17 +5,17 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { useShallow } from "zustand/shallow";
 import type {
-  RatingSwipeAction,
   ReviewFileAction,
   SwipeDirection,
   TagSwipeActionType,
+  ValidRatingSwipeAction,
 } from "@/stores/review-settings-store";
 
 /** Previous state of a file before action, used for undo */
 export type PreviousFileState = "inbox" | "archived" | "trashed" | null;
 
 /** Rating type for restoration — derived from the source action type */
-export type RatingActionType = RatingSwipeAction["type"];
+export type RatingActionType = ValidRatingSwipeAction["type"];
 
 /** A single rating restoration entry */
 export interface RatingRestoreEntry {

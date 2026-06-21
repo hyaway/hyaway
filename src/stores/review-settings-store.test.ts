@@ -22,11 +22,18 @@ import type {
   RatingServiceInfo,
 } from "@/integrations/hydrus-api/models";
 import type {
+  LooseRatingSwipeAction,
+  LooseSecondarySwipeAction,
+  LooseTagSwipeAction,
   ReviewSwipeBinding,
-  SecondarySwipeAction,
   SwipeBindings,
 } from "./review-settings-store";
 import { ServiceType } from "@/integrations/hydrus-api/models";
+
+type LegacyLooseSecondarySwipeAction =
+  | LooseSecondarySwipeAction
+  | ({ id?: string; actionType: "rating" } & LooseRatingSwipeAction)
+  | ({ id?: string; actionType: "tag" } & LooseTagSwipeAction);
 
 const localTagService = {
   name: "my tags",
@@ -45,38 +52,38 @@ const ratingAction = {
   type: "setLike",
   serviceKey: "stars",
   value: true,
-} satisfies SecondarySwipeAction;
+} satisfies LegacyLooseSecondarySwipeAction;
 
 const tagAction = {
   actionType: "tag",
   type: "add",
   serviceKey: "localTags",
   tag: "series:example",
-} satisfies SecondarySwipeAction;
+} satisfies LegacyLooseSecondarySwipeAction;
 
 function expectGeneratedActionId(
-  action: SecondarySwipeAction | undefined,
-  actionType: SecondarySwipeAction["actionType"],
+  action: LegacyLooseSecondarySwipeAction | undefined,
+  actionType: LooseSecondarySwipeAction["actionType"],
 ) {
   expect(action?.id).toEqual(expect.stringMatching(`^${actionType}:`));
 }
 
 function bindingWithSecondaryActions(
-  secondaryActions?: Array<SecondarySwipeAction>,
+  secondaryActions?: Array<LegacyLooseSecondarySwipeAction>,
 ): ReviewSwipeBinding {
   return {
     fileAction: "archive",
-    secondaryActions,
+    secondaryActions: secondaryActions as Array<LooseSecondarySwipeAction>,
   };
 }
 
 function bindingsWithSecondaryActions(
-  secondaryActions?: Array<SecondarySwipeAction>,
+  secondaryActions?: Array<LegacyLooseSecondarySwipeAction>,
 ): SwipeBindings {
   return {
     left: {
       fileAction: "archive",
-      secondaryActions,
+      secondaryActions: secondaryActions as Array<LooseSecondarySwipeAction>,
     },
     right: { fileAction: "trash" },
     up: { fileAction: "skip" },
@@ -90,7 +97,7 @@ describe("review settings action stripping helpers", () => {
       const duplicateRatingAction = {
         ...ratingAction,
         value: false,
-      } satisfies SecondarySwipeAction;
+      } satisfies LegacyLooseSecondarySwipeAction;
       const binding = bindingWithSecondaryActions([
         ratingAction,
         duplicateRatingAction,
@@ -112,11 +119,11 @@ describe("review settings action stripping helpers", () => {
       const duplicateTagAction = {
         ...tagAction,
         type: "remove",
-      } satisfies SecondarySwipeAction;
+      } satisfies LegacyLooseSecondarySwipeAction;
       const otherServiceTagAction = {
         ...tagAction,
         serviceKey: "otherLocalTags",
-      } satisfies SecondarySwipeAction;
+      } satisfies LegacyLooseSecondarySwipeAction;
       const binding = bindingWithSecondaryActions([
         tagAction,
         duplicateTagAction,
@@ -135,10 +142,8 @@ describe("review settings action stripping helpers", () => {
     });
 
     it("removes secondary actions from undo bindings", () => {
-      const binding: ReviewSwipeBinding = {
-        fileAction: "undo",
-        secondaryActions: [ratingAction, tagAction],
-      };
+      const binding = bindingWithSecondaryActions([ratingAction, tagAction]);
+      binding.fileAction = "undo";
 
       const next = normalizeReviewSwipeBinding(binding);
 
@@ -166,11 +171,11 @@ describe("review settings action stripping helpers", () => {
       const ratingActionWithId = {
         ...ratingAction,
         id: "rating-action-1",
-      } satisfies SecondarySwipeAction;
+      } satisfies LegacyLooseSecondarySwipeAction;
       const tagActionWithId = {
         ...tagAction,
         id: "tag-action-1",
-      } satisfies SecondarySwipeAction;
+      } satisfies LegacyLooseSecondarySwipeAction;
       const binding = bindingWithSecondaryActions([
         ratingActionWithId,
         tagActionWithId,
@@ -187,15 +192,10 @@ describe("review settings action stripping helpers", () => {
     it("preserves incomplete secondary actions during normalization", () => {
       const incompleteRatingAction = {
         actionType: "rating",
-        type: "setLike",
-        serviceKey: "",
-      } satisfies SecondarySwipeAction;
+      } satisfies LegacyLooseSecondarySwipeAction;
       const incompleteTagAction = {
         actionType: "tag",
-        type: "add",
-        serviceKey: "localTags",
-        tag: "",
-      } satisfies SecondarySwipeAction;
+      } satisfies LegacyLooseSecondarySwipeAction;
       const binding = bindingWithSecondaryActions([
         incompleteRatingAction,
         incompleteTagAction,
@@ -222,21 +222,24 @@ describe("review settings action stripping helpers", () => {
     });
 
     it("filters invalid rating and tag actions without mutating persisted rows", () => {
+      const validRatingAction = {
+        ...ratingAction,
+        id: "rating-action-1",
+      } satisfies LegacyLooseSecondarySwipeAction;
+      const validTagAction = {
+        ...tagAction,
+        id: "tag-action-1",
+      } satisfies LegacyLooseSecondarySwipeAction;
       const incompleteRatingAction = {
         actionType: "rating",
-        type: "setLike",
-        serviceKey: "stars",
-      } satisfies SecondarySwipeAction;
+      } satisfies LegacyLooseSecondarySwipeAction;
       const incompleteTagAction = {
         actionType: "tag",
-        type: "add",
-        serviceKey: "localTags",
-        tag: "",
-      } satisfies SecondarySwipeAction;
+      } satisfies LegacyLooseSecondarySwipeAction;
       const binding = bindingWithSecondaryActions([
-        ratingAction,
+        validRatingAction,
         incompleteRatingAction,
-        tagAction,
+        validTagAction,
         incompleteTagAction,
       ]);
 
@@ -246,17 +249,19 @@ describe("review settings action stripping helpers", () => {
       });
 
       expect(getAllSecondarySwipeActions(binding)).toHaveLength(4);
-      expect(validActions).toEqual([ratingAction, tagAction]);
+      expect(validActions).toEqual([validRatingAction, validTagAction]);
     });
 
     it("filters invalid secondary actions across bindings", () => {
+      const validRatingAction = {
+        ...ratingAction,
+        id: "rating-action-1",
+      } satisfies LegacyLooseSecondarySwipeAction;
       const incompleteRatingAction = {
         actionType: "rating",
-        type: "setLike",
-        serviceKey: "stars",
-      } satisfies SecondarySwipeAction;
+      } satisfies LegacyLooseSecondarySwipeAction;
       const bindings = bindingsWithSecondaryActions([
-        ratingAction,
+        validRatingAction,
         incompleteRatingAction,
       ]);
 
@@ -265,7 +270,7 @@ describe("review settings action stripping helpers", () => {
       });
 
       expect(next).not.toBe(bindings);
-      expect(next.left.secondaryActions).toEqual([ratingAction]);
+      expect(next.left.secondaryActions).toEqual([validRatingAction]);
       expect(bindings.left.secondaryActions).toHaveLength(2);
     });
   });

@@ -37,33 +37,52 @@ export type ReviewFileAction = ReviewFileMutationAction | "skip" | "undo";
 /** How images are loaded in review mode */
 export type ReviewImageLoadMode = "original" | "optimized";
 
+type EmptyRatingSwipeAction = {
+  type?: undefined;
+  serviceKey?: string;
+};
+
+type LooseSetLikeRatingSwipeAction = {
+  /** Set a like/dislike rating */
+  type: "setLike";
+  serviceKey?: string;
+  /** true = like, false = dislike, null = clear */
+  value?: boolean | null;
+};
+
+type LooseSetNumericalRatingSwipeAction = {
+  /** Set a numerical star rating */
+  type: "setNumerical";
+  serviceKey?: string;
+  /** Star value or null to clear */
+  value?: number | null;
+};
+
+type LooseIncDecDeltaRatingSwipeAction = {
+  /** Increment or decrement an inc/dec rating */
+  type: "incDecDelta";
+  serviceKey?: string;
+  /** +1 to increment, -1 to decrement */
+  delta?: 1 | -1;
+};
+
+type LooseSelectedRatingSwipeAction =
+  | LooseSetLikeRatingSwipeAction
+  | LooseSetNumericalRatingSwipeAction
+  | LooseIncDecDeltaRatingSwipeAction;
+
 /**
  * Rating action to perform on swipe.
  * Represented as a discriminated union to support different rating service types.
- * Currently a placeholder - the UI to configure these will be added later.
  */
-export type RatingSwipeAction =
-  | {
-      /** Set a like/dislike rating */
-      type: "setLike";
-      serviceKey: string;
-      /** true = like, false = dislike, null = clear */
-      value?: boolean | null;
-    }
-  | {
-      /** Set a numerical star rating */
-      type: "setNumerical";
-      serviceKey: string;
-      /** Star value or null to clear */
-      value?: number | null;
-    }
-  | {
-      /** Increment or decrement an inc/dec rating */
-      type: "incDecDelta";
-      serviceKey: string;
-      /** +1 to increment, -1 to decrement */
-      delta?: 1 | -1;
-    };
+export type LooseRatingSwipeAction =
+  | EmptyRatingSwipeAction
+  | LooseSelectedRatingSwipeAction;
+
+export type ValidRatingSwipeAction =
+  | Required<LooseSetLikeRatingSwipeAction>
+  | Required<LooseSetNumericalRatingSwipeAction>
+  | Required<LooseIncDecDeltaRatingSwipeAction>;
 
 /**
  * Tag action to perform on swipe.
@@ -71,29 +90,59 @@ export type RatingSwipeAction =
  */
 export type TagSwipeActionType = "add" | "remove";
 
-export type TagSwipeAction = {
-  type: TagSwipeActionType;
-  serviceKey: string;
-  tag: string;
+type EmptyTagSwipeAction = {
+  type?: undefined;
+  serviceKey?: string;
+  tag?: string;
 };
+
+type LooseSelectedTagSwipeAction = {
+  type: TagSwipeActionType;
+  serviceKey?: string;
+  tag?: string;
+};
+
+export type LooseTagSwipeAction =
+  | EmptyTagSwipeAction
+  | LooseSelectedTagSwipeAction;
+
+export type ValidTagSwipeAction = Required<LooseSelectedTagSwipeAction>;
 
 /**
  * Secondary actions that can be performed alongside the primary file action.
  * Supports rating and tag actions, extensible for future action types.
  */
-export type RatingSecondarySwipeAction = {
-  id?: string;
+export type LooseRatingSecondarySwipeAction = {
+  id: string;
   actionType: "rating";
-} & RatingSwipeAction;
+} & LooseRatingSwipeAction;
 
-export type TagSecondarySwipeAction = {
-  id?: string;
+export type ValidRatingSecondarySwipeAction = {
+  id: string;
+  actionType: "rating";
+} & ValidRatingSwipeAction;
+
+export type LooseTagSecondarySwipeAction = {
+  id: string;
   actionType: "tag";
-} & TagSwipeAction;
+} & LooseTagSwipeAction;
 
-export type SecondarySwipeAction =
-  | RatingSecondarySwipeAction
-  | TagSecondarySwipeAction;
+export type ValidTagSecondarySwipeAction = {
+  id: string;
+  actionType: "tag";
+} & ValidTagSwipeAction;
+
+export type LooseSecondarySwipeAction =
+  | LooseRatingSecondarySwipeAction
+  | LooseTagSecondarySwipeAction;
+
+export type ValidSecondarySwipeAction =
+  | ValidRatingSecondarySwipeAction
+  | ValidTagSecondarySwipeAction;
+
+type UnnormalizedLooseSecondarySwipeAction =
+  | (Omit<LooseRatingSecondarySwipeAction, "id"> & { id?: string })
+  | (Omit<LooseTagSecondarySwipeAction, "id"> & { id?: string });
 
 /**
  * A binding that maps a swipe direction to one or more actions.
@@ -103,7 +152,7 @@ export interface ReviewSwipeBinding {
   /** Primary file management action (archive, trash, skip) - required */
   fileAction: ReviewFileAction;
   /** Secondary actions to perform alongside the file action */
-  secondaryActions?: Array<SecondarySwipeAction>;
+  secondaryActions?: Array<LooseSecondarySwipeAction>;
 }
 
 /** Complete mapping of all swipe directions to their bindings */
@@ -532,18 +581,18 @@ export function hasUndoBinding(bindings: SwipeBindings): boolean {
 }
 
 export function createSecondarySwipeActionId(
-  actionType: SecondarySwipeAction["actionType"],
+  actionType: LooseSecondarySwipeAction["actionType"],
 ): string {
   return `${actionType}:${generateID()}`;
 }
 
 function withNormalizedSecondaryActionId(
-  action: SecondarySwipeAction,
+  action: UnnormalizedLooseSecondarySwipeAction,
   usedIds: Set<string>,
-): SecondarySwipeAction {
+): LooseSecondarySwipeAction {
   if (action.id && !usedIds.has(action.id)) {
     usedIds.add(action.id);
-    return action;
+    return { ...action, id: action.id };
   }
 
   let id = createSecondarySwipeActionId(action.actionType);
@@ -556,8 +605,8 @@ function withNormalizedSecondaryActionId(
 }
 
 function normalizeSecondaryActions(
-  secondaryActions: Array<SecondarySwipeAction> | undefined,
-): Array<SecondarySwipeAction> | undefined {
+  secondaryActions: Array<UnnormalizedLooseSecondarySwipeAction> | undefined,
+): Array<LooseSecondarySwipeAction> | undefined {
   if (!secondaryActions?.length) return undefined;
 
   const actionIds = new Set<string>();
@@ -578,15 +627,16 @@ export interface SecondarySwipeActionValidityContext {
 
 export function getAllSecondarySwipeActions(
   binding: ReviewSwipeBinding,
-): Array<SecondarySwipeAction> {
+): Array<LooseSecondarySwipeAction> {
   return binding.secondaryActions ?? [];
 }
 
 export function isValidRatingSecondarySwipeAction(
-  action: SecondarySwipeAction,
+  action: LooseSecondarySwipeAction,
   context: SecondarySwipeActionValidityContext = {},
-): action is RatingSecondarySwipeAction {
+): action is ValidRatingSecondarySwipeAction {
   if (action.actionType !== "rating") return false;
+  if (!action.id) return false;
   if (context.canEditFileRatings === false) return false;
   if (!action.serviceKey) return false;
   if (context.readOnlyRatingServiceKeys?.has(action.serviceKey)) return false;
@@ -595,6 +645,8 @@ export function isValidRatingSecondarySwipeAction(
   if (context.ratingServicesByKey && !service) return false;
 
   switch (action.type) {
+    case undefined:
+      return false;
     case "setLike":
       if (service && !isLikeRatingService(service)) return false;
       return action.value !== undefined;
@@ -608,12 +660,13 @@ export function isValidRatingSecondarySwipeAction(
 }
 
 export function isValidTagSecondarySwipeAction(
-  action: SecondarySwipeAction,
+  action: LooseSecondarySwipeAction,
   context: SecondarySwipeActionValidityContext = {},
-): action is TagSecondarySwipeAction {
+): action is ValidTagSecondarySwipeAction {
   if (action.actionType !== "tag") return false;
+  if (!action.id) return false;
   if (context.canEditFileTags === false) return false;
-  if (!action.serviceKey || !action.tag.trim()) return false;
+  if (!action.type || !action.serviceKey || !action.tag?.trim()) return false;
   if (
     context.localTagServicesByKey &&
     !context.localTagServicesByKey.has(action.serviceKey)
@@ -625,9 +678,9 @@ export function isValidTagSecondarySwipeAction(
 }
 
 export function isValidSecondarySwipeAction(
-  action: SecondarySwipeAction,
+  action: LooseSecondarySwipeAction,
   context: SecondarySwipeActionValidityContext = {},
-): action is SecondarySwipeAction {
+): action is ValidSecondarySwipeAction {
   return (
     isValidRatingSecondarySwipeAction(action, context) ||
     isValidTagSecondarySwipeAction(action, context)
@@ -637,7 +690,7 @@ export function isValidSecondarySwipeAction(
 export function getValidSecondarySwipeActions(
   binding: ReviewSwipeBinding,
   context: SecondarySwipeActionValidityContext = {},
-): Array<SecondarySwipeAction> {
+): Array<ValidSecondarySwipeAction> {
   return getAllSecondarySwipeActions(binding).filter((action) =>
     isValidSecondarySwipeAction(action, context),
   );
@@ -718,7 +771,7 @@ export function normalizeSwipeBindings(bindings: SwipeBindings): SwipeBindings {
 
 function stripSecondaryActions(
   binding: ReviewSwipeBinding,
-  shouldStrip: (action: SecondarySwipeAction) => boolean,
+  shouldStrip: (action: LooseSecondarySwipeAction) => boolean,
 ): ReviewSwipeBinding {
   if (!binding.secondaryActions?.length) return binding;
 
@@ -739,7 +792,7 @@ function stripSecondaryActions(
 
 function stripSecondaryActionsFromBindings(
   bindings: SwipeBindings,
-  shouldStrip: (action: SecondarySwipeAction) => boolean,
+  shouldStrip: (action: LooseSecondarySwipeAction) => boolean,
 ): SwipeBindings {
   let changed = false;
   const nextBindings = { ...bindings };
@@ -767,7 +820,9 @@ export function stripRatingActionsForServices(
   return stripSecondaryActions(
     binding,
     (action) =>
-      action.actionType === "rating" && serviceKeys.has(action.serviceKey),
+      action.actionType === "rating" &&
+      !!action.serviceKey &&
+      serviceKeys.has(action.serviceKey),
   );
 }
 
@@ -781,15 +836,17 @@ export function stripRatingActionsForServicesFromBindings(
   return stripSecondaryActionsFromBindings(
     bindings,
     (action) =>
-      action.actionType === "rating" && serviceKeys.has(action.serviceKey),
+      action.actionType === "rating" &&
+      !!action.serviceKey &&
+      serviceKeys.has(action.serviceKey),
   );
 }
 
 function shouldStripRatingAction(
-  action: RatingSwipeAction,
+  action: LooseRatingSwipeAction,
   ratingServicesByKey: Map<string, RatingServiceInfo> | undefined,
 ) {
-  return !ratingServicesByKey?.has(action.serviceKey);
+  return !action.serviceKey || !ratingServicesByKey?.has(action.serviceKey);
 }
 
 export function stripInvalidRatingActions(
@@ -829,7 +886,7 @@ export function stripRatingActionsForMissingPermission(
 }
 
 function shouldStripTagAction(
-  action: TagSwipeAction,
+  action: LooseTagSwipeAction,
   localTagServicesByKey: Map<string, LocalTagServiceInfo> | undefined,
 ) {
   return !action.serviceKey || !localTagServicesByKey?.has(action.serviceKey);
