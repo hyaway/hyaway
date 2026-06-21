@@ -23,12 +23,14 @@ test("count: count desc, then namespaced-first/name", () => {
   ]);
 });
 
-test("alpha: by tag name, namespace-agnostic", () => {
-  expect(sortTagItems(items, "alpha").map((i) => i.tag)).toEqual([
-    "ace",
-    "apple",
-    "mid",
-    "zebra",
+test("alpha: by full displayed string (namespace included), interleaving unnamespaced", () => {
+  // ":apple" sorts before the "character:" group, ":zebra" after — i.e.
+  // unnamespaced tags interleave A-Z, unlike the namespace mode which groups.
+  expect(sortTagItems(items, "alpha").map(key)).toEqual([
+    ":apple",
+    "character:ace",
+    "character:mid",
+    ":zebra",
   ]);
 });
 

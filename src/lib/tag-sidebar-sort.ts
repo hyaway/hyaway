@@ -25,11 +25,12 @@ export function sortTagItems(
       return a.tag.localeCompare(b.tag);
     });
   } else if (mode === "alpha") {
-    // Flat alphabetical by tag name, namespace-agnostic; namespace tiebreak.
+    // Flat alphabetical by the full displayed tag (namespace included), so
+    // namespaced and unnamespaced tags interleave A-Z by what's shown.
     result.sort((a, b) => {
-      const byTag = a.tag.localeCompare(b.tag);
-      if (byTag !== 0) return byTag;
-      return a.namespace.localeCompare(b.namespace);
+      const aFull = a.namespace ? `${a.namespace}:${a.tag}` : a.tag;
+      const bFull = b.namespace ? `${b.namespace}:${b.tag}` : b.tag;
+      return aFull.localeCompare(bFull);
     });
   } else {
     // count: count desc, then namespaced-first/name.
