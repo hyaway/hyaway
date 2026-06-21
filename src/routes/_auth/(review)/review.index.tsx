@@ -8,6 +8,7 @@ import { ReviewFooter } from "./-components/review-footer";
 import { useReviewImmersiveEffects } from "./-components/use-review-immersive-effects";
 import { ReviewSettingsPopover } from "./-components/review-settings-popover";
 import { ReviewStatsBreakdown } from "./-components/review-stats-breakdown";
+import { ReviewTagsSidebar } from "./-components/review-tags-sidebar";
 import {
   ReviewSwipeDeckVisual,
   useReviewSwipeDeck,
@@ -105,6 +106,7 @@ function ReviewPage() {
   // The deck will size itself based on viewport
   return (
     <div className="flex h-full flex-col">
+      <ReviewTagsSidebar />
       <PageHeaderActions>
         <ReviewSettingsPopover />
       </PageHeaderActions>
