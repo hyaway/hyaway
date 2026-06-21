@@ -36,27 +36,27 @@ export function ReviewThresholdOverlay({
   thresholds,
 }: ReviewThresholdOverlayProps) {
   const bindings = useReviewSwipeBindings();
-  const { servicesMap } = useRatingServices();
+  const { ratingServicesByKey } = useRatingServices();
   const { localTagServicesByKey } = useLocalTagServices();
   // Get descriptors for each direction
   const leftDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.left,
-    servicesMap,
+    ratingServicesByKey,
     localTagServicesByKey,
   );
   const rightDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.right,
-    servicesMap,
+    ratingServicesByKey,
     localTagServicesByKey,
   );
   const upDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.up,
-    servicesMap,
+    ratingServicesByKey,
     localTagServicesByKey,
   );
   const downDescriptor = getSwipeBindingOverlayDescriptor(
     bindings.down,
-    servicesMap,
+    ratingServicesByKey,
     localTagServicesByKey,
   );
 

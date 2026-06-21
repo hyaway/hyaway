@@ -90,7 +90,7 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
   const total = stats.left + stats.right + stats.up + stats.down;
   const history = useReviewQueueHistory();
   const sources = useReviewQueueSources();
-  const { servicesMap } = useRatingServices();
+  const { ratingServicesByKey } = useRatingServices();
   const { localTagServicesByKey } = useLocalTagServices();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -169,8 +169,8 @@ export function ReviewCompletion({ stats, bindings }: ReviewCompletionProps) {
               direction={direction}
               fileIds={fileIdsByDirection[direction]}
               bindings={bindings}
-              servicesMap={servicesMap}
-              tagServicesMap={localTagServicesByKey}
+              ratingServicesByKey={ratingServicesByKey}
+              tagServicesByKey={localTagServicesByKey}
             />
           ))}
         </div>
@@ -362,21 +362,22 @@ interface DecisionFilmstripSectionProps {
   direction: SwipeDirection;
   fileIds: Array<number>;
   bindings: SwipeBindings;
-  servicesMap: Map<string, RatingServiceInfo>;
-  tagServicesMap: Map<string, LocalTagServiceInfo>;
+  ratingServicesByKey: Map<string, RatingServiceInfo>;
+  tagServicesByKey: Map<string, LocalTagServiceInfo>;
 }
 
 const DecisionFilmstripSection = memo(function DecisionFilmstripSectionMemo({
   direction,
   fileIds,
   bindings,
-  servicesMap,
-  tagServicesMap,
+  ratingServicesByKey,
+  tagServicesByKey,
 }: DecisionFilmstripSectionProps) {
   const binding = bindings[direction];
   const descriptor = useMemo(
-    () => getSwipeBindingDescriptor(binding, servicesMap, tagServicesMap),
-    [binding, servicesMap, tagServicesMap],
+    () =>
+      getSwipeBindingDescriptor(binding, ratingServicesByKey, tagServicesByKey),
+    [binding, ratingServicesByKey, tagServicesByKey],
   );
   const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];

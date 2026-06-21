@@ -40,7 +40,7 @@ export function useRatingServices() {
   }, [servicesData?.services]);
 
   // Create a map for easy lookup by service key
-  const servicesMap = useMemo(() => {
+  const ratingServicesByKey = useMemo(() => {
     const map = new Map<string, RatingServiceInfo>();
     for (const [key, service] of ratingServices) {
       map.set(key, service);
@@ -61,7 +61,7 @@ export function useRatingServices() {
 
   return {
     ratingServices,
-    servicesMap,
+    ratingServicesByKey,
     isLoading,
     ...rest,
   };

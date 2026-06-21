@@ -264,7 +264,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCardMemo({
   // Get threshold settings from store (percentages)
   const showGestureThresholds = useReviewShowGestureThresholds();
   const thresholds = useReviewSwipeThresholds();
-  const { servicesMap } = useRatingServices();
+  const { ratingServicesByKey } = useRatingServices();
   const { localTagServicesByKey } = useLocalTagServices();
 
   // Calculate rotation based on horizontal drag
@@ -543,7 +543,7 @@ export const ReviewSwipeCard = memo(function ReviewSwipeCardMemo({
 
               const descriptor = getSwipeBindingOverlayDescriptor(
                 binding,
-                servicesMap,
+                ratingServicesByKey,
                 localTagServicesByKey,
               );
               const Icon = descriptor.icon;
