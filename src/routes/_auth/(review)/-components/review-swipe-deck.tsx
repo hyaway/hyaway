@@ -22,6 +22,7 @@ import type {
   ValidSwipeBindings,
 } from "@/stores/review-settings-store";
 import type {
+  FileTagUpdate,
   FileMetadata,
   UpdateFileTagsOptions,
 } from "@/integrations/hydrus-api/models";
@@ -282,6 +283,7 @@ function executeSecondaryTagActions(
   updateTags: TagMutate,
 ): Array<TagRestoreEntry> {
   const restoreEntries: Array<TagRestoreEntry> = [];
+  const tagUpdates: Array<FileTagUpdate> = [];
   if (!canEditTags || !metadata) return restoreEntries;
 
   for (const action of secondaryActions) {
@@ -302,11 +304,17 @@ function executeSecondaryTagActions(
       tag: action.tag,
       actionType: action.type,
     });
-    updateTags({
-      file_id: fileId,
+    tagUpdates.push({
       serviceKey: action.serviceKey,
       tag: action.tag,
       action: contentAction,
+    });
+  }
+
+  if (tagUpdates.length > 0) {
+    updateTags({
+      file_id: fileId,
+      changes: tagUpdates,
     });
   }
 
@@ -452,13 +460,19 @@ export function useReviewSwipeDeck() {
 
       // Reverse tag actions that changed state
       if (canEditTags) {
+        const tagUpdates: Array<FileTagUpdate> = [];
         for (const tag of restore.tags ?? []) {
           if (!validLocalTagServiceKeys.has(tag.serviceKey)) continue;
-          updateTags({
-            file_id: lastEntry.fileId,
+          tagUpdates.push({
             serviceKey: tag.serviceKey,
             tag: tag.tag,
             action: getReverseContentUpdateAction(tag.actionType),
+          });
+        }
+        if (tagUpdates.length > 0) {
+          updateTags({
+            file_id: lastEntry.fileId,
+            changes: tagUpdates,
           });
         }
       }

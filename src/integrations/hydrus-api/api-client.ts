@@ -44,6 +44,11 @@ import type {
 
 export { refreshSessionKey };
 
+type HydrusTagActionToTagsMap = Partial<Record<number, Array<string>>>;
+type HydrusServiceToTagActionsMap = Partial<
+  Record<string, HydrusTagActionToTagsMap>
+>;
+
 // #region Static API Functions (no auth required)
 
 /**
@@ -176,19 +181,28 @@ export async function cleanTags(
 export async function updateFileTags(
   options: UpdateFileTagsOptions,
 ): Promise<void> {
-  const { serviceKey, tag, action, ...fileIdentifiers } = options;
+  const { changes, ...fileIdentifiers } = options;
 
-  if (!serviceKey) {
+  if (changes.length === 0) return;
+
+  if (changes.some((tagUpdate) => !tagUpdate.serviceKey)) {
     throw new Error("A tag service key is required to update file tags.");
+  }
+
+  const serviceKeysToActionsToTags: HydrusServiceToTagActionsMap = {};
+
+  for (const tagUpdate of changes) {
+    const actionsToTags =
+      serviceKeysToActionsToTags[tagUpdate.serviceKey] ??
+      (serviceKeysToActionsToTags[tagUpdate.serviceKey] = {});
+    const tags =
+      actionsToTags[tagUpdate.action] ?? (actionsToTags[tagUpdate.action] = []);
+    tags.push(tagUpdate.tag);
   }
 
   await sessionKeyClient.post("/add_tags/add_tags", {
     ...fileIdentifiers,
-    service_keys_to_actions_to_tags: {
-      [serviceKey]: {
-        [action]: [tag],
-      },
-    },
+    service_keys_to_actions_to_tags: serviceKeysToActionsToTags,
     override_previously_deleted_mappings: true,
     create_new_deleted_mappings: false,
   });

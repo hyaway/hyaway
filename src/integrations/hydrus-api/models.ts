@@ -457,10 +457,14 @@ export type FileTagEditIdentifiers =
   | { hash: string; file_id?: never; file_ids?: never; hashes?: never }
   | { hashes: Array<string>; file_id?: never; file_ids?: never; hash?: never };
 
-export type UpdateFileTagsOptions = FileTagEditIdentifiers & {
+export type FileTagUpdate = {
   serviceKey: string;
   tag: string;
   action: ContentUpdateAction.ADD | ContentUpdateAction.DELETE;
+};
+
+export type UpdateFileTagsOptions = FileTagEditIdentifiers & {
+  changes: Array<FileTagUpdate>;
 };
 
 // #endregion Tag Search

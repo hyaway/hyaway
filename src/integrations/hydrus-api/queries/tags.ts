@@ -253,11 +253,15 @@ export const useUpdateFileTagsMutation = () => {
       }
 
       updateFileMetadataCaches(queryClient, fileIds, (metadata) =>
-        applyStorageTagChange(
+        variables.changes.reduce(
+          (nextMetadata, tagUpdate) =>
+            applyStorageTagChange(
+              nextMetadata,
+              tagUpdate.serviceKey,
+              tagUpdate.tag,
+              tagUpdate.action,
+            ),
           metadata,
-          variables.serviceKey,
-          variables.tag,
-          variables.action,
         ),
       );
     },
