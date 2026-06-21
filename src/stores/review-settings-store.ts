@@ -63,8 +63,10 @@ export type RatingSwipeAction =
  * Tag action to perform on swipe.
  * Adds or removes a specific storage tag mapping from the file.
  */
+export type TagSwipeActionType = "add" | "remove";
+
 export type TagSwipeAction = {
-  type: "add" | "remove";
+  type: TagSwipeActionType;
   serviceKey: string;
   tag: string;
 };
@@ -73,9 +75,15 @@ export type TagSwipeAction = {
  * Secondary actions that can be performed alongside the primary file action.
  * Supports rating and tag actions, extensible for future action types.
  */
+export type RatingSecondarySwipeAction = {
+  actionType: "rating";
+} & RatingSwipeAction;
+
+export type TagSecondarySwipeAction = { actionType: "tag" } & TagSwipeAction;
+
 export type SecondarySwipeAction =
-  | ({ actionType: "rating" } & RatingSwipeAction)
-  | ({ actionType: "tag" } & TagSwipeAction);
+  | RatingSecondarySwipeAction
+  | TagSecondarySwipeAction;
 
 /**
  * A binding that maps a swipe direction to one or more actions.
@@ -264,7 +272,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           set((state) => ({
             bindings: {
               ...state.bindings,
-              [direction]: binding,
+              [direction]: normalizeReviewSwipeBinding(binding),
             },
           }));
         },
@@ -298,7 +306,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
     }),
     {
       name: "hyaway-review-queue", // Keeping this key for backward compatibility
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         shortcutsEnabled: state.shortcutsEnabled,
@@ -393,6 +401,17 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
                   ),
                 ),
               },
+            };
+          }
+        }
+
+        // v3 -> v4: normalize duplicate secondary swipe actions.
+        if (version < 4 && state && typeof state === "object") {
+          const bindings = state.bindings as SwipeBindings | undefined;
+          if (bindings) {
+            state = {
+              ...state,
+              bindings: normalizeSwipeBindings(bindings),
             };
           }
         }
@@ -500,6 +519,79 @@ export function getBindingForDirection(
  */
 export function hasUndoBinding(bindings: SwipeBindings): boolean {
   return SWIPE_DIRECTIONS.some((d) => bindings[d].fileAction === "undo");
+}
+
+function getTagActionIdentity(action: TagSwipeAction): string {
+  return `${action.serviceKey}\u0000${action.tag}`;
+}
+
+function normalizeSecondaryActions(
+  secondaryActions: Array<SecondarySwipeAction> | undefined,
+): Array<SecondarySwipeAction> | undefined {
+  if (!secondaryActions?.length) return undefined;
+
+  const ratingServiceKeys = new Set<string>();
+  const tagActionIdentities = new Set<string>();
+  const normalized: Array<SecondarySwipeAction> = [];
+
+  for (const action of secondaryActions) {
+    if (action.actionType === "rating") {
+      if (!action.serviceKey || ratingServiceKeys.has(action.serviceKey)) {
+        continue;
+      }
+      ratingServiceKeys.add(action.serviceKey);
+      normalized.push(action);
+      continue;
+    }
+
+    if (!action.serviceKey || !action.tag) {
+      continue;
+    }
+
+    const identity = getTagActionIdentity(action);
+    if (tagActionIdentities.has(identity)) {
+      continue;
+    }
+    tagActionIdentities.add(identity);
+    normalized.push(action);
+  }
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+export function normalizeReviewSwipeBinding(
+  binding: ReviewSwipeBinding,
+): ReviewSwipeBinding {
+  if (binding.fileAction === "undo") {
+    return binding.secondaryActions?.length
+      ? { ...binding, secondaryActions: undefined }
+      : binding;
+  }
+
+  const secondaryActions = normalizeSecondaryActions(binding.secondaryActions);
+  if (secondaryActions === binding.secondaryActions) {
+    return binding;
+  }
+
+  return {
+    ...binding,
+    secondaryActions,
+  };
+}
+
+export function normalizeSwipeBindings(bindings: SwipeBindings): SwipeBindings {
+  let changed = false;
+  const nextBindings = { ...bindings };
+
+  for (const direction of SWIPE_DIRECTIONS) {
+    const nextBinding = normalizeReviewSwipeBinding(bindings[direction]);
+    if (nextBinding !== bindings[direction]) {
+      nextBindings[direction] = nextBinding;
+      changed = true;
+    }
+  }
+
+  return changed ? nextBindings : bindings;
 }
 
 function stripSecondaryActions(

@@ -3,6 +3,8 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  normalizeReviewSwipeBinding,
+  normalizeSwipeBindings,
   stripInvalidRatingActions,
   stripInvalidRatingActionsFromBindings,
   stripInvalidTagActions,
@@ -73,6 +75,68 @@ function bindingsWithSecondaryActions(
 }
 
 describe("review settings action stripping helpers", () => {
+  describe("normalizeReviewSwipeBinding", () => {
+    it("keeps the first rating action for each rating service", () => {
+      const duplicateRatingAction = {
+        ...ratingAction,
+        value: false,
+      } satisfies SecondarySwipeAction;
+      const binding = bindingWithSecondaryActions([
+        ratingAction,
+        duplicateRatingAction,
+        tagAction,
+      ]);
+
+      const next = normalizeReviewSwipeBinding(binding);
+
+      expect(next.secondaryActions).toEqual([ratingAction, tagAction]);
+    });
+
+    it("keeps the first tag action for each local tag service and tag", () => {
+      const duplicateTagAction = {
+        ...tagAction,
+        type: "remove",
+      } satisfies SecondarySwipeAction;
+      const otherServiceTagAction = {
+        ...tagAction,
+        serviceKey: "otherLocalTags",
+      } satisfies SecondarySwipeAction;
+      const binding = bindingWithSecondaryActions([
+        tagAction,
+        duplicateTagAction,
+        otherServiceTagAction,
+      ]);
+
+      const next = normalizeReviewSwipeBinding(binding);
+
+      expect(next.secondaryActions).toEqual([tagAction, otherServiceTagAction]);
+    });
+
+    it("removes secondary actions from undo bindings", () => {
+      const binding: ReviewSwipeBinding = {
+        fileAction: "undo",
+        secondaryActions: [ratingAction, tagAction],
+      };
+
+      const next = normalizeReviewSwipeBinding(binding);
+
+      expect(next.secondaryActions).toBeUndefined();
+    });
+
+    it("normalizes every binding in a bindings map", () => {
+      const bindings = bindingsWithSecondaryActions([
+        ratingAction,
+        ratingAction,
+      ]);
+
+      const next = normalizeSwipeBindings(bindings);
+
+      expect(next).not.toBe(bindings);
+      expect(next.left.secondaryActions).toEqual([ratingAction]);
+      expect(next.right).toBe(bindings.right);
+    });
+  });
+
   describe("stripRatingActionsForServices", () => {
     it("strips matching rating actions from a binding", () => {
       const binding = bindingWithSecondaryActions([ratingAction, tagAction]);
