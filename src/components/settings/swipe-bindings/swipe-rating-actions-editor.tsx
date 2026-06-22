@@ -3,8 +3,7 @@
 
 import { useMemo } from "react";
 import {
-  IconCircleX,
-  IconCircleXFilled,
+  IconEraser,
   IconMinus,
   IconPlus,
   IconSquareFilled,
@@ -242,9 +241,9 @@ function LikeRatingValuePicker({
         }}
       >
         {isClearConfigured ? (
-          <IconCircleXFilled className="size-7" />
+          <IconEraser className="size-6" stroke={2.5} />
         ) : (
-          <IconCircleX className="size-7" />
+          <IconEraser className="size-6" />
         )}
       </Button>
     </div>
@@ -315,9 +314,9 @@ function NumericalRatingValuePicker({
         }}
       >
         {isClearConfigured ? (
-          <IconCircleXFilled className="size-7" />
+          <IconEraser className="size-6" stroke={2.5} />
         ) : (
-          <IconCircleX className="size-7" />
+          <IconEraser className="size-6" />
         )}
       </Button>
     </div>
