@@ -3,13 +3,7 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { memo, useDeferredValue, useMemo, useState } from "react";
-import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import type { TagsSortMode } from "@/stores/tags-settings-store";
-import type { TagItem, TagSortMode } from "@/lib/tag-sidebar-sort";
-import {
-  useTagsSettingsActions,
-  useTagsSortMode,
-} from "@/stores/tags-settings-store";
+import type { TagItem } from "@/lib/tag-sidebar-types";
 import {
   SidebarContent,
   SidebarFooter,
@@ -19,16 +13,8 @@ import {
 } from "@/components/ui-primitives/sidebar";
 import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 import { Heading } from "@/components/ui-primitives/heading";
-import { TagStatus } from "@/integrations/hydrus-api/models";
-import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagBadge } from "@/components/tag/tag-badge";
 import { TagActionMenu, TagActionTrigger } from "@/components/tag/tag-actions";
-import { parseTag } from "@/lib/tag-utils";
-import { sortTagItems } from "@/lib/tag-sidebar-sort";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui-primitives/toggle-group";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
@@ -37,79 +23,22 @@ function fullTag(item: TagItem): string {
   return item.namespace ? `${item.namespace}:${item.tag}` : item.tag;
 }
 
-const DEFAULT_SORT_OPTIONS = [
-  { value: "count", label: "Count" },
-  { value: "namespace", label: "Namespace" },
-] as const;
-
 export const TagsSidebar = memo(function TagsSidebarMemo({
-  items,
-  title = "Tags",
-  showIndex = true,
-  sort,
+  tags,
+  itemsCount,
+  title,
+  showIndex,
+  headerControls,
 }: {
-  items: Array<FileMetadata>;
-  title?: string;
-  showIndex?: boolean;
-  sort?: {
-    mode: string;
-    onChange: (mode: string) => void;
-    options: ReadonlyArray<{ value: string; label: string }>;
-  };
+  tags: Array<TagItem>;
+  itemsCount: number;
+  title: string;
+  showIndex: boolean;
+  headerControls?: React.ReactNode;
 }) {
   const isMobile = useIsMobile();
-  const allTagsServiceId = useAllKnownTagsServiceQuery().data;
   const [search, setSearch] = useState("");
-  const storeSortMode = useTagsSortMode();
-  const { setSortMode } = useTagsSettingsActions();
-  const activeSortMode: string = sort ? sort.mode : storeSortMode;
-  const handleSortChange = sort
-    ? sort.onChange
-    : (mode: string) => setSortMode(mode as TagsSortMode);
-  const sortOptions = sort ? sort.options : DEFAULT_SORT_OPTIONS;
-
-  // Defer heavy computation so UI stays responsive
-  const deferredItems = useDeferredValue(items);
   const deferredSearch = useDeferredValue(search);
-  const deferredSortMode = useDeferredValue(activeSortMode);
-
-  const tags = useMemo((): Array<TagItem> => {
-    if (!allTagsServiceId || deferredItems.length === 0) return [];
-
-    // Use object for faster string key lookup than Map
-    const counts: Record<string, number> = Object.create(null);
-
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let i = 0; i < deferredItems.length; i++) {
-      const displayTags =
-        deferredItems[i].tags?.[allTagsServiceId]?.display_tags[
-          TagStatus.CURRENT
-        ];
-
-      if (!displayTags) continue;
-
-      // eslint-disable-next-line @typescript-eslint/prefer-for-of
-      for (let j = 0; j < displayTags.length; j++) {
-        const displayTag = displayTags[j];
-        if (displayTag) {
-          counts[displayTag] = (counts[displayTag] || 0) + 1;
-        }
-      }
-    }
-
-    // Get keys once and pre-allocate result array
-    const keys = Object.keys(counts);
-    const result: Array<TagItem> = new Array(keys.length);
-
-    for (let i = 0; i < keys.length; i++) {
-      const displayTag = keys[i];
-      const count = counts[displayTag];
-      const { namespace, tag } = parseTag(displayTag);
-      result[i] = { tag, count, namespace };
-    }
-
-    return sortTagItems(result, deferredSortMode as TagSortMode);
-  }, [deferredItems, allTagsServiceId, deferredSortMode]);
 
   // Filter tags based on search
   const filteredTags = useMemo(() => {
@@ -247,26 +176,7 @@ export const TagsSidebar = memo(function TagsSidebarMemo({
           onChange={(e) => setSearch(e.target.value)}
           tabIndex={isMobile ? -1 : undefined}
         />
-        <ToggleGroup
-          value={[activeSortMode]}
-          onValueChange={(value) => {
-            const next = value[0];
-            if (next) handleSortChange(next);
-          }}
-          variant="outline-muted"
-          size="sm"
-          className="w-full"
-        >
-          {sortOptions.map((option) => (
-            <ToggleGroupItem
-              key={option.value}
-              value={option.value}
-              className="flex-1"
-            >
-              {option.label}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        {headerControls}
       </SidebarHeader>
       <SidebarContent className="min-h-0 flex-1 pe-1">
         <ScrollArea viewportClassName="h-full max-h-svh pe-2.5" ref={parentRef}>
@@ -313,7 +223,7 @@ export const TagsSidebar = memo(function TagsSidebarMemo({
                         >
                           <TagRowBadge
                             tagItem={tagItem}
-                            showCount={deferredItems.length > 1}
+                            showCount={itemsCount > 1}
                           />
                         </TagActionTrigger>
                       </div>
@@ -329,9 +239,9 @@ export const TagsSidebar = memo(function TagsSidebarMemo({
         <span className="text-muted-foreground text-sm">
           {deferredSearch.trim()
             ? `${filteredTags.length} of ${tags.length} tags`
-            : deferredItems.length === 1
+            : itemsCount === 1
               ? `${tags.length} tags`
-              : `${tags.length} unique tags for ${deferredItems.length} loaded files`}
+              : `${tags.length} unique tags for ${itemsCount} loaded files`}
         </span>
       </SidebarFooter>
     </>
