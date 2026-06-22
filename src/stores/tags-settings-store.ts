@@ -6,14 +6,14 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 export type TagsSortMode = "count" | "namespace";
-export type ReviewTagsSortMode = "hydrus" | "namespace";
+export type FileTagsSortMode = "hydrus" | "namespace";
 
 type TagsSettingsState = {
   sortMode: TagsSortMode;
-  reviewSortMode: ReviewTagsSortMode;
+  fileSortMode: FileTagsSortMode;
   actions: {
     setSortMode: (mode: TagsSortMode) => void;
-    setReviewSortMode: (mode: ReviewTagsSortMode) => void;
+    setFileSortMode: (mode: FileTagsSortMode) => void;
     reset: () => void;
   };
 };
@@ -22,11 +22,11 @@ const useTagsSettingsStore = create<TagsSettingsState>()(
   persist(
     (set, _get, store) => ({
       sortMode: "count",
-      reviewSortMode: "hydrus",
+      fileSortMode: "hydrus",
       actions: {
         setSortMode: (sortMode: TagsSortMode) => set({ sortMode }),
-        setReviewSortMode: (reviewSortMode: ReviewTagsSortMode) =>
-          set({ reviewSortMode }),
+        setFileSortMode: (fileSortMode: FileTagsSortMode) =>
+          set({ fileSortMode }),
         reset: () => set(store.getInitialState()),
       },
     }),
@@ -41,8 +41,8 @@ const useTagsSettingsStore = create<TagsSettingsState>()(
 export const useTagsSortMode = () =>
   useTagsSettingsStore((state) => state.sortMode);
 
-export const useReviewTagsSortMode = () =>
-  useTagsSettingsStore((state) => state.reviewSortMode);
+export const useFileTagsSortMode = () =>
+  useTagsSettingsStore((state) => state.fileSortMode);
 
 export const useTagsSettingsActions = () =>
   useTagsSettingsStore((state) => state.actions);
