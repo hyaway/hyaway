@@ -227,6 +227,12 @@
   }
   html {
     @apply font-sans;
+    scrollbar-gutter: stable;
+  }
+  html:has([data-review-deck]),
+  html:has([data-video-theater]),
+  html:has([data-viewer-overlay]) {
+    scrollbar-gutter: auto;
   }
 
   input,
