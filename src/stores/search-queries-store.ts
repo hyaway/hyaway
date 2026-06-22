@@ -24,6 +24,7 @@ import {
 } from "@/stores/search-settings-store";
 import { generateSearchId } from "@/lib/search-entry-utils";
 import { isIgnorableTagRuleValue } from "@/lib/search-rule-utils";
+import { getNextUniqueName } from "@/lib/unique-name";
 import { systemTagToRule } from "@/routes/_auth/(search)/-lib/query-builder-fields";
 
 // ---------------------------------------------------------------------------
@@ -168,21 +169,10 @@ const DRAFT_BASE = "Draft";
  */
 export function nextUniqueName(base: string): string {
   const entries = useSearchQueriesStore.getState().entries;
-  let max = -1;
-  for (const entry of Object.values(entries)) {
-    const name = entry.displayName ?? "";
-    if (name === base) {
-      if (0 > max) max = 0;
-    } else if (name.startsWith(`${base} (`)) {
-      const inner = name.slice(base.length + 2, -1);
-      if (/^\d+$/.test(inner)) {
-        const n = Number(inner);
-        if (n > max) max = n;
-      }
-    }
-  }
-  if (max === -1) return base;
-  return `${base} (${max + 1})`;
+  return getNextUniqueName(
+    base,
+    Object.values(entries).map((entry) => entry.displayName ?? ""),
+  );
 }
 
 /** Get the next available "Draft" / "Draft (N)" name based on existing entries. */

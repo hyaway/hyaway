@@ -20,6 +20,7 @@ import {
   MIN_OPTIMIZE_SIZE_THRESHOLD_MB,
   normalizeOptimizeSizeThresholdMB,
 } from "@/lib/optimize-image-settings";
+import { getNextUniqueName } from "@/lib/unique-name";
 
 // #region Types
 
@@ -275,25 +276,12 @@ function getUniqueBindingProfileName(
   allowedProfileId?: string,
 ) {
   const baseName = normalizeBindingProfileName(name);
-  const usedNames = new Set(
+  return getNextUniqueName(
+    baseName,
     Object.values(profiles)
       .filter((profile) => profile.id !== allowedProfileId)
-      .map((profile) => profile.name.toLocaleLowerCase()),
+      .map((profile) => profile.name),
   );
-
-  if (!usedNames.has(baseName.toLocaleLowerCase())) return baseName;
-
-  const match = baseName.match(/^(.*?)\s*\((\d+)\)$/);
-  const nameRoot = match ? match[1].trim() : baseName;
-  let index = match ? Number(match[2]) + 1 : 2;
-  let candidate = `${nameRoot} (${index})`;
-
-  while (usedNames.has(candidate.toLocaleLowerCase())) {
-    index++;
-    candidate = `${nameRoot} (${index})`;
-  }
-
-  return candidate;
 }
 
 function getAvailableBindingProfileId(profiles: ReviewBindingProfiles) {

@@ -198,7 +198,7 @@ describe("review settings action stripping helpers", () => {
 
       expect(migrated.activeBindingProfileId).toBe("first");
       expect(migrated.bindingProfiles.first.name).toBe("Review");
-      expect(migrated.bindingProfiles.second.name).toBe("Review (2)");
+      expect(migrated.bindingProfiles.second.name).toBe("Review (1)");
       expect(
         migrated.bindingProfiles.first.bindings.left.secondaryActions,
       ).toHaveLength(1);
