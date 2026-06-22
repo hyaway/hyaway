@@ -7,6 +7,7 @@ import { render } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
 import { FileTagsSidebar } from "./file-tags-sidebar";
+import type { ReactNode } from "react";
 
 // theme-store calls window.matchMedia at initialisation; stub the module to avoid jsdom errors.
 vi.mock("@/stores/theme-store", () => ({
@@ -17,25 +18,34 @@ vi.mock("@/stores/theme-store", () => ({
 // useIsMobile calls matchMedia at render time; jsdom doesn't support it.
 vi.mock("@/hooks/use-mobile", () => ({ useIsMobile: () => false }));
 
-// No current file -> wrapper renders nothing.
-vi.mock("@/stores/review-queue-store", () => ({
-  useReviewQueueCurrentFileId: () => undefined,
+vi.mock("@/components/app-shell/right-sidebar-portal", () => ({
+  RightSidebarPortal: ({ children }: { children: ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
+vi.mock("@/components/tag/tags-sidebar", () => ({
+  TagsSidebar: ({ title }: { title: string }) => <div>{title}</div>,
 }));
 
 vi.mock("@/integrations/hydrus-api/queries/services", () => ({
   useAllKnownTagsServiceQuery: () => ({ data: "all" }),
 }));
 
-vi.mock("@/integrations/hydrus-api/queries/manage-files", () => ({
-  useGetSingleFileMetadata: () => ({ data: undefined }),
+const { useGetSingleFileMetadata } = vi.hoisted(() => ({
+  useGetSingleFileMetadata: vi.fn(() => ({ data: undefined })),
 }));
 
-test("renders nothing when there is no current file", () => {
+vi.mock("@/integrations/hydrus-api/queries/manage-files", () => ({
+  useGetSingleFileMetadata,
+}));
+
+test("loads metadata for the provided file id", () => {
   const qc = new QueryClient();
-  const { container } = render(
+  render(
     <QueryClientProvider client={qc}>
-      <FileTagsSidebar />
+      <FileTagsSidebar fileId={123} />
     </QueryClientProvider>,
   );
-  expect(container.firstChild).toBeNull();
+  expect(useGetSingleFileMetadata).toHaveBeenCalledWith(123);
 });
