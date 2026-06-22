@@ -511,10 +511,7 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
 
           createBindingProfile: (name) => {
             const current = get();
-            const profile = createBindingProfile(
-              current.bindingProfiles,
-              name,
-            );
+            const profile = createBindingProfile(current.bindingProfiles, name);
             set((state) => ({
               activeBindingProfileId: profile.id,
               bindingProfiles: {
