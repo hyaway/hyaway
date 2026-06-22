@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useSearch } from "@tanstack/react-router";
-import { PagesDisplaySettingsPopover } from "./pages-display-settings-popover";
 import { PagesSearchInput } from "./pages-search-input";
 import { PagesTreeView } from "./pages-tree-view";
 import type { MediaPage } from "@/integrations/hydrus-api/models";
@@ -15,6 +14,7 @@ import {
   SidebarHeader,
   SidebarSeparator,
 } from "@/components/ui-primitives/sidebar";
+import { Heading } from "@/components/ui-primitives/heading";
 import { ScrollArea } from "@/components/ui-primitives/scroll-area";
 
 interface PagesIndexRightSidebarProps {
@@ -36,11 +36,10 @@ export function PagesIndexRightSidebar({
   return (
     <RightSidebarPortal>
       <div className="flex h-full flex-col overflow-hidden">
-        <SidebarHeader className="gap-3 px-3 py-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm/5 font-semibold">Pages</h2>
-            <PagesDisplaySettingsPopover />
-          </div>
+        <SidebarHeader className="gap-4 pt-4">
+          <Heading level={3} className="text-lg font-semibold">
+            Pages
+          </Heading>
           <PagesSearchInput variant="sidebar" />
         </SidebarHeader>
         <SidebarSeparator />
