@@ -3,6 +3,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { useShallow } from "zustand/shallow";
 import { generateID } from "@react-querybuilder/core";
 import type {
   LocalTagServiceInfo,
@@ -176,6 +177,14 @@ export type ValidSwipeBindings = Record<
   ValidReviewSwipeBinding
 >;
 
+export interface ReviewBindingProfile {
+  id: string;
+  name: string;
+  bindings: SwipeBindings;
+}
+
+export type ReviewBindingProfiles = Record<string, ReviewBindingProfile>;
+
 // #endregion
 
 // #region Defaults
@@ -208,6 +217,9 @@ export const DEFAULT_SWIPE_BINDINGS: SwipeBindings = {
   down: { fileAction: "undo" },
 };
 
+export const DEFAULT_BINDING_PROFILE_ID = "default";
+export const DEFAULT_BINDING_PROFILE_NAME = "Default";
+
 export const DEFAULT_REVIEW_RENDER_QUALITY = 90;
 export const MIN_REVIEW_RENDER_QUALITY = 40;
 export const MAX_REVIEW_RENDER_QUALITY = 100;
@@ -216,6 +228,126 @@ export const MIN_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB =
   MIN_OPTIMIZE_SIZE_THRESHOLD_MB;
 export const MAX_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB =
   MAX_OPTIMIZE_SIZE_THRESHOLD_MB;
+
+// #endregion
+
+// #region Binding Profile Utilities
+
+function cloneReviewSwipeBinding(
+  binding: ReviewSwipeBinding,
+): ReviewSwipeBinding {
+  return {
+    ...binding,
+    secondaryActions: binding.secondaryActions?.map((action) => ({
+      ...action,
+    })),
+  };
+}
+
+export function cloneSwipeBindings(bindings: SwipeBindings): SwipeBindings {
+  return {
+    left: cloneReviewSwipeBinding(bindings.left),
+    right: cloneReviewSwipeBinding(bindings.right),
+    up: cloneReviewSwipeBinding(bindings.up),
+    down: cloneReviewSwipeBinding(bindings.down),
+  };
+}
+
+function createDefaultBindingProfiles(
+  bindings: SwipeBindings = DEFAULT_SWIPE_BINDINGS,
+): ReviewBindingProfiles {
+  return {
+    [DEFAULT_BINDING_PROFILE_ID]: {
+      id: DEFAULT_BINDING_PROFILE_ID,
+      name: DEFAULT_BINDING_PROFILE_NAME,
+      bindings: normalizeSwipeBindings(cloneSwipeBindings(bindings)),
+    },
+  };
+}
+
+function normalizeBindingProfileName(name: string) {
+  return name.trim() || DEFAULT_BINDING_PROFILE_NAME;
+}
+
+function getUniqueBindingProfileName(
+  profiles: ReviewBindingProfiles,
+  name: string,
+  allowedProfileId?: string,
+) {
+  const baseName = normalizeBindingProfileName(name);
+  const usedNames = new Set(
+    Object.values(profiles)
+      .filter((profile) => profile.id !== allowedProfileId)
+      .map((profile) => profile.name.toLocaleLowerCase()),
+  );
+
+  if (!usedNames.has(baseName.toLocaleLowerCase())) return baseName;
+
+  const match = baseName.match(/^(.*?)\s*\((\d+)\)$/);
+  const nameRoot = match ? match[1].trim() : baseName;
+  let index = match ? Number(match[2]) + 1 : 2;
+  let candidate = `${nameRoot} (${index})`;
+
+  while (usedNames.has(candidate.toLocaleLowerCase())) {
+    index++;
+    candidate = `${nameRoot} (${index})`;
+  }
+
+  return candidate;
+}
+
+function getAvailableBindingProfileId(profiles: ReviewBindingProfiles) {
+  let profileId = `profile-${generateID()}`;
+  while (Object.hasOwn(profiles, profileId)) {
+    profileId = `profile-${generateID()}`;
+  }
+  return profileId;
+}
+
+function getBindingProfile(profiles: ReviewBindingProfiles, profileId: string) {
+  return (profiles as Partial<ReviewBindingProfiles>)[profileId];
+}
+
+function createBindingProfile(
+  profiles: ReviewBindingProfiles,
+  name: string,
+  bindings: SwipeBindings,
+): ReviewBindingProfile {
+  const id = getAvailableBindingProfileId(profiles);
+  return {
+    id,
+    name: getUniqueBindingProfileName(profiles, name),
+    bindings: normalizeSwipeBindings(cloneSwipeBindings(bindings)),
+  };
+}
+
+export function getSortedBindingProfiles(
+  profiles: ReviewBindingProfiles,
+): Array<ReviewBindingProfile> {
+  return Object.values(profiles).sort((left, right) =>
+    left.name.localeCompare(right.name, undefined, {
+      sensitivity: "base",
+      numeric: true,
+    }),
+  );
+}
+
+function getActiveBindingProfile(
+  state: Pick<
+    ReviewSettingsState,
+    "activeBindingProfileId" | "bindingProfiles"
+  >,
+) {
+  const activeProfile = getBindingProfile(
+    state.bindingProfiles,
+    state.activeBindingProfileId,
+  );
+  return (
+    activeProfile ??
+    getSortedBindingProfiles(state.bindingProfiles).at(0) ??
+    createDefaultBindingProfiles()[DEFAULT_BINDING_PROFILE_ID]
+  );
+}
 
 // #endregion
 
@@ -240,8 +372,10 @@ type ReviewSettingsState = {
   optimizeSizeThresholdMB: number;
   /** Start review in immersive (fullscreen overlay) mode */
   immersiveMode: boolean;
-  /** Mapping of swipe directions to action bindings */
-  bindings: SwipeBindings;
+  /** Active swipe binding profile ID */
+  activeBindingProfileId: string;
+  /** Saved swipe binding profiles */
+  bindingProfiles: ReviewBindingProfiles;
 
   actions: {
     /** Enable or disable keyboard shortcuts */
@@ -262,6 +396,16 @@ type ReviewSettingsState = {
     setOptimizeSizeThresholdMB: (sizeMB: number) => void;
     /** Set immersive mode */
     setImmersiveMode: (enabled: boolean) => void;
+    /** Set the active swipe binding profile */
+    setActiveBindingProfile: (profileId: string) => void;
+    /** Create a fresh binding profile and return its ID */
+    createBindingProfile: (name?: string) => string;
+    /** Clone the active binding profile and return the clone ID */
+    cloneActiveBindingProfile: () => string;
+    /** Delete a binding profile, recreating Default if the last profile is deleted */
+    deleteBindingProfile: (profileId: string) => void;
+    /** Rename a binding profile and return the final display name */
+    renameBindingProfile: (profileId: string, name: string) => string;
     /** Set the binding for a specific direction */
     setBinding: (
       direction: SwipeDirection,
@@ -278,7 +422,7 @@ type ReviewSettingsState = {
 
 const useReviewSettingsStore = create<ReviewSettingsState>()(
   persist(
-    (set, _get, store) => ({
+    (set, get, store) => ({
       shortcutsEnabled: true,
       gesturesEnabled: true,
       showGestureThresholds: false,
@@ -288,7 +432,8 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
       renderQuality: DEFAULT_REVIEW_RENDER_QUALITY,
       optimizeSizeThresholdMB: DEFAULT_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB,
       immersiveMode: false,
-      bindings: DEFAULT_SWIPE_BINDINGS,
+      activeBindingProfileId: DEFAULT_BINDING_PROFILE_ID,
+      bindingProfiles: createDefaultBindingProfiles(),
 
       actions: {
         setShortcutsEnabled: (shortcutsEnabled: boolean) => {
@@ -345,11 +490,111 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
           set({ immersiveMode });
         },
 
-        setBinding: (direction, binding) => {
+        setActiveBindingProfile: (activeBindingProfileId) => {
+          set((state) =>
+            getBindingProfile(state.bindingProfiles, activeBindingProfileId)
+              ? { activeBindingProfileId }
+              : {},
+          );
+        },
+
+        createBindingProfile: (name = DEFAULT_BINDING_PROFILE_NAME) => {
+          const current = get();
+          const profile = createBindingProfile(
+            current.bindingProfiles,
+            name,
+            DEFAULT_SWIPE_BINDINGS,
+          );
           set((state) => ({
-            bindings: {
-              ...state.bindings,
-              [direction]: normalizeReviewSwipeBinding(binding),
+            activeBindingProfileId: profile.id,
+            bindingProfiles: {
+              ...state.bindingProfiles,
+              [profile.id]: profile,
+            },
+          }));
+          return profile.id;
+        },
+
+        cloneActiveBindingProfile: () => {
+          const current = get();
+          const source = getActiveBindingProfile(current);
+          const profile = createBindingProfile(
+            current.bindingProfiles,
+            source.name,
+            source.bindings,
+          );
+          set((state) => ({
+            activeBindingProfileId: profile.id,
+            bindingProfiles: {
+              ...state.bindingProfiles,
+              [profile.id]: profile,
+            },
+          }));
+          return profile.id;
+        },
+
+        deleteBindingProfile: (profileId) => {
+          set((state) => {
+            const { [profileId]: _removed, ...remainingProfiles } =
+              state.bindingProfiles;
+
+            if (Object.keys(remainingProfiles).length === 0) {
+              return {
+                activeBindingProfileId: DEFAULT_BINDING_PROFILE_ID,
+                bindingProfiles: createDefaultBindingProfiles(),
+              };
+            }
+
+            const activeBindingProfileId =
+              state.activeBindingProfileId === profileId
+                ? getSortedBindingProfiles(remainingProfiles)[0].id
+                : state.activeBindingProfileId;
+
+            return {
+              activeBindingProfileId,
+              bindingProfiles: remainingProfiles,
+            };
+          });
+        },
+
+        renameBindingProfile: (profileId, name) => {
+          const current = get();
+          const profile = getBindingProfile(current.bindingProfiles, profileId);
+          if (!profile) return name.trim();
+
+          const nextName = getUniqueBindingProfileName(
+            current.bindingProfiles,
+            name,
+            profileId,
+          );
+          if (nextName === profile.name) return nextName;
+
+          set((state) => ({
+            bindingProfiles: {
+              ...state.bindingProfiles,
+              [profileId]: {
+                ...profile,
+                name: nextName,
+              },
+            },
+          }));
+          return nextName;
+        },
+
+        setBinding: (
+          direction: SwipeDirection,
+          binding: ReviewSwipeBinding,
+        ) => {
+          set((state) => ({
+            bindingProfiles: {
+              ...state.bindingProfiles,
+              [state.activeBindingProfileId]: {
+                ...getActiveBindingProfile(state),
+                bindings: {
+                  ...getActiveBindingProfile(state).bindings,
+                  [direction]: normalizeReviewSwipeBinding(binding),
+                },
+              },
             },
           }));
         },
@@ -376,14 +621,21 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
         },
 
         resetBindings: () => {
-          const initial = store.getInitialState();
-          set({ bindings: initial.bindings });
+          set((state) => ({
+            bindingProfiles: {
+              ...state.bindingProfiles,
+              [state.activeBindingProfileId]: {
+                ...getActiveBindingProfile(state),
+                bindings: cloneSwipeBindings(DEFAULT_SWIPE_BINDINGS),
+              },
+            },
+          }));
         },
       },
     }),
     {
       name: "hyaway-review-queue", // Keeping this key for backward compatibility
-      version: 4,
+      version: 5,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         shortcutsEnabled: state.shortcutsEnabled,
@@ -395,112 +647,276 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
         renderQuality: state.renderQuality,
         optimizeSizeThresholdMB: state.optimizeSizeThresholdMB,
         immersiveMode: state.immersiveMode,
-        bindings: state.bindings,
+        activeBindingProfileId: state.activeBindingProfileId,
+        bindingProfiles: state.bindingProfiles,
       }),
       // Migrations from older store shapes
-      migrate: (persisted, version) => {
-        let state = persisted as any;
-
-        // v0 -> v1: horizontalThreshold/verticalThreshold -> thresholds object
-        if (version < 1 && state && typeof state === "object") {
-          const horizontal =
-            typeof state.horizontalThreshold === "number"
-              ? state.horizontalThreshold
-              : DEFAULT_HORIZONTAL_THRESHOLD;
-          const vertical =
-            typeof state.verticalThreshold === "number"
-              ? state.verticalThreshold
-              : DEFAULT_VERTICAL_THRESHOLD;
-          state = {
-            ...state,
-            thresholds: {
-              left: horizontal,
-              right: horizontal,
-              up: vertical,
-              down: vertical,
-            },
-            horizontalThreshold: undefined,
-            verticalThreshold: undefined,
-          };
-        }
-
-        // v1 -> v2: default down binding changed from "skip" to "undo"
-        if (version < 2 && state && typeof state === "object") {
-          const bindings = state.bindings as SwipeBindings | undefined;
-          if (
-            bindings?.down &&
-            bindings.down.fileAction === "skip" &&
-            !bindings.down.secondaryActions?.length
-          ) {
-            state = {
-              ...state,
-              bindings: {
-                ...bindings,
-                down: { fileAction: "undo" },
-              },
-            };
-          }
-        }
-
-        // v2 -> v3: thresholds can no longer be 0; clamp persisted values
-        if (version < 3 && state && typeof state === "object") {
-          const thresholds = state.thresholds as SwipeThresholds | undefined;
-          if (thresholds) {
-            state = {
-              ...state,
-              thresholds: {
-                left: Math.min(
-                  MAX_SWIPE_THRESHOLD,
-                  Math.max(
-                    MIN_SWIPE_THRESHOLD,
-                    thresholds.left || MIN_SWIPE_THRESHOLD,
-                  ),
-                ),
-                right: Math.min(
-                  MAX_SWIPE_THRESHOLD,
-                  Math.max(
-                    MIN_SWIPE_THRESHOLD,
-                    thresholds.right || MIN_SWIPE_THRESHOLD,
-                  ),
-                ),
-                up: Math.min(
-                  MAX_SWIPE_THRESHOLD,
-                  Math.max(
-                    MIN_SWIPE_THRESHOLD,
-                    thresholds.up || MIN_SWIPE_THRESHOLD,
-                  ),
-                ),
-                down: Math.min(
-                  MAX_SWIPE_THRESHOLD,
-                  Math.max(
-                    MIN_SWIPE_THRESHOLD,
-                    thresholds.down || MIN_SWIPE_THRESHOLD,
-                  ),
-                ),
-              },
-            };
-          }
-        }
-
-        // v3 -> v4: normalize duplicate secondary swipe actions and add row ids.
-        if (version < 4 && state && typeof state === "object") {
-          const bindings = state.bindings as SwipeBindings | undefined;
-          if (bindings) {
-            state = {
-              ...state,
-              bindings: normalizeSwipeBindings(bindings),
-            };
-          }
-        }
-
-        return state;
-      },
+      migrate: migrateReviewSettingsState,
     },
   ),
 );
 
 // Sync settings across tabs
 setupCrossTabSync(useReviewSettingsStore);
+
+// #endregion
+
+// #region Migrations
+
+type PersistedReviewSettingsStateBase = {
+  shortcutsEnabled?: boolean;
+  gesturesEnabled?: boolean;
+  showGestureThresholds?: boolean;
+  trackWatchHistory?: boolean;
+  imageLoadMode?: ReviewImageLoadMode;
+  renderQuality?: number;
+  optimizeSizeThresholdMB?: number;
+  immersiveMode?: boolean;
+};
+
+type PersistedReviewSettingsStateV0 = PersistedReviewSettingsStateBase & {
+  horizontalThreshold?: number;
+  verticalThreshold?: number;
+  bindings?: SwipeBindings;
+};
+
+type PersistedReviewSettingsStateV1 = Omit<
+  PersistedReviewSettingsStateV0,
+  "horizontalThreshold" | "verticalThreshold"
+> & {
+  thresholds?: SwipeThresholds;
+};
+
+type PersistedReviewSettingsStateV2 = PersistedReviewSettingsStateV1;
+
+type PersistedReviewSettingsStateV3 = PersistedReviewSettingsStateV2;
+
+type PersistedReviewSettingsStateV4 = PersistedReviewSettingsStateV3;
+
+type PersistedReviewSettingsStateV5 = Omit<
+  PersistedReviewSettingsStateV4,
+  "bindings"
+> & {
+  activeBindingProfileId?: string;
+  bindingProfiles?: ReviewBindingProfiles;
+};
+
+type MigratedReviewSettingsState = Partial<
+  Omit<ReviewSettingsState, "actions">
+> & {
+  activeBindingProfileId: string;
+  bindingProfiles: ReviewBindingProfiles;
+};
+
+export function migrateReviewSettingsState(
+  persisted: unknown,
+  version: number,
+): MigratedReviewSettingsState {
+  const v1State =
+    version < 1
+      ? migrateReviewSettingsStateV0ToV1(
+          getPersistedReviewSettingsState<PersistedReviewSettingsStateV0>(
+            persisted,
+          ),
+        )
+      : getPersistedReviewSettingsState<PersistedReviewSettingsStateV1>(
+          persisted,
+        );
+
+  const v2State =
+    version < 2
+      ? migrateReviewSettingsStateV1ToV2(v1State)
+      : getPersistedReviewSettingsState<PersistedReviewSettingsStateV2>(
+          persisted,
+        );
+
+  const v3State =
+    version < 3
+      ? migrateReviewSettingsStateV2ToV3(v2State)
+      : getPersistedReviewSettingsState<PersistedReviewSettingsStateV3>(
+          persisted,
+        );
+
+  const v4State =
+    version < 4
+      ? migrateReviewSettingsStateV3ToV4(v3State)
+      : getPersistedReviewSettingsState<PersistedReviewSettingsStateV4>(
+          persisted,
+        );
+
+  const v5State =
+    version < 5
+      ? migrateReviewSettingsStateV4ToV5(v4State)
+      : getPersistedReviewSettingsState<PersistedReviewSettingsStateV5>(
+          persisted,
+        );
+
+  return normalizeReviewSettingsStateProfiles(v5State);
+}
+
+function getPersistedReviewSettingsState<TState>(persisted: unknown): TState {
+  return (
+    persisted && typeof persisted === "object" ? persisted : {}
+  ) as TState;
+}
+
+function normalizeReviewSettingsStateProfiles(
+  state: PersistedReviewSettingsStateV5,
+): PersistedReviewSettingsStateV5 & {
+  activeBindingProfileId: string;
+  bindingProfiles: ReviewBindingProfiles;
+} {
+  // Rebuild each persisted profile with a stable shape and normalized bindings.
+  const rawProfiles = state.bindingProfiles;
+  const profiles = rawProfiles ?? createDefaultBindingProfiles();
+  const normalizedEntries = Object.values(profiles).map((profile) => {
+    const rawProfile = profile as Partial<ReviewBindingProfile>;
+    const profileId = rawProfile.id || getAvailableBindingProfileId(profiles);
+    return [
+      profileId,
+      {
+        id: profileId,
+        name: normalizeBindingProfileName(rawProfile.name ?? ""),
+        bindings: normalizeSwipeBindings(
+          cloneSwipeBindings(rawProfile.bindings ?? DEFAULT_SWIPE_BINDINGS),
+        ),
+      },
+    ] as const;
+  });
+
+  // If persisted data had no usable profile entries, keep the store operable.
+  let nextProfiles = Object.fromEntries(normalizedEntries);
+  if (Object.keys(nextProfiles).length === 0) {
+    nextProfiles = createDefaultBindingProfiles();
+  }
+
+  // Preserve profile IDs while resolving duplicate display names.
+  const deduplicatedProfiles: ReviewBindingProfiles = {};
+  for (const profile of Object.values(nextProfiles)) {
+    const name = getUniqueBindingProfileName(
+      deduplicatedProfiles,
+      profile.name,
+    );
+    deduplicatedProfiles[profile.id] = { ...profile, name };
+  }
+
+  // Fall back to the first sorted profile if the active profile was removed.
+  const requestedActiveBindingProfileId = state.activeBindingProfileId ?? "";
+  const activeBindingProfileId = getBindingProfile(
+    deduplicatedProfiles,
+    requestedActiveBindingProfileId,
+  )
+    ? requestedActiveBindingProfileId
+    : getSortedBindingProfiles(deduplicatedProfiles)[0].id;
+
+  return {
+    ...state,
+    activeBindingProfileId,
+    bindingProfiles: deduplicatedProfiles,
+  };
+}
+
+function migrateReviewSettingsStateV0ToV1(
+  state: PersistedReviewSettingsStateV0,
+): PersistedReviewSettingsStateV1 {
+  const {
+    horizontalThreshold: rawHorizontalThreshold,
+    verticalThreshold: rawVerticalThreshold,
+    ...rest
+  } = state;
+  const horizontal =
+    typeof rawHorizontalThreshold === "number"
+      ? rawHorizontalThreshold
+      : DEFAULT_HORIZONTAL_THRESHOLD;
+  const vertical =
+    typeof rawVerticalThreshold === "number"
+      ? rawVerticalThreshold
+      : DEFAULT_VERTICAL_THRESHOLD;
+
+  return {
+    ...rest,
+    thresholds: {
+      left: horizontal,
+      right: horizontal,
+      up: vertical,
+      down: vertical,
+    },
+  };
+}
+
+function migrateReviewSettingsStateV1ToV2(
+  state: PersistedReviewSettingsStateV1,
+): PersistedReviewSettingsStateV2 {
+  const bindings = state.bindings;
+  if (
+    bindings?.down &&
+    bindings.down.fileAction === "skip" &&
+    !bindings.down.secondaryActions?.length
+  ) {
+    return {
+      ...state,
+      bindings: {
+        ...bindings,
+        down: { fileAction: "undo" },
+      },
+    };
+  }
+
+  return state;
+}
+
+function migrateReviewSettingsStateV2ToV3(
+  state: PersistedReviewSettingsStateV2,
+): PersistedReviewSettingsStateV3 {
+  const thresholds = state.thresholds;
+  if (!thresholds) return state;
+
+  return {
+    ...state,
+    thresholds: {
+      left: Math.min(
+        MAX_SWIPE_THRESHOLD,
+        Math.max(MIN_SWIPE_THRESHOLD, thresholds.left || MIN_SWIPE_THRESHOLD),
+      ),
+      right: Math.min(
+        MAX_SWIPE_THRESHOLD,
+        Math.max(MIN_SWIPE_THRESHOLD, thresholds.right || MIN_SWIPE_THRESHOLD),
+      ),
+      up: Math.min(
+        MAX_SWIPE_THRESHOLD,
+        Math.max(MIN_SWIPE_THRESHOLD, thresholds.up || MIN_SWIPE_THRESHOLD),
+      ),
+      down: Math.min(
+        MAX_SWIPE_THRESHOLD,
+        Math.max(MIN_SWIPE_THRESHOLD, thresholds.down || MIN_SWIPE_THRESHOLD),
+      ),
+    },
+  };
+}
+
+function migrateReviewSettingsStateV3ToV4(
+  state: PersistedReviewSettingsStateV3,
+): PersistedReviewSettingsStateV4 {
+  const bindings = state.bindings;
+  if (!bindings) return state;
+
+  return {
+    ...state,
+    bindings: normalizeSwipeBindings(bindings),
+  };
+}
+
+function migrateReviewSettingsStateV4ToV5(
+  state: PersistedReviewSettingsStateV4,
+): PersistedReviewSettingsStateV5 {
+  const { bindings, ...rest } = state;
+
+  return {
+    ...rest,
+    activeBindingProfileId: DEFAULT_BINDING_PROFILE_ID,
+    bindingProfiles: createDefaultBindingProfiles(bindings),
+  };
+}
 
 // #endregion
 
@@ -546,13 +962,33 @@ export const useReviewOptimizeSizeThresholdMB = () =>
 export const useReviewImmersiveMode = () =>
   useReviewSettingsStore((state) => state.immersiveMode);
 
+/** Get all binding profiles sorted by display name */
+export const useReviewBindingProfiles = () =>
+  useReviewSettingsStore(
+    useShallow((state) => getSortedBindingProfiles(state.bindingProfiles)),
+  );
+
+/** Get the active binding profile ID */
+export const useActiveReviewBindingProfileId = () =>
+  useReviewSettingsStore((state) => state.activeBindingProfileId);
+
+/** Get the active binding profile */
+export const useActiveReviewBindingProfile = () =>
+  useReviewSettingsStore((state) => getActiveBindingProfile(state));
+
+/** Get the active binding profile name */
+export const useActiveReviewBindingProfileName = () =>
+  useReviewSettingsStore((state) => getActiveBindingProfile(state).name);
+
 /** Get the complete bindings object */
 export const useReviewSwipeBindings = () =>
-  useReviewSettingsStore((state) => state.bindings);
+  useReviewSettingsStore((state) => getActiveBindingProfile(state).bindings);
 
 /** Get the binding for a specific direction */
 export const useReviewSwipeBinding = (direction: SwipeDirection) =>
-  useReviewSettingsStore((state) => state.bindings[direction]);
+  useReviewSettingsStore(
+    (state) => getActiveBindingProfile(state).bindings[direction],
+  );
 
 /** Get actions */
 export const useReviewSettingsActions = () =>
@@ -563,7 +999,9 @@ export const useReviewSettingsActions = () =>
  * Convenience selector for common use case.
  */
 export const useFileActionForDirection = (direction: SwipeDirection) =>
-  useReviewSettingsStore((state) => state.bindings[direction].fileAction);
+  useReviewSettingsStore(
+    (state) => getActiveBindingProfile(state).bindings[direction].fileAction,
+  );
 
 // #endregion
 

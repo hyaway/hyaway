@@ -3,9 +3,16 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_BINDING_PROFILE_ID,
+  DEFAULT_SWIPE_BINDINGS,
+  MAX_SWIPE_THRESHOLD,
+  MIN_SWIPE_THRESHOLD,
+  cloneSwipeBindings,
   getAllSecondarySwipeActions,
+  getSortedBindingProfiles,
   getValidSecondarySwipeActions,
   getValidSwipeBindings,
+  migrateReviewSettingsState,
   normalizeReviewSwipeBinding,
   normalizeSwipeBindings,
   stripInvalidRatingActions,
@@ -92,6 +99,128 @@ function bindingsWithSecondaryActions(
 }
 
 describe("review settings action stripping helpers", () => {
+  describe("binding profile helpers", () => {
+    it("sorts binding profiles alphabetically by display name", () => {
+      expect(
+        getSortedBindingProfiles({
+          second: {
+            id: "second",
+            name: "Review",
+            bindings: DEFAULT_SWIPE_BINDINGS,
+          },
+          first: {
+            id: "first",
+            name: "Default",
+            bindings: DEFAULT_SWIPE_BINDINGS,
+          },
+        }).map((profile) => profile.id),
+      ).toEqual(["first", "second"]);
+    });
+
+    it("clones secondary swipe actions when cloning bindings", () => {
+      const bindings = bindingsWithSecondaryActions([
+        { ...ratingAction, id: "rating-action-1" },
+      ]);
+
+      const cloned = cloneSwipeBindings(bindings);
+
+      expect(cloned).toEqual(bindings);
+      expect(cloned).not.toBe(bindings);
+      expect(cloned.left).not.toBe(bindings.left);
+      expect(cloned.left.secondaryActions).not.toBe(
+        bindings.left.secondaryActions,
+      );
+      expect(cloned.left.secondaryActions?.[0]).not.toBe(
+        bindings.left.secondaryActions?.[0],
+      );
+    });
+  });
+
+  describe("migrateReviewSettingsState", () => {
+    it("migrates legacy thresholds and bindings into the current profile shape", () => {
+      const legacyBindings = {
+        ...DEFAULT_SWIPE_BINDINGS,
+        down: { fileAction: "skip" },
+      } satisfies SwipeBindings;
+
+      const migrated = migrateReviewSettingsState(
+        {
+          horizontalThreshold: 0,
+          verticalThreshold: 50,
+          bindings: legacyBindings,
+        },
+        0,
+      );
+
+      expect(migrated.thresholds).toEqual({
+        left: MIN_SWIPE_THRESHOLD,
+        right: MIN_SWIPE_THRESHOLD,
+        up: MAX_SWIPE_THRESHOLD,
+        down: MAX_SWIPE_THRESHOLD,
+      });
+      expect(migrated.activeBindingProfileId).toBe(DEFAULT_BINDING_PROFILE_ID);
+      expect(
+        migrated.bindingProfiles[DEFAULT_BINDING_PROFILE_ID].bindings.down,
+      ).toEqual({ fileAction: "undo" });
+      expect(migrated).not.toHaveProperty("bindings");
+    });
+
+    it("normalizes persisted binding profiles in the current version", () => {
+      const profileWithGeneratedActionIds = bindingsWithSecondaryActions([
+        ratingAction,
+      ]);
+      const profileWithUndoSecondaryActions = {
+        ...DEFAULT_SWIPE_BINDINGS,
+        down: {
+          fileAction: "undo",
+          secondaryActions: [ratingAction as LooseSecondarySwipeAction],
+        },
+      } satisfies SwipeBindings;
+
+      const migrated = migrateReviewSettingsState(
+        {
+          activeBindingProfileId: "missing-profile",
+          bindingProfiles: {
+            first: {
+              id: "first",
+              name: "Review",
+              bindings: profileWithGeneratedActionIds,
+            },
+            second: {
+              id: "second",
+              name: "Review",
+              bindings: profileWithUndoSecondaryActions,
+            },
+          },
+        },
+        5,
+      );
+
+      expect(migrated.activeBindingProfileId).toBe("first");
+      expect(migrated.bindingProfiles.first.name).toBe("Review");
+      expect(migrated.bindingProfiles.second.name).toBe("Review (2)");
+      expect(
+        migrated.bindingProfiles.first.bindings.left.secondaryActions,
+      ).toHaveLength(1);
+      expectGeneratedActionId(
+        migrated.bindingProfiles.first.bindings.left.secondaryActions?.[0],
+        "rating",
+      );
+      expect(
+        migrated.bindingProfiles.second.bindings.down.secondaryActions,
+      ).toBeUndefined();
+    });
+
+    it("recovers from non-object persisted state", () => {
+      const migrated = migrateReviewSettingsState(null, 5);
+
+      expect(migrated.activeBindingProfileId).toBe(DEFAULT_BINDING_PROFILE_ID);
+      expect(Object.keys(migrated.bindingProfiles)).toEqual([
+        DEFAULT_BINDING_PROFILE_ID,
+      ]);
+    });
+  });
+
   describe("normalizeReviewSwipeBinding", () => {
     it("preserves duplicate rating actions during normalization", () => {
       const duplicateRatingAction = {
