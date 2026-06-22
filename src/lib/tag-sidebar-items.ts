@@ -3,6 +3,7 @@
 
 import type { TagItem } from "@/lib/tag-sidebar-types";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import { TagStatus } from "@/integrations/hydrus-api/models";
 import { parseTag } from "@/lib/tag-utils";
 
 export function createTagSidebarItems(
@@ -16,7 +17,7 @@ export function createTagSidebarItems(
   // eslint-disable-next-line @typescript-eslint/prefer-for-of
   for (let i = 0; i < items.length; i++) {
     const displayTags =
-      items[i].tags?.[allTagsServiceId]?.];
+      items[i].tags?.[allTagsServiceId]?.display_tags[TagStatus.CURRENT];
 
     if (!displayTags) continue;
 
