@@ -78,8 +78,8 @@ export function BindingProfileControls({
   );
 
   return (
-    <div className="flex min-w-0 flex-wrap items-end gap-2 rounded-lg border p-3">
-      <div className="flex min-w-0 flex-1 flex-col gap-3 md:flex-row md:items-center">
+    <div className="@container/profile-controls flex min-w-0 flex-wrap items-end gap-2 rounded-lg border p-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-3 @lg/profile-controls:flex-row @lg/profile-controls:items-center">
         <Label>Profile</Label>
         <div className="flex min-w-0 flex-1 items-center gap-1">
           {isRenaming ? (
