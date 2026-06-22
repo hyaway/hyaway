@@ -37,14 +37,16 @@ export function PagesIndexRightSidebar({
     <RightSidebarPortal>
       <div className="flex h-full flex-col overflow-hidden">
         <SidebarHeader className="gap-4 pt-4">
-          <Heading level={3} className="text-lg font-semibold">
+          <Heading level={3} className="text-base font-semibold">
             Pages
           </Heading>
           <PagesSearchInput variant="sidebar" />
         </SidebarHeader>
         <SidebarSeparator />
         <SidebarGroup className="min-h-0 flex-1">
-          <SidebarGroupLabel>{tree?.name ?? "Pages tree"}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground px-2 text-sm font-medium normal-case">
+            {tree?.name ?? "Pages tree"}
+          </SidebarGroupLabel>
           <SidebarGroupContent className="min-h-0 flex-1">
             <ScrollArea className="h-full">
               <PagesTreeView

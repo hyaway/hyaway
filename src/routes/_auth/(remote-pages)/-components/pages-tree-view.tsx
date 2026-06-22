@@ -34,7 +34,7 @@ type PagesTreeRow = {
 };
 
 const sidebarMenuButtonClassName = cn(
-  "ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground peer/menu-button group/menu-button relative flex w-full items-center gap-2.5 overflow-hidden rounded-lg p-2.5 text-left text-sm outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-10 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:font-medium [&_svg]:size-6 [&_svg]:shrink-0 [&>span:last-child]:truncate",
+  "ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground peer/menu-button group/menu-button relative flex min-h-9 w-full items-center gap-2 overflow-hidden rounded-md px-2 py-1.5 text-left text-sm outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-10 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:font-medium [&_svg]:size-5 [&_svg]:shrink-0 [&>span:last-child]:truncate",
 );
 
 function buildTreeRows(root: PagesTreeNode | null, expandedKeys: Set<string>) {
@@ -165,9 +165,7 @@ export function PagesTreeView({
 
   if ((!filteredTree || rows.length === 0) && !latestPage) {
     return (
-      <p className="text-muted-foreground px-2 py-3 text-xs/5">
-        {emptyMessage}
-      </p>
+      <p className="text-muted-foreground px-2 py-3 text-sm">{emptyMessage}</p>
     );
   }
 
@@ -184,10 +182,10 @@ export function PagesTreeView({
               pageId: useFriendlyUrls ? latestPage.slug : latestPage.page_key,
             }}
             size="lg"
-            className="border-primary/20 bg-primary/5 hover:bg-primary/10 data-active:bg-primary/10 border shadow-xs"
+            className="border-sidebar-border hover:bg-sidebar-accent data-active:bg-sidebar-accent min-h-10 rounded-md border bg-transparent px-2 py-1.5 text-sm shadow-xs"
           >
-            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="text-primary text-xs/4 font-medium">
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-sm">
+              <span className="bg-primary text-primary-foreground w-fit rounded-sm px-1.5 py-0.5 text-xs/4 font-medium shadow-xs">
                 Last opened
               </span>
               <span
@@ -224,7 +222,7 @@ export function PagesTreeView({
               />
               {groupColorByKey.get(row.node.page_key) ? (
                 <IconPointFilled
-                  className="-mx-2 size-4 shrink-0"
+                  className="mr-0.5 -ml-2 size-4 shrink-0"
                   style={{
                     color: groupColorByKey.get(row.node.page_key) ?? "",
                   }}
@@ -232,7 +230,7 @@ export function PagesTreeView({
                 />
               ) : (
                 <IconPoint
-                  className="text-muted-foreground -mx-2 size-4 shrink-0"
+                  className="text-muted-foreground mr-0.5 -ml-2 size-4 shrink-0"
                   aria-hidden="true"
                 />
               )}
