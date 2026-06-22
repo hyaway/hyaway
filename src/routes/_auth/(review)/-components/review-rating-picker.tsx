@@ -361,6 +361,7 @@ function NumericRatingButton({
   className,
   truncateLabel,
 }: NumericRatingButtonProps) {
+  const [open, setOpen] = useState(false);
   const { mutate: setRating, isPending } = useSetRatingMutation();
   const { filled: FilledIcon, outline: OutlineIcon } = useShapeIcons(
     serviceKey,
@@ -395,7 +396,7 @@ function NumericRatingButton({
   };
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
           <BottomNavButton
@@ -403,6 +404,7 @@ function NumericRatingButton({
             customContent={content}
             disabled={isPending}
             className={className}
+            data-menu-open={open}
             truncateLabel={truncateLabel}
           />
         }
