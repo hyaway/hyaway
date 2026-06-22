@@ -8,11 +8,11 @@ import { ReviewFooter } from "./-components/review-footer";
 import { useReviewImmersiveEffects } from "./-components/use-review-immersive-effects";
 import { ReviewSettingsPopover } from "./-components/review-settings-popover";
 import { ReviewStatsBreakdown } from "./-components/review-stats-breakdown";
-import { FileTagsSidebar } from "./-components/file-tags-sidebar";
 import {
   ReviewSwipeDeckVisual,
   useReviewSwipeDeck,
 } from "./-components/review-swipe-deck";
+import { FileTagsSidebar } from "@/components/tag/file-tags-sidebar";
 import { SwipeBindingsConfig } from "@/components/settings/swipe-bindings/swipe-bindings-config";
 import { EmptyState } from "@/components/page-shell/empty-state";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
