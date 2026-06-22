@@ -42,7 +42,7 @@ export function FileTagsSidebar({ fileId }: FileTagsSidebarProps) {
       <TagsSidebar
         tags={tags}
         itemsCount={itemsCount}
-        title="Current file"
+        title="File tags"
         showIndex={false}
         headerControls={<FileTagsSidebarSortControls />}
       />
