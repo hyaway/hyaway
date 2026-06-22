@@ -61,15 +61,20 @@ function ReviewPage() {
         <PageHeaderActions>
           <ReviewSettingsPopover />
         </PageHeaderActions>
+        <SwipeBindingsConfig className="my-4" />
         <EmptyState
           message="No items in review queue. Add files from a page to start reviewing."
           action={
-            <LinkButton to="/pages" search={{ q: undefined }} variant="outline">
+            <LinkButton
+              to="/pages"
+              search={{ q: undefined }}
+              variant="secondary"
+            >
               Browse pages
             </LinkButton>
           }
+          className="border px-4 pt-6 pb-8"
         />
-        <SwipeBindingsConfig className="my-8" />
       </div>
     );
   }
