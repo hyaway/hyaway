@@ -14,10 +14,18 @@ All notable changes to hyAway are documented here.
 
 - **Tag swipe actions** — Review swipes can now add or remove tags while moving through files
 - **Swipe action profiles** — Save and switch between review swipe setups for different tagging and rating workflows
+- **File tag sidebars** — File details and Review now show the current file's Hydrus tags in the right sidebar
+- **Tag sidebar sorting** — Gallery tag sidebars can sort by Count or Namespace, while new file tag sidebars can use Hydrus order or Namespace sorting
+
+### Changed
+
+- The Pages sidebar header, tree rows, and last-opened page item now use the consistent sidebar styling as the rest of the app
+- Tags sidebar header is now better aligned with the app header and buttons
 
 ### Fixed
 
 - File open, link, and download actions no longer trigger twice for some users
+- App pages now reserve scrollbar space to prevent width jumps on navigation, while Review, video theater, and viewer overlays keep edge-to-edge layouts
 
 ---
 
