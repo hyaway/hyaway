@@ -7,6 +7,11 @@ import { AnimatePresence } from "motion/react";
 import { ReviewSwipeCard } from "./review-swipe-card";
 import { ReviewCardContent } from "./review-card-content";
 import { useReviewKeyboardShortcuts } from "./use-review-keyboard-shortcuts";
+import {
+  executeFileAction,
+  reverseFileAction,
+  shouldHideFromViewAfterReviewAction,
+} from "./review-file-actions";
 import { executeSecondaryRatingActions } from "./review-rating-actions";
 import {
   executeSecondaryTagActions,
@@ -17,11 +22,7 @@ import type {
   PreviousFileState,
   RestoreData,
 } from "@/stores/review-queue-store";
-import type {
-  ReviewFileAction,
-  ReviewFileMutationAction,
-  ValidSwipeBindings,
-} from "@/stores/review-settings-store";
+import type { ValidSwipeBindings } from "@/stores/review-settings-store";
 import type { FileTagUpdate } from "@/integrations/hydrus-api/models";
 import {
   getBindingForDirection,
@@ -103,75 +104,6 @@ function DeckContainer({
       {children(cardSize)}
     </div>
   );
-}
-
-/** Check if a mutation action didn't change the file state (e.g., archiving already archived) */
-function wasMutationUnchanged(
-  action: ReviewFileMutationAction,
-  fileState: PreviousFileState,
-): boolean {
-  return (
-    (action === "archive" && fileState === "archived") ||
-    (action === "trash" && fileState === "trashed")
-  );
-}
-
-/** Mutation function signature for file management operations */
-type FileMutate = (args: { file_ids: Array<number> }) => void;
-
-/**
- * Execute the primary file action if it would change state.
- * "skip" and "undo" are explicit no-ops. Mutation actions use a complete
- * (non-Partial) map so adding a new mutation action forces a compile error
- * until handled.
- */
-function executeFileAction(
-  fileAction: ReviewFileAction,
-  fileId: number,
-  fileState: PreviousFileState,
-  mutations: Record<ReviewFileMutationAction, FileMutate>,
-): void {
-  if (fileAction === "skip" || fileAction === "undo") return;
-  if (wasMutationUnchanged(fileAction, fileState)) return;
-  mutations[fileAction]({ file_ids: [fileId] });
-}
-
-/**
- * Reverse a previously-applied file action for undo.
- * Maps each forward action to its inverse mutation.
- */
-function reverseFileAction(
-  fileAction: ReviewFileAction,
-  fileId: number,
-  fileState: PreviousFileState,
-  undoMutations: Record<ReviewFileMutationAction, FileMutate>,
-): void {
-  if (fileAction === "skip" || fileAction === "undo") return;
-  if (wasMutationUnchanged(fileAction, fileState)) return;
-  undoMutations[fileAction]({ file_ids: [fileId] });
-}
-
-function shouldHideFromViewAfterReviewAction(
-  fileAction: ReviewFileAction,
-  options: {
-    hideFilteredFiles: boolean;
-    hideFilteredFilesEvenWhenSkipped: boolean;
-  },
-) {
-  if (!options.hideFilteredFiles) return false;
-
-  switch (fileAction) {
-    case "archive":
-    case "trash":
-      return true;
-    case "skip":
-      return options.hideFilteredFilesEvenWhenSkipped;
-    case "undo":
-      return false;
-    default:
-      fileAction satisfies never;
-      return false;
-  }
 }
 
 export function useReviewSwipeDeck() {
