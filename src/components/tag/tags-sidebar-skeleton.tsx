@@ -29,7 +29,7 @@ export function TagsSidebarSkeleton({ tagCount = 20 }: { tagCount?: number }) {
 
   return (
     <>
-      <SidebarHeader className="gap-4">
+      <SidebarHeader className="gap-4 pt-4">
         <Heading level={3} className="text-lg font-semibold">
           Tags
         </Heading>
