@@ -554,6 +554,7 @@ function TagsEditor({
             placeholder={variant.placeholder}
             ariaLabel={variant.ariaLabel}
             clearOnSelect
+            submitButton
             onSelect={handleAddTag}
             onSubmit={handleAddTag}
           />

@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IconTagStarred } from "@tabler/icons-react";
+import { IconPlus, IconTagStarred } from "@tabler/icons-react";
 import { defaultFilter } from "cmdk";
 import type { CSSProperties } from "react";
 import type { SystemTagSuggestion } from "@/routes/_auth/(search)/-lib/query-builder-fields";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui-primitives/button";
 import {
   Command,
   CommandGroup,
@@ -41,6 +43,7 @@ export function TagAutocompleteInput({
   className,
   inputClassName,
   clearOnSelect,
+  submitButton,
   submitEmptyOnBlur,
   submitEmptyOnEnter,
   systemTagSuggestions = SYSTEM_TAG_SUGGESTIONS,
@@ -64,6 +67,12 @@ export function TagAutocompleteInput({
   inputClassName?: string;
   /** Clear the input after a suggestion is selected. */
   clearOnSelect?: boolean;
+  /**
+   * Show an explicit "add" button on mobile. Mobile virtual keyboards often
+   * don't fire a usable Enter keydown (IME keyCode 229), so a tappable button
+   * is the reliable way to submit free text there.
+   */
+  submitButton?: boolean;
   /** Call onBlur with an empty string when the input is cleared. */
   submitEmptyOnBlur?: boolean;
   /** Call onSubmit with an empty string when Enter is pressed in a cleared input. */
@@ -75,6 +84,7 @@ export function TagAutocompleteInput({
   const [debouncedInput, setDebouncedInput] = useState(value);
   const [open, setOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const isMobile = useIsMobile();
 
   // Sync controlled value
   useEffect(() => {
@@ -153,8 +163,22 @@ export function TagAutocompleteInput({
     [clearOnSelect, onChange, onSelect],
   );
 
-  return (
-    <div className={className ?? "relative w-full"}>
+  // Commit the currently-typed text (shared by Enter and the mobile add button).
+  const submitInput = useCallback(() => {
+    const trimmed = inputValue.trim();
+    if (!onSubmit || (!trimmed && !submitEmptyOnEnter)) return;
+    onSubmit(trimmed);
+    if (clearOnSelect) {
+      setInputValue("");
+      onChange?.("");
+    }
+    setOpen(false);
+  }, [inputValue, onSubmit, submitEmptyOnEnter, clearOnSelect, onChange]);
+
+  const showSubmitButton = Boolean(submitButton) && isMobile;
+
+  const inputField = (
+    <>
       <Input
         className={cn(
           "w-full",
@@ -195,13 +219,7 @@ export function TagAutocompleteInput({
             (inputValue.trim() || submitEmptyOnEnter)
           ) {
             e.preventDefault();
-            const trimmed = inputValue.trim();
-            onSubmit(trimmed);
-            if (clearOnSelect) {
-              setInputValue("");
-              onChange?.("");
-            }
-            setOpen(false);
+            submitInput();
           }
         }}
         name={name}
@@ -218,6 +236,29 @@ export function TagAutocompleteInput({
           style={colorizedInputStyle}
           aria-hidden
         />
+      )}
+    </>
+  );
+
+  return (
+    <div className={className ?? "relative w-full"}>
+      {showSubmitButton ? (
+        <div className="flex w-full items-center gap-2">
+          <div className="relative min-w-0 flex-1">{inputField}</div>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label="Add tag"
+            disabled={disabled === true || !inputValue.trim()}
+            onPointerDown={(e) => e.preventDefault()}
+            onClick={submitInput}
+          >
+            <IconPlus className="size-5" />
+          </Button>
+        </div>
+      ) : (
+        inputField
       )}
       {showDropdown && (
         <div
