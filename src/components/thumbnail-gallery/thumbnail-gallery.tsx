@@ -18,7 +18,7 @@ import { ThumbnailGallerySkeleton } from "./thumbnail-gallery-skeleton";
 import type { FileLinkBuilder } from "./thumbnail-gallery-item";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { ScrollPositionBadge } from "@/components/scroll-position-badge";
-import { TagsSidebar } from "@/components/tag/tags-sidebar";
+import { ThumbnailGalleryTagsSidebar } from "@/components/tag/thumbnail-gallery-tags-sidebar";
 import { PageError } from "@/components/page-shell/page-error";
 import { Spinner } from "@/components/ui-primitives/spinner";
 import {
@@ -383,7 +383,7 @@ export function PureThumbnailGallery({
             </div>
           )}
           <RightSidebarPortal>
-            <TagsSidebar items={deferredItems} />
+            <ThumbnailGalleryTagsSidebar items={deferredItems} />
           </RightSidebarPortal>
         </>
       )}
