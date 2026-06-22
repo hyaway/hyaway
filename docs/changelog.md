@@ -8,6 +8,19 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-06-22
+
+### Added
+
+- **Tag swipe actions** — Review swipes can now add or remove tags while moving through files
+- **Swipe action profiles** — Save and switch between review swipe setups for different tagging and rating workflows
+
+### Fixed
+
+- File open, link, and download actions no longer trigger twice for some users
+
+---
+
 ## 2026-06-02
 
 ### Changed
