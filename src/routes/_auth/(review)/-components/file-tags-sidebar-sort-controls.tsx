@@ -1,9 +1,9 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ReviewTagsSortMode } from "@/stores/tags-settings-store";
+import type { FileTagsSortMode } from "@/stores/tags-settings-store";
 import {
-  useReviewTagsSortMode,
+  useFileTagsSortMode,
   useTagsSettingsActions,
 } from "@/stores/tags-settings-store";
 import {
@@ -11,31 +11,31 @@ import {
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
 
-const REVIEW_CURRENT_FILE_TAGS_SIDEBAR_SORT_OPTIONS = [
+const FILE_TAGS_SIDEBAR_SORT_OPTIONS = [
   { value: "hydrus", label: "Hydrus" },
   { value: "namespace", label: "Namespace" },
 ] as const;
 
-export function useReviewCurrentFileTagsSidebarSortMode() {
-  return useReviewTagsSortMode();
+export function useFileTagsSidebarSortMode() {
+  return useFileTagsSortMode();
 }
 
-export function ReviewCurrentFileTagsSidebarSortControls() {
-  const reviewSortMode = useReviewCurrentFileTagsSidebarSortMode();
-  const { setReviewSortMode } = useTagsSettingsActions();
+export function FileTagsSidebarSortControls() {
+  const fileSortMode = useFileTagsSidebarSortMode();
+  const { setFileSortMode } = useTagsSettingsActions();
 
   return (
     <ToggleGroup
-      value={[reviewSortMode]}
+      value={[fileSortMode]}
       onValueChange={(value) => {
-        const next = value[0] as ReviewTagsSortMode | undefined;
-        if (next) setReviewSortMode(next);
+        const next = value[0] as FileTagsSortMode | undefined;
+        if (next) setFileSortMode(next);
       }}
       variant="outline-muted"
       size="sm"
       className="w-full"
     >
-      {REVIEW_CURRENT_FILE_TAGS_SIDEBAR_SORT_OPTIONS.map((option) => (
+      {FILE_TAGS_SIDEBAR_SORT_OPTIONS.map((option) => (
         <ToggleGroupItem
           key={option.value}
           value={option.value}
