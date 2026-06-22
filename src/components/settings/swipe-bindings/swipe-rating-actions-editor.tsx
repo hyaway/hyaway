@@ -544,6 +544,10 @@ function RatingActionEditor({
                   Will <strong>{ratingActionLabel.toLowerCase()}</strong>{" "}
                   {selectedService.name}
                 </>
+              ) : ratingActionLabel === "Clear" ? (
+                <>
+                  Will clear <strong>{selectedService.name}</strong>
+                </>
               ) : (
                 <>
                   Will set {selectedService.name} to:{" "}
