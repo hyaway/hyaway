@@ -3,10 +3,13 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_BINDING_PROFILE_NAME,
   DEFAULT_SWIPE_BINDINGS,
   MAX_SWIPE_THRESHOLD,
   MIN_SWIPE_THRESHOLD,
+  NEW_BINDING_PROFILE_NAME,
   cloneSwipeBindings,
+  createBindingProfile,
   getAllSecondarySwipeActions,
   getSortedBindingProfiles,
   getValidSecondarySwipeActions,
@@ -133,6 +136,25 @@ describe("review settings action stripping helpers", () => {
         bindings.left.secondaryActions?.[0],
       );
     });
+
+    it("names fresh binding profiles Profile by default", () => {
+      const profile = createBindingProfile({});
+
+      expect(profile.name).toBe(NEW_BINDING_PROFILE_NAME);
+      expect(profile.bindings).toEqual(DEFAULT_SWIPE_BINDINGS);
+    });
+
+    it("deduplicates fresh binding profile names from Profile", () => {
+      const profile = createBindingProfile({
+        existing: {
+          id: "existing",
+          name: NEW_BINDING_PROFILE_NAME,
+          bindings: DEFAULT_SWIPE_BINDINGS,
+        },
+      });
+
+      expect(profile.name).toBe(`${NEW_BINDING_PROFILE_NAME} (1)`);
+    });
   });
 
   describe("migrateReviewSettingsState", () => {
@@ -162,7 +184,7 @@ describe("review settings action stripping helpers", () => {
       ).toEqual({ fileAction: "undo" });
       expect(
         migrated.bindingProfiles[migrated.activeBindingProfileId].name,
-      ).toBe("Default");
+      ).toBe(DEFAULT_BINDING_PROFILE_NAME);
       expect(migrated).not.toHaveProperty("bindings");
     });
 
@@ -220,7 +242,23 @@ describe("review settings action stripping helpers", () => {
       ]);
       expect(
         migrated.bindingProfiles[migrated.activeBindingProfileId].name,
-      ).toBe("Default");
+      ).toBe(DEFAULT_BINDING_PROFILE_NAME);
+    });
+
+    it("uses Default when persisted profiles have no usable entries", () => {
+      const migrated = migrateReviewSettingsState(
+        {
+          bindingProfiles: {},
+        },
+        5,
+      );
+
+      expect(Object.keys(migrated.bindingProfiles)).toEqual([
+        migrated.activeBindingProfileId,
+      ]);
+      expect(
+        migrated.bindingProfiles[migrated.activeBindingProfileId].name,
+      ).toBe(DEFAULT_BINDING_PROFILE_NAME);
     });
   });
 

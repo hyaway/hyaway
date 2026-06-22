@@ -219,6 +219,7 @@ export const DEFAULT_SWIPE_BINDINGS: SwipeBindings = {
 };
 
 export const DEFAULT_BINDING_PROFILE_NAME = "Default";
+export const NEW_BINDING_PROFILE_NAME = "Profile";
 
 export const DEFAULT_REVIEW_RENDER_QUALITY = 90;
 export const MIN_REVIEW_RENDER_QUALITY = 40;
@@ -277,16 +278,20 @@ function createDefaultBindingProfileState(
   };
 }
 
-function normalizeBindingProfileName(name: string) {
-  return name.trim() || DEFAULT_BINDING_PROFILE_NAME;
+function normalizeBindingProfileName(
+  name: string,
+  fallbackName = DEFAULT_BINDING_PROFILE_NAME,
+) {
+  return name.trim() || fallbackName;
 }
 
 function getUniqueBindingProfileName(
   profiles: ReviewBindingProfiles,
   name: string,
   allowedProfileId?: string,
+  fallbackName = DEFAULT_BINDING_PROFILE_NAME,
 ) {
-  const baseName = normalizeBindingProfileName(name);
+  const baseName = normalizeBindingProfileName(name, fallbackName);
   return getNextUniqueName(
     baseName,
     Object.values(profiles)
@@ -307,15 +312,20 @@ function getBindingProfile(profiles: ReviewBindingProfiles, profileId: string) {
   return (profiles as Partial<ReviewBindingProfiles>)[profileId];
 }
 
-function createBindingProfile(
+export function createBindingProfile(
   profiles: ReviewBindingProfiles,
-  name: string,
-  bindings: SwipeBindings,
+  name = NEW_BINDING_PROFILE_NAME,
+  bindings: SwipeBindings = DEFAULT_SWIPE_BINDINGS,
 ): ReviewBindingProfile {
   const id = getAvailableBindingProfileId(profiles);
   return {
     id,
-    name: getUniqueBindingProfileName(profiles, name),
+    name: getUniqueBindingProfileName(
+      profiles,
+      name,
+      undefined,
+      NEW_BINDING_PROFILE_NAME,
+    ),
     bindings: normalizeSwipeBindings(cloneSwipeBindings(bindings)),
   };
 }
@@ -499,12 +509,11 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
             );
           },
 
-          createBindingProfile: (name = DEFAULT_BINDING_PROFILE_NAME) => {
+          createBindingProfile: (name) => {
             const current = get();
             const profile = createBindingProfile(
               current.bindingProfiles,
               name,
-              DEFAULT_SWIPE_BINDINGS,
             );
             set((state) => ({
               activeBindingProfileId: profile.id,
@@ -563,9 +572,12 @@ const useReviewSettingsStore = create<ReviewSettingsState>()(
             );
             if (!profile) return name.trim();
 
+            const trimmedName = name.trim();
+            if (!trimmedName) return profile.name;
+
             const nextName = getUniqueBindingProfileName(
               current.bindingProfiles,
-              name,
+              trimmedName,
               profileId,
             );
             if (nextName === profile.name) return nextName;
