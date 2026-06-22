@@ -8,24 +8,21 @@ import { ReviewSwipeCard } from "./review-swipe-card";
 import { ReviewCardContent } from "./review-card-content";
 import { useReviewKeyboardShortcuts } from "./use-review-keyboard-shortcuts";
 import { executeSecondaryRatingActions } from "./review-rating-actions";
+import {
+  executeSecondaryTagActions,
+  getReverseContentUpdateAction,
+} from "./review-tag-actions";
 import type { SwipeDirection } from "./review-swipe-card";
 import type {
   PreviousFileState,
   RestoreData,
-  TagRestoreEntry,
 } from "@/stores/review-queue-store";
 import type {
   ReviewFileAction,
   ReviewFileMutationAction,
-  TagSwipeActionType,
-  ValidSecondarySwipeAction,
   ValidSwipeBindings,
 } from "@/stores/review-settings-store";
-import type {
-  FileMetadata,
-  FileTagUpdate,
-  UpdateFileTagsOptions,
-} from "@/integrations/hydrus-api/models";
+import type { FileTagUpdate } from "@/integrations/hydrus-api/models";
 import {
   getBindingForDirection,
   getValidSwipeBindings,
@@ -58,13 +55,11 @@ import {
 } from "@/integrations/hydrus-api/queries/ratings";
 import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
 import {
-  getTagActionStateChange,
   useCanEditFileTags,
   useUpdateFileTagsMutation,
 } from "@/integrations/hydrus-api/queries/tags";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
 import { getFileMetadata } from "@/integrations/hydrus-api/api-client";
-import { ContentUpdateAction } from "@/integrations/hydrus-api/models";
 import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
 
 /** Number of cards to render in the stack */
@@ -123,24 +118,6 @@ function wasMutationUnchanged(
 
 /** Mutation function signature for file management operations */
 type FileMutate = (args: { file_ids: Array<number> }) => void;
-/** Mutation function signature for tag operations */
-type TagMutate = (args: UpdateFileTagsOptions) => void;
-
-const contentUpdateActionByTagAction: Record<
-  TagSwipeActionType,
-  ContentUpdateAction
-> = {
-  add: ContentUpdateAction.ADD,
-  remove: ContentUpdateAction.DELETE,
-};
-
-const reverseContentUpdateActionByTagAction: Record<
-  TagSwipeActionType,
-  ContentUpdateAction
-> = {
-  add: ContentUpdateAction.DELETE,
-  remove: ContentUpdateAction.ADD,
-};
 
 /**
  * Execute the primary file action if it would change state.
@@ -195,61 +172,6 @@ function shouldHideFromViewAfterReviewAction(
       fileAction satisfies never;
       return false;
   }
-}
-
-function getContentUpdateAction(actionType: "add" | "remove") {
-  return contentUpdateActionByTagAction[actionType];
-}
-
-function getReverseContentUpdateAction(actionType: "add" | "remove") {
-  return reverseContentUpdateActionByTagAction[actionType];
-}
-
-function executeSecondaryTagActions(
-  secondaryActions: Array<ValidSecondarySwipeAction>,
-  fileId: number,
-  metadata: FileMetadata | undefined,
-  validLocalTagServiceKeys: Set<string>,
-  canEditTags: boolean,
-  updateTags: TagMutate,
-): Array<TagRestoreEntry> {
-  const restoreEntries: Array<TagRestoreEntry> = [];
-  const tagUpdates: Array<FileTagUpdate> = [];
-  if (!canEditTags || !metadata) return restoreEntries;
-
-  for (const action of secondaryActions) {
-    if (action.actionType !== "tag") continue;
-    if (!validLocalTagServiceKeys.has(action.serviceKey)) continue;
-
-    const contentAction = getContentUpdateAction(action.type);
-    const { changed } = getTagActionStateChange(
-      metadata,
-      action.serviceKey,
-      action.tag,
-      contentAction,
-    );
-    if (!changed) continue;
-
-    restoreEntries.push({
-      serviceKey: action.serviceKey,
-      tag: action.tag,
-      actionType: action.type,
-    });
-    tagUpdates.push({
-      serviceKey: action.serviceKey,
-      tag: action.tag,
-      action: contentAction,
-    });
-  }
-
-  if (tagUpdates.length > 0) {
-    updateTags({
-      file_id: fileId,
-      changes: tagUpdates,
-    });
-  }
-
-  return restoreEntries;
 }
 
 export function useReviewSwipeDeck() {
