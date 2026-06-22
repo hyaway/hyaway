@@ -1161,6 +1161,116 @@ function DirectionBindingEditor({
         </ToggleGroup>
       </div>
 
+      {/* Tag Actions — hidden when undo is selected (no secondary actions for undo) */}
+      {binding.fileAction !== "undo" && (
+        <div className="flex min-w-0 flex-col gap-2">
+          <Label
+            className={cn(
+              "text-xs",
+              canEditTags && hasLocalTagServices
+                ? "text-muted-foreground"
+                : "text-muted-foreground/50",
+            )}
+          >
+            Tag actions (optional)
+          </Label>
+
+          {!canEditTags && tagActions.length === 0 ? (
+            <span className="text-muted-foreground/50 text-xs">
+              No permission to edit file tags
+            </span>
+          ) : !hasLocalTagServices && tagActions.length === 0 ? (
+            <span className="text-muted-foreground/50 text-xs">
+              No local tag domains available
+            </span>
+          ) : null}
+
+          {tagActions.length > 0 && (
+            <div className="flex min-w-0 flex-col gap-2">
+              {tagActions.map((tagAction, index) => {
+                const identity = getTagSwipeActionIdentity(tagAction);
+                const actionId = tagAction.id;
+                const isOrphanedTag =
+                  tagAction.serviceKey &&
+                  !allLocalTagServiceKeys.has(tagAction.serviceKey);
+
+                if (isOrphanedTag) {
+                  return (
+                    <RatingActionWarning
+                      key={`${identity}-${index}`}
+                      variant="destructive"
+                      title="Tag service does not exist"
+                      description={
+                        <>
+                          Tag service{" "}
+                          <span className="break-all">
+                            {tagAction.serviceKey}
+                          </span>{" "}
+                          is no longer available. Clear it and pick a different
+                          local tag domain for this swipe action.
+                        </>
+                      }
+                      onClear={() => removeTagAction(actionId)}
+                    />
+                  );
+                }
+
+                return (
+                  <TagActionEditor
+                    key={actionId}
+                    draft={{
+                      ...tagAction,
+                      validationMessage: getTagDraftDuplicateMessage(
+                        tagAction,
+                        actionId,
+                      ),
+                    }}
+                    localTagServices={localTagServices}
+                    disabled={!canEditTags}
+                    cleanTagsMutation={cleanTagsMutation}
+                    validateDraft={(draft) =>
+                      getTagDraftDuplicateMessage(draft, actionId)
+                    }
+                    onDraftChange={(draft) => {
+                      upsertTagAction(
+                        {
+                          type: draft.type,
+                          serviceKey: draft.serviceKey,
+                          tag: draft.tag,
+                        },
+                        actionId,
+                      );
+                    }}
+                    onCommit={(draft) => commitTagDraft(draft, actionId)}
+                    onRemove={() => removeTagAction(actionId)}
+                  />
+                );
+              })}
+            </div>
+          )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="self-start"
+            onClick={() => {
+              const actionId = createSecondarySwipeActionId("tag");
+              upsertTagAction(
+                {
+                  type: "add",
+                  serviceKey: getDefaultLocalTagServiceKey(localTagServices),
+                },
+                actionId,
+              );
+            }}
+            disabled={!canAddTag}
+          >
+            <IconPlus className="size-4" />
+            Add tag
+          </Button>
+        </div>
+      )}
+
       {/* Rating Actions — hidden when undo is selected (no secondary actions for undo) */}
       {binding.fileAction !== "undo" && (
         <div className="flex min-w-0 flex-col gap-2">
@@ -1284,116 +1394,6 @@ function DirectionBindingEditor({
           >
             <IconPlus className="size-4" />
             Add rating
-          </Button>
-        </div>
-      )}
-
-      {/* Tag Actions — hidden when undo is selected (no secondary actions for undo) */}
-      {binding.fileAction !== "undo" && (
-        <div className="flex min-w-0 flex-col gap-2">
-          <Label
-            className={cn(
-              "text-xs",
-              canEditTags && hasLocalTagServices
-                ? "text-muted-foreground"
-                : "text-muted-foreground/50",
-            )}
-          >
-            Tag actions (optional)
-          </Label>
-
-          {!canEditTags && tagActions.length === 0 ? (
-            <span className="text-muted-foreground/50 text-xs">
-              No permission to edit file tags
-            </span>
-          ) : !hasLocalTagServices && tagActions.length === 0 ? (
-            <span className="text-muted-foreground/50 text-xs">
-              No local tag domains available
-            </span>
-          ) : null}
-
-          {tagActions.length > 0 && (
-            <div className="flex min-w-0 flex-col gap-2">
-              {tagActions.map((tagAction, index) => {
-                const identity = getTagSwipeActionIdentity(tagAction);
-                const actionId = tagAction.id;
-                const isOrphanedTag =
-                  tagAction.serviceKey &&
-                  !allLocalTagServiceKeys.has(tagAction.serviceKey);
-
-                if (isOrphanedTag) {
-                  return (
-                    <RatingActionWarning
-                      key={`${identity}-${index}`}
-                      variant="destructive"
-                      title="Tag service does not exist"
-                      description={
-                        <>
-                          Tag service{" "}
-                          <span className="break-all">
-                            {tagAction.serviceKey}
-                          </span>{" "}
-                          is no longer available. Clear it and pick a different
-                          local tag domain for this swipe action.
-                        </>
-                      }
-                      onClear={() => removeTagAction(actionId)}
-                    />
-                  );
-                }
-
-                return (
-                  <TagActionEditor
-                    key={actionId}
-                    draft={{
-                      ...tagAction,
-                      validationMessage: getTagDraftDuplicateMessage(
-                        tagAction,
-                        actionId,
-                      ),
-                    }}
-                    localTagServices={localTagServices}
-                    disabled={!canEditTags}
-                    cleanTagsMutation={cleanTagsMutation}
-                    validateDraft={(draft) =>
-                      getTagDraftDuplicateMessage(draft, actionId)
-                    }
-                    onDraftChange={(draft) => {
-                      upsertTagAction(
-                        {
-                          type: draft.type,
-                          serviceKey: draft.serviceKey,
-                          tag: draft.tag,
-                        },
-                        actionId,
-                      );
-                    }}
-                    onCommit={(draft) => commitTagDraft(draft, actionId)}
-                    onRemove={() => removeTagAction(actionId)}
-                  />
-                );
-              })}
-            </div>
-          )}
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="self-start"
-            onClick={() => {
-              const actionId = createSecondarySwipeActionId("tag");
-              upsertTagAction(
-                {
-                  type: "add",
-                  serviceKey: getDefaultLocalTagServiceKey(localTagServices),
-                },
-                actionId,
-              );
-            }}
-            disabled={!canAddTag}
-          >
-            <IconPlus className="size-4" />
-            Add tag
           </Button>
         </div>
       )}
