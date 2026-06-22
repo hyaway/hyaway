@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 export type TagsSortMode = "count" | "namespace";
-export type ReviewTagsSortMode = "alpha" | "namespace";
+export type ReviewTagsSortMode = "hydrus" | "namespace";
 
 type TagsSettingsState = {
   sortMode: TagsSortMode;
@@ -22,7 +22,7 @@ const useTagsSettingsStore = create<TagsSettingsState>()(
   persist(
     (set, _get, store) => ({
       sortMode: "count",
-      reviewSortMode: "namespace",
+      reviewSortMode: "hydrus",
       actions: {
         setSortMode: (sortMode: TagsSortMode) => set({ sortMode }),
         setReviewSortMode: (reviewSortMode: ReviewTagsSortMode) =>
