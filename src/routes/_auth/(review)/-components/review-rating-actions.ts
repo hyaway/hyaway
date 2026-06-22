@@ -34,47 +34,54 @@ export function executeSecondaryRatingActions(
 
     const currentRating = ratings?.[serviceKey] ?? null;
 
-    if (action.type === "setLike") {
-      if (currentRating === action.value) continue;
+    switch (action.type) {
+      case "setLike":
+        if (currentRating === action.value) continue;
 
-      restoreEntries.push({
-        serviceKey,
-        actionType: "setLike",
-        previousValue: currentRating,
-      });
-      setRating({
-        file_id: fileId,
-        rating_service_key: serviceKey,
-        rating: action.value,
-      });
-    } else if (action.type === "setNumerical") {
-      if (currentRating === action.value) continue;
+        restoreEntries.push({
+          serviceKey,
+          actionType: "setLike",
+          previousValue: currentRating,
+        });
+        setRating({
+          file_id: fileId,
+          rating_service_key: serviceKey,
+          rating: action.value,
+        });
+        continue;
+      case "setNumerical":
+        if (currentRating === action.value) continue;
 
-      restoreEntries.push({
-        serviceKey,
-        actionType: "setNumerical",
-        previousValue: currentRating,
-      });
-      setRating({
-        file_id: fileId,
-        rating_service_key: serviceKey,
-        rating: action.value,
-      });
-    } else {
-      const prevValue = (currentRating as number | null) ?? 0;
-      const nextValue = Math.max(0, prevValue + action.delta);
-      if (nextValue === prevValue) continue;
+        restoreEntries.push({
+          serviceKey,
+          actionType: "setNumerical",
+          previousValue: currentRating,
+        });
+        setRating({
+          file_id: fileId,
+          rating_service_key: serviceKey,
+          rating: action.value,
+        });
+        continue;
+      case "incDecDelta": {
+        const prevValue = (currentRating as number | null) ?? 0;
+        const nextValue = Math.max(0, prevValue + action.delta);
+        if (nextValue === prevValue) continue;
 
-      restoreEntries.push({
-        serviceKey,
-        actionType: "incDecDelta",
-        previousValue: prevValue,
-      });
-      setRating({
-        file_id: fileId,
-        rating_service_key: serviceKey,
-        rating: nextValue,
-      });
+        restoreEntries.push({
+          serviceKey,
+          actionType: "incDecDelta",
+          previousValue: prevValue,
+        });
+        setRating({
+          file_id: fileId,
+          rating_service_key: serviceKey,
+          rating: nextValue,
+        });
+        continue;
+      }
+      default:
+        action satisfies never;
     }
   }
 
