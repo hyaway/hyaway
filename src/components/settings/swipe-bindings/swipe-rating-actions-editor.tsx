@@ -10,6 +10,7 @@ import {
   IconSquareFilled,
   IconTrash,
 } from "@tabler/icons-react";
+import { SwipeActionWarning } from "./swipe-action-warning";
 import type {
   LooseRatingSecondarySwipeAction,
   LooseRatingSwipeAction,
@@ -57,7 +58,6 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
-import { SwipeActionWarning } from "@/components/settings/swipe-action-warning";
 import { cn } from "@/lib/utils";
 
 interface RatingServiceIconProps {

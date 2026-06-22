@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { IconMinus, IconPlus, IconTag, IconTrash } from "@tabler/icons-react";
+import { SwipeActionWarning } from "./swipe-action-warning";
 import type { LocalTagServiceInfo } from "@/integrations/hydrus-api/models";
 import type {
   LooseTagSwipeAction,
@@ -32,7 +33,6 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui-primitives/toggle-group";
-import { SwipeActionWarning } from "@/components/settings/swipe-action-warning";
 import { cn } from "@/lib/utils";
 
 type TagActionDraft = LooseTagSwipeAction & {

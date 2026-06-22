@@ -9,7 +9,7 @@ import {
   SliderField,
   SwitchField,
 } from "./setting-fields";
-import { SwipeBindingsConfig } from "./swipe-bindings-config";
+import { SwipeBindingsConfig } from "./swipe-bindings/swipe-bindings-config";
 import { Button } from "@/components/ui-primitives/button";
 import { Accordion } from "@/components/ui-primitives/accordion";
 import { Label } from "@/components/ui-primitives/label";

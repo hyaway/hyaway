@@ -17,6 +17,8 @@ import {
   IconRestore,
   IconTrash,
 } from "@tabler/icons-react";
+import { SwipeRatingActionsEditor } from "./swipe-rating-actions-editor";
+import { SwipeTagActionsEditor } from "./swipe-tag-actions-editor";
 import type {
   ReviewFileAction,
   ReviewSwipeBinding,
@@ -62,8 +64,6 @@ import {
 import { Input } from "@/components/ui-primitives/input";
 import { Button } from "@/components/ui-primitives/button";
 import { SettingsResetButton } from "@/components/settings/settings-ui";
-import { SwipeRatingActionsEditor } from "@/components/settings/swipe-rating-actions-editor";
-import { SwipeTagActionsEditor } from "@/components/settings/swipe-tag-actions-editor";
 import { cn } from "@/lib/utils";
 
 // #region Direction Config
