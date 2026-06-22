@@ -8,9 +8,8 @@ import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useReviewQueueCurrentFileId } from "@/stores/review-queue-store";
 import {
-  
   useReviewTagsSortMode,
-  useTagsSettingsActions
+  useTagsSettingsActions,
 } from "@/stores/tags-settings-store";
 
 const REVIEW_SORT_OPTIONS = [
@@ -45,8 +44,7 @@ export function ReviewTagsSidebar() {
   const sort = useMemo(
     () => ({
       mode: reviewSortMode,
-      onChange: (mode: string) =>
-        setReviewSortMode(mode as ReviewTagsSortMode),
+      onChange: (mode: string) => setReviewSortMode(mode as ReviewTagsSortMode),
       options: REVIEW_SORT_OPTIONS,
     }),
     [reviewSortMode, setReviewSortMode],

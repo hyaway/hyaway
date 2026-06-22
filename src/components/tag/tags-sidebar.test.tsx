@@ -9,7 +9,6 @@ import { TagsSidebar } from "./tags-sidebar";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 
-
 // theme-store calls window.matchMedia at initialisation; stub the module to avoid jsdom errors.
 vi.mock("@/stores/theme-store", () => ({
   useThemeStore: () => ({ activeTheme: "light" }),
@@ -27,7 +26,9 @@ vi.mock("@/integrations/hydrus-api/queries/services", () => ({
 const meta = {
   tags: {
     all: {
-      display_tags: { [TagStatus.CURRENT]: ["zebra", "apple", "character:mid"] },
+      display_tags: {
+        [TagStatus.CURRENT]: ["zebra", "apple", "character:mid"],
+      },
     },
   },
 } as unknown as FileMetadata;

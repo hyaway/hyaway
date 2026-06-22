@@ -22,6 +22,14 @@ vi.mock("@/stores/review-queue-store", () => ({
   useReviewQueueCurrentFileId: () => undefined,
 }));
 
+vi.mock("@/integrations/hydrus-api/queries/services", () => ({
+  useAllKnownTagsServiceQuery: () => ({ data: "all" }),
+}));
+
+vi.mock("@/integrations/hydrus-api/queries/manage-files", () => ({
+  useGetSingleFileMetadata: () => ({ data: undefined }),
+}));
+
 test("renders nothing when there is no current review card", () => {
   const qc = new QueryClient();
   const { container } = render(
