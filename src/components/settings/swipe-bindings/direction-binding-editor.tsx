@@ -19,10 +19,6 @@ import type {
   ReviewSwipeBinding,
   SwipeDirection,
 } from "@/stores/review-settings-store";
-import type {
-  LocalTagServiceInfo,
-  RatingServiceInfo,
-} from "@/integrations/hydrus-api/models";
 import { Label } from "@/components/ui-primitives/label";
 import {
   ToggleGroup,
@@ -57,13 +53,6 @@ const PRIMARY_ACTIONS: Array<{
 interface DirectionBindingEditorProps {
   direction: SwipeDirection;
   binding: ReviewSwipeBinding;
-  ratingServices: Array<[string, RatingServiceInfo]>;
-  localTagServices: Array<[string, LocalTagServiceInfo]>;
-  allRatingServiceKeys: Set<string>;
-  allLocalTagServiceKeys: Set<string>;
-  readOnlyServiceKeys: Set<string>;
-  canEditRatings: boolean;
-  canEditTags: boolean;
   isModified: boolean;
   onBindingChange: (binding: ReviewSwipeBinding) => void;
   onReset: () => void;
@@ -72,13 +61,6 @@ interface DirectionBindingEditorProps {
 export function DirectionBindingEditor({
   direction,
   binding,
-  ratingServices,
-  localTagServices,
-  allRatingServiceKeys,
-  allLocalTagServiceKeys,
-  readOnlyServiceKeys,
-  canEditRatings,
-  canEditTags,
   isModified,
   onBindingChange,
   onReset,
@@ -134,9 +116,6 @@ export function DirectionBindingEditor({
       {binding.fileAction !== "undo" && (
         <SwipeTagActionsEditor
           binding={binding}
-          localTagServices={localTagServices}
-          allLocalTagServiceKeys={allLocalTagServiceKeys}
-          canEditTags={canEditTags}
           onBindingChange={onBindingChange}
         />
       )}
@@ -144,10 +123,6 @@ export function DirectionBindingEditor({
       {binding.fileAction !== "undo" && (
         <SwipeRatingActionsEditor
           binding={binding}
-          ratingServices={ratingServices}
-          allRatingServiceKeys={allRatingServiceKeys}
-          readOnlyServiceKeys={readOnlyServiceKeys}
-          canEditRatings={canEditRatings}
           onBindingChange={onBindingChange}
         />
       )}

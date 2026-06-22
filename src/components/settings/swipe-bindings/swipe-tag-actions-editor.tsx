@@ -1,6 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useMemo } from "react";
 import { IconMinus, IconPlus, IconTag, IconTrash } from "@tabler/icons-react";
 import { SwipeActionWarning } from "./swipe-action-warning";
 import type { LocalTagServiceInfo } from "@/integrations/hydrus-api/models";
@@ -16,6 +17,9 @@ import {
   withUpsertedSecondarySwipeAction,
   withoutSecondarySwipeAction,
 } from "@/stores/review-settings-store";
+import { Permission } from "@/integrations/hydrus-api/models";
+import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
 import { useCleanTagsMutation } from "@/integrations/hydrus-api/queries/tags";
 import { TagAutocompleteInput } from "@/components/tag/tag-autocomplete-input";
 import { TagBadgeFromString } from "@/components/tag/tag-badge";
@@ -267,20 +271,22 @@ function TagActionEditor({
 
 interface SwipeTagActionsEditorProps {
   binding: ReviewSwipeBinding;
-  localTagServices: Array<[string, LocalTagServiceInfo]>;
-  allLocalTagServiceKeys: Set<string>;
-  canEditTags: boolean;
   onBindingChange: (binding: ReviewSwipeBinding) => void;
 }
 
 export function SwipeTagActionsEditor({
   binding,
-  localTagServices,
-  allLocalTagServiceKeys,
-  canEditTags,
   onBindingChange,
 }: SwipeTagActionsEditorProps) {
+  const { localTagServices } = useLocalTagServices();
   const cleanTagsMutation = useCleanTagsMutation();
+  const { hasPermission, isFetched: permissionsFetched } = usePermissions();
+  const canEditTags =
+    permissionsFetched && hasPermission(Permission.EDIT_FILE_TAGS);
+  const allLocalTagServiceKeys = useMemo(
+    () => new Set(localTagServices.map(([key]) => key)),
+    [localTagServices],
+  );
   const tagActions = getSecondarySwipeActionsByType(
     binding.secondaryActions,
     "tag",

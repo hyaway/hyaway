@@ -1,7 +1,6 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo } from "react";
 import { BindingProfileControls } from "./binding-profile-controls";
 import { DirectionBindingEditor } from "./direction-binding-editor";
 import type {
@@ -14,11 +13,6 @@ import {
   useReviewSettingsActions,
   useReviewSwipeBindings,
 } from "@/stores/review-settings-store";
-import { Permission } from "@/integrations/hydrus-api/models";
-import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
-import { useLocalTagServices } from "@/integrations/hydrus-api/queries/services";
-import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
-import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
 import { cn } from "@/lib/utils";
 
 // #region Main Component
@@ -45,21 +39,6 @@ export function SwipeBindingsConfig({
 }: SwipeBindingsConfigProps) {
   const bindings = useReviewSwipeBindings();
   const { setBinding } = useReviewSettingsActions();
-  const { ratingServices } = useRatingServices();
-  const { localTagServices } = useLocalTagServices();
-  const { hasPermission, isFetched: permissionsFetched } = usePermissions();
-  const canEditRatings = hasPermission(Permission.EDIT_FILE_RATINGS);
-  const canEditTags = hasPermission(Permission.EDIT_FILE_TAGS);
-
-  const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
-  const allRatingServiceKeys = useMemo(
-    () => new Set(ratingServices.map(([key]) => key)),
-    [ratingServices],
-  );
-  const allLocalTagServiceKeys = useMemo(
-    () => new Set(localTagServices.map(([key]) => key)),
-    [localTagServices],
-  );
 
   const handleBindingChange = (
     direction: SwipeDirection,
@@ -113,13 +92,6 @@ export function SwipeBindingsConfig({
             key={direction}
             direction={direction}
             binding={bindings[direction]}
-            ratingServices={ratingServices}
-            localTagServices={localTagServices}
-            allRatingServiceKeys={allRatingServiceKeys}
-            allLocalTagServiceKeys={allLocalTagServiceKeys}
-            readOnlyServiceKeys={readOnlyServiceKeys}
-            canEditRatings={canEditRatings && permissionsFetched}
-            canEditTags={canEditTags && permissionsFetched}
             isModified={isDirectionModified(direction)}
             onBindingChange={(binding) =>
               handleBindingChange(direction, binding)

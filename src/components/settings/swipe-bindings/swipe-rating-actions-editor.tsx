@@ -29,10 +29,14 @@ import {
   withoutSecondarySwipeAction,
 } from "@/stores/review-settings-store";
 import {
+  Permission,
   isIncDecRatingService,
   isLikeRatingService,
   isNumericalRatingService,
 } from "@/integrations/hydrus-api/models";
+import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
+import { useReadOnlyRatingServiceKeys } from "@/stores/ratings-settings-store";
 import {
   LikeDislikeControl,
   NumericalRatingControl,
@@ -564,21 +568,22 @@ function RatingActionEditor({
 
 interface SwipeRatingActionsEditorProps {
   binding: ReviewSwipeBinding;
-  ratingServices: Array<[string, RatingServiceInfo]>;
-  allRatingServiceKeys: Set<string>;
-  readOnlyServiceKeys: Set<string>;
-  canEditRatings: boolean;
   onBindingChange: (binding: ReviewSwipeBinding) => void;
 }
 
 export function SwipeRatingActionsEditor({
   binding,
-  ratingServices,
-  allRatingServiceKeys,
-  readOnlyServiceKeys,
-  canEditRatings,
   onBindingChange,
 }: SwipeRatingActionsEditorProps) {
+  const { ratingServices } = useRatingServices();
+  const readOnlyServiceKeys = useReadOnlyRatingServiceKeys();
+  const { hasPermission, isFetched: permissionsFetched } = usePermissions();
+  const canEditRatings =
+    permissionsFetched && hasPermission(Permission.EDIT_FILE_RATINGS);
+  const allRatingServiceKeys = useMemo(
+    () => new Set(ratingServices.map(([key]) => key)),
+    [ratingServices],
+  );
   const ratingActions = getSecondarySwipeActionsByType(
     binding.secondaryActions,
     "rating",
