@@ -154,7 +154,7 @@ export function ReviewControlsSettings({
             <div className="flex items-center justify-between gap-4 rounded-lg border p-3">
               <div className="flex flex-col gap-1">
                 <span className="text-muted-foreground text-sm">
-                  Clear review queue to edit swipe actions
+                  Clear review queue to edit swipe actions and action profiles
                 </span>
                 <span className="text-muted-foreground text-xs">
                   {count} {count === 1 ? "file" : "files"} in review
