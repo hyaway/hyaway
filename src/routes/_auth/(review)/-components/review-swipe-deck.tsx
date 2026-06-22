@@ -7,10 +7,10 @@ import { AnimatePresence } from "motion/react";
 import { ReviewSwipeCard } from "./review-swipe-card";
 import { ReviewCardContent } from "./review-card-content";
 import { useReviewKeyboardShortcuts } from "./use-review-keyboard-shortcuts";
+import { executeSecondaryRatingActions } from "./review-rating-actions";
 import type { SwipeDirection } from "./review-swipe-card";
 import type {
   PreviousFileState,
-  RatingRestoreEntry,
   RestoreData,
   TagRestoreEntry,
 } from "@/stores/review-queue-store";
@@ -22,8 +22,8 @@ import type {
   ValidSwipeBindings,
 } from "@/stores/review-settings-store";
 import type {
-  FileTagUpdate,
   FileMetadata,
+  FileTagUpdate,
   UpdateFileTagsOptions,
 } from "@/integrations/hydrus-api/models";
 import {
@@ -123,12 +123,6 @@ function wasMutationUnchanged(
 
 /** Mutation function signature for file management operations */
 type FileMutate = (args: { file_ids: Array<number> }) => void;
-/** Mutation function signature for rating operations */
-type RatingMutate = (args: {
-  file_id: number;
-  rating_service_key: string;
-  rating: boolean | number | null;
-}) => void;
 /** Mutation function signature for tag operations */
 type TagMutate = (args: UpdateFileTagsOptions) => void;
 
@@ -201,69 +195,6 @@ function shouldHideFromViewAfterReviewAction(
       fileAction satisfies never;
       return false;
   }
-}
-
-/**
- * Execute secondary rating actions and build restore entries for undo.
- * Returns the restore entries so the caller can record them in history.
- */
-function executeSecondaryRatingActions(
-  secondaryActions: Array<ValidSecondarySwipeAction>,
-  fileId: number,
-  ratings: Record<string, unknown> | undefined,
-  validRatingServiceKeys: Set<string>,
-  setRating: RatingMutate,
-): Array<RatingRestoreEntry> {
-  const restoreEntries: Array<RatingRestoreEntry> = [];
-
-  for (const action of secondaryActions) {
-    if (action.actionType !== "rating") continue;
-
-    const { serviceKey } = action;
-
-    // Skip orphaned rating actions (service no longer exists)
-    if (!validRatingServiceKeys.has(serviceKey)) continue;
-
-    const currentRating = ratings?.[serviceKey] ?? null;
-
-    if (action.type === "setLike") {
-      restoreEntries.push({
-        serviceKey,
-        actionType: "setLike",
-        previousValue: currentRating as boolean | null,
-      });
-      setRating({
-        file_id: fileId,
-        rating_service_key: serviceKey,
-        rating: action.value,
-      });
-    } else if (action.type === "setNumerical") {
-      restoreEntries.push({
-        serviceKey,
-        actionType: "setNumerical",
-        previousValue: currentRating as number | null,
-      });
-      setRating({
-        file_id: fileId,
-        rating_service_key: serviceKey,
-        rating: action.value,
-      });
-    } else {
-      const prevValue = (currentRating as number | null) ?? 0;
-      restoreEntries.push({
-        serviceKey,
-        actionType: "incDecDelta",
-        previousValue: prevValue,
-      });
-      setRating({
-        file_id: fileId,
-        rating_service_key: serviceKey,
-        rating: Math.max(0, prevValue + action.delta),
-      });
-    }
-  }
-
-  return restoreEntries;
 }
 
 function getContentUpdateAction(actionType: "add" | "remove") {
