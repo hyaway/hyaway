@@ -17,6 +17,10 @@ import { getTagActionStateChange } from "@/integrations/hydrus-api/queries/tags"
 /** Mutation function signature for tag operations */
 type TagMutate = (args: UpdateFileTagsOptions) => void;
 
+function assertNever(value: never): never {
+  throw new Error(`Unhandled tag action type: ${String(value)}`);
+}
+
 function getContentUpdateAction(actionType: TagSwipeActionType) {
   switch (actionType) {
     case "add":
@@ -25,7 +29,7 @@ function getContentUpdateAction(actionType: TagSwipeActionType) {
       return ContentUpdateAction.DELETE;
     default:
       actionType satisfies never;
-      return ContentUpdateAction.ADD;
+      return assertNever(actionType);
   }
 }
 
@@ -37,7 +41,7 @@ export function getReverseContentUpdateAction(actionType: TagSwipeActionType) {
       return ContentUpdateAction.ADD;
     default:
       actionType satisfies never;
-      return ContentUpdateAction.ADD;
+      return assertNever(actionType);
   }
 }
 
@@ -54,14 +58,7 @@ export function executeSecondaryTagActions(
   if (!canEditTags || !metadata) return restoreEntries;
 
   for (const action of secondaryActions) {
-    switch (action.actionType) {
-      case "rating":
-        continue;
-      case "tag":
-        break;
-      default:
-        action satisfies never;
-    }
+    if (action.actionType !== "tag") continue;
 
     if (!validLocalTagServiceKeys.has(action.serviceKey)) continue;
 
