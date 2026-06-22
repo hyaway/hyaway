@@ -1017,6 +1017,17 @@ export function getBindingForDirection<TBinding extends ReviewSwipeBinding>(
   return bindings[direction];
 }
 
+export function isReviewSwipeBindingModified(
+  direction: SwipeDirection,
+  binding: ReviewSwipeBinding,
+): boolean {
+  const defaultBinding = DEFAULT_SWIPE_BINDINGS[direction];
+  return (
+    binding.fileAction !== defaultBinding.fileAction ||
+    (binding.secondaryActions?.length ?? 0) > 0
+  );
+}
+
 /**
  * Check if any swipe direction is bound to the undo action.
  */

@@ -70,7 +70,6 @@ interface TagActionEditorProps {
   draft: TagActionDraft;
   localTagServices: Array<[string, LocalTagServiceInfo]>;
   disabled?: boolean;
-  cleanTagsMutation: ReturnType<typeof useCleanTagsMutation>;
   validateDraft: (draft: TagActionDraft) => string | undefined;
   onDraftChange: (draft: TagActionDraft) => void;
   onCommit: (
@@ -83,12 +82,12 @@ function TagActionEditor({
   draft,
   localTagServices,
   disabled,
-  cleanTagsMutation,
   validateDraft,
   onDraftChange,
   onCommit,
   onRemove,
 }: TagActionEditorProps) {
+  const cleanTagsMutation = useCleanTagsMutation();
   const selectedTagService = localTagServices.find(
     ([key]) => key === draft.serviceKey,
   )?.[1];
@@ -279,7 +278,6 @@ export function SwipeTagActionsEditor({
   onBindingChange,
 }: SwipeTagActionsEditorProps) {
   const { localTagServices } = useLocalTagServices();
-  const cleanTagsMutation = useCleanTagsMutation();
   const { hasPermission, isFetched: permissionsFetched } = usePermissions();
   const canEditTags =
     permissionsFetched && hasPermission(Permission.EDIT_FILE_TAGS);
@@ -437,7 +435,6 @@ export function SwipeTagActionsEditor({
                 }}
                 localTagServices={localTagServices}
                 disabled={!canEditTags}
-                cleanTagsMutation={cleanTagsMutation}
                 validateDraft={(draft) =>
                   getTagDraftDuplicateMessage(draft, actionId)
                 }

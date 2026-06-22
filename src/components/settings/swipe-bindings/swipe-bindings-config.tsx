@@ -3,16 +3,7 @@
 
 import { BindingProfileControls } from "./binding-profile-controls";
 import { DirectionBindingEditor } from "./direction-binding-editor";
-import type {
-  ReviewSwipeBinding,
-  SwipeDirection,
-} from "@/stores/review-settings-store";
-import {
-  DEFAULT_SWIPE_BINDINGS,
-  SWIPE_DIRECTIONS,
-  useReviewSettingsActions,
-  useReviewSwipeBindings,
-} from "@/stores/review-settings-store";
+import { SWIPE_DIRECTIONS } from "@/stores/review-settings-store";
 import { cn } from "@/lib/utils";
 
 // #region Main Component
@@ -37,29 +28,6 @@ export function SwipeBindingsConfig({
   disabled = false,
   columns = 2,
 }: SwipeBindingsConfigProps) {
-  const bindings = useReviewSwipeBindings();
-  const { setBinding } = useReviewSettingsActions();
-
-  const handleBindingChange = (
-    direction: SwipeDirection,
-    binding: ReviewSwipeBinding,
-  ) => {
-    setBinding(direction, binding);
-  };
-
-  const handleResetDirection = (direction: SwipeDirection) => {
-    setBinding(direction, DEFAULT_SWIPE_BINDINGS[direction]);
-  };
-
-  const isDirectionModified = (direction: SwipeDirection) => {
-    const current = bindings[direction];
-    const defaultBinding = DEFAULT_SWIPE_BINDINGS[direction];
-    return (
-      current.fileAction !== defaultBinding.fileAction ||
-      (current.secondaryActions?.length ?? 0) > 0
-    );
-  };
-
   return (
     <div
       className={cn(
@@ -88,16 +56,7 @@ export function SwipeBindingsConfig({
         )}
       >
         {SWIPE_DIRECTIONS.map((direction) => (
-          <DirectionBindingEditor
-            key={direction}
-            direction={direction}
-            binding={bindings[direction]}
-            isModified={isDirectionModified(direction)}
-            onBindingChange={(binding) =>
-              handleBindingChange(direction, binding)
-            }
-            onReset={() => handleResetDirection(direction)}
-          />
+          <DirectionBindingEditor key={direction} direction={direction} />
         ))}
       </div>
     </div>

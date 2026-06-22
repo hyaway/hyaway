@@ -10,10 +10,9 @@ import {
   IconRestore,
   IconTrash,
 } from "@tabler/icons-react";
-import type { SwipeDirection } from "@/stores/review-settings-store";
 import {
-  DEFAULT_SWIPE_BINDINGS,
   SWIPE_DIRECTIONS,
+  isReviewSwipeBindingModified,
   useActiveReviewBindingProfile,
   useReviewBindingProfiles,
   useReviewSettingsActions,
@@ -74,16 +73,9 @@ export function BindingProfileControls({
     setIsRenaming(false);
   }, [activeProfile.id, renameBindingProfile]);
 
-  const isDirectionModified = (direction: SwipeDirection) => {
-    const current = bindings[direction];
-    const defaultBinding = DEFAULT_SWIPE_BINDINGS[direction];
-    return (
-      current.fileAction !== defaultBinding.fileAction ||
-      (current.secondaryActions?.length ?? 0) > 0
-    );
-  };
-
-  const hasModifications = SWIPE_DIRECTIONS.some(isDirectionModified);
+  const hasModifications = SWIPE_DIRECTIONS.some((direction) =>
+    isReviewSwipeBindingModified(direction, bindings[direction]),
+  );
 
   return (
     <div className="flex min-w-0 flex-wrap items-end gap-2 rounded-lg border p-3">

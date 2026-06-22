@@ -16,8 +16,13 @@ import { SwipeTagActionsEditor } from "./swipe-tag-actions-editor";
 import type { ComponentType } from "react";
 import type {
   ReviewFileAction,
-  ReviewSwipeBinding,
   SwipeDirection,
+} from "@/stores/review-settings-store";
+import {
+  DEFAULT_SWIPE_BINDINGS,
+  isReviewSwipeBindingModified,
+  useReviewSettingsActions,
+  useReviewSwipeBinding,
 } from "@/stores/review-settings-store";
 import { Label } from "@/components/ui-primitives/label";
 import {
@@ -52,28 +57,32 @@ const PRIMARY_ACTIONS: Array<{
 
 interface DirectionBindingEditorProps {
   direction: SwipeDirection;
-  binding: ReviewSwipeBinding;
-  isModified: boolean;
-  onBindingChange: (binding: ReviewSwipeBinding) => void;
-  onReset: () => void;
 }
 
 export function DirectionBindingEditor({
   direction,
-  binding,
-  isModified,
-  onBindingChange,
-  onReset,
 }: DirectionBindingEditorProps) {
+  const binding = useReviewSwipeBinding(direction);
+  const { setBinding } = useReviewSettingsActions();
   const config = DIRECTION_CONFIG[direction];
   const DirectionIcon = config.icon;
+  const isModified = isReviewSwipeBindingModified(direction, binding);
+
+  const handleBindingChange = (nextBinding: typeof binding) => {
+    setBinding(direction, nextBinding);
+  };
+
+  const handleReset = () => {
+    setBinding(direction, DEFAULT_SWIPE_BINDINGS[direction]);
+  };
+
   const handlePrimaryActionChange = (value: Array<string>) => {
     const primaryAction = value[0] as ReviewFileAction | undefined;
     if (!primaryAction) {
       return;
     }
 
-    onBindingChange({
+    handleBindingChange({
       ...binding,
       fileAction: primaryAction,
       ...(primaryAction === "undo" ? { secondaryActions: undefined } : {}),
@@ -89,7 +98,7 @@ export function DirectionBindingEditor({
         </div>
         {isModified && (
           <SettingsResetButton
-            onReset={onReset}
+            onReset={handleReset}
             label={`Reset ${config.label}`}
           />
         )}
@@ -116,14 +125,14 @@ export function DirectionBindingEditor({
       {binding.fileAction !== "undo" && (
         <SwipeTagActionsEditor
           binding={binding}
-          onBindingChange={onBindingChange}
+          onBindingChange={handleBindingChange}
         />
       )}
 
       {binding.fileAction !== "undo" && (
         <SwipeRatingActionsEditor
           binding={binding}
-          onBindingChange={onBindingChange}
+          onBindingChange={handleBindingChange}
         />
       )}
     </div>

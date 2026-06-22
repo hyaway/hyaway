@@ -17,7 +17,6 @@ import type {
   ReviewSwipeBinding,
 } from "@/stores/review-settings-store";
 import type {
-  IncDecRatingServiceInfo,
   LikeRatingServiceInfo,
   NumericalRatingServiceInfo,
   RatingServiceInfo,
@@ -172,7 +171,6 @@ function RatingValuePicker({
     return (
       <IncDecRatingValuePicker
         serviceKey={serviceKey}
-        service={service}
         ratingAction={ratingAction}
         onRatingActionChange={onRatingActionChange}
       />
@@ -332,7 +330,6 @@ function IncDecRatingValuePicker({
   onRatingActionChange,
 }: {
   serviceKey: string;
-  service: IncDecRatingServiceInfo;
   ratingAction: LooseRatingSwipeAction | undefined;
   onRatingActionChange: (action: LooseRatingSwipeAction | undefined) => void;
 }) {
