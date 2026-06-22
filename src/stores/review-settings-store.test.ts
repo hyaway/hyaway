@@ -3,7 +3,6 @@
 
 import { describe, expect, it } from "vitest";
 import {
-  DEFAULT_BINDING_PROFILE_ID,
   DEFAULT_SWIPE_BINDINGS,
   MAX_SWIPE_THRESHOLD,
   MIN_SWIPE_THRESHOLD,
@@ -158,10 +157,12 @@ describe("review settings action stripping helpers", () => {
         up: MAX_SWIPE_THRESHOLD,
         down: MAX_SWIPE_THRESHOLD,
       });
-      expect(migrated.activeBindingProfileId).toBe(DEFAULT_BINDING_PROFILE_ID);
       expect(
-        migrated.bindingProfiles[DEFAULT_BINDING_PROFILE_ID].bindings.down,
+        migrated.bindingProfiles[migrated.activeBindingProfileId].bindings.down,
       ).toEqual({ fileAction: "undo" });
+      expect(
+        migrated.bindingProfiles[migrated.activeBindingProfileId].name,
+      ).toBe("Default");
       expect(migrated).not.toHaveProperty("bindings");
     });
 
@@ -214,10 +215,12 @@ describe("review settings action stripping helpers", () => {
     it("recovers from non-object persisted state", () => {
       const migrated = migrateReviewSettingsState(null, 5);
 
-      expect(migrated.activeBindingProfileId).toBe(DEFAULT_BINDING_PROFILE_ID);
       expect(Object.keys(migrated.bindingProfiles)).toEqual([
-        DEFAULT_BINDING_PROFILE_ID,
+        migrated.activeBindingProfileId,
       ]);
+      expect(
+        migrated.bindingProfiles[migrated.activeBindingProfileId].name,
+      ).toBe("Default");
     });
   });
 

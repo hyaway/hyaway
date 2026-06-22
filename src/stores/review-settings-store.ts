@@ -218,7 +218,6 @@ export const DEFAULT_SWIPE_BINDINGS: SwipeBindings = {
   down: { fileAction: "undo" },
 };
 
-export const DEFAULT_BINDING_PROFILE_ID = "default";
 export const DEFAULT_BINDING_PROFILE_NAME = "Default";
 
 export const DEFAULT_REVIEW_RENDER_QUALITY = 90;
@@ -257,12 +256,24 @@ export function cloneSwipeBindings(bindings: SwipeBindings): SwipeBindings {
 function createDefaultBindingProfiles(
   bindings: SwipeBindings = DEFAULT_SWIPE_BINDINGS,
 ): ReviewBindingProfiles {
+  const id = getAvailableBindingProfileId({});
+
   return {
-    [DEFAULT_BINDING_PROFILE_ID]: {
-      id: DEFAULT_BINDING_PROFILE_ID,
+    [id]: {
+      id,
       name: DEFAULT_BINDING_PROFILE_NAME,
       bindings: normalizeSwipeBindings(cloneSwipeBindings(bindings)),
     },
+  };
+}
+
+function createDefaultBindingProfileState(
+  bindings: SwipeBindings = DEFAULT_SWIPE_BINDINGS,
+) {
+  const bindingProfiles = createDefaultBindingProfiles(bindings);
+  return {
+    activeBindingProfileId: getSortedBindingProfiles(bindingProfiles)[0].id,
+    bindingProfiles,
   };
 }
 
@@ -333,7 +344,7 @@ function getActiveBindingProfile(
   return (
     activeProfile ??
     getSortedBindingProfiles(state.bindingProfiles).at(0) ??
-    createDefaultBindingProfiles()[DEFAULT_BINDING_PROFILE_ID]
+    getSortedBindingProfiles(createDefaultBindingProfiles())[0]
   );
 }
 
@@ -410,217 +421,220 @@ type ReviewSettingsState = {
 
 const useReviewSettingsStore = create<ReviewSettingsState>()(
   persist(
-    (set, get, store) => ({
-      shortcutsEnabled: true,
-      gesturesEnabled: true,
-      showGestureThresholds: false,
-      thresholds: DEFAULT_SWIPE_THRESHOLDS,
-      trackWatchHistory: true,
-      imageLoadMode: "optimized",
-      renderQuality: DEFAULT_REVIEW_RENDER_QUALITY,
-      optimizeSizeThresholdMB: DEFAULT_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB,
-      immersiveMode: false,
-      activeBindingProfileId: DEFAULT_BINDING_PROFILE_ID,
-      bindingProfiles: createDefaultBindingProfiles(),
+    (set, get, store) => {
+      const defaultBindingProfileState = createDefaultBindingProfileState();
 
-      actions: {
-        setShortcutsEnabled: (shortcutsEnabled: boolean) => {
-          set({ shortcutsEnabled });
-        },
+      return {
+        shortcutsEnabled: true,
+        gesturesEnabled: true,
+        showGestureThresholds: false,
+        thresholds: DEFAULT_SWIPE_THRESHOLDS,
+        trackWatchHistory: true,
+        imageLoadMode: "optimized",
+        renderQuality: DEFAULT_REVIEW_RENDER_QUALITY,
+        optimizeSizeThresholdMB: DEFAULT_REVIEW_OPTIMIZE_SIZE_THRESHOLD_MB,
+        immersiveMode: false,
+        ...defaultBindingProfileState,
 
-        setGesturesEnabled: (gesturesEnabled: boolean) => {
-          set({ gesturesEnabled });
-        },
+        actions: {
+          setShortcutsEnabled: (shortcutsEnabled: boolean) => {
+            set({ shortcutsEnabled });
+          },
 
-        setShowGestureThresholds: (showGestureThresholds: boolean) => {
-          set({ showGestureThresholds });
-        },
+          setGesturesEnabled: (gesturesEnabled: boolean) => {
+            set({ gesturesEnabled });
+          },
 
-        setThreshold: (direction: SwipeDirection, threshold: number) => {
-          const clamped = Math.min(
-            MAX_SWIPE_THRESHOLD,
-            Math.max(MIN_SWIPE_THRESHOLD, threshold),
-          );
-          set((state) => ({
-            thresholds: {
-              ...state.thresholds,
-              [direction]: clamped,
-            },
-          }));
-        },
+          setShowGestureThresholds: (showGestureThresholds: boolean) => {
+            set({ showGestureThresholds });
+          },
 
-        setTrackWatchHistory: (trackWatchHistory: boolean) => {
-          set({ trackWatchHistory });
-        },
-
-        setImageLoadMode: (imageLoadMode: ReviewImageLoadMode) => {
-          set({ imageLoadMode });
-        },
-
-        setRenderQuality: (renderQuality: number) => {
-          set({
-            renderQuality: Math.min(
-              MAX_REVIEW_RENDER_QUALITY,
-              Math.max(MIN_REVIEW_RENDER_QUALITY, renderQuality),
-            ),
-          });
-        },
-
-        setOptimizeSizeThresholdMB: (optimizeSizeThresholdMB: number) => {
-          set({
-            optimizeSizeThresholdMB: normalizeOptimizeSizeThresholdMB(
-              optimizeSizeThresholdMB,
-            ),
-          });
-        },
-
-        setImmersiveMode: (immersiveMode: boolean) => {
-          set({ immersiveMode });
-        },
-
-        setActiveBindingProfile: (activeBindingProfileId) => {
-          set((state) =>
-            getBindingProfile(state.bindingProfiles, activeBindingProfileId)
-              ? { activeBindingProfileId }
-              : {},
-          );
-        },
-
-        createBindingProfile: (name = DEFAULT_BINDING_PROFILE_NAME) => {
-          const current = get();
-          const profile = createBindingProfile(
-            current.bindingProfiles,
-            name,
-            DEFAULT_SWIPE_BINDINGS,
-          );
-          set((state) => ({
-            activeBindingProfileId: profile.id,
-            bindingProfiles: {
-              ...state.bindingProfiles,
-              [profile.id]: profile,
-            },
-          }));
-          return profile.id;
-        },
-
-        cloneActiveBindingProfile: () => {
-          const current = get();
-          const source = getActiveBindingProfile(current);
-          const profile = createBindingProfile(
-            current.bindingProfiles,
-            source.name,
-            source.bindings,
-          );
-          set((state) => ({
-            activeBindingProfileId: profile.id,
-            bindingProfiles: {
-              ...state.bindingProfiles,
-              [profile.id]: profile,
-            },
-          }));
-          return profile.id;
-        },
-
-        deleteBindingProfile: (profileId) => {
-          set((state) => {
-            const { [profileId]: _removed, ...remainingProfiles } =
-              state.bindingProfiles;
-
-            if (Object.keys(remainingProfiles).length === 0) {
-              return {
-                activeBindingProfileId: DEFAULT_BINDING_PROFILE_ID,
-                bindingProfiles: createDefaultBindingProfiles(),
-              };
-            }
-
-            const activeBindingProfileId =
-              state.activeBindingProfileId === profileId
-                ? getSortedBindingProfiles(remainingProfiles)[0].id
-                : state.activeBindingProfileId;
-
-            return {
-              activeBindingProfileId,
-              bindingProfiles: remainingProfiles,
-            };
-          });
-        },
-
-        renameBindingProfile: (profileId, name) => {
-          const current = get();
-          const profile = getBindingProfile(current.bindingProfiles, profileId);
-          if (!profile) return name.trim();
-
-          const nextName = getUniqueBindingProfileName(
-            current.bindingProfiles,
-            name,
-            profileId,
-          );
-          if (nextName === profile.name) return nextName;
-
-          set((state) => ({
-            bindingProfiles: {
-              ...state.bindingProfiles,
-              [profileId]: {
-                ...profile,
-                name: nextName,
+          setThreshold: (direction: SwipeDirection, threshold: number) => {
+            const clamped = Math.min(
+              MAX_SWIPE_THRESHOLD,
+              Math.max(MIN_SWIPE_THRESHOLD, threshold),
+            );
+            set((state) => ({
+              thresholds: {
+                ...state.thresholds,
+                [direction]: clamped,
               },
-            },
-          }));
-          return nextName;
-        },
+            }));
+          },
 
-        setBinding: (
-          direction: SwipeDirection,
-          binding: ReviewSwipeBinding,
-        ) => {
-          set((state) => ({
-            bindingProfiles: {
-              ...state.bindingProfiles,
-              [state.activeBindingProfileId]: {
-                ...getActiveBindingProfile(state),
-                bindings: {
-                  ...getActiveBindingProfile(state).bindings,
-                  [direction]: normalizeReviewSwipeBinding(binding),
+          setTrackWatchHistory: (trackWatchHistory: boolean) => {
+            set({ trackWatchHistory });
+          },
+
+          setImageLoadMode: (imageLoadMode: ReviewImageLoadMode) => {
+            set({ imageLoadMode });
+          },
+
+          setRenderQuality: (renderQuality: number) => {
+            set({
+              renderQuality: Math.min(
+                MAX_REVIEW_RENDER_QUALITY,
+                Math.max(MIN_REVIEW_RENDER_QUALITY, renderQuality),
+              ),
+            });
+          },
+
+          setOptimizeSizeThresholdMB: (optimizeSizeThresholdMB: number) => {
+            set({
+              optimizeSizeThresholdMB: normalizeOptimizeSizeThresholdMB(
+                optimizeSizeThresholdMB,
+              ),
+            });
+          },
+
+          setImmersiveMode: (immersiveMode: boolean) => {
+            set({ immersiveMode });
+          },
+
+          setActiveBindingProfile: (activeBindingProfileId) => {
+            set((state) =>
+              getBindingProfile(state.bindingProfiles, activeBindingProfileId)
+                ? { activeBindingProfileId }
+                : {},
+            );
+          },
+
+          createBindingProfile: (name = DEFAULT_BINDING_PROFILE_NAME) => {
+            const current = get();
+            const profile = createBindingProfile(
+              current.bindingProfiles,
+              name,
+              DEFAULT_SWIPE_BINDINGS,
+            );
+            set((state) => ({
+              activeBindingProfileId: profile.id,
+              bindingProfiles: {
+                ...state.bindingProfiles,
+                [profile.id]: profile,
+              },
+            }));
+            return profile.id;
+          },
+
+          cloneActiveBindingProfile: () => {
+            const current = get();
+            const source = getActiveBindingProfile(current);
+            const profile = createBindingProfile(
+              current.bindingProfiles,
+              source.name,
+              source.bindings,
+            );
+            set((state) => ({
+              activeBindingProfileId: profile.id,
+              bindingProfiles: {
+                ...state.bindingProfiles,
+                [profile.id]: profile,
+              },
+            }));
+            return profile.id;
+          },
+
+          deleteBindingProfile: (profileId) => {
+            set((state) => {
+              const { [profileId]: _removed, ...remainingProfiles } =
+                state.bindingProfiles;
+
+              if (Object.keys(remainingProfiles).length === 0) {
+                return createDefaultBindingProfileState();
+              }
+
+              const activeBindingProfileId =
+                state.activeBindingProfileId === profileId
+                  ? getSortedBindingProfiles(remainingProfiles)[0].id
+                  : state.activeBindingProfileId;
+
+              return {
+                activeBindingProfileId,
+                bindingProfiles: remainingProfiles,
+              };
+            });
+          },
+
+          renameBindingProfile: (profileId, name) => {
+            const current = get();
+            const profile = getBindingProfile(
+              current.bindingProfiles,
+              profileId,
+            );
+            if (!profile) return name.trim();
+
+            const nextName = getUniqueBindingProfileName(
+              current.bindingProfiles,
+              name,
+              profileId,
+            );
+            if (nextName === profile.name) return nextName;
+
+            set((state) => ({
+              bindingProfiles: {
+                ...state.bindingProfiles,
+                [profileId]: {
+                  ...profile,
+                  name: nextName,
                 },
               },
-            },
-          }));
-        },
+            }));
+            return nextName;
+          },
 
-        resetControlsSettings: () => {
-          const initial = store.getInitialState();
-          set({
-            shortcutsEnabled: initial.shortcutsEnabled,
-            gesturesEnabled: initial.gesturesEnabled,
-            showGestureThresholds: initial.showGestureThresholds,
-            thresholds: initial.thresholds,
-          });
-        },
-
-        resetDataSettings: () => {
-          const initial = store.getInitialState();
-          set({
-            trackWatchHistory: initial.trackWatchHistory,
-            imageLoadMode: initial.imageLoadMode,
-            renderQuality: initial.renderQuality,
-            optimizeSizeThresholdMB: initial.optimizeSizeThresholdMB,
-            immersiveMode: initial.immersiveMode,
-          });
-        },
-
-        resetBindings: () => {
-          set((state) => ({
-            bindingProfiles: {
-              ...state.bindingProfiles,
-              [state.activeBindingProfileId]: {
-                ...getActiveBindingProfile(state),
-                bindings: cloneSwipeBindings(DEFAULT_SWIPE_BINDINGS),
+          setBinding: (
+            direction: SwipeDirection,
+            binding: ReviewSwipeBinding,
+          ) => {
+            set((state) => ({
+              bindingProfiles: {
+                ...state.bindingProfiles,
+                [state.activeBindingProfileId]: {
+                  ...getActiveBindingProfile(state),
+                  bindings: {
+                    ...getActiveBindingProfile(state).bindings,
+                    [direction]: normalizeReviewSwipeBinding(binding),
+                  },
+                },
               },
-            },
-          }));
+            }));
+          },
+
+          resetControlsSettings: () => {
+            const initial = store.getInitialState();
+            set({
+              shortcutsEnabled: initial.shortcutsEnabled,
+              gesturesEnabled: initial.gesturesEnabled,
+              showGestureThresholds: initial.showGestureThresholds,
+              thresholds: initial.thresholds,
+            });
+          },
+
+          resetDataSettings: () => {
+            const initial = store.getInitialState();
+            set({
+              trackWatchHistory: initial.trackWatchHistory,
+              imageLoadMode: initial.imageLoadMode,
+              renderQuality: initial.renderQuality,
+              optimizeSizeThresholdMB: initial.optimizeSizeThresholdMB,
+              immersiveMode: initial.immersiveMode,
+            });
+          },
+
+          resetBindings: () => {
+            set((state) => ({
+              bindingProfiles: {
+                ...state.bindingProfiles,
+                [state.activeBindingProfileId]: {
+                  ...getActiveBindingProfile(state),
+                  bindings: cloneSwipeBindings(DEFAULT_SWIPE_BINDINGS),
+                },
+              },
+            }));
+          },
         },
-      },
-    }),
+      };
+    },
     {
       name: "hyaway-review-queue", // Keeping this key for backward compatibility
       version: 5,
@@ -901,8 +915,7 @@ function migrateReviewSettingsStateV4ToV5(
 
   return {
     ...rest,
-    activeBindingProfileId: DEFAULT_BINDING_PROFILE_ID,
-    bindingProfiles: createDefaultBindingProfiles(bindings),
+    ...createDefaultBindingProfileState(bindings),
   };
 }
 
