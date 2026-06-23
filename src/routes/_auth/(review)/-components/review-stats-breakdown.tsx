@@ -287,7 +287,7 @@ function GridStatItem({
   const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];
   const content = (
-    <div className="flex w-20 min-w-0 flex-col items-center gap-1">
+    <div className="flex max-w-40 min-w-20 flex-col items-center gap-1">
       <div
         className={cn(
           "flex size-10 items-center justify-center",
