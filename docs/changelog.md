@@ -14,6 +14,7 @@ All notable changes to hyAway are documented here.
 
 - **Tag swipe actions** — Review swipes can now add or remove tags while moving through files
 - **Swipe action profiles** — Save and switch between review swipe setups for different tagging and rating workflows
+- **Review stats breakdown** — Click action counts in review to see all applied actions. Tooltips over actions with secondary actions that describe everything that will be performed
 - **File tag sidebars** — File details and Review now show the current file's Hydrus tags in the right sidebar
 - **Tag sidebar sorting** — Gallery tag sidebars can sort by Count or Namespace, while new file tag sidebars can use Hydrus order or Namespace sorting
 
