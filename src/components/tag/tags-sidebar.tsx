@@ -29,15 +29,21 @@ export const TagsSidebar = memo(function TagsSidebarMemo({
   title,
   showIndex,
   headerControls,
+  searchValue,
+  onSearchChange,
 }: {
   tags: Array<TagItem>;
   itemsCount: number;
   title: string;
   showIndex: boolean;
   headerControls?: React.ReactNode;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }) {
   const isMobile = useIsMobile();
-  const [search, setSearch] = useState("");
+  const [uncontrolledSearch, setUncontrolledSearch] = useState("");
+  const search = searchValue ?? uncontrolledSearch;
+  const setSearch = onSearchChange ?? setUncontrolledSearch;
   const deferredSearch = useDeferredValue(search);
 
   // Filter tags based on search

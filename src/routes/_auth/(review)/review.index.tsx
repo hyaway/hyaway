@@ -70,7 +70,7 @@ function ReviewPage() {
           action={
             <LinkButton
               to="/pages"
-              search={{ q: undefined }}
+              search={(current) => ({ ...current, q: undefined })}
               variant="secondary"
             >
               Browse pages

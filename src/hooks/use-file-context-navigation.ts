@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useMemo, useRef } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { toast } from "sonner";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -59,6 +59,7 @@ export function useFileContextNavigation({
   buildParams,
 }: FileContextNavigationOptions): FileContextNavigationResult {
   const navigate = useNavigate();
+  const currentSearch = useSearch({ strict: false });
   const getGlobalTouchCount = useGlobalTouchCount();
 
   // O(1) lookup instead of O(n) indexOf on every render
@@ -108,6 +109,7 @@ export function useFileContextNavigation({
         navigate({
           to: contextRoute,
           params: buildParams(prevId),
+          search: currentSearch,
           replace: true,
         });
         return;
@@ -119,6 +121,7 @@ export function useFileContextNavigation({
         navigate({
           to: contextRoute,
           params: buildParams(nextId),
+          search: currentSearch,
           replace: true,
         });
       }
@@ -126,7 +129,7 @@ export function useFileContextNavigation({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [buildParams, contextRoute, navigate, nextId, prevId]);
+  }, [buildParams, contextRoute, currentSearch, navigate, nextId, prevId]);
 
   // Swipe gesture navigation
   const touchStartRef = useRef<{
@@ -207,6 +210,7 @@ export function useFileContextNavigation({
             navigate({
               to: contextRoute,
               params: buildParams(prevId),
+              search: currentSearch,
               replace: true,
             });
           } else {
@@ -221,6 +225,7 @@ export function useFileContextNavigation({
             navigate({
               to: contextRoute,
               params: buildParams(nextId),
+              search: currentSearch,
               replace: true,
             });
           } else {
@@ -250,6 +255,7 @@ export function useFileContextNavigation({
   }, [
     buildParams,
     contextRoute,
+    currentSearch,
     getGlobalTouchCount,
     navigate,
     nextId,
@@ -275,6 +281,7 @@ export function useFileContextNavigation({
           navigate({
             to: contextRoute,
             params: buildParams(prevId),
+            search: currentSearch,
             replace: true,
           });
         }
@@ -291,6 +298,7 @@ export function useFileContextNavigation({
           navigate({
             to: contextRoute,
             params: buildParams(nextId),
+            search: currentSearch,
             replace: true,
           });
         }

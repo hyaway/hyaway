@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo } from "react";
 import type { ReactNode } from "react";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
@@ -14,6 +14,7 @@ import { TagActionBadge } from "@/components/tag/tag-badge";
 import { TagActionMenu, isSystemTag } from "@/components/tag/tag-actions";
 import { useRovingTagActionTriggers } from "@/components/tag/tag-list-focus";
 import { useFileTagsDisplaySortMode } from "@/components/settings/file-tags-settings";
+import { useTagFilterSearchParam } from "@/hooks/use-tag-filter-search-param";
 import { createTagItems } from "@/lib/tag-sidebar-items";
 import { sortTagItems } from "@/lib/tag-sidebar-sort";
 import { cn } from "@/lib/utils";
@@ -25,7 +26,8 @@ function fullTag(item: TagItem): string {
 export function InlineTagsList({ data }: { data: FileMetadata }) {
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
   const fileSortMode = useFileTagsDisplaySortMode();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useTagFilterSearchParam();
+  const deferredSearch = useDeferredValue(search);
 
   const tags = useMemo(() => {
     return sortTagItems(
@@ -35,12 +37,12 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
   }, [allTagsServiceId, data, fileSortMode]);
 
   const filteredTagsSet = useMemo(() => {
-    if (!search.trim()) return null;
-    const searchLower = search.toLowerCase();
+    if (!deferredSearch.trim()) return null;
+    const searchLower = deferredSearch.toLowerCase();
     return new Set(
       tags.filter((tag) => tag.toLowerCase().includes(searchLower)),
     );
-  }, [tags, search]);
+  }, [tags, deferredSearch]);
 
   const filteredCount = filteredTagsSet?.size ?? tags.length;
   const enabledTagIndices = useMemo(
@@ -66,7 +68,7 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
     <div className="flex flex-col gap-4">
       <SectionHeading
         title={
-          search.trim()
+          deferredSearch.trim()
             ? `Tags (${filteredCount} of ${tags.length})`
             : `Tags (${tags.length})`
         }

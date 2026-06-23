@@ -54,7 +54,7 @@ import {
 import { useSearchSettingsActions } from "@/stores/search-settings-store";
 import { useActiveTheme } from "@/stores/theme-store";
 
-const SearchResultsSearchSchema = z.object({
+const SearchResultsSearchSchema = z.looseObject({
   builder: z.boolean().optional(),
   instant: z.boolean().optional(),
 });
@@ -129,7 +129,7 @@ function SearchPage() {
     navigate({
       to: "/search/$searchId",
       params: { searchId: clonedSearchId },
-      search: { builder: builderOpen, instant },
+      search: (current) => ({ ...current, builder: builderOpen, instant }),
     });
   }, [
     builderOpen,
