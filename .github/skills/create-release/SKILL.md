@@ -16,7 +16,7 @@ Create releases with changelog entry and git tag.
 1. **Update changelog** for today's date in `docs/changelog.md`
 2. **Commit** if there are uncommitted changes
 3. **Push branch first**: `git push` (important: push before tagging!)
-4. **Tag**: `git tag v2026.01.28`
+4. **Tag**: `git tag -m "Release v2026.01.28" v2026.01.28`
 5. **Push tag**: `git push origin v2026.01.28`
 
 > **Why push before tagging?** `git push --follow-tags` only pushes tags pointing to commits in the push range. If HEAD is already on remote, the tag won't be included. Pushing branch first, then tagging and pushing the tag separately avoids this issue.
@@ -29,17 +29,27 @@ Once the tag reaches the remote, it triggers:
 ## Commands
 
 ```bash
+# Verify changelog date matches release tag
+rg "^## 2026-01-28$" docs/changelog.md
+
+# Check whether the tag already exists locally or remotely
+git tag --list v2026.01.28
+git ls-remote --tags origin refs/tags/v2026.01.28
+
 # Push branch first
 git push
 
-# Create release tag
-git tag v2026.01.28
+# Create release tag with a message
+git tag -m "Release v2026.01.28" v2026.01.28
 
 # Push the tag
 git push origin v2026.01.28
 
 # Tag specific commit
-git tag v2026.01.28 <commit-hash>
+git tag -m "Release v2026.01.28" v2026.01.28 <commit-hash>
+
+# Verify remote tag
+git ls-remote --tags origin refs/tags/v2026.01.28
 
 # Delete tag (if needed to redo)
 git tag -d v2026.01.28
@@ -50,4 +60,6 @@ git push origin :refs/tags/v2026.01.28
 
 - Changelog entry date must match tag: `v2026.01.28` expects `## 2026-01-28`
 - Tag must point to commit containing the changelog entry
+- This repo may have `tag.gpgSign=true`; plain `git tag vYYYY.MM.DD` can fail with `fatal: no tag message?`. Use `git tag -m "Release vYYYY.MM.DD" vYYYY.MM.DD` so signed or annotated tag configuration has an explicit message.
+- Check both local and remote tags before creating a release tag, because the local tag may be absent even if the release already exists on origin.
 - Old commits (before workflow existed) need manual dispatch via GitHub Actions UI
