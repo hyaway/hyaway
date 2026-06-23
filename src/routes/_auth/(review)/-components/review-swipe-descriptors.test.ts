@@ -59,7 +59,8 @@ describe("review swipe descriptors tag actions", () => {
     );
 
     expect(descriptor.label).toBe("Archive\n+series:example");
-    expect(descriptor.secondaryActionCount).toBe(1);
+    expect(descriptor.secondaryTagActionLabels).toEqual(["+series:example"]);
+    expect(descriptor.secondaryRatingActionLabels).toEqual([]);
   });
 
   it("keeps full rating service names in swipe descriptor labels", () => {
@@ -78,8 +79,9 @@ describe("review swipe descriptors tag actions", () => {
 
     const descriptor = getSwipeBindingDescriptor(binding, ratingServices);
 
-    expect(descriptor.label).toBe("Archive\nFavorite like");
-    expect(descriptor.secondaryActionCount).toBe(1);
+    expect(descriptor.label).toBe("Archive\nFavorite: like");
+    expect(descriptor.secondaryTagActionLabels).toEqual([]);
+    expect(descriptor.secondaryRatingActionLabels).toEqual(["Favorite: like"]);
   });
 
   it("includes remove tag actions in swipe descriptors", () => {
@@ -140,9 +142,13 @@ describe("review swipe descriptors tag actions", () => {
     );
 
     expect(descriptor.label).toBe(
-      "Archive\nFavorite like\nstar rating 7/10\n+series:example",
+      "Archive\nFavorite: like\nstar rating: 7/10\n+series:example",
     );
-    expect(descriptor.secondaryActionCount).toBe(3);
+    expect(descriptor.secondaryTagActionLabels).toEqual(["+series:example"]);
+    expect(descriptor.secondaryRatingActionLabels).toEqual([
+      "Favorite: like",
+      "star rating: 7/10",
+    ]);
   });
 
   it("omits skip labels when skip has valid secondary actions", () => {
@@ -172,7 +178,10 @@ describe("review swipe descriptors tag actions", () => {
       new Map([["localTags", localTagService]]),
     );
 
-    expect(descriptor.label).toBe("Favorite like\n+reviewed");
+    expect(descriptor.label).toBe("Favorite: like\n+reviewed");
+    expect(descriptor.primaryActionLabel).toBe("Skip");
+    expect(descriptor.secondaryTagActionLabels).toEqual(["+reviewed"]);
+    expect(descriptor.secondaryRatingActionLabels).toEqual(["Favorite: like"]);
   });
 
   it("ignores persisted incomplete secondary actions in swipe descriptors", () => {
@@ -202,6 +211,7 @@ describe("review swipe descriptors tag actions", () => {
     );
 
     expect(descriptor.label).toBe("Archive");
-    expect(descriptor.secondaryActionCount).toBe(0);
+    expect(descriptor.secondaryTagActionLabels).toEqual([]);
+    expect(descriptor.secondaryRatingActionLabels).toEqual([]);
   });
 });

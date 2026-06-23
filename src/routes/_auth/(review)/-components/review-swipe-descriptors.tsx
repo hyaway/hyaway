@@ -26,8 +26,12 @@ import { isNumericalRatingService } from "@/integrations/hydrus-api/models";
 export interface SwipeBindingDescriptor {
   /** Display label for the binding */
   label: string;
-  /** Number of valid secondary actions attached to the binding */
-  secondaryActionCount: number;
+  /** Display label for the primary file action */
+  primaryActionLabel: string;
+  /** Display labels for valid secondary tag actions */
+  secondaryTagActionLabels: Array<string>;
+  /** Display labels for valid secondary rating actions */
+  secondaryRatingActionLabels: Array<string>;
   /** Icon component to render */
   icon: Icon;
   /** Tailwind classes for the icon/text color */
@@ -71,7 +75,7 @@ function formatRatingActionFull(
 ): string {
   const service = ratingServices?.get(action.serviceKey);
   const valueStr = getRatingValueString(action, ratingServices);
-  return `${service?.name ?? action.serviceKey} ${valueStr}`;
+  return `${service?.name ?? action.serviceKey}: ${valueStr}`;
 }
 
 function formatTagActionFull(action: ValidTagSwipeAction): string {
@@ -79,15 +83,28 @@ function formatTagActionFull(action: ValidTagSwipeAction): string {
   return `${prefix}${action.tag}`;
 }
 
-function formatSecondaryActionFull(
-  action: ValidSecondarySwipeAction,
+function getSecondaryActionLabelsByType(
+  actions: Array<ValidSecondarySwipeAction>,
   ratingServices?: Map<string, RatingServiceInfo>,
-): string {
-  if (action.actionType === "rating") {
-    return formatRatingActionFull(action, ratingServices);
+) {
+  const allLabels: Array<string> = [];
+  const tagLabels: Array<string> = [];
+  const ratingLabels: Array<string> = [];
+
+  for (const action of actions) {
+    if (action.actionType === "rating") {
+      const label = formatRatingActionFull(action, ratingServices);
+      allLabels.push(label);
+      ratingLabels.push(label);
+      continue;
+    }
+
+    const label = formatTagActionFull(action);
+    allLabels.push(label);
+    tagLabels.push(label);
   }
 
-  return formatTagActionFull(action);
+  return { allLabels, tagLabels, ratingLabels };
 }
 
 /** Base descriptor without styling (shared between normal and overlay) */
@@ -137,7 +154,9 @@ function buildSwipeBindingDescriptor(
   const style = styles[binding.fileAction];
   const fileDescriptor: SwipeBindingDescriptor = {
     label: base.label,
-    secondaryActionCount: 0,
+    primaryActionLabel: base.label,
+    secondaryTagActionLabels: [],
+    secondaryRatingActionLabels: [],
     icon: base.icon,
     ...style,
   };
@@ -145,19 +164,21 @@ function buildSwipeBindingDescriptor(
     localTagServicesByKey: tagServices,
     ratingServicesByKey: ratingServices,
   });
-  const secondaryActionCount = validSecondaryActions.length;
+  const {
+    allLabels: secondaryActionLabels,
+    tagLabels: secondaryTagActionLabels,
+    ratingLabels: secondaryRatingActionLabels,
+  } = getSecondaryActionLabelsByType(validSecondaryActions, ratingServices);
   const fileLabelPrefix =
     binding.fileAction === "skip" ? "" : fileDescriptor.label;
 
-  if (secondaryActionCount > 0) {
-    const fullActionLabels = validSecondaryActions.map((action) =>
-      formatSecondaryActionFull(action, ratingServices),
-    );
-    const actionLabel = fullActionLabels.join("\n");
+  if (secondaryActionLabels.length > 0) {
+    const actionLabel = secondaryActionLabels.join("\n");
 
     return {
       ...fileDescriptor,
-      secondaryActionCount,
+      secondaryTagActionLabels,
+      secondaryRatingActionLabels,
       label: fileLabelPrefix
         ? `${fileLabelPrefix}\n${actionLabel}`
         : actionLabel,

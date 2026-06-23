@@ -115,20 +115,22 @@ function ReviewPage() {
         <ReviewSettingsPopover />
       </PageHeaderActions>
 
-      {/* Stats breakdown - shown below progress in normal mode */}
+      {/* Stats breakdown - shown above progress in normal mode */}
       {history.length > 0 && !isImmersive && (
         <ReviewStatsBreakdown
           stats={directionStats}
           bindings={deckState.bindings}
           variant="inline"
-          className="px-4 pb-1"
+          className="px-4"
         />
       )}
       {/* Progress indicator */}
       <div
         className={cn(
-          "text-muted-foreground flex items-center gap-2 px-4 py-1 text-sm tabular-nums",
-          isImmersive && "fixed inset-x-0 top-0 z-60",
+          "text-muted-foreground flex items-center gap-2 text-sm tabular-nums",
+          isImmersive
+            ? "fixed inset-x-0 top-0 z-60 px-4 py-2"
+            : "px-4 pt-0 pb-1",
         )}
       >
         <Progress value={progress} className="flex-1" />

@@ -12,6 +12,7 @@ import { getSwipeBindingDescriptor } from "./review-swipe-descriptors";
 import type { Icon } from "@tabler/icons-react";
 import type { ReviewDirectionStats } from "@/stores/review-queue-store";
 import type {
+  ReviewSwipeBinding,
   SwipeBindings,
   SwipeDirection,
 } from "@/stores/review-settings-store";
@@ -100,19 +101,26 @@ export function ReviewStatsBreakdown({
     return (
       <div
         className={cn(
-          "flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm tabular-nums",
+          "flex flex-wrap items-center justify-center text-sm tabular-nums",
+          showLabels ? "gap-x-3 gap-y-1" : "gap-x-1 gap-y-0",
           className,
         )}
       >
         {visibleDirections.map((direction, index) => (
-          <span key={direction} className="inline-flex items-center gap-3">
+          <span
+            key={direction}
+            className={cn(
+              "inline-flex items-center",
+              showLabels ? "gap-3" : "gap-1",
+            )}
+          >
             {index > 0 && showLabels && (
               <IconCircleFilled className="text-muted-foreground size-1" />
             )}
             <InlineStatItem
               direction={direction}
               count={stats[direction]}
-              bindings={bindings}
+              binding={bindings[direction]}
               ratingServices={ratingServicesByKey}
               tagServices={localTagServicesByKey}
               showLabel={showLabels}
@@ -136,7 +144,7 @@ export function ReviewStatsBreakdown({
           key={direction}
           direction={direction}
           count={stats[direction]}
-          bindings={bindings}
+          binding={bindings[direction]}
           ratingServices={ratingServicesByKey}
           tagServices={localTagServicesByKey}
         />
@@ -148,7 +156,7 @@ export function ReviewStatsBreakdown({
 interface StatItemProps {
   direction: SwipeDirection;
   count: number;
-  bindings: SwipeBindings;
+  binding: ReviewSwipeBinding;
   ratingServices: Map<string, RatingServiceInfo>;
   tagServices: Map<string, LocalTagServiceInfo>;
   showLabel?: boolean;
@@ -157,17 +165,17 @@ interface StatItemProps {
 function InlineStatItem({
   direction,
   count,
-  bindings,
+  binding,
   ratingServices,
   tagServices,
   showLabel = true,
 }: StatItemProps) {
-  const binding = bindings[direction];
   const descriptor = getSwipeBindingDescriptor(
     binding,
     ratingServices,
     tagServices,
   );
+  const compact = !showLabel;
   const ActionIcon = descriptor.icon;
   const DirectionIcon = DIRECTION_ICONS[direction];
   const inlineContent = (
@@ -176,43 +184,33 @@ function InlineStatItem({
       {showLabel && (
         <span className="inline-flex items-center gap-0.5">
           <ActionIcon className="size-4" strokeWidth={2.5} />
-          {descriptor.secondaryActionCount > 0 && (
-            <span className="text-muted-foreground">
-              +{descriptor.secondaryActionCount}
-            </span>
-          )}
+          <InlineSecondaryActionCounts
+            tagCount={descriptor.secondaryTagActionLabels.length}
+            ratingCount={descriptor.secondaryRatingActionLabels.length}
+          />
         </span>
       )}
       <DirectionIcon className="size-4" strokeWidth={2.5} />
     </>
   );
-  const content = (
-    <span
-      className={cn(
-        "inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap",
-        descriptor.textClass,
-      )}
-    >
-      {inlineContent}
-    </span>
-  );
   const trigger = (
     <Button
       variant="ghost"
-      size="sm"
-      aria-label={`Show ${descriptor.label.replace(/\n/g, " ")} details`}
-      className={descriptor.textClass}
+      size={compact ? "xs" : "sm"}
+      aria-label={`Show ${descriptor.primaryActionLabel} details`}
+      className={cn(
+        descriptor.textClass,
+        compact && "h-7 gap-0.5 px-1.5 text-xs",
+      )}
     >
       {inlineContent}
     </Button>
   );
 
-  if (!showLabel) return content;
-
   return (
     <Popover>
       <PopoverTrigger render={trigger} />
-      <PopoverContent side="bottom" align="center" className="w-56 gap-2 p-3">
+      <PopoverContent side="bottom" align="center" className="w-64 gap-3 p-3">
         <div className="flex items-start gap-2">
           <span
             className={cn(
@@ -223,23 +221,64 @@ function InlineStatItem({
             <ActionIcon className="size-4" strokeWidth={2.5} />
             <DirectionIcon className="size-4" strokeWidth={2.5} />
           </span>
-          <span className="text-sm whitespace-pre-line">
-            {descriptor.label}
-          </span>
+          <div className="flex min-w-0 flex-col gap-2 text-sm">
+            <span>{descriptor.primaryActionLabel}</span>
+            <InlineSecondaryActionSection
+              title="Tags"
+              labels={descriptor.secondaryTagActionLabels}
+            />
+            <InlineSecondaryActionSection
+              title="Ratings"
+              labels={descriptor.secondaryRatingActionLabels}
+            />
+          </div>
         </div>
       </PopoverContent>
     </Popover>
   );
 }
 
+function InlineSecondaryActionSection({
+  title,
+  labels,
+}: {
+  title: string;
+  labels: Array<string>;
+}) {
+  if (labels.length === 0) return null;
+
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <span className="text-muted-foreground text-xs font-medium">{title}</span>
+      <span className="whitespace-pre-line">{labels.join("\n")}</span>
+    </div>
+  );
+}
+
+function InlineSecondaryActionCounts({
+  tagCount,
+  ratingCount,
+}: {
+  tagCount: number;
+  ratingCount: number;
+}) {
+  if (tagCount === 0 && ratingCount === 0) return null;
+
+  return (
+    <span className="text-muted-foreground">
+      {tagCount > 0 && `${tagCount}T`}
+      {ratingCount > 0 && `${ratingCount}R`}
+    </span>
+  );
+}
+
 function GridStatItem({
   direction,
   count,
-  bindings,
+  binding,
   ratingServices,
   tagServices,
 }: StatItemProps) {
-  const binding = bindings[direction];
   const descriptor = getSwipeBindingDescriptor(
     binding,
     ratingServices,
@@ -266,7 +305,10 @@ function GridStatItem({
     </div>
   );
 
-  if (descriptor.secondaryActionCount === 0) {
+  if (
+    descriptor.secondaryTagActionLabels.length === 0 &&
+    descriptor.secondaryRatingActionLabels.length === 0
+  ) {
     return content;
   }
 
