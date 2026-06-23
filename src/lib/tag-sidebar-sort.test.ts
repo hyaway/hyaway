@@ -36,8 +36,8 @@ test("count: count desc, then namespaced-first/name", () => {
   ]);
 });
 
-test("hydrus: preserves incoming order", () => {
-  expect(sortTagItems(items, "hydrus").map(combineTag)).toEqual([
+test("api: preserves incoming order", () => {
+  expect(sortTagItems(items, "api").map(combineTag)).toEqual([
     "zebra",
     "apple",
     "character:mid",
@@ -80,7 +80,7 @@ test("count: equal counts fall back to compareTags", () => {
   ]);
 });
 
-test.each(["count", "namespace", "hydrus"] as const)(
+test.each(["count", "namespace", "api"] as const)(
   "%s: returns a new array without mutating input",
   (mode) => {
     const copy = [...items];
@@ -91,8 +91,8 @@ test.each(["count", "namespace", "hydrus"] as const)(
   },
 );
 
-test("hydrus: returned copy preserves object identity and order", () => {
-  const result = sortTagItems(items, "hydrus");
+test("api: returned copy preserves object identity and order", () => {
+  const result = sortTagItems(items, "api");
 
   expect(result).toEqual(items);
   expect(result).not.toBe(items);

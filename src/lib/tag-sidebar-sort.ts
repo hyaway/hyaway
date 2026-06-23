@@ -4,7 +4,7 @@
 import type { TagItem } from "@/lib/tag-sidebar-types";
 import { compareTags } from "@/lib/tag-utils";
 
-export type TagSortMode = "count" | "namespace" | "hydrus";
+export type TagSortMode = "count" | "namespace" | "api";
 
 function assertNever(value: never): never {
   throw new Error(`Unhandled tag sort mode: ${String(value)}`);
@@ -18,7 +18,7 @@ export function sortTagItems(
   const result = [...items];
 
   switch (mode) {
-    case "hydrus":
+    case "api":
       return result;
     case "namespace":
       result.sort((a, b) => {

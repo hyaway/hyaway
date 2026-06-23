@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 export type TagsSortMode = "count" | "namespace";
-export type FileTagsSortMode = "hydrus" | "namespace";
+export type FileTagsSortMode = "api" | "namespace";
 
 type TagsSettingsState = {
   sortMode: TagsSortMode;

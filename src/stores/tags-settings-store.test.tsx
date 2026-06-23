@@ -18,7 +18,7 @@ test("fileSortMode defaults to namespace and updates", async () => {
 
   expect(result.current.mode).toBe("namespace");
   act(() => {
-    result.current.actions.setFileSortMode("hydrus");
+    result.current.actions.setFileSortMode("api");
   });
-  expect(result.current.mode).toBe("hydrus");
+  expect(result.current.mode).toBe("api");
 });

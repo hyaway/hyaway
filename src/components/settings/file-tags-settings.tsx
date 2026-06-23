@@ -17,7 +17,7 @@ export const FILE_TAGS_SETTINGS_TITLE = "File tags";
 export const DEFAULT_FILE_TAGS_SORT_MODE: FileTagsSortMode = "namespace";
 
 const FILE_TAGS_SORT_OPTIONS = [
-  { value: "hydrus", label: "Hydrus" },
+  { value: "api", label: "Basic" },
   { value: "namespace", label: "Namespace" },
 ] as const;
 
