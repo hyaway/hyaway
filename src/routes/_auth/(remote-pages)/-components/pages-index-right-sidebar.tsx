@@ -1,8 +1,8 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useSearch } from "@tanstack/react-router";
 import { PagesSearchInput } from "./pages-search-input";
+import { usePagesSearch } from "./pages-search-context";
 import { PagesTreeView } from "./pages-tree-view";
 import type { MediaPage } from "@/integrations/hydrus-api/models";
 import type { PagesTreeNode } from "@/integrations/hydrus-api/queries/manage-pages";
@@ -23,15 +23,12 @@ interface PagesIndexRightSidebarProps {
   treeEmptyMessage?: string;
 }
 
-const PAGES_ROUTE_FULL_PATH = "/_auth/(remote-pages)/pages/";
-
 export function PagesIndexRightSidebar({
   tree,
   latestPage,
   treeEmptyMessage,
 }: PagesIndexRightSidebarProps) {
-  const { q } = useSearch({ from: PAGES_ROUTE_FULL_PATH });
-  const query = q ?? "";
+  const { query } = usePagesSearch();
 
   return (
     <RightSidebarPortal>

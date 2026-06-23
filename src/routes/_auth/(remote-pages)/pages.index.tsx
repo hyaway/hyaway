@@ -4,7 +4,13 @@
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from "react";
 import z from "zod";
 
 import {
@@ -13,6 +19,10 @@ import {
 } from "./-components/pages-grid-item";
 import { PagesIndexRightSidebar } from "./-components/pages-index-right-sidebar";
 import { PagesSearchInput } from "./-components/pages-search-input";
+import {
+  PagesSearchProvider,
+  usePagesSearch,
+} from "./-components/pages-search-context";
 import { PagesDisplaySettingsPopover } from "./-components/pages-display-settings-popover";
 import { usePageGroupMetaByPageKey } from "./-hooks/use-page-group-meta";
 import { usePagesSearchHighlights } from "./-hooks/use-pages-search-highlights";
@@ -90,6 +100,27 @@ export const Route = createFileRoute("/_auth/(remote-pages)/pages/")({
  */
 function PagesIndex() {
   const { q } = Route.useSearch();
+  const navigate = Route.useNavigate();
+
+  useEffect(() => {
+    if (q === undefined) return;
+
+    void navigate({
+      search: (current) => ({ ...current, q: undefined }),
+      replace: true,
+      resetScroll: false,
+    });
+  }, [navigate, q]);
+
+  return (
+    <PagesSearchProvider initialQuery={q}>
+      <PagesIndexContent />
+    </PagesSearchProvider>
+  );
+}
+
+function PagesIndexContent() {
+  const { query: searchQuery } = usePagesSearch();
   const {
     data: pages,
     isPending,
@@ -107,7 +138,6 @@ function PagesIndex() {
   const expandCards = usePagesExpandCards();
   const showLatestOpenedPage = usePagesShowLatestOpenedPage();
   const containerRef = useRef<HTMLDivElement>(null);
-  const searchQuery = q ?? "";
   const normalizedQuery = searchQuery.trim();
 
   const { tree: filteredPagesTree } = useMemo(
