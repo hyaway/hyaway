@@ -7,7 +7,11 @@ import { PageGroupPath } from "./page-group-path";
 import { HighlightedText } from "./pages-highlighted-text";
 import { Item, ItemContent, ItemTitle } from "@/components/ui-primitives/item";
 import { ThumbnailImage } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
-import { getVisibleFileIds } from "@/integrations/hydrus-api/queries/file-metadata-cache";
+import {
+  formatHiddenFileCount,
+  getHiddenFileCount,
+  getVisibleFileIds,
+} from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import { useGetPageInfoQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { PageState } from "@/integrations/hydrus-api/models";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
@@ -191,7 +195,9 @@ export const PagesGridItem = memo(function PagesGridItemMemo({
               previewAspectClass,
             )}
           >
-            No files
+            {data
+              ? formatHiddenFileCount(getHiddenFileCount(data)) || "No files"
+              : "No files"}
           </div>
         )}
       </ItemContent>
