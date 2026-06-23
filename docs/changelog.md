@@ -22,6 +22,8 @@ All notable changes to hyAway are documented here.
 
 - The Pages sidebar header, tree rows, and last-opened page item now use the consistent sidebar styling as the rest of the app
 - Tags sidebar header is now better aligned with the app header and buttons
+- File tag sort settings now also apply to the inline tags list on file detail pages
+- File detail tag filters now stay synchronized between the inline tags list and the file tags sidebar
 
 ### Fixed
 
