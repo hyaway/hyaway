@@ -25,6 +25,7 @@ import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { SectionHeading } from "@/components/page-shell/section-heading";
 import { Separator } from "@/components/ui-primitives/separator";
+import { FileTagsFilterProvider } from "@/components/tag/file-tags-filter-context";
 import { FileTagsSidebar } from "@/components/tag/file-tags-sidebar";
 import { LOADING_ACTIONS, useFileActions } from "@/hooks/use-file-actions";
 import {
@@ -119,7 +120,6 @@ function FileDetailContent({
         fileId={fileId}
         trackLocalWatchHistory={trackLocalWatchHistory}
       />
-      <FileTagsSidebar fileId={fileId} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-2 pb-12 sm:pb-16">
         <div className="relative -mx-4 sm:-mx-6">
@@ -156,7 +156,10 @@ function FileDetailContent({
           <ViewingStatisticsTable statistics={data.file_viewing_statistics} />
         </div>
         <Separator className="my-2" />
-        <InlineTagsList data={data} />
+        <FileTagsFilterProvider>
+          <FileTagsSidebar fileId={fileId} />
+          <InlineTagsList data={data} />
+        </FileTagsFilterProvider>
       </div>
 
       <PageHeaderActions>

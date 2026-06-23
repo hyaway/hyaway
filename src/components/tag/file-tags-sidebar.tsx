@@ -8,7 +8,7 @@ import { RightSidebarPortal } from "@/components/app-shell/right-sidebar-portal"
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
-import { useTagFilterSearchParam } from "@/hooks/use-tag-filter-search-param";
+import { useFileTagsFilter } from "@/components/tag/file-tags-filter-context";
 import { createTagItems } from "@/lib/tag-sidebar-items";
 import { sortTagItems } from "@/lib/tag-sidebar-sort";
 
@@ -24,7 +24,7 @@ export function FileTagsSidebar({ fileId }: FileTagsSidebarProps) {
   const { data: currentMetadata } = useGetSingleFileMetadata(fileId);
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
   const fileSortMode = useFileTagsDisplaySortMode();
-  const [tagFilter, setTagFilter] = useTagFilterSearchParam();
+  const { filterValue, setFilterValue } = useFileTagsFilter();
 
   const tags = useMemo(() => {
     if (!currentMetadata) return [];
@@ -45,8 +45,8 @@ export function FileTagsSidebar({ fileId }: FileTagsSidebarProps) {
         title="File tags"
         showIndex={false}
         headerControls={<FileTagsSidebarSortControls />}
-        searchValue={tagFilter}
-        onSearchChange={setTagFilter}
+        searchValue={filterValue}
+        onSearchChange={setFilterValue}
       />
     </RightSidebarPortal>
   );

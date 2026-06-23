@@ -45,7 +45,7 @@ import {
   usePagesVerticalGap,
 } from "@/stores/pages-settings-store";
 
-const PagesSearchSchema = z.looseObject({
+const PagesSearchSchema = z.object({
   q: z.string().optional(),
 });
 

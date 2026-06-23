@@ -28,10 +28,6 @@ vi.mock("@/components/tag/tags-sidebar", () => ({
   TagsSidebar: ({ title }: { title: string }) => <div>{title}</div>,
 }));
 
-vi.mock("@/hooks/use-tag-filter-search-param", () => ({
-  useTagFilterSearchParam: () => ["", vi.fn()] as const,
-}));
-
 vi.mock("@/integrations/hydrus-api/queries/services", () => ({
   useAllKnownTagsServiceQuery: () => ({ data: "all" }),
 }));

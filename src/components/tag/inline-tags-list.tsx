@@ -12,9 +12,9 @@ import { Skeleton } from "@/components/ui-primitives/skeleton";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
 import { TagActionBadge } from "@/components/tag/tag-badge";
 import { TagActionMenu, isSystemTag } from "@/components/tag/tag-actions";
+import { useFileTagsFilter } from "@/components/tag/file-tags-filter-context";
 import { useRovingTagActionTriggers } from "@/components/tag/tag-list-focus";
 import { useFileTagsDisplaySortMode } from "@/components/settings/file-tags-settings";
-import { useTagFilterSearchParam } from "@/hooks/use-tag-filter-search-param";
 import { createTagItems } from "@/lib/tag-sidebar-items";
 import { sortTagItems } from "@/lib/tag-sidebar-sort";
 import { cn } from "@/lib/utils";
@@ -26,8 +26,8 @@ function fullTag(item: TagItem): string {
 export function InlineTagsList({ data }: { data: FileMetadata }) {
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
   const fileSortMode = useFileTagsDisplaySortMode();
-  const [search, setSearch] = useTagFilterSearchParam();
-  const deferredSearch = useDeferredValue(search);
+  const { filterValue, setFilterValue } = useFileTagsFilter();
+  const deferredSearch = useDeferredValue(filterValue);
 
   const tags = useMemo(() => {
     return sortTagItems(
@@ -76,8 +76,11 @@ export function InlineTagsList({ data }: { data: FileMetadata }) {
           <Input
             type="search"
             placeholder="Filter tags..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            value={filterValue}
+            onChange={(e) => setFilterValue(e.target.value)}
             className="w-48 text-sm"
           />
         }

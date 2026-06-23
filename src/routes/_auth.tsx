@@ -3,7 +3,6 @@
 
 import { useState } from "react";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
 import {
   IconAlertTriangle,
   IconChevronDown,
@@ -26,12 +25,7 @@ import { AuthStatusScreen } from "@/components/page-shell/auth-status-screen";
 import { Button, LinkButton } from "@/components/ui-primitives/button";
 import { Spinner } from "@/components/ui-primitives/spinner";
 
-const AuthSearchSchema = z.looseObject({
-  tagFilter: z.string().optional(),
-});
-
 export const Route = createFileRoute("/_auth")({
-  validateSearch: (search) => AuthSearchSchema.parse(search),
   component: AuthPageLayout,
 });
 

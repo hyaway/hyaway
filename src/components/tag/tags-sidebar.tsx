@@ -178,6 +178,9 @@ export const TagsSidebar = memo(function TagsSidebarMemo({
         <SidebarInput
           type="search"
           placeholder="Filter tags..."
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           tabIndex={isMobile ? -1 : undefined}

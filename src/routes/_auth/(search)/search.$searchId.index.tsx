@@ -54,7 +54,7 @@ import {
 import { useSearchSettingsActions } from "@/stores/search-settings-store";
 import { useActiveTheme } from "@/stores/theme-store";
 
-const SearchResultsSearchSchema = z.looseObject({
+const SearchResultsSearchSchema = z.object({
   builder: z.boolean().optional(),
   instant: z.boolean().optional(),
 });
