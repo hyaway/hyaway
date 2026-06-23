@@ -2,15 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useMemo } from "react";
-import {
-  FileTagsSidebarSortControls,
-  useFileTagsSidebarSortMode,
-} from "./file-tags-sidebar-sort-controls";
+import { FileTagsSidebarSortControls } from "./file-tags-sidebar-sort-controls";
+import { useFileTagsDisplaySortMode } from "@/components/settings/file-tags-settings";
 import { RightSidebarPortal } from "@/components/app-shell/right-sidebar-portal";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { useGetSingleFileMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
-import { createTagSidebarItems } from "@/lib/tag-sidebar-items";
+import { createTagItems } from "@/lib/tag-sidebar-items";
 import { sortTagItems } from "@/lib/tag-sidebar-sort";
 
 interface FileTagsSidebarProps {
@@ -24,13 +22,13 @@ interface FileTagsSidebarProps {
 export function FileTagsSidebar({ fileId }: FileTagsSidebarProps) {
   const { data: currentMetadata } = useGetSingleFileMetadata(fileId);
   const allTagsServiceId = useAllKnownTagsServiceQuery().data;
-  const fileSortMode = useFileTagsSidebarSortMode();
+  const fileSortMode = useFileTagsDisplaySortMode();
 
   const tags = useMemo(() => {
     if (!currentMetadata) return [];
 
     return sortTagItems(
-      createTagSidebarItems([currentMetadata], allTagsServiceId),
+      createTagItems([currentMetadata], allTagsServiceId),
       fileSortMode,
     );
   }, [allTagsServiceId, currentMetadata, fileSortMode]);

@@ -6,6 +6,10 @@ import {
   FileViewerSettings,
 } from "@/components/settings/file-viewer-settings";
 import {
+  FILE_DETAIL_SETTINGS_TITLE,
+  FileDetailSettings,
+} from "@/components/settings/file-detail-settings";
+import {
   REVIEW_CONTROLS_SETTINGS_TITLE,
   ReviewControlsSettings,
 } from "@/components/settings/review-controls-settings";
@@ -46,6 +50,11 @@ export function ReviewSettingsPopover() {
         defaultSections="all"
         hideExpandedSettings
       />
+      <Separator className="my-2" />
+      <SettingsHeader>
+        <SettingsTitle>{FILE_DETAIL_SETTINGS_TITLE}</SettingsTitle>
+      </SettingsHeader>
+      <FileDetailSettings idPrefix="popover-" />
       {hasRatingServices && (
         <>
           <Separator className="my-2" />

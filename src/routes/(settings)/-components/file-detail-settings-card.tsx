@@ -4,6 +4,7 @@
 import {
   FILE_DETAIL_SETTINGS_TITLE,
   FileDetailSettings,
+  useResetFileDetailSettings,
 } from "@/components/settings/file-detail-settings";
 import {
   SettingsCardTitle,
@@ -15,20 +16,19 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui-primitives/card";
-import { useFileViewerSettingsActions } from "@/stores/file-viewer-settings-store";
 
 export function FileDetailSettingsCard() {
-  const { setNotesOpenExpanded } = useFileViewerSettingsActions();
+  const resetFileDetailSettings = useResetFileDetailSettings();
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <SettingsCardTitle>{FILE_DETAIL_SETTINGS_TITLE}</SettingsCardTitle>
-          <SettingsResetButton onReset={() => setNotesOpenExpanded(false)} />
+          <SettingsResetButton onReset={resetFileDetailSettings} />
         </div>
         <CardDescription>
-          Configure how file metadata and details are displayed.
+          Configure how file metadata, details, and tags are displayed.
         </CardDescription>
       </CardHeader>
       <CardContent>

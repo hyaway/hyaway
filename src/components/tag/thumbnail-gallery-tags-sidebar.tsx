@@ -10,7 +10,7 @@ import {
 } from "@/components/tag/thumbnail-gallery-tags-sidebar-sort-controls";
 import { TagsSidebar } from "@/components/tag/tags-sidebar";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
-import { createTagSidebarItems } from "@/lib/tag-sidebar-items";
+import { createTagItems } from "@/lib/tag-sidebar-items";
 import { sortTagItems } from "@/lib/tag-sidebar-sort";
 
 export const ThumbnailGalleryTagsSidebar = memo(
@@ -31,7 +31,7 @@ export const ThumbnailGalleryTagsSidebar = memo(
     const deferredSortMode = useDeferredValue(sortMode);
 
     const tags = useMemo((): Array<TagItem> => {
-      const result = createTagSidebarItems(deferredItems, allTagsServiceId);
+      const result = createTagItems(deferredItems, allTagsServiceId);
       return sortTagItems(result, deferredSortMode);
     }, [deferredItems, allTagsServiceId, deferredSortMode]);
 

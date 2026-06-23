@@ -9,16 +9,16 @@ beforeEach(() => {
   localStorage.clear();
 });
 
-test("fileSortMode defaults to hydrus and updates", async () => {
+test("fileSortMode defaults to namespace and updates", async () => {
   const store = await import("./tags-settings-store");
   const { result } = renderHook(() => ({
     mode: store.useFileTagsSortMode(),
     actions: store.useTagsSettingsActions(),
   }));
 
-  expect(result.current.mode).toBe("hydrus");
-  act(() => {
-    result.current.actions.setFileSortMode("namespace");
-  });
   expect(result.current.mode).toBe("namespace");
+  act(() => {
+    result.current.actions.setFileSortMode("hydrus");
+  });
+  expect(result.current.mode).toBe("hydrus");
 });

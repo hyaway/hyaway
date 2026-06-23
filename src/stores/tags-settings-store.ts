@@ -22,7 +22,7 @@ const useTagsSettingsStore = create<TagsSettingsState>()(
   persist(
     (set, _get, store) => ({
       sortMode: "count",
-      fileSortMode: "hydrus",
+      fileSortMode: "namespace",
       actions: {
         setSortMode: (sortMode: TagsSortMode) => set({ sortMode }),
         setFileSortMode: (fileSortMode: FileTagsSortMode) =>

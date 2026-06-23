@@ -6,7 +6,7 @@ import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { parseTag } from "@/lib/tag-utils";
 
-export function createTagSidebarItems(
+export function createTagItems(
   items: ReadonlyArray<FileMetadata>,
   allTagsServiceId: string | undefined,
 ): Array<TagItem> {
