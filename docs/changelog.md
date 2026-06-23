@@ -27,6 +27,7 @@ All notable changes to hyAway are documented here.
 
 - File open, link, and download actions no longer trigger twice for some users
 - App pages now reserve scrollbar space to prevent width jumps on navigation, while Review, video theater, and viewer overlays keep edge-to-edge layouts
+- Hydrus page cards now handle hidden files in their preview thumbnails and file counts
 
 ---
 

@@ -7,6 +7,7 @@ import { PageGroupPath } from "./page-group-path";
 import { HighlightedText } from "./pages-highlighted-text";
 import { Item, ItemContent, ItemTitle } from "@/components/ui-primitives/item";
 import { ThumbnailImage } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
+import { getVisibleFileIds } from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import { useGetPageInfoQuery } from "@/integrations/hydrus-api/queries/manage-pages";
 import { PageState } from "@/integrations/hydrus-api/models";
 import { Skeleton } from "@/components/ui-primitives/skeleton";
@@ -78,13 +79,15 @@ export const PagesGridItem = memo(function PagesGridItemMemo({
   const linkPageId = useFriendlyUrls ? pageSlug : pageKey;
   const previewAspectClass = "aspect-square";
 
-  const totalFiles = data?.page_info.media.num_files ?? 0;
-  // Show all 4 thumbnails if 4 or fewer files, otherwise show 3 + count card
+  const visibleFileIds = data
+    ? getVisibleFileIds(data.page_info.media.hash_ids, data)
+    : [];
+  const totalFiles = visibleFileIds.length;
+  // Show all 4 thumbnails if 4 or fewer visible files, otherwise show 3 + count card
   const showCountCard = totalFiles > 4;
   const maxThumbnails = showCountCard ? 3 : 4;
   const remainingFiles = Math.max(totalFiles - 3, 0);
-  const previewFileIds =
-    data?.page_info.media.hash_ids.slice(0, maxThumbnails) ?? [];
+  const previewFileIds = visibleFileIds.slice(0, maxThumbnails);
   const totalSlots = 4;
   const filledSlots = previewFileIds.length + (showCountCard ? 1 : 0);
   const emptySlots = Math.max(0, totalSlots - filledSlots);
