@@ -379,11 +379,15 @@ export const useFocusPageMutation = () => {
 export const useCreatePageMutation = () => {
   const queryClient = useQueryClient();
   const isConfigured = useIsApiConfigured();
+  const hasPermission = useHasPermission(Permission.MANAGE_PAGES);
 
   return useMutation({
     mutationFn: async (options: CreatePageOptions) => {
       if (!isConfigured) {
         throw new Error("Hydrus API session not established.");
+      }
+      if (!hasPermission) {
+        throw new Error("Hydrus API key is missing Manage pages permission.");
       }
       return createPage(options);
     },

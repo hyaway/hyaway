@@ -18,6 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import z from "zod";
 import { SearchQueryBuilder } from "./-components/system-predicate-builder";
+import { useHydrusSearchPageActions } from "./-components/hydrus-search-page-actions";
 import {
   committedSearchQueryKey,
   useCommittedSearchFilesQuery,
@@ -161,6 +162,12 @@ function SearchPage() {
     setDefaultQuery(committed ?? entry.staged);
   }, [committed, entry.staged, setDefaultQuery]);
 
+  const hydrusPageActions = useHydrusSearchPageActions({
+    committed,
+    displayName,
+    searchTags,
+  });
+
   const searchActions = useMemo((): Array<FloatingFooterAction> => {
     const showDraftDefaultActions = !instantSearch && isDirty;
     const defaultActions: Array<FloatingFooterAction> = !showDraftDefaultActions
@@ -207,6 +214,7 @@ function SearchPage() {
         onClick: handleSaveAsNew,
         overflowOnly: true,
       },
+      ...hydrusPageActions,
       ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
       {
         id: "delete-search",
@@ -226,6 +234,7 @@ function SearchPage() {
     isPinned,
     handleTogglePinned,
     handleSaveAsNew,
+    hydrusPageActions,
     showHiddenFilesAction,
     handleDelete,
   ]);

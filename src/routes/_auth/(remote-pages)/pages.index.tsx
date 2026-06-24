@@ -24,6 +24,7 @@ import {
   usePagesSearch,
 } from "./-components/pages-search-context";
 import { PagesDisplaySettingsPopover } from "./-components/pages-display-settings-popover";
+import { usePageOfPagesActions } from "./-components/page-of-pages-actions";
 import { usePageGroupMetaByPageKey } from "./-hooks/use-page-group-meta";
 import { usePagesSearchHighlights } from "./-hooks/use-pages-search-highlights";
 import { usePageGridLanes } from "./-hooks/use-page-grid-lanes";
@@ -41,6 +42,7 @@ import { ScrollPositionBadge } from "@/components/scroll-position-badge";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import {
   useGetMediaPagesQuery,
+  useGetPagesQuery,
   useGetPagesTreeQuery,
 } from "@/integrations/hydrus-api/queries/manage-pages";
 import { useLatestOpenedPageMatch } from "@/stores/latest-opened-page-store";
@@ -129,6 +131,8 @@ function PagesIndexContent() {
     error,
   } = useGetMediaPagesQuery();
   const { data: pagesTree } = useGetPagesTreeQuery();
+  const { data: pagesData } = useGetPagesQuery();
+  const createPageOfPagesActions = usePageOfPagesActions(pagesData?.pages);
   const queryClient = useQueryClient();
   const minLanes = usePagesMinLanes();
   const maxLanes = usePagesMaxLanes();
@@ -279,7 +283,10 @@ function PagesIndexContent() {
       <PageHeaderActions>
         <PagesDisplaySettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter leftContent={refetchButton} />
+      <PageFloatingFooter
+        leftContent={refetchButton}
+        actions={createPageOfPagesActions}
+      />
     </>
   );
 }
