@@ -1,13 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useReducer,
-  useRef,
-} from "react";
+import { useCallback, useLayoutEffect, useReducer, useRef } from "react";
 import {
   getPagesSearchMatchRanges,
   getPagesSearchTerms,
@@ -21,6 +15,11 @@ function getTextNode(element: HTMLElement) {
   return child as Text;
 }
 
+const supportsCustomHighlight =
+  typeof CSS !== "undefined" &&
+  "highlights" in CSS &&
+  typeof Highlight !== "undefined";
+
 interface PagesSearchHighlightsOptions {
   query: string;
   highlightName: string;
@@ -30,21 +29,22 @@ export function usePagesSearchHighlights({
   query,
   highlightName,
 }: PagesSearchHighlightsOptions) {
-  const elementMapRef = useRef<Map<string, HTMLElement | null>>(new Map());
+  const elementMapRef = useRef<Map<string, HTMLElement>>(new Map());
+  const callbackMapRef = useRef<
+    Map<string, (node: HTMLElement | null) => void>
+  >(new Map());
   const [elementVersion, bumpElementVersion] = useReducer(
     (value: number) => value + 1,
     0,
   );
-  const supportsCustomHighlight = useMemo(() => {
-    return (
-      typeof CSS !== "undefined" &&
-      "highlights" in CSS &&
-      typeof Highlight !== "undefined"
-    );
-  }, []);
 
-  const registerLabelRef = useCallback(
-    (key: string) => (node: HTMLElement | null) => {
+  const registerLabelRef = useCallback((key: string) => {
+    const existingCallback = callbackMapRef.current.get(key);
+    if (existingCallback) {
+      return existingCallback;
+    }
+
+    const callback = (node: HTMLElement | null) => {
       const previousNode = elementMapRef.current.get(key) ?? null;
 
       if (node) {
@@ -56,9 +56,11 @@ export function usePagesSearchHighlights({
       if (previousNode !== node) {
         bumpElementVersion();
       }
-    },
-    [],
-  );
+    };
+
+    callbackMapRef.current.set(key, callback);
+    return callback;
+  }, []);
 
   useLayoutEffect(() => {
     if (!supportsCustomHighlight) {
@@ -74,7 +76,6 @@ export function usePagesSearchHighlights({
     const ranges: Array<Range> = [];
 
     elementMapRef.current.forEach((element) => {
-      if (!element) return;
       const textNode = getTextNode(element);
       if (!textNode) return;
 
