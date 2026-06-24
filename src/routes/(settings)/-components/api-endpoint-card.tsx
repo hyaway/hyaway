@@ -33,11 +33,16 @@ import {
 
 type Protocol = "https://" | "http://";
 
-const RECOMMENDED_CLIENT_API_VERSION = 87;
+const RECOMMENDED_CLIENT_API_VERSION = 93;
 const MANY_FEATURES_BROKEN_CLIENT_API_VERSION = 78;
 const MOST_FEATURES_BROKEN_CLIENT_API_VERSION = 66;
 
 const CLIENT_API_COMPATIBILITY_WARNINGS = [
+  {
+    apiVersion: 93,
+    hydrusVersion: 676,
+    label: "Creating Hydrus pages from hyAway will not work.",
+  },
   {
     apiVersion: 87,
     hydrusVersion: 657,
