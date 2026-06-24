@@ -367,6 +367,10 @@ export type FileIdentifiers =
   | { hash: string }
   | { file_id: number };
 
+export type AddFilesToPageOptions = FileIdentifiers & {
+  page_key: string;
+};
+
 export type DeleteFilesOptions = FileIdentifiers & {
   file_service_key?: string;
   reason?: string;
@@ -375,6 +379,18 @@ export type DeleteFilesOptions = FileIdentifiers & {
 export type UndeleteFilesOptions = FileIdentifiers & {
   file_service_key?: string;
 };
+
+/**
+ * Add files to an existing media page in the Hydrus client.
+ *
+ * @permission Requires: Manage Pages (4)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#manage_pages_add_files
+ */
+export async function addFilesToPage(
+  options: AddFilesToPageOptions,
+): Promise<void> {
+  await sessionKeyClient.post("/manage_pages/add_files", options);
+}
 
 /**
  * Send files to the trash.

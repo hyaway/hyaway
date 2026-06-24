@@ -30,7 +30,12 @@ import {
   useUnarchiveFilesMutation,
   useUndeleteFilesMutation,
 } from "@/integrations/hydrus-api/queries/manage-files";
-import { Permission } from "@/integrations/hydrus-api/models";
+import { useAddFilesToScratchpadMutation } from "@/integrations/hydrus-api/queries/manage-pages";
+import {
+  MIN_CREATE_PAGE_CLIENT_API_VERSION,
+  Permission,
+} from "@/integrations/hydrus-api/models";
+import { useApiVersionQuery } from "@/integrations/hydrus-api/queries/access";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 
 export interface FileAction {
@@ -132,6 +137,32 @@ function useManagementActions(
       };
 
   return [trashAction, archiveAction];
+}
+
+// --- Page Actions ---
+
+function usePageActions(fileId: number): Array<FileAction> {
+  const apiVersionQuery = useApiVersionQuery();
+  const permissions = usePermissions();
+  const canCreatePagesWithClientApi =
+    (apiVersionQuery.data?.version ?? 0) >= MIN_CREATE_PAGE_CLIENT_API_VERSION;
+  const canManagePages = permissions.hasPermission(Permission.MANAGE_PAGES);
+  const addFilesToScratchpadMutation = useAddFilesToScratchpadMutation();
+
+  return [
+    {
+      id: "add-to-scratchpad",
+      label: "Add to scratchpad",
+      icon: IconFileText,
+      onClick: () => addFilesToScratchpadMutation.mutate({ file_id: fileId }),
+      isPending: addFilesToScratchpadMutation.isPending,
+      disabled:
+        addFilesToScratchpadMutation.isPending ||
+        !canCreatePagesWithClientApi ||
+        !permissions.isFetched ||
+        !canManagePages,
+    },
+  ];
 }
 
 // --- External Actions (Download/Open File/Thumbnail) ---
@@ -277,6 +308,7 @@ export function useFileActions(
   // Always call hooks (rules of hooks), but conditionally include results
   const navigationActions = useNavigationActions(data.file_id);
   const managementActions = useManagementActions(data, reviewSource);
+  const pageActions = usePageActions(data.file_id);
   const externalActions = useExternalActions(data, { includeThumbnail });
 
   const groups: Array<FileActionsGroup> = [];
@@ -288,6 +320,7 @@ export function useFileActions(
   // Skip management and external actions for permanently deleted files
   if (!isPermanentlyDeleted) {
     groups.push({ id: "management", actions: managementActions });
+    groups.push({ id: "pages", actions: pageActions });
 
     if (includeExternal) {
       groups.push({ id: "external", actions: externalActions });

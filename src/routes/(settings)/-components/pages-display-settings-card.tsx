@@ -6,6 +6,7 @@ import {
   PagesDisplaySettings,
 } from "@/components/settings/pages-display-settings";
 import { PagesLatestOpenedSettings } from "@/components/settings/pages-latest-opened-settings";
+import { PagesScratchpadSettings } from "@/components/settings/pages-scratchpad-settings";
 import { PagesUrlsSettings } from "@/components/settings/pages-urls-settings";
 import {
   SettingsCardTitle,
@@ -32,10 +33,12 @@ export function PagesDisplaySettingsCard() {
           <SettingsResetButton onReset={reset} />
         </div>
         <CardDescription>
-          Configure pages grid display and URL format.
+          Configure Hydrus page shortcuts, grid display, and URL format.
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <PagesScratchpadSettings />
+        <Separator className="my-4" />
         <PagesUrlsSettings />
         <Separator className="my-4" />
         <PagesLatestOpenedSettings />

@@ -4,6 +4,7 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  addFilesToPage,
   createPage,
   focusPage,
   getPageInfo,
@@ -14,9 +15,14 @@ import { useIsApiConfigured } from "../hydrus-config-store";
 import { PageState, PageType, Permission } from "../models";
 import { useHasPermission } from "./access";
 
+import type { QueryClient } from "@tanstack/react-query";
+import type { FileIdentifiers } from "../api-client";
 import type { CreatePageOptions, MediaPage, Page } from "../models";
 
 import { createPageSlug } from "@/lib/format-utils";
+import { getScratchpadPageName } from "@/stores/pages-settings-store";
+
+const HYAWAY_PAGE_NAME = "hyAway";
 
 /**
  * Iteratively flattens a page tree into an array of all pages
@@ -73,6 +79,58 @@ export type PageOfPagesDestinationSection = PageOfPagesDestination & {
 
 const isPageOfPages = (page: Pick<Page, "page_type">) =>
   page.page_type === PageType.PAGE_OF_PAGES;
+
+const isFileSearchPage = (page: Pick<Page, "page_type">) =>
+  page.page_type === PageType.FILE_SEARCH;
+
+const findRootPageOfPages = (rootPage: Page, name: string) =>
+  rootPage.pages?.find((page) => page.name === name && isPageOfPages(page)) ??
+  null;
+
+const findFileSearchChildPage = (page: Page, name: string) =>
+  page.pages?.find((child) => child.name === name && isFileSearchPage(child)) ??
+  null;
+
+async function getOrCreateScratchpadPageKey(
+  queryClient: QueryClient,
+): Promise<string> {
+  const scratchpadPageName = getScratchpadPageName();
+  const pagesResponse = await queryClient.ensureQueryData({
+    queryKey: ["getPages"],
+    queryFn: getPages,
+  });
+  const rootPage = pagesResponse.pages;
+  const hyAwayPage = findRootPageOfPages(rootPage, HYAWAY_PAGE_NAME);
+
+  if (hyAwayPage) {
+    const scratchpadPage = findFileSearchChildPage(
+      hyAwayPage,
+      scratchpadPageName,
+    );
+    if (scratchpadPage) {
+      return scratchpadPage.page_key;
+    }
+  }
+
+  const hyAwayPageKey = hyAwayPage
+    ? hyAwayPage.page_key
+    : (
+        await createPage({
+          page_type: PageType.PAGE_OF_PAGES,
+          page_name: HYAWAY_PAGE_NAME,
+          focus_page: false,
+        })
+      ).page_key;
+
+  const scratchpadPage = await createPage({
+    page_type: PageType.FILE_SEARCH,
+    page_name: scratchpadPageName,
+    page_of_pages_key: hyAwayPageKey,
+    focus_page: false,
+  });
+
+  return scratchpadPage.page_key;
+}
 
 function collectPageOfPagesDescendants(
   page: Page,
@@ -397,5 +455,38 @@ export const useCreatePageMutation = () => {
       });
     },
     mutationKey: ["createRemotePage"],
+  });
+};
+
+export const useAddFilesToScratchpadMutation = () => {
+  const queryClient = useQueryClient();
+  const isConfigured = useIsApiConfigured();
+  const hasPermission = useHasPermission(Permission.MANAGE_PAGES);
+
+  return useMutation({
+    mutationFn: async (fileIdentifiers: FileIdentifiers) => {
+      if (!isConfigured) {
+        throw new Error("Hydrus API session not established.");
+      }
+      if (!hasPermission) {
+        throw new Error("Hydrus API key is missing Manage pages permission.");
+      }
+
+      const scratchpadPageKey = await getOrCreateScratchpadPageKey(queryClient);
+      await addFilesToPage({
+        ...fileIdentifiers,
+        page_key: scratchpadPageKey,
+      });
+      return scratchpadPageKey;
+    },
+    onSuccess: (scratchpadPageKey) => {
+      queryClient.invalidateQueries({
+        queryKey: ["getPages"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["getPageInfo", scratchpadPageKey],
+      });
+    },
+    mutationKey: ["addFilesToScratchpad"],
   });
 };
