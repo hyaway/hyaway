@@ -119,6 +119,13 @@ export function OverflowActionItem({
   action: FloatingFooterAction;
   children?: ReactNode;
 }) {
+  const content = children ?? (
+    <>
+      <action.icon />
+      {action.label}
+    </>
+  );
+
   return (
     <DropdownMenuItem
       // Link actions navigate/download via the rendered <a>; don't also
@@ -138,11 +145,15 @@ export function OverflowActionItem({
         ) : undefined
       }
     >
-      {children ?? (
-        <>
-          <action.icon />
-          {action.label}
-        </>
+      {action.disabled && action.title ? (
+        <div className="flex flex-col gap-1">
+          <span className="flex items-center gap-3">{content}</span>
+          <span className="text-muted-foreground text-xs/4">
+            {action.title}
+          </span>
+        </div>
+      ) : (
+        content
       )}
     </DropdownMenuItem>
   );
