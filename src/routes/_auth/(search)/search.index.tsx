@@ -120,6 +120,11 @@ function SearchIndex() {
               <AlertDescription>
                 Creating a matching page in hydrus will make it load much
                 faster.
+                <br />
+                <br />
+                Use "Save as Hydrus page" to create a new top level page,
+                <br />
+                or "Save in..." to place it under an existing page of pages.
               </AlertDescription>
             </Alert>
           </>
