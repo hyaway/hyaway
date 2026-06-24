@@ -4,6 +4,7 @@
 import {
   BaseResponseSchema,
   CleanTagsResponseSchema,
+  CreatePageResponseSchema,
   GetClientOptionsResponseSchema,
   GetPageInfoResponseSchema,
   GetPagesResponseSchema,
@@ -24,6 +25,8 @@ import type {
   AccessKeyType,
   CanvasType,
   CleanTagsResponse,
+  CreatePageOptions,
+  CreatePageResponse,
   FavouriteTagsResponse,
   GetClientOptionsResponse,
   GetFileMetadataResponse,
@@ -325,6 +328,22 @@ export async function focusPage(pageKey: string): Promise<void> {
   await sessionKeyClient.post("/manage_pages/focus_page", {
     page_key: pageKey,
   });
+}
+
+/**
+ * Create a new page in the Hydrus client.
+ *
+ * @permission Requires: Manage Pages (4)
+ * @see https://hydrusnetwork.github.io/hydrus/developer_api.html#manage_pages_new_page
+ */
+export async function createPage(
+  options: CreatePageOptions,
+): Promise<CreatePageResponse> {
+  const response = await sessionKeyClient.post(
+    "/manage_pages/new_page",
+    options,
+  );
+  return CreatePageResponseSchema.parse(response.data);
 }
 
 /**

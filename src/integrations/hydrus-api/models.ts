@@ -657,6 +657,30 @@ export const GetPageInfoResponseSchema = BaseResponseSchema.extend({
 
 export type GetPageInfoResponse = z.infer<typeof GetPageInfoResponseSchema>;
 
+export type CreatePageOptions = {
+  page_type: PageType;
+  page_name?: string;
+  page_of_pages_key?: string;
+  focus_page?: boolean;
+  tags?: HydrusTagSearch;
+  file_service_key?: string;
+  tag_service_key?: string;
+  hashes?: Array<string>;
+  file_sort_type?: HydrusFileSortType;
+  file_sort_asc?: boolean;
+  file_sort_namespaces?: Array<string>;
+  collect_namespaces?: Array<string>;
+  system_hash_locked?: boolean;
+};
+
+export const CreatePageResponseSchema = BaseResponseSchema.extend({
+  page_key: z.string(),
+  page_type: z.enum(PageType),
+  page_name: z.string(),
+});
+
+export type CreatePageResponse = z.infer<typeof CreatePageResponseSchema>;
+
 /**
  * Extended Page type used in the UI with computed fields.
  * - `id`: Alias for `page_key` for convenience
