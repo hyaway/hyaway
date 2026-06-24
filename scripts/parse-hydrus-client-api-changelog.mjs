@@ -87,7 +87,7 @@ const exactClientApiPhrasePattern =
   /Client API now has calls to get\/set the favourite tags/i;
 
 const apiVersionPattern =
-  /(?:Client API|client api|api) (?:version is now|is now version|version is incremented to|version to|is now version)\s*(\d+)|incremented Client API version to\s*(\d+)|client api version is now\s*(\d+)|the client api version is now\s*(\d+)|the Client API version is now\s*(\d+)|client api is now version\s*(\d+)|the client api is now version\s*(\d+)|although it is a tiny change.*Client API version to\s*(\d+)|client api version is incremented to\s*(\d+)/i;
+  /(?:Client API|client api|cilent api) (?:version is now|is now version|version is incremented to|version to|is now version)\s*(\d+)|incremented Client API version to\s*(\d+)|client api version is now\s*(\d+)|the client api version is now\s*(\d+)|the Client API version is now\s*(\d+)|client api is now version\s*(\d+)|the client api is now version\s*(\d+)|although it is a tiny change.*Client API version to\s*(\d+)|client api version is incremented to\s*(\d+)|\/api_version.*remains\s*(1)\s*just for this week/i;
 
 const html = readFileSync(sourcePath, "utf8");
 const document = new JSDOM(html).window.document;
@@ -96,6 +96,10 @@ const rows = extractRows(document);
 switch (format) {
   case "json": {
     console.log(JSON.stringify(rows, null, 2));
+    break;
+  }
+  case "gaps": {
+    console.log(JSON.stringify(findApiVersionGaps(rows), null, 2));
     break;
   }
   case "tsv": {
@@ -120,7 +124,7 @@ switch (format) {
   }
   default: {
     throw new Error(
-      `Unknown --format "${format}". Use markdown, json, or tsv.`,
+      `Unknown --format "${format}". Use markdown, json, tsv, or gaps.`,
     );
   }
 }
@@ -173,6 +177,29 @@ function extractRows(document) {
   }
 
   return rows;
+}
+
+function findApiVersionGaps(rows) {
+  const apiVersions = rows
+    .filter((row) => row.apiVersion !== null)
+    .map((row) => Number(row.apiVersion))
+    .filter(Number.isFinite)
+    .sort((left, right) => left - right);
+  const uniqueApiVersions = Array.from(new Set(apiVersions));
+  const maxApiVersion = Math.max(...uniqueApiVersions);
+  const missing = [];
+
+  for (let apiVersion = 1; apiVersion <= maxApiVersion; apiVersion += 1) {
+    if (!uniqueApiVersions.includes(apiVersion)) {
+      missing.push(apiVersion);
+    }
+  }
+
+  return {
+    min: uniqueApiVersions[0] ?? null,
+    max: Number.isFinite(maxApiVersion) ? maxApiVersion : null,
+    missing,
+  };
 }
 
 function readArg(name) {
