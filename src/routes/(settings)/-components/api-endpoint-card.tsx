@@ -3,7 +3,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
-import { IconCircleCheck } from "@tabler/icons-react";
+import { IconAlertTriangle, IconCircleCheck } from "@tabler/icons-react";
 import { useEffect } from "react";
 import { SETTINGS_ENDPOINT_FIELD_NAME } from "./constants";
 import { ApiErrorAlert } from "./api-error-alert";
@@ -32,6 +32,78 @@ import {
 } from "@/integrations/hydrus-api/hydrus-config-store";
 
 type Protocol = "https://" | "http://";
+
+const RECOMMENDED_CLIENT_API_VERSION = 87;
+const MANY_FEATURES_BROKEN_CLIENT_API_VERSION = 78;
+const MOST_FEATURES_BROKEN_CLIENT_API_VERSION = 66;
+
+const CLIENT_API_COMPATIBILITY_WARNINGS = [
+  {
+    apiVersion: 87,
+    hydrusVersion: 657,
+    label: "Rating overlays and rating settings will be incomplete.",
+  },
+  {
+    apiVersion: 83,
+    hydrusVersion: 649,
+    label: "Custom rating icons will not load.",
+  },
+  {
+    apiVersion: 80,
+    hydrusVersion: 622,
+    label: "Favourite tags will not load or save.",
+  },
+  {
+    apiVersion: 78,
+    hydrusVersion: 607,
+    label: "Watch history sync and view-count tools will not work.",
+  },
+  {
+    apiVersion: 71,
+    hydrusVersion: 591,
+    label: "The automatic access-key setup can fail.",
+  },
+  {
+    apiVersion: 69,
+    hydrusVersion: 588,
+    label: "Some gallery and search filters will not work correctly.",
+  },
+  {
+    apiVersion: 66,
+    hydrusVersion: 584,
+    label: "Remote Hydrus pages can fail to load.",
+  },
+] as const;
+
+function getCompatibilityWarnings(apiVersion: number) {
+  return CLIENT_API_COMPATIBILITY_WARNINGS.filter(
+    (warning) => apiVersion < warning.apiVersion,
+  );
+}
+
+function getCompatibilityAlertCopy(apiVersion: number) {
+  if (apiVersion < MOST_FEATURES_BROKEN_CLIENT_API_VERSION) {
+    return {
+      title: "Hydrus is too old for most hyAway features",
+      message:
+        "hyAway uses many Hydrus Client API features that your Hydrus client does not have. Most of hyAway will not work correctly until Hydrus is updated.",
+    };
+  }
+
+  if (apiVersion < MANY_FEATURES_BROKEN_CLIENT_API_VERSION) {
+    return {
+      title: "Hydrus is missing many hyAway features",
+      message:
+        "Your Hydrus client is missing Client API features that hyAway uses for setup, searches, pages, tags, and watch history. Some parts of hyAway will break.",
+    };
+  }
+
+  return {
+    title: "Hydrus is missing some hyAway features",
+    message:
+      "hyAway uses a lot of newer Hydrus Client API features. Your Hydrus client is older, so these hyAway features are likely to break.",
+  };
+}
 
 /** Parse a URL into protocol and host parts */
 function parseEndpoint(url: string): { protocol: Protocol; host: string } {
@@ -182,17 +254,22 @@ export function ApiEndpointCard() {
               </AlertDescription>
             </Alert>
           ) : isSuccess ? (
-            <Alert>
-              <IconCircleCheck />
-              <AlertTitle>Endpoint is valid!</AlertTitle>
-              <AlertDescription>
-                API endpoint: <b>{apiEndpoint}</b>
-                <br />
-                Hydrus version: <b>{data.hydrus_version}</b>
-                <br />
-                API version: <b>{data.version}</b>
-              </AlertDescription>
-            </Alert>
+            <>
+              <Alert>
+                <IconCircleCheck />
+                <AlertTitle>Endpoint is valid!</AlertTitle>
+                <AlertDescription>
+                  API endpoint: <b>{apiEndpoint}</b>
+                  <br />
+                  Hydrus version: <b>{data.hydrus_version}</b>
+                  <br />
+                  API version: <b>{data.version}</b>
+                </AlertDescription>
+              </Alert>
+              {data.version < RECOMMENDED_CLIENT_API_VERSION && (
+                <HydrusClientApiCompatibilityAlert apiVersion={data.version} />
+              )}
+            </>
           ) : isError ? (
             <ApiErrorAlert
               error={error}
@@ -204,5 +281,36 @@ export function ApiEndpointCard() {
         </CardContent>
       </Card>
     </form>
+  );
+}
+
+function HydrusClientApiCompatibilityAlert({
+  apiVersion,
+}: {
+  apiVersion: number;
+}) {
+  const warnings = getCompatibilityWarnings(apiVersion);
+  const mostFeaturesWillBreak =
+    apiVersion < MOST_FEATURES_BROKEN_CLIENT_API_VERSION;
+  const alertCopy = getCompatibilityAlertCopy(apiVersion);
+
+  return (
+    <Alert variant={mostFeaturesWillBreak ? "destructive" : "default"}>
+      <IconAlertTriangle />
+      <AlertTitle>{alertCopy.title}</AlertTitle>
+      <AlertDescription>
+        <p>{alertCopy.message}</p>
+        {!mostFeaturesWillBreak && (
+          <ul className="mt-3 list-disc space-y-1 pl-5">
+            {warnings.map((warning) => (
+              <li key={warning.apiVersion}>
+                <b>API {warning.apiVersion}</b> / Hydrus {warning.hydrusVersion}
+                : {warning.label}
+              </li>
+            ))}
+          </ul>
+        )}
+      </AlertDescription>
+    </Alert>
   );
 }
