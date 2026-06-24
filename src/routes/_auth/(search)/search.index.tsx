@@ -118,13 +118,13 @@ function SearchIndex() {
               <IconInfoCircle />
               <AlertTitle>Viewing a saved search often?</AlertTitle>
               <AlertDescription>
-                Creating a matching page in hydrus will make it load much
+                Creating a matching page in Hydrus will make it load much
                 faster.
                 <br />
                 <br />
-                Use "Save as Hydrus page" to create a new top level page,
+                Use "Create Hydrus page" to create a new top-level page,
                 <br />
-                or "Save in..." to place it under an existing page of pages.
+                or "Create in..." to place it under an existing page of pages.
               </AlertDescription>
             </Alert>
           </>

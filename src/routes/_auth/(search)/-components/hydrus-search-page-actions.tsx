@@ -130,7 +130,7 @@ export function useHydrusSearchPageActions({
     return [
       {
         id: "create-hydrus-page-root",
-        label: "Save as Hydrus page",
+        label: "Create Hydrus page",
         icon: IconFolderPlus,
         onClick: () => handleCreateHydrusPage(),
         disabled: createHydrusPageDisabled,
@@ -140,7 +140,7 @@ export function useHydrusSearchPageActions({
       },
       {
         id: "create-hydrus-page-in-group",
-        label: "Save in...",
+        label: "Create in...",
         icon: IconFolder,
         onClick: () => undefined,
         disabled: createHydrusPageDisabled || pageOfPagesSections.length === 0,
