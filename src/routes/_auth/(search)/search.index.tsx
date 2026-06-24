@@ -15,15 +15,17 @@ import {
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
 import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
+import { useHydrusSearchPageActions } from "./-components/hydrus-search-page-actions";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
 import { SearchSortTag } from "./-components/search-sort-tag";
 import type { SavedSearchSort } from "@/stores/search-settings-store";
 import { copySearchCache } from "@/lib/search-entry-utils";
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { SavedSearchSortSelect } from "@/components/settings/saved-search-sort-select";
+import { OverflowActionItem } from "@/components/page-shell/page-floating-footer";
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { SearchTagList } from "@/components/tag/tag-badge";
@@ -236,6 +238,11 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
     () => queryToHydrusSearch(staged.query),
     [staged.query],
   );
+  const hydrusPageActions = useHydrusSearchPageActions({
+    searchState: staged,
+    displayName,
+    searchTags,
+  });
 
   const sortLabel = getSortLabel(staged.sort.sortType, staged.sort.sortAsc);
   const sortColor = getThemeAdjustedColorFromHex(
@@ -399,6 +406,16 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
                 <IconCopy />
                 Clone
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {hydrusPageActions.map((action) =>
+                action.renderOverflow ? (
+                  <Fragment key={action.id}>
+                    {action.renderOverflow(action)}
+                  </Fragment>
+                ) : (
+                  <OverflowActionItem key={action.id} action={action} />
+                ),
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleDelete} variant="destructive">
                 <IconTrash />
