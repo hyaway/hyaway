@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { IconDots } from "@tabler/icons-react";
 
 import { FooterPortal } from "../app-shell/footer-portal";
@@ -21,6 +21,8 @@ export interface FloatingFooterAction {
   label: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   onClick: () => void;
+  /** Custom item to render when this action appears in the overflow menu */
+  renderOverflow?: (action: FloatingFooterAction) => ReactNode;
   variant?: "default" | "destructive";
   href?: string;
   download?: boolean;
@@ -93,36 +95,56 @@ export function PageFloatingFooter({
               }
             />
             <DropdownMenuContent side="top" align="center">
-              {overflowActions.map((action) => (
-                <DropdownMenuItem
-                  key={action.id}
-                  // Link actions navigate/download via the rendered <a>; don't also
-                  // fire onClick or it happens twice (e.g. double download).
-                  onClick={action.href ? undefined : action.onClick}
-                  variant={action.variant}
-                  disabled={action.disabled}
-                  render={
-                    action.href ? (
-                      <a
-                        href={action.href}
-                        download={action.download || undefined}
-                        target={action.external ? "_blank" : undefined}
-                        rel={
-                          action.external ? "noopener noreferrer" : undefined
-                        }
-                      />
-                    ) : undefined
-                  }
-                >
-                  <action.icon />
-                  {action.label}
-                </DropdownMenuItem>
-              ))}
+              {overflowActions.map((action) =>
+                action.renderOverflow ? (
+                  <Fragment key={action.id}>
+                    {action.renderOverflow(action)}
+                  </Fragment>
+                ) : (
+                  <OverflowActionItem key={action.id} action={action} />
+                ),
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
       </div>
     </FooterPortal>
+  );
+}
+
+export function OverflowActionItem({
+  action,
+  children,
+}: {
+  action: FloatingFooterAction;
+  children?: ReactNode;
+}) {
+  return (
+    <DropdownMenuItem
+      // Link actions navigate/download via the rendered <a>; don't also
+      // fire onClick or it happens twice (e.g. double download).
+      onClick={action.href ? undefined : action.onClick}
+      variant={action.variant}
+      disabled={action.disabled}
+      title={action.title}
+      render={
+        action.href ? (
+          <a
+            href={action.href}
+            download={action.download || undefined}
+            target={action.external ? "_blank" : undefined}
+            rel={action.external ? "noopener noreferrer" : undefined}
+          />
+        ) : undefined
+      }
+    >
+      {children ?? (
+        <>
+          <action.icon />
+          {action.label}
+        </>
+      )}
+    </DropdownMenuItem>
   );
 }
 
