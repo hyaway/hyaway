@@ -85,6 +85,11 @@ function SearchPage() {
     () => (committedQuery ? queryToHydrusSearch(committedQuery) : []),
     [committedQuery],
   );
+  const hydrusPageSearchState = committed ?? entry.staged;
+  const hydrusPageSearchTags = useMemo(
+    () => queryToHydrusSearch(hydrusPageSearchState.query),
+    [hydrusPageSearchState.query],
+  );
 
   const { data, isLoading, isFetching, isError, error } =
     useCommittedSearchFilesQuery(searchId);
@@ -163,9 +168,9 @@ function SearchPage() {
   }, [committed, entry.staged, setDefaultQuery]);
 
   const hydrusPageActions = useHydrusSearchPageActions({
-    committed,
+    searchState: hydrusPageSearchState,
     displayName,
-    searchTags,
+    searchTags: hydrusPageSearchTags,
   });
 
   const searchActions = useMemo((): Array<FloatingFooterAction> => {

@@ -30,11 +30,11 @@ import {
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 
 export function useHydrusSearchPageActions({
-  committed,
+  searchState,
   displayName,
   searchTags,
 }: {
-  committed: SearchState | undefined;
+  searchState: SearchState | undefined;
   displayName: string;
   searchTags: HydrusTagSearch;
 }): Array<FloatingFooterAction> {
@@ -61,7 +61,7 @@ export function useHydrusSearchPageActions({
 
   const handleCreateHydrusPage = useCallback(
     (pageOfPagesKey?: string) => {
-      if (!committed || searchTags.length === 0) return;
+      if (!searchState || searchTags.length === 0) return;
 
       createHydrusPageMutation.mutate(
         {
@@ -70,9 +70,9 @@ export function useHydrusSearchPageActions({
           page_of_pages_key: pageOfPagesKey,
           focus_page: false,
           tags: searchTags,
-          file_service_key: committed.fileServiceKey ?? undefined,
-          file_sort_type: committed.sort.sortType,
-          file_sort_asc: committed.sort.sortAsc,
+          file_service_key: searchState.fileServiceKey ?? undefined,
+          file_sort_type: searchState.sort.sortType,
+          file_sort_asc: searchState.sort.sortAsc,
         },
         {
           onSuccess: (page) => {
@@ -94,16 +94,16 @@ export function useHydrusSearchPageActions({
       );
     },
     [
-      committed,
       createHydrusPageMutation,
       displayName,
       handleOpenCreatedPage,
+      searchState,
       searchTags,
     ],
   );
 
   return useMemo((): Array<FloatingFooterAction> => {
-    const canCreateHydrusPage = Boolean(committed) && searchTags.length > 0;
+    const canCreateHydrusPage = Boolean(searchState) && searchTags.length > 0;
     const canCreateHydrusPageWithClientApi =
       (apiVersionQuery.data?.version ?? 0) >=
       MIN_CREATE_PAGE_CLIENT_API_VERSION;
@@ -121,8 +121,8 @@ export function useHydrusSearchPageActions({
         ? "Checking Hydrus permissions."
         : !canManagePages
           ? "Requires Manage pages permission."
-          : !committed
-            ? "Run search first."
+          : !searchState
+            ? "Add filters first."
             : searchTags.length === 0
               ? "Add filters first."
               : undefined;
@@ -203,11 +203,11 @@ export function useHydrusSearchPageActions({
     ];
   }, [
     apiVersionQuery.data?.version,
-    committed,
     createHydrusPageMutation.isPending,
     handleCreateHydrusPage,
     pageOfPagesSections,
     permissions,
+    searchState,
     searchTags,
   ]);
 }
