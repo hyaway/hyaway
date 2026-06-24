@@ -20,7 +20,10 @@ import type { FileIdentifiers } from "../api-client";
 import type { CreatePageOptions, MediaPage, Page } from "../models";
 
 import { createPageSlug } from "@/lib/format-utils";
-import { getScratchpadPageName } from "@/stores/pages-settings-store";
+import {
+  getScratchpadPageLocation,
+  getScratchpadPageName,
+} from "@/stores/pages-settings-store";
 
 const HYAWAY_PAGE_NAME = "hyAway";
 
@@ -94,12 +97,32 @@ const findFileSearchChildPage = (page: Page, name: string) =>
 async function getOrCreateScratchpadPageKey(
   queryClient: QueryClient,
 ): Promise<string> {
+  const scratchpadPageLocation = getScratchpadPageLocation();
   const scratchpadPageName = getScratchpadPageName();
   const pagesResponse = await queryClient.ensureQueryData({
     queryKey: ["getPages"],
     queryFn: getPages,
   });
   const rootPage = pagesResponse.pages;
+
+  if (scratchpadPageLocation === "root") {
+    const scratchpadPage = findFileSearchChildPage(
+      rootPage,
+      scratchpadPageName,
+    );
+    if (scratchpadPage) {
+      return scratchpadPage.page_key;
+    }
+
+    return (
+      await createPage({
+        page_type: PageType.FILE_SEARCH,
+        page_name: scratchpadPageName,
+        focus_page: false,
+      })
+    ).page_key;
+  }
+
   const hyAwayPage = findRootPageOfPages(rootPage, HYAWAY_PAGE_NAME);
 
   if (hyAwayPage) {

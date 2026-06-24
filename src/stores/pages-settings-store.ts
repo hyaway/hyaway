@@ -14,6 +14,11 @@ export const MIN_PAGE_CARD_WIDTH = 120;
 export const MAX_PAGE_CARD_WIDTH = 320;
 export const PAGE_CARD_ASPECT_RATIO = 1.35; // height = width * 1.35
 export const DEFAULT_SCRATCHPAD_PAGE_NAME = "scratchpad";
+export const SCRATCHPAD_PAGE_LOCATION_VALUES = ["hyaway", "root"] as const;
+export type ScratchpadPageLocation =
+  (typeof SCRATCHPAD_PAGE_LOCATION_VALUES)[number];
+export const DEFAULT_SCRATCHPAD_PAGE_LOCATION: ScratchpadPageLocation =
+  "hyaway";
 
 // Gap constants
 export const DEFAULT_PAGE_CARD_HORIZONTAL_GAP = 8;
@@ -31,6 +36,7 @@ type PagesSettingsState = {
   verticalGap: number;
   expandCards: boolean;
   lastOpenSection: string;
+  scratchpadPageLocation: ScratchpadPageLocation;
   scratchpadPageName: string;
   actions: {
     setLanesRange: (min: number, max: number) => void;
@@ -42,6 +48,7 @@ type PagesSettingsState = {
     setVerticalGap: (gap: number) => void;
     setExpandCards: (expand: boolean) => void;
     setLastOpenSection: (section: string) => void;
+    setScratchpadPageLocation: (location: ScratchpadPageLocation) => void;
     setScratchpadPageName: (name: string) => void;
     reset: () => void;
   };
@@ -60,6 +67,7 @@ const usePagesSettingsStore = create<PagesSettingsState>()(
       verticalGap: DEFAULT_PAGE_CARD_VERTICAL_GAP,
       expandCards: false,
       lastOpenSection: "layout",
+      scratchpadPageLocation: DEFAULT_SCRATCHPAD_PAGE_LOCATION,
       scratchpadPageName: DEFAULT_SCRATCHPAD_PAGE_NAME,
       actions: {
         setLanesRange: (minLanes: number, maxLanes: number) =>
@@ -76,6 +84,9 @@ const usePagesSettingsStore = create<PagesSettingsState>()(
         setExpandCards: (expandCards: boolean) => set({ expandCards }),
         setLastOpenSection: (lastOpenSection: string) =>
           set({ lastOpenSection }),
+        setScratchpadPageLocation: (
+          scratchpadPageLocation: ScratchpadPageLocation,
+        ) => set({ scratchpadPageLocation }),
         setScratchpadPageName: (scratchpadPageName: string) =>
           set({ scratchpadPageName }),
         reset: () => set(store.getInitialState()),
@@ -121,6 +132,13 @@ export const usePagesLastOpenSection = () =>
 
 export const useScratchpadPageName = () =>
   usePagesSettingsStore((state) => state.scratchpadPageName);
+
+export const useScratchpadPageLocation = () =>
+  usePagesSettingsStore((state) => state.scratchpadPageLocation);
+
+export const getScratchpadPageLocation = () =>
+  usePagesSettingsStore.getState().scratchpadPageLocation ??
+  DEFAULT_SCRATCHPAD_PAGE_LOCATION;
 
 export const getScratchpadPageName = () => {
   const name = usePagesSettingsStore.getState().scratchpadPageName.trim();
