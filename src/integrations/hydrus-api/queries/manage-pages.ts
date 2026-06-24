@@ -3,12 +3,18 @@
 
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { focusPage, getPageInfo, getPages, refreshPage } from "../api-client";
+import {
+  createPage,
+  focusPage,
+  getPageInfo,
+  getPages,
+  refreshPage,
+} from "../api-client";
 import { useIsApiConfigured } from "../hydrus-config-store";
-import { PageState, Permission } from "../models";
+import { PageState, PageType, Permission } from "../models";
 import { useHasPermission } from "./access";
 
-import type { MediaPage, Page } from "../models";
+import type { CreatePageOptions, MediaPage, Page } from "../models";
 
 import { createPageSlug } from "@/lib/format-utils";
 
@@ -55,6 +61,56 @@ export type PagesTreeNode = Omit<Page, "pages"> & {
   slug?: string;
   pages?: Array<PagesTreeNode>;
 };
+
+export type PageOfPagesDestination = {
+  pageKey: string;
+  label: string;
+};
+
+export type PageOfPagesDestinationSection = PageOfPagesDestination & {
+  descendants: Array<PageOfPagesDestination>;
+};
+
+const isPageOfPages = (page: Pick<Page, "page_type">) =>
+  page.page_type === PageType.PAGE_OF_PAGES;
+
+function collectPageOfPagesDescendants(
+  page: Page,
+  path: Array<string>,
+  out: Array<PageOfPagesDestination>,
+) {
+  for (const child of page.pages ?? []) {
+    if (!isPageOfPages(child)) continue;
+
+    const childPath = [...path, child.name];
+    out.push({
+      pageKey: child.page_key,
+      label: `./${childPath.slice(1).join("/")}`,
+    });
+    collectPageOfPagesDescendants(child, childPath, out);
+  }
+}
+
+export function buildPageOfPagesDestinationSections(
+  rootPage: Page,
+): Array<PageOfPagesDestinationSection> {
+  const sections: Array<PageOfPagesDestinationSection> = [];
+
+  for (const child of rootPage.pages ?? []) {
+    if (!isPageOfPages(child)) continue;
+
+    const descendants: Array<PageOfPagesDestination> = [];
+    collectPageOfPagesDescendants(child, [child.name], descendants);
+
+    sections.push({
+      pageKey: child.page_key,
+      label: child.name,
+      descendants,
+    });
+  }
+
+  return sections;
+}
 
 /**
  * Builds a hierarchical pages tree that only includes nodes with media pages
@@ -154,17 +210,21 @@ export const useGetPagesQuery = () => {
  * Adds computed `id` and `slug` fields to each page.
  */
 export const useGetMediaPagesQuery = () => {
-  const { data, ...rest } = useGetPagesQuery();
+  const query = useGetPagesQuery();
 
   const mediaPages = useMemo(
     (): Array<MediaPage> =>
-      data?.pages ? flattenPagesToMedia(data.pages) : [],
-    [data?.pages],
+      query.data?.pages ? flattenPagesToMedia(query.data.pages) : [],
+    [query.data?.pages],
   );
 
   return {
-    ...rest,
     data: mediaPages,
+    isPending: query.isPending,
+    isFetching: query.isFetching,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
   };
 };
 
@@ -173,16 +233,20 @@ export const useGetMediaPagesQuery = () => {
  * with media pages in their subtree.
  */
 export const useGetPagesTreeQuery = () => {
-  const { data, ...rest } = useGetPagesQuery();
+  const query = useGetPagesQuery();
 
   const pagesTree = useMemo(
-    () => (data?.pages ? buildPagesTree(data.pages) : null),
-    [data?.pages],
+    () => (query.data?.pages ? buildPagesTree(query.data.pages) : null),
+    [query.data?.pages],
   );
 
   return {
-    ...rest,
     data: pagesTree,
+    isPending: query.isPending,
+    isFetching: query.isFetching,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
   };
 };
 
@@ -309,5 +373,25 @@ export const useFocusPageMutation = () => {
       return focusPage(pageKey);
     },
     mutationKey: ["focusRemotePage"],
+  });
+};
+
+export const useCreatePageMutation = () => {
+  const queryClient = useQueryClient();
+  const isConfigured = useIsApiConfigured();
+
+  return useMutation({
+    mutationFn: async (options: CreatePageOptions) => {
+      if (!isConfigured) {
+        throw new Error("Hydrus API session not established.");
+      }
+      return createPage(options);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getPages"],
+      });
+    },
+    mutationKey: ["createRemotePage"],
   });
 };
