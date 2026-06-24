@@ -5,6 +5,7 @@ import z from "zod";
 
 export const HYDRUS_API_HEADER_ACCESS_KEY = "Hydrus-Client-API-Access-Key";
 export const HYDRUS_API_HEADER_SESSION_KEY = "Hydrus-Client-API-Session-Key";
+export const MIN_CREATE_PAGE_CLIENT_API_VERSION = 93;
 
 export const BaseResponseSchema = z.object({
   version: z.number().int().positive(),

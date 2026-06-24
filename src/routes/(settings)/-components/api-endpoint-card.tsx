@@ -30,10 +30,11 @@ import {
   useApiEndpoint,
   useAuthActions,
 } from "@/integrations/hydrus-api/hydrus-config-store";
+import { MIN_CREATE_PAGE_CLIENT_API_VERSION } from "@/integrations/hydrus-api/models";
 
 type Protocol = "https://" | "http://";
 
-const RECOMMENDED_CLIENT_API_VERSION = 93;
+const RECOMMENDED_CLIENT_API_VERSION = MIN_CREATE_PAGE_CLIENT_API_VERSION;
 const MANY_FEATURES_BROKEN_CLIENT_API_VERSION = 78;
 const MOST_FEATURES_BROKEN_CLIENT_API_VERSION = 66;
 
