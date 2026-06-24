@@ -6,6 +6,7 @@ import {
   IconArchiveOff,
   IconFileDownload,
   IconFileText,
+  IconFolderShare,
   IconMovie,
   IconMusic,
   IconPhoto,
@@ -152,8 +153,8 @@ function usePageActions(fileId: number): Array<FileAction> {
   return [
     {
       id: "add-to-scratchpad",
-      label: "Add to scratchpad",
-      icon: IconFileText,
+      label: "Send to scratchpad",
+      icon: IconFolderShare,
       onClick: () => addFilesToScratchpadMutation.mutate({ file_id: fileId }),
       isPending: addFilesToScratchpadMutation.isPending,
       disabled:
