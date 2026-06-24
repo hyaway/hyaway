@@ -216,6 +216,7 @@ function CreatePageOfPagesNameDialogItem({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
+        nativeButton={false}
         render={
           <DropdownMenuItem
             closeOnClick={false}
