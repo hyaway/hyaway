@@ -34,6 +34,7 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "licenses": "pnpx license-checker-rseidelsohn --production --relativeLicensePath --relativeModulePath --out NOTICE --nopeer --excludePrivatePackage --csv",
+    "hydrus:api-changelog": "node scripts/parse-hydrus-client-api-changelog.mjs",
     "ref:update": "git -C .reference/hydrus fetch --depth 1 && git -C .reference/hydrus reset --hard origin/master",
     "ref:clone": "git clone --depth 1 https://github.com/hydrusnetwork/hydrus.git .reference/hydrus"
   },
