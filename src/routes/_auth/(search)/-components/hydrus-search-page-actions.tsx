@@ -3,11 +3,12 @@
 
 import { useCallback, useMemo } from "react";
 import { IconFolder, IconFolderPlus } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
-import type { HydrusTagSearch, Page } from "@/integrations/hydrus-api/models";
+import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
 import type { SearchState } from "@/stores/search-defaults";
 import { OverflowActionItem } from "@/components/page-shell/page-floating-footer";
 import {
@@ -25,6 +26,7 @@ import {
 import { useApiVersionQuery } from "@/integrations/hydrus-api/queries/access";
 import {
   buildPageOfPagesDestinationSections,
+  ensurePageOfPagesPath,
   formatHydrusPagePath,
   useCreatePageMutation,
   useGetPagesQuery,
@@ -33,16 +35,6 @@ import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 
 const HYAWAY_PAGE_NAME = "hyAway";
 const SEARCH_PAGE_NAME = "search";
-const DEFAULT_SEARCH_PARENT_PATH = formatHydrusPagePath(
-  SEARCH_PAGE_NAME,
-  HYAWAY_PAGE_NAME,
-);
-
-const findPageOfPagesChild = (page: Page | null | undefined, name: string) =>
-  page?.pages?.find(
-    (child) =>
-      child.name === name && child.page_type === PageType.PAGE_OF_PAGES,
-  ) ?? null;
 
 export function useHydrusSearchPageActions({
   searchState,
@@ -54,6 +46,7 @@ export function useHydrusSearchPageActions({
   searchTags: HydrusTagSearch;
 }): Array<FloatingFooterAction> {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const apiVersionQuery = useApiVersionQuery();
   const permissions = usePermissions();
   const createHydrusPageMutation = useCreatePageMutation();
@@ -121,32 +114,14 @@ export function useHydrusSearchPageActions({
     if (!searchState || searchTags.length === 0) return;
 
     try {
-      const rootPage = pagesData?.pages;
-      const hyAwayPage = findPageOfPagesChild(rootPage, HYAWAY_PAGE_NAME);
-      const hyAwayPageKey = hyAwayPage
-        ? hyAwayPage.page_key
-        : (
-            await createHydrusPageMutation.mutateAsync({
-              page_type: PageType.PAGE_OF_PAGES,
-              page_name: HYAWAY_PAGE_NAME,
-              focus_page: false,
-            })
-          ).page_key;
-      const searchPage = findPageOfPagesChild(hyAwayPage, SEARCH_PAGE_NAME);
-      const searchPageKey = searchPage
-        ? searchPage.page_key
-        : (
-            await createHydrusPageMutation.mutateAsync({
-              page_type: PageType.PAGE_OF_PAGES,
-              page_name: SEARCH_PAGE_NAME,
-              page_of_pages_key: hyAwayPageKey,
-              focus_page: false,
-            })
-          ).page_key;
+      const searchParentPage = await ensurePageOfPagesPath(queryClient, [
+        HYAWAY_PAGE_NAME,
+        SEARCH_PAGE_NAME,
+      ]);
       const page = await createHydrusPageMutation.mutateAsync({
         page_type: PageType.FILE_SEARCH,
         page_name: displayName,
-        page_of_pages_key: searchPageKey,
+        page_of_pages_key: searchParentPage.pageKey,
         focus_page: false,
         tags: searchTags,
         file_service_key: searchState.fileServiceKey ?? undefined,
@@ -155,10 +130,7 @@ export function useHydrusSearchPageActions({
       });
 
       toast.success("Hydrus page created", {
-        description: formatHydrusPagePath(
-          page.page_name,
-          DEFAULT_SEARCH_PARENT_PATH,
-        ),
+        description: formatHydrusPagePath(page.page_name, searchParentPage.path),
         action: {
           label: "Open page",
           onClick: () => handleOpenCreatedPage(page.page_key),
@@ -173,7 +145,7 @@ export function useHydrusSearchPageActions({
     createHydrusPageMutation,
     displayName,
     handleOpenCreatedPage,
-    pagesData?.pages,
+    queryClient,
     searchState,
     searchTags,
   ]);

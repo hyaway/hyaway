@@ -33,6 +33,7 @@ import {
 } from "@/stores/scratchpad-settings-store";
 
 const HYAWAY_PAGE_NAME = "hyAway";
+const SCRATCHPAD_HYAWAY_PARENT_PATH = [HYAWAY_PAGE_NAME];
 
 /**
  * Iteratively flattens a page tree into an array of all pages
@@ -88,6 +89,15 @@ export type PageOfPagesDestinationSection = PageOfPagesDestination & {
   descendants: Array<PageOfPagesDestination>;
 };
 
+export type EnsurePageOfPagesPathResult = {
+  pageKey: string;
+  path: string;
+};
+
+type EnsurePageOfPagesPathOptions = {
+  refetch?: boolean;
+};
+
 const isPageOfPages = (page: Pick<Page, "page_type">) =>
   page.page_type === PageType.PAGE_OF_PAGES;
 
@@ -105,9 +115,6 @@ const findPageOfPagesChildPage = (
       isPageOfPages(child) &&
       !excludePageKeys?.has(child.page_key),
   ) ?? null;
-
-const findRootPageOfPages = (rootPage: Page, name: string) =>
-  findPageOfPagesChildPage(rootPage, name);
 
 const findFileSearchChildPage = (page: Page, name: string) =>
   page.pages?.find((child) => child.name === name && isFileSearchPage(child)) ??
@@ -188,64 +195,116 @@ async function createPageWithRecovery(
   }
 }
 
-async function getOrCreateScratchpadPageKey(
+export async function ensurePageOfPagesPath(
   queryClient: QueryClient,
-  options: { refetch?: boolean } = {},
-): Promise<string> {
-  const scratchpadPageLocation = getScratchpadPageLocation();
-  const scratchpadPageName = getScratchpadPageName();
+  pageNames: Array<string>,
+  options: EnsurePageOfPagesPathOptions = {},
+): Promise<EnsurePageOfPagesPathResult> {
+  const pathNames = pageNames.map((name) => name.trim()).filter(Boolean);
   const pagesResponse = options.refetch
     ? await refetchPagesResponse(queryClient)
     : await queryClient.ensureQueryData({
         queryKey: ["getPages"],
         queryFn: getPages,
       });
-  const rootPage = pagesResponse.pages;
 
-  if (scratchpadPageLocation === "root") {
-    const scratchpadPage = findFileSearchChildPage(
-      rootPage,
-      scratchpadPageName,
-    );
-    if (scratchpadPage) {
-      return scratchpadPage.page_key;
+  if (pathNames.length === 0) {
+    return {
+      pageKey: pagesResponse.pages.page_key,
+      path: "",
+    };
+  }
+
+  let parentPage: Page | null = pagesResponse.pages;
+  let parentPageKey: string | undefined;
+  const ensuredPathNames: Array<string> = [];
+  let createdAnyPage = false;
+
+  for (const pageName of pathNames) {
+    const existingPage: Page | null = parentPage
+      ? findPageOfPagesChildPage(parentPage, pageName)
+      : null;
+
+    if (existingPage) {
+      parentPage = existingPage;
+      parentPageKey = existingPage.page_key;
+      ensuredPathNames.push(existingPage.name);
+      continue;
     }
 
-    return (
-      await createPage({
-        page_type: PageType.FILE_SEARCH,
-        page_name: scratchpadPageName,
+    let createdPage: CreatePageResponse;
+
+    try {
+      createdPage = await createPageWithRecovery(queryClient, {
+        page_type: PageType.PAGE_OF_PAGES,
+        page_name: pageName,
+        page_of_pages_key: parentPageKey,
         focus_page: false,
-      })
-    ).page_key;
-  }
+      });
+    } catch (error) {
+      if (!options.refetch && parentPageKey) {
+        return ensurePageOfPagesPath(queryClient, pathNames, {
+          refetch: true,
+        });
+      }
 
-  const hyAwayPage = findRootPageOfPages(rootPage, HYAWAY_PAGE_NAME);
-
-  if (hyAwayPage) {
-    const scratchpadPage = findFileSearchChildPage(
-      hyAwayPage,
-      scratchpadPageName,
-    );
-    if (scratchpadPage) {
-      return scratchpadPage.page_key;
+      throw error;
     }
+
+    parentPage = null;
+    parentPageKey = createdPage.page_key;
+    ensuredPathNames.push(createdPage.page_name);
+    createdAnyPage = true;
   }
 
-  const hyAwayPageKey = hyAwayPage
-    ? hyAwayPage.page_key
-    : (
-        await createPageWithRecovery(queryClient, {
-          page_type: PageType.PAGE_OF_PAGES,
-          page_name: HYAWAY_PAGE_NAME,
-          focus_page: false,
-        })
-      ).page_key;
+  if (createdAnyPage) {
+    queryClient.invalidateQueries({
+      queryKey: ["getPages"],
+    });
+  }
+
+  return {
+    pageKey: parentPageKey!,
+    path: ensuredPathNames.join(" / "),
+  };
+}
+
+async function getOrCreateScratchpadPageKey(
+  queryClient: QueryClient,
+  options: { refetch?: boolean } = {},
+): Promise<string> {
+  const scratchpadPageLocation = getScratchpadPageLocation();
+  const scratchpadPageName = getScratchpadPageName();
+  const parentPath =
+    scratchpadPageLocation === "root" ? [] : SCRATCHPAD_HYAWAY_PARENT_PATH;
+  const scratchpadParentPage = await ensurePageOfPagesPath(
+    queryClient,
+    parentPath,
+    options,
+  );
+  const pagesResponse = await queryClient.ensureQueryData({
+    queryKey: ["getPages"],
+    queryFn: getPages,
+  });
+  const cachedParentPage = findPageByKey(
+    pagesResponse.pages,
+    scratchpadParentPage.pageKey,
+  );
+  const cachedScratchpadPage = cachedParentPage
+    ? findFileSearchChildPage(cachedParentPage, scratchpadPageName)
+    : null;
+
+  if (cachedScratchpadPage) {
+    return cachedScratchpadPage.page_key;
+  }
 
   const scratchpadPage = await createPage({
     page_type: PageType.FILE_SEARCH,
     page_name: scratchpadPageName,
-    page_of_pages_key: hyAwayPageKey,
+    page_of_pages_key:
+      scratchpadPageLocation === "root"
+        ? undefined
+        : scratchpadParentPage.pageKey,
     focus_page: false,
   });
 
