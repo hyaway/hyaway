@@ -122,9 +122,9 @@ function SearchIndex() {
                 faster.
                 <br />
                 <br />
-                Use "Create Hydrus page" to create a new top-level page,
-                <br />
-                or "Create in..." to place it under an existing page of pages.
+                Use "Save as page" to create under hyAway / search, or "Save as
+                page in..." to choose the top page notebook or another page of
+                pages.
               </AlertDescription>
             </Alert>
           </>
