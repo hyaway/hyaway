@@ -12,6 +12,7 @@ import type { SearchState } from "@/stores/search-defaults";
 import { OverflowActionItem } from "@/components/page-shell/page-floating-footer";
 import {
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -24,6 +25,7 @@ import {
 import { useApiVersionQuery } from "@/integrations/hydrus-api/queries/access";
 import {
   buildPageOfPagesDestinationSections,
+  formatHydrusPagePath,
   useCreatePageMutation,
   useGetPagesQuery,
 } from "@/integrations/hydrus-api/queries/manage-pages";
@@ -60,7 +62,7 @@ export function useHydrusSearchPageActions({
   );
 
   const handleCreateHydrusPage = useCallback(
-    (pageOfPagesKey?: string) => {
+    (pageOfPagesKey?: string, parentPath?: string) => {
       if (!searchState || searchTags.length === 0) return;
 
       createHydrusPageMutation.mutate(
@@ -77,7 +79,7 @@ export function useHydrusSearchPageActions({
         {
           onSuccess: (page) => {
             toast.success("Hydrus page created", {
-              description: page.page_name,
+              description: formatHydrusPagePath(page.page_name, parentPath),
               action: {
                 label: "Open page",
                 onClick: () => handleOpenCreatedPage(page.page_key),
@@ -160,7 +162,9 @@ export function useHydrusSearchPageActions({
                   section.descendants.length === 0 ? (
                     <DropdownMenuItem
                       key={section.pageKey}
-                      onClick={() => handleCreateHydrusPage(section.pageKey)}
+                      onClick={() =>
+                        handleCreateHydrusPage(section.pageKey, section.path)
+                      }
                       disabled={isCreating}
                     >
                       {section.label}
@@ -173,17 +177,24 @@ export function useHydrusSearchPageActions({
                       <DropdownMenuSubContent className="max-h-[min(60dvh,var(--available-height))] min-w-64">
                         <DropdownMenuItem
                           onClick={() =>
-                            handleCreateHydrusPage(section.pageKey)
+                            handleCreateHydrusPage(
+                              section.pageKey,
+                              section.path,
+                            )
                           }
                           disabled={isCreating}
                         >
-                          {section.label}
+                          /
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         {section.descendants.map((destination) => (
                           <DropdownMenuItem
                             key={destination.pageKey}
                             onClick={() =>
-                              handleCreateHydrusPage(destination.pageKey)
+                              handleCreateHydrusPage(
+                                destination.pageKey,
+                                destination.path,
+                              )
                             }
                             disabled={isCreating}
                           >

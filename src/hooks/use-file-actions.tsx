@@ -6,7 +6,7 @@ import {
   IconArchiveOff,
   IconFileDownload,
   IconFileText,
-  IconFolderShare,
+  IconGhost2,
   IconMovie,
   IconMusic,
   IconPhoto,
@@ -14,6 +14,8 @@ import {
   IconTrash,
   IconTrashOff,
 } from "@tabler/icons-react";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 import type { ComponentType, SVGProps } from "react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -143,6 +145,7 @@ function useManagementActions(
 // --- Page Actions ---
 
 function usePageActions(fileId: number): Array<FileAction> {
+  const navigate = useNavigate();
   const apiVersionQuery = useApiVersionQuery();
   const permissions = usePermissions();
   const canCreatePagesWithClientApi =
@@ -153,9 +156,26 @@ function usePageActions(fileId: number): Array<FileAction> {
   return [
     {
       id: "add-to-scratchpad",
-      label: "Send to scratchpad",
-      icon: IconFolderShare,
-      onClick: () => addFilesToScratchpadMutation.mutate({ file_id: fileId }),
+      label: "Add to scratchpad",
+      icon: IconGhost2,
+      onClick: () =>
+        addFilesToScratchpadMutation.mutate(
+          { file_id: fileId },
+          {
+            onSuccess: (scratchpadPageKey) => {
+              toast.success("Added to scratchpad", {
+                action: {
+                  label: "Open scratchpad",
+                  onClick: () =>
+                    navigate({
+                      to: "/pages/$pageId",
+                      params: { pageId: scratchpadPageKey },
+                    }),
+                },
+              });
+            },
+          },
+        ),
       isPending: addFilesToScratchpadMutation.isPending,
       disabled:
         addFilesToScratchpadMutation.isPending ||

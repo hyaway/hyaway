@@ -20,6 +20,7 @@ import {
 } from "@/components/ui-primitives/dialog";
 import {
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -34,6 +35,7 @@ import { useApiVersionQuery } from "@/integrations/hydrus-api/queries/access";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 import {
   buildPageOfPagesDestinationSections,
+  formatHydrusPagePath,
   useCreatePageMutation,
 } from "@/integrations/hydrus-api/queries/manage-pages";
 
@@ -53,7 +55,7 @@ export function usePageOfPagesActions(rootPage: Page | undefined): {
   );
 
   const handleCreatePageOfPages = useCallback(
-    (pageName: string, pageOfPagesKey?: string) => {
+    (pageName: string, pageOfPagesKey?: string, parentPath?: string) => {
       createPageMutation.mutate(
         {
           page_type: PageType.PAGE_OF_PAGES,
@@ -64,7 +66,7 @@ export function usePageOfPagesActions(rootPage: Page | undefined): {
         {
           onSuccess: (page) => {
             toast.success("Hydrus page of pages created", {
-              description: page.page_name,
+              description: formatHydrusPagePath(page.page_name, parentPath),
             });
           },
           onError: (error) => {
@@ -144,6 +146,7 @@ export function usePageOfPagesActions(rootPage: Page | undefined): {
                     <CreatePageOfPagesNameDialogItem
                       key={section.pageKey}
                       label={section.label}
+                      path={section.path}
                       pageOfPagesKey={section.pageKey}
                       isCreating={isCreating}
                       onOpenDialog={setDialogRequest}
@@ -155,15 +158,18 @@ export function usePageOfPagesActions(rootPage: Page | undefined): {
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent className="max-h-[min(60dvh,var(--available-height))] min-w-64">
                         <CreatePageOfPagesNameDialogItem
-                          label={section.label}
+                          label={`/(new page)`}
+                          path={section.path}
                           pageOfPagesKey={section.pageKey}
                           isCreating={isCreating}
                           onOpenDialog={setDialogRequest}
                         />
+                        <DropdownMenuSeparator />
                         {section.descendants.map((destination) => (
                           <CreatePageOfPagesNameDialogItem
                             key={destination.pageKey}
                             label={destination.label}
+                            path={destination.path}
                             pageOfPagesKey={destination.pageKey}
                             isCreating={isCreating}
                             onOpenDialog={setDialogRequest}
@@ -200,6 +206,7 @@ export function usePageOfPagesActions(rootPage: Page | undefined): {
 
 type PageOfPagesDialogRequest = {
   label: string;
+  path?: string;
   pageOfPagesKey?: string;
   icon?: ComponentType<SVGProps<SVGSVGElement>>;
   title?: string;
@@ -209,6 +216,7 @@ type PageOfPagesDialogRequest = {
 function CreatePageOfPagesNameDialogItem({
   action,
   label = action?.label ?? "New page of pages",
+  path,
   pageOfPagesKey,
   isCreating,
   onOpenDialog,
@@ -216,6 +224,7 @@ function CreatePageOfPagesNameDialogItem({
 }: {
   action?: FloatingFooterAction;
   label?: string;
+  path?: string;
   pageOfPagesKey?: string;
   isCreating: boolean;
   onOpenDialog: (request: PageOfPagesDialogRequest) => void;
@@ -228,6 +237,7 @@ function CreatePageOfPagesNameDialogItem({
       onClick={() =>
         onOpenDialog({
           label,
+          path,
           pageOfPagesKey,
           icon: Icon,
           title: action?.title,
@@ -252,11 +262,16 @@ function CreatePageOfPagesNameDialog({
 }: {
   request: PageOfPagesDialogRequest | null;
   isCreating: boolean;
-  onCreate: (pageName: string, pageOfPagesKey?: string) => void;
+  onCreate: (
+    pageName: string,
+    pageOfPagesKey?: string,
+    parentPath?: string,
+  ) => void;
   onClose: () => void;
 }) {
   const [pageName, setPageName] = useState("");
   const label = request?.label ?? "New page of pages";
+  const destinationLabel = request?.path ?? label;
   const trimmedPageName = pageName.trim();
 
   useEffect(() => {
@@ -267,7 +282,7 @@ function CreatePageOfPagesNameDialog({
     event.preventDefault();
     if (!request || !trimmedPageName || isCreating) return;
 
-    onCreate(trimmedPageName, request.pageOfPagesKey);
+    onCreate(trimmedPageName, request.pageOfPagesKey, request.path);
     onClose();
     setPageName("");
   };
@@ -284,7 +299,7 @@ function CreatePageOfPagesNameDialog({
           <DialogTitle>Page of pages name</DialogTitle>
           <DialogDescription>
             {request?.pageOfPagesKey
-              ? `Create inside ${label}.`
+              ? `Create inside ${destinationLabel}.`
               : "Create at the Hydrus root."}
           </DialogDescription>
         </DialogHeader>

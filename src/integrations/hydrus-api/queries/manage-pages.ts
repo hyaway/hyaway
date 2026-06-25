@@ -3,6 +3,7 @@
 
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import {
   addFilesToPage,
   createPage,
@@ -80,6 +81,7 @@ export type PagesTreeNode = Omit<Page, "pages"> & {
 export type PageOfPagesDestination = {
   pageKey: string;
   label: string;
+  path: string;
 };
 
 export type PageOfPagesDestinationSection = PageOfPagesDestination & {
@@ -114,6 +116,9 @@ const findFileSearchChildPage = (page: Page, name: string) =>
 const findPageByKey = (rootPage: Page, pageKey: string) =>
   flattenPages(rootPage).find((page) => page.page_key === pageKey) ?? null;
 
+const isNotFoundError = (error: unknown) =>
+  axios.isAxiosError(error) && error.response?.status === 404;
+
 async function refetchPagesResponse(
   queryClient: QueryClient,
 ): Promise<GetPagesResponse> {
@@ -126,7 +131,13 @@ async function createPageWithRecovery(
   queryClient: QueryClient,
   options: CreatePageOptions,
 ): Promise<CreatePageResponse> {
-  if (options.page_type !== PageType.PAGE_OF_PAGES || !options.page_name) {
+  const hasParentPage = Boolean(options.page_of_pages_key);
+  // Work around a Hydrus bug where PAGE_OF_PAGES can be created but
+  // /manage_pages/new_page still returns an error before sending the response.
+  const canRecoverCreatedPage =
+    options.page_type === PageType.PAGE_OF_PAGES && Boolean(options.page_name);
+
+  if (!hasParentPage && !canRecoverCreatedPage) {
     return createPage(options);
   }
 
@@ -148,13 +159,14 @@ async function createPageWithRecovery(
     const refreshedParentPage = options.page_of_pages_key
       ? findPageByKey(refreshedPagesResponse.pages, options.page_of_pages_key)
       : refreshedPagesResponse.pages;
-    const recoveredPage = refreshedParentPage
-      ? findPageOfPagesChildPage(
-          refreshedParentPage,
-          options.page_name,
-          existingSiblingPageKeys,
-        )
-      : null;
+    const recoveredPage =
+      canRecoverCreatedPage && refreshedParentPage && options.page_name
+        ? findPageOfPagesChildPage(
+            refreshedParentPage,
+            options.page_name,
+            existingSiblingPageKeys,
+          )
+        : null;
 
     if (recoveredPage) {
       return {
@@ -166,19 +178,28 @@ async function createPageWithRecovery(
       };
     }
 
+    if (hasParentPage && isNotFoundError(error) && !refreshedParentPage) {
+      throw new Error(
+        "That Hydrus page of pages no longer exists. The page list has been refreshed; choose another destination.",
+      );
+    }
+
     throw error;
   }
 }
 
 async function getOrCreateScratchpadPageKey(
   queryClient: QueryClient,
+  options: { refetch?: boolean } = {},
 ): Promise<string> {
   const scratchpadPageLocation = getScratchpadPageLocation();
   const scratchpadPageName = getScratchpadPageName();
-  const pagesResponse = await queryClient.ensureQueryData({
-    queryKey: ["getPages"],
-    queryFn: getPages,
-  });
+  const pagesResponse = options.refetch
+    ? await refetchPagesResponse(queryClient)
+    : await queryClient.ensureQueryData({
+        queryKey: ["getPages"],
+        queryFn: getPages,
+      });
   const rootPage = pagesResponse.pages;
 
   if (scratchpadPageLocation === "root") {
@@ -231,6 +252,26 @@ async function getOrCreateScratchpadPageKey(
   return scratchpadPage.page_key;
 }
 
+async function addFilesToScratchpad(
+  queryClient: QueryClient,
+  fileIdentifiers: FileIdentifiers,
+  options: { refetch?: boolean } = {},
+): Promise<string> {
+  const scratchpadPageKey = await getOrCreateScratchpadPageKey(
+    queryClient,
+    options,
+  );
+  await addFilesToPage({
+    ...fileIdentifiers,
+    page_key: scratchpadPageKey,
+  });
+  return scratchpadPageKey;
+}
+
+export function formatHydrusPagePath(pageName: string, parentPath?: string) {
+  return parentPath ? `${parentPath} / ${pageName}` : pageName;
+}
+
 function collectPageOfPagesDescendants(
   page: Page,
   path: Array<string>,
@@ -242,7 +283,8 @@ function collectPageOfPagesDescendants(
     const childPath = [...path, child.name];
     out.push({
       pageKey: child.page_key,
-      label: `./${childPath.slice(1).join("/")}`,
+      label: childPath.slice(1).join("/"),
+      path: childPath.join(" / "),
     });
     collectPageOfPagesDescendants(child, childPath, out);
   }
@@ -262,6 +304,7 @@ export function buildPageOfPagesDestinationSections(
     sections.push({
       pageKey: child.page_key,
       label: child.name,
+      path: child.name,
       descendants,
     });
   }
@@ -571,12 +614,17 @@ export const useAddFilesToScratchpadMutation = () => {
         throw new Error("Hydrus API key is missing Manage pages permission.");
       }
 
-      const scratchpadPageKey = await getOrCreateScratchpadPageKey(queryClient);
-      await addFilesToPage({
-        ...fileIdentifiers,
-        page_key: scratchpadPageKey,
-      });
-      return scratchpadPageKey;
+      try {
+        return await addFilesToScratchpad(queryClient, fileIdentifiers);
+      } catch (error) {
+        if (!isNotFoundError(error)) {
+          throw error;
+        }
+
+        return addFilesToScratchpad(queryClient, fileIdentifiers, {
+          refetch: true,
+        });
+      }
     },
     onSuccess: (scratchpadPageKey) => {
       queryClient.invalidateQueries({
