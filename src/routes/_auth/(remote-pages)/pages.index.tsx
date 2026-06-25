@@ -132,7 +132,8 @@ function PagesIndexContent() {
   } = useGetMediaPagesQuery();
   const { data: pagesTree } = useGetPagesTreeQuery();
   const { data: pagesData } = useGetPagesQuery();
-  const createPageOfPagesActions = usePageOfPagesActions(pagesData?.pages);
+  const { actions: createPageOfPagesActions, dialog: createPageOfPagesDialog } =
+    usePageOfPagesActions(pagesData?.pages);
   const queryClient = useQueryClient();
   const minLanes = usePagesMinLanes();
   const maxLanes = usePagesMaxLanes();
@@ -287,6 +288,7 @@ function PagesIndexContent() {
         leftContent={refetchButton}
         actions={createPageOfPagesActions}
       />
+      {createPageOfPagesDialog}
     </>
   );
 }

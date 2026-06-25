@@ -17,7 +17,13 @@ import { useHasPermission } from "./access";
 
 import type { QueryClient } from "@tanstack/react-query";
 import type { FileIdentifiers } from "../api-client";
-import type { CreatePageOptions, MediaPage, Page } from "../models";
+import type {
+  CreatePageOptions,
+  CreatePageResponse,
+  GetPagesResponse,
+  MediaPage,
+  Page,
+} from "../models";
 
 import { createPageSlug } from "@/lib/format-utils";
 import {
@@ -86,13 +92,83 @@ const isPageOfPages = (page: Pick<Page, "page_type">) =>
 const isFileSearchPage = (page: Pick<Page, "page_type">) =>
   page.page_type === PageType.FILE_SEARCH;
 
+const findPageOfPagesChildPage = (
+  page: Page,
+  name: string,
+  excludePageKeys?: Set<string>,
+) =>
+  page.pages?.find(
+    (child) =>
+      child.name === name &&
+      isPageOfPages(child) &&
+      !excludePageKeys?.has(child.page_key),
+  ) ?? null;
+
 const findRootPageOfPages = (rootPage: Page, name: string) =>
-  rootPage.pages?.find((page) => page.name === name && isPageOfPages(page)) ??
-  null;
+  findPageOfPagesChildPage(rootPage, name);
 
 const findFileSearchChildPage = (page: Page, name: string) =>
   page.pages?.find((child) => child.name === name && isFileSearchPage(child)) ??
   null;
+
+const findPageByKey = (rootPage: Page, pageKey: string) =>
+  flattenPages(rootPage).find((page) => page.page_key === pageKey) ?? null;
+
+async function refetchPagesResponse(
+  queryClient: QueryClient,
+): Promise<GetPagesResponse> {
+  const pagesResponse = await getPages();
+  queryClient.setQueryData(["getPages"], pagesResponse);
+  return pagesResponse;
+}
+
+async function createPageWithRecovery(
+  queryClient: QueryClient,
+  options: CreatePageOptions,
+): Promise<CreatePageResponse> {
+  if (options.page_type !== PageType.PAGE_OF_PAGES || !options.page_name) {
+    return createPage(options);
+  }
+
+  const pagesResponse = await queryClient.ensureQueryData({
+    queryKey: ["getPages"],
+    queryFn: getPages,
+  });
+  const parentPage = options.page_of_pages_key
+    ? findPageByKey(pagesResponse.pages, options.page_of_pages_key)
+    : pagesResponse.pages;
+  const existingSiblingPageKeys = new Set(
+    parentPage?.pages?.map((page) => page.page_key) ?? [],
+  );
+
+  try {
+    return await createPage(options);
+  } catch (error) {
+    const refreshedPagesResponse = await refetchPagesResponse(queryClient);
+    const refreshedParentPage = options.page_of_pages_key
+      ? findPageByKey(refreshedPagesResponse.pages, options.page_of_pages_key)
+      : refreshedPagesResponse.pages;
+    const recoveredPage = refreshedParentPage
+      ? findPageOfPagesChildPage(
+          refreshedParentPage,
+          options.page_name,
+          existingSiblingPageKeys,
+        )
+      : null;
+
+    if (recoveredPage) {
+      return {
+        version: refreshedPagesResponse.version,
+        hydrus_version: refreshedPagesResponse.hydrus_version,
+        page_key: recoveredPage.page_key,
+        page_type: recoveredPage.page_type,
+        page_name: recoveredPage.name,
+      };
+    }
+
+    throw error;
+  }
+}
 
 async function getOrCreateScratchpadPageKey(
   queryClient: QueryClient,
@@ -138,7 +214,7 @@ async function getOrCreateScratchpadPageKey(
   const hyAwayPageKey = hyAwayPage
     ? hyAwayPage.page_key
     : (
-        await createPage({
+        await createPageWithRecovery(queryClient, {
           page_type: PageType.PAGE_OF_PAGES,
           page_name: HYAWAY_PAGE_NAME,
           focus_page: false,
@@ -470,7 +546,7 @@ export const useCreatePageMutation = () => {
       if (!hasPermission) {
         throw new Error("Hydrus API key is missing Manage pages permission.");
       }
-      return createPage(options);
+      return createPageWithRecovery(queryClient, options);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
