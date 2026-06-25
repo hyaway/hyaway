@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { IconFolder, IconFolderPlus } from "@tabler/icons-react";
+import { IconFolderPlus } from "@tabler/icons-react";
 import { toast } from "sonner";
 
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
@@ -104,7 +104,7 @@ export function usePageOfPagesActions(rootPage: Page | undefined): {
 
     return [
       {
-        id: "create-page-of-pages-root",
+        id: "create-page-of-pages",
         label: "New page of pages",
         icon: IconFolderPlus,
         onClick: () => undefined,
@@ -113,26 +113,7 @@ export function usePageOfPagesActions(rootPage: Page | undefined): {
         title: createPageDisabledTitle,
         overflowOnly: true,
         renderOverflow: (action) =>
-          action.disabled ? (
-            <OverflowActionItem action={action} />
-          ) : (
-            <CreatePageOfPagesNameDialogItem
-              action={action}
-              isCreating={isCreating}
-              onOpenDialog={setDialogRequest}
-            />
-          ),
-      },
-      {
-        id: "create-page-of-pages-in-page-of-pages",
-        label: "New page of pages in...",
-        icon: IconFolder,
-        onClick: () => undefined,
-        disabled: createPageDisabled || pageOfPagesSections.length === 0,
-        title: createPageDisabledTitle,
-        overflowOnly: true,
-        renderOverflow: (action) =>
-          createPageDisabled || pageOfPagesSections.length === 0 ? (
+          createPageDisabled ? (
             <OverflowActionItem action={action} />
           ) : (
             <DropdownMenuSub>
@@ -141,6 +122,14 @@ export function usePageOfPagesActions(rootPage: Page | undefined): {
                 {action.label}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="max-h-[min(60dvh,var(--available-height))] min-w-64">
+                <CreatePageOfPagesNameDialogItem
+                  label="(new page here)"
+                  isCreating={isCreating}
+                  onOpenDialog={setDialogRequest}
+                />
+                {pageOfPagesSections.length > 0 ? (
+                  <DropdownMenuSeparator />
+                ) : null}
                 {pageOfPagesSections.map((section) =>
                   section.descendants.length === 0 ? (
                     <CreatePageOfPagesNameDialogItem
@@ -158,7 +147,7 @@ export function usePageOfPagesActions(rootPage: Page | undefined): {
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent className="max-h-[min(60dvh,var(--available-height))] min-w-64">
                         <CreatePageOfPagesNameDialogItem
-                          label={`/(new page)`}
+                          label={`(new page here)`}
                           path={section.path}
                           pageOfPagesKey={section.pageKey}
                           isCreating={isCreating}
@@ -273,6 +262,7 @@ function CreatePageOfPagesNameDialog({
   const label = request?.label ?? "New page of pages";
   const destinationLabel = request?.path ?? label;
   const trimmedPageName = pageName.trim();
+  const createsInTopPageNotebook = request && !request.pageOfPagesKey;
 
   useEffect(() => {
     if (request) setPageName("");
@@ -298,9 +288,9 @@ function CreatePageOfPagesNameDialog({
         <DialogHeader>
           <DialogTitle>Page of pages name</DialogTitle>
           <DialogDescription>
-            {request?.pageOfPagesKey
-              ? `Create inside ${destinationLabel}.`
-              : "Create at the Hydrus root."}
+            {createsInTopPageNotebook
+              ? "Create in the top page notebook."
+              : `Create inside ${destinationLabel}.`}
           </DialogDescription>
         </DialogHeader>
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
