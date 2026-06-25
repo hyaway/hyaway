@@ -1,13 +1,13 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { IconFolder, IconFolderPlus } from "@tabler/icons-react";
 import { toast } from "sonner";
 
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
 import type { Page } from "@/integrations/hydrus-api/models";
-import type { FormEvent } from "react";
+import type { ComponentType, FormEvent, ReactNode, SVGProps } from "react";
 import { OverflowActionItem } from "@/components/page-shell/page-floating-footer";
 import { Button } from "@/components/ui-primitives/button";
 import {
@@ -17,7 +17,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui-primitives/dialog";
 import {
   DropdownMenuItem,
@@ -38,12 +37,15 @@ import {
   useCreatePageMutation,
 } from "@/integrations/hydrus-api/queries/manage-pages";
 
-export function usePageOfPagesActions(
-  rootPage: Page | undefined,
-): Array<FloatingFooterAction> {
+export function usePageOfPagesActions(rootPage: Page | undefined): {
+  actions: Array<FloatingFooterAction>;
+  dialog: ReactNode;
+} {
   const apiVersionQuery = useApiVersionQuery();
   const permissions = usePermissions();
   const createPageMutation = useCreatePageMutation();
+  const [dialogRequest, setDialogRequest] =
+    useState<PageOfPagesDialogRequest | null>(null);
 
   const pageOfPagesSections = useMemo(
     () => (rootPage ? buildPageOfPagesDestinationSections(rootPage) : []),
@@ -77,7 +79,9 @@ export function usePageOfPagesActions(
     [createPageMutation],
   );
 
-  return useMemo((): Array<FloatingFooterAction> => {
+  const handleCloseDialog = useCallback(() => setDialogRequest(null), []);
+
+  const actions = useMemo((): Array<FloatingFooterAction> => {
     const isCreating = createPageMutation.isPending;
     const canCreatePagesWithClientApi =
       (apiVersionQuery.data?.version ?? 0) >=
@@ -113,7 +117,7 @@ export function usePageOfPagesActions(
             <CreatePageOfPagesNameDialogItem
               action={action}
               isCreating={isCreating}
-              onCreate={handleCreatePageOfPages}
+              onOpenDialog={setDialogRequest}
             />
           ),
       },
@@ -142,7 +146,7 @@ export function usePageOfPagesActions(
                       label={section.label}
                       pageOfPagesKey={section.pageKey}
                       isCreating={isCreating}
-                      onCreate={handleCreatePageOfPages}
+                      onOpenDialog={setDialogRequest}
                     />
                   ) : (
                     <DropdownMenuSub key={section.pageKey}>
@@ -154,7 +158,7 @@ export function usePageOfPagesActions(
                           label={section.label}
                           pageOfPagesKey={section.pageKey}
                           isCreating={isCreating}
-                          onCreate={handleCreatePageOfPages}
+                          onOpenDialog={setDialogRequest}
                         />
                         {section.descendants.map((destination) => (
                           <CreatePageOfPagesNameDialogItem
@@ -162,7 +166,7 @@ export function usePageOfPagesActions(
                             label={destination.label}
                             pageOfPagesKey={destination.pageKey}
                             isCreating={isCreating}
-                            onCreate={handleCreatePageOfPages}
+                            onOpenDialog={setDialogRequest}
                             truncate
                           />
                         ))}
@@ -178,62 +182,108 @@ export function usePageOfPagesActions(
   }, [
     apiVersionQuery.data?.version,
     createPageMutation.isPending,
-    handleCreatePageOfPages,
     pageOfPagesSections,
     permissions,
   ]);
+
+  const dialog = (
+    <CreatePageOfPagesNameDialog
+      request={dialogRequest}
+      isCreating={createPageMutation.isPending}
+      onCreate={handleCreatePageOfPages}
+      onClose={handleCloseDialog}
+    />
+  );
+
+  return { actions, dialog };
 }
+
+type PageOfPagesDialogRequest = {
+  label: string;
+  pageOfPagesKey?: string;
+  icon?: ComponentType<SVGProps<SVGSVGElement>>;
+  title?: string;
+  truncate?: boolean;
+};
 
 function CreatePageOfPagesNameDialogItem({
   action,
   label = action?.label ?? "New page of pages",
   pageOfPagesKey,
   isCreating,
-  onCreate,
+  onOpenDialog,
   truncate = false,
 }: {
   action?: FloatingFooterAction;
   label?: string;
   pageOfPagesKey?: string;
   isCreating: boolean;
-  onCreate: (pageName: string, pageOfPagesKey?: string) => void;
+  onOpenDialog: (request: PageOfPagesDialogRequest) => void;
   truncate?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
-  const [pageName, setPageName] = useState("");
   const Icon = action?.icon;
+
+  return (
+    <DropdownMenuItem
+      onClick={() =>
+        onOpenDialog({
+          label,
+          pageOfPagesKey,
+          icon: Icon,
+          title: action?.title,
+          truncate,
+        })
+      }
+      disabled={isCreating}
+      title={action?.title}
+      className="cursor-pointer"
+    >
+      {Icon ? <Icon /> : null}
+      <PageOfPagesDestinationLabel label={label} truncate={truncate} />
+    </DropdownMenuItem>
+  );
+}
+
+function CreatePageOfPagesNameDialog({
+  request,
+  isCreating,
+  onCreate,
+  onClose,
+}: {
+  request: PageOfPagesDialogRequest | null;
+  isCreating: boolean;
+  onCreate: (pageName: string, pageOfPagesKey?: string) => void;
+  onClose: () => void;
+}) {
+  const [pageName, setPageName] = useState("");
+  const label = request?.label ?? "New page of pages";
   const trimmedPageName = pageName.trim();
+
+  useEffect(() => {
+    if (request) setPageName("");
+  }, [request]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!trimmedPageName || isCreating) return;
+    if (!request || !trimmedPageName || isCreating) return;
 
-    onCreate(trimmedPageName, pageOfPagesKey);
-    setOpen(false);
+    onCreate(trimmedPageName, request.pageOfPagesKey);
+    onClose();
     setPageName("");
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        nativeButton={false}
-        render={
-          <DropdownMenuItem
-            closeOnClick={false}
-            disabled={isCreating}
-            title={action?.title}
-            className="cursor-pointer"
-          >
-            {Icon ? <Icon /> : null}
-            <PageOfPagesDestinationLabel label={label} truncate={truncate} />
-          </DropdownMenuItem>
-        }
-      />
+    <Dialog
+      open={Boolean(request)}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Page of pages name</DialogTitle>
           <DialogDescription>
-            {pageOfPagesKey
+            {request?.pageOfPagesKey
               ? `Create inside ${label}.`
               : "Create at the Hydrus root."}
           </DialogDescription>
@@ -248,12 +298,7 @@ function CreatePageOfPagesNameDialogItem({
             aria-label="Page of pages name"
           />
           <DialogFooter>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setOpen(false)}
-            >
+            <Button type="button" variant="ghost" size="sm" onClick={onClose}>
               Cancel
             </Button>
             <Button
