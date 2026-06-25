@@ -7,6 +7,7 @@ import { SearchSettingsCard } from "./-components/search-settings-card";
 import { HistorySettingsCard } from "./-components/history-settings-card";
 import { ReviewQueueSettingsCard } from "./-components/review-queue-settings-card";
 import { ResetAllDataSettingsCard } from "./-components/reset-all-data-settings-card";
+import { ScratchpadSettingsCard } from "./-components/scratchpad-settings-card";
 import { Heading } from "@/components/ui-primitives/heading";
 
 export const Route = createFileRoute("/(settings)/settings/data")({
@@ -27,6 +28,7 @@ function SettingsDataComponent() {
       <SearchSettingsCard />
       <SearchLimitsSettingsCard />
       <HistorySettingsCard />
+      <ScratchpadSettingsCard />
       <ResetAllDataSettingsCard />
     </div>
   );

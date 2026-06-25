@@ -30,7 +30,7 @@ import { createPageSlug } from "@/lib/format-utils";
 import {
   getScratchpadPageLocation,
   getScratchpadPageName,
-} from "@/stores/pages-settings-store";
+} from "@/stores/scratchpad-settings-store";
 
 const HYAWAY_PAGE_NAME = "hyAway";
 
@@ -516,8 +516,18 @@ export const useGetPageInfoQuery = (pageKey: string, simple = true) => {
 
   return useQuery({
     queryKey: ["getPageInfo", pageKey, simple],
-    queryFn: async () => {
-      return getPageInfo(pageKey, simple);
+    queryFn: async ({ client }) => {
+      try {
+        return await getPageInfo(pageKey, simple);
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          client.invalidateQueries({
+            queryKey: ["getPages"],
+          });
+        }
+
+        throw error;
+      }
     },
     enabled: isConfigured && hasPermission && !!pageKey,
     refetchInterval: (query) => {

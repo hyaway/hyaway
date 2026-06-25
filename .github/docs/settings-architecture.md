@@ -34,6 +34,7 @@ Settings follow a **shared controls + thin wrappers** pattern to eliminate dupli
 | ----------------- | ---------------------------------------- | ------------------------------------------ |
 | Thumbnail gallery | `thumbnail-gallery-display-settings.tsx` | `THUMBNAIL_GALLERY_DISPLAY_SETTINGS_TITLE` |
 | Pages display     | `pages-display-settings.tsx`             | `PAGES_DISPLAY_SETTINGS_TITLE`             |
+| Scratchpad        | `scratchpad-settings.tsx`                | `SCRATCHPAD_SETTINGS_TITLE`                |
 | Media viewer      | `file-viewer-settings.tsx`               | `FILE_VIEWER_SETTINGS_TITLE`               |
 | File details      | `file-detail-settings.tsx`               | `FILE_DETAIL_SETTINGS_TITLE`               |
 | Watch history     | `history-settings.tsx`                   | `WATCH_HISTORY_SETTINGS_TITLE`             |

@@ -14,6 +14,7 @@ import {
   IconTrash,
   IconTrashOff,
 } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -33,6 +34,7 @@ import {
   useUnarchiveFilesMutation,
   useUndeleteFilesMutation,
 } from "@/integrations/hydrus-api/queries/manage-files";
+import { hideFileIdsInViewCaches } from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import { useAddFilesToScratchpadMutation } from "@/integrations/hydrus-api/queries/manage-pages";
 import {
   MIN_CREATE_PAGE_CLIENT_API_VERSION,
@@ -40,6 +42,7 @@ import {
 } from "@/integrations/hydrus-api/models";
 import { useApiVersionQuery } from "@/integrations/hydrus-api/queries/access";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
+import { useScratchpadHideSentFiles } from "@/stores/scratchpad-settings-store";
 
 export interface FileAction {
   id: string;
@@ -144,14 +147,22 @@ function useManagementActions(
 
 // --- Page Actions ---
 
-function usePageActions(fileId: number): Array<FileAction> {
+function usePageActions({
+  fileId,
+  reviewSource,
+}: {
+  fileId: number;
+  reviewSource?: ReviewSource | Array<ReviewSource>;
+}): Array<FileAction> {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const apiVersionQuery = useApiVersionQuery();
   const permissions = usePermissions();
   const canCreatePagesWithClientApi =
     (apiVersionQuery.data?.version ?? 0) >= MIN_CREATE_PAGE_CLIENT_API_VERSION;
   const canManagePages = permissions.hasPermission(Permission.MANAGE_PAGES);
   const addFilesToScratchpadMutation = useAddFilesToScratchpadMutation();
+  const scratchpadHideSentFiles = useScratchpadHideSentFiles();
 
   return [
     {
@@ -163,6 +174,9 @@ function usePageActions(fileId: number): Array<FileAction> {
           { file_id: fileId },
           {
             onSuccess: (scratchpadPageKey) => {
+              if (scratchpadHideSentFiles) {
+                hideFileIdsInViewCaches(queryClient, [fileId], reviewSource);
+              }
               toast.success("Added to scratchpad", {
                 action: {
                   label: "Open scratchpad",
@@ -329,7 +343,10 @@ export function useFileActions(
   // Always call hooks (rules of hooks), but conditionally include results
   const navigationActions = useNavigationActions(data.file_id);
   const managementActions = useManagementActions(data, reviewSource);
-  const pageActions = usePageActions(data.file_id);
+  const pageActions = usePageActions({
+    fileId: data.file_id,
+    reviewSource,
+  });
   const externalActions = useExternalActions(data, { includeThumbnail });
 
   const groups: Array<FileActionsGroup> = [];

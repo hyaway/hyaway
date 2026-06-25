@@ -10,6 +10,7 @@ import {
   CardHeader,
 } from "@/components/ui-primitives/card";
 import { useReviewSettingsActions } from "@/stores/review-settings-store";
+import { useScratchpadSettingsActions } from "@/stores/scratchpad-settings-store";
 import { useSearchLimitsActions } from "@/stores/search-limits-store";
 import { useSearchSettingsActions } from "@/stores/search-settings-store";
 import { useWatchHistoryActions } from "@/stores/watch-history-store";
@@ -19,12 +20,14 @@ export function ResetAllDataSettingsCard() {
   const { resetDefaultQuery } = useSearchSettingsActions();
   const { reset: resetWatchHistory } = useWatchHistoryActions();
   const { resetDataSettings: resetReviewData } = useReviewSettingsActions();
+  const { reset: resetScratchpad } = useScratchpadSettingsActions();
 
   const handleResetAll = () => {
     resetSearchLimits();
     resetDefaultQuery();
     resetWatchHistory();
     resetReviewData();
+    resetScratchpad();
   };
 
   return (
