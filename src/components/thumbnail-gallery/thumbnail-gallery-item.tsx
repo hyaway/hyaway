@@ -287,10 +287,7 @@ function ItemLink({
   return (
     <ContextMenu open={menuOpen} onOpenChange={setMenuOpen}>
       <ContextMenuTrigger>{linkElement}</ContextMenuTrigger>
-      <ThumbnailGalleryItemContextMenu
-        item={item}
-        itemIndex={virtualRowIndex}
-      />
+      <ThumbnailGalleryItemContextMenu item={item} />
     </ContextMenu>
   );
 }

@@ -11,6 +11,7 @@ import {
 } from "@tabler/icons-react";
 
 import { useThumbnailGalleryContext } from "./thumbnail-gallery-context";
+import { getFileIdsFromFileId } from "./use-thumbnail-gallery-view";
 
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 
@@ -44,8 +45,6 @@ interface ThumbnailGalleryItemContextMenuProps {
     | "mime"
     | "file_viewing_statistics"
   >;
-  /** Index of this item in the gallery (for review from here) */
-  itemIndex?: number;
   /** Hide review queue actions (useful when already in review context) */
   hideReviewActions?: boolean;
 }
@@ -59,14 +58,14 @@ function getClientApiStats(item: ThumbnailGalleryItemContextMenuProps["item"]) {
 
 export function ThumbnailGalleryItemContextMenu({
   item,
-  itemIndex,
   hideReviewActions = false,
 }: ThumbnailGalleryItemContextMenuProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setQueue, addToQueue } = useReviewQueueActions();
   const queueRemaining = useReviewQueueRemaining();
-  const { fileIds, infoMode, reviewSource } = useThumbnailGalleryContext();
+  const { reviewFileIds, infoMode, reviewSource } =
+    useThumbnailGalleryContext();
 
   const clearViewtimeMutation = useClearFileViewtimeMutation();
   const clearViewsMutation = useClearFileViewsMutation();
@@ -77,22 +76,21 @@ export function ThumbnailGalleryItemContextMenu({
     reviewSource,
   });
 
-  // Get file IDs from this item onward
-  const fileIdsFromHere =
-    fileIds && itemIndex !== undefined
-      ? fileIds.slice(itemIndex)
+  const getFileIdsFromHere = () =>
+    reviewFileIds
+      ? getFileIdsFromFileId(reviewFileIds, item.file_id)
       : [item.file_id];
 
   // Get current Client API stats for preserving values
   const clientApiStats = getClientApiStats(item);
 
   const handleNewReview = () => {
-    setQueue(fileIdsFromHere, reviewSource);
+    setQueue(getFileIdsFromHere(), reviewSource);
     navigate({ to: "/review" });
   };
 
   const handleAddToReview = () => {
-    addToQueue(fileIdsFromHere, reviewSource);
+    addToQueue(getFileIdsFromHere(), reviewSource);
     navigate({ to: "/review" });
   };
 
@@ -129,7 +127,7 @@ export function ThumbnailGalleryItemContextMenu({
         <>
           <ContextMenuItem onClick={handleNewReview}>
             <IconCards />
-            {fileIdsFromHere.length > 1 ? "New review from here" : "New review"}
+            New review from here
           </ContextMenuItem>
           {queueRemaining > 0 && (
             <ContextMenuItem onClick={handleAddToReview}>
@@ -140,9 +138,7 @@ export function ThumbnailGalleryItemContextMenu({
                 </span>
                 <span className="ml-[-1ch] text-xl font-normal">+</span>
               </span>
-              {fileIdsFromHere.length > 1
-                ? "Add to review from here"
-                : "Add to review"}
+              Add to review from here
             </ContextMenuItem>
           )}
         </>

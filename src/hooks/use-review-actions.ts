@@ -6,7 +6,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { IconCards } from "@tabler/icons-react";
 import type { ComponentType, SVGProps } from "react";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
-import type { ReviewSource } from "@/stores/review-queue-store";
+import { useThumbnailGalleryContext } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import {
   useReviewQueueActions,
   useReviewQueueRemaining,
@@ -35,36 +35,27 @@ const IconCardsPlus: ComponentType<SVGProps<SVGSVGElement>> = (props) =>
     ),
   );
 
-interface UseReviewActionsOptions {
-  /** File IDs to add to review queue */
-  fileIds: Array<number>;
-  /** Source view to hide files from when review hide settings apply. */
-  source?: ReviewSource;
-}
-
 /**
  * Hook that provides review queue actions for gallery pages.
  * Returns an array of FloatingFooterAction objects ready to pass to PageFloatingFooter.
  */
-export function useReviewActions({
-  fileIds,
-  source,
-}: UseReviewActionsOptions): Array<FloatingFooterAction> {
+export function useReviewActions(): Array<FloatingFooterAction> {
+  const { reviewFileIds = [], reviewSource } = useThumbnailGalleryContext();
   const navigate = useNavigate();
   const { setQueue, addToQueue } = useReviewQueueActions();
   const queueRemaining = useReviewQueueRemaining();
 
-  const hasFiles = fileIds.length > 0;
+  const hasFiles = reviewFileIds.length > 0;
 
   const handleReview = () => {
     if (!hasFiles) return;
-    setQueue(fileIds, source);
+    setQueue(reviewFileIds, reviewSource);
     navigate({ to: "/review" });
   };
 
   const handleAddToQueue = () => {
     if (!hasFiles) return;
-    addToQueue(fileIds, source);
+    addToQueue(reviewFileIds, reviewSource);
     navigate({ to: "/review" });
   };
 

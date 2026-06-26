@@ -7,7 +7,6 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useLocation } from "@tanstack/react-router";
 import { useRef } from "react";
 import {
   archiveFiles,
@@ -32,6 +31,7 @@ import type {
 } from "../api-client";
 import type { FileMetadata, FileViewingStatistics } from "../models";
 import type { ReviewSource } from "@/stores/review-queue-store";
+import { fileIdsFingerprint } from "@/lib/file-ids-fingerprint";
 import { useMetadataBatchSize } from "@/stores/metadata-settings-store";
 
 export const useGetSingleFileMetadata = (fileId: number) => {
@@ -75,23 +75,11 @@ export const useGetFilesMetadata = (
   });
 };
 
-/**
- * Lightweight fingerprint for an array of file IDs.
- * Avoids putting the full (potentially 100k+) array into a TanStack Query key,
- * which would force JSON.stringify / deep-compare on every render.
- */
-export function fileIdsFingerprint(
-  ids: Array<number>,
-): [length: number, first: number | undefined, last: number | undefined] {
-  return [ids.length, ids[0], ids[ids.length - 1]];
-}
-
 export const useInfiniteGetFilesMetadata = (
   file_ids: Array<number>,
   only_return_basic_information = false,
 ) => {
   const isConfigured = useIsApiConfigured();
-  const { pathname } = useLocation();
   const batchSize = useMetadataBatchSize();
 
   // Keep file_ids in a ref so the queryFn always reads the latest array
@@ -103,7 +91,6 @@ export const useInfiniteGetFilesMetadata = (
   return useInfiniteQuery({
     queryKey: [
       "infiniteGetFilesMetadata",
-      pathname,
       fileIdsFingerprint(file_ids),
       only_return_basic_information,
       batchSize,

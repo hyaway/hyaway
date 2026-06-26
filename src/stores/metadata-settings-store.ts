@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { setupCrossTabSync } from "@/lib/cross-tab-sync";
 
 export const DEFAULT_LOAD_ALL_METADATA_BY_DEFAULT = false;
-export const DEFAULT_LOAD_ALL_METADATA_WHEN_NAMESPACE_SORT = true;
+export const DEFAULT_LOAD_ALL_METADATA_WHEN_NAMESPACE_SORT = false;
 export const DEFAULT_METADATA_BATCH_SIZE = 128;
 export const MIN_METADATA_BATCH_SIZE = 128;
 export const MAX_METADATA_BATCH_SIZE = 1024;
