@@ -1,7 +1,7 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useDeferredValue, useMemo } from "react";
+import { useMemo } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import type { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import type { NamespaceSortConfig } from "@/stores/search-defaults";
@@ -43,14 +43,14 @@ export function getHybridSortedLoadedFileIds({
 
 export function getNavigationFileIds({
   visibleFileIds,
-  renderedFileIds,
+  visibleLoadedFileIds,
   namespaceSort,
 }: {
   visibleFileIds: Array<number>;
-  renderedFileIds: Array<number>;
+  visibleLoadedFileIds: Array<number>;
   namespaceSort?: NamespaceSortConfig;
 }) {
-  return namespaceSort ? renderedFileIds : visibleFileIds;
+  return namespaceSort ? visibleLoadedFileIds : visibleFileIds;
 }
 
 export function getFileIdsFromFileId(fileIds: Array<number>, fileId: number) {
@@ -149,8 +149,8 @@ function useLoadedThumbnailGalleryView({
   namespaceSort?: NamespaceSortConfig;
   allTagsServiceId?: string;
 }) {
-  // Keep loaded metadata and its IDs together so deferring preserves one render snapshot.
-  const loadedView = useMemo(() => {
+  // Keep current loaded metadata and its IDs together for action/navigation queues.
+  return useMemo(() => {
     const loaded = data ? data.pages.flatMap((page) => page.metadata) : [];
     const sortedLoaded = sortLoadedItemsByNamespaces(
       loaded,
@@ -165,11 +165,6 @@ function useLoadedThumbnailGalleryView({
       visibleFileIds: visibleItems.map((item) => item.file_id),
     };
   }, [data, namespaceSort, allTagsServiceId, hiddenFileIds]);
-
-  // Counts/status use the latest loaded data; the grid keeps rendering deferred items.
-  const renderedView = useDeferredValue(loadedView);
-
-  return { loadedView, renderedView };
 }
 
 export function useThumbnailGalleryView({
@@ -191,53 +186,51 @@ export function useThumbnailGalleryView({
     [sourceFileIds, hiddenFileIds],
   );
 
-  const { loadedView, renderedView } = useLoadedThumbnailGalleryView({
+  const {
+    loadedItemsCount,
+    visibleItems: visibleLoadedItems,
+    visibleFileIds: visibleLoadedFileIds,
+  } = useLoadedThumbnailGalleryView({
     data,
     hiddenFileIds,
     namespaceSort,
     allTagsServiceId,
   });
-  const { loadedItemsCount, visibleItems } = loadedView;
-  const {
-    loadedItemsCount: renderedLoadedItemsCount,
-    visibleItems: renderedItems,
-    visibleFileIds: renderedFileIds,
-  } = renderedView;
   // Namespace review uses the sorted loaded prefix plus the still-unloaded source tail.
   const reviewFileIds = useMemo(() => {
     if (!namespaceSort) return visibleFileIds;
 
     const remainingVisibleSourceFileIds = getVisibleSourceFileIds(
-      sourceFileIds.slice(renderedLoadedItemsCount),
+      sourceFileIds.slice(loadedItemsCount),
       hiddenFileIds,
     );
 
     return getHybridSortedLoadedFileIds({
-      sortedLoadedVisibleFileIds: renderedFileIds,
+      sortedLoadedVisibleFileIds: visibleLoadedFileIds,
       remainingVisibleSourceFileIds,
     });
   }, [
     namespaceSort,
     visibleFileIds,
     sourceFileIds,
-    renderedLoadedItemsCount,
+    loadedItemsCount,
     hiddenFileIds,
-    renderedFileIds,
+    visibleLoadedFileIds,
   ]);
   // Namespace navigation is limited to loaded sorted items; unsorted navigation uses all source IDs.
   const navigationFileIds = getNavigationFileIds({
     visibleFileIds,
-    renderedFileIds,
+    visibleLoadedFileIds,
     namespaceSort,
   });
 
   return {
     totalItems: visibleFileIds.length,
     loadedItemsCount,
-    visibleItemsCount: visibleItems.length,
+    visibleItemsCount: visibleLoadedItems.length,
     visibleFileIds,
-    renderedItems,
-    renderedFileIds,
+    visibleLoadedItems,
+    visibleLoadedFileIds,
     reviewFileIds,
     navigationFileIds,
   };
@@ -248,8 +241,8 @@ export type ThumbnailGalleryView = {
   loadedItemsCount: number;
   visibleItemsCount: number;
   visibleFileIds: Array<number>;
-  renderedItems: Array<FileMetadata>;
-  renderedFileIds: Array<number>;
+  visibleLoadedItems: Array<FileMetadata>;
+  visibleLoadedFileIds: Array<number>;
   reviewFileIds: Array<number>;
   navigationFileIds: Array<number>;
 };

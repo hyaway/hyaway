@@ -75,7 +75,7 @@ describe("thumbnail gallery view helpers", () => {
     expect(
       getNavigationFileIds({
         visibleFileIds: [1, 2, 3, 4],
-        renderedFileIds: [1, 2],
+        visibleLoadedFileIds: [1, 2],
       }),
     ).toEqual([1, 2, 3, 4]);
   });
@@ -84,7 +84,7 @@ describe("thumbnail gallery view helpers", () => {
     expect(
       getNavigationFileIds({
         visibleFileIds: [1, 2, 3, 4],
-        renderedFileIds: [2, 1],
+        visibleLoadedFileIds: [2, 1],
         namespaceSort: {
           mode: "namespaces",
           namespaces: ["series"],
