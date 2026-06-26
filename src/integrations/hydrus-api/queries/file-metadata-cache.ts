@@ -18,22 +18,24 @@ type InfiniteMetadataData = {
   pageParams: Array<number>;
 };
 
-type ViewCacheLocalData = {
+export type ViewCacheData = object & {
   hyaway?: {
     hiddenFileIds?: Array<number>;
   };
 };
 
-export function getHiddenFileIds(data: unknown) {
-  if (!data || typeof data !== "object") return [];
-  return (data as ViewCacheLocalData).hyaway?.hiddenFileIds ?? [];
+export function getHiddenFileIds(data: ViewCacheData | null | undefined) {
+  return data?.hyaway?.hiddenFileIds ?? [];
 }
 
-export function getHiddenFileCount(data: unknown) {
+export function getHiddenFileCount(data: ViewCacheData | null | undefined) {
   return getHiddenFileIds(data).length;
 }
 
-export function getVisibleFileIds(fileIds: Array<number>, data: unknown) {
+export function getVisibleFileIds(
+  fileIds: Array<number>,
+  data: ViewCacheData | null | undefined,
+) {
   const hiddenFileIds = getHiddenFileIds(data);
   if (hiddenFileIds.length === 0) return fileIds;
 
@@ -48,7 +50,7 @@ export function formatHiddenFileCount(hiddenFileCount: number) {
 }
 
 function withAddedHiddenFileIds<T extends object>(
-  data: T & ViewCacheLocalData,
+  data: T & ViewCacheData,
   fileIds: Array<number>,
 ) {
   if (fileIds.length === 0) return data;
@@ -74,7 +76,7 @@ function withAddedHiddenFileIds<T extends object>(
   };
 }
 
-function withoutHiddenFileIds<T extends object>(data: T & ViewCacheLocalData) {
+function withoutHiddenFileIds<T extends object>(data: T & ViewCacheData) {
   const hiddenFileIds = getHiddenFileIds(data);
   if (hiddenFileIds.length === 0) return data;
 
@@ -259,7 +261,7 @@ export function hideFileIdsInViewCaches(
     : [sourceOrSources];
   if (sources.length === 0) return;
 
-  queryClient.setQueriesData<SearchFilesResponse & ViewCacheLocalData>(
+  queryClient.setQueriesData<SearchFilesResponse & ViewCacheData>(
     {
       predicate: (query) =>
         sources.some((source) =>
@@ -276,7 +278,7 @@ export function hideFileIdsInViewCaches(
     },
   );
 
-  queryClient.setQueriesData<GetPageInfoResponse & ViewCacheLocalData>(
+  queryClient.setQueriesData<GetPageInfoResponse & ViewCacheData>(
     {
       predicate: (query) =>
         sources.some((source) =>
@@ -307,7 +309,7 @@ export function clearHiddenFileIdsInViewCaches(
     : [sourceOrSources];
   if (sources.length === 0) return;
 
-  queryClient.setQueriesData<SearchFilesResponse & ViewCacheLocalData>(
+  queryClient.setQueriesData<SearchFilesResponse & ViewCacheData>(
     {
       predicate: (query) =>
         sources.some((source) =>
@@ -317,7 +319,7 @@ export function clearHiddenFileIdsInViewCaches(
     (oldData) => (oldData ? withoutHiddenFileIds(oldData) : oldData),
   );
 
-  queryClient.setQueriesData<GetPageInfoResponse & ViewCacheLocalData>(
+  queryClient.setQueriesData<GetPageInfoResponse & ViewCacheData>(
     {
       predicate: (query) =>
         sources.some((source) =>

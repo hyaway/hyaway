@@ -4,6 +4,7 @@
 import { IconEye } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { FloatingFooterAction } from "@/components/page-shell/page-floating-footer";
+import type { ViewCacheData } from "@/integrations/hydrus-api/queries/file-metadata-cache";
 import type { ReviewSource } from "@/stores/review-queue-store";
 import {
   clearHiddenFileIdsInViewCaches,
@@ -39,7 +40,7 @@ export function useHiddenFileView({
   fileIds,
   source,
 }: {
-  data: unknown;
+  data?: ViewCacheData | null;
   fileIds: Array<number>;
   source?: ReviewSource;
 }) {
