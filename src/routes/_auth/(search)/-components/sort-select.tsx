@@ -11,14 +11,21 @@ import {
 } from "@tabler/icons-react";
 import { defaultFilter } from "cmdk";
 import {
+  getDefaultSortAsc,
   getSortColorHex,
   getSortOption,
   getSortOrderLabel,
 } from "../-lib/query-builder-fields";
+import { NamespaceSortBadge } from "./search-sort-tag";
 import type { CSSProperties } from "react";
+import type { SortConfig } from "@/stores/search-defaults";
 import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 import { Button } from "@/components/ui-primitives/button";
-import { useNamespaceColor } from "@/integrations/hydrus-api/queries/options";
+import { Input } from "@/components/ui-primitives/input";
+import {
+  useDefaultNamespaceSorts,
+  useNamespaceColor,
+} from "@/integrations/hydrus-api/queries/options";
 import {
   Command,
   CommandEmpty,
@@ -35,6 +42,11 @@ import {
 import { getThemeAdjustedColorFromHex } from "@/lib/color-utils";
 import { cn } from "@/lib/utils";
 import { useActiveTheme } from "@/stores/theme-store";
+import {
+  formatNamespaceSortValue,
+  isNamespaceSortConfig,
+  parseNamespaceSortValue,
+} from "@/stores/search-defaults";
 
 const SORT_GROUPS = [
   {
@@ -112,31 +124,41 @@ const SORT_DROPDOWN_HEIGHT_STYLE = {
     "calc(var(--sort-dropdown-max-height) - 3rem)",
 } as CSSProperties;
 
+const NAMESPACE_SORT_COMMAND_BADGE_CLASSNAME = cn(
+  "group-data-selected/command-item:before:bg-[color-mix(in_srgb,var(--badge-overlay)_25%,transparent)]",
+);
+
 export type { SortConfig } from "@/stores/search-defaults";
 
 export function SortSection({
-  sortType,
-  sortAsc,
-  onSortTypeChange,
+  sort,
+  onSortChange,
   onSortAscToggle,
 }: {
-  sortType: HydrusFileSortType;
-  sortAsc: boolean;
-  onSortTypeChange: (value: HydrusFileSortType) => void;
+  sort: SortConfig;
+  onSortChange: (value: SortConfig) => void;
   onSortAscToggle: () => void;
 }) {
-  const sortOrderLabel = getSortOrderLabel(sortType, sortAsc);
+  const sortAsc = sort.sortAsc;
+  const sortOrderLabel = isNamespaceSortConfig(sort)
+    ? sortAsc
+      ? "a-z"
+      : "z-a"
+    : getSortOrderLabel(sort.sortType, sortAsc);
   const theme = useActiveTheme();
   const sortColor = getThemeAdjustedColorFromHex(
-    getSortColorHex(sortType, sortAsc),
+    isNamespaceSortConfig(sort)
+      ? undefined
+      : getSortColorHex(sort.sortType, sortAsc),
     theme,
   );
   const sortColorStyle = sortColor
     ? ({ "--badge-overlay": sortColor } as CSSProperties)
     : undefined;
+  const isNamespaceSort = isNamespaceSortConfig(sort);
 
   return (
-    <div className="@container flex max-w-2xl flex-wrap items-center gap-2">
+    <div className="@container flex max-w-5xl flex-wrap items-center gap-2">
       <span className="text-muted-foreground shrink-0 text-sm font-medium">
         Sort by
       </span>
@@ -146,11 +168,10 @@ export function SortSection({
           "w-full max-w-5xl",
         )}
       >
-        <SortSelect
-          value={sortType}
-          sortAsc={sortAsc}
-          onChange={onSortTypeChange}
-        />
+        <SortSelect value={sort} onChange={onSortChange} />
+        {isNamespaceSort && (
+          <NamespaceSortSelect value={sort} onChange={onSortChange} />
+        )}
         {sortOrderLabel && (
           <Button
             variant="ghost"
@@ -182,20 +203,22 @@ export function SortSection({
 
 export function SortSelect({
   value,
-  sortAsc,
   onChange,
 }: {
-  value: HydrusFileSortType;
-  sortAsc: boolean;
-  onChange: (value: HydrusFileSortType) => void;
+  value: SortConfig;
+  onChange: (value: SortConfig) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [activePage, setActivePage] = useState<string | null>(null);
   const theme = useActiveTheme();
   const namespaceColor = useNamespaceColor("");
+  const isNamespaceSort = isNamespaceSortConfig(value);
+  const selectedSystemSortType = isNamespaceSort ? null : value.sortType;
   const selectedSortColor = getThemeAdjustedColorFromHex(
-    getSortColorHex(value, sortAsc),
+    isNamespaceSort
+      ? undefined
+      : getSortColorHex(value.sortType, value.sortAsc),
     theme,
   );
   const selectedColor = selectedSortColor ?? namespaceColor;
@@ -203,7 +226,9 @@ export function SortSelect({
     "--badge-overlay": selectedColor,
   } as CSSProperties;
 
-  const selectedLabel = getSortOption(value).label;
+  const selectedLabel = isNamespaceSort
+    ? "namespaces"
+    : getSortOption(value.sortType).label;
 
   useEffect(() => {
     if (!open) {
@@ -211,6 +236,23 @@ export function SortSelect({
       setActivePage(null);
     }
   }, [open]);
+
+  const selectSystemSort = (sortType: HydrusFileSortType) => {
+    onChange({
+      sortType,
+      sortAsc: getDefaultSortAsc(sortType),
+    });
+    setOpen(false);
+  };
+
+  const selectNamespaceSortType = () => {
+    onChange({
+      mode: "namespaces",
+      namespaces: isNamespaceSort ? value.namespaces : [],
+      sortAsc: isNamespaceSort ? value.sortAsc : true,
+    });
+    setOpen(false);
+  };
 
   const isSearching = search.length > 0;
 
@@ -258,28 +300,39 @@ export function SortSelect({
           <CommandList className="max-h-(--sort-dropdown-list-max-height) min-h-0 flex-1">
             <CommandEmpty>No results.</CommandEmpty>
             {isSearching ? (
-              SORT_GROUPS.map((group) => (
-                <CommandGroup key={group.label} heading={group.label}>
-                  {group.options.map((sortType) => {
-                    const opt = getSortOption(sortType);
+              <>
+                {SORT_GROUPS.map((group) => (
+                  <CommandGroup key={group.label} heading={group.label}>
+                    {group.options.map((sortType) => {
+                      const opt = getSortOption(sortType);
 
-                    return (
-                      <CommandItem
-                        key={opt.value}
-                        value={opt.label}
-                        keywords={[group.label, opt.label]}
-                        data-checked={value === opt.value || undefined}
-                        onSelect={() => {
-                          onChange(opt.value);
-                          setOpen(false);
-                        }}
-                      >
-                        <SortOptionLabel sortType={opt.value} />
-                      </CommandItem>
-                    );
-                  })}
+                      return (
+                        <CommandItem
+                          key={opt.value}
+                          value={opt.label}
+                          keywords={[group.label, opt.label]}
+                          data-checked={
+                            selectedSystemSortType === opt.value || undefined
+                          }
+                          onSelect={() => selectSystemSort(opt.value)}
+                        >
+                          <SortOptionLabel sortType={opt.value} />
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                ))}
+                <CommandGroup heading="namespaces">
+                  <CommandItem
+                    value="namespaces"
+                    keywords={["namespaces", "namespace", "tags"]}
+                    data-checked={isNamespaceSort || undefined}
+                    onSelect={selectNamespaceSortType}
+                  >
+                    namespaces
+                  </CommandItem>
                 </CommandGroup>
-              ))
+              </>
             ) : activePage === null ? (
               <CommandGroup>
                 {SORT_GROUPS.flatMap((group) =>
@@ -292,11 +345,10 @@ export function SortSelect({
                           key={opt.value}
                           value={opt.label}
                           keywords={[group.label, opt.label]}
-                          data-checked={value === opt.value || undefined}
-                          onSelect={() => {
-                            onChange(opt.value);
-                            setOpen(false);
-                          }}
+                          data-checked={
+                            selectedSystemSortType === opt.value || undefined
+                          }
+                          onSelect={() => selectSystemSort(opt.value)}
                         >
                           <SortOptionLabel sortType={opt.value} />
                         </CommandItem>
@@ -307,8 +359,9 @@ export function SortSelect({
                       key={group.label}
                       value={group.label}
                       data-checked={
-                        group.options.some((option) => option === value) ||
-                        undefined
+                        group.options.some(
+                          (option) => option === selectedSystemSortType,
+                        ) || undefined
                       }
                       onSelect={() => setActivePage(group.label)}
                     >
@@ -320,6 +373,14 @@ export function SortSelect({
                     </CommandItem>
                   ),
                 )}
+                <CommandItem
+                  key="namespaces"
+                  value="namespaces"
+                  data-checked={isNamespaceSort || undefined}
+                  onSelect={selectNamespaceSortType}
+                >
+                  namespaces
+                </CommandItem>
               </CommandGroup>
             ) : (
               <>
@@ -343,11 +404,10 @@ export function SortSelect({
                         key={opt.value}
                         value={opt.label}
                         keywords={[activePage, opt.label]}
-                        data-checked={value === opt.value || undefined}
-                        onSelect={() => {
-                          onChange(opt.value);
-                          setOpen(false);
-                        }}
+                        data-checked={
+                          selectedSystemSortType === opt.value || undefined
+                        }
+                        onSelect={() => selectSystemSort(opt.value)}
                       >
                         <SortOptionLabel sortType={opt.value} />
                       </CommandItem>
@@ -360,6 +420,150 @@ export function SortSelect({
         </Command>
       </PopoverContent>
     </Popover>
+  );
+}
+
+function NamespaceSortSelect({
+  value,
+  onChange,
+}: {
+  value: Extract<SortConfig, { mode: "namespaces" }>;
+  onChange: (value: SortConfig) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(
+    formatNamespaceSortValue(value.namespaces),
+  );
+  const namespaceSorts = useDefaultNamespaceSorts();
+  const presetOptions = namespaceSorts.map((sort) => ({
+    label: formatNamespaceSortValue(sort.namespaces),
+    namespaces: sort.namespaces,
+    sortAsc: sort.sort_order !== 1,
+  }));
+  const customNamespaces = parseNamespaceSortValue(inputValue);
+  const customLabel = formatNamespaceSortValue(customNamespaces);
+  const showCustomOption =
+    inputValue.trim().length > 0 &&
+    customNamespaces.length > 0 &&
+    !presetOptions.some((option) => option.label === customLabel);
+  const showDropdown = open && (presetOptions.length > 0 || showCustomOption);
+
+  useEffect(() => {
+    if (!open) setInputValue(formatNamespaceSortValue(value.namespaces));
+  }, [open, value.namespaces]);
+
+  const selectNamespaceSort = (
+    namespaces: Array<string>,
+    sortAsc = value.sortAsc,
+  ) => {
+    if (namespaces.length === 0) return;
+    setInputValue(formatNamespaceSortValue(namespaces));
+    onChange({
+      mode: "namespaces",
+      namespaces,
+      sortAsc,
+    });
+    setOpen(false);
+  };
+
+  const submitTypedValue = () => {
+    selectNamespaceSort(customNamespaces);
+  };
+
+  return (
+    <div className="flex max-w-4xl min-w-64 flex-[2_1_24rem] flex-wrap items-center gap-2">
+      <div className="relative min-w-64 flex-1 basis-96">
+        <Input
+          className="h-9 w-full"
+          aria-label="Namespace sort"
+          value={inputValue}
+          onChange={(event) => {
+            setInputValue(event.target.value);
+            setOpen(true);
+          }}
+          onPointerDown={() => setOpen(true)}
+          onFocus={() => setOpen(true)}
+          onBlur={() => {
+            setOpen(false);
+            if (customNamespaces.length > 0) submitTypedValue();
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && customNamespaces.length > 0) {
+              event.preventDefault();
+              submitTypedValue();
+            }
+          }}
+          autoComplete="off"
+        />
+        {showDropdown && (
+          <div
+            className="bg-popover border-border ring-foreground/5 absolute top-full left-0 z-50 mt-1 w-[min(42rem,calc(100dvw-1rem))] min-w-full overflow-hidden rounded-lg border shadow-md ring-1"
+            onPointerDown={(event) => event.preventDefault()}
+          >
+            <Command shouldFilter={false}>
+              <CommandList className="max-h-72">
+                {showCustomOption && (
+                  <CommandGroup heading="custom">
+                    <CommandItem
+                      value={`custom ${customLabel}`}
+                      keywords={[customLabel]}
+                      className="h-auto items-center gap-2 py-1.5"
+                      onSelect={() => selectNamespaceSort(customNamespaces)}
+                    >
+                      <span className="text-muted-foreground shrink-0">
+                        Use
+                      </span>
+                      <NamespaceSortBadge
+                        namespaces={customNamespaces}
+                        size="xs"
+                        compact
+                        className={NAMESPACE_SORT_COMMAND_BADGE_CLASSNAME}
+                      />
+                    </CommandItem>
+                  </CommandGroup>
+                )}
+                <CommandGroup heading="preset namespaces">
+                  {presetOptions.length > 0 ? (
+                    presetOptions.map((option) => (
+                      <CommandItem
+                        key={option.label}
+                        value={option.label}
+                        keywords={[option.label]}
+                        className="h-auto py-1.5"
+                        data-checked={
+                          formatNamespaceSortValue(value.namespaces) ===
+                          option.label
+                            ? true
+                            : undefined
+                        }
+                        onSelect={() =>
+                          selectNamespaceSort(option.namespaces, option.sortAsc)
+                        }
+                      >
+                        <NamespaceSortBadge
+                          namespaces={option.namespaces}
+                          size="xs"
+                          compact
+                          className={NAMESPACE_SORT_COMMAND_BADGE_CLASSNAME}
+                        />
+                      </CommandItem>
+                    ))
+                  ) : (
+                    <div className="text-muted-foreground px-2 py-1.5 text-sm">
+                      No preset namespaces.
+                    </div>
+                  )}
+                </CommandGroup>
+                <p className="text-muted-foreground px-2 pb-2 text-xs/5">
+                  Separate custom namespaces with dashes. Escape a dash inside a
+                  namespace with a backslash, like creator\-id-page.
+                </p>
+              </CommandList>
+            </Command>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

@@ -16,10 +16,11 @@ import {
   buildRatingFieldGroups,
   buildSystemTagSuggestions,
   fieldGroups,
-  getDefaultSortAsc,
-  getSortColorHex,
-  getSortLabel,
 } from "../-lib/query-builder-fields";
+import {
+  getSearchSortColorHex,
+  getSearchSortLabel,
+} from "../-lib/search-sort-config";
 import { useSearchPageState } from "../-hooks/use-search-page-state";
 import {
   enforceCombinators,
@@ -54,6 +55,7 @@ import type {
   StagedSearchEntry,
 } from "../-lib/system-predicate-builder-helpers";
 import type { SystemTagSuggestion } from "../-lib/query-builder-fields";
+import type { SortConfig } from "@/stores/search-defaults";
 import type {
   Field,
   OptionGroup,
@@ -62,7 +64,6 @@ import type {
   RuleType,
   UseRuleGroup,
 } from "react-querybuilder";
-import type { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 import type { RovingTagButtonProps } from "@/components/tag/tag-list-focus";
 import { useGetServicesQuery } from "@/integrations/hydrus-api/queries/services";
 import { useRatingServices } from "@/integrations/hydrus-api/queries/use-rating-services";
@@ -94,6 +95,7 @@ import {
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
+import { isNamespaceSortConfig } from "@/stores/search-defaults";
 import { useActiveTheme } from "@/stores/theme-store";
 
 export type { SortConfig } from "./sort-select";
@@ -313,8 +315,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
   const theme = useActiveTheme();
 
   const query = entry.staged.query;
-  const sortType = entry.staged.sort.sortType;
-  const sortAsc = entry.staged.sort.sortAsc;
+  const sort = entry.staged.sort;
   const fileServiceKey = entry.staged.fileServiceKey;
   const { ratingServices } = useRatingServices();
   const { data: servicesData } = useGetServicesQuery();
@@ -355,19 +356,16 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     [allFieldGroups],
   );
 
-  const handleSortTypeChange = useCallback(
-    (value: HydrusFileSortType) => {
-      setSearchStagedSort(entryKey, {
-        sortType: value,
-        sortAsc: getDefaultSortAsc(value),
-      });
+  const handleSortChange = useCallback(
+    (value: SortConfig) => {
+      setSearchStagedSort(entryKey, value);
     },
     [entryKey, setSearchStagedSort],
   );
 
   const handleSortAscToggle = useCallback(() => {
-    setSearchStagedSort(entryKey, { sortType, sortAsc: !sortAsc });
-  }, [entryKey, setSearchStagedSort, sortType, sortAsc]);
+    setSearchStagedSort(entryKey, { ...sort, sortAsc: !sort.sortAsc });
+  }, [entryKey, setSearchStagedSort, sort]);
 
   const handleFileServiceChange = useCallback(
     (value: string | null) => {
@@ -384,10 +382,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       ),
     [rootSearchEntries],
   );
-  const stagedSortLabel = useMemo(
-    () => getSortLabel(sortType, sortAsc),
-    [sortType, sortAsc],
-  );
+  const stagedSortLabel = useMemo(() => getSearchSortLabel(sort), [sort]);
   const selectedFileService = useMemo(
     () =>
       fileServiceValues.find(
@@ -399,9 +394,8 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
     ? `File domain: ${selectedFileService.name}`
     : undefined;
   const stagedSortColor = useMemo(
-    () =>
-      getThemeAdjustedColorFromHex(getSortColorHex(sortType, sortAsc), theme),
-    [sortType, sortAsc, theme],
+    () => getThemeAdjustedColorFromHex(getSearchSortColorHex(sort), theme),
+    [sort, theme],
   );
   const pickedStagedTagStyle = useSelectedTagBadgeStyle();
 
@@ -592,9 +586,8 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       )}
       {(isOpen || sortSectionPicked) && (
         <SortSection
-          sortType={sortType}
-          sortAsc={sortAsc}
-          onSortTypeChange={handleSortTypeChange}
+          sort={sort}
+          onSortChange={handleSortChange}
           onSortAscToggle={handleSortAscToggle}
         />
       )}
@@ -660,6 +653,7 @@ export function SearchQueryBuilder({ onCommit }: SearchQueryBuilderProps) {
       {!isOpen && (
         <StagedSearchTagList
           entries={rootSearchEntries}
+          sort={sort}
           sortLabel={stagedSortLabel}
           sortColor={stagedSortColor}
           fileServiceLabel={stagedFileServiceLabel}
@@ -722,6 +716,7 @@ function CollapsedSearchQueryControls({
 
 function StagedSearchTagList({
   entries,
+  sort,
   sortLabel,
   sortColor,
   fileServiceLabel,
@@ -734,6 +729,7 @@ function StagedSearchTagList({
   onFileServiceSelect,
 }: {
   entries: Array<StagedSearchEntry>;
+  sort: SortConfig;
   sortLabel: string;
   sortColor?: string;
   fileServiceLabel?: string;
@@ -746,6 +742,7 @@ function StagedSearchTagList({
   onFileServiceSelect: () => void;
 }) {
   const hasTags = entries.length > 0;
+  const isNamespaceSort = isNamespaceSortConfig(sort);
   const rovingTriggers = useRovingTagActionTriggers({
     itemCount: entries.length + 1 + (fileServiceLabel ? 1 : 0),
   });
@@ -802,14 +799,21 @@ function StagedSearchTagList({
       })}
       <StagedSearchTagButton
         isPicked={sortPicked}
+        className={
+          isNamespaceSort ? STAGED_OR_GROUP_BUTTON_CLASSNAME : undefined
+        }
         onClick={onSortSelect}
         rovingProps={rovingTriggers.getButtonProps(entries.length)}
       >
         <SearchSortTag
           label={sortLabel}
+          sort={sort}
           color={sortColor}
           size="compact-mobile-wrap"
           selected={sortPicked}
+          badgeClassName={
+            isNamespaceSort ? STAGED_OR_GROUP_BADGE_CLASSNAME : undefined
+          }
         />
       </StagedSearchTagButton>
       {fileServiceLabel && (
