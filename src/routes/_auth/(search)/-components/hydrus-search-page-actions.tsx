@@ -11,6 +11,7 @@ import type { FloatingFooterAction } from "@/components/page-shell/page-floating
 import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
 import type { SearchState } from "@/stores/search-defaults";
 import { OverflowActionItem } from "@/components/page-shell/page-floating-footer";
+import { isNamespaceSortConfig } from "@/stores/search-defaults";
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -27,7 +28,6 @@ import { useApiVersionQuery } from "@/integrations/hydrus-api/queries/access";
 import {
   buildPageOfPagesDestinationSections,
   ensurePageOfPagesPath,
-  formatHydrusPagePath,
   useCreatePageMutation,
   useGetPagesQuery,
 } from "@/integrations/hydrus-api/queries/manage-pages";
@@ -35,6 +35,20 @@ import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 
 const HYAWAY_PAGE_NAME = "hyAway";
 const SEARCH_PAGE_NAME = "search";
+
+function getPageSortOptions(sort: SearchState["sort"]) {
+  if (isNamespaceSortConfig(sort)) {
+    return {
+      file_sort_namespaces: sort.namespaces,
+      file_sort_asc: sort.sortAsc,
+    };
+  }
+
+  return {
+    file_sort_type: sort.sortType,
+    file_sort_asc: sort.sortAsc,
+  };
+}
 
 export function useHydrusSearchPageActions({
   searchState,
@@ -68,7 +82,7 @@ export function useHydrusSearchPageActions({
   );
 
   const handleCreateHydrusPage = useCallback(
-    (pageOfPagesKey?: string, parentPath?: string) => {
+    (pageOfPagesKey?: string) => {
       if (!searchState || searchTags.length === 0) return;
 
       createHydrusPageMutation.mutate(
@@ -79,18 +93,11 @@ export function useHydrusSearchPageActions({
           focus_page: false,
           tags: searchTags,
           file_service_key: searchState.fileServiceKey ?? undefined,
-          file_sort_type: searchState.sort.sortType,
-          file_sort_asc: searchState.sort.sortAsc,
+          ...getPageSortOptions(searchState.sort),
         },
         {
           onSuccess: (page) => {
-            toast.success("Hydrus page created", {
-              description: formatHydrusPagePath(page.page_name, parentPath),
-              action: {
-                label: "Open page",
-                onClick: () => handleOpenCreatedPage(page.page_key),
-              },
-            });
+            handleOpenCreatedPage(page.page_key);
           },
           onError: (error) => {
             toast.error("Failed to create Hydrus page", {
@@ -125,17 +132,10 @@ export function useHydrusSearchPageActions({
         focus_page: false,
         tags: searchTags,
         file_service_key: searchState.fileServiceKey ?? undefined,
-        file_sort_type: searchState.sort.sortType,
-        file_sort_asc: searchState.sort.sortAsc,
+        ...getPageSortOptions(searchState.sort),
       });
 
-      toast.success("Hydrus page created", {
-        description: formatHydrusPagePath(page.page_name, searchParentPage.path),
-        action: {
-          label: "Open page",
-          onClick: () => handleOpenCreatedPage(page.page_key),
-        },
-      });
+      handleOpenCreatedPage(page.page_key);
     } catch (error) {
       toast.error("Failed to create Hydrus page", {
         description: error instanceof Error ? error.message : "Unknown error",
@@ -218,9 +218,7 @@ export function useHydrusSearchPageActions({
                   section.descendants.length === 0 ? (
                     <DropdownMenuItem
                       key={section.pageKey}
-                      onClick={() =>
-                        handleCreateHydrusPage(section.pageKey, section.path)
-                      }
+                      onClick={() => handleCreateHydrusPage(section.pageKey)}
                       disabled={isCreating}
                     >
                       {section.label}
@@ -233,10 +231,7 @@ export function useHydrusSearchPageActions({
                       <DropdownMenuSubContent className="max-h-[min(60dvh,var(--available-height))] min-w-64">
                         <DropdownMenuItem
                           onClick={() =>
-                            handleCreateHydrusPage(
-                              section.pageKey,
-                              section.path,
-                            )
+                            handleCreateHydrusPage(section.pageKey)
                           }
                           disabled={isCreating}
                         >
@@ -247,10 +242,7 @@ export function useHydrusSearchPageActions({
                           <DropdownMenuItem
                             key={destination.pageKey}
                             onClick={() =>
-                              handleCreateHydrusPage(
-                                destination.pageKey,
-                                destination.path,
-                              )
+                              handleCreateHydrusPage(destination.pageKey)
                             }
                             disabled={isCreating}
                           >
