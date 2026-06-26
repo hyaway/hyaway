@@ -382,11 +382,7 @@ function FilmstripItem({
   const wrappedLink = enableContextMenu ? (
     <ContextMenu open={isMenuOpen} onOpenChange={onMenuOpenChange}>
       <ContextMenuTrigger>{linkElement}</ContextMenuTrigger>
-      <ThumbnailGalleryItemContextMenu
-        item={item}
-        itemIndex={itemIndex}
-        hideReviewActions
-      />
+      <ThumbnailGalleryItemContextMenu item={item} hideReviewActions />
     </ContextMenu>
   ) : (
     linkElement
