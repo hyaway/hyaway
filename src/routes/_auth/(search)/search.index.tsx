@@ -17,7 +17,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Fragment, useCallback, useMemo, useRef, useState } from "react";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
-import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
+import {
+  getSearchSortColorHex,
+  getSearchSortLabel,
+} from "./-lib/search-sort-config";
 import { useHydrusSearchPageActions } from "./-components/hydrus-search-page-actions";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
 import { SearchSortTag } from "./-components/search-sort-tag";
@@ -249,9 +252,9 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
     searchTags,
   });
 
-  const sortLabel = getSortLabel(staged.sort.sortType, staged.sort.sortAsc);
+  const sortLabel = getSearchSortLabel(staged.sort);
   const sortColor = getThemeAdjustedColorFromHex(
-    getSortColorHex(staged.sort.sortType, staged.sort.sortAsc),
+    getSearchSortColorHex(staged.sort),
     theme,
   );
   const [isRenaming, setIsRenaming] = useState(false);
@@ -440,6 +443,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
             >
               <SearchSortTag
                 label={sortLabel}
+                sort={staged.sort}
                 color={sortColor}
                 size="compact-mobile-wrap"
               />
