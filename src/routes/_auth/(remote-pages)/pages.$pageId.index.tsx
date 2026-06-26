@@ -16,11 +16,11 @@ import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
+import { ThumbnailGalleryFloatingFooter } from "@/components/thumbnail-gallery/thumbnail-gallery-floating-footer";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGalleryDisplaySettingsPopover } from "@/components/thumbnail-gallery/thumbnail-gallery-display-settings-popover";
-import { useReviewActions } from "@/hooks/use-review-actions";
-import { useHiddenFileView } from "@/hooks/use-hidden-file-view";
+import { useThumbnailGalleryModel } from "@/components/thumbnail-gallery/use-thumbnail-gallery-model";
 import { PageState } from "@/integrations/hydrus-api/models";
 import {
   useFocusPageMutation,
@@ -104,11 +104,18 @@ function PageContent({
     type: "remotePage",
     pageKey: resolvedPageKey,
   } as const;
-  const { hiddenFileIds, visibleFileIds, hiddenLabel, showHiddenFilesAction } =
-    useHiddenFileView({ data, fileIds, source: reviewSource });
-  const reviewActions = useReviewActions({
-    fileIds: visibleFileIds,
-    source: reviewSource,
+  const {
+    metadataQuery,
+    shouldLoadAllMetadata,
+    loadAllMetadataAction,
+    visibleFileIds,
+    hiddenLabel,
+    showHiddenFilesAction,
+    galleryView,
+  } = useThumbnailGalleryModel({
+    fileIds,
+    hiddenFileViewData: data,
+    reviewSource,
   });
 
   useEffect(() => {
@@ -169,6 +176,7 @@ function PageContent({
       isPending: focusPageMutation.isPending,
       overflowOnly: true,
     },
+    loadAllMetadataAction,
     ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
   ];
 
@@ -218,13 +226,19 @@ function PageContent({
         />
         {data?.page_info.media ? (
           <ThumbnailGalleryProvider
-            fileIds={visibleFileIds}
+            reviewFileIds={galleryView.reviewFileIds}
             reviewSource={reviewSource}
           >
             <ThumbnailGallery
-              fileIds={data.page_info.media.hash_ids}
-              hiddenFileIds={hiddenFileIds}
+              sourceFileIds={data.page_info.media.hash_ids}
+              metadataQuery={metadataQuery}
+              galleryView={galleryView}
+              loadAll={shouldLoadAllMetadata}
               getFileLink={getFileLink}
+            />
+            <ThumbnailGalleryFloatingFooter
+              leftContent={refetchButton}
+              actions={overflowActions}
             />
           </ThumbnailGalleryProvider>
         ) : (
@@ -234,10 +248,12 @@ function PageContent({
       <PageHeaderActions>
         <ThumbnailGalleryDisplaySettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter
-        leftContent={refetchButton}
-        actions={[...reviewActions, ...overflowActions]}
-      />
+      {!data?.page_info.media && (
+        <PageFloatingFooter
+          leftContent={refetchButton}
+          actions={overflowActions}
+        />
+      )}
     </>
   );
 }
