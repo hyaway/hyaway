@@ -9,6 +9,7 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui-primitives/card";
+import { useMetadataSettingsActions } from "@/stores/metadata-settings-store";
 import { useReviewSettingsActions } from "@/stores/review-settings-store";
 import { useScratchpadSettingsActions } from "@/stores/scratchpad-settings-store";
 import { useSearchLimitsActions } from "@/stores/search-limits-store";
@@ -21,6 +22,7 @@ export function ResetAllDataSettingsCard() {
   const { reset: resetWatchHistory } = useWatchHistoryActions();
   const { resetDataSettings: resetReviewData } = useReviewSettingsActions();
   const { reset: resetScratchpad } = useScratchpadSettingsActions();
+  const { reset: resetMetadata } = useMetadataSettingsActions();
 
   const handleResetAll = () => {
     resetSearchLimits();
@@ -28,6 +30,7 @@ export function ResetAllDataSettingsCard() {
     resetWatchHistory();
     resetReviewData();
     resetScratchpad();
+    resetMetadata();
   };
 
   return (

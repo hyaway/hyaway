@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SearchLimitsSettingsCard } from "./-components/search-limits-settings-card";
 import { SearchSettingsCard } from "./-components/search-settings-card";
 import { HistorySettingsCard } from "./-components/history-settings-card";
+import { MetadataSettingsCard } from "./-components/metadata-settings-card";
 import { ReviewQueueSettingsCard } from "./-components/review-queue-settings-card";
 import { ResetAllDataSettingsCard } from "./-components/reset-all-data-settings-card";
 import { ScratchpadSettingsCard } from "./-components/scratchpad-settings-card";
@@ -25,10 +26,11 @@ function SettingsDataComponent() {
         Data Settings
       </Heading>
       <ReviewQueueSettingsCard />
+      <MetadataSettingsCard />
+      <ScratchpadSettingsCard />
       <SearchSettingsCard />
       <SearchLimitsSettingsCard />
       <HistorySettingsCard />
-      <ScratchpadSettingsCard />
       <ResetAllDataSettingsCard />
     </div>
   );

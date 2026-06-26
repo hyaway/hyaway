@@ -32,6 +32,7 @@ import type {
 } from "../api-client";
 import type { FileMetadata, FileViewingStatistics } from "../models";
 import type { ReviewSource } from "@/stores/review-queue-store";
+import { useMetadataBatchSize } from "@/stores/metadata-settings-store";
 
 export const useGetSingleFileMetadata = (fileId: number) => {
   const isConfigured = useIsApiConfigured();
@@ -79,7 +80,7 @@ export const useGetFilesMetadata = (
  * Avoids putting the full (potentially 100k+) array into a TanStack Query key,
  * which would force JSON.stringify / deep-compare on every render.
  */
-function fileIdsFingerprint(
+export function fileIdsFingerprint(
   ids: Array<number>,
 ): [length: number, first: number | undefined, last: number | undefined] {
   return [ids.length, ids[0], ids[ids.length - 1]];
@@ -91,7 +92,7 @@ export const useInfiniteGetFilesMetadata = (
 ) => {
   const isConfigured = useIsApiConfigured();
   const { pathname } = useLocation();
-  const BATCH_SIZE = 128;
+  const batchSize = useMetadataBatchSize();
 
   // Keep file_ids in a ref so the queryFn always reads the latest array
   // without needing the full array in the queryKey.
@@ -105,11 +106,11 @@ export const useInfiniteGetFilesMetadata = (
       pathname,
       fileIdsFingerprint(file_ids),
       only_return_basic_information,
-      BATCH_SIZE,
+      batchSize,
     ],
     queryFn: async ({ pageParam = 0 }) => {
       const currentIds = fileIdsRef.current;
-      const batchFileIds = currentIds.slice(pageParam, pageParam + BATCH_SIZE);
+      const batchFileIds = currentIds.slice(pageParam, pageParam + batchSize);
       if (batchFileIds.length === 0) {
         return { metadata: [], nextCursor: undefined };
       }
@@ -121,7 +122,7 @@ export const useInfiniteGetFilesMetadata = (
         metadata: response.metadata,
         nextCursor:
           pageParam + batchFileIds.length < currentIds.length
-            ? pageParam + BATCH_SIZE
+            ? pageParam + batchSize
             : undefined,
       };
     },
