@@ -27,8 +27,6 @@ interface ThumbnailGalleryContextValue {
   localHistoryEntries?: Array<WatchHistoryEntry>;
   /** File IDs to use for review actions and review-from-here. */
   reviewFileIds?: Array<number>;
-  /** File IDs to use for contextual navigation. */
-  navigationFileIds?: Array<number>;
   /** Source view to hide files from when review hide settings apply. */
   reviewSource?: ReviewSource;
 }
@@ -45,8 +43,6 @@ export interface ThumbnailGalleryProviderProps {
   localHistoryEntries?: Array<WatchHistoryEntry>;
   /** File IDs to use for review actions and review-from-here. */
   reviewFileIds?: Array<number>;
-  /** File IDs to use for contextual navigation. */
-  navigationFileIds?: Array<number>;
   /** Source view to hide files from when review hide settings apply. */
   reviewSource?: ReviewSource;
 }
@@ -56,7 +52,6 @@ export function ThumbnailGalleryProvider({
   infoMode = "filesize",
   localHistoryEntries,
   reviewFileIds,
-  navigationFileIds,
   reviewSource,
 }: ThumbnailGalleryProviderProps) {
   const value = useMemo(
@@ -64,16 +59,9 @@ export function ThumbnailGalleryProvider({
       infoMode,
       localHistoryEntries,
       reviewFileIds,
-      navigationFileIds,
       reviewSource,
     }),
-    [
-      infoMode,
-      localHistoryEntries,
-      reviewFileIds,
-      navigationFileIds,
-      reviewSource,
-    ],
+    [infoMode, localHistoryEntries, reviewFileIds, reviewSource],
   );
 
   return (

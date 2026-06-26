@@ -217,13 +217,6 @@ export function useThumbnailGalleryView({
     hiddenFileIds,
     visibleLoadedFileIds,
   ]);
-  // Namespace navigation is limited to loaded sorted items; unsorted navigation uses all source IDs.
-  const navigationFileIds = getNavigationFileIds({
-    visibleFileIds,
-    visibleLoadedFileIds,
-    namespaceSort,
-  });
-
   return {
     totalItems: visibleFileIds.length,
     loadedItemsCount,
@@ -232,7 +225,6 @@ export function useThumbnailGalleryView({
     visibleLoadedItems,
     visibleLoadedFileIds,
     reviewFileIds,
-    navigationFileIds,
   };
 }
 
@@ -244,7 +236,6 @@ export type ThumbnailGalleryView = {
   visibleLoadedItems: Array<FileMetadata>;
   visibleLoadedFileIds: Array<number>;
   reviewFileIds: Array<number>;
-  navigationFileIds: Array<number>;
 };
 
 export function useThumbnailGalleryViewForQuery({
