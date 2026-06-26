@@ -3,7 +3,6 @@
 
 import { useMemo } from "react";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
-import type { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import type { NamespaceSortConfig } from "@/stores/search-defaults";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 import { useAllKnownTagsServiceQuery } from "@/integrations/hydrus-api/queries/services";
@@ -172,14 +171,14 @@ export function useThumbnailGalleryView({
   data,
   hiddenFileIds,
   namespaceSort,
-  allTagsServiceId,
 }: {
   sourceFileIds: Array<number>;
   data: { pages: Array<{ metadata: Array<FileMetadata> }> } | undefined;
   hiddenFileIds?: Array<number>;
   namespaceSort?: NamespaceSortConfig;
-  allTagsServiceId?: string;
 }): ThumbnailGalleryView {
+  const allTagsServiceId = useAllKnownTagsServiceQuery().data;
+
   // Source-order IDs drive total counts, unsorted navigation, and unloaded tails.
   const visibleFileIds = useMemo(
     () => getVisibleSourceFileIds(sourceFileIds, hiddenFileIds),
@@ -237,25 +236,3 @@ export type ThumbnailGalleryView = {
   visibleLoadedFileIds: Array<number>;
   reviewFileIds: Array<number>;
 };
-
-export function useThumbnailGalleryViewForQuery({
-  sourceFileIds,
-  itemsQuery,
-  hiddenFileIds,
-  namespaceSort,
-}: {
-  sourceFileIds: Array<number>;
-  itemsQuery: ReturnType<typeof useInfiniteGetFilesMetadata>;
-  hiddenFileIds?: Array<number>;
-  namespaceSort?: NamespaceSortConfig;
-}) {
-  const allTagsServiceId = useAllKnownTagsServiceQuery().data;
-
-  return useThumbnailGalleryView({
-    sourceFileIds,
-    data: itemsQuery.data,
-    hiddenFileIds,
-    namespaceSort,
-    allTagsServiceId,
-  });
-}

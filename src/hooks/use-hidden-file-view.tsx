@@ -18,10 +18,11 @@ function useShowHiddenFilesAction({
   source,
 }: {
   hiddenFileIds: Array<number>;
-  source: ReviewSource;
+  source?: ReviewSource;
 }): FloatingFooterAction | null {
   const queryClient = useQueryClient();
 
+  if (!source) return null;
   if (hiddenFileIds.length === 0) return null;
 
   return {
@@ -40,7 +41,7 @@ export function useHiddenFileView({
 }: {
   data: unknown;
   fileIds: Array<number>;
-  source: ReviewSource;
+  source?: ReviewSource;
 }) {
   const hiddenFileIds = getHiddenFileIds(data);
   const visibleFileIds = getVisibleFileIds(fileIds, data);
