@@ -4,6 +4,8 @@
 import {
   IconCopy,
   IconDeviceFloppy,
+  IconFolderPlus,
+  IconInfoCircle,
   IconPin,
   IconPinned,
   IconPinnedOff,
@@ -25,7 +27,10 @@ import {
 } from "./-hooks/use-committed-search-query";
 import { useSearchPageState } from "./-hooks/use-search-page-state";
 import { queryToHydrusSearch } from "./-lib/query-to-hydrus-search";
-import { getSortColorHex, getSortLabel } from "./-lib/query-builder-fields";
+import {
+  getSearchSortColorHex,
+  getSearchSortLabel,
+} from "./-lib/search-sort-config";
 import { SearchSettingsPopover } from "./-components/search-settings-popover";
 import { SearchSortTag } from "./-components/search-sort-tag";
 import type { FileLinkBuilder } from "@/components/thumbnail-gallery/thumbnail-gallery-item";
@@ -38,12 +43,18 @@ import { PageFloatingFooter } from "@/components/page-shell/page-floating-footer
 import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
+import { ThumbnailGalleryFloatingFooter } from "@/components/thumbnail-gallery/thumbnail-gallery-floating-footer";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGallerySkeleton } from "@/components/thumbnail-gallery/thumbnail-gallery-skeleton";
-import { useReviewActions } from "@/hooks/use-review-actions";
-import { useHiddenFileView } from "@/hooks/use-hidden-file-view";
+import { useThumbnailGalleryModel } from "@/components/thumbnail-gallery/use-thumbnail-gallery-model";
+import { Button } from "@/components/ui-primitives/button";
 import { SearchTagList } from "@/components/tag/tag-badge";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui-primitives/alert";
 import {
   useCommittedSearch,
   useSearchDirty,
@@ -52,8 +63,13 @@ import {
   useSearchQueriesActions,
   useSearchQueryEntry,
 } from "@/stores/search-queries-store";
+import {
+  useLoadAllMetadataByDefault,
+  useLoadAllMetadataWhenNamespaceSort,
+} from "@/stores/metadata-settings-store";
 import { useSearchSettingsActions } from "@/stores/search-settings-store";
 import { useActiveTheme } from "@/stores/theme-store";
+import { isNamespaceSortConfig } from "@/stores/search-defaults";
 
 const SearchResultsSearchSchema = z.object({
   builder: z.boolean().optional(),
@@ -96,14 +112,39 @@ function SearchPage() {
   const queryClient = useQueryClient();
 
   const fileIds = data?.file_ids ?? [];
+  const namespaceSort =
+    committed && isNamespaceSortConfig(committed.sort)
+      ? committed.sort
+      : undefined;
+  const loadAllMetadataByDefault = useLoadAllMetadataByDefault();
+  const loadAllMetadataWhenNamespaceSort =
+    useLoadAllMetadataWhenNamespaceSort();
   const reviewSource = { type: "searchPage", entryKey: searchId } as const;
-  const { hiddenFileIds, visibleFileIds, hiddenLabel, showHiddenFilesAction } =
-    useHiddenFileView({ data, fileIds, source: reviewSource });
-  const hasFiles = visibleFileIds.length > 0;
-  const reviewActions = useReviewActions({
-    fileIds: visibleFileIds,
-    source: reviewSource,
+  const {
+    metadataQuery,
+    shouldLoadAllMetadata,
+    hasLoadedAllMetadata,
+    loadAllMetadataAction,
+    visibleFileIds,
+    hiddenLabel,
+    showHiddenFilesAction,
+    galleryView,
+  } = useThumbnailGalleryModel({
+    fileIds,
+    hiddenFileViewData: data,
+    reviewSource,
+    namespaceSort,
+    requestAllMetadata: !!namespaceSort && loadAllMetadataWhenNamespaceSort,
   });
+  const LoadAllMetadataIcon = loadAllMetadataAction.icon;
+  const hasFiles = visibleFileIds.length > 0;
+  const showNamespaceSortWarning =
+    !!namespaceSort &&
+    hasFiles &&
+    !loadAllMetadataByDefault &&
+    !loadAllMetadataWhenNamespaceSort &&
+    !hasLoadedAllMetadata;
+  const showGallery = !isLoading && !isError && hasFiles;
 
   const handleCommit = useCallback(() => {
     setPreserveCurrentScroll(true);
@@ -172,6 +213,11 @@ function SearchPage() {
     displayName,
     searchTags: hydrusPageSearchTags,
   });
+  const saveAsHydrusPageAction = useMemo(
+    () =>
+      hydrusPageActions.find((action) => action.id === "create-hydrus-page"),
+    [hydrusPageActions],
+  );
 
   const searchActions = useMemo((): Array<FloatingFooterAction> => {
     const showDraftDefaultActions = !instantSearch && isDirty;
@@ -220,6 +266,7 @@ function SearchPage() {
         overflowOnly: true,
       },
       ...hydrusPageActions,
+      loadAllMetadataAction,
       ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
       {
         id: "delete-search",
@@ -240,14 +287,10 @@ function SearchPage() {
     handleTogglePinned,
     handleSaveAsNew,
     hydrusPageActions,
+    loadAllMetadataAction,
     showHiddenFilesAction,
     handleDelete,
   ]);
-  const footerActions = useMemo(
-    () => [...reviewActions, ...searchActions],
-    [reviewActions, searchActions],
-  );
-
   const fileCount = visibleFileIds.length;
   const fileCountLabel = `${fileCount} ${fileCount === 1 ? "file" : "files"}`;
   const pageTitle =
@@ -288,16 +331,11 @@ function SearchPage() {
             <SearchTagList tags={searchTags} badgeSize="compact-mobile-wrap">
               {committed && (
                 <SearchSortTag
-                  label={getSortLabel(
-                    committed.sort.sortType,
-                    committed.sort.sortAsc,
-                  )}
+                  label={getSearchSortLabel(committed.sort)}
+                  sort={committed.sort}
                   size="compact-mobile-wrap"
                   color={getThemeAdjustedColorFromHex(
-                    getSortColorHex(
-                      committed.sort.sortType,
-                      committed.sort.sortAsc,
-                    ),
+                    getSearchSortColorHex(committed.sort),
                     theme,
                   )}
                 />
@@ -312,16 +350,53 @@ function SearchPage() {
             fallbackMessage="An unknown error occurred while searching."
           />
         )}
-        {!isLoading && !isError && hasFiles && (
+        {!isLoading && !isError && showNamespaceSortWarning && (
+          <Alert className="mb-3 gap-1 pb-3">
+            <IconInfoCircle className="size-4" />
+            <AlertTitle>Namespace sorting loaded items only</AlertTitle>
+            <AlertDescription className="flex flex-wrap items-center gap-2">
+              <span>Save as a Hydrus page to order the full result set.</span>
+              <Button
+                size="xs"
+                variant="outline"
+                onClick={saveAsHydrusPageAction?.onClick}
+                disabled={
+                  !saveAsHydrusPageAction || saveAsHydrusPageAction.disabled
+                }
+                title={saveAsHydrusPageAction?.title}
+              >
+                <IconFolderPlus className="size-4" />
+                {saveAsHydrusPageAction?.isPending ? "Saving" : "Save page"}
+              </Button>
+              <Button
+                size="xs"
+                variant="outline"
+                onClick={loadAllMetadataAction.onClick}
+                disabled={loadAllMetadataAction.disabled}
+                title={loadAllMetadataAction.title}
+              >
+                <LoadAllMetadataIcon className="size-4" />
+                {loadAllMetadataAction.label}
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+        {showGallery && (
           <ThumbnailGalleryProvider
-            fileIds={visibleFileIds}
+            reviewFileIds={galleryView.reviewFileIds}
             reviewSource={reviewSource}
           >
             <ThumbnailGallery
-              fileIds={fileIds}
-              hiddenFileIds={hiddenFileIds}
+              sourceFileIds={fileIds}
+              metadataQuery={metadataQuery}
+              galleryView={galleryView}
+              loadAll={shouldLoadAllMetadata}
               getFileLink={getFileLink}
               preserveCurrentScroll={preserveCurrentScroll}
+            />
+            <ThumbnailGalleryFloatingFooter
+              leftContent={refetchButton}
+              actions={searchActions}
             />
           </ThumbnailGalleryProvider>
         )}
@@ -341,7 +416,12 @@ function SearchPage() {
       <PageHeaderActions>
         <SearchSettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter leftContent={refetchButton} actions={footerActions} />
+      {!showGallery && (
+        <PageFloatingFooter
+          leftContent={refetchButton}
+          actions={searchActions}
+        />
+      )}
     </>
   );
 }
