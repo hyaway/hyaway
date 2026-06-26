@@ -13,6 +13,7 @@ import {
 } from "@/integrations/hydrus-api/models";
 import { useHasPermission } from "@/integrations/hydrus-api/queries/access";
 import { useCommittedSearch } from "@/stores/search-queries-store";
+import { isNamespaceSortConfig } from "@/stores/search-defaults";
 
 export { committedSearchQueryKey };
 
@@ -32,14 +33,27 @@ export function useCommittedSearchFilesQuery(entryKey: string) {
     return queryToHydrusSearch(committed.query);
   }, [committed]);
 
-  const searchOptions = useMemo(
-    () => ({
-      file_sort_type: committed?.sort.sortType ?? HydrusFileSortType.ImportTime,
-      file_sort_asc: committed?.sort.sortAsc ?? true,
-      file_service_key: committed?.fileServiceKey ?? undefined,
-    }),
-    [committed],
-  );
+  const searchOptions = useMemo(() => {
+    if (!committed) {
+      return {
+        file_sort_type: HydrusFileSortType.ImportTime,
+        file_sort_asc: true,
+        file_service_key: undefined,
+      };
+    }
+
+    if (isNamespaceSortConfig(committed.sort)) {
+      return {
+        file_service_key: committed.fileServiceKey ?? undefined,
+      };
+    }
+
+    return {
+      file_sort_type: committed.sort.sortType,
+      file_sort_asc: committed.sort.sortAsc,
+      file_service_key: committed.fileServiceKey ?? undefined,
+    };
+  }, [committed]);
 
   const result = useQuery({
     queryKey: [...committedSearchQueryKey(entryKey), searchTags, searchOptions],
