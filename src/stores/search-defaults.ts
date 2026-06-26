@@ -9,10 +9,93 @@ import { HydrusFileSortType } from "@/integrations/hydrus-api/models";
 // Types
 // ---------------------------------------------------------------------------
 
-export type SortConfig = {
+export type SystemSortConfig = {
+  mode?: "system";
   sortType: HydrusFileSortType;
   sortAsc: boolean;
 };
+
+export type NamespaceSortConfig = {
+  mode: "namespaces";
+  namespaces: Array<string>;
+  sortAsc: boolean;
+};
+
+export type SortConfig = SystemSortConfig | NamespaceSortConfig;
+
+export function isNamespaceSortConfig(
+  sort: SortConfig,
+): sort is NamespaceSortConfig {
+  return sort.mode === "namespaces";
+}
+
+export function getSystemSortConfig(sort: SortConfig): SystemSortConfig {
+  if (isNamespaceSortConfig(sort)) {
+    return { sortType: HydrusFileSortType.ImportTime, sortAsc: false };
+  }
+
+  return sort;
+}
+
+function isUndesiredNamespaceCharacter(character: string): boolean {
+  const codePoint = character.codePointAt(0);
+  if (codePoint === undefined) return false;
+
+  return (
+    codePoint <= 0x1f ||
+    (codePoint >= 0x7f && codePoint <= 0x9f) ||
+    codePoint === 0x200b ||
+    codePoint === 0x200e ||
+    codePoint === 0x200f ||
+    (codePoint >= 0x202a && codePoint <= 0x202e) ||
+    (codePoint >= 0x2066 && codePoint <= 0x2069) ||
+    codePoint === 0xfeff ||
+    (codePoint >= 0xe000 && codePoint <= 0xf8ff)
+  );
+}
+
+function stripUndesiredNamespaceCharacters(value: string): string {
+  return Array.from(value)
+    .filter((character) => !isUndesiredNamespaceCharacter(character))
+    .join("");
+}
+
+export function parseNamespaceSortValue(value: string): Array<string> {
+  return value
+    .split(/(?<!\\)-/)
+    .map((namespace) =>
+      stripUndesiredNamespaceCharacters(namespace.replaceAll("\\-", "-"))
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase(),
+    )
+    .filter((namespace) => namespace.length > 0 && !namespace.includes(":"));
+}
+
+export function formatNamespaceSortValue(namespaces: Array<string>): string {
+  return namespaces
+    .map((namespace) => namespace.replaceAll("-", "\\-"))
+    .join("-");
+}
+
+export function areSortConfigsEquivalent(
+  left: SortConfig,
+  right: SortConfig,
+): boolean {
+  if (isNamespaceSortConfig(left) || isNamespaceSortConfig(right)) {
+    return (
+      isNamespaceSortConfig(left) &&
+      isNamespaceSortConfig(right) &&
+      left.sortAsc === right.sortAsc &&
+      left.namespaces.length === right.namespaces.length &&
+      left.namespaces.every(
+        (namespace, index) => namespace === right.namespaces[index],
+      )
+    );
+  }
+
+  return left.sortType === right.sortType && left.sortAsc === right.sortAsc;
+}
 
 type SearchRuleBase<
   TField extends string,

@@ -12,6 +12,7 @@ import type {
 } from "@/stores/search-defaults";
 import type { SavedSearchSort } from "@/stores/search-settings-store";
 import {
+  areSortConfigsEquivalent,
   createSearchRule,
   emptyStaged,
   serializeSearchQueryForComparison,
@@ -57,8 +58,7 @@ function areSearchStatesEquivalent(
   if (staged === committed) return true;
 
   return (
-    staged.sort.sortType === committed.sort.sortType &&
-    staged.sort.sortAsc === committed.sort.sortAsc &&
+    areSortConfigsEquivalent(staged.sort, committed.sort) &&
     staged.fileServiceKey === committed.fileServiceKey &&
     serializeSearchQueryForComparison(stripEmptyRules(staged.query)) ===
       serializeSearchQueryForComparison(committed.query)
