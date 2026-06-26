@@ -442,8 +442,9 @@ function NamespaceSortSelect({
   }));
   const customNamespaces = parseNamespaceSortValue(inputValue);
   const customLabel = formatNamespaceSortValue(customNamespaces);
+  const inputIsEmpty = inputValue.trim().length === 0;
   const showCustomOption =
-    inputValue.trim().length > 0 &&
+    !inputIsEmpty &&
     customNamespaces.length > 0 &&
     !presetOptions.some((option) => option.label === customLabel);
   const showDropdown = open && (presetOptions.length > 0 || showCustomOption);
@@ -456,7 +457,7 @@ function NamespaceSortSelect({
     namespaces: Array<string>,
     sortAsc = value.sortAsc,
   ) => {
-    if (namespaces.length === 0) return;
+    if (namespaces.length === 0 && !inputIsEmpty) return;
     setInputValue(formatNamespaceSortValue(namespaces));
     onChange({
       mode: "namespaces",
@@ -467,7 +468,9 @@ function NamespaceSortSelect({
   };
 
   const submitTypedValue = () => {
-    selectNamespaceSort(customNamespaces);
+    if (inputIsEmpty || customNamespaces.length > 0) {
+      selectNamespaceSort(customNamespaces);
+    }
   };
 
   return (
@@ -485,10 +488,13 @@ function NamespaceSortSelect({
           onFocus={() => setOpen(true)}
           onBlur={() => {
             setOpen(false);
-            if (customNamespaces.length > 0) submitTypedValue();
+            submitTypedValue();
           }}
           onKeyDown={(event) => {
-            if (event.key === "Enter" && customNamespaces.length > 0) {
+            if (
+              event.key === "Enter" &&
+              (inputIsEmpty || customNamespaces.length > 0)
+            ) {
               event.preventDefault();
               submitTypedValue();
             }
