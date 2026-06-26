@@ -17,6 +17,8 @@ import {
 import { ThumbnailGallerySkeleton } from "./thumbnail-gallery-skeleton";
 import type { FileLinkBuilder } from "./thumbnail-gallery-item";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import type { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
+import type { ThumbnailGalleryView } from "./use-thumbnail-gallery-view";
 import { ScrollPositionBadge } from "@/components/scroll-position-badge";
 import { ThumbnailGalleryTagsSidebar } from "@/components/tag/thumbnail-gallery-tags-sidebar";
 import { PageError } from "@/components/page-shell/page-error";
@@ -25,7 +27,6 @@ import {
   useEffectiveGalleryBaseWidthMode,
   useThumbnailDimensions,
 } from "@/integrations/hydrus-api/queries/options";
-import { useInfiniteGetFilesMetadata } from "@/integrations/hydrus-api/queries/manage-files";
 import { useMasonryNavigation } from "@/hooks/use-masonry-navigation";
 import { useGalleryResponsiveLanes } from "@/hooks/use-responsive-lanes";
 import {
@@ -48,9 +49,11 @@ import { useImageBackground as useFileViewerImageBackground } from "@/stores/fil
 import { useSidebarIsTransitioning } from "@/stores/sidebar-store";
 
 export interface ThumbnailGalleryProps {
-  fileIds: Array<number>;
-  /** File IDs to hide visually while keeping the source metadata query unchanged. */
-  hiddenFileIds?: Array<number>;
+  sourceFileIds: Array<number>;
+  metadataQuery: ReturnType<typeof useInfiniteGetFilesMetadata>;
+  galleryView: ThumbnailGalleryView;
+  /** Fetch every metadata page as soon as possible instead of waiting for scroll proximity. */
+  loadAll?: boolean;
   /** Custom link builder for contextual navigation */
   getFileLink?: FileLinkBuilder;
   /**
@@ -63,41 +66,42 @@ export interface ThumbnailGalleryProps {
 }
 
 export function ThumbnailGallery({
-  fileIds,
-  hiddenFileIds,
+  sourceFileIds,
+  metadataQuery,
+  galleryView,
+  loadAll,
   getFileLink,
   preserveCurrentScroll,
   "aria-label": ariaLabel = "File gallery",
 }: ThumbnailGalleryProps) {
-  const itemsQuery = useInfiniteGetFilesMetadata(fileIds, false);
   const defaultDimensions = useThumbnailDimensions();
 
-  if (fileIds.length === 0) {
+  if (sourceFileIds.length === 0) {
     return <p>Page is empty.</p>;
   }
 
-  if (itemsQuery.isPending) {
+  if (metadataQuery.isPending) {
     return <ThumbnailGallerySkeleton />;
   }
 
-  if (itemsQuery.isError) {
+  if (metadataQuery.isError) {
     return (
       <PageError
-        error={itemsQuery.error}
+        error={metadataQuery.error}
         fallbackMessage="An unknown error occurred while fetching gallery"
       />
     );
   }
 
-  if (itemsQuery.data.pages[0].metadata.length === 0) {
+  if (metadataQuery.data.pages[0].metadata.length === 0) {
     return <p>No images loaded.</p>;
   }
 
   return (
     <PureThumbnailGallery
-      itemsQuery={itemsQuery}
-      hiddenFileIds={hiddenFileIds}
-      totalItems={fileIds.length - (hiddenFileIds?.length ?? 0)}
+      metadataQuery={metadataQuery}
+      galleryView={galleryView}
+      loadAll={loadAll}
       defaultDimensions={defaultDimensions}
       getFileLink={getFileLink}
       preserveCurrentScroll={preserveCurrentScroll}
@@ -107,40 +111,31 @@ export function ThumbnailGallery({
 }
 
 export function PureThumbnailGallery({
-  itemsQuery,
-  hiddenFileIds,
-  totalItems,
+  metadataQuery,
+  galleryView,
+  loadAll,
   defaultDimensions,
   getFileLink,
   preserveCurrentScroll,
   "aria-label": ariaLabel,
 }: {
-  itemsQuery: ReturnType<typeof useInfiniteGetFilesMetadata>;
-  hiddenFileIds?: Array<number>;
-  totalItems: number;
+  metadataQuery: ReturnType<typeof useInfiniteGetFilesMetadata>;
+  galleryView: ThumbnailGalleryView;
+  loadAll?: boolean;
   defaultDimensions: { width: number; height: number };
   getFileLink?: FileLinkBuilder;
   preserveCurrentScroll?: boolean;
   "aria-label"?: string;
 }) {
-  const { data, isFetchingNextPage, fetchNextPage, hasNextPage } = itemsQuery;
-
-  const hiddenFileIdSet = useMemo(
-    () => (hiddenFileIds?.length ? new Set(hiddenFileIds) : null),
-    [hiddenFileIds],
-  );
-  const { loadedItemsCount, visibleItems } = useMemo(() => {
-    const loaded = data ? data.pages.flatMap((page) => page.metadata) : [];
-    return {
-      loadedItemsCount: loaded.length,
-      visibleItems: hiddenFileIdSet
-        ? loaded.filter((item) => !hiddenFileIdSet.has(item.file_id))
-        : loaded,
-    };
-  }, [data, hiddenFileIdSet]);
-
-  // Defer items so old grid stays visible while new items load
-  const deferredItems = useDeferredValue(visibleItems);
+  const { isFetchingNextPage, fetchNextPage, hasNextPage } = metadataQuery;
+  const {
+    totalItems,
+    loadedItemsCount,
+    visibleItemsCount,
+    visibleLoadedItems,
+  } = galleryView;
+  // Deferring the item list is a render concern; action/navigation IDs stay current in galleryView.
+  const renderedItems = useDeferredValue(visibleLoadedItems);
 
   // Get layout settings - defer expensive ones for responsive slider UX
   const baseWidthMode = useEffectiveGalleryBaseWidthMode();
@@ -175,7 +170,7 @@ export function PureThumbnailGallery({
   const { width, lanes } = useGalleryResponsiveLanes(
     parentRef,
     deferredBaseWidth,
-    deferredItems.length,
+    renderedItems.length,
     { horizontalGap: deferredHorizontalGap },
   );
 
@@ -211,15 +206,15 @@ export function PureThumbnailGallery({
     ? () => (typeof document !== "undefined" ? window.scrollY : 0)
     : restoredScrollY;
   const getItemKey = useCallback(
-    (index: number) => deferredItems[index].file_id,
-    [deferredItems],
+    (index: number) => renderedItems[index].file_id,
+    [renderedItems],
   );
 
   const rowVirtualizer = useWindowVirtualizer({
-    count: deferredItems.length,
+    count: renderedItems.length,
     getItemKey,
     estimateSize: (i) => {
-      const item = deferredItems[i];
+      const item = renderedItems[i];
       return getItemHeight(item);
     },
     // Lower overscan to reduce concurrent thumbnail loads during fast scroll.
@@ -246,16 +241,18 @@ export function PureThumbnailGallery({
     if (!hasNextPage || isFetchingNextPage || fetchingRef.current) return;
 
     const loadedButNothingVisible =
-      totalItems > 0 && loadedItemsCount > 0 && visibleItems.length === 0;
+      totalItems > 0 && loadedItemsCount > 0 && visibleItemsCount === 0;
     const fetchThreshold = Math.min(
-      Math.max(deferredItems.length * 0.5, 1),
+      Math.max(renderedItems.length * 0.5, 1),
       256,
     );
     const isNearRenderedEnd =
       lastItemIndex !== undefined &&
-      lastItemIndex >= deferredItems.length - fetchThreshold;
+      lastItemIndex >= renderedItems.length - fetchThreshold;
+    const shouldFetchNextPage =
+      loadAll || loadedButNothingVisible || isNearRenderedEnd;
 
-    if (!loadedButNothingVisible && !isNearRenderedEnd) {
+    if (!shouldFetchNextPage) {
       return;
     }
 
@@ -264,21 +261,22 @@ export function PureThumbnailGallery({
       fetchingRef.current = false;
     });
   }, [
-    deferredItems.length,
+    renderedItems.length,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     lastItemIndex,
+    loadAll,
     loadedItemsCount,
     totalItems,
-    visibleItems.length,
+    visibleItemsCount,
   ]);
 
   // Re-measure when items or dimensions change
   useEffect(() => {
     rowVirtualizer.measure();
   }, [
-    deferredItems,
+    renderedItems,
     width,
     lanes,
     deferredVerticalGap,
@@ -291,7 +289,7 @@ export function PureThumbnailGallery({
   const { setLinkRef, handleKeyDown, handleItemFocus, getTabIndex } =
     useMasonryNavigation({
       lanes: effectiveLanes,
-      totalItems: deferredItems.length,
+      totalItems: renderedItems.length,
       getVirtualItems: rowVirtualizer.getVirtualItems.bind(rowVirtualizer),
       scrollToIndex: rowVirtualizer.scrollToIndex.bind(rowVirtualizer),
     });
@@ -349,7 +347,7 @@ export function PureThumbnailGallery({
             className="@container relative w-full"
           >
             {virtualItems.map((virtualRow) => {
-              const item = deferredItems[virtualRow.index];
+              const item = renderedItems[virtualRow.index];
               const itemHeight = getItemHeight(item);
 
               return (
@@ -357,7 +355,7 @@ export function PureThumbnailGallery({
                   key={virtualRow.key}
                   virtualRow={virtualRow}
                   lanes={effectiveLanes}
-                  totalItemsCount={deferredItems.length}
+                  totalItemsCount={renderedItems.length}
                   item={item}
                   width={width}
                   height={itemHeight}
@@ -372,7 +370,7 @@ export function PureThumbnailGallery({
           </ul>
           <ScrollPositionBadge
             current={lastItemIndex === undefined ? 0 : lastItemIndex + 1}
-            loaded={deferredItems.length}
+            loaded={renderedItems.length}
             total={totalItems}
             isScrolling={rowVirtualizer.isScrolling}
             show={showScrollBadge}
@@ -383,7 +381,7 @@ export function PureThumbnailGallery({
             </div>
           )}
           <RightSidebarPortal>
-            <ThumbnailGalleryTagsSidebar items={deferredItems} />
+            <ThumbnailGalleryTagsSidebar items={renderedItems} />
           </RightSidebarPortal>
         </>
       )}

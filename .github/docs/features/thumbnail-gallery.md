@@ -154,6 +154,19 @@ See [Settings Architecture](../settings-architecture.md) for the settings UI pat
 - **Scroll restoration** - Uses `useScrollRestoration` hook
 - **CSS variables for animation settings** - Duration settings are read once at gallery root and passed to children via CSS custom properties, avoiding re-renders of all items when settings change
 
+### Future: Incremental Namespace Sort
+
+Namespace sorting currently re-sorts the full loaded metadata prefix whenever another metadata page arrives. For example, after 10,000 loaded items, fetching one more 128-item batch sorts all 10,128 loaded items again.
+
+A future optimization could treat newly fetched metadata pages as append-only input:
+
+1. Keep the previous sorted loaded prefix and its namespace sort keys.
+2. Build namespace sort keys only for the appended batch.
+3. Sort the appended batch.
+4. Merge the previous sorted prefix with the sorted appended batch.
+
+This would change append-page work from a full re-sort of `existing + appended` to sorting the appended batch plus a linear merge. Fall back to a full sort when the loaded item list is not a pure append, when namespace sort settings change, when the all-tags service changes, or when metadata/tag mutation patches may have changed existing sort keys.
+
 ### CSS Variables
 
 Animation durations are set as CSS custom properties at the gallery root to prevent child re-renders:
