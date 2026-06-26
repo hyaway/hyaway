@@ -4,6 +4,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 import { updateFileMetadataCaches } from "./file-metadata-cache";
+import { fileIdsFingerprint } from "@/lib/file-ids-fingerprint";
 import type { FileMetadata } from "../models";
 
 function createQueryClient(staleTime = Infinity) {
@@ -22,6 +23,18 @@ function metadata(fileId: number, isInbox = true): FileMetadata {
 }
 
 describe("updateFileMetadataCaches", () => {
+  it("fingerprints the full file ID order", () => {
+    expect(fileIdsFingerprint([1, 2, 3, 4])).toEqual(
+      fileIdsFingerprint([1, 2, 3, 4]),
+    );
+    expect(fileIdsFingerprint([1, 2, 3, 4])).not.toEqual(
+      fileIdsFingerprint([1, 9, 8, 4]),
+    );
+    expect(fileIdsFingerprint([1, 2, 3, 4])).not.toEqual(
+      fileIdsFingerprint([4, 3, 2, 1]),
+    );
+  });
+
   it("updates single file metadata queries", () => {
     const queryClient = createQueryClient();
     queryClient.setQueryData(["getSingleFileMetadata", 1], metadata(1));
@@ -100,7 +113,12 @@ describe("updateFileMetadataCaches", () => {
     };
 
     queryClient.setQueryData(
-      ["infiniteGetFilesMetadata", "/recently-inboxed", [4, 1, 4], false, 128],
+      [
+        "infiniteGetFilesMetadata",
+        fileIdsFingerprint([1, 2, 3, 4]),
+        false,
+        128,
+      ],
       infiniteData,
     );
 
@@ -111,8 +129,7 @@ describe("updateFileMetadataCaches", () => {
 
     const nextData = queryClient.getQueryData<typeof infiniteData>([
       "infiniteGetFilesMetadata",
-      "/recently-inboxed",
-      [4, 1, 4],
+      fileIdsFingerprint([1, 2, 3, 4]),
       false,
       128,
     ]);
@@ -133,8 +150,7 @@ describe("updateFileMetadataCaches", () => {
     };
     const queryKey = [
       "infiniteGetFilesMetadata",
-      "/recently-inboxed",
-      [1, 1, 1],
+      fileIdsFingerprint([1]),
       false,
       128,
     ];
@@ -156,8 +172,7 @@ describe("updateFileMetadataCaches", () => {
     };
     const queryKey = [
       "infiniteGetFilesMetadata",
-      "/recently-inboxed",
-      [1, 1, 1],
+      fileIdsFingerprint([1]),
       false,
       128,
     ];
