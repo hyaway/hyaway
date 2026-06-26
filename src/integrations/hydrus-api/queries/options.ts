@@ -35,6 +35,14 @@ export const useGetClientOptionsQuery = <T = GetClientOptionsResponse>(
   });
 };
 
+export const useDefaultNamespaceSorts = () => {
+  const { data } = useGetClientOptionsQuery(
+    (response) => response.options?.default_namespace_sorts ?? [],
+  );
+
+  return data ?? [];
+};
+
 export const useThumbnailDimensions = () => {
   const { data: thumbnail_dimensions } = useGetClientOptionsQuery(
     (response) => response.old_options?.thumbnail_dimensions,

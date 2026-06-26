@@ -697,6 +697,14 @@ export type MediaPage = Page & {
 // #endregion Pages
 
 // #region Database
+export const HydrusNamespaceSortSchema = z.object({
+  sort_metatype: z.literal("namespaces"),
+  sort_order: z.number(),
+  namespaces: z.array(z.string()),
+});
+
+export type HydrusNamespaceSort = z.infer<typeof HydrusNamespaceSortSchema>;
+
 export const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
   old_options: z
     .object({
@@ -728,6 +736,7 @@ export const GetClientOptionsResponseSchema = BaseResponseSchema.extend({
             .optional(),
         })
         .optional(),
+      default_namespace_sorts: z.array(HydrusNamespaceSortSchema).optional(),
     })
     .optional(),
 });
