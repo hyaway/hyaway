@@ -15,7 +15,7 @@ import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
-import { useHiddenFileView } from "@/hooks/use-hidden-file-view";
+import { useThumbnailGalleryModel } from "@/components/thumbnail-gallery/use-thumbnail-gallery-model";
 import { useMostViewedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 
 export const Route = createFileRoute("/_auth/(galleries)/most-viewed/")({
@@ -31,8 +31,19 @@ function RouteComponent() {
   const openSearchAction = useMostViewedSearchFooterAction();
   const fileIds = data?.file_ids ?? [];
   const reviewSource = { type: "predefinedSearch", key: "mostViewed" } as const;
-  const { hiddenFileIds, visibleFileIds, hiddenLabel, showHiddenFilesAction } =
-    useHiddenFileView({ data, fileIds, source: reviewSource });
+  const {
+    metadataQuery,
+    shouldLoadAllMetadata,
+    loadAllMetadataAction,
+    visibleFileIds,
+    hiddenLabel,
+    showHiddenFilesAction,
+    galleryView,
+  } = useThumbnailGalleryModel({
+    fileIds,
+    hiddenFileViewData: data,
+    reviewSource,
+  });
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -97,12 +108,14 @@ function RouteComponent() {
         {visibleFileIds.length > 0 ? (
           <ThumbnailGalleryProvider
             infoMode="views"
-            fileIds={visibleFileIds}
+            reviewFileIds={galleryView.reviewFileIds}
             reviewSource={reviewSource}
           >
             <ThumbnailGallery
-              fileIds={fileIds}
-              hiddenFileIds={hiddenFileIds}
+              sourceFileIds={fileIds}
+              metadataQuery={metadataQuery}
+              galleryView={galleryView}
+              loadAll={shouldLoadAllMetadata}
               getFileLink={getFileLink}
             />
           </ThumbnailGalleryProvider>
@@ -117,6 +130,7 @@ function RouteComponent() {
         leftContent={refetchButton}
         actions={[
           ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
+          loadAllMetadataAction,
           openSearchAction,
         ]}
       />

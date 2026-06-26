@@ -11,6 +11,7 @@ import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
+import { useThumbnailGalleryModel } from "@/components/thumbnail-gallery/use-thumbnail-gallery-model";
 import { Button } from "@/components/ui-primitives/button";
 import {
   useWatchHistoryActions,
@@ -28,6 +29,12 @@ function RouteComponent() {
   const entries = useWatchHistoryEntries();
   const enabled = useWatchHistoryEnabled();
   const { clearHistory, setEnabled } = useWatchHistoryActions();
+  const {
+    metadataQuery,
+    shouldLoadAllMetadata,
+    loadAllMetadataAction,
+    galleryView,
+  } = useThumbnailGalleryModel({ fileIds });
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -69,9 +76,15 @@ function RouteComponent() {
           <ThumbnailGalleryProvider
             infoMode="lastViewedLocal"
             localHistoryEntries={entries}
-            fileIds={fileIds}
+            reviewFileIds={galleryView.reviewFileIds}
           >
-            <ThumbnailGallery fileIds={fileIds} getFileLink={getFileLink} />
+            <ThumbnailGallery
+              sourceFileIds={fileIds}
+              metadataQuery={metadataQuery}
+              galleryView={galleryView}
+              loadAll={shouldLoadAllMetadata}
+              getFileLink={getFileLink}
+            />
           </ThumbnailGalleryProvider>
         ) : (
           emptyContent
@@ -80,7 +93,7 @@ function RouteComponent() {
       <PageHeaderActions>
         <HistorySettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter actions={[clearAction]} />
+      <PageFloatingFooter actions={[loadAllMetadataAction, clearAction]} />
     </>
   );
 }

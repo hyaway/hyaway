@@ -13,10 +13,10 @@ import { PageHeaderActions } from "@/components/page-shell/page-header-actions";
 import { PageHeading } from "@/components/page-shell/page-heading";
 import { PageLoading } from "@/components/page-shell/page-loading";
 import { RefetchButton } from "@/components/page-shell/refetch-button";
+import { ThumbnailGalleryFloatingFooter } from "@/components/thumbnail-gallery/thumbnail-gallery-floating-footer";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
-import { useReviewActions } from "@/hooks/use-review-actions";
-import { useHiddenFileView } from "@/hooks/use-hidden-file-view";
+import { useThumbnailGalleryModel } from "@/components/thumbnail-gallery/use-thumbnail-gallery-model";
 import { useRecentlyInboxedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 
 export const Route = createFileRoute("/_auth/(galleries)/recently-inboxed/")({
@@ -35,14 +35,26 @@ function RouteComponent() {
     type: "predefinedSearch",
     key: "recentlyInboxed",
   } as const;
-  const { hiddenFileIds, visibleFileIds, hiddenLabel, showHiddenFilesAction } =
-    useHiddenFileView({ data, fileIds, source: reviewSource });
-  const hasFiles = visibleFileIds.length > 0;
-  const reviewActions = useReviewActions({
-    fileIds: visibleFileIds,
-    source: reviewSource,
+  const {
+    metadataQuery,
+    shouldLoadAllMetadata,
+    loadAllMetadataAction,
+    visibleFileIds,
+    hiddenLabel,
+    showHiddenFilesAction,
+    galleryView,
+  } = useThumbnailGalleryModel({
+    fileIds,
+    hiddenFileViewData: data,
+    reviewSource,
   });
+  const hasFiles = visibleFileIds.length > 0;
   const openSearchAction = useRecentlyInboxedSearchFooterAction();
+  const footerActions = [
+    ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
+    loadAllMetadataAction,
+    openSearchAction,
+  ];
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -106,13 +118,19 @@ function RouteComponent() {
         />
         {hasFiles ? (
           <ThumbnailGalleryProvider
-            fileIds={visibleFileIds}
+            reviewFileIds={galleryView.reviewFileIds}
             reviewSource={reviewSource}
           >
             <ThumbnailGallery
-              fileIds={fileIds}
-              hiddenFileIds={hiddenFileIds}
+              sourceFileIds={fileIds}
+              metadataQuery={metadataQuery}
+              galleryView={galleryView}
+              loadAll={shouldLoadAllMetadata}
               getFileLink={getFileLink}
+            />
+            <ThumbnailGalleryFloatingFooter
+              leftContent={refetchButton}
+              actions={footerActions}
             />
           </ThumbnailGalleryProvider>
         ) : (
@@ -122,14 +140,12 @@ function RouteComponent() {
       <PageHeaderActions>
         <RecentFilesSettingsPopover />
       </PageHeaderActions>
-      <PageFloatingFooter
-        leftContent={refetchButton}
-        actions={[
-          ...reviewActions,
-          ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
-          openSearchAction,
-        ]}
-      />
+      {!hasFiles && (
+        <PageFloatingFooter
+          leftContent={refetchButton}
+          actions={footerActions}
+        />
+      )}
     </>
   );
 }

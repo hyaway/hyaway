@@ -16,7 +16,7 @@ import { RefetchButton } from "@/components/page-shell/refetch-button";
 import { useRecentlyTrashedFilesQuery } from "@/integrations/hydrus-api/queries/search";
 import { ThumbnailGallery } from "@/components/thumbnail-gallery/thumbnail-gallery";
 import { ThumbnailGalleryProvider } from "@/components/thumbnail-gallery/thumbnail-gallery-context";
-import { useHiddenFileView } from "@/hooks/use-hidden-file-view";
+import { useThumbnailGalleryModel } from "@/components/thumbnail-gallery/use-thumbnail-gallery-model";
 
 export const Route = createFileRoute("/_auth/(galleries)/recently-trashed/")({
   component: RouteComponent,
@@ -34,8 +34,19 @@ function RouteComponent() {
     type: "predefinedSearch",
     key: "recentlyTrashed",
   } as const;
-  const { hiddenFileIds, visibleFileIds, hiddenLabel, showHiddenFilesAction } =
-    useHiddenFileView({ data, fileIds, source: reviewSource });
+  const {
+    metadataQuery,
+    shouldLoadAllMetadata,
+    loadAllMetadataAction,
+    visibleFileIds,
+    hiddenLabel,
+    showHiddenFilesAction,
+    galleryView,
+  } = useThumbnailGalleryModel({
+    fileIds,
+    hiddenFileViewData: data,
+    reviewSource,
+  });
 
   // Link builder for contextual navigation
   const getFileLink: FileLinkBuilder = (fileId) =>
@@ -99,12 +110,14 @@ function RouteComponent() {
         />
         {visibleFileIds.length > 0 ? (
           <ThumbnailGalleryProvider
-            fileIds={visibleFileIds}
+            reviewFileIds={galleryView.reviewFileIds}
             reviewSource={reviewSource}
           >
             <ThumbnailGallery
-              fileIds={fileIds}
-              hiddenFileIds={hiddenFileIds}
+              sourceFileIds={fileIds}
+              metadataQuery={metadataQuery}
+              galleryView={galleryView}
+              loadAll={shouldLoadAllMetadata}
               getFileLink={getFileLink}
             />
           </ThumbnailGalleryProvider>
@@ -119,6 +132,7 @@ function RouteComponent() {
         leftContent={refetchButton}
         actions={[
           ...(showHiddenFilesAction ? [showHiddenFilesAction] : []),
+          loadAllMetadataAction,
           openSearchAction,
         ]}
       />
