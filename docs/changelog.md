@@ -24,6 +24,7 @@ All notable changes to hyAway are documented here.
 
 ### Fixed
 
+- Image fullscreen and theater navigation now resets pan and zoom between files while preserving viewer mode during rapid keyboard navigation
 - Thumbnail galleries now correctly load only one batch at the end of the gallery when loading takes longer
 
 ---

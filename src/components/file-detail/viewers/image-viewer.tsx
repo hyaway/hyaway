@@ -1,7 +1,14 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   IconArrowsMaximize,
   IconMaximize,
@@ -106,6 +113,10 @@ export function ImageViewer({
 
   const fitScale = useMemo(() => Math.min(1, rawFitScale), [rawFitScale]);
   const minScale = fitScale > 0 ? fitScale : 1;
+  const fitPosition = useMemo(
+    () => getCenteredPosition(overlaySize, imageNaturalSize, fitScale),
+    [fitScale, imageNaturalSize, overlaySize],
+  );
 
   const { containerStyle, containerClassName, imageStyle, imageClassName } =
     useBackgroundStyles(
@@ -121,6 +132,12 @@ export function ImageViewer({
     fitScale > 0 &&
     overlaySize.width > 0 &&
     overlaySize.height > 0;
+  const overlayStageStyle = overlayReady
+    ? containerStyle
+    : getFillCanvasPlaceholderStyle(effectiveImageBackground, averageColor);
+  const overlayStageClassName = overlayReady
+    ? containerClassName
+    : getFillCanvasPlaceholderClassName(effectiveImageBackground);
 
   const handleImageLoad = useCallback(
     (event: React.SyntheticEvent<HTMLImageElement>) => {
@@ -222,6 +239,21 @@ export function ImageViewer({
   const bumpModeToken = useCallback(() => {
     setModeChangeToken((prev) => prev + 1);
   }, []);
+
+  useLayoutEffect(() => {
+    setLoaded(false);
+    setImageNaturalSize({ width: 0, height: 0 });
+    setIsAtFit(true);
+    setIsAt1x(false);
+    currentScaleRef.current = 1;
+    currentPositionRef.current = { x: 0, y: 0 };
+    zoomIntentRef.current = "fit";
+    hasNotifiedLoadRef.current = false;
+    isZoomingRef.current = false;
+    isPanningRef.current = false;
+    setIsPanning(false);
+    bumpModeToken();
+  }, [bumpModeToken, fileId, fileUrl]);
 
   const returnInline = useCallback(() => {
     if (document.fullscreenElement) {
@@ -546,23 +578,26 @@ export function ImageViewer({
       >
         <div
           ref={overlayStageRef}
-          style={containerStyle}
+          style={overlayStageStyle}
           className={cn(
             "group relative h-full w-full overflow-hidden",
             // Prevent browser-native pinch zoom/scroll on touch; the transform
             // library handles gestures inside the overlay.
             "touch-none",
             isPanning ? "cursor-grabbing" : "cursor-grab",
-            containerClassName,
+            overlayStageClassName,
           )}
         >
           {overlayReady && (
             <TransformWrapper
               ref={transformRef}
+              key={`${fileId}:${modeChangeToken}`}
               minScale={minScale}
               maxScale={MAX_ZOOM}
               initialScale={fitScale}
-              centerOnInit={true}
+              initialPositionX={fitPosition.x}
+              initialPositionY={fitPosition.y}
+              centerOnInit={false}
               limitToBounds={true}
               disablePadding={usesMousePointer}
               autoAlignment={
@@ -1202,7 +1237,7 @@ function OverlayFitReset({
     centerViewRef.current = centerView;
   }, [centerView]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isReady || fitScale <= 0) return;
     if (lastTokenRef.current === modeChangeToken) return;
 
@@ -1427,4 +1462,25 @@ function useContainerSize(container: HTMLElement | null) {
 
 function isNearScale(current: number, target: number): boolean {
   return Math.abs(current - target) <= target * SCALE_TOLERANCE;
+}
+
+function getCenteredPosition(
+  containerSize: { width: number; height: number },
+  imageNaturalSize: { width: number; height: number },
+  scale: number,
+) {
+  if (
+    containerSize.width === 0 ||
+    containerSize.height === 0 ||
+    imageNaturalSize.width === 0 ||
+    imageNaturalSize.height === 0 ||
+    scale === 0
+  ) {
+    return { x: 0, y: 0 };
+  }
+
+  return {
+    x: (containerSize.width - imageNaturalSize.width * scale) / 2,
+    y: (containerSize.height - imageNaturalSize.height * scale) / 2,
+  };
 }

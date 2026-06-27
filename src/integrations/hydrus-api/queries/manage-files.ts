@@ -36,7 +36,10 @@ import { fileIdsFingerprint } from "@/lib/file-ids-fingerprint";
 const METADATA_BATCH_SIZE = 256;
 const LOAD_ALL_METADATA_BATCH_SIZE = 1024;
 
-export const useGetSingleFileMetadata = (fileId: number) => {
+export const useGetSingleFileMetadata = (
+  fileId: number,
+  { keepPreviousData = false }: { keepPreviousData?: boolean } = {},
+) => {
   const isConfigured = useIsApiConfigured();
 
   return useQuery({
@@ -49,6 +52,9 @@ export const useGetSingleFileMetadata = (fileId: number) => {
       return response.metadata[0];
     },
     enabled: isConfigured && !!fileId,
+    placeholderData: keepPreviousData
+      ? (previousData) => previousData
+      : undefined,
     gcTime: 10 * 1000,
   });
 };

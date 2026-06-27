@@ -48,7 +48,9 @@ export function FileDetail({
   prependActions,
   trackLocalWatchHistory = true,
 }: FileDetailProps) {
-  const { data, isLoading, isError, error } = useGetSingleFileMetadata(fileId);
+  const { data, isLoading, isError, error } = useGetSingleFileMetadata(fileId, {
+    keepPreviousData: true,
+  });
 
   if (isLoading) {
     return (
@@ -95,7 +97,7 @@ export function FileDetail({
   return (
     <FileDetailContent
       data={data}
-      fileId={fileId}
+      fileId={data.file_id}
       prependActions={prependActions}
       trackLocalWatchHistory={trackLocalWatchHistory}
     />
