@@ -21,7 +21,12 @@ import {
   getSearchSortColorHex,
   getSearchSortLabel,
 } from "./-lib/search-sort-config";
-import { useHydrusSearchPageActions } from "./-components/hydrus-search-page-actions";
+import {
+  HYAWAY_PAGE_NAME,
+  PINNED_SEARCH_PAGE_NAME,
+  SEARCH_PAGE_NAME,
+  useHydrusSearchPageActions,
+} from "./-components/hydrus-search-page-actions";
 import { SearchIndexSettingsPopover } from "./-components/search-index-settings-popover";
 import { SearchSortTag } from "./-components/search-sort-tag";
 import type { SavedSearchSort } from "@/stores/search-settings-store";
@@ -63,6 +68,9 @@ import {
 } from "@/stores/search-settings-store";
 import { useActiveTheme } from "@/stores/theme-store";
 import { Separator } from "@/components/ui-primitives/separator";
+
+const DEFAULT_SEARCH_PAGE_PATH = `${HYAWAY_PAGE_NAME}/${SEARCH_PAGE_NAME}`;
+const PINNED_SEARCH_PAGE_PATH = `${HYAWAY_PAGE_NAME}/${PINNED_SEARCH_PAGE_NAME}`;
 
 export const Route = createFileRoute("/_auth/(search)/search/")({
   component: SearchIndex,
@@ -125,9 +133,10 @@ function SearchIndex() {
                 faster.
                 <br />
                 <br />
-                Use "Save as page" to create under hyAway / search, or "Save as
-                page in..." to choose the top page notebook or another page of
-                pages.
+                Use "Save as page" to create under "{DEFAULT_SEARCH_PAGE_PATH}",
+                or under "{PINNED_SEARCH_PAGE_PATH}" for pinned searches. Use
+                "Save as page in..." to choose the top page notebook or another
+                page of pages.
               </AlertDescription>
             </Alert>
           </>
@@ -248,6 +257,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
   );
   const hydrusPageActions = useHydrusSearchPageActions({
     searchId,
+    searchIsPinned: isPinned,
     searchState: staged,
     displayName,
     searchTags,

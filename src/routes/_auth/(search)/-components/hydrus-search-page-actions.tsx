@@ -35,8 +35,9 @@ import {
 } from "@/integrations/hydrus-api/queries/manage-pages";
 import { usePermissions } from "@/integrations/hydrus-api/queries/permissions";
 
-const HYAWAY_PAGE_NAME = "hyAway";
-const SEARCH_PAGE_NAME = "search";
+export const HYAWAY_PAGE_NAME = "hyAway";
+export const SEARCH_PAGE_NAME = "search";
+export const PINNED_SEARCH_PAGE_NAME = "pinned";
 
 function getPageSortOptions(sort: SearchState["sort"]) {
   if (isNamespaceSortConfig(sort)) {
@@ -54,11 +55,13 @@ function getPageSortOptions(sort: SearchState["sort"]) {
 
 export function useHydrusSearchPageActions({
   searchId,
+  searchIsPinned = false,
   searchState,
   displayName,
   searchTags,
 }: {
   searchId?: string;
+  searchIsPinned?: boolean;
   searchState: SearchState | undefined;
   displayName: string;
   searchTags: HydrusTagSearch;
@@ -156,10 +159,12 @@ export function useHydrusSearchPageActions({
     if (!searchState || searchTags.length === 0) return;
 
     try {
-      const searchParentPage = await ensurePageOfPagesPath(queryClient, [
-        HYAWAY_PAGE_NAME,
-        SEARCH_PAGE_NAME,
-      ]);
+      const searchParentPage = await ensurePageOfPagesPath(
+        queryClient,
+        searchIsPinned
+          ? [HYAWAY_PAGE_NAME, PINNED_SEARCH_PAGE_NAME]
+          : [HYAWAY_PAGE_NAME, SEARCH_PAGE_NAME],
+      );
       const page = await createHydrusPageMutation.mutateAsync({
         page_type: PageType.FILE_SEARCH,
         page_name: displayName,
@@ -181,6 +186,7 @@ export function useHydrusSearchPageActions({
     displayName,
     handleCreateSuccess,
     queryClient,
+    searchIsPinned,
     searchState,
     searchTags,
   ]);

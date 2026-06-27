@@ -210,6 +210,7 @@ function SearchPage() {
 
   const hydrusPageActions = useHydrusSearchPageActions({
     searchId,
+    searchIsPinned: isPinned,
     searchState: hydrusPageSearchState,
     displayName,
     searchTags: hydrusPageSearchTags,
