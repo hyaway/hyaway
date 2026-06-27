@@ -1,14 +1,10 @@
 // Copyright 2026 hyAway contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SettingsGroup, SliderField, SwitchField } from "./setting-fields";
+import { SettingsGroup, SwitchField } from "./setting-fields";
 import {
-  MAX_METADATA_BATCH_SIZE,
-  METADATA_BATCH_SIZE_STEP,
-  MIN_METADATA_BATCH_SIZE,
   useLoadAllMetadataByDefault,
   useLoadAllMetadataWhenNamespaceSort,
-  useMetadataBatchSize,
   useMetadataSettingsActions,
 } from "@/stores/metadata-settings-store";
 
@@ -22,12 +18,8 @@ export function MetadataSettings({ idPrefix = "" }: MetadataSettingsProps) {
   const loadAllMetadataByDefault = useLoadAllMetadataByDefault();
   const loadAllMetadataWhenNamespaceSort =
     useLoadAllMetadataWhenNamespaceSort();
-  const metadataBatchSize = useMetadataBatchSize();
-  const {
-    setLoadAllMetadataByDefault,
-    setLoadAllMetadataWhenNamespaceSort,
-    setMetadataBatchSize,
-  } = useMetadataSettingsActions();
+  const { setLoadAllMetadataByDefault, setLoadAllMetadataWhenNamespaceSort } =
+    useMetadataSettingsActions();
 
   return (
     <SettingsGroup>
@@ -45,16 +37,6 @@ export function MetadataSettings({ idPrefix = "" }: MetadataSettingsProps) {
         checked={loadAllMetadataByDefault || loadAllMetadataWhenNamespaceSort}
         disabled={loadAllMetadataByDefault}
         onCheckedChange={setLoadAllMetadataWhenNamespaceSort}
-      />
-      <SliderField
-        id={`${idPrefix}metadata-batch-size-slider`}
-        label="Metadata batch size"
-        value={metadataBatchSize}
-        min={MIN_METADATA_BATCH_SIZE}
-        max={MAX_METADATA_BATCH_SIZE}
-        step={METADATA_BATCH_SIZE_STEP}
-        onValueChange={setMetadataBatchSize}
-        commitOnRelease
       />
     </SettingsGroup>
   );

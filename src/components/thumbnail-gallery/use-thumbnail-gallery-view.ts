@@ -73,16 +73,14 @@ function useLoadedThumbnailGalleryView({
     () => (data ? data.pages.flatMap((page) => page.metadata) : []),
     [data],
   );
-  const sortedLoadedResult = useMemo(
-    () =>
-      getIncrementalNamespaceSortedItems({
-        items: loaded,
-        previousState: namespaceSortStateRef.current,
-        namespaceSort,
-        serviceKey: allTagsServiceId,
-      }),
-    [loaded, namespaceSort, allTagsServiceId],
-  );
+  const sortedLoadedResult = useMemo(() => {
+    return getIncrementalNamespaceSortedItems({
+      items: loaded,
+      previousState: namespaceSortStateRef.current,
+      namespaceSort,
+      serviceKey: allTagsServiceId,
+    });
+  }, [loaded, namespaceSort, allTagsServiceId]);
 
   useEffect(() => {
     namespaceSortStateRef.current = sortedLoadedResult.state;

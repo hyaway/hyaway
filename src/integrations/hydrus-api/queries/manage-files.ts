@@ -32,7 +32,9 @@ import type {
 import type { FileMetadata, FileViewingStatistics } from "../models";
 import type { ReviewSource } from "@/stores/review-queue-store";
 import { fileIdsFingerprint } from "@/lib/file-ids-fingerprint";
-import { useMetadataBatchSize } from "@/stores/metadata-settings-store";
+
+const METADATA_BATCH_SIZE = 256;
+const LOAD_ALL_METADATA_BATCH_SIZE = 1024;
 
 export const useGetSingleFileMetadata = (fileId: number) => {
   const isConfigured = useIsApiConfigured();
@@ -78,14 +80,16 @@ export const useGetFilesMetadata = (
 export const useInfiniteGetFilesMetadata = (
   file_ids: Array<number>,
   only_return_basic_information = false,
+  { loadAll = false }: { loadAll?: boolean } = {},
 ) => {
   const isConfigured = useIsApiConfigured();
-  const batchSize = useMetadataBatchSize();
 
   // Keep file_ids in a ref so the queryFn always reads the latest array
   // without needing the full array in the queryKey.
   const fileIdsRef = useRef(file_ids);
   fileIdsRef.current = file_ids;
+  const loadAllRef = useRef(loadAll);
+  loadAllRef.current = loadAll;
 
   // eslint-disable-next-line @tanstack/query/exhaustive-deps -- file_ids accessed via ref intentionally; fingerprint covers invalidation
   return useInfiniteQuery({
@@ -93,24 +97,24 @@ export const useInfiniteGetFilesMetadata = (
       "infiniteGetFilesMetadata",
       fileIdsFingerprint(file_ids),
       only_return_basic_information,
-      batchSize,
     ],
     queryFn: async ({ pageParam = 0 }) => {
       const currentIds = fileIdsRef.current;
+      const batchSize = loadAllRef.current
+        ? LOAD_ALL_METADATA_BATCH_SIZE
+        : METADATA_BATCH_SIZE;
       const batchFileIds = currentIds.slice(pageParam, pageParam + batchSize);
       if (batchFileIds.length === 0) {
         return { metadata: [], nextCursor: undefined };
       }
+      const nextCursor = pageParam + batchFileIds.length;
       const response = await getFileMetadata(
         batchFileIds,
         only_return_basic_information,
       );
       return {
         metadata: response.metadata,
-        nextCursor:
-          pageParam + batchFileIds.length < currentIds.length
-            ? pageParam + batchSize
-            : undefined,
+        nextCursor: nextCursor < currentIds.length ? nextCursor : undefined,
       };
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
