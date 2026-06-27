@@ -14,6 +14,10 @@ import {
   ITEM_FOOTER_HEIGHT,
   ThumbnailGalleryItem,
 } from "./thumbnail-gallery-item";
+import {
+  getThumbnailGalleryFetchReason,
+  isThumbnailGalleryNearRenderedEnd,
+} from "./thumbnail-gallery-load-more";
 import { ThumbnailGallerySkeleton } from "./thumbnail-gallery-skeleton";
 import type { FileLinkBuilder } from "./thumbnail-gallery-item";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
@@ -237,25 +241,44 @@ export function PureThumbnailGallery({
 
   // Guard against duplicate fetch calls before isFetchingNextPage updates
   const fetchingRef = useRef(false);
+  // Normal infinite scroll is edge-triggered: once it fires near the rendered
+  // end, the range must leave that zone before it can fire again.
+  const nearEndFetchTriggeredRef = useRef(false);
   useEffect(() => {
-    if (!hasNextPage || isFetchingNextPage || fetchingRef.current) return;
+    const isNearRenderedEnd = isThumbnailGalleryNearRenderedEnd({
+      renderedItemsCount: renderedItems.length,
+      lastItemIndex,
+      lanes: effectiveLanes,
+    });
 
-    const loadedButNothingVisible =
-      totalItems > 0 && loadedItemsCount > 0 && visibleItemsCount === 0;
-    const fetchThreshold = Math.min(
-      Math.max(renderedItems.length * 0.5, 1),
-      256,
-    );
-    const isNearRenderedEnd =
-      lastItemIndex !== undefined &&
-      lastItemIndex >= renderedItems.length - fetchThreshold;
-    const shouldFetchNextPage =
-      loadAll || loadedButNothingVisible || isNearRenderedEnd;
+    if (!isNearRenderedEnd) {
+      nearEndFetchTriggeredRef.current = false;
+    }
 
-    if (!shouldFetchNextPage) {
+    const fetchReason = getThumbnailGalleryFetchReason({
+      hasNextPage,
+      isFetchingNextPage,
+      isFetchInFlight: fetchingRef.current,
+      loadAll,
+      totalItems,
+      loadedItemsCount,
+      visibleItemsCount,
+      renderedItemsCount: renderedItems.length,
+      lastItemIndex,
+      lanes: effectiveLanes,
+      hasTriggeredNearEndFetch: nearEndFetchTriggeredRef.current,
+    });
+
+    if (!fetchReason) {
       return;
     }
 
+    if (fetchReason === "nearRenderedEnd") {
+      nearEndFetchTriggeredRef.current = true;
+    }
+
+    // Set synchronously so rerenders before TanStack flips isFetchingNextPage
+    // cannot issue the same next-page request twice.
     fetchingRef.current = true;
     void fetchNextPage().finally(() => {
       fetchingRef.current = false;
@@ -266,6 +289,7 @@ export function PureThumbnailGallery({
     hasNextPage,
     isFetchingNextPage,
     lastItemIndex,
+    effectiveLanes,
     loadAll,
     loadedItemsCount,
     totalItems,
