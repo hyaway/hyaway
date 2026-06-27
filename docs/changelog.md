@@ -8,6 +8,26 @@ All notable changes to hyAway are documented here.
 
 ---
 
+## 2026-06-27
+
+### Added
+
+- **Hydrus page creation** — Searches can now be saved as Hydrus file-search pages, and the Pages view can create new page-of-pages destinations
+- **Namespace search sorting** — Search results can now sort by Hydrus namespace presets or custom namespace chains
+- **Scratchpad** — Send files to a configurable Hydrus scratchpad page from galleries, file pages, and review, with an option to hide sent files from the current view. Use this to mark files for revisiting on full desktop client and performing advanced actions later.
+- **Metadata loading actions** — Galleries can load all file metadata on demand, with settings to load metadata eagerly by default or for namespace-sorted searches
+
+### Changed
+
+- Gallery metadata now loads 256 files per default page, with larger batches when loading all metadata
+- Connection settings now warn when the connected Hydrus Client API is missing features needed for page creation, searches, tags, and watch history
+
+### Fixed
+
+- Thumbnail galleries now correctly load only one batch at the end of the gallery when loading takes longer
+
+---
+
 ## 2026-06-23
 
 ### Added
