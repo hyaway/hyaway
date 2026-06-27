@@ -137,13 +137,16 @@ function SearchPage() {
     requestAllMetadata: !!namespaceSort && loadAllMetadataWhenNamespaceSort,
   });
   const LoadAllMetadataIcon = loadAllMetadataAction.icon;
-  const hasFiles = visibleFileIds.length > 0;
+  const fileCount = visibleFileIds.length;
+  const hasFiles = fileCount > 0;
   const showNamespaceSortWarning =
     !!namespaceSort &&
     hasFiles &&
     !loadAllMetadataByDefault &&
     !loadAllMetadataWhenNamespaceSort &&
     !hasLoadedAllMetadata;
+  const showLargeNamespaceSortWarning =
+    !!namespaceSort && hasFiles && fileCount > 3000;
   const showGallery = !isLoading && !isError && hasFiles;
 
   const handleCommit = useCallback(() => {
@@ -293,7 +296,6 @@ function SearchPage() {
     showHiddenFilesAction,
     handleDelete,
   ]);
-  const fileCount = visibleFileIds.length;
   const fileCountLabel = `${fileCount} ${fileCount === 1 ? "file" : "files"}`;
   const pageTitle =
     !isLoading && !isError
@@ -353,67 +355,62 @@ function SearchPage() {
           />
         )}
         {!isLoading && !isError && showNamespaceSortWarning && (
-          <>
-            <Alert className="mb-3 gap-1 pb-3">
-              <IconInfoCircle className="size-4" />
-              <AlertTitle>Namespace sorting needs more metadata</AlertTitle>
-              <AlertDescription className="flex min-w-0 flex-col gap-2">
-                <span className="min-w-0 text-wrap">
-                  Only loaded items are sorted right now.
-                </span>
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="max-w-full min-w-0"
-                    onClick={loadAllMetadataAction.onClick}
-                    disabled={loadAllMetadataAction.disabled}
-                    title={loadAllMetadataAction.title}
-                  >
-                    <LoadAllMetadataIcon className="size-4 shrink-0" />
-                    <span className="min-w-0 truncate sm:hidden">
-                      Load metadata
-                    </span>
-                    <span className="hidden min-w-0 truncate sm:inline">
-                      {loadAllMetadataAction.label}
-                    </span>
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-            {fileCount > 3000 && (
-              <Alert className="mb-3 gap-1 pb-3">
-                <IconInfoCircle className="size-4" />
-                <AlertTitle>There are a lot of results</AlertTitle>
-                <AlertDescription className="flex min-w-0 flex-col gap-2">
-                  <span className="min-w-0 text-wrap">
-                    Once you're happy with the query, consider saving as a
-                    Hydrus page instead of namespace sorting here.
+          <Alert className="mb-3 gap-1 pb-3">
+            <IconInfoCircle className="size-4" />
+            <AlertTitle>Namespace sorting needs more metadata</AlertTitle>
+            <AlertDescription className="flex min-w-0 flex-col gap-2">
+              <span className="min-w-0 text-wrap">
+                Only loaded items are sorted right now.
+              </span>
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="max-w-full min-w-0"
+                  onClick={loadAllMetadataAction.onClick}
+                  disabled={loadAllMetadataAction.disabled}
+                  title={loadAllMetadataAction.title}
+                >
+                  <LoadAllMetadataIcon className="size-4 shrink-0" />
+                  <span className="min-w-0 truncate sm:hidden">
+                    Load metadata
                   </span>
-                  <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="max-w-full min-w-0"
-                      onClick={saveAsHydrusPageAction?.onClick}
-                      disabled={
-                        !saveAsHydrusPageAction ||
-                        saveAsHydrusPageAction.disabled
-                      }
-                      title={saveAsHydrusPageAction?.title}
-                    >
-                      <IconFolderPlus className="size-4 shrink-0" />
-                      <span className="min-w-0 truncate">
-                        {saveAsHydrusPageAction?.isPending
-                          ? "Saving"
-                          : "Save page"}
-                      </span>
-                    </Button>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-          </>
+                  <span className="hidden min-w-0 truncate sm:inline">
+                    {loadAllMetadataAction.label}
+                  </span>
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+        {!isLoading && !isError && showLargeNamespaceSortWarning && (
+          <Alert className="mb-3 gap-1 pb-3">
+            <IconInfoCircle className="size-4" />
+            <AlertTitle>There are a lot of results</AlertTitle>
+            <AlertDescription className="flex min-w-0 flex-col gap-2">
+              <span className="min-w-0 text-wrap">
+                Once you're happy with the query, consider saving as a Hydrus
+                page instead of namespace sorting here.
+              </span>
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="max-w-full min-w-0"
+                  onClick={saveAsHydrusPageAction?.onClick}
+                  disabled={
+                    !saveAsHydrusPageAction || saveAsHydrusPageAction.disabled
+                  }
+                  title={saveAsHydrusPageAction?.title}
+                >
+                  <IconFolderPlus className="size-4 shrink-0" />
+                  <span className="min-w-0 truncate">
+                    {saveAsHydrusPageAction?.isPending ? "Saving" : "Save page"}
+                  </span>
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
         )}
         {showGallery && (
           <ThumbnailGalleryProvider
