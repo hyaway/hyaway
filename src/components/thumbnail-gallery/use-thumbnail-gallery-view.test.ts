@@ -8,9 +8,13 @@ import {
   getNavigationFileIds,
   getVisibleLoadedItems,
   getVisibleSourceFileIds,
-  sortLoadedItemsByNamespaces,
 } from "./use-thumbnail-gallery-view";
+import {
+  getIncrementalNamespaceSortedItems,
+  sortLoadedItemsByNamespaces,
+} from "./thumbnail-gallery-namespace-sort";
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
+import type { NamespaceSortConfig } from "@/stores/search-defaults";
 import { TagStatus } from "@/integrations/hydrus-api/models";
 
 const TAG_SERVICE_KEY = "616c6c206b6e6f776e2074616773";
@@ -134,5 +138,98 @@ describe("thumbnail gallery view helpers", () => {
     );
 
     expect(sortedItems.map((item) => item.file_id)).toEqual([1, 2]);
+  });
+
+  it("incrementally merges appended namespace-sorted metadata", () => {
+    const namespaceSort: NamespaceSortConfig = {
+      mode: "namespaces",
+      namespaces: ["series", "page"],
+      sortAsc: true,
+    };
+    const firstBatch = [
+      metadata(1, ["series:b", "page:10"]),
+      metadata(2, ["series:a", "page:2"]),
+    ];
+    const secondBatch = [
+      metadata(3, ["series:a", "page:12"]),
+      metadata(4, ["series:c", "page:1"]),
+    ];
+
+    const firstResult = getIncrementalNamespaceSortedItems({
+      items: firstBatch,
+      namespaceSort,
+      serviceKey: TAG_SERVICE_KEY,
+    });
+    const secondResult = getIncrementalNamespaceSortedItems({
+      items: [...firstBatch, ...secondBatch],
+      previousState: firstResult.state,
+      namespaceSort,
+      serviceKey: TAG_SERVICE_KEY,
+    });
+    const fullSort = sortLoadedItemsByNamespaces(
+      [...firstBatch, ...secondBatch],
+      namespaceSort,
+      TAG_SERVICE_KEY,
+    );
+
+    expect(secondResult.strategy).toBe("append");
+    expect(secondResult.items.map((item) => item.file_id)).toEqual(
+      fullSort.map((item) => item.file_id),
+    );
+  });
+
+  it("preserves source order for equal namespace sort keys across batches", () => {
+    const namespaceSort: NamespaceSortConfig = {
+      mode: "namespaces",
+      namespaces: ["series"],
+      sortAsc: true,
+    };
+    const firstBatch = [metadata(1, ["series:a"]), metadata(2, ["series:a"])];
+    const secondBatch = [metadata(3, ["series:a"]), metadata(4, ["series:a"])];
+
+    const firstResult = getIncrementalNamespaceSortedItems({
+      items: firstBatch,
+      namespaceSort,
+      serviceKey: TAG_SERVICE_KEY,
+    });
+    const secondResult = getIncrementalNamespaceSortedItems({
+      items: [...firstBatch, ...secondBatch],
+      previousState: firstResult.state,
+      namespaceSort,
+      serviceKey: TAG_SERVICE_KEY,
+    });
+
+    expect(secondResult.strategy).toBe("append");
+    expect(secondResult.items.map((item) => item.file_id)).toEqual([
+      1, 2, 3, 4,
+    ]);
+  });
+
+  it("falls back to a full namespace sort when existing metadata changes", () => {
+    const namespaceSort: NamespaceSortConfig = {
+      mode: "namespaces",
+      namespaces: ["series"],
+      sortAsc: true,
+    };
+    const originalItems = [
+      metadata(1, ["series:a"]),
+      metadata(2, ["series:b"]),
+    ];
+    const firstResult = getIncrementalNamespaceSortedItems({
+      items: originalItems,
+      namespaceSort,
+      serviceKey: TAG_SERVICE_KEY,
+    });
+    const changedItems = [metadata(1, ["series:z"]), originalItems[1]];
+
+    const secondResult = getIncrementalNamespaceSortedItems({
+      items: changedItems,
+      previousState: firstResult.state,
+      namespaceSort,
+      serviceKey: TAG_SERVICE_KEY,
+    });
+
+    expect(secondResult.strategy).toBe("full");
+    expect(secondResult.items.map((item) => item.file_id)).toEqual([2, 1]);
   });
 });
