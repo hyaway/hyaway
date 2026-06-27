@@ -11,8 +11,11 @@ These are the parts of the app that support review today.
 ### Finding files for review
 
 - Media pages browser
-- Predefined queries like random inbox and recently inboxed
-- Search, including favourite tags and saved searches
+- Predefined queries like random inbox, recently inboxed, recently archived, and recently trashed
+- Search, including favourite tags, saved searches, default queries, pinned searches, and visual system predicates
+- Search result sorting, including Hydrus file sorts and namespace-based sorts
+- Saving hyAway searches as Hydrus file-search pages
+- Scratchpad page actions for collecting individual files during browsing or review
 - Page tag counts, tag sorting, and tag filtering for building new searches from current page tags
 - Buttons at the end of review to navigate to other pages
 
@@ -22,14 +25,15 @@ These are the parts of the app that support review today.
 - Tags
 - Metadata (file size, dimensions, etc.)
 - Ratings
-- Notes
+- Notes, including inline add, edit, rename, and delete on file pages
 
 ### Review queue itself
 
 - Swipe-based archive/delete flow
 - Skip/undo support while reviewing
 - Configurable swipe bindings and thresholds
-- Rating actions during review
+- Rating and tag actions during review
+- Swipe action profiles for switching between review workflows
 - Touch and keyboard controls
 - Review footer actions for the current file
 
@@ -37,11 +41,12 @@ These are the parts of the app that support review today.
 
 - Archive/delete from gallery and file pages
 - Add or edit ratings
+- Add files to the scratchpad page
 
 ### Review of the review
 
 - Undo and recovery paths for mistakes
-- Decision filmstrip at the end of review, grouped by action
+- Decision filmstrip at the end of review, grouped by action, with action count breakdowns
 - Predefined queries for recently archived and recently trashed files
 - Watch history
 
@@ -63,20 +68,20 @@ These are the parts of the app that support review today.
 
 New features will serve the review workflow. Some examples:
 
-- Add/remove tags as actions in review flow and file pages
-- Add/edit notes
+- Add/remove tags from file pages and gallery items
 - Actions on whole pages, like archive all or trash all
-- Stats about overall progress
-- Improvements to file loading
+- Multi select on gallery views
+- Stats about overall archive/review progress
+- Further improvements to file loading
 
 ### Requiring Hydrus support
 
 Some features depend on Hydrus supporting them and exposing them through the Client API:
 
-- Sorting searches by custom user namespaces
+- Namespace sorting though search api instead of doing it in hyAway
 - Showing the search query of saved media pages
-- Converting a search page to a media page in Hydrus
 - Editing media page queries
+- Moving, closing pages, other media page management
 - Using Hydrus saved searches instead of browser local storage
 - Notes positioning info for showing notes on images
 - Hydrus grouping, including sending a whole group to review
