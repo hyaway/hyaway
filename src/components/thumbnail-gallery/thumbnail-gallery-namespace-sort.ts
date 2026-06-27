@@ -4,11 +4,11 @@
 import type { FileMetadata } from "@/integrations/hydrus-api/models";
 import type { NamespaceSortConfig } from "@/stores/search-defaults";
 import { TagStatus } from "@/integrations/hydrus-api/models";
-import { parseTag } from "@/lib/tag-utils";
 
 const NUMERIC_TAG_COLLATOR = new Intl.Collator(undefined, { numeric: true });
+const EMPTY_NAMESPACE_TAGS: ReadonlyArray<string> = [];
 
-type NamespaceSortKey = Array<Array<string>>;
+type NamespaceSortKey = Array<ReadonlyArray<string>>;
 
 type NamespaceSortEntry = {
   item: FileMetadata;
@@ -49,15 +49,18 @@ function getNamespaceSortKey(
   const displayTags = item.tags?.[serviceKey]?.display_tags;
   const currentTags = displayTags?.[TagStatus.CURRENT] ?? [];
   const tagsByNamespace = new Map<string, Array<string>>();
+  const desiredNamespaces = new Set(namespaces);
 
   for (const displayTag of currentTags) {
-    const { namespace, tag } = parseTag(displayTag);
+    const namespace = getDisplayTagNamespace(displayTag);
+    if (!desiredNamespaces.has(namespace)) continue;
+
     const namespaceTags = tagsByNamespace.get(namespace);
 
     if (namespaceTags) {
-      namespaceTags.push(tag);
+      namespaceTags.push(displayTag);
     } else {
-      tagsByNamespace.set(namespace, [tag]);
+      tagsByNamespace.set(namespace, [displayTag]);
     }
   }
 
@@ -66,8 +69,18 @@ function getNamespaceSortKey(
   }
 
   return namespaces.map(
-    (desiredNamespace) => tagsByNamespace.get(desiredNamespace) ?? [],
+    (desiredNamespace) =>
+      tagsByNamespace.get(desiredNamespace) ?? EMPTY_NAMESPACE_TAGS,
   );
+}
+
+function getDisplayTagNamespace(displayTag: string) {
+  const startIndex = displayTag.startsWith("-") ? 1 : 0;
+  const separatorIndex = displayTag.indexOf(":", startIndex);
+
+  return separatorIndex === -1
+    ? ""
+    : displayTag.slice(startIndex, separatorIndex);
 }
 
 function compareNamespaceSortKeys(

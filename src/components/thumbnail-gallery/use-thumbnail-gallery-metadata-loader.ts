@@ -12,6 +12,20 @@ interface ThumbnailGalleryMetadataLoaderOptions {
   requestAllMetadata?: boolean;
 }
 
+function getLoadAllMetadataLabel({
+  fileCount,
+  hasLoadedAllMetadata,
+  isLoadingAllMetadata,
+}: {
+  fileCount: number;
+  hasLoadedAllMetadata: boolean;
+  isLoadingAllMetadata: boolean;
+}) {
+  if (hasLoadedAllMetadata) return "Loaded all metadata";
+  if (isLoadingAllMetadata) return "Loading all metadata";
+  return `Load all metadata (${fileCount})`;
+}
+
 export function useThumbnailGalleryMetadataLoader(
   fileIds: Array<number>,
   { requestAllMetadata = false }: ThumbnailGalleryMetadataLoaderOptions = {},
@@ -22,21 +36,24 @@ export function useThumbnailGalleryMetadataLoader(
   >(null);
 
   const metadataKey = fileIdsFingerprint(fileIds).join(":");
-  const metadataQuery = useInfiniteGetFilesMetadata(fileIds, false);
+  const isLoadAllMetadataRequested =
+    loadAllMetadataByDefault ||
+    requestAllMetadata ||
+    requestedAllMetadataKey === metadataKey;
+  const metadataQuery = useInfiniteGetFilesMetadata(fileIds, false, {
+    loadAll: isLoadAllMetadataRequested,
+  });
   const hasLoadedAllMetadata =
     fileIds.length > 0 &&
     !metadataQuery.hasNextPage &&
     !metadataQuery.isFetchingNextPage;
-  const shouldLoadAllMetadata =
-    (loadAllMetadataByDefault ||
-      requestAllMetadata ||
-      requestedAllMetadataKey === metadataKey) &&
-    !hasLoadedAllMetadata;
-  const label = hasLoadedAllMetadata
-    ? `Loaded all metadata`
-    : shouldLoadAllMetadata
-      ? `Loading all metadata`
-      : `Load all metadata (${fileIds.length})`;
+  const isLoadingAllMetadata =
+    isLoadAllMetadataRequested && !hasLoadedAllMetadata;
+  const label = getLoadAllMetadataLabel({
+    fileCount: fileIds.length,
+    hasLoadedAllMetadata,
+    isLoadingAllMetadata,
+  });
 
   const loadAllMetadataAction = useMemo(
     (): FloatingFooterAction => ({
@@ -45,14 +62,14 @@ export function useThumbnailGalleryMetadataLoader(
       icon: IconBookDownload,
       onClick: () => setRequestedAllMetadataKey(metadataKey),
       disabled:
-        fileIds.length === 0 || shouldLoadAllMetadata || hasLoadedAllMetadata,
-      isPending: shouldLoadAllMetadata && !hasLoadedAllMetadata,
+        fileIds.length === 0 || isLoadingAllMetadata || hasLoadedAllMetadata,
+      isPending: isLoadingAllMetadata,
       overflowOnly: true,
     }),
     [
       fileIds.length,
       label,
-      shouldLoadAllMetadata,
+      isLoadingAllMetadata,
       hasLoadedAllMetadata,
       metadataKey,
     ],
@@ -60,7 +77,7 @@ export function useThumbnailGalleryMetadataLoader(
 
   return {
     metadataQuery,
-    shouldLoadAllMetadata,
+    shouldLoadAllMetadata: isLoadingAllMetadata,
     hasLoadedAllMetadata,
     loadAllMetadataAction,
   };
