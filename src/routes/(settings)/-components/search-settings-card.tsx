@@ -3,6 +3,7 @@
 
 import { IconTrashX } from "@tabler/icons-react";
 import { DefaultQuerySettings } from "@/components/settings/default-query-settings";
+import { SearchHydrusPageSettings } from "@/components/settings/search-settings";
 import {
   SettingsCardTitle,
   SettingsResetButton,
@@ -26,14 +27,14 @@ export function SearchSettingsCard() {
   const unpinnedQueryCount = useOtherSearchKeys().length;
   const { clearSavedSearches, clearUnpinnedSearches } =
     useSearchQueriesActions();
-  const { resetDefaultQuery } = useSearchSettingsActions();
+  const { resetSearchData } = useSearchSettingsActions();
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <SettingsCardTitle>Search</SettingsCardTitle>
-          <SettingsResetButton onReset={resetDefaultQuery} />
+          <SettingsResetButton onReset={resetSearchData} />
         </div>
         <CardDescription>
           Configure query defaults and saved search data.
@@ -41,6 +42,9 @@ export function SearchSettingsCard() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <DefaultQuerySettings />
+        <div className="border-border border-t pt-4">
+          <SearchHydrusPageSettings />
+        </div>
         <div className="border-border flex items-center justify-between gap-4 border-t pt-4">
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium">Clear unpinned searches</span>

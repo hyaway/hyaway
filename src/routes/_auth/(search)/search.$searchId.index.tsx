@@ -209,6 +209,7 @@ function SearchPage() {
   }, [committed, entry.staged, setDefaultQuery]);
 
   const hydrusPageActions = useHydrusSearchPageActions({
+    searchId,
     searchState: hydrusPageSearchState,
     displayName,
     searchTags: hydrusPageSearchTags,

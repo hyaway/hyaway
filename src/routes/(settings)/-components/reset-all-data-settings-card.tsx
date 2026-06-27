@@ -18,7 +18,7 @@ import { useWatchHistoryActions } from "@/stores/watch-history-store";
 
 export function ResetAllDataSettingsCard() {
   const { reset: resetSearchLimits } = useSearchLimitsActions();
-  const { resetDefaultQuery } = useSearchSettingsActions();
+  const { resetSearchData } = useSearchSettingsActions();
   const { reset: resetWatchHistory } = useWatchHistoryActions();
   const { resetDataSettings: resetReviewData } = useReviewSettingsActions();
   const { reset: resetScratchpad } = useScratchpadSettingsActions();
@@ -26,7 +26,7 @@ export function ResetAllDataSettingsCard() {
 
   const handleResetAll = () => {
     resetSearchLimits();
-    resetDefaultQuery();
+    resetSearchData();
     resetWatchHistory();
     resetReviewData();
     resetScratchpad();

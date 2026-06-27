@@ -247,6 +247,7 @@ function SearchEntryCard({ searchId }: { searchId: string }) {
     [staged.query],
   );
   const hydrusPageActions = useHydrusSearchPageActions({
+    searchId,
     searchState: staged,
     displayName,
     searchTags,

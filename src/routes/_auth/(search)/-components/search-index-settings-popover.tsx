@@ -3,6 +3,7 @@
 
 import { IconTrashX } from "@tabler/icons-react";
 import { DefaultQuerySettings } from "@/components/settings/default-query-settings";
+import { SearchHydrusPageSettings } from "@/components/settings/search-settings";
 import { SettingsPopover } from "@/components/settings/settings-popover";
 import {
   SettingsHeader,
@@ -27,6 +28,7 @@ export function SearchIndexSettingsPopover() {
         <SettingsTitle>Search</SettingsTitle>
       </SettingsHeader>
       <DefaultQuerySettings />
+      <SearchHydrusPageSettings />
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium">Clear un-pinned searches</span>

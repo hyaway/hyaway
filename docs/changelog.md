@@ -16,6 +16,7 @@ All notable changes to hyAway are documented here.
 - **Namespace search sorting** — Search results can now sort by Hydrus namespace presets or custom namespace chains
 - **Scratchpad** — Send files to a configurable Hydrus scratchpad page from galleries, file pages, and review, with an option to hide sent files from the current view. Use this to mark files for revisiting on full desktop client and performing advanced actions later.
 - **Metadata loading actions** — Galleries can load all file metadata on demand, with settings to load metadata eagerly by default or for namespace-sorted searches
+- **Search cleanup** — Saved searches can now be deleted automatically after they are saved as Hydrus pages
 
 ### Changed
 

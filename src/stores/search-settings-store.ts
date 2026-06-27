@@ -9,6 +9,7 @@ import { defaultStaged, ensureSearchQueryIds } from "@/stores/search-defaults";
 
 const DEFAULT_SEARCH_RESULTS_INSTANT = true;
 const DEFAULT_SEARCH_RESULTS_BUILDER = false;
+const DEFAULT_DELETE_SEARCH_AFTER_PAGE_SAVE = false;
 const DEFAULT_SAVED_SEARCH_SORT: SavedSearchSort = "newest-first";
 
 export const SAVED_SEARCH_SORT_VALUES = [
@@ -30,14 +31,18 @@ type SearchSettingsState = {
   searchResultsInstantDefault: boolean;
   /** Whether search result pages open with the query builder expanded by default. */
   searchResultsBuilderDefault: boolean;
+  /** Whether saved searches are deleted after creating a Hydrus page from them. */
+  deleteSearchAfterPageSave: boolean;
   /** Ordering for saved search lists and menus. */
   savedSearchSort: SavedSearchSort;
   actions: {
     setDefaultQuery: (state: SearchState) => void;
     setSearchResultsInstantDefault: (enabled: boolean) => void;
     setSearchResultsBuilderDefault: (enabled: boolean) => void;
+    setDeleteSearchAfterPageSave: (enabled: boolean) => void;
     setSavedSearchSort: (sort: SavedSearchSort) => void;
     resetDefaultQuery: () => void;
+    resetSearchData: () => void;
     resetSearchAppearance: () => void;
     reset: () => void;
   };
@@ -49,6 +54,7 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
       defaultQuery: defaultStaged(),
       searchResultsInstantDefault: DEFAULT_SEARCH_RESULTS_INSTANT,
       searchResultsBuilderDefault: DEFAULT_SEARCH_RESULTS_BUILDER,
+      deleteSearchAfterPageSave: DEFAULT_DELETE_SEARCH_AFTER_PAGE_SAVE,
       savedSearchSort: DEFAULT_SAVED_SEARCH_SORT,
       actions: {
         setDefaultQuery: (defaultQuery: SearchState) =>
@@ -64,9 +70,16 @@ const useSearchSettingsStore = create<SearchSettingsState>()(
         setSearchResultsBuilderDefault: (
           searchResultsBuilderDefault: boolean,
         ) => set({ searchResultsBuilderDefault }),
+        setDeleteSearchAfterPageSave: (deleteSearchAfterPageSave: boolean) =>
+          set({ deleteSearchAfterPageSave }),
         setSavedSearchSort: (savedSearchSort: SavedSearchSort) =>
           set({ savedSearchSort }),
         resetDefaultQuery: () => set({ defaultQuery: defaultStaged() }),
+        resetSearchData: () =>
+          set({
+            defaultQuery: defaultStaged(),
+            deleteSearchAfterPageSave: DEFAULT_DELETE_SEARCH_AFTER_PAGE_SAVE,
+          }),
         resetSearchAppearance: () =>
           set({
             searchResultsInstantDefault: DEFAULT_SEARCH_RESULTS_INSTANT,
@@ -92,6 +105,9 @@ export const useSearchResultsInstantDefault = () =>
 
 export const useSearchResultsBuilderDefault = () =>
   useSearchSettingsStore((state) => state.searchResultsBuilderDefault);
+
+export const useDeleteSearchAfterPageSave = () =>
+  useSearchSettingsStore((state) => state.deleteSearchAfterPageSave);
 
 export const useSavedSearchSort = () =>
   useSearchSettingsStore((state) => state.savedSearchSort);

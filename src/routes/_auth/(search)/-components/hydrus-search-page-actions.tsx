@@ -12,6 +12,8 @@ import type { HydrusTagSearch } from "@/integrations/hydrus-api/models";
 import type { SearchState } from "@/stores/search-defaults";
 import { OverflowActionItem } from "@/components/page-shell/page-floating-footer";
 import { isNamespaceSortConfig } from "@/stores/search-defaults";
+import { useSearchQueriesActions } from "@/stores/search-queries-store";
+import { useDeleteSearchAfterPageSave } from "@/stores/search-settings-store";
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -51,10 +53,12 @@ function getPageSortOptions(sort: SearchState["sort"]) {
 }
 
 export function useHydrusSearchPageActions({
+  searchId,
   searchState,
   displayName,
   searchTags,
 }: {
+  searchId?: string;
   searchState: SearchState | undefined;
   displayName: string;
   searchTags: HydrusTagSearch;
@@ -65,6 +69,8 @@ export function useHydrusSearchPageActions({
   const permissions = usePermissions();
   const createHydrusPageMutation = useCreatePageMutation();
   const { data: pagesData } = useGetPagesQuery();
+  const deleteSearchAfterPageSave = useDeleteSearchAfterPageSave();
+  const { removeSearchEntry } = useSearchQueriesActions();
 
   const pageOfPagesSections = useMemo(
     () =>
@@ -75,10 +81,39 @@ export function useHydrusSearchPageActions({
   );
 
   const handleOpenCreatedPage = useCallback(
-    (pageKey: string) => {
-      navigate({ to: "/pages/$pageId", params: { pageId: pageKey } });
+    (pageKey: string, replace: boolean) => {
+      return navigate({
+        to: "/pages/$pageId",
+        params: { pageId: pageKey },
+        replace,
+      });
     },
     [navigate],
+  );
+
+  const handleCreateSuccess = useCallback(
+    async (pageKey: string) => {
+      const shouldDeleteSearch = deleteSearchAfterPageSave && Boolean(searchId);
+
+      try {
+        await handleOpenCreatedPage(pageKey, shouldDeleteSearch);
+      } catch (error) {
+        toast.error("Hydrus page created, but hyAway could not open it", {
+          description: error instanceof Error ? error.message : "Unknown error",
+        });
+        return;
+      }
+
+      if (shouldDeleteSearch && searchId) {
+        removeSearchEntry(searchId);
+      }
+    },
+    [
+      deleteSearchAfterPageSave,
+      handleOpenCreatedPage,
+      removeSearchEntry,
+      searchId,
+    ],
   );
 
   const handleCreateHydrusPage = useCallback(
@@ -97,7 +132,7 @@ export function useHydrusSearchPageActions({
         },
         {
           onSuccess: (page) => {
-            handleOpenCreatedPage(page.page_key);
+            void handleCreateSuccess(page.page_key);
           },
           onError: (error) => {
             toast.error("Failed to create Hydrus page", {
@@ -111,7 +146,7 @@ export function useHydrusSearchPageActions({
     [
       createHydrusPageMutation,
       displayName,
-      handleOpenCreatedPage,
+      handleCreateSuccess,
       searchState,
       searchTags,
     ],
@@ -135,7 +170,7 @@ export function useHydrusSearchPageActions({
         ...getPageSortOptions(searchState.sort),
       });
 
-      handleOpenCreatedPage(page.page_key);
+      void handleCreateSuccess(page.page_key);
     } catch (error) {
       toast.error("Failed to create Hydrus page", {
         description: error instanceof Error ? error.message : "Unknown error",
@@ -144,7 +179,7 @@ export function useHydrusSearchPageActions({
   }, [
     createHydrusPageMutation,
     displayName,
-    handleOpenCreatedPage,
+    handleCreateSuccess,
     queryClient,
     searchState,
     searchTags,
