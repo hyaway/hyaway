@@ -64,7 +64,7 @@ These are the parts of the app that support review today.
 
 ## Likely future features
 
-### Using existing Client API
+### Possible with the current Client API
 
 New features will serve the review workflow. Some examples:
 
@@ -72,6 +72,8 @@ New features will serve the review workflow. Some examples:
 - Actions on whole pages, like archive all or trash all
 - Multi select on gallery views
 - Stats about overall archive/review progress
+- File viewer improvements
+- More keyboard shortcuts, shortcut customization
 - Further improvements to file loading
 
 ### Requiring Hydrus support
