@@ -381,7 +381,7 @@ function SearchPage() {
                 </div>
               </AlertDescription>
             </Alert>
-            {fileCount > 2000 && (
+            {fileCount > 3000 && (
               <Alert className="mb-3 gap-1 pb-3">
                 <IconInfoCircle className="size-4" />
                 <AlertTitle>There are a lot of results</AlertTitle>
