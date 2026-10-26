@@ -42,6 +42,24 @@ export function isImageProjectFile(mime: string): boolean {
 }
 
 /**
+ * MIME type to give the video player for a Hydrus video MIME.
+ * Vidstack only accepts a fixed set of video types (and also checks
+ * canPlayType), so it rejects MOV/MKV before even requesting the file.
+ * Browsers sniff the real container, so alias these to a sibling type:
+ * QuickTime -> MP4 (same ISO BMFF family), Matroska -> WebM (Matroska subset).
+ */
+export function getVideoPlayerMimeType(mime: string): string {
+  switch (mime) {
+    case "video/quicktime":
+      return "video/mp4";
+    case "video/x-matroska":
+      return "video/webm";
+    default:
+      return mime;
+  }
+}
+
+/**
  * Check if a MIME type can be rendered by Hydrus's render endpoint.
  * This includes both static images and viewable image project files.
  */

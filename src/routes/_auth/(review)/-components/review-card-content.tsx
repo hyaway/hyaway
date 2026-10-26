@@ -17,7 +17,7 @@ import type {
   MediaPlayerInstance,
   VideoMimeType,
 } from "@vidstack/react";
-import { isImageProjectFile } from "@/lib/mime-utils";
+import { getVideoPlayerMimeType, isImageProjectFile } from "@/lib/mime-utils";
 
 import { FileStateBadge } from "@/components/file-detail/file-state-badge";
 import { RatingsOverlay } from "@/components/file-detail/ratings-overlay";
@@ -147,7 +147,10 @@ export const ReviewCardContent = memo(function ReviewCardContentMemo({
             "h-full w-full transition-opacity duration-200",
             loaded ? "opacity-100" : "opacity-0",
           )}
-          src={{ src: mediaUrl, type: metadata.mime as VideoMimeType }}
+          src={{
+            src: mediaUrl,
+            type: getVideoPlayerMimeType(metadata.mime) as VideoMimeType,
+          }}
           playsInline
           crossOrigin={true}
           onCanPlay={handleLoad}

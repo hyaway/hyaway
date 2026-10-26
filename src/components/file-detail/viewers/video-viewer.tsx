@@ -21,6 +21,7 @@ import { VidstackZoomButton } from "./vidstack-zoom-button";
 import type { VideoMimeType } from "@vidstack/react";
 import { useActiveTheme } from "@/stores/theme-store";
 import { cn } from "@/lib/utils";
+import { getVideoPlayerMimeType } from "@/lib/mime-utils";
 import {
   useMediaAutoPlay,
   useMediaStartWithSound,
@@ -180,7 +181,10 @@ export function VideoViewer({
       <div className={cn("flex h-full w-full items-center justify-center")}>
         <MediaPlayer
           title={`🎞️${fileId}`}
-          src={{ src: fileUrl, type: mime as VideoMimeType }}
+          src={{
+            src: fileUrl,
+            type: getVideoPlayerMimeType(mime) as VideoMimeType,
+          }}
           playsInline
           crossOrigin={true}
           onCanPlay={onLoad}
